@@ -146,6 +146,8 @@ describe('AwsIdentityFederationSetup', () => {
   const mockLaunchOnClick = jest.fn();
   const mockCallbackStart = jest.fn();
   const mockCallbackCancel = jest.fn();
+  const mockCallbackPrepare = jest.fn();
+  const mockAddSuccess = jest.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
     mockUseGetCloudConnectors.mockReturnValue({
@@ -187,7 +189,10 @@ describe('AwsIdentityFederationSetup', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     mockUseKibana.mockReturnValue({
-      services: { application: { navigateToApp: jest.fn() } },
+      services: {
+        application: { navigateToApp: jest.fn() },
+        notifications: { toasts: { addSuccess: mockAddSuccess } },
+      },
     } as unknown as ReturnType<typeof useKibana>);
 
     mockUseCreateCloudConnector.mockReturnValue({
@@ -198,9 +203,10 @@ describe('AwsIdentityFederationSetup', () => {
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     mockUseIacCallback.mockReturnValue({
       status: 'idle',
-      received: undefined,
+      created: undefined,
       start: mockCallbackStart,
       cancel: mockCallbackCancel,
+      prepare: mockCallbackPrepare,
     });
     mockUseCloudConnectorTemplate.mockReset();
     mockUseCloudConnectorTemplate.mockReturnValue(staticTemplateHookResult);
@@ -323,6 +329,14 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
+      // The callback gave up, which is when the provisioner flow offers manual entry.
+      mockUseIacCallback.mockReturnValue({
+        status: 'expired',
+        created: undefined,
+        start: mockCallbackStart,
+        cancel: mockCallbackCancel,
+        prepare: mockCallbackPrepare,
+      });
     });
 
     it('passes the integrations to the template hook and launches through its onClick', async () => {
@@ -500,19 +514,14 @@ describe('AwsIdentityFederationSetup', () => {
   });
 
   describe('CloudFormation callback (New Identity tab, provisioner on)', () => {
-    const RECEIVED = {
-      roleArn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
-      stackArn: VALID_STACK_ARN,
-      awsAccountId: '123456789012',
-      region: 'us-east-1',
-    };
     const callbackState = (
       overrides: Partial<ReturnType<typeof useIacCallback>>
     ): ReturnType<typeof useIacCallback> => ({
       status: 'idle',
-      received: undefined,
+      created: undefined,
       start: mockCallbackStart,
       cancel: mockCallbackCancel,
+      prepare: mockCallbackPrepare,
       ...overrides,
     });
 
@@ -538,49 +547,147 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
     });
 
-    it('fills the empty Role ARN and stack ARN fields once received and says so', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'received', received: RECEIVED }));
+    it('shows the manual success toast and selects the identity without filling the form', () => {
+      mockUseIacCallback.mockReturnValue(
+        callbackState({
+          status: 'received',
+          created: { id: 'cc-1', name: 'my-identity' },
+        })
+      );
       renderSetup({ cloud, integrations });
 
-      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
-        RECEIVED.roleArn
-      );
-      expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue(
-        VALID_STACK_ARN
-      );
-      expect(screen.getByTestId('awsIdentityFederationSetup-callbackReceived')).toHaveTextContent(
-        '123456789012'
-      );
+      expect(mockAddSuccess).toHaveBeenCalledWith({
+        title: 'Federated identity created successfully',
+      });
+      expect(screen.queryByTestId('awsIdentityFederationSetup-roleArn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('awsIdentityFederationSetup-stackArn')).not.toBeInTheDocument();
+      expect(onConnectorIdChange).toHaveBeenCalledWith('cc-1', 'my-identity');
+      expect(mockCallbackCancel).toHaveBeenCalled();
       expect(
         screen.queryByTestId('awsIdentityFederationSetup-callbackPending')
       ).not.toBeInTheDocument();
     });
 
-    it('offers the received values instead of overwriting what the user typed', async () => {
+    it('sends the typed name to the pending callback', async () => {
       const user = userEvent.setup();
-      const { rerender } = renderSetup({ cloud, integrations });
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      renderSetup({ cloud, integrations });
+
       await user.type(
-        screen.getByTestId('awsIdentityFederationSetup-roleArn'),
-        'arn:aws:iam::123456789012:role/Typed'
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
       );
 
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'received', received: RECEIVED }));
-      rerender(setupElement({ cloud, integrations }));
+      expect(mockCallbackPrepare).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorName: 'my-identity', accountType: 'single-account' })
+      );
+    });
 
-      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
-        'arn:aws:iam::123456789012:role/Typed'
-      );
-      await user.click(screen.getByTestId('awsIdentityFederationSetup-callbackUseValues'));
+    const expectManualEntry = (shown: boolean) => {
+      for (const testSubj of [
+        'awsIdentityFederationSetup-stackArn',
+        'awsIdentityFederationSetup-roleArn',
+        'awsIdentityFederationSetup-createButton',
+      ]) {
+        if (shown) {
+          expect(screen.getByTestId(testSubj)).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId(testSubj)).not.toBeInTheDocument();
+        }
+      }
+    };
 
-      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
-        RECEIVED.roleArn
-      );
-      expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue(
-        VALID_STACK_ARN
-      );
+    it('hides the ARN fields and Create before Launch', () => {
+      renderSetup({ cloud, integrations });
+
+      expectManualEntry(false);
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeInTheDocument();
       expect(
-        screen.queryByTestId('awsIdentityFederationSetup-callbackUseValues')
+        screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
+      ).toBeInTheDocument();
+    });
+
+    it('keeps the ARN fields hidden while waiting on a rendered launch', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+      );
+      renderSetup({ cloud, integrations });
+
+      expectManualEntry(false);
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
+    });
+
+    it('shows the ARN fields when the launch went out without a callback record', () => {
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+      );
+      renderSetup({ cloud, integrations });
+
+      expectManualEntry(true);
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-callbackManualFallback')
       ).not.toBeInTheDocument();
+    });
+
+    it.each(['expired', 'error'] as const)(
+      'shows the ARN fields and a hint when the callback is %s',
+      (status) => {
+        mockUseIacCallback.mockReturnValue(callbackState({ status }));
+        renderSetup({ cloud, integrations });
+
+        expectManualEntry(true);
+        expect(
+          screen.getByTestId('awsIdentityFederationSetup-callbackManualFallback')
+        ).toBeInTheDocument();
+      }
+    );
+
+    it('shows the ARN fields without a hint after a static-template fallback', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'cancelled' }));
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, {
+          iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
+        })
+      );
+      renderSetup({ cloud, integrations });
+
+      expectManualEntry(true);
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-callbackManualFallback')
+      ).not.toBeInTheDocument();
+    });
+
+    it('stops waiting after a static-template fallback, which cannot call back', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, {
+          iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
+        })
+      );
+      renderSetup({ cloud, integrations });
+
+      expect(mockCallbackCancel).toHaveBeenCalled();
+    });
+
+    it('stops waiting when the launch failed', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { templateGenerationError: 'boom' })
+      );
+      renderSetup({ cloud, integrations });
+
+      expect(mockCallbackCancel).toHaveBeenCalled();
+    });
+
+    it('keeps waiting on a rendered launch', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+      );
+      renderSetup({ cloud, integrations });
+
+      expect(mockCallbackCancel).not.toHaveBeenCalled();
     });
 
     it('cancels the callback once the identity is created', () => {

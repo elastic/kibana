@@ -21,6 +21,8 @@ import {
   DeleteIacCallbackResponseSchema,
   GetIacCallbackRequestSchema,
   GetIacCallbackResponseSchema,
+  PrepareIacCallbackRequestSchema,
+  PrepareIacCallbackResponseSchema,
   ReceiveIacCallbackRequestSchema,
   ReceiveIacCallbackResponseSchema,
 } from '../../types/rest_spec/iac_callback';
@@ -29,6 +31,7 @@ import {
   createIacCallbackHandler,
   deleteIacCallbackHandler,
   getIacCallbackHandler,
+  prepareIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
@@ -168,6 +171,36 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteIacCallbackHandler
+    );
+
+  router.versioned
+    .put({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
+      summary: 'Prepare an IaC callback',
+      description:
+        'Store the federated identity name, account type, and template details on a pending callback so the stack report can create the cloud connector.',
+      access: 'internal',
+      security: IAC_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: PrepareIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PrepareIacCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+            409: {
+              description: 'The callback is no longer pending.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      prepareIacCallbackHandler
     );
 
   // Public: the stack's Lambda calls this with the per-callback key. Kibana's auth chain rejects

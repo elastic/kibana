@@ -33,6 +33,7 @@ import type {
   CreateIacCallbackRequestSchema,
   DeleteIacCallbackRequestSchema,
   GetIacCallbackRequestSchema,
+  PrepareIacCallbackRequestSchema,
   ReceiveIacCallbackRequestSchema,
 } from '../../types/rest_spec/iac_callback';
 import type { IacCallback } from '../../../common/types/models/iac_callback';
@@ -257,8 +258,39 @@ export const deleteIacCallbackHandler: FleetRequestHandler<
 };
 
 /**
+ * Stores the name and template details the form already has onto the pending callback, so the
+ * Lambda's later report can create the cloud connector without the user pasting ARNs.
+ */
+export const prepareIacCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof PrepareIacCallbackRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PrepareIacCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!existing) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  const result = await iacCallbackService.prepare(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    existing.id,
+    request.body
+  );
+  if (result.outcome === 'not_found') {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  if (result.outcome === 'conflict') {
+    return response.conflict({
+      body: { message: 'Callback is no longer accepting identity details' },
+    });
+  }
+  return response.ok({ body: { item: result.item } });
+};
+
+/**
  * Called by the stack's Lambda. Kibana's auth chain has already accepted the key; the service
- * then requires it to be the key bound to this record. Writes only the callback record.
+ * then requires it to be the key bound to this record. Creates the cloud connector and records
+ * the ARNs on the callback.
  */
 export const receiveIacCallbackHandler: FleetRequestHandler<
   TypeOf<typeof ReceiveIacCallbackRequestSchema.params>,

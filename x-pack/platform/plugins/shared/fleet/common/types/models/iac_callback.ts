@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AccountType } from './cloud_connector';
+
 export type IacCallbackStatus = 'pending' | 'received' | 'cancelled';
 
 /** What the stack's Lambda reports once the IAM role exists. */
@@ -16,11 +18,24 @@ export interface IacCallbackReceivedValues {
 }
 
 /**
+ * Identity details the browser records on the pending callback so the Lambda's report can be
+ * written straight onto a cloud connector. The Lambda never sends these.
+ */
+export interface IacCallbackIdentity {
+  connector_name?: string;
+  account_type?: AccountType;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+}
+
+/**
  * A one-time record that lets a launched CloudFormation stack report its role ARN and stack ARN
  * back to Kibana. Kibana mints a short-lived, zero-privilege API key bound to the record; the
- * key itself is never stored and is returned exactly once, at creation.
+ * key itself is never stored and is returned exactly once, at creation. On receive, Kibana
+ * creates the cloud connector and stores its id here.
  */
-export interface IacCallback extends Partial<IacCallbackReceivedValues> {
+export interface IacCallback extends Partial<IacCallbackReceivedValues>, IacCallbackIdentity {
   id: string;
   provider: 'aws';
   status: IacCallbackStatus;
@@ -30,4 +45,6 @@ export interface IacCallback extends Partial<IacCallbackReceivedValues> {
   space_id?: string;
   expires_at: string;
   received_at?: string;
+  /** Set once receive has created the cloud connector for this launch. */
+  cloud_connector_id?: string;
 }

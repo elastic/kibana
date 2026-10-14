@@ -29,6 +29,7 @@ import {
   createIacCallbackHandler,
   deleteIacCallbackHandler,
   getIacCallbackHandler,
+  prepareIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
@@ -41,7 +42,13 @@ jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 jest.mock('../../services/iac_callback', () => ({
-  iacCallbackService: { create: jest.fn(), get: jest.fn(), receive: jest.fn(), cancel: jest.fn() },
+  iacCallbackService: {
+    create: jest.fn(),
+    get: jest.fn(),
+    prepare: jest.fn(),
+    receive: jest.fn(),
+    cancel: jest.fn(),
+  },
 }));
 
 const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
@@ -555,6 +562,45 @@ describe('IaC callback handlers', () => {
       await getIacCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+  });
+
+  describe('prepareIacCallbackHandler', () => {
+    it('stores identity details on the pending record in this space', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.prepare.mockResolvedValue({
+        outcome: 'prepared',
+        item: { ...ITEM, connector_name: 'my-identity' },
+      });
+      const request = httpServerMock.createKibanaRequest({
+        params: { callbackId: 'cb-1' },
+        body: { connector_name: 'my-identity', account_type: 'single-account' },
+      });
+
+      await prepareIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.prepare).toHaveBeenCalledWith(soClient, 'cb-1', {
+        connector_name: 'my-identity',
+        account_type: 'single-account',
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...ITEM, connector_name: 'my-identity' } },
+      });
+    });
+
+    it('returns 409 when the record is no longer pending', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.prepare.mockResolvedValue({ outcome: 'conflict' });
+      const request = httpServerMock.createKibanaRequest({
+        params: { callbackId: 'cb-1' },
+        body: { connector_name: 'late' },
+      });
+
+      await prepareIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: 'Callback is no longer accepting identity details' },
+      });
     });
   });
 

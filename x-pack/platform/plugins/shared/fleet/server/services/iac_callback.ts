@@ -12,14 +12,17 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { IAC_CALLBACK_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   IacCallback,
+  IacCallbackIdentity,
   IacCallbackReceivedValues,
 } from '../../common/types/models/iac_callback';
+import type { CloudConnectorIacState } from '../../common/types/models/cloud_connector';
 import type { IacCallbackSOAttributes } from '../types/so_attributes';
-import { FleetError } from '../errors';
+import { CloudConnectorCreateError, FleetError } from '../errors';
 
 import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
 import { invalidateAPIKeys } from './api_keys/security';
+import { cloudConnectorService } from './cloud_connector';
 
 /** How long the stack has to call back. Also the lifetime of the key bound to the record. */
 export const IAC_CALLBACK_EXPIRATION = '2h';
@@ -30,6 +33,18 @@ export interface CreateIacCallbackOptions {
   createdBy?: string;
   spaceId?: string;
 }
+
+const CONNECTOR_NAME_MAX_LENGTH = 255;
+
+/** Last path segment of an IAM role ARN, used when the browser has not named the identity yet. */
+const roleNameFromArn = (roleArn: string): string => {
+  const resource = roleArn.split(':role/')[1] ?? '';
+  const name = resource.split('/').pop()?.trim() ?? '';
+  return name.slice(0, CONNECTOR_NAME_MAX_LENGTH) || 'aws-workload-identity';
+};
+
+const isDuplicateName = (error: unknown): boolean =>
+  error instanceof CloudConnectorCreateError && error.message.includes('already exists');
 
 export interface IacCallbackReceiveInput {
   /** Id of the API key the caller authenticated with; undefined for any other authentication. */
@@ -143,8 +158,56 @@ class IacCallbackService {
   }
 
   /**
+   * Records the name, account type, and template details the browser already has, so receive
+   * can create the cloud connector without asking the user to paste ARNs. Only a pending record
+   * accepts this; a received or cancelled one is a conflict.
+   */
+  public async prepare(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    identity: IacCallbackIdentity
+  ): Promise<
+    { outcome: 'prepared'; item: IacCallback } | { outcome: 'not_found' } | { outcome: 'conflict' }
+  > {
+    const so = await this.getSavedObject(soClient, id);
+    if (!so) {
+      return { outcome: 'not_found' };
+    }
+    if (so.attributes.status !== 'pending') {
+      return { outcome: 'conflict' };
+    }
+
+    const update: Partial<IacCallbackSOAttributes> = {};
+    if (identity.connector_name !== undefined) {
+      update.connector_name = identity.connector_name;
+    }
+    if (identity.account_type !== undefined) {
+      update.account_type = identity.account_type;
+    }
+    if (identity.iac_key !== undefined) {
+      update.iac_key = identity.iac_key;
+    }
+    if (identity.iac_blueprint_id !== undefined) {
+      update.iac_blueprint_id = identity.iac_blueprint_id;
+    }
+    if (identity.iac_blueprint_version !== undefined) {
+      update.iac_blueprint_version = identity.iac_blueprint_version;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return { outcome: 'prepared', item: toItem(so.id, so.attributes) };
+    }
+
+    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
+    return { outcome: 'prepared', item: toItem(so.id, { ...so.attributes, ...update }) };
+  }
+
+  /**
    * Applies what the stack's Lambda reported. The caller must present the key bound to the
    * record; anything else looks like a missing record so an attacker learns nothing.
+   *
+   * The role ARN and stack ARN are written onto a new cloud connector in the launch space.
+   * The browser is not asked to copy them into the form.
    */
   public async receive(
     soClient: SavedObjectsClientContract,
@@ -188,6 +251,8 @@ class IacCallbackService {
         : { outcome: 'conflict', item: toItem(so.id, attributes) };
     }
 
+    const connector = await this.createCloudConnector(so.id, attributes, payload);
+
     const update: Partial<IacCallbackSOAttributes> = {
       status: 'received',
       received_at: new Date().toISOString(),
@@ -195,6 +260,8 @@ class IacCallbackService {
       stack_arn: payload.stack_arn,
       aws_account_id: payload.aws_account_id,
       region: payload.region,
+      connector_name: connector.name,
+      cloud_connector_id: connector.id,
     };
     await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
 
@@ -202,11 +269,57 @@ class IacCallbackService {
     await invalidateAPIKeys([attributes.api_key_id]);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `IaC callback received [id=${so.id}] [api_key_id=${attributes.api_key_id}] [role_arn=${payload.role_arn}] [aws_account_id=${payload.aws_account_id}]`,
+      message: `IaC callback received [id=${so.id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${payload.role_arn}] [aws_account_id=${payload.aws_account_id}]`,
     });
-    this.logger.debug(`IaC callback received [id=${so.id}]`);
+    this.logger.debug(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
 
     return { outcome: 'received', item: toItem(so.id, { ...attributes, ...update }) };
+  }
+
+  /**
+   * Creates the federated identity in the space the launch happened in. A name the browser
+   * stored wins; otherwise the role's name is used. A name that is already taken gets a short
+   * suffix so the stack's one report still produces an identity.
+   */
+  private async createCloudConnector(
+    callbackId: string,
+    attributes: IacCallbackSOAttributes,
+    payload: IacCallbackReceivedValues
+  ) {
+    const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
+    const preferred =
+      attributes.connector_name?.trim().slice(0, CONNECTOR_NAME_MAX_LENGTH) ||
+      roleNameFromArn(payload.role_arn);
+
+    const iac: CloudConnectorIacState = { iac_deployment_id: payload.stack_arn };
+    if (attributes.iac_key !== undefined) {
+      iac.iac_key = attributes.iac_key;
+    }
+    if (attributes.iac_blueprint_id !== undefined) {
+      iac.iac_blueprint_id = attributes.iac_blueprint_id;
+    }
+    if (attributes.iac_blueprint_version !== undefined) {
+      iac.iac_blueprint_version = attributes.iac_blueprint_version;
+    }
+
+    const create = (name: string) =>
+      cloudConnectorService.create(spaceClient, {
+        name,
+        cloudProvider: 'aws',
+        ...(attributes.account_type ? { accountType: attributes.account_type } : {}),
+        vars: { role_arn: { type: 'text', value: payload.role_arn } },
+        ...iac,
+      });
+
+    try {
+      return await create(preferred);
+    } catch (error) {
+      if (!isDuplicateName(error)) {
+        throw error;
+      }
+      const suffix = ` ${callbackId.slice(0, 8)}`;
+      return create(`${preferred.slice(0, CONNECTOR_NAME_MAX_LENGTH - suffix.length)}${suffix}`);
+    }
   }
 
   /** Marks the record cancelled and kills its key, whatever state it was in. */

@@ -9,7 +9,6 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
@@ -34,7 +35,6 @@ import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_c
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { useIacCallback } from '../hooks/use_iac_callback';
-import type { IacCallbackReceived } from '../hooks/use_iac_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -96,6 +96,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   onIacTemplateRecorded,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
+  const { notifications } = useKibana().services;
+  const queryClient = useQueryClient();
   const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
     cloudProvider: 'aws',
     accountType,
@@ -135,35 +137,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
 
-  // The launched stack can report its role and stack ARNs back instead of the user pasting them.
-  // The record is created at Launch (through the template hook) and polled here.
+  // The launched stack reports its role and stack ARNs to Kibana, which writes them onto a
+  // cloud connector. This form waits; it does not copy the ARNs into the fields below.
   const {
     status: callbackStatus,
-    received: callbackReceived,
+    created: callbackCreated,
     start: startCallback,
     cancel: cancelCallback,
+    prepare: prepareCallback,
   } = useIacCallback({ enabled: isIacProvisionerEnabled });
-  // Values that arrived while the user had already typed something; offered, not applied.
-  const [offeredValues, setOfferedValues] = useState<IacCallbackReceived | undefined>(undefined);
-  const [appliedValues, setAppliedValues] = useState<IacCallbackReceived | undefined>(undefined);
-  const applyReceivedValues = useCallback((values: IacCallbackReceived) => {
-    setRoleArn(values.roleArn);
-    setStackArn(values.stackArn);
-    setAppliedValues(values);
-    setOfferedValues(undefined);
-  }, []);
-  const lastHandledRef = useRef<IacCallbackReceived | undefined>(undefined);
-  useEffect(() => {
-    if (!callbackReceived || lastHandledRef.current === callbackReceived) return;
-    lastHandledRef.current = callbackReceived;
-    if (roleArn === '' && stackArn === '') {
-      applyReceivedValues(callbackReceived);
-    } else {
-      setOfferedValues(callbackReceived);
-    }
-    // Only a newly received set should run this; the fields are read, not watched.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callbackReceived, applyReceivedValues]);
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -224,6 +206,58 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     getLaunchStackParams: startCallback,
   });
 
+  // Only the rendered template carries the callback parameters. A launch that fell back to the
+  // static template (null key) or never reached the console cannot call back, so stop waiting.
+  const isStaticLaunch = iacConfirm !== undefined && iacConfirm.iac_key === null;
+  useEffect(() => {
+    if (callbackStatus === 'pending' && (isStaticLaunch || templateGenerationError)) {
+      cancelCallback();
+    }
+  }, [callbackStatus, isStaticLaunch, templateGenerationError, cancelCallback]);
+
+  // With the provisioner on, the stack creates the identity through the callback, so the ARN
+  // fields and Create only appear when that cannot happen: the launch went out without a
+  // callback record, or the wait ended without an identity.
+  const hasCallbackFailed = callbackStatus === 'expired' || callbackStatus === 'error';
+  // A cancelled wait follows a static-template fallback or a failed launch, which stay silent
+  // (or show their own error), so only an expired or failed wait gets the hint.
+  const hasCallbackGivenUp = hasCallbackFailed || callbackStatus === 'cancelled';
+  const hasLaunchedWithoutCallback = iacConfirm !== undefined && callbackStatus === 'idle';
+  const showManualEntry =
+    !isIacProvisionerEnabled || hasCallbackGivenUp || hasLaunchedWithoutCallback;
+
+  // Keep the pending record in step with the name and template the form already has. Receive
+  // uses them when it creates the cloud connector; the role and stack ARNs never land here.
+  useEffect(() => {
+    if (callbackStatus !== 'pending') return;
+    prepareCallback({
+      connectorName,
+      accountType,
+      iacKey: iacConfirm?.iac_key,
+      iacBlueprintId: iacConfirm?.iac_blueprint_id,
+      iacBlueprintVersion: iacConfirm?.iac_blueprint_version,
+    });
+  }, [callbackStatus, connectorName, accountType, iacConfirm, prepareCallback]);
+
+  const handledCreatedIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!callbackCreated || handledCreatedIdRef.current === callbackCreated.id) return;
+    handledCreatedIdRef.current = callbackCreated.id;
+    queryClient.invalidateQueries(['get-cloud-connectors']);
+    notifications?.toasts.addSuccess({
+      title: i18n.translate('xpack.fleet.cloudConnector.createSuccess', {
+        defaultMessage: 'Federated identity created successfully',
+      }),
+    });
+    setSelected({ id: callbackCreated.id, name: callbackCreated.name });
+    setSelectedTabId(TABS.EXISTING_CONNECTION);
+    setRoleArn('');
+    setConnectorName('');
+    setStackArn('');
+    clearIacConfirm();
+    cancelCallback();
+  }, [callbackCreated, queryClient, notifications, clearIacConfirm, cancelCallback]);
+
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
       setSelected({ id: connector.id, name: connector.name });
@@ -231,8 +265,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setRoleArn('');
       setConnectorName('');
       setStackArn('');
-      setAppliedValues(undefined);
-      setOfferedValues(undefined);
       // The template details belong to the identity just created; a second Create without a new
       // Launch must not re-post it.
       clearIacConfirm();
@@ -336,104 +368,78 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               >
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.iacCallback.pendingHint"
-                  defaultMessage="Waiting for CloudFormation to report the role… or paste the values below."
+                  defaultMessage="Waiting for CloudFormation to create the federated identity…"
                 />
               </EuiText>
             </>
           )}
-          {appliedValues && (
+          {isIacProvisionerEnabled && hasCallbackFailed && (
             <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                announceOnMount
+              <EuiSpacer size="s" />
+              <EuiText
                 size="s"
-                color="success"
-                iconType="check"
-                data-test-subj="awsIdentityFederationSetup-callbackReceived"
-                title={i18n.translate('xpack.fleet.cloudConnector.iacCallback.receivedTitle', {
-                  defaultMessage: 'Received from CloudFormation — account {accountId}',
-                  values: { accountId: appliedValues.awsAccountId },
-                })}
-              />
-            </>
-          )}
-          {offeredValues && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="warning"
-                iconType="info"
-                data-test-subj="awsIdentityFederationSetup-callbackOffered"
-                title={i18n.translate('xpack.fleet.cloudConnector.iacCallback.offeredTitle', {
-                  defaultMessage:
-                    'CloudFormation reported a role for account {accountId}, but the fields below already have values.',
-                  values: { accountId: offeredValues.awsAccountId },
-                })}
-              >
-                <EuiButton
-                  size="s"
-                  color="warning"
-                  onClick={() => applyReceivedValues(offeredValues)}
-                  data-test-subj="awsIdentityFederationSetup-callbackUseValues"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.cloudConnector.iacCallback.useValuesButton"
-                    defaultMessage="Use these values"
-                  />
-                </EuiButton>
-              </EuiCallOut>
-            </>
-          )}
-          {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
-              it is what the identity's details link to and what a later update targets. */}
-          <EuiSpacer size="m" />
-          <StackArnField
-            value={stackArn}
-            onChange={setStackArn}
-            data-test-subj="awsIdentityFederationSetup-stackArn"
-          />
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
-              defaultMessage: 'Role ARN',
-            })}
-            isInvalid={roleArnInvalid}
-            error={
-              roleArnInvalid
-                ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
-                    defaultMessage: 'Role ARN is required',
-                  })
-                : undefined
-            }
-            fullWidth
-          >
-            <EuiFieldText
-              fullWidth
-              value={roleArn}
-              isInvalid={roleArnInvalid}
-              onChange={(e) => setRoleArn(e.target.value)}
-              data-test-subj="awsIdentityFederationSetup-roleArn"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isLoading={isCreating}
-                isDisabled={isCreateDisabled}
-                onClick={handleCreate}
-                data-test-subj="awsIdentityFederationSetup-createButton"
+                color="subdued"
+                data-test-subj="awsIdentityFederationSetup-callbackManualFallback"
               >
                 <FormattedMessage
-                  id="xpack.fleet.awsIdentityFederationSetup.createButton"
-                  defaultMessage="Create Identity"
+                  id="xpack.fleet.cloudConnector.iacCallback.manualFallbackHint"
+                  defaultMessage="CloudFormation did not report back. Copy the stack ARN and Role ARN from the stack, then create the identity."
                 />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiText>
+            </>
+          )}
+          {showManualEntry && (
+            <>
+              {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
+                  it is what the identity's details link to and what a later update targets. */}
+              <EuiSpacer size="m" />
+              <StackArnField
+                value={stackArn}
+                onChange={setStackArn}
+                data-test-subj="awsIdentityFederationSetup-stackArn"
+              />
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
+                  defaultMessage: 'Role ARN',
+                })}
+                isInvalid={roleArnInvalid}
+                error={
+                  roleArnInvalid
+                    ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
+                        defaultMessage: 'Role ARN is required',
+                      })
+                    : undefined
+                }
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={roleArn}
+                  isInvalid={roleArnInvalid}
+                  onChange={(e) => setRoleArn(e.target.value)}
+                  data-test-subj="awsIdentityFederationSetup-roleArn"
+                />
+              </EuiFormRow>
+              <EuiSpacer size="l" />
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    isLoading={isCreating}
+                    isDisabled={isCreateDisabled}
+                    onClick={handleCreate}
+                    data-test-subj="awsIdentityFederationSetup-createButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.awsIdentityFederationSetup.createButton"
+                      defaultMessage="Create Identity"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </>
       ),
     },

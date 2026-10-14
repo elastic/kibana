@@ -12,12 +12,18 @@ import {
   sendCreateIacCallback,
   sendDeleteIacCallback,
   sendGetIacCallback,
+  sendPrepareIacCallback,
 } from '../../../hooks/use_request/iac_callback';
-import type { IacCallback } from '../../../../common/types/models/iac_callback';
+import type {
+  IacCallback,
+  IacCallbackIdentity,
+} from '../../../../common/types/models/iac_callback';
+import type { AccountType } from '../../../../common/types/models/cloud_connector';
 
 export const IAC_CALLBACK_POLL_INTERVAL_MS = 3_000;
-/** Stop polling after this even if the record has not expired yet; the user can still paste. */
+/** Stop polling after this even if the record has not expired yet. */
 export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
+const PREPARE_DEBOUNCE_MS = 300;
 
 export type IacCallbackClientStatus =
   | 'idle'
@@ -27,17 +33,25 @@ export type IacCallbackClientStatus =
   | 'expired'
   | 'error';
 
-export interface IacCallbackReceived {
-  roleArn: string;
-  stackArn: string;
-  awsAccountId: string;
-  region: string;
+/** The cloud connector receive created. The form does not copy ARNs out of the callback. */
+export interface IacCallbackCreated {
+  id: string;
+  name: string;
+}
+
+/** What the form already knows, sent to the pending record so receive can create the connector. */
+export interface IacCallbackPrepareInput {
+  connectorName?: string;
+  accountType?: AccountType;
+  iacKey?: string | null;
+  iacBlueprintId?: string | null;
+  iacBlueprintVersion?: string | null;
 }
 
 export interface UseIacCallbackResult {
   status: IacCallbackClientStatus;
-  /** Set once the stack reported back. Kept across a later cancel. */
-  received?: IacCallbackReceived;
+  /** Set once receive has created the cloud connector. */
+  created?: IacCallbackCreated;
   /**
    * Creates a callback record (cancelling the previous one) and returns the stack parameters to
    * put on the quick-create link. Undefined when the callback cannot be used — disabled, no public
@@ -47,6 +61,8 @@ export interface UseIacCallbackResult {
   start: () => Promise<Record<string, string> | undefined>;
   /** Cancels the current record (if any) and invalidates its key. */
   cancel: () => Promise<void>;
+  /** Stores the form's name and template details on the pending record. No-op without one. */
+  prepare: (identity: IacCallbackPrepareInput) => void;
 }
 
 /**
@@ -62,25 +78,43 @@ export const getIacCallbackKibanaUrl = (
   return /^https:\/\//.test(url) ? url : undefined;
 };
 
-const toReceived = (item: IacCallback): IacCallbackReceived | undefined =>
-  item.role_arn && item.stack_arn && item.aws_account_id && item.region
-    ? {
-        roleArn: item.role_arn,
-        stackArn: item.stack_arn,
-        awsAccountId: item.aws_account_id,
-        region: item.region,
-      }
+const toCreated = (item: IacCallback): IacCallbackCreated | undefined =>
+  item.cloud_connector_id
+    ? { id: item.cloud_connector_id, name: item.connector_name ?? item.cloud_connector_id }
     : undefined;
+
+const toPrepareBody = (identity: IacCallbackPrepareInput): IacCallbackIdentity => {
+  const body: IacCallbackIdentity = {};
+  const name = identity.connectorName?.trim();
+  if (name) {
+    body.connector_name = name;
+  }
+  if (identity.accountType) {
+    body.account_type = identity.accountType;
+  }
+  if (identity.iacKey !== undefined) {
+    body.iac_key = identity.iacKey;
+  }
+  if (identity.iacBlueprintId !== undefined) {
+    body.iac_blueprint_id = identity.iacBlueprintId;
+  }
+  if (identity.iacBlueprintVersion !== undefined) {
+    body.iac_blueprint_version = identity.iacBlueprintVersion;
+  }
+  return body;
+};
 
 export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbackResult => {
   const { http } = useStartServices();
   const [status, setStatus] = useState<IacCallbackClientStatus>('idle');
-  const [received, setReceived] = useState<IacCallbackReceived | undefined>(undefined);
+  const [created, setCreated] = useState<IacCallbackCreated | undefined>(undefined);
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   // `start` awaits twice; a record created after the form went away must be cancelled, not polled.
   const mountedRef = useRef(true);
+  const prepareTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const lastPrepareRef = useRef<string | undefined>(undefined);
 
   const stopPolling = useCallback(() => {
     if (timerRef.current) {
@@ -138,7 +172,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         if (item.status === 'received') {
           stopPolling();
           activeIdRef.current = undefined;
-          setReceived(toReceived(item));
+          setCreated(toCreated(item));
           setStatus('received');
         } else if (item.status === 'cancelled') {
           stopPolling();
@@ -158,8 +192,9 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     if (!kibanaUrl) {
       return undefined;
     }
-    // A new Launch supersedes whatever record the previous one created.
+    // A new Launch supersedes whatever record the previous one created, including a received one.
     await cancel();
+    setStatus('idle');
 
     if (!mountedRef.current) {
       return undefined;
@@ -173,7 +208,8 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
       return undefined;
     }
     activeIdRef.current = data.item.id;
-    setReceived(undefined);
+    lastPrepareRef.current = undefined;
+    setCreated(undefined);
     setStatus('pending');
     startPolling(data.item.id, data.item.expires_at);
 
@@ -184,11 +220,43 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     };
   }, [enabled, http.basePath, cancel, startPolling]);
 
+  const prepare = useCallback((identity: IacCallbackPrepareInput) => {
+    if (prepareTimerRef.current) {
+      clearTimeout(prepareTimerRef.current);
+    }
+    prepareTimerRef.current = setTimeout(() => {
+      prepareTimerRef.current = undefined;
+      const id = activeIdRef.current;
+      if (!id) {
+        return;
+      }
+      const body = toPrepareBody(identity);
+      if (Object.keys(body).length === 0) {
+        return;
+      }
+      const serialized = JSON.stringify(body);
+      if (serialized === lastPrepareRef.current) {
+        return;
+      }
+      lastPrepareRef.current = serialized;
+      sendPrepareIacCallback(id, body).catch(() => {
+        // The next edit retries. A missed prepare still leaves the role name as a fallback.
+        if (lastPrepareRef.current === serialized) {
+          lastPrepareRef.current = undefined;
+        }
+      });
+    }, PREPARE_DEBOUNCE_MS);
+  }, []);
+
   // Leaving the form cancels the wait so the key dies with it.
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      if (prepareTimerRef.current) {
+        clearTimeout(prepareTimerRef.current);
+        prepareTimerRef.current = undefined;
+      }
       stopPolling();
       const id = activeIdRef.current;
       activeIdRef.current = undefined;
@@ -198,5 +266,5 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     };
   }, [stopPolling]);
 
-  return { status, received, start, cancel };
+  return { status, created, start, cancel, prepare };
 };

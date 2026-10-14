@@ -439,4 +439,12 @@ export interface IacCallbackSOAttributes {
   stack_arn?: string;
   aws_account_id?: string;
   region?: string;
+  /** Name the browser wants on the cloud connector created when the stack reports back. */
+  connector_name?: string;
+  account_type?: 'single-account' | 'organization-account';
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  /** Cloud connector created from this callback. Set together with status `received`. */
+  cloud_connector_id?: string;
 }

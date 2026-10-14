@@ -7,6 +7,7 @@
 
 import type {
   IacCallback,
+  IacCallbackIdentity,
   IacCallbackReceivedValues,
   IacCallbackStatus,
 } from '../models/iac_callback';
@@ -38,6 +39,15 @@ export interface DeleteIacCallbackRequest {
 export interface DeleteIacCallbackResponse {
   id: string;
   status: IacCallbackStatus;
+}
+
+export interface PrepareIacCallbackRequest {
+  params: { callbackId: string };
+  body: IacCallbackIdentity;
+}
+
+export interface PrepareIacCallbackResponse {
+  item: IacCallback;
 }
 
 export interface ReceiveIacCallbackRequest {

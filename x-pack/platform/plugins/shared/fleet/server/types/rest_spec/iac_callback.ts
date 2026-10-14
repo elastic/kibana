@@ -36,6 +36,14 @@ export const IacCallbackItemSchema = schema.object({
   stack_arn: schema.maybe(schema.string()),
   aws_account_id: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
+  connector_name: schema.maybe(schema.string()),
+  account_type: schema.maybe(
+    schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')])
+  ),
+  iac_key: schema.maybe(schema.nullable(schema.string())),
+  iac_blueprint_id: schema.maybe(schema.nullable(schema.string())),
+  iac_blueprint_version: schema.maybe(schema.nullable(schema.string())),
+  cloud_connector_id: schema.maybe(schema.string()),
 });
 
 export const CreateIacCallbackRequestSchema = {
@@ -69,6 +77,23 @@ export const DeleteIacCallbackRequestSchema = {
 export const DeleteIacCallbackResponseSchema = schema.object({
   id: schema.string(),
   status: IacCallbackStatusSchema,
+});
+
+export const PrepareIacCallbackRequestSchema = {
+  params: CallbackIdParamsSchema,
+  body: schema.object({
+    connector_name: schema.maybe(schema.string({ minLength: 1, maxLength: 255 })),
+    account_type: schema.maybe(
+      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')])
+    ),
+    iac_key: schema.maybe(schema.nullable(schema.string({ maxLength: 2048 }))),
+    iac_blueprint_id: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
+    iac_blueprint_version: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
+  }),
+};
+
+export const PrepareIacCallbackResponseSchema = schema.object({
+  item: IacCallbackItemSchema,
 });
 
 export const ReceiveIacCallbackRequestSchema = {

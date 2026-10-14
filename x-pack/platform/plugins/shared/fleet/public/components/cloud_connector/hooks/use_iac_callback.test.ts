@@ -12,6 +12,7 @@ import {
   sendCreateIacCallback,
   sendDeleteIacCallback,
   sendGetIacCallback,
+  sendPrepareIacCallback,
 } from '../../../hooks/use_request/iac_callback';
 import type { IacCallback } from '../../../../common/types/models/iac_callback';
 
@@ -28,6 +29,7 @@ const mockedUseStartServices = jest.mocked(useStartServices);
 const mockedCreate = jest.mocked(sendCreateIacCallback);
 const mockedGet = jest.mocked(sendGetIacCallback);
 const mockedDelete = jest.mocked(sendDeleteIacCallback);
+const mockedPrepare = jest.mocked(sendPrepareIacCallback);
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const EXPIRES_AT = '2026-10-13T12:00:00.000Z';
@@ -114,7 +116,34 @@ describe('useIacCallback', () => {
     expect(result.current.status).toBe('pending');
   });
 
-  it('polls while pending and exposes the values once received', async () => {
+  it('stores the form name on the pending record', async () => {
+    mockedPrepare.mockResolvedValue({ data: { item: pendingItem() }, error: null } as any);
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    await act(async () => {
+      await result.current.start();
+    });
+
+    act(() => {
+      result.current.prepare({
+        connectorName: '  my-identity  ',
+        accountType: 'single-account',
+        iacKey: 'sha256',
+      });
+    });
+    expect(mockedPrepare).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(mockedPrepare).toHaveBeenCalledWith('cb-1', {
+      connector_name: 'my-identity',
+      account_type: 'single-account',
+      iac_key: 'sha256',
+    });
+  });
+
+  it('polls while pending and exposes the created connector once received', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
       await result.current.start();
@@ -126,18 +155,20 @@ describe('useIacCallback', () => {
     expect(result.current.status).toBe('pending');
 
     mockedGet.mockResolvedValue({
-      data: { item: pendingItem('cb-1', { status: 'received', ...RECEIVED_VALUES }) },
+      data: {
+        item: pendingItem('cb-1', {
+          status: 'received',
+          ...RECEIVED_VALUES,
+          connector_name: 'my-identity',
+          cloud_connector_id: 'cc-1',
+        }),
+      },
       error: null,
     } as any);
     await poll();
 
     expect(result.current.status).toBe('received');
-    expect(result.current.received).toEqual({
-      roleArn: RECEIVED_VALUES.role_arn,
-      stackArn: RECEIVED_VALUES.stack_arn,
-      awsAccountId: RECEIVED_VALUES.aws_account_id,
-      region: RECEIVED_VALUES.region,
-    });
+    expect(result.current.created).toEqual({ id: 'cc-1', name: 'my-identity' });
 
     // Polling stops once received.
     await poll();
@@ -233,6 +264,32 @@ describe('useIacCallback', () => {
       params = await result.current.start();
     });
     expect(params).toBeUndefined();
+    expect(result.current.status).toBe('idle');
+  });
+
+  it('a new start() leaves a previous received status behind even when no record is created', async () => {
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    await act(async () => {
+      await result.current.start();
+    });
+    mockedGet.mockResolvedValue({
+      data: {
+        item: pendingItem('cb-1', {
+          status: 'received',
+          ...RECEIVED_VALUES,
+          cloud_connector_id: 'cc-1',
+        }),
+      },
+      error: null,
+    } as any);
+    await poll();
+    expect(result.current.status).toBe('received');
+
+    mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
+    await act(async () => {
+      await result.current.start();
+    });
+
     expect(result.current.status).toBe('idle');
   });
 

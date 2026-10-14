@@ -97,6 +97,18 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.item.stack_arn).to.be(PAYLOAD.stack_arn);
       expect(body.item.aws_account_id).to.be(ACCOUNT);
       expect(body.item.region).to.be('us-east-1');
+      expect(body.item.cloud_connector_id).to.be.a('string');
+
+      const connectors = await supertest
+        .get('/api/fleet/cloud_connectors')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      const created = connectors.body.items.find(
+        (connector: { id: string }) => connector.id === body.item.cloud_connector_id
+      );
+      expect(created.vars.role_arn.value).to.be(PAYLOAD.role_arn);
+      expect(created.iac_deployment_id).to.be(PAYLOAD.stack_arn);
+      expect(created.name).to.be('ElasticWorkloadIdentity-abc');
 
       // The key is single use: it was invalidated on the first receive, so Kibana's auth chain
       // now rejects it before the handler — a replay with the dead key is 401, not 200.

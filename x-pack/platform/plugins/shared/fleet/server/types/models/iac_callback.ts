@@ -13,11 +13,16 @@ const IacCallbackStatusSchema = schema.oneOf([
   schema.literal('cancelled'),
 ]);
 
+const AccountTypeSchema = schema.oneOf([
+  schema.literal('single-account'),
+  schema.literal('organization-account'),
+]);
+
 /**
  * Stored shape of a `fleet-iac-callback`. Only the API key id is kept so the key can be
  * invalidated and matched against the caller; the key itself is never stored.
  */
-export const IacCallbackSchemaV1 = schema.object({
+const iacCallbackFieldsV1 = {
   provider: schema.literal('aws'),
   status: IacCallbackStatusSchema,
   api_key_id: schema.string({ minLength: 1, maxLength: 256 }),
@@ -30,4 +35,20 @@ export const IacCallbackSchemaV1 = schema.object({
   stack_arn: schema.maybe(schema.string({ maxLength: 2048 })),
   aws_account_id: schema.maybe(schema.string({ maxLength: 12 })),
   region: schema.maybe(schema.string({ maxLength: 64 })),
+};
+
+export const IacCallbackSchemaV1 = schema.object(iacCallbackFieldsV1);
+
+/**
+ * Identity fields the browser writes while the record is pending, and the cloud connector id
+ * receive writes once it has created that connector. None of these are indexed.
+ */
+export const IacCallbackSchemaV2 = schema.object({
+  ...iacCallbackFieldsV1,
+  connector_name: schema.maybe(schema.string({ maxLength: 255 })),
+  account_type: schema.maybe(AccountTypeSchema),
+  iac_key: schema.maybe(schema.nullable(schema.string({ maxLength: 2048 }))),
+  iac_blueprint_id: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
+  iac_blueprint_version: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
+  cloud_connector_id: schema.maybe(schema.string({ maxLength: 256 })),
 });

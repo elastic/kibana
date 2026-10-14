@@ -12,9 +12,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { IAC_CALLBACK_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { IacCallbackSOAttributes } from '../types/so_attributes';
 
+import { CloudConnectorCreateError } from '../errors';
+
 import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
 import { invalidateAPIKeys } from './api_keys/security';
+import { cloudConnectorService } from './cloud_connector';
 import { iacCallbackService, IAC_CALLBACK_EXPIRATION } from './iac_callback';
 
 jest.mock('./app_context');
@@ -66,6 +69,16 @@ describe('iacCallbackService', () => {
     jest.useFakeTimers().setSystemTime(NOW);
     soClient = savedObjectsClientMock.create();
     jest.mocked(appContextService.getLogger).mockReturnValue(loggerMock.create());
+    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
+    jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
+      id: 'cc-1',
+      name: 'ElasticWorkloadIdentity-abc',
+      cloudProvider: 'aws',
+      vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+      created_at: NOW.toISOString(),
+      updated_at: NOW.toISOString(),
+      packagePolicyCount: 0,
+    });
     mockedInvalidate.mockResolvedValue({
       invalidated_api_keys: ['key-1'],
       previously_invalidated_api_keys: [],
@@ -75,6 +88,7 @@ describe('iacCallbackService', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   describe('create', () => {
@@ -165,6 +179,47 @@ describe('iacCallbackService', () => {
         space_id: 'default',
         expires_at: FUTURE,
       });
+    });
+  });
+
+  describe('prepare', () => {
+    it('stores the identity details on a pending record', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs()));
+      soClient.update.mockResolvedValue({
+        id: 'cb-1',
+        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {},
+      });
+
+      const result = await iacCallbackService.prepare(soClient, 'cb-1', {
+        connector_name: 'my-identity',
+        account_type: 'single-account',
+        iac_key: 'sha256:abc',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
+        connector_name: 'my-identity',
+        account_type: 'single-account',
+        iac_key: 'sha256:abc',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+      expect(result).toMatchObject({
+        outcome: 'prepared',
+        item: { connector_name: 'my-identity', iac_key: 'sha256:abc' },
+      });
+    });
+
+    it('is a conflict once the record has been received', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs({ status: 'received' })));
+      const result = await iacCallbackService.prepare(soClient, 'cb-1', {
+        connector_name: 'late',
+      });
+      expect(result).toEqual({ outcome: 'conflict' });
+      expect(soClient.update).not.toHaveBeenCalled();
     });
   });
 
@@ -261,18 +316,115 @@ describe('iacCallbackService', () => {
         payload: PAYLOAD,
       });
 
+      expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+        name: 'ElasticWorkloadIdentity-abc',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+        iac_deployment_id: STACK_ARN,
+      });
+      expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('default');
       expect(soClient.update).toHaveBeenCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
         status: 'received',
         received_at: NOW.toISOString(),
         ...PAYLOAD,
+        connector_name: 'ElasticWorkloadIdentity-abc',
+        cloud_connector_id: 'cc-1',
       });
       expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `IaC callback received [id=cb-1] [api_key_id=key-1] [role_arn=${ROLE_ARN}] [aws_account_id=123456789012]`,
+        message: `IaC callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}] [aws_account_id=123456789012]`,
       });
       expect(result).toEqual({
         outcome: 'received',
-        item: expect.objectContaining({ id: 'cb-1', status: 'received', ...PAYLOAD }),
+        item: expect.objectContaining({
+          id: 'cb-1',
+          status: 'received',
+          ...PAYLOAD,
+          cloud_connector_id: 'cc-1',
+        }),
+      });
+    });
+
+    it('creates the connector with the name and template details stored on the record', async () => {
+      soClient.get.mockResolvedValue(
+        soWith(
+          pendingAttrs({
+            connector_name: 'my-identity',
+            account_type: 'organization-account',
+            iac_key: 'sha256:abc',
+            iac_blueprint_id: 'federated-identity',
+            iac_blueprint_version: '1.0.0',
+          })
+        )
+      );
+      soClient.update.mockResolvedValue({
+        id: 'cb-1',
+        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {},
+      });
+      jest.mocked(cloudConnectorService.create).mockResolvedValue({
+        id: 'cc-9',
+        name: 'my-identity',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+        created_at: NOW.toISOString(),
+        updated_at: NOW.toISOString(),
+        packagePolicyCount: 0,
+      });
+
+      await iacCallbackService.receive(soClient, 'cb-1', { apiKeyId: 'key-1', payload: PAYLOAD });
+
+      expect(cloudConnectorService.create).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          name: 'my-identity',
+          accountType: 'organization-account',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+          iac_deployment_id: STACK_ARN,
+          vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+        })
+      );
+    });
+
+    it('suffixes the name when that identity name already exists', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs({ connector_name: 'my-identity' })));
+      soClient.update.mockResolvedValue({
+        id: 'cb-1',
+        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {},
+      });
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValueOnce(
+          new CloudConnectorCreateError('A cloud connector with this name already exists')
+        )
+        .mockResolvedValueOnce({
+          id: 'cc-2',
+          name: 'my-identity cb-1',
+          cloudProvider: 'aws',
+          vars: { role_arn: { type: 'text', value: ROLE_ARN } },
+          created_at: NOW.toISOString(),
+          updated_at: NOW.toISOString(),
+          packagePolicyCount: 0,
+        });
+
+      const result = await iacCallbackService.receive(soClient, 'cb-1', {
+        apiKeyId: 'key-1',
+        payload: PAYLOAD,
+      });
+
+      expect(cloudConnectorService.create).toHaveBeenNthCalledWith(
+        2,
+        soClient,
+        expect.objectContaining({ name: 'my-identity cb-1' })
+      );
+      expect(result).toMatchObject({
+        outcome: 'received',
+        item: { cloud_connector_id: 'cc-2', connector_name: 'my-identity cb-1' },
       });
     });
 
