@@ -71,17 +71,11 @@ export class ServiceAccountsTestPlugin
         security: {
           authz: { enabled: false, reason: 'Test endpoint scheduling a no-op task as the caller' },
         },
-        validate: {
-          query: schema.object({
-            waitMs: schema.number({ min: 0, max: 20_000, defaultValue: 0 }),
-          }),
-        },
+        validate: false,
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
         try {
-          // Expire the session token after HTTP authentication, before the internal API-key grant.
-          await setTimeout(request.query.waitMs);
           const task = await taskManagerStart.schedule(
             {
               taskType: NOOP_TASK_TYPE,
