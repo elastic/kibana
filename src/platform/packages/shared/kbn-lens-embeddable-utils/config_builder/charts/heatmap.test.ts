@@ -113,3 +113,35 @@ test('generates metric chart config', async () => {
     }
   `);
 });
+
+test('hides the legend and shows axis labels when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      legend: { show: false },
+      axisLabel: { xAxis: true, yAxis: true },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      legend: expect.objectContaining({ isVisible: false }),
+      gridConfig: expect.objectContaining({
+        isXAxisLabelVisible: true,
+        isXAxisTitleVisible: false,
+        isYAxisLabelVisible: true,
+        isYAxisTitleVisible: false,
+      }),
+    })
+  );
+});
