@@ -6,24 +6,10 @@
  */
 
 import type { GraphTelemetryEvent } from './types';
-import {
-  GraphEventTypes,
-  GRAPH_FLYOUT_VERSION,
-  GRAPH_NODE_ACTION,
-  GRAPH_NODE_TYPE,
-  GRAPH_TOGGLE_STATE,
-} from './types';
+import { GraphEventTypes, GRAPH_NODE_ACTION, GRAPH_NODE_TYPE, GRAPH_TOGGLE_STATE } from './types';
 
 /** Joins all values of a const map into a pipe-separated string for schema descriptions. */
 const list = (o: Record<string, string>): string => Object.values(o).join('|');
-
-const flyoutVersionField = {
-  type: 'keyword',
-  _meta: {
-    description: `Which flyout system the graph was used in (${list(GRAPH_FLYOUT_VERSION)})`,
-    optional: false,
-  },
-} as const;
 
 export const graphNodeActionClickedEvent: GraphTelemetryEvent = {
   eventType: GraphEventTypes.NodeActionClicked,
@@ -53,7 +39,6 @@ export const graphNodeActionClickedEvent: GraphTelemetryEvent = {
         optional: true,
       },
     },
-    flyoutVersion: flyoutVersionField,
   },
 };
 
@@ -68,7 +53,6 @@ export const graphFilterChangedEvent: GraphTelemetryEvent = {
         optional: false,
       },
     },
-    flyoutVersion: flyoutVersionField,
   },
 };
 
@@ -89,15 +73,12 @@ export const graphSearchSubmittedEvent: GraphTelemetryEvent = {
         optional: false,
       },
     },
-    flyoutVersion: flyoutVersionField,
   },
 };
 
 export const graphPreviewExpandedEvent: GraphTelemetryEvent = {
   eventType: GraphEventTypes.PreviewExpanded,
-  schema: {
-    flyoutVersion: flyoutVersionField,
-  },
+  schema: {},
 };
 
 export const graphTelemetryEvents = [

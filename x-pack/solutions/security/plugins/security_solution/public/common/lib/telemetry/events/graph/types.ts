@@ -13,13 +13,6 @@ import type {
   GraphToggleState,
 } from '@kbn/cloud-security-posture-graph';
 
-/** Which flyout system the graph was used in. */
-export const GRAPH_FLYOUT_VERSION = {
-  LEGACY: 'legacy',
-  V2: 'v2',
-} as const;
-export type GraphFlyoutVersion = (typeof GRAPH_FLYOUT_VERSION)[keyof typeof GRAPH_FLYOUT_VERSION];
-
 /** Exhaustive maps so a new package value fails to compile here until it is described. */
 export const GRAPH_NODE_TYPE: Record<GraphNodeType, GraphNodeType> = {
   entity: 'entity',
@@ -54,23 +47,19 @@ interface ReportGraphNodeActionClickedParams {
   nodeType: GraphNodeType;
   action: GraphNodeAction;
   state?: GraphToggleState;
-  flyoutVersion: GraphFlyoutVersion;
 }
 
 interface ReportGraphFilterChangedParams {
   change: 'added' | 'removed';
-  flyoutVersion: GraphFlyoutVersion;
 }
 
 interface ReportGraphSearchSubmittedParams {
   timeRangeChanged: boolean;
   queryChanged: boolean;
-  flyoutVersion: GraphFlyoutVersion;
 }
 
-interface ReportGraphPreviewExpandedParams {
-  flyoutVersion: GraphFlyoutVersion;
-}
+/** The preview expand carries no properties. */
+type ReportGraphPreviewExpandedParams = Record<string, never>;
 
 export interface GraphTelemetryEventsMap {
   [GraphEventTypes.NodeActionClicked]: ReportGraphNodeActionClickedParams;

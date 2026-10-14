@@ -31,6 +31,12 @@ describe('graph telemetry events', () => {
     });
   });
 
+  it('does not tag events with the flyout system in use', () => {
+    graphTelemetryEvents.forEach(({ schema }) => {
+      expect(Object.keys(schema)).not.toContain('flyoutVersion');
+    });
+  });
+
   it('only marks the toggle state as optional on the node action event', () => {
     const nodeAction = graphTelemetryEvents.find(
       ({ eventType }) => eventType === GraphEventTypes.NodeActionClicked

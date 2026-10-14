@@ -8,11 +8,9 @@
 import { renderHook } from '@testing-library/react';
 import { useGraphTelemetry } from './use_graph_telemetry';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { GraphEventTypes } from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 
 const mockReportEvent = jest.fn();
 
@@ -22,10 +20,9 @@ describe('useGraphTelemetry', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: { telemetry: { reportEvent: mockReportEvent } },
     });
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
   });
 
-  it('maps a node action to GraphEventTypes.NodeActionClicked with the flyout version', () => {
+  it('maps a node action to GraphEventTypes.NodeActionClicked', () => {
     const { result } = renderHook(() => useGraphTelemetry());
 
     result.current.onTelemetryEvent({
@@ -39,7 +36,6 @@ describe('useGraphTelemetry', () => {
       nodeType: 'entity',
       action: 'show_actions_by',
       state: 'show',
-      flyoutVersion: 'v2',
     });
   });
 
@@ -56,7 +52,6 @@ describe('useGraphTelemetry', () => {
       nodeType: 'grouped_entity',
       action: 'show_grouped_entities',
       state: undefined,
-      flyoutVersion: 'v2',
     });
   });
 
@@ -73,7 +68,6 @@ describe('useGraphTelemetry', () => {
       nodeType: 'grouped_event',
       action: 'show_grouped_events',
       state: undefined,
-      flyoutVersion: 'v2',
     });
   });
 
@@ -89,24 +83,19 @@ describe('useGraphTelemetry', () => {
 
     expect(mockReportEvent).toHaveBeenNthCalledWith(1, GraphEventTypes.FilterChanged, {
       change: 'added',
-      flyoutVersion: 'v2',
     });
     expect(mockReportEvent).toHaveBeenNthCalledWith(2, GraphEventTypes.SearchSubmitted, {
       timeRangeChanged: true,
       queryChanged: false,
-      flyoutVersion: 'v2',
     });
   });
 
-  it('reports the legacy flyout version when the new flyout is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+  it('reports the preview expand', () => {
     const { result } = renderHook(() => useGraphTelemetry());
 
     result.current.reportPreviewExpanded();
 
-    expect(mockReportEvent).toHaveBeenCalledWith(GraphEventTypes.PreviewExpanded, {
-      flyoutVersion: 'legacy',
-    });
+    expect(mockReportEvent).toHaveBeenCalledWith(GraphEventTypes.PreviewExpanded, {});
   });
 
   it('does not throw when the telemetry service is unavailable', () => {
