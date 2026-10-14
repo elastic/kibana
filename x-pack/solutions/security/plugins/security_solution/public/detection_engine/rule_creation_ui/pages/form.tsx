@@ -136,7 +136,10 @@ export const useRuleIndexPattern = ({
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-  const [isDataViewLoading, setIsDataViewLoading] = useState(false);
+  // Loading from the first render for a rule that already has a data view, before the effect runs.
+  const [isDataViewLoading, setIsDataViewLoading] = useState(
+    () => dataSourceType === DataSourceType.DataView && dataViewId != null && dataViewId !== ''
+  );
   // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
   // when the index pattern changes
   // when we select new dataView
