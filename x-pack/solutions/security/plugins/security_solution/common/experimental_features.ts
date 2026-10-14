@@ -386,7 +386,7 @@ export const allowedExperimentalValues = Object.freeze({
    * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
-  linuxRansomwareProtection: true,
+  linuxRansomwareProtection: false,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
