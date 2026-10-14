@@ -13,6 +13,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
+  markExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
@@ -41,11 +42,16 @@ const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
  * Builds a request carrying a UIAM credential and, optionally, an inbound client authentication
  * header that rode in with it.
  */
-function createUiamRequest(sharedSecret?: string, authorization = 'Bearer essu_access-token') {
+function createUiamRequest(
+  sharedSecret?: string,
+  authorization = 'Bearer essu_access-token',
+  additionalHeaders: Record<string, string> = {}
+) {
   return httpServerMock.createKibanaRequest({
     headers: {
       authorization,
       ...(sharedSecret === undefined ? {} : { [ES_CLIENT_AUTHENTICATION_HEADER]: sharedSecret }),
+      ...additionalHeaders,
     },
   });
 }
@@ -55,14 +61,12 @@ describe('UiamService', () => {
   let readFileSyncSpy: jest.SpyInstance;
   let agentSpy: jest.SpyInstance;
   let fetchSpy: jest.SpyInstance;
-  let getCurrentUser: jest.Mock;
   beforeEach(() => {
     readFileSyncSpy = jest
       .spyOn(fs, 'readFileSync')
       .mockImplementation((path) => `mocked file content for ${path}`);
     agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
     fetchSpy = jest.spyOn(window, 'fetch');
-    getCurrentUser = jest.fn().mockReturnValue(null);
 
     uiamService = new UiamService(
       loggingSystemMock.createLogger(),
@@ -82,7 +86,6 @@ describe('UiamService', () => {
           'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp',
         elasticsearchUrl: 'https://es.example.com',
         kibanaVersion: '9.0.0',
-        getCurrentUser,
       }
     );
   });
@@ -465,14 +468,26 @@ describe('UiamService', () => {
         }
       );
 
-      it('omits client authentication for an external API key', async () => {
+      it('omits client authentication for a real API key without an attestation', async () => {
         fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
-        getCurrentUser.mockReturnValue({ api_key: { internal: false } });
-        const request = createUiamRequest(undefined, 'ApiKey essu_external-key');
 
-        await run(uiamService, request);
+        await run(uiamService, createUiamRequest(undefined, 'ApiKey essu_external-key'));
 
-        expect(getCurrentUser).toHaveBeenCalledWith(request);
+        expect(fetchSpy.mock.calls[0][1].headers).not.toHaveProperty(
+          ES_CLIENT_AUTHENTICATION_HEADER
+        );
+      });
+
+      it('omits client authentication for a real API key with an invalid attestation', async () => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+
+        await run(
+          uiamService,
+          createUiamRequest(undefined, 'ApiKey essu_external-key', {
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'invalid-attestation',
+          })
+        );
+
         expect(fetchSpy.mock.calls[0][1].headers).not.toHaveProperty(
           ES_CLIENT_AUTHENTICATION_HEADER
         );
@@ -480,11 +495,44 @@ describe('UiamService', () => {
 
       it("uses Kibana's client authentication for an internal API key", async () => {
         fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
-        getCurrentUser.mockReturnValue({ api_key: { internal: true } });
+        const credential = new HTTPAuthorizationHeader('ApiKey', 'essu_internal-key');
 
-        await run(uiamService, createUiamRequest(undefined, 'ApiKey essu_internal-key'));
+        await run(
+          uiamService,
+          createUiamRequest(undefined, credential.toString(), {
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              'secret',
+              credential
+            ),
+          })
+        );
 
         expect(fetchSpy.mock.calls[0][1].headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe('secret');
+      });
+
+      it("uses Kibana's client authentication for an unmarked fake API key request", async () => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_internal-key' },
+        });
+
+        await run(uiamService, request);
+
+        expect(fetchSpy.mock.calls[0][1].headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe('secret');
+      });
+
+      it('omits client authentication for a fake request marked as external', async () => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_external-key' },
+        });
+        markExternalUiamCredential(request);
+
+        await run(uiamService, request);
+
+        expect(fetchSpy.mock.calls[0][1].headers).not.toHaveProperty(
+          ES_CLIENT_AUTHENTICATION_HEADER
+        );
       });
     });
 
