@@ -129609,16 +129609,12 @@ paths:
           name: page
           required: false
           schema:
-            maximum: 9007199254740991
-            minimum: -9007199254740991
             type: number
         - description: The number of items to return per page.
           in: query
           name: perPage
           required: false
           schema:
-            maximum: 9007199254740991
-            minimum: -9007199254740991
             type: number
         - description: The field to sort the results by.
           in: query
@@ -148165,8 +148161,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         name:
           description: The monitor name.
@@ -148231,9 +148225,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:
@@ -149306,8 +149298,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         name:
           description: The monitor name.
@@ -149372,9 +149362,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:
@@ -152764,8 +152752,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         max_redirects:
           anyOf:
@@ -152867,9 +152853,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:
@@ -155440,8 +155424,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         max_redirects:
           anyOf:
@@ -155535,9 +155517,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:
@@ -155729,8 +155709,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
@@ -155796,9 +155774,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:
@@ -172229,8 +172205,6 @@ components:
           maxItems: 1000
           type: array
         max_attempts:
-          maximum: 9007199254740991
-          minimum: -9007199254740991
           type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
@@ -172302,9 +172276,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
-            - maximum: 9007199254740991
-              minimum: -9007199254740991
-              title: Minutes
+            - title: Minutes
               type: number
             - additionalProperties: false
               properties:

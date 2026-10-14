@@ -24,6 +24,7 @@ import {
   MAX_ROUTE_ID_LENGTH,
   MAX_ROUTE_STRING_LENGTH,
   maxArraySizeMessage,
+  safeNumber,
 } from '../zod_query';
 
 /**
@@ -42,7 +43,7 @@ type BoundedJson =
 const boundedJsonRuntime: z.ZodType<BoundedJson> = z.lazy(() =>
   z.union([
     z.string().max(MAX_PARAM_VALUE_LENGTH),
-    z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER),
+    safeNumber(z.number()),
     z.boolean(),
     z.null(),
     z.array(boundedJsonRuntime).max(MAX_MONITOR_FANOUT_SIZE),
@@ -87,7 +88,7 @@ const locationsField = z
   .max(MAX_MONITOR_FANOUT_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_FANOUT_SIZE) });
 
 const scheduleField = z.union([
-  z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER).meta({ title: 'Minutes' }),
+  safeNumber(z.number()).meta({ title: 'Minutes' }),
   z
     .strictObject({
       number: z.union([z.string().max(32), z.number()]),
@@ -170,11 +171,7 @@ const typedOverlays: Record<string, z.ZodType> = {
       z.null(),
     ])
     .optional(),
-  [ConfigKey.MAX_ATTEMPTS]: z
-    .number()
-    .min(Number.MIN_SAFE_INTEGER)
-    .max(Number.MAX_SAFE_INTEGER)
-    .optional(),
+  [ConfigKey.MAX_ATTEMPTS]: safeNumber(z.number()).optional(),
   [ConfigKey.MAX_REDIRECTS]: z
     .union([
       z.string().max(32).meta({ title: 'Count as string' }),
