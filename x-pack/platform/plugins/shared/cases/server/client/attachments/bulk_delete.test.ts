@@ -415,7 +415,7 @@ describe('bulk_delete', () => {
         expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
       });
 
-      it('throws when a saved object failed to be deleted, before any stats or user actions are written', async () => {
+      it('still surfaces a saved object that failed to be deleted', async () => {
         // The service only answers with the ids it confirmed deleted, so a missing id means the
         // saved object may still be there.
         clientArgs.services.attachmentService.bulkDelete.mockResolvedValue(['mock-comment-1']);
@@ -426,6 +426,66 @@ describe('bulk_delete', () => {
             clientArgs
           )
         ).rejects.toThrow('Failed to delete attachment mock-comment-2 on case mock-id-1.');
+      });
+
+      it('records the attachments that did delete before throwing, scoped to those ids', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue(['mock-comment-1']);
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-1', 'mock-comment-2'] },
+            clientArgs
+          )
+        ).rejects.toThrow('Failed to delete attachment mock-comment-2 on case mock-id-1.');
+
+        expect(clientArgs.services.caseService.patchCase).toHaveBeenCalled();
+
+        const { attachments } =
+          clientArgs.services.userActionService.creator.bulkCreateAttachmentDeletion.mock
+            .calls[0][0];
+        expect(attachments.map(({ id }) => id)).toEqual(['mock-comment-1']);
+      });
+
+      it('clears the case id only from the alerts whose attachment actually deleted', async () => {
+        const survivingAlertAttachment = {
+          ...alertAttachment,
+          id: 'mock-comment-5',
+          attributes: {
+            ...alertAttachment.attributes,
+            alertId: ['surviving-id'],
+            index: ['surviving-index'],
+          },
+        } as unknown as (typeof mockCaseComments)[number];
+
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [alertAttachment, survivingAlertAttachment],
+        });
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue(['mock-comment-4']);
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-4', savedObjectIds: ['mock-comment-4', 'mock-comment-5'] },
+            clientArgs
+          )
+        ).rejects.toThrow('Failed to delete attachment mock-comment-5 on case mock-id-4.');
+
+        expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
+          alerts: [{ id: 'test-id', index: 'test-index' }],
+          caseId: 'mock-id-4',
+        });
+      });
+
+      it('writes nothing when no attachment was deleted at all', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue([]);
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-1', 'mock-comment-2'] },
+            clientArgs
+          )
+        ).rejects.toThrow(
+          'Failed to delete attachments mock-comment-1, mock-comment-2 on case mock-id-1.'
+        );
 
         expect(clientArgs.services.caseService.patchCase).not.toHaveBeenCalled();
         expect(
