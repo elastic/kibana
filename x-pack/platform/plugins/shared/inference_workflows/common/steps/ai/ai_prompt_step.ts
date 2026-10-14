@@ -25,9 +25,51 @@ export const normalizeOptionalConnectorParam = (value: string | undefined): stri
   return trimmed ? trimmed : undefined;
 };
 
+/**
+ * Validation message shown when `aggregate-by` is set without a `plugin-id`: the parent rollup id
+ * only means something next to the attribution id it groups.
+ */
+export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
+  '`aggregate-by` can only be set when `plugin-id` is also set.';
+
 export const ConfigSchema = z
   .object({
     'connector-id': z.string().max(255).optional(),
+    'max-step-size': z
+      .string()
+      .max(32)
+      .optional()
+      .describe(
+        'Maximum response size for this workflow step. Also used as the response content length limit of the LLM call.'
+      ),
+    'plugin-id': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The feature id to attribute this step's LLM call to in token usage tracking and connector telemetry. When omitted, no telemetry metadata is sent."
+      ),
+    'aggregate-by': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The parent feature id to group this step's token usage under. Only used when `plugin-id` is set."
+      ),
+    'product-solution': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+      ),
+    'product-feature': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
+      ),
     'reasoning-level': z
       .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
       .optional()
@@ -51,6 +93,16 @@ export const ConfigSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Cannot specify both connector-id and connector-id-by-feature.',
         path: ['connector-id-by-feature'],
+      });
+    }
+    if (
+      normalizeOptionalConnectorParam(cfg['aggregate-by']) !== undefined &&
+      normalizeOptionalConnectorParam(cfg['plugin-id']) === undefined
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+        path: ['aggregate-by'],
       });
     }
   });

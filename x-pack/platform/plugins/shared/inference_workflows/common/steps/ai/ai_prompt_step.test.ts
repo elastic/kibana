@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ConfigSchema, normalizeOptionalConnectorParam } from './ai_prompt_step';
+import {
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+  ConfigSchema,
+  normalizeOptionalConnectorParam,
+} from './ai_prompt_step';
 
 describe('ai_prompt_step common', () => {
   describe('normalizeOptionalConnectorParam', () => {
@@ -48,6 +52,40 @@ describe('ai_prompt_step common', () => {
       expect(
         ConfigSchema.safeParse({ 'connector-id': '', 'connector-id-by-feature': '' }).success
       ).toBe(true);
+    });
+  });
+
+  describe('ConfigSchema telemetry fields', () => {
+    it('accepts a step without any telemetry field, so existing workflows keep validating', () => {
+      expect(ConfigSchema.safeParse({ 'connector-id': 'my-connector' }).success).toBe(true);
+    });
+
+    it('accepts every telemetry field together with max-step-size', () => {
+      expect(
+        ConfigSchema.safeParse({
+          'connector-id': 'my-connector',
+          'max-step-size': '10mb',
+          'plugin-id': 'my_feature',
+          'aggregate-by': 'my_parent',
+          'product-solution': 'security',
+          'product-feature': 'alert_triage',
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects aggregate-by without plugin-id, since a parent rollup needs a feature to group', () => {
+      const result = ConfigSchema.safeParse({ 'aggregate-by': 'my_parent' });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]).toEqual(
+        expect.objectContaining({
+          message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+          path: ['aggregate-by'],
+        })
+      );
+    });
+
+    it('accepts a blank aggregate-by without plugin-id, so a templated field can render empty', () => {
+      expect(ConfigSchema.safeParse({ 'aggregate-by': '', 'plugin-id': '' }).success).toBe(true);
     });
   });
 });

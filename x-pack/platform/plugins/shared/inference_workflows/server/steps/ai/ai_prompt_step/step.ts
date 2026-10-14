@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { isSpanContextValid, trace } from '@opentelemetry/api';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { validateReasoningEffort } from '@kbn/inference-common';
 import {
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   AiPromptStepCommonDefinition,
   normalizeOptionalConnectorParam,
 } from '../../../../common/steps/ai';
@@ -47,6 +51,22 @@ const buildMetadata = (
   };
 };
 
+/**
+ * Parses a `max-step-size` value (e.g. `"10mb"` or a raw byte count) into bytes, the same way the
+ * ai.agent step does. Returns `undefined` for empty or malformed values so the limit is not changed.
+ */
+export const parseMaxStepSize = (value: string | undefined): number | undefined => {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  try {
+    return ByteSizeValue.parse(trimmed).getValueInBytes();
+  } catch {
+    return undefined;
+  }
+};
+
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
@@ -57,6 +77,12 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         context.config['connector-id-by-feature']
       );
       const connectorId = normalizeOptionalConnectorParam(context.config['connector-id']);
+      const pluginId = normalizeOptionalConnectorParam(context.config['plugin-id']);
+      const aggregateBy = normalizeOptionalConnectorParam(context.config['aggregate-by']);
+      // Workflows only validate the config schema's shape, which drops its refinements.
+      if (aggregateBy && !pluginId) {
+        throw new Error(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+      }
       const request = context.contextManager.getFakeRequest();
 
       let resolvedConnectorId: string;
@@ -89,6 +115,27 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       }
 
       const reasoningLevel = context.config['reasoning-level'];
+      const maxContentLength = parseMaxStepSize(context.config['max-step-size']);
+      // Sent only with a plugin-id, so a step without one makes exactly the same call as before.
+      let telemetryMetadata: ConnectorTelemetryMetadata | undefined;
+      if (pluginId) {
+        const { execution, workflow } = context.contextManager.getContext();
+        const productSolution = normalizeOptionalConnectorParam(context.config['product-solution']);
+        const productFeature = normalizeOptionalConnectorParam(context.config['product-feature']);
+        // Without tracing enabled the active span is a no-op whose trace id is all zeros.
+        const spanContext = trace.getActiveSpan()?.spanContext();
+        const traceId =
+          spanContext && isSpanContextValid(spanContext) ? spanContext.traceId : undefined;
+        telemetryMetadata = {
+          pluginId,
+          ...(aggregateBy ? { aggregateBy } : {}),
+          ...(productSolution ? { productSolution } : {}),
+          ...(productFeature ? { productFeature } : {}),
+          interactionId: execution.id,
+          spaceId: workflow.spaceId,
+          ...(traceId ? { traceId } : {}),
+        };
+      }
       const chatModel = await inference.getChatModel({
         connectorId: resolvedConnectorId,
         request: context.contextManager.getFakeRequest(),
@@ -96,6 +143,8 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           temperature: context.input.temperature,
           maxRetries: 0,
           ...(reasoningLevel !== undefined ? { reasoning: { effort: reasoningLevel } } : {}),
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+          ...(telemetryMetadata ? { telemetryMetadata } : {}),
         },
       });
 

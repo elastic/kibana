@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INVALID_SPAN_CONTEXT, TraceFlags, trace } from '@opentelemetry/api';
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
@@ -22,12 +23,16 @@ jest.mock('../../../../common/steps/ai', () => ({
   // The real helper, so the handler tests cover how blank connector fields are treated.
   normalizeOptionalConnectorParam: jest.requireActual('../../../../common/steps/ai/ai_prompt_step')
     .normalizeOptionalConnectorParam,
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE: jest.requireActual(
+    '../../../../common/steps/ai/ai_prompt_step'
+  ).AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
 }));
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
+import { AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE } from '../../../../common/steps/ai';
 import { aiPromptStepDefinition } from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -412,6 +417,134 @@ describe('aiPromptStepDefinition', () => {
           }),
         });
       });
+    });
+
+    describe('telemetry attribution', () => {
+      const validSpanContext = {
+        traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+        spanId: '00f067aa0ba902b7',
+        traceFlags: TraceFlags.SAMPLED,
+      };
+      const getChatModelOptions = () =>
+        mockInference.getChatModel.mock.calls[0][0].chatModelOptions;
+
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok' });
+        mockContextManager.getContext.mockReturnValue({
+          execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
+          workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId: 'my-space' },
+          kibanaUrl: '',
+          consts: {},
+          variables: {},
+          steps: {},
+        });
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('sends no telemetry metadata without a plugin-id, so existing steps make the same call', async () => {
+        await handler(mockContext);
+
+        expect(getChatModelOptions()).not.toHaveProperty('telemetryMetadata');
+        expect(mockContextManager.getContext).not.toHaveBeenCalled();
+      });
+
+      it('attributes the call to plugin-id and aggregate-by, which become feature_id / parent_feature_id in token usage', async () => {
+        jest.spyOn(trace, 'getActiveSpan').mockReturnValue(trace.wrapSpanContext(validSpanContext));
+        mockContext.config = {
+          ...mockContext.config,
+          'plugin-id': 'alertzero_alert_triage',
+          'aggregate-by': 'alertzero_parent',
+          'product-solution': 'security',
+          'product-feature': 'alert_triage',
+        };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).toEqual({
+          pluginId: 'alertzero_alert_triage',
+          aggregateBy: 'alertzero_parent',
+          productSolution: 'security',
+          productFeature: 'alert_triage',
+          interactionId: 'exec-1',
+          spaceId: 'my-space',
+          traceId: validSpanContext.traceId,
+        });
+      });
+
+      it('leaves out the all-zero trace id of the no-op span used when tracing is off', async () => {
+        jest
+          .spyOn(trace, 'getActiveSpan')
+          .mockReturnValue(trace.wrapSpanContext(INVALID_SPAN_CONTEXT));
+        mockContext.config = { ...mockContext.config, 'plugin-id': 'my_feature' };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).not.toHaveProperty('traceId');
+      });
+
+      it('sends the request context without optional fields that are blank or absent', async () => {
+        jest.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined);
+        mockContext.config = {
+          ...mockContext.config,
+          'plugin-id': 'my_feature',
+          'aggregate-by': '',
+        };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).toEqual({
+          pluginId: 'my_feature',
+          interactionId: 'exec-1',
+          spaceId: 'my-space',
+        });
+      });
+
+      it('treats a blank plugin-id as unset, so a templated value that renders empty sends nothing', async () => {
+        mockContext.config = { ...mockContext.config, 'plugin-id': '  ' };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions()).not.toHaveProperty('telemetryMetadata');
+      });
+
+      it('rejects aggregate-by without plugin-id before calling the model, since the engine skips schema refinements', async () => {
+        mockContext.config = { ...mockContext.config, 'aggregate-by': 'alertzero_parent' };
+
+        await expect(handler(mockContext)).rejects.toThrow(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('max-step-size', () => {
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok' });
+      });
+
+      it('passes max-step-size as the response length limit, so large replies are not cut at the 1 MB default', async () => {
+        mockContext.config = { ...mockContext.config, 'max-step-size': '10mb' };
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions.maxContentLength).toBe(
+          10 * 1024 * 1024
+        );
+      });
+
+      it.each([undefined, '', 'not-a-size'])(
+        'keeps the default limit when max-step-size is %j',
+        async (value) => {
+          mockContext.config = { ...mockContext.config, 'max-step-size': value };
+
+          await handler(mockContext);
+
+          expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions).not.toHaveProperty(
+            'maxContentLength'
+          );
+        }
+      );
     });
 
     describe('error handling', () => {
