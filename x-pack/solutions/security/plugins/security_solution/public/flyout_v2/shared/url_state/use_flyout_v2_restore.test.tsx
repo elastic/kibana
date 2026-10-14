@@ -175,6 +175,34 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
   });
 
+  it('restores a child entity flyout in resolved mode when the descriptor carries it', () => {
+    renderRestore(
+      buildUrl([
+        { kind: 'rule', ruleId: 'rule-1' },
+        {
+          kind: 'user',
+          userName: 'alice',
+          entityId: 'user:alice',
+          scopeId: 'entities-table',
+          mode: 'resolved',
+        },
+      ])
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openUserFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userName: 'alice',
+        entityId: 'user:alice',
+        scopeId: 'entities-table',
+        mode: 'resolved',
+      })
+    );
+  });
+
   it('restores an entity flyout in resolved mode when the descriptor carries it', () => {
     const { history } = renderRestore('/');
 
