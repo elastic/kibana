@@ -52,6 +52,7 @@ import {
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
+import { useStepFragmentYamlSupport } from './use_step_fragment_yaml_support';
 import {
   getShowCreationEmptyState,
   subscribeShowCreationEmptyState,
@@ -336,6 +337,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const [insertion, setInsertion] = useState<InsertionState | null>(null);
   const [panel, setPanel] = useState<PanelState | null>(null);
+  const stepYamlEditorMount = useStepFragmentYamlSupport(
+    panel?.mode === 'edit' ? panel.stepName : undefined
+  );
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
   /** After a trigger insert's Done: clear the ghost on the next definition update (not eagerly). */
@@ -1279,6 +1283,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               isFallbackStep={panelIsFallbackStep}
               onExpandedChange={setFieldEditorExpanded}
               onFragmentChange={handleStepDraftChange}
+              onYamlEditorMount={stepYamlEditorMount}
             />
           </KibanaSectionErrorBoundary>
         </CanvasConfigPanelShell>

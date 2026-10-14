@@ -39,6 +39,7 @@ import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { ESQL_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { getBuiltInStepDefinition } from '@kbn/workflows';
 import {
@@ -112,6 +113,12 @@ export interface StepConfigPanelProps {
    * stateful shell live-applies each valid edit straight to the YAML.
    */
   readonly onFragmentChange?: (fragment: string) => void;
+  /**
+   * Mount hook for the YAML tab's `CodeEditor` — the stateful shell uses this
+   * to wire full-workflow validation/autocomplete onto the step fragment
+   * (see `useStepFragmentYamlSupport`).
+   */
+  readonly onYamlEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const CODE_EDITOR_HEIGHT = 160;
@@ -250,6 +257,7 @@ export function StepConfigPanel({
   isFallbackStep = false,
   onExpandedChange,
   onFragmentChange,
+  onYamlEditorMount,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -850,6 +858,7 @@ export function StepConfigPanel({
                 languageId={YAML_LANG_ID}
                 value={fragment}
                 onChange={setFragment}
+                editorDidMount={onYamlEditorMount}
                 height="100%"
                 aria-label={i18n.translate('workflows.stepConfigPanel.yamlAriaLabel', {
                   defaultMessage: 'Step YAML',

@@ -110,6 +110,28 @@ The rendered layout has two shapes depending on `continue`:
 
 ---
 
+## Human-in-the-loop (`waitForInput`)
+
+**responder**
+The person who answers a `waitForInput` step. Distinct from the workflow _author_, who writes the step's `message` and `schema`.
+_Avoid_: user, operator (both used elsewhere for different roles), approver (one response shape among several, not the general term).
+
+**response surface**
+One of the UIs a responder can use to answer a `waitForInput` step: the Inbox flyout, the external (Slack-linked) HTML form, or the Kibana execution view. Each renders a different subset of `with.schema`.
+_Avoid_: resume UI, answer screen.
+
+**form field**
+One property of `with.schema`, as the author edits it in the visual builder — a label, an answer type, and whether it's required or has a default. Distinct from the underlying JSON Schema property, which is its serialized form.
+_Avoid_: schema property (reserve for the JSON Schema level), question (Slack/competitor term, not used here).
+
+**response**
+The value a responder submits, read downstream as `steps.<name>.output.response.<key>`. Distinct from the step's `output`, which also carries audit fields (`respondedBy`, `respondedAt`, `channel`).
+_Avoid_: answer, submission.
+
+**message**
+The `with.message` string shown to the responder above the form fields. Liquid-rendered, plain text on every response surface today.
+_Avoid_: prompt (reserved for LLM-facing text elsewhere in the codebase).
+
 ## Code / copy divergence (intentional)
 
 Internal vocabulary is schema-aligned (`fallback`, `isFailure`, `fallbackTarget`) regardless of what design settles on for user-facing copy ("Add error handling" vs "Add fallback steps" — pending design sign-off per ADR-0004). `CONTEXT.md` records the mapping so the divergence is intentional rather than rot.

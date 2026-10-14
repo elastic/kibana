@@ -11,6 +11,7 @@ import YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { WorkflowDefinitionProvider } from './workflow_definition_provider';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepFragmentModelUri } from '../step_fragment/step_fragment_models';
 
 jest.mock('../template_expression/parse_template_at_position');
 
@@ -442,6 +443,19 @@ steps:
 
       const result = provider.provideDefinition(model, new monaco.Position(1, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('step-fragment models', () => {
+    it('does NOT navigate on a step-fragment editor model', () => {
+      const fragmentModel = {
+        ...model,
+        uri: createStepFragmentModelUri(),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = provider.provideDefinition(fragmentModel, new monaco.Position(1, 1));
+      expect(result).toBeNull();
+      expect(parseTemplateAtPosition).not.toHaveBeenCalled();
     });
   });
 });

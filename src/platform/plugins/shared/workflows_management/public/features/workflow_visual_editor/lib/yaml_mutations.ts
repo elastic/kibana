@@ -503,6 +503,22 @@ export const duplicateStep = (
   return { success: true, yaml: serialize(doc, detectIndent(yaml)), newName };
 };
 
+/**
+ * Source character range `[start, end)` of `stepName`'s mapping node in `yaml`
+ * (end = just after its last value, including that line's trailing newline).
+ * Used to splice a live-edited fragment back into its exact position for
+ * full-document validation/autocomplete without re-serializing the document.
+ */
+export const getStepSourceRange = (
+  yaml: string,
+  stepName: string
+): readonly [number, number] | undefined => {
+  const doc = parseDocument(yaml);
+  const location = locateStep(doc, stepName);
+  if (!location || !location.node.range) return undefined;
+  return [location.node.range[0], location.node.range[1]];
+};
+
 /** Extracts a step's YAML fragment (a mapping, comments included). */
 export const getStepFragment = (yaml: string, stepName: string): string | undefined => {
   const doc = parseDocument(yaml);

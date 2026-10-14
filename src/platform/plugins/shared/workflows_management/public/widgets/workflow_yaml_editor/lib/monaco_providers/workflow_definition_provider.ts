@@ -10,6 +10,7 @@
 import YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { isStepFragmentModel } from '../step_fragment/step_fragment_models';
 import type { TemplateExpressionInfo } from '../template_expression/parse_template_at_position';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 
@@ -218,6 +219,13 @@ export class WorkflowDefinitionProvider implements monaco.languages.DefinitionPr
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): monaco.languages.ProviderResult<monaco.languages.Definition> {
+    // Step-fragment editors (the graph flyout's YAML tab) show one
+    // de-indented step; this provider resolves against the main document and
+    // the fragment's own coordinates, so it would navigate to the wrong place.
+    if (isStepFragmentModel(model)) {
+      return null;
+    }
+
     const templateInfo = parseTemplateAtPosition(model, position);
     if (!templateInfo?.isInsideTemplate || templateInfo.pathSegments.length === 0) {
       return null;

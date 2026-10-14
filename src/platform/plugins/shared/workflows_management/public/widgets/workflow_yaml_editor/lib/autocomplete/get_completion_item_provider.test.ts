@@ -23,6 +23,12 @@ import { createMockWorkflowContextRegistry } from '../../../../../common/lib/cre
 
 import { isDeprecatedStepType } from '../../../../../common/schema';
 import { createStepInfo } from '../../../../shared/test_utils/step_info_factory';
+import {
+  createStepFragmentModelUri,
+  registerStepFragmentModel,
+  type StepFragmentTarget,
+} from '../step_fragment/step_fragment_models';
+import type { StepFragmentVirtualYaml } from '../step_fragment/step_fragment_virtual_yaml';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -719,6 +725,121 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toEqual([]);
       expect(result?.incomplete).toBe(false);
+    });
+  });
+
+  describe('step-fragment models', () => {
+    const buildTarget = (overrides: Partial<StepFragmentTarget> = {}): StepFragmentTarget => ({
+      model: {
+        uri: { toString: () => 'inmemory://model/shadow.yaml' },
+      } as unknown as monaco.editor.ITextModel,
+      virtual: {
+        yaml: 'name: demo\nsteps:\n  - name: first\n    type: console\n',
+        startLineNumber: 3,
+        columnOffset: 4,
+        lineCount: 2,
+      },
+      computed: {} as any,
+      ...overrides,
+    });
+
+    it('returns empty suggestions when the fragment model is unregistered', async () => {
+      const fragmentModel = {
+        uri: { toString: () => `inmemory://model/workflow-step-fragment-unregistered.yaml` },
+      } as unknown as monaco.editor.ITextModel;
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        fragmentModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result).toEqual({ suggestions: [], incomplete: false });
+    });
+
+    it('resolves against the shadow model at the mapped position, with the target computed data', async () => {
+      const fragmentUri = createStepFragmentModelUri();
+      const fragmentModel = { uri: fragmentUri } as unknown as monaco.editor.ITextModel;
+      const target = buildTarget();
+      const registration = registerStepFragmentModel(fragmentModel, () => target);
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: [],
+        isInEsqlQueryField: false,
+      });
+
+      try {
+        const provider = getCompletionItemProvider(emptyRegistry, getState);
+        await provider.provideCompletionItems!(
+          fragmentModel,
+          new monaco.Position(1, 5),
+          mockCompletionContext,
+          {} as monaco.CancellationToken
+        );
+
+        expect(buildAutocompleteContext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            model: target.model,
+            position: expect.objectContaining({ lineNumber: 3, column: 9 }),
+            editorState: expect.objectContaining({ computed: target.computed }),
+          })
+        );
+      } finally {
+        registration.dispose();
+      }
+    });
+
+    it('maps suggestion ranges back to fragment coordinates and drops suggestions with a command', async () => {
+      const fragmentUri = createStepFragmentModelUri();
+      const fragmentModel = { uri: fragmentUri } as unknown as monaco.editor.ITextModel;
+      const virtual: StepFragmentVirtualYaml = {
+        yaml: 'name: demo\nsteps:\n  - name: first\n    type: console\n',
+        startLineNumber: 3,
+        columnOffset: 4,
+        lineCount: 2,
+      };
+      const registration = registerStepFragmentModel(fragmentModel, () => buildTarget({ virtual }));
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'type',
+          insertText: 'type: console',
+          range: { startLineNumber: 3, startColumn: 5, endLineNumber: 3, endColumn: 9 },
+        },
+        {
+          label: 'create-connector',
+          insertText: 'my-connector',
+          range: { startLineNumber: 3, startColumn: 5, endLineNumber: 3, endColumn: 9 },
+          command: { id: 'workflows.openConnectorFlyout', title: 'Create connector' },
+        },
+      ]);
+
+      try {
+        const provider = getCompletionItemProvider(emptyRegistry, getState);
+        const result = await provider.provideCompletionItems!(
+          fragmentModel,
+          mockPosition,
+          mockCompletionContext,
+          {} as monaco.CancellationToken
+        );
+
+        expect(result?.suggestions).toHaveLength(1);
+        expect(result?.suggestions?.[0].label).toBe('type');
+        expect(result?.suggestions?.[0].range).toEqual({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 5,
+        });
+      } finally {
+        registration.dispose();
+      }
     });
   });
 });

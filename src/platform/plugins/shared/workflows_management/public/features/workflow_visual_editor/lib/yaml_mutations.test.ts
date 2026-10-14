@@ -16,6 +16,7 @@ import {
   deleteTrigger,
   duplicateStep,
   getStepFragment,
+  getStepSourceRange,
   getTriggerFragment,
   insertStepAtIndex,
   insertStepAtPath,
@@ -256,6 +257,66 @@ steps:
       const r = replaceStepFragment(BASE, 'first', fragment);
       expect(r.yaml).toContain('x-custom: 1 # unknown');
       expect(r.yaml).toContain('"{{ a | json }}"');
+    });
+  });
+
+  describe('getStepSourceRange', () => {
+    it('returns the range of a top-level step, slicing to its own text', () => {
+      const range = getStepSourceRange(BASE, 'first');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(BASE.slice(start, end)).toBe(
+        'name: first\n    type: console\n    with:\n      message: "hello {{ inputs.name }}" # keep me\n'
+      );
+    });
+
+    it('returns the range of the last step, up to end of document', () => {
+      const range = getStepSourceRange(BASE, 'second');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(BASE.slice(start, end)).toBe(
+        'name: second\n    type: http\n    with:\n      url: https://example.com\n'
+      );
+      expect(BASE.slice(end)).toBe('');
+    });
+
+    it('returns the range of a step nested in an if branch', () => {
+      const withIf = `name: demo
+steps:
+  - name: gate
+    type: if
+    condition: x
+    steps:
+      - name: yes
+        type: console
+    else:
+      - name: no
+        type: console
+`;
+      const range = getStepSourceRange(withIf, 'yes');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(withIf.slice(start, end)).toBe('name: yes\n        type: console\n');
+    });
+
+    it('returns the range of a fallback step under on-failure', () => {
+      const withFallback = `name: demo
+steps:
+  - name: first
+    type: console
+    on-failure:
+      fallback:
+        - name: recover
+          type: console
+`;
+      const range = getStepSourceRange(withFallback, 'recover');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(withFallback.slice(start, end)).toBe('name: recover\n          type: console\n');
+    });
+
+    it('returns undefined for a step that does not exist', () => {
+      expect(getStepSourceRange(BASE, 'missing')).toBeUndefined();
     });
   });
 

@@ -112,6 +112,7 @@ import {
 import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION } from '../lib/step_fragment/step_fragment_models';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -334,7 +335,11 @@ export const WorkflowYAMLEditor = ({
     }
     return [
       {
-        fileMatch: ['*'],
+        // Step-fragment editors (the graph flyout's YAML tab) show a single
+        // de-indented step, not a full workflow — they validate against a
+        // hidden full-document shadow model instead (see
+        // `attachStepFragmentYamlSupport`), so they're excluded here.
+        fileMatch: ['*', STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
         schema: workflowJsonSchemaStrict as SchemasSettings['schema'],
         uri: workflowSchemaUriStrict,
