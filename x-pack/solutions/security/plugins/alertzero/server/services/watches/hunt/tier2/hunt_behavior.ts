@@ -18,6 +18,7 @@ import type {
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import type { HuntBehaviorModels } from '../types';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -435,7 +436,7 @@ const buildGenerationContext = ({
  * falls back to a non-executable placeholder (no FROM clause).
  */
 const generateGroundedEsql = async ({
-  model,
+  esqlModel,
   esClient,
   logger,
   behaviors,
@@ -445,7 +446,7 @@ const generateGroundedEsql = async ({
   allowedIndices,
   rowLimit,
 }: {
-  model: ScopedModel;
+  esqlModel: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   behaviors: ValidatedBehavior[];
@@ -467,7 +468,7 @@ const generateGroundedEsql = async ({
     async (behavior): Promise<[string, string] | undefined> => {
       try {
         const { query, error } = await generateEsql({
-          model,
+          model: esqlModel,
           esClient: probeClient,
           logger,
           nlQuery:
@@ -560,7 +561,7 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
 };
 
 export const huntBehavior = async (
-  model: ScopedModel,
+  models: HuntBehaviorModels,
   logger: Logger,
   params: HuntBehaviorParams,
   esClient?: ElasticsearchClient,
@@ -619,7 +620,9 @@ export const huntBehavior = async (
     };
   }
 
-  const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
+  const structured = models.extraction.chatModel.withStructuredOutput(
+    huntBehaviorLlmExtractionSchema
+  );
   const contextBlock = renderArticleContext(articleContext);
   const result = (await structured.invoke(
     `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
@@ -774,7 +777,7 @@ export const huntBehavior = async (
       );
     }
     const groundedEsql = await generateGroundedEsql({
-      model,
+      esqlModel: models.esql,
       esClient,
       logger,
       behaviors: generationTargets,

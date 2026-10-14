@@ -82,6 +82,12 @@ const verifyFrameworkServesSeededIds = async (
 globalSetupHook(
   `Seed synthetic MITRE entities (versions ${SEEDED_MITRE_FRAMEWORK_VERSION}, ${SEEDED_ATLAS_FRAMEWORK_VERSION})`,
   async ({ esClient, kbnClient, config, log }) => {
+    // Serverless does not allow writing to restricted indices, and only stateful specs need the seed.
+    if (config.serverless) {
+      log.info('[managed-mitre setup] Skipping on serverless');
+      return;
+    }
+
     log.info(
       `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} (enterprise) and ${SEEDED_ATLAS_FRAMEWORK_VERSION} (atlas) fixture entities into ${SEEDED_MITRE_INDEX}`
     );
