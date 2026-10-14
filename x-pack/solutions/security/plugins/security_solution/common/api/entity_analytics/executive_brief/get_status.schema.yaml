@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Get Executive Brief Status API
+  version: '1'
+paths:
+  /internal/entity_analytics/executive_brief/status:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetExecutiveBriefStatus
+      summary: Get the executive brief job status
+      description: Returns the latest job of the caller's brief in this space, for polling.
+      responses:
+        '200':
+          description: The latest job
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/BriefJob'
+        '404':
+          description: No brief in this space

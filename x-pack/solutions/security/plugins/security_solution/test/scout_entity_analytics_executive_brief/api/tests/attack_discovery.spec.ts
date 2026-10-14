@@ -1,0 +1,193 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { LlmProxy } from '@kbn/ftr-llm-proxy';
+import { expect } from '@kbn/scout-security/api';
+import type {
+  AttentionLevel,
+  Brief,
+} from '../../../../common/api/entity_analytics/executive_brief/common.gen';
+import { EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
+import {
+  createAttackDiscoveryIndex,
+  createBriefConnector,
+  deleteAllBriefs,
+  deleteAttackDiscoveries,
+  deleteAttackDiscoveryIndex,
+  deleteBriefConnector,
+  getCurrentUser,
+  mockSubmitBrief,
+  seedAttackDiscoveries,
+  waitForBriefJob,
+} from '../fixtures/brief_helpers';
+
+/** A model answer at `level` whose one assessment cites the first discovery. */
+const discoveryBrief = (level: AttentionLevel): Brief => ({
+  verdict: {
+    level,
+    headline: 'Attack Discovery found activity worth reviewing',
+    summary: 'A discovered attack is open and worth reviewing.',
+  },
+  assessments: {
+    threats: {
+      level,
+      summary: 'A discovered attack is open.',
+      factIds: [1],
+    },
+  },
+});
+
+apiTest.describe(
+  'Executive brief - attack discoveries as evidence',
+  { tag: EXECUTIVE_BRIEF_TAGS },
+  () => {
+    let headers: Record<string, string>;
+    let username: string;
+    let connectorId: string;
+    let llmProxy: LlmProxy;
+
+    apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth, esClient, log }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      headers = cookieHeader;
+      ({ username } = await getCurrentUser({ apiClient, headers }));
+      ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
+      await createAttackDiscoveryIndex(esClient);
+    });
+
+    apiTest.beforeEach(async ({ esClient }) => {
+      await deleteAllBriefs(esClient);
+      await deleteAttackDiscoveries(esClient);
+      llmProxy.clear();
+    });
+
+    apiTest.afterAll(async ({ apiServices, esClient }) => {
+      await deleteAllBriefs(esClient);
+      await deleteAttackDiscoveries(esClient);
+      await deleteAttackDiscoveryIndex(esClient);
+      await deleteBriefConnector({ apiServices, connectorId, llmProxy });
+    });
+
+    apiTest(
+      "uses the caller's own and shared discoveries, never another user's private one",
+      async ({ entityAnalyticsApi, esClient }) => {
+        await seedAttackDiscoveries(esClient, [
+          {
+            id: 'ad-private-other',
+            title: 'Private discovery of another analyst',
+            alertIds: ['alert-a'],
+            riskScore: 70,
+            users: ['another-analyst'],
+          },
+          { id: 'ad-shared', title: 'Shared discovery', alertIds: ['alert-b'], riskScore: 60 },
+          {
+            id: 'ad-own',
+            title: 'Discovery owned by the caller',
+            alertIds: ['alert-c'],
+            riskScore: 50,
+            users: [username],
+          },
+        ]);
+        mockSubmitBrief(llmProxy, discoveryBrief('watch'));
+
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
+        expect(document.job.status).toBe('succeeded');
+        expect(document.metadata?.signals.attack_discoveries.status).toBe('ok');
+        const discoveryIds = (document.report?.facts ?? [])
+          .filter(({ source }) => source?.type === 'attack_discovery')
+          .map(({ source }) => source?.id)
+          .sort();
+        expect(discoveryIds).toStrictEqual(['ad-own', 'ad-shared']);
+      }
+    );
+
+    apiTest(
+      'collapses regenerated discoveries with overlapping alerts into the highest-risk one',
+      async ({ entityAnalyticsApi, esClient }) => {
+        await seedAttackDiscoveries(esClient, [
+          {
+            id: 'ad-first-run',
+            title: 'Credential theft (first run)',
+            alertIds: ['alert-1', 'alert-2', 'alert-3'],
+            riskScore: 225,
+          },
+          {
+            id: 'ad-second-run',
+            title: 'Credential theft (second run)',
+            alertIds: ['alert-1', 'alert-2', 'alert-3', 'alert-4'],
+            riskScore: 200,
+          },
+        ]);
+        mockSubmitBrief(llmProxy, discoveryBrief('watch'));
+
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
+        expect(document.job.status).toBe('succeeded');
+        expect(document.report?.facts).toStrictEqual([
+          expect.objectContaining({
+            id: 1,
+            signalId: 'attack_discoveries',
+            // A total of 225 over 3 alerts averages 75.
+            severity: 'high',
+            numbers: { alerts: 3 },
+            source: { type: 'attack_discovery', id: 'ad-first-run' },
+          }),
+        ]);
+      }
+    );
+
+    apiTest(
+      'caps the attention level at what a low-severity discovery supports',
+      async ({ entityAnalyticsApi, esClient }) => {
+        await seedAttackDiscoveries(esClient, [
+          { id: 'ad-low', title: 'Unusual logon', alertIds: ['alert-low'], riskScore: 10 },
+        ]);
+        mockSubmitBrief(llmProxy, discoveryBrief('urgent'));
+
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
+        expect(document.job.status).toBe('succeeded');
+        expect(document.report?.facts).toStrictEqual([
+          expect.objectContaining({ id: 1, severity: 'low' }),
+        ]);
+        expect(document.report?.verdict?.level).toBe('watch');
+        expect(document.report?.assessments).toStrictEqual({
+          threats: expect.objectContaining({ level: 'watch' }),
+        });
+        expect(document.metadata?.verification?.lowered).toBeGreaterThanOrEqual(1);
+      }
+    );
+  }
+);

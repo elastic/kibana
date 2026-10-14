@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "include": ["**/*"],
+  "exclude": ["target/**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"]
+  },
+  "kbn_references": [
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/scout-security",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/elastic-assistant-common"
+  ]
+}

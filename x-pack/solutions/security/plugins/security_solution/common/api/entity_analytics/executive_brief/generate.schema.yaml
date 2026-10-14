@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: Generate Executive Brief API
+  version: '1'
+paths:
+  /internal/entity_analytics/executive_brief:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GenerateExecutiveBrief
+      summary: Generate an executive brief
+      description: Starts a brief job for the caller in this space, replacing any job in progress. The time window is fixed by the server from `range`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - range
+              properties:
+                range:
+                  $ref: './common.schema.yaml#/components/schemas/BriefRange'
+                connectorId:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                  description: The AI connector to use; defaults to the one configured for the feature.
+      responses:
+        '200':
+          description: The started job; it runs in the background
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/BriefJob'

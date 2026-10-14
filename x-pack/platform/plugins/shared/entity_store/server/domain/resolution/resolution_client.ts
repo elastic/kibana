@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
+import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
@@ -24,7 +25,7 @@ import type { RefreshOption } from '../../infra/elasticsearch/resolution';
 import {
   searchEntitiesByIds,
   searchByResolvedToField,
-  searchResolutionGroup,
+  searchResolutionGroups,
   bulkUpdateEntityDocs,
 } from '../../infra/elasticsearch/resolution';
 
@@ -62,8 +63,8 @@ export interface UnlinkResult {
 }
 
 export interface ResolutionGroup {
-  target: Record<string, unknown>;
-  aliases: Array<Record<string, unknown>>;
+  target: Entity;
+  aliases: Entity[];
   group_size: number;
   entity_type: string;
 }
@@ -338,22 +339,22 @@ export class ResolutionClient {
     const targetId = resolvedTo ?? entityId;
 
     // 3. Query for target + all aliases in one search
-    const response = await searchResolutionGroup(this.esClient, {
+    const response = await searchResolutionGroups(this.esClient, {
       index,
       entityIdField: ENTITY_ID_FIELD,
       resolvedToField: RESOLVED_TO_FIELD,
-      targetId,
+      targetIds: [targetId],
       maxSize: MAX_RESOLUTION_SEARCH_SIZE,
     });
 
     this.throwIfTruncated(response, `getResolutionGroup for target '${targetId}'`);
 
     // 4. Separate target from aliases
-    let target: Record<string, unknown> | undefined;
-    const aliases: Array<Record<string, unknown>> = [];
+    let target: Entity | undefined;
+    const aliases: Entity[] = [];
 
     for (const hit of response.hits.hits) {
-      const source = hit._source as Record<string, unknown>;
+      const source = hit._source as Entity;
       const hitEntityId = getFieldValue(source, ENTITY_ID_FIELD);
 
       if (hitEntityId === targetId) {
@@ -367,7 +368,7 @@ export class ResolutionClient {
     // resolveTo, it's the target entity
     if (!target) {
       if (!resolvedTo) {
-        target = inputEntity;
+        target = inputEntity as Entity;
       } else {
         throw new EntitiesNotFoundError([targetId]);
       }
@@ -379,6 +380,85 @@ export class ResolutionClient {
       group_size: 1 + aliases.length,
       entity_type: getFieldValue(target, ENGINE_METADATA_TYPE_FIELD) ?? '',
     };
+  }
+
+  /**
+   * Returns the resolution group of each entity (target or alias), keyed by the requested id, in
+   * two searches: the entities for their targets, then every group's target and aliases.
+   * Entities that are not in the store, or whose target is missing, are left out.
+   */
+  public async getResolutionGroups(
+    rawEntityIds: string[],
+    { abortSignal }: { abortSignal?: AbortSignal } = {}
+  ): Promise<Map<string, ResolutionGroup>> {
+    const entityIds = [...new Set(rawEntityIds)];
+    if (entityIds.length === 0) {
+      return new Map();
+    }
+    const index = await this.latestIndexName();
+
+    // 1. Each requested entity's target: itself, or what its resolved_to points at
+    const entitiesResponse = await searchEntitiesByIds(this.esClient, {
+      index,
+      entityIdField: ENTITY_ID_FIELD,
+      entityIds,
+      source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
+      signal: abortSignal,
+    });
+    const targetIdOf = new Map<string, string>();
+    for (const { _source: source = {} } of entitiesResponse.hits.hits) {
+      const entityId = getFieldValue(source, ENTITY_ID_FIELD);
+      if (entityId) {
+        targetIdOf.set(entityId, getFieldValue(source, RESOLVED_TO_FIELD) ?? entityId);
+      }
+    }
+    const targetIds = new Set(targetIdOf.values());
+    if (targetIds.size === 0) {
+      return new Map();
+    }
+
+    // 2. Every group's target and aliases in one search
+    const groupsResponse = await searchResolutionGroups(this.esClient, {
+      index,
+      entityIdField: ENTITY_ID_FIELD,
+      resolvedToField: RESOLVED_TO_FIELD,
+      targetIds: [...targetIds],
+      maxSize: MAX_RESOLUTION_SEARCH_SIZE,
+      signal: abortSignal,
+    });
+    this.throwIfTruncated(groupsResponse, 'getResolutionGroups');
+
+    const targets = new Map<string, Entity>();
+    const aliasesOf = new Map<string, Entity[]>();
+    for (const hit of groupsResponse.hits.hits) {
+      const source = hit._source as Entity;
+      const entityId = getFieldValue(source, ENTITY_ID_FIELD);
+      const resolvedTo = getFieldValue(source, RESOLVED_TO_FIELD);
+      if (entityId && targetIds.has(entityId)) {
+        targets.set(entityId, source);
+      } else if (resolvedTo) {
+        const aliases = aliasesOf.get(resolvedTo) ?? [];
+        aliases.push(source);
+        aliasesOf.set(resolvedTo, aliases);
+      }
+    }
+
+    // 3. Each requested entity's group
+    const groups = new Map<string, ResolutionGroup>();
+    for (const [entityId, targetId] of targetIdOf) {
+      const target = targets.get(targetId);
+      if (!target) {
+        continue;
+      }
+      const aliases = aliasesOf.get(targetId) ?? [];
+      groups.set(entityId, {
+        target,
+        aliases,
+        group_size: 1 + aliases.length,
+        entity_type: getFieldValue(target, ENGINE_METADATA_TYPE_FIELD) ?? '',
+      });
+    }
+    return groups;
   }
 
   /**

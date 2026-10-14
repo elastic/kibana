@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout-security';
+import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
+
+/**
+ * Stateful classic only: the `entityAnalyticsExecutiveBriefEnabled` flag is set by the
+ * `entity_analytics_executive_brief` server config set, which has no serverless variant.
+ */
+export const EXECUTIVE_BRIEF_TAGS = [...tags.stateful.classic];
+
+export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief';
+
+export const BRIEF_SIGNAL_IDS = ['attack_discoveries', 'high_risk_entities'] as const;
+
+/**
+ * The high-risk entity `seedHighRiskEntity` writes; `id` is its EUID. The signal reports it as
+ * fact 1.
+ */
+export const SEEDED_ENTITY = {
+  id: 'user:brief-scout-user',
+  name: 'brief-scout-user',
+  riskLevel: 'High',
+  riskScore: 82,
+} as const;
+
+/**
+ * A model answer for the seeded high-risk entity: its threats assessment cites fact 1 at `watch`,
+ * which the evidence supports, and mentions the entity by its EUID token, so verification keeps it unchanged. The
+ * prose has no other digits or ids, so the number and citation checks have nothing to change.
+ */
+export const HIGH_RISK_ENTITY_BRIEF: Brief = {
+  verdict: {
+    level: 'watch',
+    headline: 'One user is at high risk and worth monitoring',
+    summary: `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk. No attack discoveries were found in this period.`,
+  },
+  assessments: {
+    threats: {
+      level: 'watch',
+      summary: 'One user is at high risk; no discovered attacks.',
+      factIds: [1],
+    },
+    response: {
+      level: 'clear',
+      summary: 'Nothing is waiting for a response.',
+      factIds: [],
+    },
+  },
+};

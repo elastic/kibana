@@ -16,7 +16,8 @@ const criticalityRank: Partial<Record<AssetCriticalityLevel, number>> = {
   extreme_impact: 4,
 };
 
-const getHigherCriticality = (
+/** The higher of two asset criticality levels; on a tie, the left one. */
+export const getHigherCriticality = (
   left?: AssetCriticalityLevel | null,
   right?: AssetCriticalityLevel | null
 ): AssetCriticalityLevel | undefined | null => {

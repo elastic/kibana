@@ -21,18 +21,22 @@ export const searchEntitiesByIds = (
     entityIdField: string;
     entityIds: string[];
     source?: boolean | string[];
+    signal?: AbortSignal;
   }
 ): Promise<SearchResponse<Record<string, unknown>>> =>
-  esClient.search({
-    index: params.index,
-    size: params.entityIds.length,
-    query: {
-      bool: {
-        filter: [{ terms: { [params.entityIdField]: params.entityIds } }],
+  esClient.search(
+    {
+      index: params.index,
+      size: params.entityIds.length,
+      query: {
+        bool: {
+          filter: [{ terms: { [params.entityIdField]: params.entityIds } }],
+        },
       },
+      _source: params.source ?? true,
     },
-    _source: params.source ?? true,
-  });
+    { signal: params.signal }
+  );
 
 /**
  * Searches for entities that have resolved_to pointing to any of the given target IDs.
@@ -59,32 +63,36 @@ export const searchByResolvedToField = (
   });
 
 /**
- * Searches for a resolution group: the target entity + all aliases pointing to it.
+ * Searches for resolution groups: the target entities + all aliases pointing to them.
  */
-export const searchResolutionGroup = (
+export const searchResolutionGroups = (
   esClient: ElasticsearchClient,
   params: {
     index: string;
     entityIdField: string;
     resolvedToField: string;
-    targetId: string;
+    targetIds: string[];
     maxSize: number;
+    signal?: AbortSignal;
   }
 ): Promise<SearchResponse<Record<string, unknown>>> =>
-  esClient.search({
-    index: params.index,
-    size: params.maxSize,
-    query: {
-      bool: {
-        should: [
-          { term: { [params.entityIdField]: params.targetId } },
-          { term: { [params.resolvedToField]: params.targetId } },
-        ],
-        minimum_should_match: 1,
+  esClient.search(
+    {
+      index: params.index,
+      size: params.maxSize,
+      query: {
+        bool: {
+          should: [
+            { terms: { [params.entityIdField]: params.targetIds } },
+            { terms: { [params.resolvedToField]: params.targetIds } },
+          ],
+          minimum_should_match: 1,
+        },
       },
+      _source: true,
     },
-    _source: true,
-  });
+    { signal: params.signal }
+  );
 
 interface BulkFieldUpdate {
   docId: string;

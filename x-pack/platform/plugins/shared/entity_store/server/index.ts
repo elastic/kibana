@@ -58,7 +58,7 @@ export type {
 export { isEntityTypeCreatableFromSingleDocument } from '../common/domain/definitions/creatable_from_single_document';
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { RelationshipsClient } from './domain/relationships';
-export type { ResolutionClient } from './domain/resolution';
+export type { ResolutionClient, ResolutionGroup } from './domain/resolution';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';

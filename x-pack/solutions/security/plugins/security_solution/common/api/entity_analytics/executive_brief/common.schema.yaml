@@ -1,0 +1,326 @@
+openapi: 3.0.0
+info:
+  title: Executive Brief Common Schema
+  description: Common schema for the Entity Analytics executive brief
+  version: '1'
+paths: {}
+components:
+  schemas:
+    BriefRange:
+      type: string
+      description: The period the brief covers, ending when it is generated.
+      enum:
+        - 24h
+        - 7d
+        - 30d
+
+    BriefJobStatus:
+      type: string
+      enum:
+        - pending
+        - running
+        - succeeded
+        - failed
+
+    BriefJobStage:
+      type: string
+      enum:
+        - gather
+        - compose
+        - verify
+
+    BriefErrorCode:
+      type: string
+      enum:
+        - interrupted
+        - timeout
+        - llm_error
+        - llm_output
+        - internal
+
+    BriefJob:
+      type: object
+      description: The latest run. It can be newer than the report, while it runs or after it failed.
+      required:
+        - id
+        - status
+        - startedAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/BriefJobStatus'
+        stage:
+          $ref: '#/components/schemas/BriefJobStage'
+          description: Only while running.
+        startedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          description: The last stage change, or the finish time.
+        took:
+          type: integer
+          description: Milliseconds from start to finish; only once the job succeeded or failed.
+        error:
+          type: object
+          description: Only when the job failed.
+          required:
+            - code
+            - message
+          properties:
+            code:
+              $ref: '#/components/schemas/BriefErrorCode'
+            message:
+              type: string
+
+    AttentionLevel:
+      type: string
+      enum:
+        - urgent
+        - action
+        - watch
+        - clear
+
+    Verdict:
+      type: object
+      required:
+        - level
+        - headline
+        - summary
+      properties:
+        level:
+          $ref: '#/components/schemas/AttentionLevel'
+        headline:
+          type: string
+          minLength: 1
+        summary:
+          type: string
+          minLength: 1
+
+    Assessment:
+      type: object
+      required:
+        - level
+        - summary
+        - factIds
+      properties:
+        level:
+          $ref: '#/components/schemas/AttentionLevel'
+        summary:
+          type: string
+          minLength: 1
+        factIds:
+          type: array
+          items:
+            type: integer
+
+    Assessments:
+      type: object
+      properties:
+        threats:
+          $ref: '#/components/schemas/Assessment'
+        response:
+          $ref: '#/components/schemas/Assessment'
+
+    Brief:
+      type: object
+      description: >
+        The part of the report the AI writes and the server verifies. Each assessment cites the
+        facts behind it in `factIds`; the verdict summarises the assessments. Prose mentions an
+        entity as `{{ entity.id <euid> }}`.
+      required:
+        - verdict
+        - assessments
+      properties:
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        assessments:
+          $ref: '#/components/schemas/Assessments'
+
+    Severity:
+      type: string
+      enum:
+        - critical
+        - high
+        - medium
+        - low
+
+    FactSourceType:
+      type: string
+      enum:
+        - attack_discovery
+        - entity
+        - case
+
+    FactSource:
+      type: object
+      description: What a fact points at.
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/FactSourceType'
+        id:
+          type: string
+          description: Absent for aggregate facts.
+
+    Fact:
+      type: object
+      description: One finding of a signal about some entities.
+      required:
+        - id
+        - signalId
+        - title
+        - entityIds
+      properties:
+        id:
+          type: integer
+          description: 1-based, in order within one brief; assessments cite facts by it.
+        signalId:
+          type: string
+        title:
+          type: string
+        severity:
+          $ref: '#/components/schemas/Severity'
+        timestamp:
+          type: string
+          format: date-time
+        entityIds:
+          type: array
+          description: EUIDs of the entities the fact is about; keys of the report's `entities`.
+          items:
+            type: string
+        numbers:
+          type: object
+          description: The only numbers the AI may quote for this fact.
+          additionalProperties:
+            type: number
+        details:
+          type: object
+          description: Short non-numeric descriptors.
+          additionalProperties:
+            type: string
+        source:
+          $ref: '#/components/schemas/FactSource'
+
+    BriefReport:
+      type: object
+      description: Everything needed to render the brief. `verdict` and `assessments` are absent when nothing was found.
+      required:
+        - entities
+        - facts
+      properties:
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        assessments:
+          $ref: '#/components/schemas/Assessments'
+        entities:
+          type: object
+          description: Entity Store records of the entities the facts reference, keyed by EUID.
+          additionalProperties:
+            $ref: '../../../../../../../../platform/plugins/shared/entity_store/common/domain/definitions/entity.schema.yaml#/components/schemas/Entity'
+        facts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fact'
+
+    SignalStatus:
+      type: string
+      enum:
+        - ok
+        - empty
+        - unavailable
+        - timeout
+        - error
+
+    SignalRun:
+      type: object
+      description: How one signal's run went.
+      required:
+        - status
+        - took
+      properties:
+        status:
+          $ref: '#/components/schemas/SignalStatus'
+        took:
+          type: integer
+          description: Milliseconds.
+
+    VerificationSummary:
+      type: object
+      required:
+        - dropped
+        - lowered
+        - repaired
+      properties:
+        dropped:
+          type: object
+          description: Claims or assessments removed, per check.
+          properties:
+            citation:
+              type: integer
+            number:
+              type: integer
+            guardrail:
+              type: integer
+        lowered:
+          type: integer
+          description: Attention levels lowered to what the cited evidence supports.
+        repaired:
+          type: boolean
+          description: True when a repair round-trip to the AI was needed.
+
+    BriefMetadata:
+      type: object
+      description: About the report. `tokens` and `verification` are absent when the AI was not called.
+      required:
+        - generatedAt
+        - period
+        - connectorId
+        - signals
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        period:
+          type: object
+          required:
+            - range
+            - from
+            - to
+          properties:
+            range:
+              $ref: '#/components/schemas/BriefRange'
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        connectorId:
+          type: string
+        model:
+          type: string
+        tokens:
+          type: object
+          required:
+            - prompt
+            - completion
+            - total
+          properties:
+            prompt:
+              type: integer
+            completion:
+              type: integer
+            total:
+              type: integer
+        verification:
+          $ref: '#/components/schemas/VerificationSummary'
+        signals:
+          type: object
+          description: How each signal's run went, keyed by signal id.
+          additionalProperties:
+            $ref: '#/components/schemas/SignalRun'
