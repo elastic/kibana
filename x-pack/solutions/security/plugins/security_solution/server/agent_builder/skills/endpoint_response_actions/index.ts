@@ -49,8 +49,8 @@ skill.
 
 The response actions available are isolate, release (unisolate), scan, and
 running processes; each runs solely through this skill's tools (\`isolate_host\`,
-\`unisolate_host\`, \`scan\`, \`running_processes\`), and isolate, release, and
-scan pause for the analyst's confirmation. Never improvise one with another
+\`unisolate_host\`, \`scan\`, \`running_processes\`), and all four pause for
+the analyst's confirmation. Never improvise one with another
 tool, such as a raw API call. Other response actions (execute, kill-process,
 suspend-process, get-file, upload, runscript, memory-dump) are not available
 from chat: say so and point the analyst to the Response Actions UI.
@@ -64,7 +64,7 @@ from chat: say so and point the analyst to the Response Actions UI.
    - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
    - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
    - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`running_processes\`
+   - running processes → \`running_processes\` (write, platform-confirmed)
    - scan path → \`scan\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
@@ -80,8 +80,8 @@ from chat: say so and point the analyst to the Response Actions UI.
 - For status and response action lookups, use the tools above instead of
   \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
   diagnostic queries made by other loaded skills.
-- Never claim an endpoint was isolated, released, or scanned until the tool
-  result reports it. A write tool pauses for the analyst's confirmation first;
+- Never claim an endpoint was isolated, released, or scanned, or that its
+  process list was retrieved, until the tool result reports it. A write tool pauses for the analyst's confirmation first;
   until then say the action is awaiting confirmation, and if declined report it
   as cancelled.
 - Call a write tool directly with the hostname the analyst gave. The tool

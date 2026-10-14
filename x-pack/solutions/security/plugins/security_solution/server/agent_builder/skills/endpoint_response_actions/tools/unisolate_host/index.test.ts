@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -134,26 +133,55 @@ describe('unisolateHostTool', () => {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
-      try {
-        const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-        expect(data.hostName).toBe('nonexistent-host');
-        expect(mockLogger.error).not.toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('nonexistent-host');
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online', packages: ['endpoint'] },
+            { id: 'live-b', status: 'online', packages: ['endpoint'] },
+          ],
+        }),
+      };
+      const mockResponseActionsClient = { release: jest.fn() };
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'dup-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe(ToolResultType.other);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('ambiguous_hostname');
+      expect(data.hostName).toBe('dup-host');
+      expect(data.candidates).toEqual([
+        { agentId: 'live-a', status: 'healthy' },
+        { agentId: 'live-b', status: 'healthy' },
+      ]);
+      expect(mockResponseActionsClient.release).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('calls agentService.list with the correct kuery filter', async () => {
@@ -161,25 +189,19 @@ describe('unisolateHostTool', () => {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
-      try {
-        await tool.handler({ hostName: 'my-host', comment: 'test comment' }, mockContext);
+      await tool.handler({ hostName: 'my-host', comment: 'test comment' }, mockContext);
 
-        expect(mockAgentService.listAgents).toHaveBeenCalledWith({
-          showInactive: true,
-          kuery: 'local_metadata.host.name.keyword: "my-host"',
-          page: 1,
-          perPage: 25,
-        });
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(mockAgentService.listAgents).toHaveBeenCalledWith({
+        showInactive: true,
+        kuery: 'local_metadata.host.name.keyword: "my-host"',
+        page: 1,
+        perPage: 25,
+      });
     });
 
     it('calls responseActionsClient.release with endpoint_ids and comment when agent found', async () => {
@@ -213,11 +235,6 @@ describe('unisolateHostTool', () => {
         memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetInternalResponseActionsClient =
-        mockEndpointAppContextService.getInternalResponseActionsClient;
-
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -232,35 +249,29 @@ describe('unisolateHostTool', () => {
         hosts: { 'agent-123': { name: 'my-host' } },
       });
 
-      try {
-        const result = await tool.handler(
-          { hostName: 'my-host', comment: 'reconnecting' },
-          mockContext
-        );
+      const result = await tool.handler(
+        { hostName: 'my-host', comment: 'reconnecting' },
+        mockContext
+      );
 
-        expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
-          {
-            endpoint_ids: ['agent-123'],
-            comment: 'reconnecting [AI agent conversation: conv-test-1]',
-          },
-          { hosts: { 'agent-123': { name: 'my-host' } } }
-        );
+      expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
+        {
+          endpoint_ids: ['agent-123'],
+          comment: 'reconnecting [AI agent conversation: conv-test-1]',
+        },
+        { hosts: { 'agent-123': { name: 'my-host' } } }
+      );
 
-        // Ensure isolate was NOT called — unisolate tool calls release, not isolate
-        expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
+      // Ensure isolate was NOT called — unisolate tool calls release, not isolate
+      expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.actionId).toBe('action-456');
-        expect(data.status).toBe('accepted');
-        expect(data.wasSuccessful).toBe(true);
-        expect(data.comment).toBe('reconnecting');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getInternalResponseActionsClient =
-          originalGetInternalResponseActionsClient;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.actionId).toBe('action-456');
+      expect(data.status).toBe('accepted');
+      expect(data.wasSuccessful).toBe(true);
+      expect(data.comment).toBe('reconnecting');
     });
 
     it('uses a default comment when none is provided', async () => {
@@ -294,11 +305,6 @@ describe('unisolateHostTool', () => {
         memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetInternalResponseActionsClient =
-        mockEndpointAppContextService.getInternalResponseActionsClient;
-
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -313,21 +319,15 @@ describe('unisolateHostTool', () => {
         hosts: { 'agent-123': { name: 'test-host' } },
       });
 
-      try {
-        await tool.handler({ hostName: 'test-host' }, mockContext);
+      await tool.handler({ hostName: 'test-host' }, mockContext);
 
-        expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
-          {
-            endpoint_ids: ['agent-123'],
-            comment: 'Un-isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
-          },
-          { hosts: { 'agent-123': { name: 'test-host' } } }
-        );
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getInternalResponseActionsClient =
-          originalGetInternalResponseActionsClient;
-      }
+      expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
+        {
+          endpoint_ids: ['agent-123'],
+          comment: 'Un-isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
+        },
+        { hosts: { 'agent-123': { name: 'test-host' } } }
+      );
     });
 
     it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
@@ -361,11 +361,6 @@ describe('unisolateHostTool', () => {
         memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetInternalResponseActionsClient =
-        mockEndpointAppContextService.getInternalResponseActionsClient;
-
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -380,17 +375,11 @@ describe('unisolateHostTool', () => {
         hosts: { 'agent-cs-1': { name: 'cs-host' } },
       });
 
-      try {
-        await tool.handler({ hostName: 'cs-host' }, mockContext);
+      await tool.handler({ hostName: 'cs-host' }, mockContext);
 
-        expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
-          expect.objectContaining({ agentType: 'crowdstrike', isAutomated: false })
-        );
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getInternalResponseActionsClient =
-          originalGetInternalResponseActionsClient;
-      }
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
+        expect.objectContaining({ agentType: 'crowdstrike', isAutomated: false })
+      );
     });
 
     it('returns an error result when the agent service throws', async () => {
@@ -398,23 +387,17 @@ describe('unisolateHostTool', () => {
         listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
-      try {
-        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
-        expect(assertStandardReturn(result)[0].data).toHaveProperty('message');
-        expect(mockLogger.error).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+      expect(assertStandardReturn(result)[0].data).toHaveProperty('message');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('returns an error result when the response actions client throws', async () => {
@@ -443,11 +426,6 @@ describe('unisolateHostTool', () => {
         memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetInternalResponseActionsClient =
-        mockEndpointAppContextService.getInternalResponseActionsClient;
-
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -456,20 +434,14 @@ describe('unisolateHostTool', () => {
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-      try {
-        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
-        expect((assertStandardReturn(result)[0].data as Record<string, unknown>).message).toContain(
-          'Error un-isolating host'
-        );
-        expect(mockLogger.error).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getInternalResponseActionsClient =
-          originalGetInternalResponseActionsClient;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+      expect((assertStandardReturn(result)[0].data as Record<string, unknown>).message).toContain(
+        'Error un-isolating host'
+      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

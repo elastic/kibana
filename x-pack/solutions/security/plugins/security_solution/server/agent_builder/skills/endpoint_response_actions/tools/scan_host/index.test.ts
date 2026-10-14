@@ -131,6 +131,42 @@ describe('scanHostTool', () => {
     expect(data.reason).toBe('endpoint_not_found');
   });
 
+  it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'live-a', status: 'online', packages: ['endpoint'] },
+          { id: 'live-b', status: 'online', packages: ['endpoint'] },
+        ],
+      }),
+    };
+    const mockResponseActionsClient = { scan: jest.fn() };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    const tool = scanHostTool(service);
+
+    const result = await tool.handler({ hostName: 'dup-host', path: '/tmp' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe(ToolResultType.other);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.found).toBe(false);
+    expect(data.reason).toBe('ambiguous_hostname');
+    expect(data.hostName).toBe('dup-host');
+    expect(data.candidates).toEqual([
+      { agentId: 'live-a', status: 'healthy' },
+      { agentId: 'live-b', status: 'healthy' },
+    ]);
+    expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+    expect(mockLogger.error).not.toHaveBeenCalled();
+  });
+
   it('calls responseActionsClient.scan with parameters.path when agent found', async () => {
     const mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({

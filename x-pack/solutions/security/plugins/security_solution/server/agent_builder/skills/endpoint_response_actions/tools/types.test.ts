@@ -13,6 +13,7 @@ import {
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
+  waitForActionCompletion,
   GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
   MAX_ACTION_ERRORS,
   MAX_ACTION_HOSTS,
@@ -26,6 +27,15 @@ import {
   MAX_PARAMETER_KEYS,
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { Logger } from '@kbn/logging';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { getActionDetailsById } from '../../../../endpoint/services/actions';
+
+jest.mock('../../../../endpoint/services/actions', () => ({
+  getActionDetailsById: jest.fn(),
+}));
+
+const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
 
 describe('response action error helpers', () => {
   it('responseActionErrorResult returns a typed error envelope', () => {
@@ -512,5 +522,80 @@ describe('summarizeAgentState', () => {
 
     const state = result.agentState['agent-1'] as { errors: string[] };
     expect(state.errors[0].length).toBeLessThan(MAX_OUTPUT_STRING_LENGTH + 50);
+  });
+});
+
+describe('waitForActionCompletion', () => {
+  const logger = { debug: jest.fn(), error: jest.fn() } as unknown as Logger;
+  const service = {} as unknown as EndpointAppContextService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns the action details as soon as the action is completed', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: true });
+
+    const result = await waitForActionCompletion(service, 'default', 'a-1', logger);
+
+    expect(result).toEqual({ id: 'a-1', isCompleted: true });
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(1);
+    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', 'a-1', {
+      bypassSpaceValidation: true,
+    });
+  });
+
+  it('keeps polling while the action is pending and returns once it completes', async () => {
+    mockGetActionDetailsById
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockResolvedValue({ id: 'a-1', isCompleted: true, wasSuccessful: true });
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(10_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: true, wasSuccessful: true });
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(3);
+  });
+
+  it('returns the last known pending details when the retry budget is exhausted', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: false });
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: false });
+    // initial attempt + 20 retries
+    expect(mockGetActionDetailsById).toHaveBeenCalledTimes(21);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns the last known details when a later poll throws', async () => {
+    mockGetActionDetailsById
+      .mockResolvedValueOnce({ id: 'a-1', isCompleted: false })
+      .mockRejectedValue(new Error('es unavailable'));
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: false });
+  });
+
+  it('logs and rethrows when no poll ever succeeded', async () => {
+    mockGetActionDetailsById.mockRejectedValue(new Error('es unavailable'));
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger);
+    const assertion = expect(pending).rejects.toThrow('es unavailable');
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await assertion;
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to fetch completion status for action [a-1]')
+    );
   });
 });

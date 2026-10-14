@@ -82,6 +82,22 @@ describe('getRunningProcessesTool', () => {
     expect(tool.description).toContain('running processes');
   });
 
+  it('gates every dispatch with an always-on confirmation prompt naming the host, without dispatching', async () => {
+    const mockResponseActionsClient = { runningProcesses: jest.fn() };
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = getRunningProcessesTool(service);
+    expect(tool.confirmation?.askUser).toBe('always');
+    const prompt = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host' },
+      context: mockContext,
+    });
+    expect(prompt?.message).toContain('my-host');
+    expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+  });
+
   it('returns insufficient_privileges and does not dispatch when caller lacks canGetRunningProcesses', async () => {
     service.getEndpointAuthz = jest
       .fn()
@@ -117,6 +133,42 @@ describe('getRunningProcessesTool', () => {
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(false);
     expect(data.reason).toBe('endpoint_not_found');
+  });
+
+  it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'live-a', status: 'online', packages: ['endpoint'] },
+          { id: 'live-b', status: 'online', packages: ['endpoint'] },
+        ],
+      }),
+    };
+    const mockResponseActionsClient = { runningProcesses: jest.fn() };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    const tool = getRunningProcessesTool(service);
+
+    const result = await tool.handler({ hostName: 'dup-host' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe(ToolResultType.other);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.found).toBe(false);
+    expect(data.reason).toBe('ambiguous_hostname');
+    expect(data.hostName).toBe('dup-host');
+    expect(data.candidates).toEqual([
+      { agentId: 'live-a', status: 'healthy' },
+      { agentId: 'live-b', status: 'healthy' },
+    ]);
+    expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
   it('calls responseActionsClient.runningProcesses when agent found', async () => {

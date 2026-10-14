@@ -38,9 +38,9 @@ const getRunningProcessesSchema = z.object({
 });
 
 /**
- * Read-only inspection action: retrieves the list of running processes from an
- * enrolled Elastic Defend host. Read-only actions do not require a human
- * confirmation step (see the skill system instructions).
+ * Inspection action: retrieves the list of running processes from an enrolled
+ * Elastic Defend host. It enqueues a real `running-processes` response action
+ * on the endpoint, so every dispatch is gated by an analyst confirmation.
  */
 export const getRunningProcessesTool = (
   endpointAppContextService: EndpointAppContextService
@@ -50,12 +50,25 @@ export const getRunningProcessesTool = (
     type: ToolType.builtin,
     description: `Retrieves the list of running processes from a host by its hostname. Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
     schema: getRunningProcessesSchema,
+    // HITL gate enforced by the framework, not skill prose: the runner prompts
+    // the analyst for confirmation before every dispatch.
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: ({ toolParams }) => ({
+        title: 'List running processes?',
+        message: `This will request the list of running processes from **${
+          (toolParams.hostName as string) ?? 'the host'
+        }**.`,
+        color: 'primary',
+        confirm_text: 'List processes',
+      }),
+    },
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
 
-        // Despite the "read-only inspection" framing, this enqueues a real
+        // This enqueues a real
         // `running-processes` response action on the host, and the HTTP route
         // gates it behind `withEndpointAuthz({ all: ['canGetRunningProcesses'] })`.
         // The internal client skips that check, so assert the caller's privilege
