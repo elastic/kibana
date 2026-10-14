@@ -80,9 +80,9 @@ interface ExpandedEntityRowProps {
 }
 
 /** EUI grid row heights for the compact (s), normal (m) and expanded (l) densities. */
-const ROW_HEIGHT_PX: Record<EuiDataGridStyleCellPaddings, number> = { s: 25, m: 37, l: 41 };
+export const ROW_HEIGHT_PX: Record<EuiDataGridStyleCellPaddings, number> = { s: 25, m: 37, l: 41 };
 
-const getCellPaddingBlock = (
+export const getCellPaddingBlock = (
   euiTheme: EuiThemeComputed,
   cellPadding: EuiDataGridStyleCellPaddings
 ): string => {

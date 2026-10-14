@@ -52,6 +52,17 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   onOpenEntityGraph,
 }) => {
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
+  const moreActionsButton = (
+    <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        aria-label={i18nStrings.moreActions}
+        color="text"
+        size="xs"
+        onClick={() => setIsMoreActionsOpen((prev) => !prev)}
+      />
+    </EuiToolTip>
+  );
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -78,32 +89,28 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={i18nStrings.moreActions}
-          button={
-            <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="boxesVertical"
-                aria-label={i18nStrings.moreActions}
-                color="text"
-                size="xs"
-                onClick={() => setIsMoreActionsOpen((prev) => !prev)}
-              />
-            </EuiToolTip>
-          }
-          isOpen={isMoreActionsOpen}
-          closePopover={() => setIsMoreActionsOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            items={[
-              <EuiContextMenuItem disabled key="addToChat">
-                {i18nStrings.addToChat}
-              </EuiContextMenuItem>,
-            ]}
-          />
-        </EuiPopover>
+        {/* The popover mounts only once opened: a mounted popover scans its button for focusable
+            elements, which costs too much in every row while the grid scrolls. */}
+        {isMoreActionsOpen ? (
+          <EuiPopover
+            aria-label={i18nStrings.moreActions}
+            button={moreActionsButton}
+            isOpen
+            closePopover={() => setIsMoreActionsOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem disabled key="addToChat">
+                  {i18nStrings.addToChat}
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>
+        ) : (
+          moreActionsButton
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

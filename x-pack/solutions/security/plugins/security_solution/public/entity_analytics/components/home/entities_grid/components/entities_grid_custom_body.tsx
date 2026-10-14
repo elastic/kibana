@@ -14,11 +14,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   useEuiTheme,
+  type EuiDataGridCellValueElementProps,
   type EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,9 +30,11 @@ import { i18n } from '@kbn/i18n';
 import { getEntityId } from '../common';
 import type { Row } from '../common';
 import { useResetEntityGridFilters } from '../hooks/use_reset_entity_grid_filters';
-import { ExpandedEntityGroup } from './entities_expanded_row';
-import { EntityGridLoadMore } from './entities_grid_load_more';
+import { RenderEntityGridCell } from './entities_cell_renderer';
+import type { EntityGridCellContext } from './entities_cell_renderer';
+import { ExpandedEntityGroup, ROW_HEIGHT_PX, getCellPaddingBlock } from './entities_expanded_row';
 import { gridRowCellsCss, gridRowCss } from './entities_grid_styles';
+import { EntityGridLoadMore } from './entities_grid_load_more';
 import { useEntityGridView } from './entities_grid_view_context';
 
 const EMPTY_GRID_MESSAGE = i18n.translate(
@@ -54,15 +57,22 @@ const OVERSCAN_ROWS = 5;
  * Most rows kept rendered after they leave the view: rendering a row costs more than a frame
  * allows when many come into view at once, so scrolling back to rows already seen renders none.
  */
-const MAX_KEPT_ROWS = 100;
+const MAX_KEPT_ROWS = 40;
 
 /** Rows always rendered at the top, so going back to the top renders none. */
-const TOP_ROWS = 25;
+const TOP_ROWS = 15;
 
 /** The grid scrolls its own rows: only the rows in view are rendered. */
 const scrollContainerCss = css`
   max-block-size: 70vh;
   overflow: auto;
+`;
+
+/** A rendered row, placed by the virtualizer. */
+const rowContainerCss = css`
+  position: absolute;
+  inset-block-start: 0;
+  min-inline-size: 100%;
 `;
 
 const stickyHeaderCss = css`
@@ -77,32 +87,74 @@ interface EntityGridRowProps {
   index: number;
   entityId: string | undefined;
   isExpanded: boolean;
-  Cell: EuiDataGridCustomBodyProps['Cell'];
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
   rowBorderCss: SerializedStyles;
+  cellCss: SerializedStyles;
   groupProps: GroupProps;
 }
 
+const noCellProps = () => {};
+
+type CellValueComponent = ComponentType<
+  EuiDataGridCellValueElementProps & Partial<EntityGridCellContext>
+>;
+
+/** A column's width: a control column's own, or the column's initial width. */
+const getColumnWidth = (col: EuiDataGridCustomBodyProps['visibleColumns'][number]): number =>
+  'width' in col && typeof col.width === 'number'
+    ? col.width
+    : ('initialWidth' in col && col.initialWidth) || 150;
+
 /**
  * A row and, when expanded, its group's records. Memoized: a scroll renders only the rows that
- * come into view, not every rendered row again.
+ * come into view, not every rendered row again. The cells render the grid's cell renderers
+ * directly, without EUI's cell: its focus handling made each row too costly to render while
+ * scrolling.
  */
 const EntityGridRow = memo(
   ({
     index,
     entityId,
     isExpanded,
-    Cell,
     visCols,
     rowBorderCss,
+    cellCss,
     groupProps,
   }: EntityGridRowProps) => (
     <>
       <div role="row" className="euiDataGridRow" css={[gridRowCss, rowBorderCss]}>
         <div css={gridRowCellsCss}>
-          {visCols.map((col, colIndex) => (
-            <Cell colIndex={colIndex} visibleRowIndex={index} key={`${entityId}-${col.id}`} />
-          ))}
+          {visCols.map((col, colIndex) => {
+            const cellProps = {
+              rowIndex: index,
+              colIndex,
+              columnId: col.id,
+              isExpandable: false,
+              isExpanded: false,
+              isDetails: false,
+              setCellProps: noCellProps,
+            };
+            // EUI types a cell renderer as returning any node; ours render elements or null.
+            const CellValue = (
+              'rowCellRender' in col ? col.rowCellRender : RenderEntityGridCell
+            ) as CellValueComponent;
+            return (
+              <div
+                key={col.id}
+                role="gridcell"
+                css={cellCss}
+                // Runtime size: the column's width.
+                style={{ width: getColumnWidth(col) }}
+              >
+                <CellValue
+                  {...cellProps}
+                  watchlistNames={groupProps.watchlistNames}
+                  euiTheme={groupProps.euiTheme}
+                  cellHandlers={groupProps.handlers}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
       {entityId && isExpanded && <ExpandedEntityGroup entityId={entityId} {...groupProps} />}
@@ -147,7 +199,6 @@ const useKeptRowsRangeExtractor = (rows: readonly Row[]) => {
 
 export const EntityGridCustomBody = memo(
   ({
-    Cell,
     visibleColumns: visCols,
     headerRow,
     footerRow,
@@ -173,6 +224,18 @@ export const EntityGridCustomBody = memo(
         border-block-end: ${euiTheme.border.thin};
       `,
       [euiTheme.border.thin]
+    );
+    const cellCss = useMemo(
+      () => css`
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        white-space: nowrap;
+        block-size: ${ROW_HEIGHT_PX[cellPadding]}px;
+        padding: ${getCellPaddingBlock(euiTheme, cellPadding)};
+      `,
+      [euiTheme, cellPadding]
     );
     const groupProps = useMemo(
       (): GroupProps => ({
@@ -248,21 +311,17 @@ export const EntityGridCustomBody = memo(
                   key={key}
                   data-index={index}
                   ref={virtualizer.measureElement}
+                  css={rowContainerCss}
                   // Runtime position: the kept rows aren't next to the rows in view.
-                  style={{
-                    position: 'absolute',
-                    insetBlockStart: 0,
-                    minInlineSize: '100%',
-                    transform: `translateY(${start - listOffset}px)`,
-                  }}
+                  style={{ transform: `translateY(${start - listOffset}px)` }}
                 >
                   <EntityGridRow
                     index={index}
                     entityId={entityId}
                     isExpanded={entityId != null && expandedIds.has(entityId)}
-                    Cell={Cell}
                     visCols={visCols}
                     rowBorderCss={rowBorderCss}
+                    cellCss={cellCss}
                     groupProps={groupProps}
                   />
                 </div>

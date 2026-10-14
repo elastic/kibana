@@ -22,8 +22,8 @@ import { useIsFetching } from '@kbn/react-query';
 import { APP_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ENTITY_GRID_CHILDREN_QUERY_KEY, useEntityGridData } from '../hooks/use_entity_grid_data';
-import { RenderEntityGridCell } from './entities_cell_renderer';
-import type { CellHandlers, EntityGridCellContext } from './entities_cell_renderer';
+import { EntityGridRowsContext, RenderEntityGridCell } from './entities_cell_renderer';
+import type { CellHandlers, EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 import { RowActionsCell } from './cells/row_actions_cell';
 import type { RowActions } from './cells/row_actions_cell';
 import { EXPANDER_COLUMN, getGroupRecordsOptions } from './entities_expanded_row';
@@ -254,19 +254,15 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   });
 
   const cellContext = useMemo(
-    (): EntityGridCellContext => ({
-      rows,
-      watchlistNames,
-      euiTheme,
-      cellHandlers,
-      isEnriching,
-    }),
-    [rows, watchlistNames, euiTheme, cellHandlers, isEnriching]
+    (): EntityGridCellContext => ({ watchlistNames, euiTheme, cellHandlers }),
+    [watchlistNames, euiTheme, cellHandlers]
   );
+  const rowsContext = useMemo((): EntityGridRows => ({ rows, isEnriching }), [rows, isEnriching]);
 
   const gridView = useMemo(
     (): EntityGridView => ({
       ...cellContext,
+      ...rowsContext,
       expandedIds,
       timeRange,
       keepFields,
@@ -285,6 +281,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     }),
     [
       cellContext,
+      rowsContext,
       expandedIds,
       timeRange,
       keepFields,
@@ -309,22 +306,26 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EuiProgress size="xs" color="accent" position="absolute" />
       )}
       <EntityGridBodyContext.Provider value={gridView}>
-        <EuiDataGrid
-          aria-label={GRID_ARIA_LABEL}
-          leadingControlColumns={
-            isIndividualRows ? INDIVIDUAL_LEADING_CONTROL_COLUMNS : RESOLVED_LEADING_CONTROL_COLUMNS
-          }
-          columns={gridColumns}
-          columnVisibility={columnVisibility}
-          rowCount={rows.length}
-          renderCellValue={RenderEntityGridCell}
-          cellContext={cellContext}
-          renderCustomGridBody={EntityGridCustomBody}
-          sorting={sorting}
-          toolbarVisibility={toolbarVisibility}
-          gridStyle={gridStyle}
-          onFullScreenChange={onFullScreenChange}
-        />
+        <EntityGridRowsContext.Provider value={rowsContext}>
+          <EuiDataGrid
+            aria-label={GRID_ARIA_LABEL}
+            leadingControlColumns={
+              isIndividualRows
+                ? INDIVIDUAL_LEADING_CONTROL_COLUMNS
+                : RESOLVED_LEADING_CONTROL_COLUMNS
+            }
+            columns={gridColumns}
+            columnVisibility={columnVisibility}
+            rowCount={rows.length}
+            renderCellValue={RenderEntityGridCell}
+            cellContext={cellContext}
+            renderCustomGridBody={EntityGridCustomBody}
+            sorting={sorting}
+            toolbarVisibility={toolbarVisibility}
+            gridStyle={gridStyle}
+            onFullScreenChange={onFullScreenChange}
+          />
+        </EntityGridRowsContext.Provider>
       </EntityGridBodyContext.Provider>
     </div>
   );

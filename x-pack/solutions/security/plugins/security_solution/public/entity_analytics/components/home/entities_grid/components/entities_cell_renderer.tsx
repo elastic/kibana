@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { assertNever } from '@kbn/std';
 import type { EuiThemeComputed, RenderCellValue } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
@@ -31,17 +31,29 @@ export interface CellHandlers {
 }
 
 /**
- * EUI `cellContext`: what a cell reads besides its value. It must stay stable on expand, or
- * every cell remounts. While `isEnriching`, the painted rows are not enriched yet, and the
- * computed cells stay blank until they are.
+ * EUI `cellContext`: what a cell reads besides its value and its row. It must stay stable: EUI
+ * builds its cell component from it, so a new one remounts every cell.
  */
 export interface EntityGridCellContext {
-  rows: Row[];
   watchlistNames: Map<string, string>;
   euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
+}
+
+/**
+ * The rows the cells read, apart from `cellContext`: new rows, as their computed columns arrive,
+ * re-render the cells instead of remounting them. While `isEnriching`, the painted rows are not
+ * enriched yet, and the computed cells stay blank until they are.
+ */
+export interface EntityGridRows {
+  rows: Row[];
   isEnriching: boolean;
 }
+
+export const EntityGridRowsContext = createContext<EntityGridRows>({
+  rows: [],
+  isEnriching: false,
+});
 
 /** Hours before a date shows as absolute: never, so the columns read as how long ago. */
 const ALWAYS_RELATIVE_HOURS = 24 * 365 * 100;
@@ -129,8 +141,9 @@ export const renderEntityCell = (
 
 export const RenderEntityGridCell: RenderCellValue = (cellProps) => {
   const { rowIndex, columnId } = cellProps;
-  const { rows, watchlistNames, euiTheme, cellHandlers, isEnriching } =
-    cellProps as typeof cellProps & EntityGridCellContext;
+  const { watchlistNames, euiTheme, cellHandlers } = cellProps as typeof cellProps &
+    EntityGridCellContext;
+  const { rows, isEnriching } = useContext(EntityGridRowsContext);
   const row = rows[rowIndex];
   if (!row) return null;
   return renderEntityCell(columnId, row, watchlistNames, euiTheme, cellHandlers, isEnriching);

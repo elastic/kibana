@@ -9,7 +9,7 @@ import { createContext, useContext } from 'react';
 import type { EuiDataGridColumn, EuiDataGridStyleCellPaddings } from '@elastic/eui';
 import type { TimeRange } from '../common';
 import type { RowActions } from './cells/row_actions_cell';
-import type { EntityGridCellContext } from './entities_cell_renderer';
+import type { EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 
 /**
  * The React context of the custom body and the expander: the cell context plus the expanded
@@ -18,7 +18,7 @@ import type { EntityGridCellContext } from './entities_cell_renderer';
  * `cellPadding` is the display selector's density, which child rows match, and `total` is the
  * number of entities in view.
  */
-export interface EntityGridView extends EntityGridCellContext {
+export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   expandedIds: ReadonlySet<string>;
   timeRange: TimeRange;
   keepFields: readonly string[];

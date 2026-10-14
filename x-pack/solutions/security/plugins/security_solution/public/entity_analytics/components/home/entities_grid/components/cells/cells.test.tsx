@@ -178,13 +178,13 @@ describe('RowActionsCell', () => {
 
   it('opens and closes the more actions menu', async () => {
     renderActions();
-    const moreActions = screen.getByRole('button', { name: 'More actions' });
+    const getMoreActions = () => screen.getByRole('button', { name: 'More actions' });
     expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     expect(await screen.findByText('Add to chat')).toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     await waitFor(() => expect(screen.queryByText('Add to chat')).not.toBeInTheDocument());
   });
 });
