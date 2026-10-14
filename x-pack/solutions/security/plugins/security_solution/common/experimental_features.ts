@@ -309,9 +309,8 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the investigate-rule Agent Builder skill.
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  investigateRuleSkill: false,
+  investigateRuleSkill: true,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
