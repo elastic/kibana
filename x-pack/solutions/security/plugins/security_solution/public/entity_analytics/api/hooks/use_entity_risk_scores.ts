@@ -32,11 +32,11 @@ export interface EntityRiskScoresState<T extends EntityType> {
  * Fetches an entity's base and resolution-group risk scores in parallel, with one
  * `refetch` that refreshes both queries.
  *
- * How the resolution score is resolved depends on the new entity analytics page flag:
+ * How the resolution score's target is found depends on the new entity analytics page flag:
  * - flag off: the group and its target are discovered through `useResolutionGroup`, and the
  *   target's resolution score is fetched whenever the entity belongs to a group;
- * - flag on: only the group view fetches it, and `entityId` is the target (the group view is opened
- *   on the record the aliases resolve to), so the group lookup is skipped entirely.
+ * - flag on: the legacy lookup is skipped; only the group view (`isGroupView`) fetches the
+ *   resolution score, and `entityId` is the target.
  */
 export const useEntityRiskScores = <T extends EntityType>(
   entityType: T,
@@ -49,7 +49,7 @@ export const useEntityRiskScores = <T extends EntityType>(
     executionContext?: KibanaExecutionContext;
     /**
      * True when the caller renders a resolution group for `entityId` (alias records were loaded for
-     * it). Only consulted when the new entity analytics page flag is on. Defaults to false.
+     * it), which only happens with the new entity analytics page flag on. Defaults to false.
      */
     isGroupView?: boolean;
   }
@@ -89,13 +89,10 @@ export const useEntityRiskScores = <T extends EntityType>(
     [resolutionGroup?.target]
   );
 
-  // Flag on: the group view is opened on the target itself, so its id keys the resolution score.
-  const groupViewTargetEntityId = isGroupView ? entityId : undefined;
-
-  const hasResolutionGroup = isNewEntityAnalyticsPage ? isGroupView : legacyHasResolutionGroup;
-  const resolutionTargetEntityId = isNewEntityAnalyticsPage
-    ? groupViewTargetEntityId
-    : legacyTargetEntityId;
+  // The group view is opened on the target itself, so its id keys the resolution score. Outside
+  // the group view, fall back to the legacy lookup (which yields nothing when the flag is on).
+  const hasResolutionGroup = isGroupView || legacyHasResolutionGroup;
+  const resolutionTargetEntityId = isGroupView ? entityId : legacyTargetEntityId;
   const shouldFetchResolution = hasResolutionGroup && Boolean(resolutionTargetEntityId);
   const resolutionFilterQuery = useMemo(
     () =>

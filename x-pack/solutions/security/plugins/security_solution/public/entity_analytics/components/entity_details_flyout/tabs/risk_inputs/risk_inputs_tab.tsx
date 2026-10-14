@@ -141,7 +141,6 @@ function isRiskScoreFlyoutPanelProps(
   );
 }
 
-/** Only an explicit resolution request shows the group view; anything else is the entity view. */
 const toFixedView = (subTab: RiskScoreLeftPanelSubTab | undefined): RiskScoreLeftPanelSubTab =>
   subTab === RiskScoreLeftPanelSubTab.RESOLUTION
     ? RiskScoreLeftPanelSubTab.RESOLUTION
@@ -346,7 +345,7 @@ RiskInputsTab.displayName = 'RiskInputsTab';
 
 interface RiskInputsTabContentProps<T extends EntityType> {
   subTab?: RiskScoreLeftPanelSubTab;
-  /** When set, the only view rendered (no toggle). Undefined keeps the legacy toggle behavior. */
+  /** When set, render only this view with no sub-toggle. Undefined keeps the legacy toggle behavior. */
   fixedView?: RiskScoreLeftPanelSubTab;
   entityType: T;
   entityName: string;

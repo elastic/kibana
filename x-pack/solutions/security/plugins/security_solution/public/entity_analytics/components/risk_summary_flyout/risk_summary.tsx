@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useNewEntityAnalyticsPage } from '../../hooks/use_new_entity_analytics_page';
-import { shouldShowOnlyResolutionRisk } from './show_only_resolution_risk';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -226,10 +225,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
 
   // Group view: the group score is presented as the entity's score, so the link reads like the
   // entity link but still opens the resolution-group inputs.
-  const groupViewTabLink = useMemo(
-    () => ({ callback: resolutionTabLink.callback, tooltip: entityTabLink.tooltip }),
-    [entityTabLink.tooltip, resolutionTabLink.callback]
-  );
+  const groupViewTabLink = { callback: resolutionTabLink.callback, tooltip: entityTabLink.tooltip };
 
   const hasResolutionGroup = entityRiskScores?.resolution.hasResolutionGroup ?? false;
   const resolutionTargetEntityId = entityRiskScores?.resolution.resolutionTargetEntityId;
@@ -247,11 +243,11 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   // shown in the group view (see `showOnlyResolutionRisk`), so a single-entity view never shows it.
   const showResolutionRiskSummary =
     !isNewEntityAnalyticsPage && hasResolutionGroup && Boolean(resolutionEntityData?.risk);
-  const showOnlyResolutionRisk = shouldShowOnlyResolutionRisk({
-    isGroupView,
-    hasResolutionScore: Boolean(resolutionEntityData?.risk),
-    resolutionLoading: entityResolutionRiskScore?.loading ?? false,
-  });
+  // In the group view, show only the group score (labelled as the entity risk score) once it is
+  // available or still loading; otherwise fall back to the individual score.
+  const showOnlyResolutionRisk =
+    isGroupView &&
+    (Boolean(resolutionEntityData?.risk) || (entityResolutionRiskScore?.loading ?? false));
   const showResolutionPanel = showResolutionRiskSummary || showOnlyResolutionRisk;
   const displayedUpdatedAt = showOnlyResolutionRisk
     ? resolutionRiskData?.['@timestamp']
