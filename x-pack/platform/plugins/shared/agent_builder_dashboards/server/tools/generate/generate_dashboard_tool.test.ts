@@ -60,7 +60,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
   });
   const sendUiEvent = jest.fn();
   const ctx = {
-    logger: { info: jest.fn(), error: jest.fn() },
+    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     attachments: {
       add: jest.fn(async ({ id }: { id: string }) => ({ id, current_version: 1 })),
       update: jest.fn(async (id: string) => ({ id, current_version: 2, origin: 'saved-id' })),
@@ -84,6 +84,7 @@ describe('generateDashboardTool handler', () => {
       dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
+      editedPanelIds: new Set(),
     });
   });
 
@@ -144,6 +145,7 @@ describe('generateDashboardTool handler', () => {
         dashboardData,
         failures,
         panelAuthoringNotes: [],
+        editedPanelIds: new Set(),
       } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
 
     it('does not create a new dashboard without panels or controls', async () => {

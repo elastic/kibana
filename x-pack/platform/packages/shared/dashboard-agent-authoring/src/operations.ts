@@ -38,9 +38,10 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`. When the host provides a
- * `validator`, changes that make the dashboard invalid are discarded and
- * reported as failures.
+ * the host provides `resolveControlFieldCapabilities`. New panels and sections
+ * are placed below the existing ones, two panels per row, until the host arranges
+ * the layout. When the host provides a `validator`, changes that make the
+ * dashboard invalid are discarded and reported as failures.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -54,6 +55,8 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  /** Existing panels whose content was edited and kept. */
+  editedPanelIds: ReadonlySet<string>;
 }> => {
   const originalDashboardData = structuredClone(
     dashboardData ?? {
@@ -86,7 +89,12 @@ export const executeDashboardOperations = async ({
   }
 
   if (!validator) {
-    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
+    return {
+      dashboardData: nextDashboardData,
+      failures,
+      panelAuthoringNotes,
+      editedPanelIds: context.editedPanelIds,
+    };
   }
 
   const validationResult = discardInvalidChanges({
@@ -95,11 +103,11 @@ export const executeDashboardOperations = async ({
     validator,
   });
 
+  const isKept = (panelId: string) => !validationResult.discardedPanelIds.has(panelId);
   return {
     dashboardData: validationResult.dashboardData,
     failures: [...failures, ...validationResult.failures],
-    panelAuthoringNotes: panelAuthoringNotes.filter(
-      ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
-    ),
+    panelAuthoringNotes: panelAuthoringNotes.filter(({ panelId }) => isKept(panelId)),
+    editedPanelIds: new Set([...context.editedPanelIds].filter(isKept)),
   };
 };

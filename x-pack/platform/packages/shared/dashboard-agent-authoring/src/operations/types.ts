@@ -49,6 +49,8 @@ export interface OperationExecutionContext {
   logger: Logger;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  /** Existing panels whose content was edited, so the layout sizes them again. */
+  editedPanelIds: Set<string>;
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;
   resolvePanelContent?: ResolvePanelContent;
