@@ -55,10 +55,7 @@ export function registerHomeAddData(
   });
 }
 
-export function registerHomeFeatureCatalogue(
-  home: HomePublicPluginSetup,
-  canUploadFile: () => boolean
-) {
+export function registerHomeFeatureCatalogue(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
     id: featureId,
     title: featureTitle,
@@ -70,6 +67,5 @@ export function registerHomeFeatureCatalogue(
     showOnHomePage: true,
     category: 'data',
     order: 520,
-    visible: canUploadFile,
   });
 }
