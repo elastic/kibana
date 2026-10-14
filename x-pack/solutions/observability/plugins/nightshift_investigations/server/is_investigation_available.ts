@@ -8,8 +8,10 @@
 import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { resolveNightshiftModel } from '@kbn/nightshift-ai';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -21,6 +23,10 @@ export interface InvestigationInfrastructureAvailabilityDependencies {
   request: KibanaRequest;
   featureFlags: FeatureFlagsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Investigations are stored as agentic investigations, so they need the plugin. */
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** The investigation agent proposes actions with the proposals plugin's tool. */
+  proposals?: ProposalsPluginStart;
   inference?: InferenceServerStart;
   logger: Logger;
   spaceId?: string;
@@ -33,6 +39,8 @@ export const isInvestigationInfrastructureAvailable = async ({
   request,
   featureFlags,
   agentBuilder,
+  agenticInvestigations,
+  proposals,
   inference,
   logger,
   spaceId,
@@ -47,7 +55,14 @@ export const isInvestigationInfrastructureAvailable = async ({
     return false;
   }
 
-  if (!agentBuilder || !inference || !workflowsExtensions || !workflowsManagement) {
+  if (
+    !agentBuilder ||
+    !agenticInvestigations ||
+    !proposals ||
+    !inference ||
+    !workflowsExtensions ||
+    !workflowsManagement
+  ) {
     return false;
   }
 
