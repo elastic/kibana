@@ -172,15 +172,7 @@ export function getWebpackConfig(
                 sourceMap: !worker.dist,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !worker.dist,
-                postcssOptions: {
-                  config: require.resolve('../../postcss.config.js'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           ],
         },
         {
@@ -199,15 +191,7 @@ export function getWebpackConfig(
                     sourceMap: !worker.dist,
                   },
                 },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    postcssOptions: {
-                      config: require.resolve('../../postcss.config.js'),
-                    },
-                  },
-                },
+                { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
                 {
                   loader: 'sass-loader',
                   options: {
