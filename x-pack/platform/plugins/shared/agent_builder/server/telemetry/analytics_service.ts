@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { CompactionTriggeredEvent } from '@kbn/agent-builder-server/telemetry';
 import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
@@ -21,6 +22,7 @@ import {
 import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
+  ReportCompactionTriggeredParams,
   ReportPluginImportedParams,
   ReportExecutionCompleteParams,
   ReportRoundCompleteParams,
@@ -517,6 +519,33 @@ export class AnalyticsService {
       );
     } catch (error) {
       this.logger.debug('Failed to report ToolCallSuccess telemetry event', { error });
+    }
+  }
+
+  reportCompactionTriggered({
+    agentId,
+    executionId,
+    trigger,
+    tokenCountBefore,
+    tokenCountAfter,
+    summarizedCycleCount,
+    modelId,
+  }: CompactionTriggeredEvent): void {
+    try {
+      this.analytics.reportEvent<ReportCompactionTriggeredParams>(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        {
+          agent_id: normalizeAgentIdForTelemetry(agentId) ?? 'unknown',
+          execution_id: executionId,
+          trigger,
+          token_count_before: tokenCountBefore,
+          token_count_after: tokenCountAfter,
+          summarized_cycle_count: summarizedCycleCount,
+          model_id: modelId,
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report CompactionTriggered telemetry event', { error });
     }
   }
 
