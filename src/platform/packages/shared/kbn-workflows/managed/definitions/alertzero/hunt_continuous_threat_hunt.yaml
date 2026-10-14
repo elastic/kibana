@@ -11,8 +11,46 @@ consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+  no_reasons: []
 steps:
-  - name: stub
-    type: console
+  # Readiness is space-scoped; kibana.request is sent verbatim, so prefix the executing space.
+  # on-failure continue so the gate below fails the run with a readable message
+  # instead of a raw `HTTP <status>` throw (same pattern as action_isolate_host.yaml).
+  - name: check_threat_intel_readiness
+    type: kibana.request
+    on-failure:
+      continue: true
     with:
-      message: "Continuous Threat Hunt worker stub"
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/threat_intel/readiness"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+  - name: readiness_gate
+    type: if
+    condition: "${{ steps.check_threat_intel_readiness.error == null and steps.check_threat_intel_readiness.output.status != 'blocked' }}"
+    steps:
+      # Supply is reachable. Zero hunt-usable reports is an idle state (nothing
+      # ingested yet, or enrich still catching up), not a failure.
+      - name: fuel_gate
+        type: if
+        condition: "${{ steps.check_threat_intel_readiness.output.usableReportCount > 0 }}"
+        steps:
+          - name: hunt_ready
+            type: console
+            with:
+              message: "Continuous Threat Hunt: {{ steps.check_threat_intel_readiness.output.usableReportCount }} hunt-usable report(s); hunt dispatch not implemented yet"
+        else:
+          - name: hunt_idle
+            type: console
+            with:
+              message: "Continuous Threat Hunt: no hunt-usable reports yet (reasons={{ steps.check_threat_intel_readiness.output.reasonCodes | join: ',' }}); nothing to hunt"
+    else:
+      # Fail the run so the Watch UI shows red: blocked supply or an unreachable
+      # readiness route are operator-visible problems.
+      - name: hunt_not_ready
+        type: workflow.fail
+        with:
+          reason: "threat_intel_not_ready"
+          message: "Continuous Threat Hunt: threat intel supply not ready (status={{ steps.check_threat_intel_readiness.output.status | default: 'request_failed' }}, reasons={{ steps.check_threat_intel_readiness.output.reasonCodes | default: consts.no_reasons | join: ',' }}, error={{ steps.check_threat_intel_readiness.error.message | default: 'none' }})"
