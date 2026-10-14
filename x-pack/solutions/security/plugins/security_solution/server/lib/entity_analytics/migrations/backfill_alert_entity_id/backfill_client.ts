@@ -10,7 +10,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { getEuidPainlessSourceUpdateScript } from '@kbn/entity-store/common/domain/euid/painless';
 
 import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
@@ -195,7 +195,7 @@ export const startBackfill = async ({
   signal: AbortSignal;
 }): Promise<string | undefined> => {
   const script = getEuidPainlessSourceUpdateScript(
-    getEntityAnalyticsEntityTypes(),
+    getEntityAnalyticsEntityTypes().map((entityType) => getBuiltInEntityDefinition(entityType)),
     // Alert `_source` stores `kibana.alert.*` as flattened dotted keys — the rule-execution
     // enrichment writes `_source[ALERT_ENTITY_ID]` the same way. Do not unflatten here.
     `ctx._source['${ALERT_ENTITY_ID}'] = euids;`

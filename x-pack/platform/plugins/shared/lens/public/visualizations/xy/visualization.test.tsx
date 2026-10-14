@@ -233,7 +233,6 @@ describe('xy_visualization', () => {
                         "type": "other",
                       },
                     ],
-                    "touched": false,
                   },
                 ],
               },
@@ -4756,7 +4755,7 @@ describe('xy_visualization', () => {
     });
 
     describe('areaFill defaulting', () => {
-      it('applies the solid default when an area layer is introduced', () => {
+      it('applies the default area fill when an area layer is introduced', () => {
         const state = exampleState();
         (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
         expect(state.areaFill).toBeUndefined();

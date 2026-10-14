@@ -7,16 +7,15 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type {
+  EntityDefinitionOfAnyType,
   EntityDefinitionWithoutId,
-  EntityType,
   EuidAttribute,
   FieldEvaluation,
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import type { EuidGateOptions } from './commons';
-import { isEuidField, waiveForAlerts } from './commons';
+import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './commons';
 
 export interface EuidPainlessOptions extends EuidGateOptions {
   /**
@@ -175,28 +174,28 @@ function buildPreAggEvaluatedVarOverridesPreamble(
 
 /**
  * Returns an Elasticsearch runtime keyword field mapping whose Painless script
- * computes the typed EUID for the given entity type.
+ * computes the typed EUID for the given entity definition.
  *
  * Example usage:
  * ```ts
- * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping('user') }
+ * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping(userDefinition) }
  * ```
  *
  * For update contexts, where doc-values are unavailable, see
  * {@link getEuidPainlessSourceUpdateScript}.
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the EUID
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
 export function getEuidPainlessRuntimeMapping(
-  entityType: EntityType,
+  entityDefinition: EntityDefinitionOfAnyType,
   options?: EuidPainlessOptions
 ): {
   type: 'keyword';
   script: { source: string };
 } {
   const expressions = options?.expressions ?? docValuesExpressions;
-  const returnScript = getEuidPainlessEvaluation(entityType, options);
+  const returnScript = getEuidPainlessEvaluation(entityDefinition, options);
   const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript, expressions);
   return {
     type: 'keyword',
@@ -210,26 +209,26 @@ export function getEuidPainlessRuntimeMapping(
  * field value, this one to write onto the document.
  *
  * A Painless script for update contexts — `update_by_query`, ingest — that derives the EUID for
- * each of `entityTypes` from `ctx._source` and runs `onEuids`, a snippet in which the local
- * `euids` is a `List` of the values found. When no type resolves, the document is left untouched
- * via `ctx.op = 'noop'` rather than rewritten.
+ * each of `entityDefinitions` from `ctx._source` and runs `onEuids`, a snippet in which the local
+ * `euids` is a `List` of the values found. When no definition resolves, the document is left
+ * untouched via `ctx.op = 'noop'` rather than rewritten.
  *
- * All the types are evaluated in one script so a document is rewritten once rather than once per
- * type, and so the resulting list reflects a single read of the source.
+ * All the definitions are evaluated in one script so a document is rewritten once rather than once
+ * per entity type, and so the resulting list reflects a single read of the source.
  *
  * Reads `_source` because update contexts have no doc-values. That also means it resolves fields
  * the way the in-memory implementation does, which is not always the way doc-values do — a
  * multi-valued field yields the first value written rather than the lowest.
  */
 export function getEuidPainlessSourceUpdateScript(
-  entityTypes: EntityType[],
+  entityDefinitions: EntityDefinitionOfAnyType[],
   onEuids: string
 ): string {
   const { preamble, rootBinding } = sourceExpressions;
 
-  const evaluators = entityTypes.map((entityType) => ({
-    fn: `__euid_eval_${entityType}`,
-    body: getEuidPainlessEvaluation(entityType, {
+  const evaluators = entityDefinitions.map((entityDefinition) => ({
+    fn: `__euid_eval_${entityDefinition.type}`,
+    body: getEuidPainlessEvaluation(entityDefinition, {
       applyPostAggFilter: false,
       expressions: sourceExpressions,
     }),
@@ -250,7 +249,7 @@ export function getEuidPainlessSourceUpdateScript(
 }
 
 /**
- * Constructs a Painless evaluation for the provided entity type to generate the entity id.
+ * Constructs a Painless evaluation for the provided entity definition to generate the entity id.
  *
  * Applies the creation gate: a document that may not put an entity in the store yields `null`.
  * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
@@ -259,22 +258,25 @@ export function getEuidPainlessSourceUpdateScript(
  * ```ts
  * import { getEuidPainlessEvaluation } from './painless';
  *
- * const evaluation = getEuidPainlessEvaluation('host');
+ * const evaluation = getEuidPainlessEvaluation(hostDefinition);
  * // evaluation may look like:
  * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
  * ```
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
  * @returns A Painless evaluation string that computes the entity id.
  */
 export function getEuidPainlessEvaluation(
-  entityType: EntityType,
+  entityDefinition: EntityDefinitionOfAnyType,
   options?: EuidPainlessOptions
 ): string {
   const { applyPostAggFilter = true, expressions = docValuesExpressions } = options ?? {};
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
-  const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
+  const { identityField, type: entityType } = entityDefinition;
+  let prefixExpr = '';
+  if (!identityField.skipTypePrepend) {
+    assertEmittableEntityType(entityType);
+    prefixExpr = `"${entityType}:" + `;
+  }
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
@@ -380,11 +382,13 @@ export function getEuidPainlessEvaluation(
  * For risk scoring and enrichment. The caller checks store membership; this only answers which
  * entity a document refers to.
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
  * @returns A Painless evaluation string that computes the entity id.
  */
-export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
-  return getEuidPainlessEvaluation(entityType, { applyPostAggFilter: false });
+export function getEuidPainlessEvaluationForSearch(
+  entityDefinition: EntityDefinitionOfAnyType
+): string {
+  return getEuidPainlessEvaluation(entityDefinition, { applyPostAggFilter: false });
 }
 
 export interface ConditionToPainlessOptions {

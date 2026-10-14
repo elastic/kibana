@@ -13,7 +13,7 @@ const buildItem = (requested: string[], current: string[]) =>
   buildHandlerItem(
     { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: requested } as const,
     buildAlertEventRecord(),
-    { actionState: { tags: current } }
+    { alertActionState: { tags: current } }
   );
 
 describe('tagHandler', () => {

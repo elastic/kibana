@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   createSourceExpressions,
   getEuidPainlessRuntimeMapping,
@@ -121,11 +121,14 @@ export default ({ getService }: FtrProviderContext): void => {
       size: 100,
       query: { match_all: {} },
       runtime_mappings: {
-        euid_doc_values: euid.painless.getEuidRuntimeMapping(entityType, {
-          applyPostAggFilter: false,
-        }),
+        euid_doc_values: euid.painless.getEuidRuntimeMapping(
+          getBuiltInEntityDefinition(entityType),
+          {
+            applyPostAggFilter: false,
+          }
+        ),
         // `params._source` rather than `ctx._source`: same accessor, addressed for a search context.
-        euid_source: getEuidPainlessRuntimeMapping(entityType, {
+        euid_source: getEuidPainlessRuntimeMapping(getBuiltInEntityDefinition(entityType), {
           applyPostAggFilter: false,
           expressions: createSourceExpressions('params._source'),
         }),
@@ -154,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return alerts.map(({ source, fromDocValues, fromPainlessSource }) => ({
       fromDocValues,
       fromPainlessSource,
-      fromSource: euid.getEuidFromObjectForSearch(entityType, source),
+      fromSource: euid.getEuidFromObjectForSearch(getBuiltInEntityDefinition(entityType), source),
     }));
   };
 
@@ -333,7 +336,7 @@ export default ({ getService }: FtrProviderContext): void => {
             lang: 'painless',
             source: getEuidPainlessSourceUpdateScript(
               // Host alone, so an alert with no host identity is genuinely underivable.
-              [EntityType.host],
+              [getBuiltInEntityDefinition(EntityType.host)],
               `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
             ),
           },
@@ -365,7 +368,7 @@ export default ({ getService }: FtrProviderContext): void => {
             lang: 'painless',
             source: getEuidPainlessSourceUpdateScript(
               // Host alone, so an alert with no host identity is genuinely underivable.
-              [EntityType.host],
+              [getBuiltInEntityDefinition(EntityType.host)],
               `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
             ),
           },

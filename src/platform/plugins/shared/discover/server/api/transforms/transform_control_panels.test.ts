@@ -80,20 +80,29 @@ describe('control panel transforms', () => {
 
     describe('warnings for invalid stored content', () => {
       it.each([
-        { condition: 'invalid JSON', controlGroupJson: 'not-json' },
-        { condition: 'not a JSON object', controlGroupJson: '[]' },
-      ])('drops control_panels when controlGroupJson is $condition', ({ controlGroupJson }) => {
-        const { panels, warnings } = transformControlPanelsOut(controlGroupJson, 'tab-1');
+        { condition: 'invalid JSON', controlGroupJson: 'not-json', reason: 'Invalid JSON.' },
+        {
+          condition: 'not a JSON object',
+          controlGroupJson: '[]',
+          reason: 'Expected a JSON object.',
+        },
+      ])(
+        'drops control_panels when controlGroupJson is $condition',
+        ({ controlGroupJson, reason }) => {
+          const { panels, warnings } = transformControlPanelsOut(controlGroupJson, 'tab-1');
 
-        expect(panels).toBeUndefined();
-        expect(warnings).toEqual([
-          expect.objectContaining({
-            type: 'dropped_property',
-            tab_id: 'tab-1',
-            key: 'control_panels',
-          }),
-        ]);
-      });
+          expect(panels).toBeUndefined();
+          expect(warnings).toEqual([
+            expect.objectContaining({
+              type: 'dropped_property',
+              tab_id: 'tab-1',
+              key: 'control_panels',
+              value: controlGroupJson,
+              message: reason,
+            }),
+          ]);
+        }
+      );
 
       it('drops only a malformed panel entry', () => {
         const { panels, warnings } = transformControlPanelsOut(
@@ -116,11 +125,29 @@ describe('control panel transforms', () => {
         expect(panels?.map(({ id }) => id)).toEqual(['good']);
         expect(warnings).toEqual([
           {
-            type: 'dropped_panel',
+            type: 'dropped_item',
             tab_id: 'tab-1',
-            panel_id: 'bad',
-            message:
-              'Unable to transform control panel [bad]. Error: controlGroupJson panels must be JSON objects',
+            key: 'control_panels',
+            item_id: 'bad',
+            message: 'Control configuration must be a JSON object.',
+          },
+        ]);
+      });
+
+      it('reports the config of a panel without a type', () => {
+        const { warnings } = transformControlPanelsOut(
+          JSON.stringify({ untyped: { order: 0, variable_name: 'foo' } }),
+          'tab-1'
+        );
+
+        expect(warnings).toEqual([
+          {
+            type: 'dropped_item',
+            tab_id: 'tab-1',
+            key: 'control_panels',
+            item_id: 'untyped',
+            item_config: { order: 0, variable_name: 'foo' },
+            message: 'Control type is missing or invalid.',
           },
         ]);
       });
@@ -146,12 +173,22 @@ describe('control panel transforms', () => {
         expect(panels).toBeUndefined();
         expect(warnings).toEqual([
           {
-            type: 'dropped_panel',
+            type: 'dropped_item',
             tab_id: 'tab-1',
-            panel_id: 'invalid-width',
-            message:
-              'Unable to transform control panel [invalid-width]. Error: ' +
-              'Invalid input: expected "small", Invalid input: expected "medium", Invalid input: expected "large"',
+            key: 'control_panels',
+            item_id: 'invalid-width',
+            item_type: ESQL_CONTROL,
+            item_config: {
+              order: 0,
+              width: 'extra_large',
+              control_type: 'STATIC_VALUES',
+              variable_name: 'country',
+              variable_type: 'values',
+              available_options: ['US'],
+              selected_options: ['US'],
+              single_select: true,
+            },
+            message: '✖ Invalid option: expected one of "small"|"medium"|"large"\n  → at width',
           },
         ]);
       });
@@ -164,7 +201,7 @@ describe('control panel transforms', () => {
 
         expect(panels).toBeUndefined();
         expect(warnings).toEqual([
-          expect.objectContaining({ type: 'dropped_panel', tab_id: 'tab-1', panel_id: 'bad' }),
+          expect.objectContaining({ type: 'dropped_item', tab_id: 'tab-1', item_id: 'bad' }),
         ]);
       });
     });

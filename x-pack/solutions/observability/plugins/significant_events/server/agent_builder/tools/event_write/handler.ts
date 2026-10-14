@@ -7,17 +7,13 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
 import type { CompactBulkError } from '../bulk_write';
-import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
-import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
@@ -68,18 +64,13 @@ const WRITE_CONCURRENCY = 10;
  */
 export async function eventsWriteBulkHandler({
   eventSearchClient,
-  alertEventsClient,
-  emitTrigger,
   inputs,
   source,
   rejectUnknownEventIds,
   logger,
 }: {
-  /** Reads prior versions and active events from `.rule-events`. */
+  /** Reads prior versions and active events from `.rule-events`, and writes each new version. */
   eventSearchClient: RuleEventsClient;
-  /** Writes each new version to `.rule-events`. */
-  alertEventsClient: AlertEventsClientApi;
-  emitTrigger?: TriggerEmitter;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
@@ -163,13 +154,30 @@ export async function eventsWriteBulkHandler({
 
   const pendingToWrite = remaining.map((facts) => buildPendingWrite({ facts, timestamp }));
 
-  // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
   const writeLimit = pLimit(WRITE_CONCURRENCY);
   const errors = await Promise.all(
-    pendingToWrite.map(({ document }) =>
+    pendingToWrite.map(({ candidate, document }) =>
       writeLimit(async (): Promise<CompactBulkError | undefined> => {
         try {
-          await alertEventsClient.createAlertEvent(toRuleEvent(document));
+          const prior = latestByEventId.get(candidate.eventId);
+          if (prior === undefined) {
+            await eventSearchClient.createEvent({
+              event: document,
+            });
+            return undefined;
+          }
+          const written = await eventSearchClient.updateEvent({
+            event: document,
+            prior,
+          });
+          if (!written.updated) {
+            return {
+              type: 'superseded_write',
+              reason: `event_id ${JSON.stringify(
+                candidate.eventId
+              )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+            };
+          }
           return undefined;
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
@@ -180,20 +188,6 @@ export async function eventsWriteBulkHandler({
     )
   );
   applyWriteOutcomes({ pendingWrites: pendingToWrite, errors, results });
-
-  // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
-  // version -> created; a prior version with a different status (e.g. triage re-open) -> status
-  // changed. Emission is best-effort and guarded, so it never affects the returned results.
-  pendingToWrite.forEach(({ candidate, document }, responseIndex) => {
-    if (errors[responseIndex]) {
-      return;
-    }
-    emitSignificantEventWriteTriggers({
-      emitTrigger,
-      significantEvent: document,
-      priorSignificantEvent: latestByEventId.get(candidate.eventId),
-    });
-  });
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
@@ -206,20 +200,14 @@ export async function eventsWriteBulkHandler({
 export async function eventsWriteHandler({
   eventSearchClient,
   input,
-  alertEventsClient,
-  emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   input: EventsWriteInput;
-  alertEventsClient: AlertEventsClientApi;
-  emitTrigger?: TriggerEmitter;
   logger?: Logger;
 }): Promise<EventsWriteResult | EventsWriteNoOpResult> {
   const [result] = await eventsWriteBulkHandler({
     eventSearchClient,
-    alertEventsClient,
-    emitTrigger,
     inputs: [input],
     logger,
   });

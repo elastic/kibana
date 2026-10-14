@@ -6,6 +6,8 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
+import { hostEntityDefinition } from '../definitions/host';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   createSourceExpressions,
@@ -226,14 +228,14 @@ describe('getEuidPainlessEvaluation', () => {
   describe('snapshots per entity type', () => {
     Object.values(EntityType.enum).forEach((entityType) => {
       it(`generates the expected Painless script for ${entityType}`, () => {
-        const script = getEuidPainlessEvaluation(entityType);
+        const script = getEuidPainlessEvaluation(getBuiltInEntityDefinition(entityType));
         expect(script).toMatchSnapshot();
       });
     });
   });
 
   it('does not include shared field evaluations in host EUID generation', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+    const script = getEuidPainlessEvaluation(getBuiltInEntityDefinition(EntityType.enum.host));
 
     expect(script).not.toContain('entity_source');
   });
@@ -242,8 +244,8 @@ describe('getEuidPainlessEvaluation', () => {
 describe('getEuidPainlessRuntimeMapping', () => {
   Object.values(EntityType.enum).forEach((entityType) => {
     it(`returns a keyword runtime mapping that wraps getEuidPainlessEvaluation for ${entityType}`, () => {
-      const returnScript = getEuidPainlessEvaluation(entityType);
-      const mapping = getEuidPainlessRuntimeMapping(entityType);
+      const returnScript = getEuidPainlessEvaluation(getBuiltInEntityDefinition(entityType));
+      const mapping = getEuidPainlessRuntimeMapping(getBuiltInEntityDefinition(entityType));
 
       expect(mapping.type).toBe('keyword');
       expect(mapping.script).toBeDefined();
@@ -257,12 +259,17 @@ describe('getEuidPainlessRuntimeMapping', () => {
   });
 
   it('threads applyPostAggFilter through to the evaluation', () => {
-    const mapping = getEuidPainlessRuntimeMapping(EntityType.enum.user, {
-      applyPostAggFilter: false,
-    });
+    const mapping = getEuidPainlessRuntimeMapping(
+      getBuiltInEntityDefinition(EntityType.enum.user),
+      {
+        applyPostAggFilter: false,
+      }
+    );
 
     expect(mapping.script.source).toContain(
-      getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false })
+      getEuidPainlessEvaluation(getBuiltInEntityDefinition(EntityType.enum.user), {
+        applyPostAggFilter: false,
+      })
     );
   });
 });
@@ -272,19 +279,23 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   const postAggOnlyMarker = `doc.containsKey('entity.id')`;
 
   it('gates on postAggFilter by default', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+    const script = getEuidPainlessEvaluation(getBuiltInEntityDefinition(EntityType.enum.user));
 
     expect(script).toContain(postAggOnlyMarker);
   });
 
   it('omits the postAggFilter gate in the search variant', () => {
-    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+    const script = getEuidPainlessEvaluationForSearch(
+      getBuiltInEntityDefinition(EntityType.enum.user)
+    );
 
     expect(script).not.toContain(postAggOnlyMarker);
   });
 
   it('keeps the documentsFilter gate in the search variant', () => {
-    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+    const script = getEuidPainlessEvaluationForSearch(
+      getBuiltInEntityDefinition(EntityType.enum.user)
+    );
 
     // documentsFilter requires event.outcome != failure and at least one user identifier.
     expect(script).toContain(`doc.containsKey('event.outcome')`);
@@ -292,7 +303,7 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   });
 
   it('lets a detection alert satisfy the gate', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+    const script = getEuidPainlessEvaluation(getBuiltInEntityDefinition(EntityType.enum.user));
 
     // ORed in front, so Painless short-circuits and skips the whole clause for alerts.
     expect(script).toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
@@ -303,14 +314,16 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   });
 
   it('omits the alert waiver in the search variant', () => {
-    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
+    const script = getEuidPainlessEvaluationForSearch(
+      getBuiltInEntityDefinition(EntityType.enum.user)
+    );
 
     expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
   });
 
   it('does not waive anything for a definition with no postAggFilter', () => {
     // host has documentsFilter only, so there is nothing to waive.
-    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+    const script = getEuidPainlessEvaluation(getBuiltInEntityDefinition(EntityType.enum.host));
 
     expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
   });
@@ -349,15 +362,18 @@ describe('createSourceExpressions', () => {
 
 describe('getEuidPainlessSourceUpdateScript', () => {
   const ALL_TYPES = Object.values(EntityType.enum);
+  const ALL_DEFINITIONS = ALL_TYPES.map((entityType) => getBuiltInEntityDefinition(entityType));
   const onEuids = "ctx._source['some.field'] = euids;";
 
   it('never falls back to doc-values', () => {
     // The invariant the whole update-context path rests on: `doc` is not bound there.
-    expect(getEuidPainlessSourceUpdateScript(ALL_TYPES, onEuids)).not.toMatch(DOC_VALUES_READS);
+    expect(getEuidPainlessSourceUpdateScript(ALL_DEFINITIONS, onEuids)).not.toMatch(
+      DOC_VALUES_READS
+    );
   });
 
   it('defines the source reader once, however many entity types', () => {
-    const script = getEuidPainlessSourceUpdateScript(ALL_TYPES, onEuids);
+    const script = getEuidPainlessSourceUpdateScript(ALL_DEFINITIONS, onEuids);
 
     // Painless rejects a duplicate function definition, so this is a compile error, not waste.
     expect(script.split('def __euid_src(').length - 1).toBe(1);
@@ -365,7 +381,7 @@ describe('getEuidPainlessSourceUpdateScript', () => {
 
   it('evaluates every entity type it is given, in one script', () => {
     // One script rather than one per type, so a document is rewritten once.
-    const script = getEuidPainlessSourceUpdateScript(ALL_TYPES, onEuids);
+    const script = getEuidPainlessSourceUpdateScript(ALL_DEFINITIONS, onEuids);
 
     for (const entityType of ALL_TYPES) {
       expect(script).toContain(`String __euid_eval_${entityType}(def __euid_root)`);
@@ -375,7 +391,7 @@ describe('getEuidPainlessSourceUpdateScript', () => {
 
   it('leaves the document untouched when no entity type resolves', () => {
     // `ctx.op = 'noop'` rather than writing an empty value: no version bump, no merge cost.
-    const script = getEuidPainlessSourceUpdateScript(ALL_TYPES, onEuids);
+    const script = getEuidPainlessSourceUpdateScript(ALL_DEFINITIONS, onEuids);
 
     expect(script).toContain("if (euids.isEmpty()) { ctx.op = 'noop'; }");
     expect(script).toContain(`else { ${onEuids} }`);
@@ -383,19 +399,27 @@ describe('getEuidPainlessSourceUpdateScript', () => {
 
   it('skips the creation gate, as the search variant does', () => {
     // Stamping answers which entity a document refers to, not whether it may create one.
-    const script = getEuidPainlessSourceUpdateScript([EntityType.enum.user], onEuids);
+    const script = getEuidPainlessSourceUpdateScript(
+      [getBuiltInEntityDefinition(EntityType.enum.user)],
+      onEuids
+    );
 
     expect(script).not.toContain('kibana.alert.rule.uuid');
   });
 
   it('generates the expected script', () => {
     // `generic` has a single-field identity, so the snapshot stays readable.
-    expect(getEuidPainlessSourceUpdateScript([EntityType.enum.generic], onEuids)).toMatchSnapshot();
+    expect(
+      getEuidPainlessSourceUpdateScript(
+        [getBuiltInEntityDefinition(EntityType.enum.generic)],
+        onEuids
+      )
+    ).toMatchSnapshot();
   });
 });
 
 describe('getEuidPainlessRuntimeMapping with source expressions', () => {
-  const mapping = getEuidPainlessRuntimeMapping(EntityType.enum.host, {
+  const mapping = getEuidPainlessRuntimeMapping(getBuiltInEntityDefinition(EntityType.enum.host), {
     expressions: createSourceExpressions('params._source'),
   });
 
@@ -418,5 +442,23 @@ describe('getEuidPainlessRuntimeMapping with source expressions', () => {
     expect(source.indexOf('def __euid_src(')).toBeLessThan(
       source.indexOf('String ___euid_rt_eval')
     );
+  });
+});
+
+describe('type prefix validation', () => {
+  const badDefinition = { ...hostEntityDefinition, type: 'a"b' };
+
+  it('throws when the type name cannot be emitted as a prefix', () => {
+    expect(() => getEuidPainlessEvaluation(badDefinition)).toThrow(
+      'Cannot emit the entity type prefix'
+    );
+  });
+
+  it('does not throw when the type prefix is skipped', () => {
+    const definition = {
+      ...badDefinition,
+      identityField: { ...badDefinition.identityField, skipTypePrepend: true },
+    };
+    expect(() => getEuidPainlessEvaluation(definition)).not.toThrow();
   });
 });

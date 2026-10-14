@@ -70,6 +70,21 @@ export interface EsqlSourceArgs {
   esqlVariables?: ESQLControlVariable[];
 }
 
+export interface EsqlDatasetArgs {
+  query: string;
+  timeFieldName?: string;
+  projectRouting?: string;
+  http?: HttpStart;
+}
+
+/** Identity of the FROM target of an ES|QL query, without the query's schema. */
+export interface EsqlDataset {
+  datasetId: string;
+  title: string;
+  timeFieldName: string | undefined;
+  projectRouting: string | undefined;
+}
+
 function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
   const querySummary = getQuerySummary(query);
   return columns.map(({ name, esType }) => ({
@@ -270,6 +285,26 @@ export class EsqlSource implements DataSourceBase {
       EsqlSource.instanceCache.set(instanceKey, instance);
     }
     return instance;
+  }
+
+  /**
+   * Resolves the dataset identity (FROM target, time field, project routing) of a query without
+   * its schema: no `LIMIT 0` request and nothing is added to the instance cache. For consumers
+   * that only need the {@link EsqlSource.datasetId} and time field, e.g. persisted Lens layers.
+   */
+  public static async resolveDataset(args: EsqlDatasetArgs): Promise<EsqlDataset> {
+    const query = args.query.trim();
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
+    const timeFieldName =
+      args.timeFieldName ??
+      (await getESQLTimeField({ query, http: args.http, projectRouting: args.projectRouting }));
+    const datasetId = await getESQLAdHocDataviewId({
+      indexPattern: title,
+      timeFieldName,
+      projectRouting,
+    });
+    return { datasetId, title, timeFieldName, projectRouting };
   }
 
   public static clearCache(): void {

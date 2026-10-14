@@ -120,12 +120,16 @@ steps:
         slack2:
           connector-id: my-slack2
           channels: ["C0123"]
+        servicenow:
+          connector-id: my-servicenow
+          table: incident
+          sys-id: abc123
 `;
     const lineCounter = new LineCounter();
     const yamlDocument = parseDocument(yaml, { lineCounter });
     const result = collectAllConnectorIds(yamlDocument, lineCounter);
 
-    expect(result).toHaveLength(4);
+    expect(result).toHaveLength(5);
     expect(result[0].key).toBe('my-slack');
     expect(result[0].connectorType).toBe('slack');
     expect(result[1].key).toBe('my-slack-api');
@@ -134,6 +138,8 @@ steps:
     expect(result[2].connectorType).toBe('email');
     expect(result[3].key).toBe('my-slack2');
     expect(result[3].connectorType).toBe('slack2.sendMessage');
+    expect(result[4].key).toBe('my-servicenow');
+    expect(result[4].connectorType).toBe('servicenow_search.addComment');
   });
 
   it('should resolve connector type for waitForInput notification channel connector-id', () => {

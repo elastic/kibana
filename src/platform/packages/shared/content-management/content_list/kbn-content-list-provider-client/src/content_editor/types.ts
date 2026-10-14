@@ -21,8 +21,21 @@ import type { ContentListItem } from '@kbn/content-list-provider';
  * `useOpenContentEditor` from `@kbn/content-management-content-editor`.
  */
 export interface ContentEditorConfig {
-  /** Whether the content editor is readonly. Defaults to `false`. */
+  /**
+   * Whether the content editor is read-only for every item.
+   *
+   * Defaults to read-only: the flyout is only editable when this is explicitly
+   * `false` and `onSave` is provided.
+   */
   isReadonly?: boolean;
+
+  /**
+   * Message shown in the flyout when the whole list is read-only.
+   *
+   * If an item also has an edit restriction, this list-wide message is shown
+   * instead of the item's restriction reason.
+   */
+  readonlyReason?: string;
 
   /** Custom validators for title/description fields. */
   customValidators?: ContentEditorCustomValidators;

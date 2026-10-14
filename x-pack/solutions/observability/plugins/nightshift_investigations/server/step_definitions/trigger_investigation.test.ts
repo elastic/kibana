@@ -55,6 +55,17 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it('starts without a title, which Agent Builder generates', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+    );
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: undefined }));
+  });
+
   it('preserves an explicit manual trigger type', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);

@@ -56,7 +56,10 @@ import type { SignificantEventsSearchBarProps } from '../../../../components/sea
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { formatTimestamp } from '../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { getSignificantEventStatusColor } from '../shared/status_display';
+import {
+  getSignificantEventStatusColor,
+  isLiveSignificantEventStatus,
+} from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -136,7 +139,7 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
   const { canManage } = getNightshiftCapabilities(nightshift);
   const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
-  if (!canManage || event.status !== 'active') {
+  if (!canManage || !isLiveSignificantEventStatus(event.status)) {
     return null;
   }
 
