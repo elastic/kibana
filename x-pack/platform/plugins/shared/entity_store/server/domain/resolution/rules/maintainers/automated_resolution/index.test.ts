@@ -340,7 +340,8 @@ describe('automatedResolutionMaintainerConfig', () => {
         ...matcherState,
         definitionFingerprint: expect.any(String),
         lastAttemptAt: expect.any(String),
-        stoppedAtDeadline: false,
+        ranFirstAt: expect.any(String),
+        deferredByDeadline: false,
       });
     });
 

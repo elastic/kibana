@@ -60,25 +60,35 @@ const byCreation = (a: CustomResolutionRule, b: CustomResolutionRule): number =>
   (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id);
 
 /**
- * Oldest rule first, so the order is stable and explainable. A rule the
- * deadline cut off last run goes last, so one heavy rule can't starve the
- * others; among those, the least recently attempted goes first.
+ * Rules the deadline stopped or didn't reach last run go first, the one that
+ * least recently ran first leading, so they take turns at the full budget and
+ * no rule waits forever. The rest follow, oldest first, so the order is stable
+ * and explainable.
  */
 export const orderForRun = (
   customRules: CustomResolutionRule[],
   rules: Readonly<Record<string, PerRuleState>>
 ): CustomResolutionRule[] => {
   const stateOf = (rule: CustomResolutionRule) => asCustomState(rules[customRuleStateKey(rule.id)]);
-  const cutOff = customRules.filter((rule) => stateOf(rule).stoppedAtDeadline === true);
-  const rest = customRules.filter((rule) => stateOf(rule).stoppedAtDeadline !== true);
+  const deferred = customRules.filter((rule) => stateOf(rule).deferredByDeadline === true);
+  const rest = customRules.filter((rule) => stateOf(rule).deferredByDeadline !== true);
   return [
-    ...rest.sort(byCreation),
-    ...cutOff.sort(
+    ...deferred.sort(
       (a, b) =>
-        (stateOf(a).lastAttemptAt ?? '').localeCompare(stateOf(b).lastAttemptAt ?? '') ||
-        byCreation(a, b)
+        (stateOf(a).ranFirstAt ?? '').localeCompare(stateOf(b).ranFirstAt ?? '') || byCreation(a, b)
     ),
+    ...rest.sort(byCreation),
   ];
+};
+
+const markDeferred = (
+  rules: Record<string, PerRuleState>,
+  notStarted: CustomResolutionRule[]
+): void => {
+  for (const { id } of notStarted) {
+    const stateKey = customRuleStateKey(id);
+    rules[stateKey] = { ...EMPTY_RULE_STATE, ...rules[stateKey], deferredByDeadline: true };
+  }
 };
 
 const readPriorState = (
@@ -181,12 +191,14 @@ async function runEnabledRulesUntilAborted(
     );
   }
 
+  let startedOne = false;
   for (const [position, listed] of enabledRules.entries()) {
     if (softSignal.aborted) {
-      const left = enabledRules.length - position;
+      const notStarted = enabledRules.slice(position);
       if (reachedDeadline()) {
+        markDeferred(rules, notStarted);
         logger.info(
-          `Custom resolution rules reached the soft deadline; ${left} rule(s) continue next run`
+          `Custom resolution rules reached the soft deadline; ${notStarted.length} rule(s) continue next run`
         );
       } else {
         logger.debug(`Aborted automated-resolution before custom rule '${listed.id}'`);
@@ -219,6 +231,10 @@ async function runEnabledRulesUntilAborted(
 
     const ruleState = readPriorState(rules[stateKey], definitionFingerprint);
     const lastAttemptAt = new Date().toISOString();
+    const ranFirstAt = startedOne
+      ? asCustomState(rules[stateKey]).ranFirstAt ?? null
+      : lastAttemptAt;
+    startedOne = true;
     let matcherResultState: PerRuleState = ruleState;
     try {
       matcherResultState = await runEsqlMatcherRule({
@@ -241,8 +257,8 @@ async function runEnabledRulesUntilAborted(
       }
     }
 
-    const stoppedAtDeadline = reachedDeadline();
-    if (stoppedAtDeadline) {
+    const deferredByDeadline = reachedDeadline();
+    if (deferredByDeadline) {
       logger.info(`${stateKey}: stopped at the soft deadline; continues next run`);
     }
 
@@ -252,7 +268,8 @@ async function runEnabledRulesUntilAborted(
       ...matcherResultState,
       definitionFingerprint,
       lastAttemptAt,
-      stoppedAtDeadline,
+      ranFirstAt,
+      deferredByDeadline,
     };
     rules[stateKey] = nextState;
   }

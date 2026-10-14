@@ -41,14 +41,15 @@ const fingerprintOf = (customRule: CustomResolutionRule) =>
 
 const watermarked = (
   id: string,
-  lastAttemptAt = '2026-10-01T00:00:00Z',
-  stoppedAtDeadline = false
+  ranFirstAt: string | null = '2026-10-01T00:00:00Z',
+  deferredByDeadline = false
 ) => ({
   [`custom:${id}`]: {
     ...WATERMARKED,
     definitionFingerprint: fingerprintOf(rule(id)),
-    lastAttemptAt,
-    stoppedAtDeadline,
+    lastAttemptAt: '2026-10-01T00:00:00Z',
+    ranFirstAt,
+    deferredByDeadline,
   },
 });
 
@@ -123,7 +124,8 @@ describe('runCustomResolutionRules', () => {
       ...WATERMARKED,
       definitionFingerprint: fingerprintOf(rule('a')),
       lastAttemptAt: expect.any(String),
-      stoppedAtDeadline: false,
+      ranFirstAt: expect.any(String),
+      deferredByDeadline: false,
     });
   });
 
@@ -179,6 +181,7 @@ describe('runCustomResolutionRules', () => {
     expect(rules['custom:a']).toEqual({
       ...previous['custom:a'],
       lastAttemptAt: expect.any(String),
+      ranFirstAt: expect.any(String),
     });
     expect(rules['custom:a']).not.toEqual(previous['custom:a']);
   });
@@ -304,9 +307,10 @@ describe('runCustomResolutionRules', () => {
       expect(rules['custom:a']).toEqual({
         ...previous['custom:a'],
         lastAttemptAt: '2026-10-13T10:00:00.000Z',
-        stoppedAtDeadline: true,
+        ranFirstAt: '2026-10-13T10:00:00.000Z',
+        deferredByDeadline: true,
       });
-      expect(rules['custom:b']).toBe(previous['custom:b']);
+      expect(rules['custom:b']).toEqual({ ...previous['custom:b'], deferredByDeadline: true });
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('custom:a: stopped at the soft deadline')
       );
@@ -325,7 +329,7 @@ describe('runCustomResolutionRules', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('runs the oldest rule first, whatever the attempt times, and logs the order', async () => {
+    it('runs the oldest rule first, whatever the earlier runs, and logs the order', async () => {
       const { logger } = await run(
         [
           rule('c', { created_at: '2026-10-03T00:00:00Z' }),
@@ -347,33 +351,65 @@ describe('runCustomResolutionRules', () => {
       );
     });
 
-    it('moves a rule the deadline cut off last run to the end', async () => {
+    it('runs rules the deadline deferred last run before the others', async () => {
       await run(
         [
           rule('a', { created_at: '2026-10-01T00:00:00Z' }),
           rule('b', { created_at: '2026-10-02T00:00:00Z' }),
         ],
-        { previous: { ...watermarked('a', '2026-10-13T10:00:00Z', true), ...watermarked('b') } }
+        { previous: { ...watermarked('a'), ...watermarked('b', null, true) } }
       );
 
       expect(calledRuleIds()).toEqual(['custom:b', 'custom:a']);
     });
 
-    it('alternates between rules the deadline keeps cutting off', async () => {
+    it('leads with the deferred rule that least recently ran first', async () => {
       await run(
         [
           rule('a', { created_at: '2026-10-01T00:00:00Z' }),
           rule('b', { created_at: '2026-10-02T00:00:00Z' }),
+          rule('c', { created_at: '2026-10-03T00:00:00Z' }),
         ],
         {
           previous: {
             ...watermarked('a', '2026-10-13T10:05:00Z', true),
             ...watermarked('b', '2026-10-13T10:00:00Z', true),
+            ...watermarked('c', null, true),
           },
         }
       );
 
-      expect(calledRuleIds()).toEqual(['custom:b', 'custom:a']);
+      expect(calledRuleIds()).toEqual(['custom:c', 'custom:b', 'custom:a']);
+    });
+
+    it('gives every rule a full turn when one rule takes most of the budget', async () => {
+      const completed: string[] = [];
+      (runEsqlMatcherRule as jest.Mock).mockImplementation(
+        ({ ruleId, signal, state }: { ruleId: string; signal: AbortSignal; state: PerRuleState }) =>
+          new Promise<PerRuleState>((resolve) => {
+            const timer = setTimeout(() => {
+              completed.push(ruleId);
+              resolve(WATERMARKED);
+            }, 600);
+            signal.addEventListener('abort', () => {
+              clearTimeout(timer);
+              resolve(state);
+            });
+          })
+      );
+      const customRules = [
+        rule('a', { created_at: '2026-10-01T00:00:00Z' }),
+        rule('b', { created_at: '2026-10-02T00:00:00Z' }),
+        rule('c', { created_at: '2026-10-03T00:00:00Z' }),
+      ];
+
+      let previous: Record<string, PerRuleState> = {};
+      for (let tick = 0; tick < 4; tick++) {
+        ({ rules: previous } = await runWithDeadlineAfter(1_000, customRules, { previous }));
+        await jest.advanceTimersByTimeAsync(60_000);
+      }
+
+      expect(completed).toEqual(['custom:a', 'custom:b', 'custom:c', 'custom:a']);
     });
 
     it('treats a task abort as an abort, not as reaching the deadline', async () => {
