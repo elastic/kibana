@@ -126,10 +126,11 @@ jobs:
       contents: read
       issues: write
     steps:
-      - name: Checkout labeling helper from the workflow revision
+      - name: Checkout labeling helper from trusted main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
+          repository: elastic/kibana
+          ref: main
           sparse-checkout: .github/scripts
           persist-credentials: false
       - name: Copy source issue ownership labels to the fix PR

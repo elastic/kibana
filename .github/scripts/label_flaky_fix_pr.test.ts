@@ -172,7 +172,8 @@ test('compiled labeling job runs after PR creation without an agent tool or comm
   assert.deepEqual(job.needs, ['agent', 'safe_outputs']);
   assert.equal(job.if, "${{ !cancelled() && needs.safe_outputs.outputs.created_pr_number != '' }}");
   const checkout = job.steps.find(({ uses }) => uses?.startsWith('actions/checkout@'));
-  assert.equal(checkout?.with?.ref, '${{ github.sha }}');
+  assert.equal(checkout?.with?.repository, 'elastic/kibana');
+  assert.equal(checkout?.with?.ref, 'main');
   assert.equal(checkout?.with?.['persist-credentials'], false);
   const labeling = job.steps.find(({ uses }) => uses?.startsWith('actions/github-script@'));
   assert.equal(
