@@ -12,6 +12,7 @@ import {
   httpServerMock,
 } from '@kbn/core/server/mocks';
 import { DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID } from '../../../common/threat_intel';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { getThreatIntelReadiness, type ReadinessDeps } from './readiness';
 
 const logger = loggingSystemMock.createLogger();
@@ -37,10 +38,12 @@ const semanticFieldMappings = {
 
 const buildUsableStatsResponse = ({
   count = 3,
+  indicatorEligible = 2,
   lastIngest = '2024-06-01T00:00:00.000Z',
   lastEnrich = '2024-06-02T00:00:00.000Z',
 }: {
   count?: number;
+  indicatorEligible?: number;
   lastIngest?: string | null;
   lastEnrich?: string | null;
 } = {}) =>
@@ -56,6 +59,7 @@ const buildUsableStatsResponse = ({
       last_enrich: lastEnrich
         ? { value: Date.parse(lastEnrich), value_as_string: lastEnrich }
         : { value: null },
+      indicator_eligible: { doc_count: indicatorEligible },
     },
   } as const);
 
@@ -283,5 +287,75 @@ describe('getThreatIntelReadiness', () => {
     const result = await getThreatIntelReadiness(deps);
 
     expect(result.reasonCodes).toEqual(['bootstrap_incomplete', 'reports_index_missing']);
+  });
+
+  it('returns huntUsableReportCount equal to usableReportCount', async () => {
+    const deps = buildDefaultDeps();
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.huntUsableReportCount).toBe(result.usableReportCount);
+  });
+
+  it('returns indicatorEligibleReportCount from the filter aggregation', async () => {
+    const deps = buildDefaultDeps();
+    deps.esClient.search.mockResolvedValue(
+      buildUsableStatsResponse({ count: 5, indicatorEligible: 4 }) as never
+    );
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.indicatorEligibleReportCount).toBe(4);
+  });
+
+  describe('when only IOC-less reports exist (KEV-only space)', () => {
+    const buildKevOnlyDeps = () => {
+      const deps = buildDefaultDeps();
+      deps.esClient.search.mockResolvedValue(
+        buildUsableStatsResponse({ count: 1, indicatorEligible: 0 }) as never
+      );
+      return deps;
+    };
+
+    it('does not return no_usable_reports', async () => {
+      const result = await getThreatIntelReadiness(buildKevOnlyDeps());
+
+      expect(result.reasonCodes).not.toContain('no_usable_reports');
+    });
+
+    it('returns indicatorEligibleReportCount of 0', async () => {
+      const result = await getThreatIntelReadiness(buildKevOnlyDeps());
+
+      expect(result.indicatorEligibleReportCount).toBe(0);
+    });
+  });
+
+  it('returns all three counts as 0 on a blocked response', async () => {
+    const deps = buildDefaultDeps({
+      getBootstrapReady: jest.fn().mockRejectedValue(new Error('still starting')),
+    });
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect([
+      result.usableReportCount,
+      result.huntUsableReportCount,
+      result.indicatorEligibleReportCount,
+    ]).toEqual([0, 0, 0]);
+  });
+
+  it('sends the hunt-usable filter in the query and the indicator-eligible filter in the aggregation', async () => {
+    const deps = buildDefaultDeps();
+
+    await getThreatIntelReadiness(deps);
+
+    expect(deps.esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { bool: { filter: expect.arrayContaining([HUNT_USABLE_FILTER]) } },
+        aggs: expect.objectContaining({
+          indicator_eligible: { filter: INDICATOR_ELIGIBLE_FILTER },
+        }),
+      })
+    );
   });
 });

@@ -59,7 +59,10 @@ export interface ReadinessResponse {
   reasonCodes: string[];
   lastIngestAt?: string | null;
   lastEnrichAt?: string | null;
+  /** Hunt-usable count. Kept for existing readers; equals huntUsableReportCount. */
   usableReportCount: number;
+  huntUsableReportCount: number;
+  indicatorEligibleReportCount: number;
   optional?: string[];
 }
 
