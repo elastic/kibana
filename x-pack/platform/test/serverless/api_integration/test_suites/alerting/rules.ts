@@ -15,7 +15,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const retry = getService('retry');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const alertingApi = getService('alertingApi');
@@ -30,206 +29,42 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let connectorId = '';
     let ruleId = '';
-    let ruleTaskId = '';
-    let indexActionConnectorId = '';
-    let ruleExecutionFinished = true;
-    let indexActionsFinished = true;
     let alertActionIndex: string;
-    let targetIndexCreated = false;
     let testIndex = 0;
-
-    const waitForRuleExecutionToFinish = async () => {
-      await retry.tryForTime(60_000, async () => {
-        await esClient.indices.refresh({ index: '.kibana_task_manager' });
-        const response = await esClient.search({
-          index: '.kibana_task_manager',
-          query: {
-            bool: {
-              filter: [
-                { term: { _id: `task:${ruleTaskId}` } },
-                { terms: { 'task.status': ['claiming', 'running'] } },
-              ],
-            },
-          },
-        });
-        if (response.hits.hits.length > 0) {
-          throw new Error(`Rule ${ruleId} still has a claiming or running task`);
-        }
-      });
-    };
-    const waitForIndexActionsToFinish = async () => {
-      await retry.tryForTime(60_000, async () => {
-        await esClient.indices.refresh({ index: '.kibana_alerting_cases*' });
-        const actionTaskParams = await esClient.search({
-          index: '.kibana_alerting_cases*',
-          size: 1,
-          _source: false,
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'action_task_params' } },
-                {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: [
-                          { term: { 'references.id': indexActionConnectorId } },
-                          { term: { 'references.type': 'action' } },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        });
-        if (actionTaskParams.hits.hits.length > 0) {
-          throw new Error(`Connector ${indexActionConnectorId} still has pending index actions`);
-        }
-      });
-    };
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
+      await esDeleteAllIndices([`${ALERT_ACTION_INDEX}-*`]);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     beforeEach(async () => {
-      if (ruleId || ruleTaskId || connectorId || indexActionConnectorId || targetIndexCreated) {
-        const pendingResources = [
-          ruleId && `rule ${ruleId}`,
-          ruleTaskId && `task ${ruleTaskId}`,
-          connectorId && `connector ${connectorId}`,
-          indexActionConnectorId && `index actions from connector ${indexActionConnectorId}`,
-          targetIndexCreated && `index ${alertActionIndex}`,
-        ]
-          .filter(Boolean)
-          .join(', ');
-        throw new Error(
-          `Previous Alerting test cleanup left resources behind: ${pendingResources}`
-        );
-      }
-
-      connectorId = '';
-      ruleId = '';
-      ruleTaskId = '';
-      indexActionConnectorId = '';
-      ruleExecutionFinished = true;
-      indexActionsFinished = true;
       alertActionIndex = `${ALERT_ACTION_INDEX}-${testIndex++}`;
       // The .index connector needs a target, and document polling sorts by date.
       await esClient.indices.create({
         index: alertActionIndex,
-        mappings: {
-          properties: {
-            date: { type: 'date' },
-          },
-        },
+        mappings: { properties: { date: { type: 'date' } } },
       });
-      targetIndexCreated = true;
     });
 
     afterEach(async () => {
-      const cleanupErrors: Error[] = [];
-      const attemptCleanup = async (
-        step: string,
-        cleanup: () => Promise<void>
-      ): Promise<boolean> => {
-        try {
-          await cleanup();
-          return true;
-        } catch (error) {
-          cleanupErrors.push(new Error(`Failed to ${step}`, { cause: error }));
-          return false;
-        }
-      };
-
       if (ruleId) {
-        const ruleDisabled = await attemptCleanup(`disable rule ${ruleId}`, async () => {
-          await alertingApi.helpers.disableRule({ roleAuthc: roleAdmin, ruleId });
-        });
-
-        if (ruleDisabled) {
-          ruleExecutionFinished = await attemptCleanup(
-            `wait for rule task ${ruleTaskId}`,
-            waitForRuleExecutionToFinish
-          );
-        }
+        await alertingApi.helpers.disableRule({ roleAuthc: roleAdmin, ruleId });
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
       }
-
-      if (indexActionConnectorId && ruleExecutionFinished) {
-        indexActionsFinished = await attemptCleanup(
-          `wait for index actions from connector ${indexActionConnectorId}`,
-          waitForIndexActionsToFinish
-        );
-        if (indexActionsFinished) {
-          indexActionConnectorId = '';
-        }
-      }
-
-      if (ruleId) {
-        const deleted = await attemptCleanup(`delete rule ${ruleId}`, async () => {
-          await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader).expect(204);
-        });
-        if (deleted) {
-          ruleId = '';
-        }
-      }
-
       if (connectorId) {
-        const deleted = await attemptCleanup(`delete connector ${connectorId}`, async () => {
-          await supertest
-            .delete(`/api/actions/connector/${connectorId}`)
-            .set(internalReqHeader)
-            .expect(204);
-        });
-        if (deleted) {
-          connectorId = '';
-        }
+        await supertest.delete(`/api/actions/connector/${connectorId}`).set(internalReqHeader);
       }
-
-      await attemptCleanup('delete alerting event logs', async () => {
-        await esClient.deleteByQuery({
-          index: '.kibana-event-log-*',
-          conflicts: 'proceed',
-          query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
-        });
+      ruleId = '';
+      connectorId = '';
+      await esClient.deleteByQuery({
+        index: '.kibana-event-log-*',
+        conflicts: 'proceed',
+        query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
-
-      const canDeleteTargetIndex = ruleExecutionFinished && indexActionsFinished;
-      if (targetIndexCreated && canDeleteTargetIndex) {
-        ruleTaskId = '';
-        const deleted = await attemptCleanup(
-          `delete target index ${alertActionIndex}`,
-          async () => {
-            await esDeleteAllIndices([alertActionIndex]);
-          }
-        );
-        if (deleted) {
-          targetIndexCreated = false;
-        }
-      }
-
-      if (cleanupErrors.length > 0) {
-        const remainingResources = [
-          ruleId && `rule ${ruleId}`,
-          ruleTaskId && `task ${ruleTaskId}`,
-          connectorId && `connector ${connectorId}`,
-          indexActionConnectorId && `index actions from connector ${indexActionConnectorId}`,
-          targetIndexCreated && `index ${alertActionIndex}`,
-        ]
-          .filter(Boolean)
-          .join(', ');
-        throw new AggregateError(
-          cleanupErrors,
-          `Alerting rule cleanup failed. Remaining resources: ${remainingResources || 'none'}`
-        );
-      }
     });
 
     it('should schedule task, run rule and schedule actions when appropriate', async () => {
@@ -241,8 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -288,8 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
@@ -342,8 +173,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -389,8 +218,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await alertingApi.helpers.waitForDocumentInIndex({
@@ -499,8 +326,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Should retry when the the action fails
       const resp = await alertingApi.helpers.waiting.waitForAllTasks({
@@ -521,8 +346,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -565,8 +388,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
       await alertingApi.helpers.waitForNumRuleRuns({
@@ -606,8 +427,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -654,8 +473,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
       await alertingApi.helpers.waitForNumRuleRuns({
@@ -695,8 +512,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -768,8 +583,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       // Wait for the action to index a document
       const resp = await alertingApi.helpers.waiting.waitForDocumentInIndex({
@@ -849,8 +662,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -897,8 +708,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       await alertingApi.helpers.muteRule({
         roleAuthc: roleAdmin,
@@ -949,8 +758,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -997,8 +804,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       await alertingApi.helpers.muteAlert({
         roleAuthc: roleAdmin,
@@ -1048,8 +853,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: alertActionIndex,
       });
       connectorId = createdConnector.id;
-      indexActionConnectorId = createdConnector.id;
-      indexActionsFinished = false;
 
       const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
@@ -1096,8 +899,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      ruleTaskId = createdRule.scheduled_task_id ?? createdRule.id;
-      ruleExecutionFinished = false;
 
       await alertingApi.helpers.muteAlert({
         roleAuthc: roleAdmin,
