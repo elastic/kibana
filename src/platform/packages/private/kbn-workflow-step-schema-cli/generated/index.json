@@ -1013,11 +1013,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "a6d4d20e289de5d80ba991d9ea325c70786859989985e2e44ea695d41e2f92f7"
+      "sha256": "a8b38126e5327536eef557a2cc9e84efb4e3ea50e87c707d6776861f15f1fed0"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "9c0851d08308a869d549c581bfe33e6835f31f5b0ed67f0bd72f67cb7b92eb14"
+      "sha256": "8678fc9aca09dbb96d778dff0d302810a0988e53f2a1167e342d63786440ad6e"
     }
   }
 }
