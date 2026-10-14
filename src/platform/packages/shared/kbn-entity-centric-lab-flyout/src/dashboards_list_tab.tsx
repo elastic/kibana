@@ -22,6 +22,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiPanel,
@@ -39,6 +40,9 @@ import { css } from '@emotion/react';
 import { getOotbDashboards } from './dashboards_tab';
 import type { DashboardDescriptor } from './dashboards_tab';
 import { entityTypeToKind, inferEntityKind } from './kind_templates';
+import { useEntityFlyoutServices } from './services_context';
+import { useEntityDisplayName } from './entity_display_name';
+import { ENTITY_CENTRIC_LAB_SESSION_TAG } from './build_entity_flyout_attachment';
 // Thumbnail assets kept for when the variation toggle re-enables them.
 // @ts-expect-error image import
 import clusterDetailThumb from './assets/dashboard_thumbnails/cluster_detail.jpg';
@@ -314,7 +318,36 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   showThumbnails = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { agentBuilder } = useEntityFlyoutServices();
+  const displayName = useEntityDisplayName(entityName, entityType);
   const kind = entityTypeToKind(entityType) ?? inferEntityKind(entityName) ?? 'host';
+
+  const handleCreateDashboard = useCallback(() => {
+    if (!agentBuilder?.openChat) return;
+    const initialMessage = entityType
+      ? i18n.translate(
+          'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessageWithType',
+          {
+            defaultMessage:
+              'Create a dashboard for "{resourceName}" ({resourceType}). Scope it to this resource and include the panels that matter most for this resource type.',
+            values: { resourceName: displayName, resourceType: entityType },
+          }
+        )
+      : i18n.translate(
+          'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessage',
+          {
+            defaultMessage:
+              'Create a dashboard for "{resourceName}". Scope it to this resource and include the panels that matter most for this resource type.',
+            values: { resourceName: displayName },
+          }
+        );
+    agentBuilder.openChat({
+      newConversation: true,
+      sessionTag: ENTITY_CENTRIC_LAB_SESSION_TAG,
+      initialMessage,
+      autoSendInitialMessage: false,
+    });
+  }, [agentBuilder, displayName, entityType]);
 
   // --- Managed dashboards ---
   const managedDashboards = useMemo(
@@ -566,12 +599,40 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
       </EuiText>
       <EuiSpacer size="s" />
 
-      <AddDashboardPicker
-        existingIds={new Set(customDashboards.map((d) => d.id))}
-        onAdd={handleAddCustom}
-        entityName={entityName}
-        entityType={entityType}
-      />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <AddDashboardPicker
+            existingIds={new Set(customDashboards.map((d) => d.id))}
+            onAdd={handleAddCustom}
+            entityName={entityName}
+            entityType={entityType}
+          />
+        </EuiFlexItem>
+        {agentBuilder?.openChat ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              onClick={handleCreateDashboard}
+              data-test-subj="entityCentricLabDashboardsListCreateDashboard"
+            >
+              {i18n.translate(
+                'entityCentricLabFlyout.dashboardsList.custom.createDashboardButtonLabel',
+                { defaultMessage: 'Create dashboard' }
+              )}
+              <EuiIcon
+                type="sparkles"
+                size="m"
+                color={euiTheme.colors.textAssistance}
+                aria-hidden={true}
+                css={css`
+                  margin-inline-start: ${euiTheme.size.xs};
+                `}
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
 
       {customDashboards.length > 0 ? (
         <>

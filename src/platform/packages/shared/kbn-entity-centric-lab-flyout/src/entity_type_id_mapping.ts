@@ -85,6 +85,23 @@ const TYPE_NAME_TO_ENTITY_TYPE_ID: Readonly<Record<string, string>> = {
  * separately. Inferred-only kinds (`middleware`, `llm`) intentionally
  * have no entry — there's no single deterministic row for them.
  */
+/**
+ * Machine types that run services and processes: bare-metal, VMs, and the
+ * cloud instances filed under Hosts. Lambda, object storage, and other
+ * non-machine cloud types are intentionally absent.
+ */
+const HOST_RUNTIME_ENTITY_TYPE_IDS: ReadonlySet<string> = new Set([
+  'bare-metal-host',
+  'vm-host',
+  'aws-ec2',
+  'gcp-compute',
+  'azure-vm',
+]);
+
+/** Whether this entity type should show the Services and Processes flyout tabs. */
+export const entityTypeShowsHostRuntimeTabs = (entityTypeId: string | undefined): boolean =>
+  entityTypeId !== undefined && HOST_RUNTIME_ENTITY_TYPE_IDS.has(entityTypeId);
+
 export const KIND_TO_ENTITY_TYPE_ID: Partial<Record<EntityKind, string>> = {
   service: 'apm-service',
   cluster: 'k8s-cluster',

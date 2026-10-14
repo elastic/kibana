@@ -13,6 +13,7 @@
  * builder for a real API call later should be mechanical.
  */
 
+import { entityTypeShowsHostRuntimeTabs } from '@kbn/entity-centric-lab-flyout';
 import type { FakeEntityType } from '../fake_entity_types';
 
 export type OwnershipType = 'operational' | 'dev' | 'infrastructure' | 'security' | 'business';
@@ -252,13 +253,13 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     id: 'services',
     label: 'Services',
     description: 'Services running on this host',
-    enabled: entityTypeId === 'host',
+    enabled: entityTypeShowsHostRuntimeTabs(entityTypeId),
   },
   {
     id: 'processes',
     label: 'Processes',
     description: 'Processes running on this host',
-    enabled: entityTypeId === 'host',
+    enabled: entityTypeShowsHostRuntimeTabs(entityTypeId),
   },
   {
     id: 'metrics',

@@ -121,7 +121,11 @@ export {
   useEntityTypeEnabled,
 } from './src/entity_type_enablement';
 
-export { KIND_TO_ENTITY_TYPE_ID, resolveEntityTypeIdForName } from './src/entity_type_id_mapping';
+export {
+  KIND_TO_ENTITY_TYPE_ID,
+  entityTypeShowsHostRuntimeTabs,
+  resolveEntityTypeIdForName,
+} from './src/entity_type_id_mapping';
 
 export {
   getEntityDisplayConfig,

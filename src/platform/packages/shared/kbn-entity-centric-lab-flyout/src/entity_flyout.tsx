@@ -69,7 +69,10 @@ import {
 } from './build_entity_flyout_attachment';
 import type { EntityKind } from './kind_templates';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
-import { resolveEntityTypeIdForName } from './entity_type_id_mapping';
+import {
+  entityTypeShowsHostRuntimeTabs,
+  resolveEntityTypeIdForName,
+} from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink, LinkedDashboardOverride } from './flyout_template_overrides';
 import { useEntityDisplayName } from './entity_display_name';
@@ -900,7 +903,7 @@ export const EntityFlyout = ({
             },
           ]
         : []),
-      ...(kind === 'host'
+      ...(kind === 'host' || entityTypeShowsHostRuntimeTabs(entityTypeId)
         ? [
             {
               id: 'services' as TabId,
@@ -968,7 +971,7 @@ export const EntityFlyout = ({
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, tabsData.slos, alertsActiveCount, minimalTabs, kind]);
+  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, tabsData.slos, alertsActiveCount, minimalTabs, kind, entityTypeId]);
 
   // Phase-1 exclusion: drop tabs the caller explicitly hides.
   const visibleTabs = useMemo(
@@ -1144,6 +1147,14 @@ export const EntityFlyout = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiBadge
+              color="hollow"
+              data-test-subj="entityCentricLabFlyoutDashboardPreviewResourceBadge"
+            >
+              {displayName}
+            </EuiBadge>
+            <EuiSpacer size="s" />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <DashboardPreviewContent

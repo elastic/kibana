@@ -47,6 +47,7 @@ import {
   buildFakeEntityOverview,
   buildFakeEntityTabsData,
   isEntityTypeEnabled,
+  entityTypeShowsHostRuntimeTabs,
   resolveEntityTypeIdForName,
   useFlyoutTemplateOverride,
   useEntityDisplayName,
@@ -455,7 +456,7 @@ const EntityDetailPageInner = () => {
             },
           ]
         : []),
-      ...(kind === 'host'
+      ...(kind === 'host' || entityTypeShowsHostRuntimeTabs(entityTypeId)
         ? [
             {
               id: 'services' as TabId,
@@ -512,7 +513,7 @@ const EntityDetailPageInner = () => {
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, tabsData.slos, entity?.alerts?.active, kind]);
+  }, [templateOverride, tabsData.traces, tabsData.slos, entity?.alerts?.active, kind, entityTypeId]);
 
   // Phase-1 exclusion: drop Custom and Relationships tabs.
   const visibleTabs = useMemo(
@@ -1265,6 +1266,14 @@ const EntityDetailPageInner = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiBadge
+              color="hollow"
+              data-test-subj="entityDetailPageDashboardPreviewResourceBadge"
+            >
+              {displayName}
+            </EuiBadge>
+            <EuiSpacer size="s" />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {renderTabDashboard(

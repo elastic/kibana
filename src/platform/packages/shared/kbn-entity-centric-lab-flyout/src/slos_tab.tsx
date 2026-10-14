@@ -18,7 +18,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiPanel,
-  EuiProgress,
   EuiText,
   EuiTitle,
   type EuiBasicTableColumn,
@@ -43,13 +42,6 @@ const kibanaAppHref = (appPath: string): string => {
   const appIndex = window.location.pathname.indexOf('/app/');
   const basePath = appIndex > 0 ? window.location.pathname.slice(0, appIndex) : '';
   return `${basePath}${appPath}`;
-};
-
-const BUDGET_BAR_COLOR: Record<SloStatus, 'success' | 'warning' | 'danger' | 'subdued'> = {
-  Met: 'success',
-  Breaching: 'danger',
-  Degrading: 'warning',
-  'No data': 'subdued',
 };
 
 export const SlosTab = ({ slos }: SlosTabProps) => {
@@ -104,37 +96,6 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
         render: (status: SloStatus) => (
           <EuiBadge color={SLO_STATUS_COLOR[status]}>{status}</EuiBadge>
         ),
-      },
-      {
-        field: 'budgetRemaining',
-        name: i18n.translate('entityCentricLabFlyout.flyout.slos.columns.budget', {
-          defaultMessage: 'Budget',
-        }),
-        width: '110px',
-        render: (budgetRemaining: number, row: SloRow) => {
-          const clamped = Math.max(0, Math.min(100, budgetRemaining));
-          return (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  min-width: 42px;
-                  text-align: right;
-                `}
-              >
-                <EuiText size="xs">{budgetRemaining > 0 ? `${budgetRemaining}%` : '0%'}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiProgress
-                  value={clamped}
-                  max={100}
-                  size="s"
-                  color={BUDGET_BAR_COLOR[row.status]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
       },
     ],
     []
