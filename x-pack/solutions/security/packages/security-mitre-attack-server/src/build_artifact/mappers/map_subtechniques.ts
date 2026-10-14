@@ -23,7 +23,6 @@ import {
  */
 const SUBTECHNIQUE_ID_REGEX = /^((?:AML\.)?T\d{4})\.\d{3}$/;
 
-/** Derives the parent technique ID implied by a subtechnique ID's dot-prefix. */
 const getParentIdFromDotPrefix = (subtechniqueId: string): string => {
   const match = SUBTECHNIQUE_ID_REGEX.exec(subtechniqueId);
   if (match == null) {

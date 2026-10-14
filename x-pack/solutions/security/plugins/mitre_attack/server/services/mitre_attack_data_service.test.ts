@@ -306,6 +306,22 @@ describe('MitreAttackDataService', () => {
       await expect(service.ensureInitialized()).resolves.toBe(true);
     });
 
+    it('keeps serving when the repair write rejects', async () => {
+      savedObjectsRepository.bulkCreate
+        .mockResolvedValueOnce(toResponse(['TA0002']))
+        .mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+
+      nowSpy.mockReturnValue(1_000_000 + POPULATION_RETRY_COOLDOWN_MS);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+      await service.populate(); // joins the repair run
+
+      expect(service.isInitialized).toBe(true);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+    });
+
     it('serves without waiting while the repair is in flight', async () => {
       let resolveRepair!: (value: SavedObjectsBulkResponse<MitreEntity>) => void;
       savedObjectsRepository.bulkCreate

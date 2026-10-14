@@ -586,7 +586,7 @@ export const huntBehavior = async (
     esClient !== undefined;
 
   // Load the catalog first so a run without one pays for no model call. An empty catalog is a
-  // deployment-side gap population failed or data missing), not evidence the model invented ids.
+  // deployment-side gap (population failed or data missing), not evidence the model invented ids.
   const { techniqueById, subtechniqueById } = await getMitreCatalog({
     mitreDataClient,
     logger,
