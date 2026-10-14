@@ -71,19 +71,23 @@ export class PubSubExamplePlugin implements Plugin {
             },
             response: {
               200: {
-                body: () => schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) }),
+                body: () =>
+                  schema.object({
+                    id: schema.string({ minLength: 1, maxLength: 256 }),
+                    acceptedAt: schema.string({ minLength: 1, maxLength: 64 }),
+                  }),
               },
             },
           },
         },
         async (_context, request, response) => {
           const [start] = await core.getStartServices();
-          const event = await start.pubsub.publish(pingTopic, {
+          const { id, acceptedAt } = await start.pubsub.publish(pingTopic, {
             id: request.body.idempotencyKey,
             data: { source: 'http', message: request.body.message },
           });
 
-          return response.ok({ body: { id: event.id } });
+          return response.ok({ body: { id, acceptedAt } });
         }
       );
   }
