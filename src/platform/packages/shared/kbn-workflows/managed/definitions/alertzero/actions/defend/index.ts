@@ -16,6 +16,10 @@ export {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
 } from './action_kill_process';
 export {
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW,
+} from './action_memory_dump';
+export {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
 } from './action_suspend_process';

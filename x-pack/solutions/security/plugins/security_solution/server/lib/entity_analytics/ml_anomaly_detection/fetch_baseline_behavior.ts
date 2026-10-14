@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyHit, EnrichedAnomalyHit } from './types';
 import type { JobConfig } from './get_job_config';
@@ -305,7 +305,10 @@ export const fetchBaselineBehavior = async ({
       return anomaly;
     }
 
-    const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+    const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
+      getBuiltInEntityDefinition(entityType),
+      entityRecord
+    );
     if (!entityFilter) {
       logger.warn(
         `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`

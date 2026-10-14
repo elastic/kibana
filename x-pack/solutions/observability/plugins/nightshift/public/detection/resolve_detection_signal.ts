@@ -11,17 +11,17 @@ import type {
   SignalEntry,
 } from '@kbn/significant-events-schema';
 
-const streamsAlign = (
-  detectionStream: string | undefined,
-  signalStream: string | undefined
+const sourcesAlign = (
+  detectionSourceId: string | undefined,
+  signalSourceId: string | undefined
 ): boolean => {
-  if (detectionStream == null && signalStream == null) {
+  if (detectionSourceId == null && signalSourceId == null) {
     return true;
   }
-  if (detectionStream == null || signalStream == null) {
+  if (detectionSourceId == null || signalSourceId == null) {
     return false;
   }
-  return detectionStream === signalStream;
+  return detectionSourceId === signalSourceId;
 };
 
 const signalMatchesDetection = (signal: SignalEntry, detection: LifecycleDetection): boolean => {
@@ -34,7 +34,7 @@ const signalMatchesDetection = (signal: SignalEntry, detection: LifecycleDetecti
   if (metadata.detection_id != null && detection.detection_id != null) {
     return (
       metadata.detection_id === detection.detection_id &&
-      streamsAlign(detection.stream_name, signal.stream_name)
+      sourcesAlign(detection.source_id, signal.source_id)
     );
   }
 
@@ -45,7 +45,7 @@ const signalMatchesDetection = (signal: SignalEntry, detection: LifecycleDetecti
   if (
     detection.rule_uuid != null &&
     metadata.rule_uuid === detection.rule_uuid &&
-    streamsAlign(detection.stream_name, signal.stream_name)
+    sourcesAlign(detection.source_id, signal.source_id)
   ) {
     return true;
   }
@@ -53,7 +53,7 @@ const signalMatchesDetection = (signal: SignalEntry, detection: LifecycleDetecti
   if (
     detection.rule_name != null &&
     metadata.rule_name === detection.rule_name &&
-    streamsAlign(detection.stream_name, signal.stream_name)
+    sourcesAlign(detection.source_id, signal.source_id)
   ) {
     return true;
   }

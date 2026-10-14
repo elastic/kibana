@@ -118,9 +118,11 @@ const makeDeps = (
     }),
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
