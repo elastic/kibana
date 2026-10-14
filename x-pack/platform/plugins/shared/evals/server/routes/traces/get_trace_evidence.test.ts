@@ -93,7 +93,14 @@ describe('GET /internal/evals/traces/{traceId}/evidence', () => {
     const { handler } = route.versions[API_VERSIONS.internal.v1];
     const routeConfig = versionedRouter.get.mock.calls[0][0];
     const coreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
+    const noScoreHits = { hits: { total: { value: 0 }, hits: [] } };
+    const context = coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
+      evals: {
+        evaluationScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+        onlineScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+      } as any,
+    });
 
     return { handler, routeConfig, context, coreContext, logger };
   };

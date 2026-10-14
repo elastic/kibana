@@ -9,14 +9,14 @@ import {
   EVALS_TRACING_PROJECTS_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  TRACES_INDEX_PATTERN,
   GetTracingProjectsRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
-import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS } from './utils';
+import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS, getSpaceTracesScope } from './utils';
 
 /**
  * Candidate projects the paging aggregation enumerates. `total` is clamped to
@@ -36,7 +36,11 @@ const MAX_TERMS_PER_QUERY = 60_000;
 /** Ceiling per project, independent of how many projects share the budget. */
 const MAX_TRACE_IDS_PER_PROJECT = 10_000;
 
-export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetTracingProjectsRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_TRACING_PROJECTS_URL,
@@ -60,8 +64,10 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const { from, to, page, per_page: perPage, name: nameFilter } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+          const { index: tracesIndex, namespaceFilter } = getSpaceTracesScope(spaceId);
 
-          const extraFilters: Array<Record<string, unknown>> = [];
+          const extraFilters: Array<Record<string, unknown>> = [namespaceFilter];
           if (from || to) {
             const range: Record<string, string> = {};
             if (from) range.gte = from;
@@ -95,7 +101,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           // `trace_ids` is intentionally not a sub-agg here: nesting it under this
           // terms agg scales buckets by project count and trips `search.max_buckets`.
           const pagingResponse = await esClient.search({
-            index: TRACES_INDEX_PATTERN,
+            index: tracesIndex,
             size: 0,
             query: buildRootSpanQuery(),
             aggs: {
@@ -156,7 +162,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             );
 
             const traceIdsResponse = await esClient.search({
-              index: TRACES_INDEX_PATTERN,
+              index: tracesIndex,
               size: 0,
               query: buildRootSpanQuery([{ terms: { name: pagedProjectNames } }]),
               aggs: {
@@ -191,10 +197,12 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
 
           if (allTraceIds.length > 0) {
             const tokenResponse = await esClient.search({
-              index: TRACES_INDEX_PATTERN,
+              index: tracesIndex,
               size: 0,
               query: {
-                terms: { trace_id: allTraceIds },
+                bool: {
+                  filter: [{ terms: { trace_id: allTraceIds } }, namespaceFilter],
+                },
               },
               aggs: {
                 by_project: {

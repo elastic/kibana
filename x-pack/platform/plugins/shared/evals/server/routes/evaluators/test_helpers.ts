@@ -126,8 +126,14 @@ export const buildClaudeCodeToolSpanDoc = ({
   },
 });
 
+// Space-scoped trace reads target `traces-*-{space}`. Fixtures are keyed by the `traces-*` family.
+const TRACES_SPACE_INDEX_REGEX = /^traces-\*-.+$/;
+
 interface BuildSearchMockContext {
+  /** The index family: `traces-*-{space}` is reported as `traces-*`. */
   index: string | undefined;
+  /** The index exactly as the route requested it. */
+  requestedIndex: string | undefined;
   filters: Array<Record<string, unknown>>;
   traceId: string | undefined;
   emptySearchResponse: SearchResponse;
@@ -137,12 +143,15 @@ export const buildSearchMock = (
   resolve: (context: BuildSearchMockContext) => SearchResponse | Promise<SearchResponse | undefined>
 ): jest.Mock<Promise<SearchResponse>, [SearchRequest]> =>
   jest.fn(async (request: SearchRequest) => {
-    const index = Array.isArray(request.index) ? request.index[0] : request.index;
+    const requestedIndex = Array.isArray(request.index) ? request.index[0] : request.index;
+    const index =
+      requestedIndex && TRACES_SPACE_INDEX_REGEX.test(requestedIndex) ? 'traces-*' : requestedIndex;
     const filters = getFilters(request);
     const traceId = getFilterTraceId(filters);
 
     const response = await resolve({
       index,
+      requestedIndex,
       filters,
       traceId,
       emptySearchResponse,

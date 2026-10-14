@@ -12,7 +12,12 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isValidTraceId } from '@opentelemetry/api';
-import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import {
+  LOGS_INDEX_PATTERN,
+  TRACES_INDEX_PATTERN,
+  buildSpaceTracesIndexPattern,
+  buildTracesNamespaceFilter,
+} from '@kbn/evals-common';
 import type { TraceAccessor } from './types';
 
 const TRACE_SOURCE = {
@@ -80,11 +85,19 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
       throw new Error('Invalid trace_id: must be a 32-character hex string');
     }
 
-    const { index, field } = TRACE_SOURCE[source];
+    const { index: sourceIndex, field } = TRACE_SOURCE[source];
     const { filter = [], fields, sort, size, trackTotalHits, aggs } = params;
     const sortFields = sort ? (Array.isArray(sort) ? sort : [sort]) : undefined;
 
-    const filterClauses: QueryDslQueryContainer[] = [{ term: { [field]: traceAccessor.traceId } }];
+    // Only traces are routed per space; logs stay on one pattern.
+    const { spaceId } = traceAccessor;
+    const scopeToSpace = source === 'traces' && spaceId !== undefined;
+    const index = scopeToSpace ? buildSpaceTracesIndexPattern(spaceId) : sourceIndex;
+
+    const filterClauses: QueryDslQueryContainer[] = [
+      { term: { [field]: traceAccessor.traceId } },
+      ...(scopeToSpace ? [buildTracesNamespaceFilter(spaceId)] : []),
+    ];
     const mustNotClauses: QueryDslQueryContainer[] = [];
     for (const clause of filter) {
       if (clause.type === 'term') {

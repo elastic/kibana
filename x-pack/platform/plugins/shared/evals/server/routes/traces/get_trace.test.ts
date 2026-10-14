@@ -10,7 +10,13 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_TRACE_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import {
+  EVALS_TRACE_URL,
+  API_VERSIONS,
+  TRACES_INDEX_PATTERN,
+  buildSpaceFilter,
+} from '@kbn/evals-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
@@ -18,12 +24,13 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetTraceRoute } from './get_trace';
 
 describe('GET /internal/evals/traces/{traceId}', () => {
-  const setup = () => {
+  const setup = ({ spaceId }: { spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerGetTraceRoute({
       router,
       logger,
+      ...(spaceId ? { getSpaceId: async (_request: KibanaRequest) => spaceId } : {}),
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
@@ -36,11 +43,18 @@ describe('GET /internal/evals/traces/{traceId}', () => {
       API_VERSIONS.internal.v1
     ];
 
+    // No score references any trace unless a test says so.
+    const noHits = { hits: { total: { value: 0 }, hits: [] } };
+    const evaluationScoreService = { search: jest.fn().mockResolvedValue(noHits) };
+    const onlineScoreService = { search: jest.fn().mockResolvedValue(noHits) };
     const mockCoreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
+    const context = coreMock.createCustomRequestHandlerContext({
+      core: mockCoreContext,
+      evals: { evaluationScoreService, onlineScoreService } as any,
+    });
     const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
 
-    return { handler, context, esClient, logger };
+    return { handler, context, esClient, logger, evaluationScoreService, onlineScoreService };
   };
 
   const makeRequest = (traceId = 'trace-abc') =>
@@ -50,7 +64,7 @@ describe('GET /internal/evals/traces/{traceId}', () => {
       params: { traceId },
     });
 
-  it('queries the correct index with a term filter on trace_id', async () => {
+  it('reads the default space traces, filtered to its namespace, without a space', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
@@ -58,10 +72,92 @@ describe('GET /internal/evals/traces/{traceId}', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: TRACES_INDEX_PATTERN,
-        query: { term: { trace_id: 'trace-xyz' } },
+        index: 'traces-*-default',
+        query: {
+          bool: {
+            filter: [
+              { term: { trace_id: 'trace-xyz' } },
+              { term: { 'data_stream.namespace': 'default' } },
+            ],
+          },
+        },
         size: 10000,
       })
+    );
+  });
+
+  it('reads only the active space traces', async () => {
+    const { handler, context, esClient } = setup({ spaceId: 'marketing' });
+    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest('trace-xyz'), kibanaResponseFactory);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'traces-*-marketing',
+        query: {
+          bool: {
+            filter: [
+              { term: { trace_id: 'trace-xyz' } },
+              { term: { 'data_stream.namespace': 'marketing' } },
+            ],
+          },
+        },
+      })
+    );
+  });
+
+  it('reads a trace wherever it was written when a score visible in the space references it', async () => {
+    const { handler, context, esClient, evaluationScoreService } = setup({
+      spaceId: 'marketing',
+    });
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: { total: { value: 1 }, hits: [] },
+    });
+    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest('trace-xyz'), kibanaResponseFactory);
+
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [buildSpaceFilter('marketing')],
+            should: [
+              { term: { 'task.trace_id': 'trace-xyz' } },
+              { term: { 'evaluator.trace_id': 'trace-xyz' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      })
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: TRACES_INDEX_PATTERN,
+        query: { bool: { filter: [{ term: { trace_id: 'trace-xyz' } }] } },
+      })
+    );
+  });
+
+  it('reads a trace wherever it was written when an online score references it', async () => {
+    const { handler, context, esClient, onlineScoreService } = setup({ spaceId: 'marketing' });
+    onlineScoreService.search.mockResolvedValueOnce({ hits: { total: { value: 2 }, hits: [] } });
+    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest('trace-xyz'), kibanaResponseFactory);
+
+    expect(onlineScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [{ term: { trace_id: 'trace-xyz' } }, { term: { space_ids: 'marketing' } }],
+          },
+        },
+      })
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: TRACES_INDEX_PATTERN })
     );
   });
 

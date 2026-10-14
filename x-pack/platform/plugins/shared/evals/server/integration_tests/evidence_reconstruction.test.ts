@@ -43,7 +43,8 @@ import { registerGetTraceEvidenceRoute } from '../routes/traces/get_trace_eviden
 const logger = loggingSystemMock.createLogger();
 const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it';
 const LOGS_BACKING_INDEX = 'evals-logs-evidence-reconstruction-it';
-const TRACES_INDEX = 'traces-evals-evidence-reconstruction-it';
+// Routes read `traces-*-{space}`, so the index carries the default space's namespace.
+const TRACES_INDEX = 'traces-evals-evidence-reconstruction-it-default';
 
 const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const OTEL_EVENTS_TRACE_ID = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
@@ -343,7 +344,7 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
       esClient.index({
         index: TRACES_INDEX,
         id: `trace-${index}`,
-        document,
+        document: { ...document, 'data_stream.namespace': 'default' },
       })
     )
   );
@@ -398,8 +399,14 @@ describe('trace evidence reconstruction integration', () => {
     };
   };
 
+  const noScoreHits = { hits: { total: { value: 0 }, hits: [] } };
+
   const buildContext = () =>
     ({
+      evals: Promise.resolve({
+        evaluationScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+        onlineScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+      }),
       core: Promise.resolve({
         elasticsearch: {
           client: {

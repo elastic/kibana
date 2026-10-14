@@ -11,6 +11,7 @@ import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   EXECUTION_ID_BAGGAGE_KEY,
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+  EvalSpaceSpanProcessor,
   LangfuseSpanProcessor,
   PhoenixSpanProcessor,
 } from '@kbn/inference-tracing';
@@ -44,6 +45,7 @@ export function initTracing({
       { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
     ])
   );
+  lateBindingProcessor.register(new EvalSpaceSpanProcessor());
 
   const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 

@@ -85,6 +85,19 @@ The plugin reads from the following indices:
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
+### Traces and spaces
+
+Traces are space aware. Spans from in-tool experiments (workflow tasks and LLM judges) are written to the data stream namespace of the space that ran them (`traces-<dataset>-<spaceId>`), through the `data_stream.namespace` span attribute that the EDOT collector and the Elasticsearch `_otlp` endpoint route on. Agent Builder spans already do the same.
+
+The trace routes (`/internal/evals/tracing/projects`, `.../traces`, `/internal/evals/traces/{traceId}`, trace evidence, evaluator validation and instrumentation probes, and `_test`) read only `traces-*-<spaceId>` and filter on `data_stream.namespace`. A trace id is also readable when a score visible in the space references it (task, evaluator or online score `trace_id`). That covers CLI suite runs, whose Kibana calls land in the default space but whose scores are written to the `--space-ids` you pass, and scores shared with several spaces.
+
+Things to know:
+
+- Traces written before this change to a namespace other than `default` no longer show up in the evals UI. Existing `*-default` traces keep showing in the default space.
+- `_evaluate` (used by the CLI and workflows) reads as the internal user and is not scoped on the trace read. Its LLM judge spans are written to the space of the request.
+- Online evals sample the index pattern set on the rule. It defaults to the Agent Builder traces of the current space, and it is free text: a pattern that matches other spaces samples their traces too.
+- Space isolation in the plugin is enforced by these routes, not by Elasticsearch. A user with read access to `traces-*` can still query other spaces' traces directly (Dev Tools, Discover). For real isolation, scope Elasticsearch roles to `traces-*-<spaceId>` instead of `traces-*`.
+
 ## Score ingestion
 
 The `@kbn/evals` CLI sends scores via `POST /internal/evals/scores` rather than writing directly to Elasticsearch. The plugin validates the payload and persists documents to the `.evaluation-scores` data stream.
@@ -234,7 +247,7 @@ Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/ev
 
 `_evaluate` uses the same whole-round `complete` readiness check.
 
-The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
+The endpoint requires `read_evals` and current-user read access to the traces of the space (`traces-*-<spaceId>`, or `traces-*`) and to `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
 
 ## UI pages
 
