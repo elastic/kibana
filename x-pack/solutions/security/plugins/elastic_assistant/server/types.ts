@@ -145,6 +145,14 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+  /**
+   * Installs the AI Assistant space-level resources for a space (the anonymization fields data
+   * stream with its default fields, conversations, prompts, ...) if they are missing. These are
+   * otherwise created lazily the first time an AI Assistant data client is created for the space.
+   * Callers that read them directly, such as Attack Discovery generation, call this first.
+   * @returns `false` when the install failed.
+   */
+  ensureSpaceResources: (spaceId: string) => Promise<boolean>;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
