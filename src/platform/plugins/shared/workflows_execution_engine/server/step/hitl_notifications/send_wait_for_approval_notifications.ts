@@ -22,6 +22,7 @@ import {
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
   escapeServiceNowCommentText,
+  executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -287,5 +288,15 @@ export async function sendWaitForApprovalNotifications({
       abortController,
     });
     assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }

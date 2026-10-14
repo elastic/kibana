@@ -348,6 +348,16 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-servicenow-connector
         table: incident
         sys-id: abc123def456`,
+        `- name: ask_over_http
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"form":"{{ context.hitl.externalFormLink }}"}`,
       ],
     },
   },
@@ -386,7 +396,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       servicenow:
         connector-id: my-servicenow-connector
         table: incident
-        sys-id: abc123def456`,
+        sys-id: abc123def456
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"approve":"{{ context.hitl.externalApproveLink }}","reject":"{{ context.hitl.externalRejectLink }}"}`,
       ],
     },
   },
