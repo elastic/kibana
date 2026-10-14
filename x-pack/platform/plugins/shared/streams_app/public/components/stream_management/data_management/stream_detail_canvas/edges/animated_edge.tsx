@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
+import { useCanvasEvents } from '../state_management';
 
 const DASH = 4;
 const GAP = 8;
@@ -58,6 +59,7 @@ export function AnimatedEdge({
   selected,
   data,
 }: EdgeProps) {
+  const { openRoutingFlyout } = useCanvasEvents();
   const edgeMenuId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
@@ -140,6 +142,18 @@ export function AnimatedEdge({
     [centerX, centerY]
   );
 
+  const openEdgeRoutingFlyout = useCallback(() => {
+    openRoutingFlyout(id, 'routing');
+    menu.off();
+    hover.off();
+  }, [id, openRoutingFlyout, menu, hover]);
+
+  const openEdgeProcessingFlyout = useCallback(() => {
+    openRoutingFlyout(id, 'processing');
+    menu.off();
+    hover.off();
+  }, [id, openRoutingFlyout, menu, hover]);
+
   const isActive = isHovered || Boolean(selected);
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
 
@@ -209,7 +223,7 @@ export function AnimatedEdge({
               <EuiContextMenuPanel>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addProcessing"
-                  onClick={() => {}}
+                  onClick={openEdgeProcessingFlyout}
                 >
                   {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
                     defaultMessage: 'Add processing',
@@ -217,7 +231,7 @@ export function AnimatedEdge({
                 </EuiContextMenuItem>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addRouting"
-                  onClick={() => {}}
+                  onClick={openEdgeRoutingFlyout}
                 >
                   {i18n.translate('xpack.streams.animatedEdge.addRoutingContextMenuItemLabel', {
                     defaultMessage: 'Add routing',

@@ -49,6 +49,7 @@ import {
   type CanvasUrlInput,
   type CanvasUrlEvent,
   type CanvasState,
+  type RouteEdit,
 } from './types';
 
 export interface StoreUrlStateParams {
@@ -299,6 +300,20 @@ export const canvasStateMachine = setup({
             };
       }
     ),
+    syncRoutingEditMode: assign({
+      editingRoute: ({ context, event }) => {
+        switch (event.type) {
+          case 'routing.edit.open':
+            return [event.edgeId, event.mode] satisfies RouteEdit;
+
+          case 'routing.edit.close':
+            return [undefined, undefined] satisfies Partial<RouteEdit>;
+
+          default:
+            return context.editingRoute;
+        }
+      },
+    }),
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
@@ -398,6 +413,13 @@ export const canvasStateMachine = setup({
             },
             // Typing should not leave one history entry per keystroke.
             raise({ type: 'url.sync', replace: true }),
+          ],
+        },
+        'routing.*': {
+          actions: [
+            {
+              type: 'syncRoutingEditMode',
+            },
           ],
         },
       },
@@ -584,6 +606,7 @@ export const canvasStateMachine = setup({
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
       error: undefined,
+      editingRoute: [],
       sourcesRef: spawn('sourcesMachine', {
         input: {
           unitDefinition,
