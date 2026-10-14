@@ -2029,6 +2029,9 @@ importers:
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+      '@kbn/elasticsearch-home':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/elasticsearch_home
       '@kbn/embeddable-alerts-table-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/embeddable_alerts_table
@@ -3769,6 +3772,9 @@ importers:
       '@kbn/streams-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-streams-schema
+      '@kbn/subscription-status-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/subscription_status
       '@kbn/synthetics-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/synthetics
@@ -6303,8 +6309,8 @@ importers:
         specifier: 18.0.7
         version: 18.0.7
       '@types/react-virtualized':
-        specifier: 9.22.3
-        version: 9.22.3
+        specifier: 9.22.4
+        version: 9.22.4
       '@types/react-window':
         specifier: 1.8.8
         version: 1.8.8
@@ -9322,6 +9328,8 @@ importers:
 
   x-pack/platform/plugins/private/snapshot_restore: {}
 
+  x-pack/platform/plugins/private/subscription_status: {}
+
   x-pack/platform/plugins/private/task_manager_dependencies: {}
 
   x-pack/platform/plugins/private/telemetry_collection_xpack: {}
@@ -9387,6 +9395,8 @@ importers:
   x-pack/platform/plugins/shared/dataset_quality: {}
 
   x-pack/platform/plugins/shared/elastic_console: {}
+
+  x-pack/platform/plugins/shared/elasticsearch_home: {}
 
   x-pack/platform/plugins/shared/embeddable_alerts_table: {}
 
@@ -15527,8 +15537,8 @@ packages:
     peerDependencies:
       '@types/react': 18.2.79
 
-  '@types/react-virtualized@9.22.3':
-    resolution: {integrity: sha512-UKRWeBIrECaKhE4O//TSFhlgwntMwyiEIOA7WZoVkr52Jahv0dH6YIOorqc358N2V3oKFclsq5XxPmx2PiYB5A==}
+  '@types/react-virtualized@9.22.4':
+    resolution: {integrity: sha512-7xBz1a/zXt4Qpogi9khBeaZhphcHPnEF3uchRXsqsKhpHwgxgrpo6OgghLqgc5NWQ6aj5/ws7HaNzIShKNCnXg==}
 
   '@types/react-window-infinite-loader@1.0.9':
     resolution: {integrity: sha512-gEInTjQwURCnDOFyIEK2+fWB5gTjqwx30O62QfxA9stE5aiB6EWkGj4UMhc0axq7/FV++Gs/TGW8FtgEx0S6Tw==}
@@ -33193,7 +33203,7 @@ snapshots:
     dependencies:
       '@types/react': 18.2.79
 
-  '@types/react-virtualized@9.22.3':
+  '@types/react-virtualized@9.22.4':
     dependencies:
       '@types/prop-types': 15.7.5
       '@types/react': 18.2.79
