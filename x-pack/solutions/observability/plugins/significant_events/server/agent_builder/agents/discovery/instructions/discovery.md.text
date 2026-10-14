@@ -21,7 +21,7 @@ You receive a batch of active change-point detections — each representing one 
 <inputs>
 
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
-- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`. `flaky_probe: true` means this detection is a repeat probe of a high-count rule — apply `<chronic_and_recurring>` rule 1 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
+- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. The batch `source_id` is the detection's Nightshift source id; copy it as is into `slugs` and signal `source_id`, which both accept a source id or a source slug. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`. `flaky_probe: true` means this detection is a repeat probe of a high-count rule — apply `<chronic_and_recurring>` rule 1 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
 
 </inputs>
 
@@ -58,7 +58,7 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
 
-Example: platform_sig_events_event_search. Dispatch the rule-match and topology-fallback requests together in the same tool-call group (see procedure Step 3). The rule-match uses `rule_uuids`; the topology-fallback omits `rule_uuids` and `stream_names` and provides non-empty topology IDs. Both run unconditionally — a zero-result rule-match never skips the topology search.
+Example: platform_sig_events_event_search. Dispatch the rule-match and topology-fallback requests together in the same tool-call group (see procedure Step 3). The rule-match uses `rule_uuids` and omits `slugs`. The topology-fallback omits `rule_uuids` and `slugs` and provides non-empty topology IDs. Both run unconditionally — a zero-result rule-match never skips the topology search.
 
 Rule-match request:
 ```json
@@ -68,7 +68,6 @@ Rule-match request:
   "from": "now-7d",
   "to": "now",
   "per_page": 50,
-  "stream_names": ["..."],
   "rule_uuids": ["..."]
 }
 ```
@@ -85,7 +84,7 @@ Topology-fallback request:
 }
 ```
 
-Response:
+Response (`source_ids` and nested `source_id` are source ids. `slugs` and signal `source_id` still accept an id or a slug):
 ```json
 {
   "view": "compact",
@@ -101,7 +100,7 @@ Response:
       "symptom_hypothesis": "...",
       "status": "...",
       "confidence": 0.7,
-      "stream_names": ["..."],
+      "source_ids": ["3f6c1c2e-8a4b-4d57-9a53-1d2b7c9e0a11"],
       "causal_features": [],
       "blast_radius": [],
       "signal_rule_uuids": ["..."],
@@ -127,16 +126,16 @@ Request:
       "severity": "...",
       "assessment_note": "...",
       "confidence": "...",
-      "stream_names": ["..."],
+      "slugs": ["nginx-errors"],
       "signals": [
-        { "type": "detection", "stream_name": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }
+        { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }
       ],
       "blast_radius": [
-        { "type": "dependency", "subtype": "http", "feature_id": "...", "source": "...", "target": "...", "protocol": "http", "stream_name": "..." },
+        { "type": "dependency", "subtype": "http", "feature_id": "...", "source": "...", "target": "...", "protocol": "http", "source_id": "..." },
         ...
       ],
       "causal_features": [
-        { "feature_id": "...", "type": "entity", "subtype": "service", "name": "...", "stream_name": "..." },
+        { "feature_id": "...", "type": "entity", "subtype": "service", "name": "...", "source_id": "..." },
         ...
       ]
     }
@@ -159,8 +158,8 @@ Example: platform_sig_events_events_write — continuation — identical `items`
       "severity": "...",
       "assessment_note": "...",
       "confidence": "...",
-      "stream_names": ["..."],
-      "signals": [{ "type": "detection", "stream_name": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }],
+      "slugs": ["nginx-errors"],
+      "signals": [{ "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }],
       "blast_radius": [],
       "causal_features": []
     }
@@ -171,7 +170,7 @@ Handler `existing_active_event` without this `event_id` field is not a continuat
 
 Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending the completed `{ "source": "discovery", "items": [ ... ] }` object once, not by sending `{}` again.
 
-Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true, "severity": "..." }] }`. `severity` is the tier the event was stored with. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an item failure returns `written: false` with reason `"bulk_error"` or `"unknown_event_id"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and the same signal outcome, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
+Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true, "severity": "..." }] }`. `severity` is the tier the event was stored with. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an item failure returns `written: false` with reason `"bulk_error"`, `"superseded"`, or `"unknown_event_id"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and the same signal outcome, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
 
 </tool_examples>
 
@@ -228,7 +227,7 @@ Accept when any criterion below holds. Use each side's **Current evidence** verd
   - Accept the pair when the observed signatures and the affected operations support the same incident correlation or root cause. For a confirmed topology dependency, accept different local error signatures when one side's observed impact is a compatible downstream consequence of the other's failure along that path. Affected operation alone never creates a match, and an independent or contradictory impact rejects it.
   - Also compare each side's **Alert symptom**, mechanism, and failure keywords; different wording alone is not a rejection.
   - **Multi-service bridge:** **Current evidence** verdict is `confirms`, **KI context** `features[]` names topology nodes present on both sides, accept the pair even when their found rows name different services or mechanisms.
-  - **Domain** or stream name alone is not sufficient convergence.
+  - **Domain** or source name alone is not sufficient convergence.
 
 Example:
 - Detection A has **Current evidence** with verdict `confirms`: `dependency-x` is unavailable and dependent reads are blocked.
@@ -266,7 +265,7 @@ For each detection, determine whether it continues an existing active event. An 
 **`platform_sig_events_event_search` instructions**
 - Use `platform_sig_events_event_search` with `status: "active"`, `view: "compact"`, and `per_page: 50`. **`view: "compact"` returns complete signal state counts, every rule UUID, and every unresolved rule UUID, but never individual signal prose.**
 - 4 calls total maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and at most one additional page. No additional calls outside the two phases. The one exception: for each accepted continuation, call it with `view: "full"` and `event_ids: [that event_id]` to read the event's stored signal descriptions and verdicts, which the compact view never returns; while `signals_has_more` is true, repeat with `signals_page + 1`, up to 5 pages. Step 5 rates over what was read; signals beyond the fifth page are unmeasured.
-- Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a stream-only search.
+- Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a source-only search.
 - `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, increment `page` with all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
 - An inactive event is never a continuation target. If a search result is not active, discard it for routing; do not reuse its `event_id`. When both matching phases return no active accepted event, create a new event without `event_id` only when the current detection is event-eligible.
 
@@ -286,7 +285,7 @@ Before either routing search, derive each remaining detection's topology ID set 
 Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-call group**. Topology Match runs on grounded topology inputs; a zero-result Rule Match never skips it.
 **Rule Match**
 
-1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids` and `stream_names` from remaining detections.
+1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids`. Omit `slugs`.
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule. If that rule is absent from `unresolved_rule_uuids`, use it only for the Recovery reconciliation exception; it is not evidence for active incident continuation or grouping.
 3. A rule in `unresolved_rule_uuids` identifies a candidate event; it is never acceptance evidence by itself. The current detection's grounded evidence must still pass `<incident_matching>` against the event's returned topology and summary context. Collect all rule-uuid-matching candidates before selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap). The Recovery reconciliation case in item 2 above may only be accepted for recovery reconciliation. Reject a match when one of these holds:
   - The **Current evidence**'s query rows show the failure now targets a different resource, host, or downstream dependency than the active event's confirmed signals, `causal_features`, or `blast_radius`.
@@ -301,7 +300,7 @@ Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-c
 
 This search runs on grounded topology inputs. It does not depend on Rule Match: a zero-result Rule Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
 
-1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `stream_names`.
+1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `slugs`.
 2. For each rule not in `continued_rule_uuids`, accept an event continuation when both hold:
    - the current confirmed detection's grounded `causal_features[]` or exact `blast_radius[]` occurs in the returned active event's stored topology, and
    - the current detection's grounded evidence passes `<incident_matching>` against the event's returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). Compact search has no per-signal prose.
@@ -378,11 +377,12 @@ If routing and grouping produce no event items, skip the remaining steps and do 
 
    - `bulk_error`: retry the item once, unchanged.
    - `unknown_event_id`: do not retry that item in this run. Do not rerun routing, choose another event, reuse the rejected ID, or omit the ID to turn it into a new event. Exclude its rules from `written_rule_uuids` so the next discovery cycle routes them again from fresh search results.
+   - `superseded`: do not retry in this run. Another writer changed the event first; the next discovery cycle routes its rules again. Exclude its rules from `written_rule_uuids`.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
 Build structured `significant_events` from tool results — copy `event_id`, `status`, `severity`, and `written` exactly, and `reason` only when the tool result carries one. A `written: true` result has no `reason`: omit it, never infer or invent one. `severity` is the stored tier from the result; an item with `written: false` and no `severity` has none to copy, so use `"low"` as a placeholder, which the workflow ignores for unwritten items. Include `narrative_preserved: true` when the tool result carries it (the stored title and symptom_hypothesis were preserved because no new rules were introduced).
 
-Set `written_rule_uuids` to every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`, and every detection intentionally determined not event-eligible, grounded or not. Exclude `bulk_error`, `unknown_event_id`, and `duplicate_in_batch` items that were not successfully retried.
+Set `written_rule_uuids` to every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`, and every detection intentionally determined not event-eligible, grounded or not. Exclude `bulk_error`, `superseded`, `unknown_event_id`, and `duplicate_in_batch` items that were not successfully retried.
 
 </procedure>
 
@@ -428,7 +428,7 @@ Final payload constraints for `platform_sig_events_events_write`. The procedure 
 - `source`: required at the top level; always `"discovery"`.
 - `event_id`: required on every continuation item (the `rule_uuid → accepted_event_id` value). Omit only for new episodes so the handler can assign one. The handler rejects unknown IDs.
 - `title`: required and stable for unchanged continuations. Derive it from the final component's anchor rule and the tool field description; do not use `causal_features` as the affected scope.
-- `stream_names`: required; deduplicated union across all signal entries in the final `signals[]`.
+- `slugs`: required; the deduplicated union of signal `source_id` values. Each is a source id (the batch `source_id`) or a source slug.
 - `status`, `severity`: set during Step 5. `confidence`: set after them (Step 5, item 5). `severity` is required on every item with signals.
 - `symptom_hypothesis`: required; maximum 300 characters. Name the deepest evidence-supported mechanism (shared backend error when that is what the rows show). Count it against its field limit and shorten it before emitting the payload.
 - `summary`: required; maximum 600 character. Report observed failures and impacts from the component's signals. Use `blast_radius` dependency entries only for an explicit supported path; do not infer causality, repeat `symptom_hypothesis`, or include raw match counts.

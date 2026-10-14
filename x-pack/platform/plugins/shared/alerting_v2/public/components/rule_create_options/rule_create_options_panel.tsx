@@ -55,7 +55,7 @@ const ESQL_RULE_TITLE = i18n.translate(
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-  { defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.' }
+  { defaultMessage: 'Write your own ES|QL query and preview the results live.' }
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
@@ -115,7 +115,7 @@ const THRESHOLD_RULE_TITLE = i18n.translate(
 const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
+    defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.',
   }
 );
 
@@ -230,7 +230,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />

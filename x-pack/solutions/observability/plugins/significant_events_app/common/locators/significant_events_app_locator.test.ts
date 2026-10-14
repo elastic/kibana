@@ -10,12 +10,12 @@ import { SignificantEventsAppLocatorDefinition } from './significant_events_app_
 describe('SignificantEventsAppLocatorDefinition', () => {
   const locator = new SignificantEventsAppLocatorDefinition();
 
-  it('defaults to the streams tab with no query params', async () => {
+  it('defaults to the sources tab with no query params', async () => {
     const location = await locator.getLocation({});
 
     expect(location).toEqual({
       app: 'significantEvents',
-      path: '/streams',
+      path: '/sources',
       state: {},
     });
   });
@@ -40,22 +40,21 @@ describe('SignificantEventsAppLocatorDefinition', () => {
   it('serializes array query params as repeated keys', async () => {
     const { path } = await locator.getLocation({
       tab: 'knowledge_indicators',
-      stream: ['logs', 'logs.nginx'],
+      source: ['source-1', 'source-2'],
     });
 
-    expect(path).toBe('/knowledge_indicators?stream=logs&stream=logs.nginx');
+    expect(path).toBe('/knowledge_indicators?source=source-1&source=source-2');
   });
 
   it('serializes significant events filters as repeated keys', async () => {
     const { path } = await locator.getLocation({
       tab: 'significant_events',
       status: ['open', 'closed'],
-      severity: ['80-critical', '60-high'],
-      stream: 'logs',
+      severity: ['critical', 'high'],
     });
 
     expect(path).toBe(
-      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high&stream=logs'
+      '/significant_events?status=open&status=closed&severity=critical&severity=high'
     );
   });
 
@@ -64,7 +63,6 @@ describe('SignificantEventsAppLocatorDefinition', () => {
       tab: 'significant_events',
       status: [],
       severity: [],
-      stream: [],
     });
 
     expect(path).toBe('/significant_events?status=&severity=');

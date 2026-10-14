@@ -6,92 +6,89 @@
  */
 
 import React from 'react';
-import { FlyoutTemplate } from '@kbn/flyout-template';
-import { QueryClientProvider } from '@kbn/react-query';
-import { entityStoreIdType, type ImpactEntityTarget } from '@kbn/agentic-investigations-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
-import { EntityCardFlyoutOverviewCanvas } from '../components/entity_card_flyout_overview_canvas';
+import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  SecurityReduxEmbeddedProvider,
-  type SecurityCanvasEmbeddedBundle,
-} from '../components/security_redux_embedded_provider';
-import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent_navigation_context';
-import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
-import { entityAttachmentQueryClient } from './entity_attachment/query_client';
+  entityStoreIdType,
+  impactEntityFlyoutType,
+  type ImpactEntityTarget,
+} from '@kbn/agentic-investigations-common';
+import type { FlyoutDescriptor } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
+import { GroupedAttachmentFlyoutOpener } from './grouped_attachments/flyout_opener';
 
-const flyoutType = (entity: ImpactEntityTarget): 'host' | 'user' | 'service' | undefined =>
-  entityStoreIdType(entity.id);
+const OPENER_CONTAINER_TEST_SUBJ = 'securityImpactEntityFlyoutOpener';
+
+/** The name the flyout queries by: `name`, or the id with any Entity Store `type:` prefix cut. */
+const entityName = (entity: ImpactEntityTarget): string =>
+  entity.name ?? (entityStoreIdType(entity.id) ? entity.id.replace(/^[^:]+:/, '') : entity.id);
+
+/** The entity's main flyout, by Entity Store id when it has one, otherwise by name. */
+const toDescriptor = (entity: ImpactEntityTarget): FlyoutDescriptor | undefined => {
+  const flyoutType = impactEntityFlyoutType(entity);
+  if (!flyoutType) {
+    return undefined;
+  }
+  const name = entityName(entity);
+  const entityId = entityStoreIdType(entity.id) ? entity.id : undefined;
+  switch (flyoutType) {
+    case 'host':
+      return { kind: 'host', hostName: name, entityId };
+    case 'user':
+      return { kind: 'user', userName: name, entityId };
+    case 'service':
+      return { kind: 'service', serviceName: name, entityId };
+  }
+};
+
+let unmountOpener: (() => void) | undefined;
+
+const unmount = (): void => {
+  unmountOpener?.();
+  unmountOpener = undefined;
+};
 
 /**
- * Opens the entity overview as a child of the investigation details flyout. The current app stays
- * put; Back on the entity flyout returns to the conversation.
+ * The opener opens the flyout on mount, as the "What's happened" rows do. Those rows own their
+ * opener; the impact row lives in another plugin and reaches us through a plain callback, so
+ * the opener mounts in a hidden node on the body. It stays mounted: its data-view bootstrap
+ * registers the listeners that finish initializing the flyout, and removing them when the
+ * flyout opens drops that work. The next open replaces this one.
  */
+const mountOpener = (element: React.ReactElement, rendering: CoreStart['rendering']): void => {
+  unmount();
+  let container = document.querySelector<HTMLElement>(
+    `[data-test-subj="${OPENER_CONTAINER_TEST_SUBJ}"]`
+  );
+  if (!container) {
+    container = document.createElement('div');
+    container.dataset.testSubj = OPENER_CONTAINER_TEST_SUBJ;
+    container.style.display = 'none';
+    document.body.appendChild(container);
+  }
+  unmountOpener = toMountPoint(element, rendering)(container);
+};
+
+/** Pushes the entity's flyout onto the investigation flyout, the way the "What's happened" rows do. */
 export const openImpactEntityFlyout = ({
   entity,
-  overlays,
-  application,
-  agentBuilder,
-  chrome,
-  isNewFlyoutEnabled,
+  rendering,
   resolveSecurityCanvasContext,
-  searchSession,
 }: {
   entity: ImpactEntityTarget;
-  overlays: Pick<OverlayStart, 'openFlyoutTemplate'>;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  isNewFlyoutEnabled: boolean;
+  rendering: CoreStart['rendering'];
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  searchSession?: ISessionService;
 }): void => {
-  const identifierType = flyoutType(entity);
-  if (!identifierType) {
+  const descriptor = toDescriptor(entity);
+  if (!descriptor) {
     return;
   }
 
-  const title = entity.name ?? entity.id;
-
-  overlays.openFlyoutTemplate(
-    {
-      id: 'securityImpactEntityFlyout',
-      session: 'inherit',
-      size: 'm',
-      type: 'overlay',
-      // The entity overview renders its own header, so the history entry is titled here.
-      flyoutMenuProps: { title },
-      'aria-label': title,
-      'data-test-subj': 'securityImpactEntityFlyout',
-    },
-    ({ onClose }) => (
-      <FlyoutTemplate onClose={onClose}>
-        <FlyoutTemplate.Body>
-          {/* The overview's detail links navigate through this context; without it they do nothing. */}
-          <EntityAnalyticsAgentNavigationProvider
-            application={application}
-            agentBuilder={agentBuilder}
-            chrome={chrome}
-            searchSession={searchSession}
-            isNewFlyoutEnabled={isNewFlyoutEnabled}
-            closeCanvas={onClose}
-          >
-            <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
-              <QueryClientProvider client={entityAttachmentQueryClient}>
-                <EntityCardFlyoutOverviewCanvas
-                  identifier={{
-                    identifierType,
-                    identifier: title,
-                    entityStoreId: entity.id,
-                  }}
-                />
-              </QueryClientProvider>
-            </SecurityReduxEmbeddedProvider>
-          </EntityAnalyticsAgentNavigationProvider>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    )
+  mountOpener(
+    <GroupedAttachmentFlyoutOpener
+      descriptor={descriptor}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+    />,
+    rendering
   );
 };
