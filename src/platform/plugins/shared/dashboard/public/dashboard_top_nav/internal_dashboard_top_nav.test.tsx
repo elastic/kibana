@@ -11,6 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -31,7 +32,15 @@ import { DashboardInternalContext } from '../dashboard_api/use_dashboard_interna
 // The top nav reads chrome via context hooks (`useChromeStyle`), so render inside
 // the chrome provider just like production. The mock defaults to classic chrome (legacy header mode).
 const renderWithChrome = (ui: React.ReactElement) =>
-  renderWithI18n(coreServices.chrome.withProvider(ui));
+  renderWithI18n(
+    coreServices.chrome.withProvider(
+      <ChangeHistoryModalContext.Provider
+        value={{ isOpen: false, openModal: jest.fn(), closeModal: jest.fn() }}
+      >
+        {ui}
+      </ChangeHistoryModalContext.Provider>
+    )
+  );
 
 describe('Internal dashboard top nav', () => {
   beforeEach(() => {

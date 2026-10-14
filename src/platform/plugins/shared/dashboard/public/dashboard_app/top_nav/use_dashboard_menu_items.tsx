@@ -537,6 +537,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.save,
     menuItems.add,
+    menuItems.history,
     hasExportMenuItems,
     historyConfig,
     shareAction,
