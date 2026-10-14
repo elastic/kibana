@@ -47,7 +47,9 @@ function createCallbackWrapper(
         throw error;
       });
 
-    return withTimeout({ promise: work, timeoutMs: timeout }).then((outcome) => {
+    // unref so the deadline does not hold the process open once the benchmark's own
+    // handles are gone. withTimeout still clears the timer when the work finishes.
+    return withTimeout({ promise: work, timeoutMs: timeout, unref: true }).then((outcome) => {
       if (outcome.timedout) {
         throw new Error(`Timeout ${name}: timeout of ${timeout}ms reached before promise resolved`);
       }

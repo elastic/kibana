@@ -44,13 +44,13 @@ export async function loadESQLAttributes(
     return outcome.value;
   }
 
-  // The main load keeps running after we give up on it. Swallow a late rejection so it
-  // cannot surface once the fallback is already in flight.
-  void main.catch(() => undefined);
-  return buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(
+  // The deadline only starts the fallback. Main stays in the race, so a result that
+  // lands while the fallback is still building still wins.
+  const fallback = buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(
     (attributes) => attributes,
     () => undefined
   );
+  return Promise.race([main, fallback]);
 }
 
 async function buildMainESQLAttributes({
