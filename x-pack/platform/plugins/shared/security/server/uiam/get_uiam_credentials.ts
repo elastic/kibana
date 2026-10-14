@@ -36,14 +36,6 @@ export const getUiamAuthorizationHeaderFromRequest = (
   return authorization;
 };
 
-/** Returns `ApiKey` for API-key requests and defaults to `Bearer`. */
-export const getUiamAuthorizationSchemeFromRequest = (
-  request: KibanaRequest
-): 'ApiKey' | 'Bearer' =>
-  HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'apikey'
-    ? 'ApiKey'
-    : 'Bearer';
-
 /** Extracts UIAM bearer-token or API-key credentials from the request. */
 export const getUiamCredentialsFromRequest = (request: KibanaRequest): string =>
   getUiamAuthorizationHeaderFromRequest(request).credentials;

@@ -456,7 +456,12 @@ describe('UiamService', () => {
     ];
 
     describe.each(schemePreservingRequestOperations)('$name', ({ run }) => {
-      it.each(['Bearer essu_access-token', 'ApiKey essu_api-key'])(
+      it.each([
+        'Bearer essu_access-token',
+        'bearer essu_access-token',
+        'ApiKey essu_api-key',
+        'apikey essu_api-key',
+      ])(
         'preserves the incoming authorization header %j',
         async (authorization) => {
           fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });

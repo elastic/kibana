@@ -40,8 +40,7 @@ import {
   type UiamClientAuthentication,
 } from './get_client_authentication';
 import {
-  getUiamAuthorizationHeaderFromRequest,
-  getUiamAuthorizationSchemeFromRequest,
+  assertUiamCredential,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
@@ -555,10 +554,11 @@ export class UiamService implements UiamServicePublic {
    * - Real request without a valid attestation: external.
    */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
-    const scheme = getUiamAuthorizationSchemeFromRequest(request);
-    const authorization = getUiamAuthorizationHeaderFromRequest(request);
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    assertUiamCredential(authorization);
+    const { scheme } = authorization;
     const isExternalApiKey =
-      scheme === 'ApiKey' &&
+      scheme.toLowerCase() === 'apikey' &&
       (request.isFakeRequest
         ? isExternalUiamCredential(request)
         : !this.#hasValidInternalCallerAttestation(request, authorization));
