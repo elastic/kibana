@@ -20,6 +20,7 @@ import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import { riskEngineConfigurationTypeName } from '../../risk_engine/saved_object';
 import { convertRangeToISO } from '../../risk_score/tasks/helpers';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
+import { ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT } from '../../../telemetry/event_based/events/entity_analytics';
 import {
   MAX_CONFLICT_REISSUES,
   MAX_DOCS_PER_REQUEST,
@@ -467,24 +468,39 @@ export const runBackfillTask = async ({
     }
   }
 
-  const updatedState: LatestTaskStateSchema = { spaces, runs: state.runs + 1 };
-  const remaining = Object.values(spaces).filter(({ done }) => !done).length;
-  const totalStamped = Object.values(spaces).reduce((sum, { stamped }) => sum + stamped, 0);
+  const firstRunAt = state.firstRunAt ?? new Date(startedAt).toISOString();
+  const progresses = Object.values(spaces);
+  const updatedState: LatestTaskStateSchema = { spaces, runs: state.runs + 1, firstRunAt };
+  const remaining = progresses.filter(({ done }) => !done).length;
+  const totalStamped = progresses.reduce((sum, { stamped }) => sum + stamped, 0);
 
   logger.info(
     `Task "${TASK_TYPE}" run ${updatedState.runs} finished. Alerts stamped so far: ${totalStamped}. Spaces remaining: ${remaining}.`
   );
 
-  if (remaining === 0) {
-    const abandoned = Object.values(spaces).filter(
-      ({ failures }) => failures >= MAX_CONSECUTIVE_SPACE_FAILURES
-    ).length;
+  const abandoned = progresses.filter(
+    ({ failures }) => failures >= MAX_CONSECUTIVE_SPACE_FAILURES
+  ).length;
+  const spacesCompleted = Object.keys(spaces).length - abandoned;
 
+  const reportCompletion = (reachedRunLimit: boolean) => {
+    coreStart.analytics.reportEvent(ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT.eventType, {
+      durationInSeconds: Math.round((startedAt - new Date(firstRunAt).getTime()) / 1_000),
+      runs: updatedState.runs,
+      spacesCompleted,
+      spacesAbandoned: abandoned,
+      alertsStamped: totalStamped,
+      reachedRunLimit,
+    });
+  };
+
+  if (remaining === 0) {
     logger.info(
       abandoned === 0
         ? `Task "${TASK_TYPE}" completed for all spaces; removing the task.`
         : `Task "${TASK_TYPE}" finished with ${abandoned} space(s) abandoned after repeated failures; removing the task.`
     );
+    reportCompletion(false);
     return getDeleteTaskRunResult();
   }
 
@@ -492,6 +508,7 @@ export const runBackfillTask = async ({
     logger.warn(
       `Task "${TASK_TYPE}" reached the ${MAX_RUNS} run limit with ${remaining} space(s) unfinished; removing the task. Their alerts keep using the risk scoring fallback.`
     );
+    reportCompletion(true);
     return getDeleteTaskRunResult();
   }
 

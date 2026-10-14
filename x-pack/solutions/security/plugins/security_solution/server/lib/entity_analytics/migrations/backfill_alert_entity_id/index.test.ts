@@ -47,9 +47,12 @@ interface SpaceFixture {
   range?: { start: string; end: string };
 }
 
+const reportEventMock = jest.fn();
+
 const createCoreStart = (spaces: SpaceFixture[]) =>
   ({
     elasticsearch: { client: elasticsearchServiceMock.createClusterClient() },
+    analytics: { reportEvent: reportEventMock },
     savedObjects: {
       createInternalRepository: () => ({
         find: jest.fn().mockResolvedValue({
@@ -87,6 +90,7 @@ const runTask = (spaces: SpaceFixture[], state = defaultState) =>
 describe('runBackfillTask', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    reportEventMock.mockClear();
     resolveTargetIndicesMock.mockResolvedValue({ usable: new Set(['index-1']), unusable: 0 });
     countPendingAlertsMock.mockResolvedValue(100);
     startBackfillMock.mockResolvedValue('node:123');
@@ -596,6 +600,96 @@ describe('runBackfillTask', () => {
 
     expect(result).toMatchObject({ shouldDeleteTask: true });
     expect(startBackfillMock).not.toHaveBeenCalled();
+  });
+
+  describe('the completion event', () => {
+    it('reports what the backfill achieved when every space finishes', async () => {
+      pollBackfillMock.mockResolvedValue({
+        completed: true,
+        updated: 4_200,
+        total: 4_200,
+        versionConflicts: 0,
+        vanished: false,
+        failures: [],
+      });
+      const state = {
+        spaces: {
+          default: {
+            esTaskId: 'node:123',
+            done: false,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 1_000,
+          },
+        },
+        runs: 7,
+        firstRunAt: new Date(Date.now() - 60_000).toISOString(),
+      };
+
+      await runTask([{ spaceId: 'default' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({
+          runs: 8,
+          spacesCompleted: 1,
+          spacesAbandoned: 0,
+          alertsStamped: 5_200,
+          reachedRunLimit: false,
+        })
+      );
+    });
+
+    it('measures from the first run rather than the last', async () => {
+      pollBackfillMock.mockResolvedValue({
+        completed: true,
+        updated: 1,
+        total: 1,
+        versionConflicts: 0,
+        vanished: false,
+        failures: [],
+      });
+      const state = {
+        spaces: {
+          default: {
+            esTaskId: 'node:123',
+            done: false,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 0,
+          },
+        },
+        runs: 1,
+        firstRunAt: new Date(Date.now() - 2 * 60 * 60 * 1_000).toISOString(),
+      };
+
+      await runTask([{ spaceId: 'default' }], state);
+
+      const [, payload] = reportEventMock.mock.calls[0];
+      expect(payload.durationInSeconds).toBeGreaterThanOrEqual(7_190);
+    });
+
+    it('counts abandoned spaces separately from completed ones', async () => {
+      startBackfillMock.mockRejectedValue(new Error('index gone'));
+      const state = {
+        spaces: {
+          broken: {
+            done: false,
+            failures: MAX_CONSECUTIVE_SPACE_FAILURES - 1,
+            conflictReissues: 0,
+            stamped: 0,
+          },
+        },
+        runs: 5,
+      };
+
+      await runTask([{ spaceId: 'broken' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({ spacesCompleted: 0, spacesAbandoned: 1 })
+      );
+    });
   });
 
   it('drops progress for spaces that no longer exist', async () => {

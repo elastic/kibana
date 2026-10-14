@@ -75,11 +75,13 @@ export const stateSchemaByVersion = {
           )
         : {},
       runs: toCount(state.runs),
+      firstRunAt: typeof state.firstRunAt === 'string' ? state.firstRunAt : undefined,
     }),
     schema: schema.object({
       // Keyed by spaceId. Entries for spaces that disappear are dropped on the next run.
       spaces: schema.recordOf(schema.string(), spaceProgressSchema),
       runs: schema.number(),
+      firstRunAt: schema.maybe(schema.string()),
     }),
   },
 };
@@ -90,6 +92,7 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 export const defaultState: LatestTaskStateSchema = {
   spaces: {},
   runs: 0,
+  firstRunAt: undefined,
 };
 
 export const defaultSpaceProgress: SpaceProgress = {
