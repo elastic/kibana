@@ -383,16 +383,16 @@ describe('retainMonitors', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('tries the endpoint again after an hour', async () => {
+    it('tries the endpoint again after a day', async () => {
       const now = jest.spyOn(Date, 'now').mockReturnValue(0);
       rejectWith(404, '404 page not found');
 
       const httpClient = createClient();
       await retain(httpClient);
 
-      now.mockReturnValue(59 * 60 * 1000);
+      now.mockReturnValue(24 * 60 * 60 * 1000 - 60 * 1000);
       expect(httpClient.supportsRetain(location.id)).toBe(false);
-      now.mockReturnValue(61 * 60 * 1000);
+      now.mockReturnValue(24 * 60 * 60 * 1000 + 60 * 1000);
       expect(httpClient.supportsRetain(location.id)).toBe(true);
 
       now.mockRestore();

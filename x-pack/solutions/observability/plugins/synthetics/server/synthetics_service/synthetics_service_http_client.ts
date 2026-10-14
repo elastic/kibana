@@ -79,7 +79,7 @@ export interface RetainData {
 
 // A service that does not know the retain endpoint is probed again after this long, so a
 // service upgrade is picked up without restarting Kibana.
-const RETAIN_UNSUPPORTED_RETRY_MS = 60 * 60 * 1000;
+const RETAIN_UNSUPPORTED_RETRY_MS = 24 * 60 * 60 * 1000;
 
 export class SyntheticsServiceHttpClient {
   private readonly username?: string;
