@@ -146,6 +146,30 @@ describe('workspace state', () => {
     expect(snapshot.nodesById.parent.data.term).toBe('parent');
   });
 
+  it('keeps node IDs consistent with their maps when workspace IDs repeat', () => {
+    const node = {
+      id: 'field..term',
+      data: { field: 'field', term: 'term' },
+      label: 'First',
+    };
+    const duplicate = { ...node, label: 'Last' };
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [node, duplicate],
+      edges: [],
+      blocklistedNodes: [node, duplicate],
+    });
+
+    const snapshot = createWorkspaceState(workspace);
+
+    expect(snapshot.nodeIds).toEqual([node.id]);
+    expect(snapshot.nodeIds).toEqual(Object.keys(snapshot.nodesById));
+    expect(snapshot.nodesById[node.id].label).toBe('Last');
+    expect(snapshot.blocklistedNodeIds).toEqual([node.id]);
+    expect(snapshot.blocklistedNodeIds).toEqual(Object.keys(snapshot.blocklistedNodesById));
+    expect(snapshot.blocklistedNodesById[node.id].label).toBe('Last');
+  });
+
   it('stores normalized workspace snapshots', () => {
     const environment = createMockGraphStore({});
     const workspace = createWorkspaceMock();

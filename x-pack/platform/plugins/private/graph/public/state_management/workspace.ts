@@ -108,15 +108,19 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
     })
   );
 
+  const blocklistedNodesById = Object.fromEntries(
+    blocklistedNodes.map((node) => [node.id, toNodeState(node)])
+  );
+
   return {
     nodesById,
-    nodeIds: workspace.nodes.map(({ id }) => id),
+    // IDs use field + '..' + term; repeated nodes or delimiter collisions can produce the same ID.
+    // Derive IDs from the map so duplicates cannot make the normalized collections inconsistent.
+    nodeIds: Object.keys(nodesById),
     edgesById,
     edgeIds: Object.keys(edgesById),
-    blocklistedNodesById: Object.fromEntries(
-      blocklistedNodes.map((node) => [node.id, toNodeState(node)])
-    ),
-    blocklistedNodeIds: blocklistedNodes.map(({ id }) => id),
+    blocklistedNodesById,
+    blocklistedNodeIds: Object.keys(blocklistedNodesById),
   };
 };
 
