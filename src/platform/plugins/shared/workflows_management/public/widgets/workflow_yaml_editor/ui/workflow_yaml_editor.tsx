@@ -19,11 +19,7 @@ import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOW_MONACO_LAYOUT_OPTIONS,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '@kbn/workflows-ui';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -311,7 +307,6 @@ export const WorkflowYAMLEditor = ({
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
-  useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
 
   // Lifecycle
@@ -976,7 +971,7 @@ export const WorkflowYAMLEditor = ({
             onChange={onChange}
             onSyncStateChange={onSyncStateChange}
             options={options}
-            themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
+            chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
             value={workflowYaml}
             enableFindAction={true}

@@ -26,7 +26,7 @@ import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -319,7 +319,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                 >
                   <CodeEditor
                     languageId="json"
-                    themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
+                    chromeOverrides={workflowsEditorChromeOverrides}
                     value={value}
                     width="100%"
                     height="100%"
