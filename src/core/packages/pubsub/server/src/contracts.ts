@@ -21,9 +21,9 @@ export interface PubSubEventInit<TData> {
    */
   readonly id: string;
   /**
-   * Delivered to each consumer as `JSON.parse(JSON.stringify(data))`, so only JSON-compatible
-   * values survive: `undefined` properties are dropped and anything `defineTopic` rejects at
-   * compile time (`Date`, `Map`, class instances, ...) would arrive mangled.
+   * Delivered to each consumer as `JSON.parse(JSON.stringify(data))`: `undefined` properties are
+   * dropped, and instances of data-only classes arrive as plain objects. `defineTopic` rejects
+   * at compile time the shapes that would otherwise arrive mangled (`Date`, `Map`, ...).
    */
   readonly data: TData;
 }
@@ -81,7 +81,8 @@ export interface PubSubSetup {
 
   /**
    * Subscribes during plugin setup.
-   * Every event published on the topic is delivered to the consumer.
+   * Events published on the topic are queued for the consumer; delivery is best effort,
+   * see {@link PubSubStart.publish} for the drop conditions.
    */
   subscribe<TData>(topic: Topic<TData>, subscription: PubSubSubscription<TData>): void;
 }

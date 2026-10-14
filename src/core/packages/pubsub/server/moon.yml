@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/pubsub/server
-dependsOn: []
+dependsOn:
+  - '@kbn/utility-types'
 tags:
   - shared-server
   - package

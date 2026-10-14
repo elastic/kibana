@@ -79,7 +79,6 @@ export type {
 } from '@kbn/core-feature-flags-server';
 export { defineTopic } from '@kbn/core-pubsub-server';
 export type {
-  JsonCompatible,
   PubSubEvent,
   PubSubEventInit,
   PubSubHandler,

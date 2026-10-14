@@ -9,7 +9,6 @@
 
 export { defineTopic } from './src/topic';
 export type { Topic } from './src/topic';
-export type { JsonCompatible } from './src/json';
 export type {
   PubSubEvent,
   PubSubHandler,
