@@ -39,30 +39,30 @@ export class VectordbHomePage {
   public readonly promptModalCloseButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.header = this.page.testSubj.locator('vectordbHomepageHeaderLeftsideGroup');
-    this.documentationLink = this.page.testSubj.locator('vectordbHomepageDocumentationLink');
+    this.header = this.page.getByTestId('elasticsearchHomeHeaderLeftsideGroup');
+    this.documentationLink = this.page.getByTestId('elasticsearchHomeDocumentationLink');
 
-    this.banner = this.page.testSubj.locator('vectordbHomePageBanner');
-    this.bannerGetStartedButton = this.page.testSubj.locator('vectordbHomePageBannerGetStartedBtn');
+    this.banner = this.page.getByTestId('elasticsearchHomeBanner');
+    this.bannerGetStartedButton = this.page.getByTestId('elasticsearchHomeBannerGetStartedBtn');
 
-    this.dataCard = this.page.testSubj.locator('homePageDataCard');
-    this.dashboardsCard = this.page.testSubj.locator('homePageDashboardsCard');
-    this.workflowsCard = this.page.testSubj.locator('homePageWorkflowsCard');
-    this.apiKeysCard = this.page.testSubj.locator('homePageApiKeysCard');
-    this.manageDataButton = this.page.testSubj.locator('homePageDataCardDataManagement');
+    this.dataCard = this.page.getByTestId('homePageDataCard');
+    this.dashboardsCard = this.page.getByTestId('homePageDashboardsCard');
+    this.workflowsCard = this.page.getByTestId('homePageWorkflowsCard');
+    this.apiKeysCard = this.page.getByTestId('homePageApiKeysCard');
+    this.manageDataButton = this.page.getByTestId('homePageDataCardDataManagement');
 
-    this.newIndexPanel = this.page.testSubj.locator('homePageDataCardNewIndex');
-    this.newIndexName = this.page.testSubj.locator('homePageDataCardNewIndexName');
-    this.newIndexDismissButton = this.page.testSubj.locator('homePageDataCardNewIndexDismissBtn');
+    this.newIndexPanel = this.page.getByTestId('homePageDataCardNewIndex');
+    this.newIndexName = this.page.getByTestId('homePageDataCardNewIndexName');
+    this.newIndexDismissButton = this.page.getByTestId('homePageDataCardNewIndexDismissBtn');
 
-    this.addDataEmbeddingsLink = this.page.testSubj.locator('addDataEmbeddingsLink');
-    this.addDataDevToolsLink = this.page.testSubj.locator('addDataDevToolsLink');
-    this.addDataSampleDataLink = this.page.testSubj.locator('addDataSampleDataLink');
-    this.addDataUploadFileLink = this.page.testSubj.locator('addDataUploadFileLink');
-    this.viewPromptButton = this.page.testSubj.locator('viewPromptButton');
-    this.openElasticAgentButton = this.page.testSubj.locator('openElasticAgentButton');
-    this.promptModal = this.page.testSubj.locator('vectordbPromptModal');
-    this.promptModalCloseButton = this.page.testSubj.locator('vectordbPromptModalCloseButton');
+    this.addDataEmbeddingsLink = this.page.getByTestId('addDataEmbeddingsLink');
+    this.addDataDevToolsLink = this.page.getByTestId('addDataDevToolsLink');
+    this.addDataSampleDataLink = this.page.getByTestId('addDataSampleDataLink');
+    this.addDataUploadFileLink = this.page.getByTestId('addDataUploadFileLink');
+    this.viewPromptButton = this.page.getByTestId('viewPromptButton');
+    this.openElasticAgentButton = this.page.getByTestId('openElasticAgentButton');
+    this.promptModal = this.page.getByTestId('elasticsearchHomePromptModal');
+    this.promptModalCloseButton = this.page.getByTestId('elasticsearchHomePromptModalCloseButton');
   }
 
   async goto() {
@@ -72,6 +72,6 @@ export class VectordbHomePage {
 
   /** The rendered value of a stat tile, e.g. `statValue('homePageDataCard', 'documents')`. */
   statValue(cardTestSubj: string, metricKey: string) {
-    return this.page.testSubj.locator(`${cardTestSubj}-${metricKey}-value`);
+    return this.page.getByTestId(`${cardTestSubj}-${metricKey}-value`);
   }
 }
