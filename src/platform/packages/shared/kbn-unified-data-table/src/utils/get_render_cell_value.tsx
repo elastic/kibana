@@ -202,6 +202,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isCompressed={isCompressed}
           dataSource={dataSource}
+          isInteractive={isInteractive}
         />
       );
     }

@@ -340,6 +340,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -503,6 +504,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -554,6 +556,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -603,6 +606,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -676,6 +680,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: 'object',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -725,6 +730,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: 'object',
         dataSource: undefined,
         dataView: dataViewMock,
