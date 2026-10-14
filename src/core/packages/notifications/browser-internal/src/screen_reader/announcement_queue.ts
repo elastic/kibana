@@ -19,12 +19,6 @@ export interface Announcement {
   messages: string[];
 }
 
-interface AnnouncementQueueOptions {
-  /** Whether screen readers currently ignore the live region, e.g. because an ancestor is `inert`. */
-  isHidden: () => boolean;
-  onAnnounce: (announcement: Announcement) => void;
-}
-
 /**
  * How long to wait after the latest message. Messages caused by the same action (e.g. a toast and a
  * page change) are announced together, and focus changes caused by that action (e.g. a closed flyout
@@ -48,8 +42,8 @@ export const estimateReadingTimeMs = (messages: string[]): number =>
   Math.max(MIN_READING_TIME_MS, messages.join(' ').length * READING_TIME_PER_CHARACTER_MS);
 
 /**
- * Collects messages for screen readers and decides when to announce them: in batches, while the
- * live region is visible to screen readers, and without interrupting the previous announcement.
+ * Collects messages for screen readers and decides when to announce them: in batches, and without
+ * interrupting the previous announcement.
  */
 export class AnnouncementQueue {
   private pending: Array<() => string> = [];
@@ -59,7 +53,7 @@ export class AnnouncementQueue {
   private lastId = 0;
   private timeoutId?: ReturnType<typeof setTimeout>;
 
-  constructor(private readonly options: AnnouncementQueueOptions) {}
+  constructor(private readonly onAnnounce: (announcement: Announcement) => void) {}
 
   public add(message: AnnouncementMessage) {
     const now = Date.now();
@@ -92,10 +86,6 @@ export class AnnouncementQueue {
   private check = () => {
     const now = Date.now();
 
-    if (this.options.isHidden()) {
-      this.scheduleCheck(ANNOUNCEMENT_SETTLE_MS);
-      return;
-    }
     if (now < this.getReadyAt()) {
       this.scheduleCheck();
       return;
@@ -112,7 +102,7 @@ export class AnnouncementQueue {
 
     if (messages.length) {
       this.readingUntil = now + estimateReadingTimeMs(messages);
-      this.options.onAnnounce({ id: ++this.lastId, messages });
+      this.onAnnounce({ id: ++this.lastId, messages });
     }
   }
 }

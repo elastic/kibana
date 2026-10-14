@@ -15,7 +15,6 @@ import {
 } from './announcement_queue';
 
 describe('AnnouncementQueue', () => {
-  let isHidden: boolean;
   let onAnnounce: jest.Mock;
   let queue: AnnouncementQueue;
 
@@ -23,9 +22,8 @@ describe('AnnouncementQueue', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    isHidden = false;
     onAnnounce = jest.fn();
-    queue = new AnnouncementQueue({ isHidden: () => isHidden, onAnnounce });
+    queue = new AnnouncementQueue(onAnnounce);
   });
 
   afterEach(() => {
@@ -73,17 +71,6 @@ describe('AnnouncementQueue', () => {
 
     jest.advanceTimersByTime(estimateReadingTimeMs(['First']));
     expect(getAnnouncedMessages()).toEqual([['First'], ['Second']]);
-  });
-
-  it('waits while the live region is hidden from screen readers', () => {
-    isHidden = true;
-    queue.add('Synonyms set deleted');
-    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS * 10);
-    expect(onAnnounce).not.toHaveBeenCalled();
-
-    isHidden = false;
-    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
-    expect(getAnnouncedMessages()).toEqual([['Synonyms set deleted']]);
   });
 
   it('resolves function messages when announcing, and skips empty and repeated messages', () => {

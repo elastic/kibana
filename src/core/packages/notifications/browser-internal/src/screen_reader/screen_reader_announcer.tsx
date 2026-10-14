@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent, type Ref } from 'react';
+import React, { type FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { EuiLiveAnnouncer } from '@elastic/eui';
@@ -15,7 +15,6 @@ import type { Announcement } from './announcement_queue';
 
 interface Props {
   announcement$: Observable<Announcement | undefined>;
-  announcerRef: Ref<HTMLDivElement>;
 }
 
 /**
@@ -33,30 +32,25 @@ interface Props {
  * they get to it, which can be seconds later, e.g. when VoiceOver first describes the new page after
  * the focused element was removed by a navigation. Clearing it earlier would leave nothing to read.
  */
-export const ScreenReaderAnnouncer: FunctionComponent<Props> = ({
-  announcement$,
-  announcerRef,
-}) => {
+export const ScreenReaderAnnouncer: FunctionComponent<Props> = ({ announcement$ }) => {
   const announcement = useObservable(announcement$);
 
   return (
-    <div ref={announcerRef}>
-      <EuiLiveAnnouncer
-        role="alert"
-        aria-live="assertive"
-        clearAfterMs={false}
-        data-test-subj="screenReaderAnnouncer"
-      >
-        {announcement ? (
-          <>
-            {/* Keys are unique per announcement, so repeating a message inserts new nodes that
-                screen readers announce again */}
-            {announcement.messages.map((message, index) => (
-              <p key={`${announcement.id}:${index}`}>{message}</p>
-            ))}
-          </>
-        ) : null}
-      </EuiLiveAnnouncer>
-    </div>
+    <EuiLiveAnnouncer
+      role="alert"
+      aria-live="assertive"
+      clearAfterMs={false}
+      data-test-subj="screenReaderAnnouncer"
+    >
+      {announcement ? (
+        <>
+          {/* Keys are unique per announcement, so repeating a message inserts new nodes that
+              screen readers announce again */}
+          {announcement.messages.map((message, index) => (
+            <p key={`${announcement.id}:${index}`}>{message}</p>
+          ))}
+        </>
+      ) : null}
+    </EuiLiveAnnouncer>
   );
 };
