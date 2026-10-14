@@ -7,7 +7,7 @@
 
 import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
 import type { DocumentConverter, DocumentConverters } from './types';
-import { getAvailableDocumentMimeTypes } from './index';
+import { getAvailableDocumentMimeTypes } from '.';
 
 describe('getAvailableDocumentMimeTypes', () => {
   const createConverter = (available: boolean): DocumentConverter => ({

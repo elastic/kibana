@@ -41,7 +41,8 @@ describe('document extraction availability', () => {
   });
 
   it('is available when the endpoint is found', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
+      loadFreshModule();
     const get = jest.fn(async () => ({
       endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
     }));
@@ -53,7 +54,8 @@ describe('document extraction availability', () => {
   });
 
   it('is not available when ES returns no endpoints', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
+      loadFreshModule();
     const get = jest.fn(async () => ({ endpoints: [] }));
 
     await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
@@ -62,7 +64,8 @@ describe('document extraction availability', () => {
   });
 
   it('is not available when the endpoint is not found (404)', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
+      loadFreshModule();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('not found'), { statusCode: 404 });
     });
@@ -74,7 +77,8 @@ describe('document extraction availability', () => {
   });
 
   it('is not available and logs a warning for any other error', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
+      loadFreshModule();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('server error'), { statusCode: 500 });
     });

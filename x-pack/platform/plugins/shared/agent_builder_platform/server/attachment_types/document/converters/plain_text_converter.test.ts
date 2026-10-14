@@ -32,9 +32,7 @@ describe('plain text converter', () => {
   });
 
   it('rejects bytes that are not valid UTF-8', async () => {
-    await expect(toText(Buffer.from([0xc3, 0x28]))).rejects.toThrow(
-      'The file must be UTF-8 text.'
-    );
+    await expect(toText(Buffer.from([0xc3, 0x28]))).rejects.toThrow('The file must be UTF-8 text.');
   });
 
   it('rejects UTF-16 text', async () => {

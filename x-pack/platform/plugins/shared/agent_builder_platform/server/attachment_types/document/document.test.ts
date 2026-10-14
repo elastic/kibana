@@ -67,12 +67,14 @@ const createConverterMock = () => ({
 });
 
 describe('document attachment type', () => {
-  const converterMocks: Record<SupportedDocumentMimeType, ReturnType<typeof createConverterMock>> =
-    {
-      'application/pdf': createConverterMock(),
-      'text/markdown': createConverterMock(),
-      'text/plain': createConverterMock(),
-    };
+  const converterMocks: Record<
+    SupportedDocumentMimeType,
+    ReturnType<typeof createConverterMock>
+  > = {
+    'application/pdf': createConverterMock(),
+    'text/markdown': createConverterMock(),
+    'text/plain': createConverterMock(),
+  };
   const documentConverters: DocumentConverters = converterMocks;
   const pdfConverter = converterMocks['application/pdf'];
 
