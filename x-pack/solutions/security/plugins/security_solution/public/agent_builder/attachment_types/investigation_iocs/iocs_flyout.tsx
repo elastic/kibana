@@ -18,14 +18,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IOCS_TITLE } from '../grouped_attachments';
 import type { IocCategoryRow } from './parse_iocs';
 
 export const INVESTIGATION_IOCS_FLYOUT_TEST_ID = 'investigationIocsFlyout';
-
-export const INVESTIGATION_IOCS_FLYOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationIocs.flyoutTitle',
-  { defaultMessage: 'IOCs' }
-);
 
 const copyValueAriaLabel = (value: string) =>
   i18n.translate('xpack.securitySolution.agentBuilder.investigationIocs.copyValueAriaLabel', {
@@ -44,7 +40,7 @@ export const InvestigationIocsFlyout = ({ categories }: InvestigationIocsFlyoutP
   return (
     <EuiFlyoutBody data-test-subj={INVESTIGATION_IOCS_FLYOUT_TEST_ID}>
       <EuiTitle size="s" css={css({ marginBottom: euiTheme.size.l })}>
-        <h2>{INVESTIGATION_IOCS_FLYOUT_TITLE}</h2>
+        <h2>{IOCS_TITLE}</h2>
       </EuiTitle>
 
       {categories.map((category, index) => (

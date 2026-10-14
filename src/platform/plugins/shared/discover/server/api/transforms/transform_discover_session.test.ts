@@ -1041,6 +1041,26 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
+    it('round-trips a Lucene JSON query without converting the stored DSL to text', () => {
+      const query = {
+        language: 'lucene' as const,
+        expression: '{"term":{"extension":"png"}}',
+      };
+      const { attributes, references } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...classicApiTab, query }],
+      });
+      const { kibanaSavedObjectMeta } = attributes.tabs[0].attributes;
+
+      expect(parseSearchSourceJSON(kibanaSavedObjectMeta.searchSourceJSON).query).toEqual({
+        language: 'lucene',
+        query: { term: { extension: 'png' } },
+      });
+
+      const { sessionState } = transformDiscoverSessionOut(attributes, references);
+      expect(sessionState.tabs[0]).toHaveProperty('query', query);
+    });
+
     it('round-trips legacy pinned filters as app filters', () => {
       const pinnedFilter = {
         meta: {

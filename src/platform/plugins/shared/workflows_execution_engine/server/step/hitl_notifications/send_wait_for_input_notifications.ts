@@ -23,7 +23,14 @@ import {
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  escapeServiceNowCommentText,
+  executeHitlHttpChannel,
+  fitHitlTextPreservingSuffix,
+  renderServiceNowField,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -32,6 +39,20 @@ type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['c
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildDefaultInputServiceNowComment({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeServiceNowCommentText(stepMessage),
+    serviceNowCommentLink(DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, formUrl),
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildDefaultInputSlackMessage({
@@ -246,5 +267,47 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
+    const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
+    const renderedComment =
+      serviceNowConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: serviceNowConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : undefined;
+    if (renderedComment != null && renderedComment.length > SERVICENOW_COMMENT_MAX_LENGTH) {
+      throw new Error(
+        `HITL ServiceNow message is ${renderedComment.length} characters and exceeds the ${SERVICENOW_COMMENT_MAX_LENGTH} character connector limit`
+      );
+    }
+    const comment = renderedComment ?? buildDefaultInputServiceNowComment({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(table, sysId, comment),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }
