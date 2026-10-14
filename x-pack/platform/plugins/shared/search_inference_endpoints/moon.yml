@@ -45,7 +45,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-router-server-mocks'
-  - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
@@ -65,6 +64,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
