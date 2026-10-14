@@ -9,7 +9,12 @@ import deepEqual from 'fast-deep-equal';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { isBeatsOutput } from '../../../common/services/output_helpers';
-import { kafkaAuthType, kafkaOAuth2GrantType, outputType } from '../../../common/constants';
+import {
+  kafkaAuthType,
+  kafkaKerberosAuthType,
+  kafkaOAuth2GrantType,
+  outputType,
+} from '../../../common/constants';
 import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 import type { NewBeatsOutput, UpdateTypedOutput } from '../../../common/types';
 import type { NewOutput } from '../../../common';
@@ -59,6 +64,51 @@ export const validateKafkaOAuth2 = (output: UpdateTypedOutput | NewOutput): void
       'secrets.oauth2.client_secret or oauth2.client_secret_file is required'
     );
   }
+};
+
+/**
+ * Checks the settings the Kerberos authentication method of a Kafka output needs, as the Kafka
+ * output of Beats does: the path of the Kerberos configuration and a realm, a keytab for the keytab
+ * authentication, or a username and a password for the password authentication.
+ */
+export const validateKafkaKerberos = (output: UpdateTypedOutput | NewOutput): void => {
+  if (output.type !== outputType.Kafka || output.auth_type !== kafkaAuthType.Kerberos) {
+    return;
+  }
+
+  const { kerberos, secrets } = output;
+  if (!kerberos) {
+    throw new OutputInvalidError('kerberos is required when auth_type is kerberos');
+  }
+  if (!kerberos.config_path) {
+    throw new OutputInvalidError('kerberos.config_path is required');
+  }
+  if (!kerberos.realm) {
+    throw new OutputInvalidError('kerberos.realm is required');
+  }
+
+  if (kerberos.auth_type === kafkaKerberosAuthType.Keytab) {
+    if (!kerberos.keytab) {
+      throw new OutputInvalidError('kerberos.keytab is required when kerberos.auth_type is keytab');
+    }
+  } else {
+    if (!kerberos.username) {
+      throw new OutputInvalidError(
+        'kerberos.username is required when kerberos.auth_type is password'
+      );
+    }
+    if (!secrets?.kerberos?.password) {
+      throw new OutputInvalidError(
+        'secrets.kerberos.password is required when kerberos.auth_type is password'
+      );
+    }
+  }
+};
+
+/** Checks the settings of every authentication method of the Kafka output. */
+export const validateKafkaAuthMethods = (output: UpdateTypedOutput | NewOutput): void => {
+  validateKafkaOAuth2(output);
+  validateKafkaKerberos(output);
 };
 
 export const ensureNoDuplicateSecrets = (output: UpdateTypedOutput | NewOutput): void => {

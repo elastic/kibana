@@ -45,8 +45,9 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
-import { usesKafkaOAuth2 } from '../outputs/kafka_auth';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
+import { checkKafkaAuthMethodAllowed } from '../outputs/kafka_auth_gate';
+import { KAFKA_AUTH_METHODS, usesKafkaAuth } from '../outputs/kafka_auth';
 import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
@@ -231,10 +232,15 @@ export async function createOrUpdatePreconfiguredOutputs(
     ? await checkOtlpOutputAllowed(esClient, soClient)
     : { result: true as const };
 
-  // Same for the Kafka outputs using OAuth2.
-  const kafkaOAuth2Check = outputs.some(usesKafkaOAuth2)
-    ? await checkKafkaOAuth2Allowed(esClient, soClient)
-    : { result: true as const, error: undefined };
+  // Same for the Kafka outputs using an authentication method that has to be allowed.
+  const kafkaAuthMethodChecks = await Promise.all(
+    KAFKA_AUTH_METHODS.map(async (method) => ({
+      method,
+      check: outputs.some((output) => usesKafkaAuth(method, output))
+        ? await checkKafkaAuthMethodAllowed(method, esClient, soClient)
+        : { result: true as const, error: undefined },
+    }))
+  );
 
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
     if (isOtlpOutput(output) && !otlpCheck.result) {
@@ -242,8 +248,11 @@ export async function createOrUpdatePreconfiguredOutputs(
       return;
     }
 
-    if (usesKafkaOAuth2(output) && !kafkaOAuth2Check.result) {
-      logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${kafkaOAuth2Check.error}`);
+    const notAllowed = kafkaAuthMethodChecks.find(
+      ({ method, check }) => !check.result && usesKafkaAuth(method, output)
+    );
+    if (notAllowed) {
+      logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${notAllowed.check.error}`);
       return;
     }
 
@@ -554,6 +563,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.password, preconfiguredOutput.password) ||
       isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
       isDifferent(existingOutput.oauth2, preconfiguredOutput.oauth2) ||
+      isDifferent(existingOutput.kerberos, preconfiguredOutput.kerberos) ||
       isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||

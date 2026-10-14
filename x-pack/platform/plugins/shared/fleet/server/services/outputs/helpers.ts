@@ -19,7 +19,9 @@ import { appContextService } from '../app_context';
 import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
 
-import { isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
+import { isOutputSecretStorageEnabled } from '../secrets';
+
+import { isKafkaKerberosAuthEnabled, isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
 
 /** Returns true when all enrolled Fleet Servers meet the OTLP output minimum version. */
 export async function isOtlpOutputSupported(
@@ -97,6 +99,32 @@ export async function checkKafkaOAuth2Allowed(
     return {
       result: false,
       error: `OAuth2 authentication of Kafka outputs requires all Fleet Servers to be on version ${KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION} or later.`,
+    };
+  }
+
+  return { result: true };
+}
+
+/**
+ * Checks whether the Kerberos authentication method of the Kafka output is permitted in this
+ * deployment: the feature flag is on and the password can be stored as a secret.
+ * Returns { result: true } when allowed, or { result: false, error } with a human-readable reason.
+ *
+ * The password is only accepted as a secret, so output secrets storage is required.
+ */
+export async function checkKafkaKerberosAllowed(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<{ result: boolean; error?: string }> {
+  if (!(await isKafkaKerberosAuthEnabled())) {
+    return { result: false, error: 'Kerberos authentication of Kafka outputs is not enabled' };
+  }
+
+  if (!(await isOutputSecretStorageEnabled(esClient, soClient))) {
+    return {
+      result: false,
+      error:
+        'Kerberos authentication of Kafka outputs requires output secrets storage, which needs all Fleet Servers to be on version 8.12.0 or later.',
     };
   }
 

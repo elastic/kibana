@@ -7,7 +7,7 @@
 
 import { OutputInvalidError } from '../../errors';
 
-import { validateKafkaOAuth2 } from './validators';
+import { validateKafkaKerberos, validateKafkaOAuth2 } from './validators';
 
 const kafkaOutput = (fields: Record<string, unknown>) =>
   ({
@@ -123,5 +123,96 @@ describe('validateKafkaOAuth2', () => {
         })
       )
     ).not.toThrow();
+  });
+});
+
+describe('validateKafkaKerberos', () => {
+  const keytabKerberos = {
+    auth_type: 'keytab',
+    config_path: '/etc/krb5.conf',
+    keytab: '/etc/kafka.keytab',
+    realm: 'EXAMPLE.COM',
+  };
+  const passwordKerberos = {
+    auth_type: 'password',
+    config_path: '/etc/krb5.conf',
+    username: 'kafka',
+    realm: 'EXAMPLE.COM',
+  };
+
+  it('accepts the keytab authentication', () => {
+    expect(() =>
+      validateKafkaKerberos(kafkaOutput({ auth_type: 'kerberos', kerberos: keytabKerberos }))
+    ).not.toThrow();
+  });
+
+  it('accepts the password authentication with the password as a secret', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({
+          auth_type: 'kerberos',
+          kerberos: passwordKerberos,
+          secrets: { kerberos: { password: { id: 'secret-id' } } },
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('ignores the outputs that do not use Kerberos', () => {
+    expect(() => validateKafkaKerberos(kafkaOutput({ auth_type: 'ssl' }))).not.toThrow();
+    expect(() => validateKafkaKerberos(kafkaOutput({}))).not.toThrow();
+    expect(() =>
+      validateKafkaKerberos({ name: 'es', type: 'elasticsearch', auth_type: 'kerberos' } as any)
+    ).not.toThrow();
+  });
+
+  it('requires the kerberos settings', () => {
+    expect(() => validateKafkaKerberos(kafkaOutput({ auth_type: 'kerberos' }))).toThrow(
+      new OutputInvalidError('kerberos is required when auth_type is kerberos')
+    );
+  });
+
+  it('requires the path of the configuration and the realm', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({ auth_type: 'kerberos', kerberos: { ...keytabKerberos, config_path: '' } })
+      )
+    ).toThrow(new OutputInvalidError('kerberos.config_path is required'));
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({ auth_type: 'kerberos', kerberos: { ...keytabKerberos, realm: '' } })
+      )
+    ).toThrow(new OutputInvalidError('kerberos.realm is required'));
+  });
+
+  it('requires a keytab for the keytab authentication', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({ auth_type: 'kerberos', kerberos: { ...keytabKerberos, keytab: undefined } })
+      )
+    ).toThrow(
+      new OutputInvalidError('kerberos.keytab is required when kerberos.auth_type is keytab')
+    );
+  });
+
+  it('requires a username and a password for the password authentication', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({
+          auth_type: 'kerberos',
+          kerberos: { ...passwordKerberos, username: undefined },
+          secrets: { kerberos: { password: { id: 'secret-id' } } },
+        })
+      )
+    ).toThrow(
+      new OutputInvalidError('kerberos.username is required when kerberos.auth_type is password')
+    );
+    expect(() =>
+      validateKafkaKerberos(kafkaOutput({ auth_type: 'kerberos', kerberos: passwordKerberos }))
+    ).toThrow(
+      new OutputInvalidError(
+        'secrets.kerberos.password is required when kerberos.auth_type is password'
+      )
+    );
   });
 });

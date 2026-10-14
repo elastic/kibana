@@ -36,6 +36,7 @@ import {
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
 import { OutputFormKafkaOAuth2 } from './output_form_kafka_oauth2';
+import { OutputFormKafkaKerberos } from './output_form_kafka_kerberos';
 
 const kafkaSaslOptions = [
   {
@@ -73,6 +74,12 @@ const kafkaAuthenticationsOptions = [
   },
 ];
 
+const kafkaKerberosAuthenticationOption = {
+  id: kafkaAuthType.Kerberos,
+  label: 'Kerberos',
+  'data-test-subj': 'kafkaAuthenticationKerberosRadioButton',
+};
+
 const kafkaOAuth2AuthenticationOption = {
   id: kafkaAuthType.OAuth2,
   label: 'OAuth2',
@@ -85,7 +92,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
-  const { isOAuth2Enabled } = useKafkaAuthMethods();
+  const { isOAuth2Enabled, isKerberosEnabled } = useKafkaAuthMethods();
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     kafkaAuthPassword: false,
     kafkaSslKey: false,
@@ -179,6 +186,12 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
 
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
+      case kafkaAuthType.Kerberos:
+        return isKerberosEnabled ? (
+          <OutputFormKafkaKerberos inputs={inputs} />
+        ) : (
+          renderManagedElsewhereCallout()
+        );
       case kafkaAuthType.OAuth2:
         return isOAuth2Enabled ? (
           <OutputFormKafkaOAuth2 inputs={inputs} />
@@ -448,11 +461,11 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             name="kafkaAuthMethod"
             style={{ display: 'flex', gap: 30 }}
             data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
-            options={
-              isOAuth2Enabled
-                ? [...kafkaAuthenticationsOptions, kafkaOAuth2AuthenticationOption]
-                : kafkaAuthenticationsOptions
-            }
+            options={[
+              ...kafkaAuthenticationsOptions,
+              ...(isKerberosEnabled ? [kafkaKerberosAuthenticationOption] : []),
+              ...(isOAuth2Enabled ? [kafkaOAuth2AuthenticationOption] : []),
+            ]}
             compressed
             {...inputs.kafkaAuthMethodInput.props}
           />
