@@ -1572,7 +1572,7 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
  *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped, and
- *   `steps` is reconstructed from the chart's `defaultBandCount`.
+ *   a missing `steps` defaults to the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
  *   multi-stop to the effective `rangeMax` when closed, drop the unread `steps`, and
@@ -1623,13 +1623,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.name = canonicalName;
           palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
-          // A named palette renders from its id and `steps` alone. Its stops are
-          // recomputed on every render. Users can't set `steps` directly: any edit to the color
-          // ranges (add, remove, recolor, move) turns the palette into `custom`. So a stored
-          // `steps` that differs from the chart default was inherited from an older default
-          // (e.g. gauges saved when it was 3). The API's `distributed_palette` has no band count,
-          // so API→SO writes the chart default and that difference is an accepted loss.
-          palette.params.steps = defaultBandCount;
+          // A named palette renders from its id and `steps` alone, and the API's
+          // `distributed_palette` carries `steps` when set. An omitted value takes the chart default.
+          palette.params.steps ??= defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
           return;
         }
