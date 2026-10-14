@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  PreExecutionWorkflowStep,
   CurrentUser,
   ExecutionFailedEvent,
   TimelineEvent,
@@ -364,6 +365,28 @@ describe('conversation model converters', () => {
           reasoning: 'reasoning',
         },
       ]);
+    });
+
+    it('round-trips a pre-execution workflow step through Elasticsearch conversion', () => {
+      const conversation = fromEs(documentBase(), requestingUser);
+      const workflowStep: PreExecutionWorkflowStep = {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '<system_update>workflow context</system_update>',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
+      };
+      conversation.rounds[0].steps = [workflowStep];
+
+      const roundTripped = fromEs(
+        {
+          ...documentBase(),
+          _source: toEs(conversation, 'space'),
+        },
+        requestingUser
+      );
+
+      expect(roundTripped.rounds[0].steps).toEqual([workflowStep]);
     });
 
     it('adds tool_call_id for results without it', () => {
@@ -978,6 +1001,26 @@ describe('conversation model converters', () => {
   });
 
   describe('toEs', () => {
+    it('keeps the owner principal type across writes', () => {
+      const conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: creationDate,
+        rounds: [],
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account' as const,
+        },
+      };
+
+      const serialized = toEs(conversation as never, 'space');
+
+      expect(serialized.user_type).toBe('service_account');
+    });
+
     it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
       const serialized = toEs(
         {
@@ -1318,6 +1361,43 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('records the owner principal type', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('service_account:kibana/automation');
+      expect(serialized.user_type).toBe('service_account');
+    });
+
+    it('records no principal type for an owner override that has none', () => {
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          user: { id: 'user_id', username: 'user_name' },
+        },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('user_id');
+      expect(serialized.user_type).toBeUndefined();
+    });
+
     it('creates an unpinned, unread conversation with empty per-user lists', () => {
       const serialized = createRequestToEs({
         conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
@@ -1973,6 +2053,85 @@ describe('conversation model converters', () => {
       ]);
     });
 
+    describe('interrupted round blocks on a rounds-path write', () => {
+      const failedBlock = (conversation: Conversation): TimelineEvent[] => [
+        {
+          id: 'round-2::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.user, id: conversation.user.id },
+          data: { message: 'second' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: { trigger_type: 'user_message' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: {
+            time_to_last_token: 0,
+            error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
+          },
+        } as TimelineEvent,
+      ];
+
+      it('keeps an interrupted block the stored rounds never materialised (stale rounds)', () => {
+        const conversation = eventsNativeStored();
+        // Document written before interrupted executions folded into rounds: `rounds` only
+        // knows round-1, the failed round-2 exists only as events.
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+          'round-2::user_message',
+          'round-2::execution_started',
+          'round-2::execution_failed',
+        ]);
+      });
+
+      it('drops a materialised interrupted round the caller removed', () => {
+        const conversation = eventsNativeStored();
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+        // Current document: the failed round-2 is materialised in the stored rounds.
+        conversation.rounds = eventsToRounds(conversation.events);
+        expect(conversation.rounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(conversation.rounds[1].interruption?.type).toBe('failed');
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+        ]);
+        expect(updated.rounds.map((round) => round.id)).toEqual(['round-1']);
+      });
+    });
+
     it('preserves additive events (reconcile/additive-survival)', () => {
       // This is the core new invariant. Step 2 will wire error production; the
       // machinery has to be ready to preserve additive events (ids without a
@@ -1990,6 +2149,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -2024,6 +2184,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -2083,6 +2244,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
         },
       };

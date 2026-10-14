@@ -24,10 +24,9 @@ import {
   JobStoppedCallout,
 } from '../../../components/logging/log_analysis_job_status';
 import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
-import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
-import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
+import { getAnalyzeInMlMenuItem, getRecreateMlJobPrimaryAction, LogsAppHeader } from '../header';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -54,7 +53,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
   const {
-    services: { ml, http },
+    services: { application, ml, http },
   } = useKibanaContextForPlugin();
 
   const { logViewStatus } = useLogViewContext();
@@ -218,6 +217,26 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
   });
 
   const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+  const recreateMlJobPrimaryAction = useMemo(
+    () =>
+      getRecreateMlJobPrimaryAction({
+        hasSetupCapabilities: hasLogAnalysisSetupCapabilities,
+        onClick: onOpenSetup,
+      }),
+    [hasLogAnalysisSetupCapabilities, onOpenSetup]
+  );
+  const analyzeInMlItem = useMemo(
+    () =>
+      analyzeInMlLink
+        ? [
+            getAnalyzeInMlMenuItem({
+              href: analyzeInMlLink,
+              navigateToUrl: application.navigateToUrl,
+            }),
+          ]
+        : undefined,
+    [analyzeInMlLink, application.navigateToUrl]
+  );
 
   return (
     <ViewLogInContextProvider
@@ -228,17 +247,13 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     >
       <LogsPageTemplate
         hasData={logViewStatus?.index !== 'missing'}
-        pageHeader={{
-          pageTitle,
-          rightSideItems: [
-            <RecreateJobButton
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              onClick={onOpenSetup}
-              size="s"
-            />,
-            <AnalyzeInMlButton href={analyzeInMlLink} />,
-          ],
-        }}
+        header={
+          <LogsAppHeader
+            title={pageTitle}
+            primaryActionItem={recreateMlJobPrimaryAction}
+            extraItems={analyzeInMlItem}
+          />
+        }
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>

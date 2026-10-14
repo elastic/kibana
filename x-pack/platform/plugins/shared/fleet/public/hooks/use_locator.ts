@@ -25,7 +25,3 @@ export function useDashboardLocator() {
 export function useDiscoverLocator() {
   return useLocator(LOCATORS_IDS.DISCOVER_APP_LOCATOR);
 }
-
-export function useAlertingV2RuleLibraryLocator() {
-  return useLocator<{ templateId?: string }>(LOCATORS_IDS.ALERTING_V2_RULE_LIBRARY);
-}

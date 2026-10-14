@@ -98,6 +98,11 @@ export const selectReplayExecutionId = createSelector(
   (detail) => detail.replay?.executionId ?? null
 );
 
+export const selectReplayIsTestRun = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.isTestRun === true
+);
+
 export const selectReplayStepExecutionId = createSelector(
   selectDetail,
   (detail) => detail.replay?.stepExecutionId ?? null
@@ -123,9 +128,15 @@ export const selectSchema = createSelector(selectDetail, (detail) => detail.sche
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
 export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectExecutionRequest = (state: RootState) => state.detail.executionRequest;
+export const selectExecutionError = (state: RootState) => state.detail.executionError;
 export const selectStepExecutionsTotal = createSelector(
   selectDetail,
   (detail) => detail.stepExecutionsTotal
+);
+export const selectStepExecutionPages = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionPages
 );
 export const selectStepExecutions = createSelector(
   selectExecution,

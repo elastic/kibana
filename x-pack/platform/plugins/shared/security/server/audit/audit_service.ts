@@ -192,6 +192,9 @@ export class AuditService {
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
         const forwardedFor = getForwardedFor(request);
+        // The request user is the actor. An event may also name who the action was taken on, as
+        // ECS `user.target`, and that is the event's to keep.
+        const target = event.user?.target;
 
         log({
           ...event,
@@ -205,6 +208,7 @@ export class AuditService {
                 ? { domain: user.authentication_realm.name }
                 : {}),
               roles: user.roles as string[],
+              ...(target ? { target } : {}),
             }) ||
             event.user,
           kibana: {

@@ -148,7 +148,7 @@ export const FormattedCell = ({
 );
 
 export interface LinkCellProps {
-  content: string;
+  content: ReactNode;
   linkColor?: string;
   onClick: () => void;
   alignment: Alignment;

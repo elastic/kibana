@@ -192,7 +192,7 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
       expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
         workflow: {
           id: 'wf-1',
@@ -585,6 +585,7 @@ describe('Execution Routes', () => {
       expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', {
         includeInput: true,
         includeOutput: false,
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: execution });
     });
@@ -604,6 +605,7 @@ describe('Execution Routes', () => {
         includeInput: false,
         includeOutput: false,
         omitStepExecutions: true,
+        request,
       });
     });
 
@@ -780,7 +782,8 @@ describe('Execution Routes', () => {
 
       expect(mockApi.getStepExecution).toHaveBeenCalledWith(
         { executionId: 'ex-1', id: 'se-1' },
-        'default'
+        'default',
+        request
       );
       expect(result).toEqual({ type: 'ok', body: step });
     });
@@ -885,9 +888,33 @@ describe('Execution Routes', () => {
           page: 1,
           size: 50,
         },
-        'default'
+        'default',
+        request
       );
       expect(result).toEqual({ type: 'ok', body: list });
+    });
+
+    it('returns 413 when a step page exceeds the response size limit', async () => {
+      mockApi.getExecutionStepExecutions.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+      const routeHandler = handler('GET', path);
+      if (!routeHandler) throw new Error('Steps route was not registered');
+
+      const result = await routeHandler(
+        mockContext,
+        { params: { executionId: 'ex-1' }, query: { page: 2, size: 5000 } },
+        mockResponse
+      );
+
+      expect(result).toMatchObject({
+        type: 'customError',
+        statusCode: 413,
+        body: { message: expect.stringContaining('too large to load') },
+      });
+      expect(mockResponse.ok).not.toHaveBeenCalled();
     });
 
     it('should return not found when the execution does not exist', async () => {
@@ -929,6 +956,10 @@ describe('Execution Routes', () => {
   });
 
   describe('executionStepsQuerySchema', () => {
+    it('keeps the public API default at 1000 steps when size is omitted', () => {
+      expect(executionStepsQuerySchema.validate({})).toEqual({ page: 1, size: 1000 });
+    });
+
     it('accepts integer page and size values', () => {
       expect(executionStepsQuerySchema.validate({ page: 2, size: 50 })).toEqual({
         page: 2,
@@ -986,6 +1017,7 @@ describe('Execution Routes', () => {
         sortField: 'timestamp',
         sortOrder: 'desc',
         stepExecutionId: 'step-ex-1',
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
     });
@@ -1009,6 +1041,7 @@ describe('Execution Routes', () => {
         sortField: undefined,
         sortOrder: undefined,
         stepExecutionId: undefined,
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
     });
@@ -1203,7 +1236,7 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.getChildWorkflowExecutions).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.getChildWorkflowExecutions).toHaveBeenCalledWith('ex-1', 'default', request);
       expect(result).toEqual({ type: 'ok', body: children });
     });
   });

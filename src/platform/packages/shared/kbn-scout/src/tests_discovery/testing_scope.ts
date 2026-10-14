@@ -35,6 +35,8 @@ const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
 const IGNORE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
 const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 const EXCLUDE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS);
+// Jest test files cannot affect Scout Playwright test execution regardless of which package owns them.
+const JEST_TEST_MATCHERS = compileMatchers(['**/*.test.ts']);
 
 const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
   matchers.some((m) => m.match(file));
@@ -53,11 +55,15 @@ const filterExisting = (
   });
 
 /**
- * Returns true when at least one changed file matches the Scout critical-files list.
- * A critical-files hit forces a full Scout suite run (selective testing skipped).
+ * Returns true when at least one non-noise, non-Jest-test changed file matches the Scout critical-files list.
  */
 export const criticalScoutFilesTouched = (changedFiles: readonly string[]): boolean =>
-  changedFiles.some((file) => matchesAny(file, CRITICAL_FILES_MATCHERS));
+  changedFiles.some(
+    (file) =>
+      !matchesAny(file, IGNORE_MATCHERS) &&
+      !matchesAny(file, JEST_TEST_MATCHERS) &&
+      matchesAny(file, CRITICAL_FILES_MATCHERS)
+  );
 
 /**
  * Returns true when, after dropping noise files (READMEs, markdown, changelogs),
@@ -166,8 +172,8 @@ export type ScoutTestingScope =
  * Decide which Scout testing scope to apply for a given diff.
  *
  * Decision tree (only when `selectiveTesting` is true and `codeChanges` is set):
- *   1. Critical Scout files touched      -> { kind: 'full', reason: 'critical-files' }
- *   2. Diff is exclusively Scout tests   -> { kind: 'tests-only', affectedConfigPaths }
+ *   1. Diff is exclusively Scout tests   -> { kind: 'tests-only', affectedConfigPaths }
+ *   2. Critical Scout files touched      -> { kind: 'full', reason: 'critical-files' }
  *   3. Otherwise                         -> { kind: 'dependency-tree', affectedModuleIds }
  *
  * When selective testing is disabled OR no code-changes file was provided, the
@@ -185,17 +191,19 @@ export const resolveScoutTestingScope = (
     return { kind: 'full', reason: 'selective-disabled' };
   }
 
-  if (criticalScoutFilesTouched(codeChanges.changedFiles)) {
-    log.warning('Selective testing: critical Scout files touched — running full Scout suite');
-    return { kind: 'full', reason: 'critical-files' };
-  }
-
+  // Tests-only runs first so kbn-scout's own spec files are not misclassified as
+  // critical-files via the broad 'src/platform/packages/shared/kbn-scout/**/*' pattern.
   if (isScoutTestsOnlyDiff(codeChanges.changedFiles)) {
     const affectedConfigPaths = deriveScoutConfigsForFiles(codeChanges.changedFiles, repoRoot);
     log.info(
       `Selective testing: tests-only fast path — ${affectedConfigPaths.size} affected Playwright config(s)`
     );
     return { kind: 'tests-only', affectedConfigPaths };
+  }
+
+  if (criticalScoutFilesTouched(codeChanges.changedFiles)) {
+    log.warning('Selective testing: critical Scout files touched — running full Scout suite');
+    return { kind: 'full', reason: 'critical-files' };
   }
 
   const affectedModuleIds: ReadonlySet<string> = new Set(codeChanges.affectedModules);

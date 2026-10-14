@@ -15,6 +15,7 @@ import {
   getPrecisionErrorWarningMessages,
   cloneLayer,
   getUnsupportedOperationsWarningMessage,
+  getCustomRankLastValueSortFieldWarningMessages,
 } from './utils';
 import type {
   FormBasedPrivateState,
@@ -22,10 +23,12 @@ import type {
   FramePublicAPI,
   IndexPattern,
   TermsIndexPatternColumn,
+  LastValueIndexPatternColumn,
   FormBasedLayer,
 } from '@kbn/lens-common';
-import { createMockedIndexPatternWithAdditionalFields } from './mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from './mocks';
 import { getLongMessage } from '../../user_messages_utils';
+import { TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD } from '../../user_messages_ids';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -224,7 +227,6 @@ describe('indexpattern_datasource utils', () => {
       });
     });
   });
-
   describe('cloneLayer', () => {
     test('should clone layer with renewing ids', () => {
       expect(
@@ -516,6 +518,144 @@ describe('indexpattern_datasource utils', () => {
           docLinks
         );
       }).not.toThrow();
+    });
+  });
+
+  describe('getCustomRankLastValueSortFieldWarningMessages', () => {
+    const buildState = (sortField?: string): FormBasedPrivateState =>
+      ({
+        currentIndexPatternId: '1',
+        layers: {
+          layer1: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'Top values of source',
+                customLabel: true,
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'source',
+                params: {
+                  orderBy: { type: 'custom' },
+                  orderDirection: 'desc',
+                  size: 3,
+                  orderAgg: {
+                    label: 'Last value of bytes',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'last_value',
+                    sourceField: 'bytes',
+                    params: { sortField, showArrayValues: false },
+                  },
+                },
+              },
+              col2: {
+                label: 'Count',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'count',
+                sourceField: '___records___',
+              },
+            },
+          },
+        },
+      } as FormBasedPrivateState);
+
+    const framePublicAPI = {
+      dataViews: {
+        indexPatterns: {
+          '1': createMockedIndexPattern(),
+        },
+      },
+    } as unknown as FramePublicAPI;
+
+    test('should not warn when the last_value sortField is a valid date field', () => {
+      expect(
+        getCustomRankLastValueSortFieldWarningMessages(buildState('timestamp'), framePublicAPI)
+      ).toHaveLength(0);
+    });
+
+    test('should not warn for a terms column that is not custom-ranked by last_value', () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Top values of source',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'source',
+                params: { orderBy: { type: 'alphabetical' }, orderDirection: 'asc', size: 3 },
+              },
+            },
+          },
+        },
+      } as unknown as FormBasedPrivateState;
+
+      expect(getCustomRankLastValueSortFieldWarningMessages(state, framePublicAPI)).toHaveLength(0);
+    });
+
+    test('should produce a non-blocking warning with the expected metadata when sortField is missing', () => {
+      const warningMessages = getCustomRankLastValueSortFieldWarningMessages(
+        buildState(undefined),
+        framePublicAPI
+      );
+
+      expect(warningMessages).toHaveLength(1);
+      expect(warningMessages[0]).toEqual(
+        expect.objectContaining({
+          uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [
+            { id: 'toolbar' },
+            { id: 'dimensionButton', dimensionId: 'col1' },
+            { id: 'embeddableBadge' },
+          ],
+        })
+      );
+    });
+
+    test('should not render a fix button when no setState is provided', () => {
+      const warningMessages = getCustomRankLastValueSortFieldWarningMessages(
+        buildState(undefined),
+        framePublicAPI
+      );
+
+      const { container } = render(
+        <I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>
+      );
+
+      expect(container).toHaveTextContent(
+        'Top values of source is ranked by the last value of bytes, but no date field is set. timestamp is used for now. Edit the visualization and set a date field in Rank by.'
+      );
+      expect(screen.queryByTestId('lnsCustomRankLastValueSortByField')).not.toBeInTheDocument();
+    });
+
+    test('should offer a fix that persists the default date field onto the order-agg', async () => {
+      const setState = jest.fn();
+      const state = buildState(undefined);
+      const warningMessages = getCustomRankLastValueSortFieldWarningMessages(
+        state,
+        framePublicAPI,
+        setState
+      );
+
+      render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
+      await userEvent.click(screen.getByTestId('lnsCustomRankLastValueSortByField'));
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const stateSetter = setState.mock.calls[0][0];
+      const newState = stateSetter(state);
+      const updatedColumn = newState.layers.layer1.columns.col1 as TermsIndexPatternColumn;
+      const updatedOrderAgg = updatedColumn.params.orderAgg as LastValueIndexPatternColumn;
+      expect(updatedOrderAgg?.params?.sortField).toBe('timestamp');
     });
   });
 });

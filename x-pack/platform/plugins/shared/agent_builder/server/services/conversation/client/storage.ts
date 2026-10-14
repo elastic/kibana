@@ -13,13 +13,13 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAccessControl,
+  ConversationEvent,
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
-  TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
-import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, UserPrincipalType } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
   ConversationReadByEntry,
@@ -34,6 +34,7 @@ const storageSettings = {
     properties: {
       user_id: types.keyword({}),
       user_name: types.keyword({}),
+      user_type: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
       title: types.text({
@@ -158,13 +159,14 @@ export interface PersistentConversationParentLink {
 export interface ConversationProperties {
   user_id?: string;
   user_name: string;
+  user_type?: UserPrincipalType;
   agent_id: string;
   space: string;
   title: string;
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
-  events?: TimelineEvent[];
+  events?: ConversationEvent[];
   active_execution?: ActiveExecution;
   schema_version?: number;
   attachments?: VersionedAttachment[];

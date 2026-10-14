@@ -50,6 +50,7 @@ export function buildInputDefaultRenderContext(
       startedAt: new Date(startedAt),
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
+      effectiveIdentity: workflowExecution.effectiveIdentity,
       triggeredBy: workflowExecution.triggeredBy,
       usage: workflowExecution.usage,
     },

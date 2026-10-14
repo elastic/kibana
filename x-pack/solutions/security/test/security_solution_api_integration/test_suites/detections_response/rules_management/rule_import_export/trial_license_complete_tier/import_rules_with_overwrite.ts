@@ -10,21 +10,35 @@ import expect from 'expect';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
+  getImportExceptionsListItemNewerVersionSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  assertNoRuleTask,
+  assertRuleTask,
+  clearChangeHistory,
   combineToNdJson,
   getCustomQueryRuleParams,
+  getRuleTaskId,
   fetchRule,
+  importRules,
   importRulesWithSuccess,
+  refreshChangeHistory,
 } from '../../../utils';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const detectionsApi = getService('detectionsApi');
+  const es = getService('es');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI import_rules with rule overwrite set to "true"', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+      await deleteAllExceptions(supertest, log);
     });
 
     it('DOES NOT report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
@@ -50,6 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
 
       expect(importedRule.name).toBe('Rule 2');
+      expect(importedRule.revision).toBe(0);
     });
 
     it('DOES NOT report a conflict if there is an attempt to import a rule twice', async () => {
@@ -117,6 +132,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(importedRule.id).toBe(existing.id);
       expect(importedRule.name).toBe('Imported rule');
+      expect(importedRule.revision).toBe(existing.revision + 1);
+      expect(importedRule.created_at).toBe(existing.created_at);
+      expect(importedRule.created_by).toBe(existing.created_by);
+      expect(importedRule.updated_at).not.toBe(existing.updated_at);
+      expect(typeof importedRule.updated_by).toBe('string');
     });
 
     /**
@@ -225,6 +245,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.id).toBe(existing.id);
       expect(body.enabled).toBe(true);
       expect(body.name).toBe('Enabled after overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      await assertRuleTask({
+        getService,
+        ruleId: body.id,
+        enabled: true,
+      });
     });
 
     it('disables an enabled rule when overwriting with enabled false', async () => {
@@ -237,6 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
           enabled: true,
         })
       );
+      const taskId = await getRuleTaskId({ getService, ruleId: existing.id });
 
       await importRulesWithSuccess({
         getService,
@@ -257,6 +284,572 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.id).toBe(existing.id);
       expect(body.enabled).toBe(false);
       expect(body.name).toBe('Disabled after overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      await assertRuleTask({
+        getService,
+        taskId,
+        enabled: false,
+      });
+    });
+
+    it('updates interval when overwriting an existing rule', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-interval-rule',
+          name: 'Before interval overwrite',
+          interval: '100m',
+          enabled: false,
+        })
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-interval-rule',
+            name: 'After interval overwrite',
+            interval: '1h',
+            enabled: false,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-interval-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.interval).toBe('1h');
+      expect(body.name).toBe('After interval overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      await assertNoRuleTask({
+        getService,
+        ruleId: body.id,
+      });
+    });
+
+    it('updates interval when overwriting an enabled rule', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-enabled-interval-rule',
+          name: 'Before enabled interval overwrite',
+          interval: '100m',
+          enabled: true,
+        })
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-enabled-interval-rule',
+            name: 'After enabled interval overwrite',
+            interval: '1h',
+            enabled: true,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-enabled-interval-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.interval).toBe('1h');
+      expect(body.enabled).toBe(true);
+      expect(body.name).toBe('After enabled interval overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      await assertRuleTask({
+        getService,
+        ruleId: body.id,
+        enabled: true,
+      });
+    });
+
+    it('attaches an exceptions list when overwriting an existing rule', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-exceptions-rule',
+          name: 'Before exceptions overwrite',
+          enabled: false,
+        })
+      );
+
+      const exceptionsList = [
+        {
+          id: 'overwrite-exceptions-list',
+          list_id: 'overwrite_exceptions_list',
+          type: 'detection' as const,
+          namespace_type: 'single' as const,
+        },
+      ];
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-exceptions-rule',
+            name: 'After exceptions overwrite',
+            enabled: false,
+            exceptions_list: exceptionsList,
+          }),
+          {
+            ...getImportExceptionsListSchemaMock('overwrite_exceptions_list'),
+            type: 'detection',
+          },
+          getImportExceptionsListItemNewerVersionSchemaMock(
+            'overwrite_exceptions_item',
+            'overwrite_exceptions_list'
+          ),
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_count: 1,
+        errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 1,
+        exceptions_errors: [],
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-exceptions-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.name).toBe('After exceptions overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      expect(body.exceptions_list).toEqual([
+        {
+          ...exceptionsList[0],
+          id: expect.any(String),
+        },
+      ]);
+    });
+
+    it('clears exception lists when they are omitted from an overwritten rule', async () => {
+      const ruleId = 'overwrite-empty-exceptions-rule';
+      const listId = 'overwrite_empty_exceptions_list';
+      const exceptionsList = [
+        {
+          id: 'overwrite-empty-exceptions-list',
+          list_id: listId,
+          type: 'detection' as const,
+          namespace_type: 'single' as const,
+        },
+      ];
+
+      const createResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'Before empty exceptions overwrite',
+            enabled: false,
+            exceptions_list: exceptionsList,
+          }),
+          {
+            ...getImportExceptionsListSchemaMock(listId),
+            type: 'detection',
+          },
+          getImportExceptionsListItemNewerVersionSchemaMock(
+            'overwrite_empty_exceptions_item',
+            listId
+          ),
+        ],
+        overwrite: false,
+      });
+
+      expect(createResponse).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_count: 1,
+        errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 1,
+        exceptions_errors: [],
+      });
+
+      const { body: existing } = await detectionsApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
+
+      expect(existing.exceptions_list).toEqual([
+        {
+          ...exceptionsList[0],
+          id: expect.any(String),
+        },
+      ]);
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'After omitted exceptions overwrite',
+            enabled: false,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.name).toBe('After omitted exceptions overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      expect(body.exceptions_list).toEqual([]);
+    });
+
+    it('overwrites an existing exception list with the rule', async () => {
+      const ruleId = 'overwrite-existing-exceptions-rule';
+      const listId = 'overwrite_existing_exceptions_list';
+      const exceptionsList = [
+        {
+          id: 'overwrite-existing-exceptions-list',
+          list_id: listId,
+          type: 'detection' as const,
+          namespace_type: 'single' as const,
+        },
+      ];
+      const oldItem = {
+        ...getImportExceptionsListItemNewerVersionSchemaMock('old_item', listId),
+        name: 'Old exception item',
+      };
+      const newItem = {
+        ...getImportExceptionsListItemNewerVersionSchemaMock('replacement_item', listId),
+        name: 'Replacement exception item',
+      };
+
+      await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'Before exception list overwrite',
+            enabled: false,
+            exceptions_list: exceptionsList,
+          }),
+          {
+            ...getImportExceptionsListSchemaMock(listId),
+            name: 'Before exception list overwrite',
+          },
+          oldItem,
+        ],
+        overwrite: false,
+      });
+
+      const { body: existing } = await detectionsApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
+      await supertest
+        .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${oldItem.item_id}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'After exception list overwrite',
+            enabled: false,
+            exceptions_list: exceptionsList,
+          }),
+          {
+            ...getImportExceptionsListSchemaMock(listId),
+            name: 'After exception list overwrite',
+          },
+          newItem,
+        ],
+        overwrite: true,
+        overwriteExceptions: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_count: 1,
+        errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 1,
+        exceptions_errors: [],
+      });
+
+      const { body } = await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
+      const { body: list } = await supertest
+        .get(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+      await supertest
+        .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${oldItem.item_id}`)
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+      const { body: item } = await supertest
+        .get(`${EXCEPTION_LIST_ITEM_URL}?item_id=${newItem.item_id}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.name).toBe('After exception list overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      expect(body.exceptions_list).toEqual(existing.exceptions_list);
+      expect(list.name).toBe('After exception list overwrite');
+      expect(item).toMatchObject(newItem);
+    });
+
+    it('reports partial success when overwriting a batch with one schema-invalid rule', async () => {
+      const first = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-1',
+          name: 'Existing one',
+          enabled: false,
+        })
+      );
+      const second = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-2',
+          name: 'Existing two',
+          enabled: false,
+        })
+      );
+      const failed = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-bad',
+          name: 'Existing bad',
+          enabled: false,
+        })
+      );
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-1',
+            name: 'Updated one',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-2',
+            name: 'Updated two',
+            enabled: false,
+          }),
+          {
+            ...getCustomQueryRuleParams({
+              rule_id: 'overwrite-partial-bad',
+              name: 'Should not update',
+              enabled: false,
+            }),
+            risk_score: 101,
+          },
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: false,
+        success_count: 2,
+        rules_count: 3,
+        errors: [
+          {
+            error: {
+              message: 'risk_score: Too big: expected number to be <=100',
+              status_code: 400,
+            },
+          },
+        ],
+      });
+      // Schema validation failures currently omit rule_id on the error object.
+      expect(importResponse.errors[0].rule_id).toBeUndefined();
+
+      const { body: updatedFirst } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-1' } })
+        .expect(200);
+      const { body: updatedSecond } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-2' } })
+        .expect(200);
+      const { body: unchanged } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-bad' } })
+        .expect(200);
+
+      expect(updatedFirst.id).toBe(first.id);
+      expect(updatedFirst.name).toBe('Updated one');
+      expect(updatedFirst.revision).toBe(first.revision + 1);
+      expect(updatedSecond.id).toBe(second.id);
+      expect(updatedSecond.name).toBe('Updated two');
+      expect(updatedSecond.revision).toBe(second.revision + 1);
+      expect(unchanged.id).toBe(failed.id);
+      expect(unchanged.name).toBe('Existing bad');
+      expect(unchanged.revision).toBe(failed.revision);
+    });
+
+    it('reports partial success when one overwrite target references a missing connector', async () => {
+      const first = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-1',
+          name: 'Existing one',
+          enabled: false,
+        })
+      );
+      const second = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-2',
+          name: 'Existing two',
+          enabled: false,
+        })
+      );
+      const failed = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-bad',
+          name: 'Existing bad',
+          enabled: false,
+        })
+      );
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-1',
+            name: 'Updated one',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-2',
+            name: 'Updated two',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-bad',
+            name: 'Should not update',
+            enabled: false,
+            actions: [
+              {
+                group: 'default',
+                id: 'missing-overwrite-connector',
+                action_type_id: '.webhook',
+                params: {},
+              },
+            ],
+          }),
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: false,
+        success_count: 2,
+        rules_count: 3,
+        errors: [
+          {
+            rule_id: 'overwrite-partial-bad',
+            error: {
+              status_code: 404,
+              message:
+                'Rule actions reference the following missing action IDs: missing-overwrite-connector',
+            },
+          },
+        ],
+      });
+
+      const { body: updatedFirst } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-1' } })
+        .expect(200);
+      const { body: updatedSecond } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-2' } })
+        .expect(200);
+      const { body: unchanged } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-bad' } })
+        .expect(200);
+
+      expect(updatedFirst.id).toBe(first.id);
+      expect(updatedFirst.name).toBe('Updated one');
+      expect(updatedFirst.revision).toBe(first.revision + 1);
+      expect(updatedSecond.id).toBe(second.id);
+      expect(updatedSecond.name).toBe('Updated two');
+      expect(updatedSecond.revision).toBe(second.revision + 1);
+      expect(unchanged.id).toBe(failed.id);
+      expect(unchanged.name).toBe('Existing bad');
+      expect(unchanged.revision).toBe(failed.revision);
+    });
+
+    // History API is ESS-only until ruleChangesHistoryEnabled is on in serverless.
+    describe('@ess @skipInServerless overwrite change history', () => {
+      beforeEach(async () => {
+        await clearChangeHistory(es);
+      });
+
+      it('records rule_import when overwriting an existing rule', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: 'overwrite-history-rule',
+              name: 'Before import overwrite',
+              enabled: false,
+            }),
+          })
+          .expect(200);
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [
+            getCustomQueryRuleParams({
+              rule_id: 'overwrite-history-rule',
+              name: 'After import overwrite',
+              enabled: false,
+            }),
+          ],
+          overwrite: true,
+        });
+
+        await refreshChangeHistory(es);
+
+        const { body } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        expect(body.items).toHaveLength(2);
+
+        const [imported, created] = body.items;
+        expect(imported.action).toBe('rule_import');
+        expect(imported.metadata?.bulk_count).toBe(1);
+        expect(imported.rule.revision).toBe(1);
+        expect(imported.rule.name).toBe('After import overwrite');
+        expect(imported.old_values).toMatchObject({
+          name: 'Before import overwrite',
+          revision: 0,
+        });
+        expect(imported.rule.created_at).not.toBe(imported.rule.updated_at);
+
+        expect(created.action).toBe('rule_create');
+        expect(created.metadata?.bulk_count).toBeUndefined();
+        expect(created.rule.revision).toBe(0);
+        expect(created.rule.name).toBe('Before import overwrite');
+        expect(created.old_values).toBeNull();
+      });
     });
   });
 };

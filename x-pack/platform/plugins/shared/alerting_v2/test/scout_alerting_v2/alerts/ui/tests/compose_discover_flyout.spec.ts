@@ -34,10 +34,12 @@ const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
 const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
 const TIMESTAMP_ONLY_BASE_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
 const TIMESTAMP_ONLY_BREACH_SEGMENT = 'WHERE count > 100';
+// An independent recovery query is the one shape the visual builder cannot author.
+const TIMESTAMP_ONLY_RECOVERY_QUERY = `${TIMESTAMP_ONLY_BASE_QUERY} | WHERE count <= 100`;
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
-const YAML_ONLY_STANDALONE_RULE_NAME = 'scout-compose-discover-yaml-only-standalone';
+const YAML_ONLY_RULE_NAME = 'scout-compose-discover-yaml-only-recovery-query';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
 /**
  * Index with a valid `@timestamp` (so it auto-detects) plus a second date
@@ -52,10 +54,11 @@ const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -122,7 +125,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
@@ -194,7 +199,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
-      await test.step('submit and verify rule created', async () => {
+      await test.step('submit and capture rule for teardown', async () => {
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
@@ -204,14 +209,24 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
-              return items[0]?.artifacts?.some(
-                (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
-              );
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe(true);
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule includes the runbook artifact', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(
+          items[0]?.artifacts?.some(
+            (artifact) =>
+              artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
+          )
+        ).toBe(true);
       });
     });
 
@@ -226,11 +241,9 @@ test.describe(
           buildCreateRuleData({
             kind: 'signal',
             state_transition: undefined,
-            recovery_strategy: undefined,
-            query: {
-              format: 'standalone',
-              breach: { query: TEST_QUERY },
-            },
+            recovery: undefined,
+            no_data: undefined,
+            query: { base: TEST_QUERY },
             metadata: { name: EDIT_RULE_NAME },
             artifacts: [
               {
@@ -242,6 +255,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -292,15 +306,14 @@ test.describe(
           buildCreateRuleData({
             kind: 'signal',
             state_transition: undefined,
-            recovery_strategy: undefined,
-            query: {
-              format: 'standalone',
-              breach: { query: NO_TIME_FIELD_QUERY },
-            },
+            recovery: undefined,
+            no_data: undefined,
+            query: { base: NO_TIME_FIELD_QUERY },
             metadata: { name: NO_TIME_FIELD_RULE_NAME },
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -350,7 +363,6 @@ test.describe(
           buildCreateRuleData({
             kind: 'alert',
             query: {
-              format: 'composed',
               base: TIMESTAMP_ONLY_BASE_QUERY,
               breach: { segment: TIMESTAMP_ONLY_BREACH_SEGMENT },
             },
@@ -361,6 +373,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -396,23 +409,25 @@ test.describe(
       });
     });
 
-    test('edit flow: alert + standalone opens YAML-only', async ({ pageObjects, apiServices }) => {
+    test('edit flow: alert + recovery query opens YAML-only', async ({
+      pageObjects,
+      apiServices,
+    }) => {
       let ruleId: string;
 
-      await test.step('seed an alert + standalone rule via API', async () => {
+      await test.step('seed an alert rule with an independent recovery query via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
-            query: {
-              format: 'standalone',
-              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
-            },
+            query: { base: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
+            recovery: { strategy: 'query', query: TIMESTAMP_ONLY_RECOVERY_QUERY },
             time_field: 'timestamp',
             grouping: { fields: ['Carrier'] },
-            metadata: { name: YAML_ONLY_STANDALONE_RULE_NAME },
+            metadata: { name: YAML_ONLY_RULE_NAME },
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -435,19 +450,18 @@ test.describe(
     }) => {
       let ruleId: string;
 
-      await test.step('seed an alert + standalone rule with tags (opens YAML-only)', async () => {
+      await test.step('seed an alert rule with tags and a recovery query (opens YAML-only)', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
-            query: {
-              format: 'standalone',
-              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
-            },
+            query: { base: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
+            recovery: { strategy: 'query', query: TIMESTAMP_ONLY_RECOVERY_QUERY },
             time_field: 'timestamp',
             metadata: { name: 'scout-yaml-clear-tags', tags: ['prod', 'infra'] },
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
         expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
       });
 
@@ -460,13 +474,13 @@ test.describe(
       });
 
       await test.step('remove the tags block from the YAML buffer', async () => {
-        const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
+        const yaml = await pageObjects.composeDiscover.getYamlText();
         expect(yaml).toContain('tags:');
         // `tags` is serialized last under `metadata` as a block sequence; drop the
         // `tags:` line and its indented `- item` lines. The next key is top-level.
         const withoutTags = yaml.replace(/\n[ \t]*tags:[^\n]*(\n[ \t]+-[^\n]*)*/, '');
         expect(withoutTags).not.toContain('tags:');
-        await pageObjects.composeDiscover.setYamlEditorValue(withoutTags);
+        await pageObjects.composeDiscover.setYamlText(withoutTags);
       });
 
       await test.step('save via YAML and verify the rule has no tags', async () => {
@@ -525,6 +539,9 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: TWO_DATE_FIELDS_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }
@@ -569,6 +586,9 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }

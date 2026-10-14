@@ -9,7 +9,26 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
-import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
+import {
+  assertRenderedHitlEmailRecipients,
+  buildDefaultHitlApprovalEmailMessage,
+  buildHitlEmailConnectorInput,
+  buildHitlExecutionFooterPath,
+  renderHitlEmailAddresses,
+  resolveHitlEmailSubject,
+} from './build_hitl_email_notification';
+import {
+  assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
+  buildSlack2SendMessageInput,
+  escapeServiceNowCommentText,
+  executeHitlHttpChannel,
+  fitHitlTextPreservingSuffix,
+  renderServiceNowField,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
+  slackApiChannelTarget,
+} from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
@@ -42,6 +61,29 @@ export function buildWaitForApprovalResumeLinks({
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildServiceNowApprovalComment({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeServiceNowCommentText(message),
+    `${serviceNowCommentLink(approveLabel, approveUrl)}\n${serviceNowCommentLink(
+      rejectLabel,
+      rejectUrl
+    )}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildSlackMessage({
@@ -131,6 +173,10 @@ export async function sendWaitForApprovalNotifications({
   approveLabel,
   rejectLabel,
   resumeLinks,
+  spaceId,
+  workflowId,
+  executionId,
+  renderTemplate,
   connectorExecutor,
   abortController,
 }: {
@@ -139,6 +185,10 @@ export async function sendWaitForApprovalNotifications({
   approveLabel: string;
   rejectLabel: string;
   resumeLinks: WaitForApprovalResumeLinks;
+  spaceId: string;
+  workflowId: string;
+  executionId: string;
+  renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
 }): Promise<void> {
@@ -176,5 +226,77 @@ export async function sendWaitForApprovalNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const emailConfig = channels.email;
+  if (emailConfig?.['connector-id']) {
+    const emailTo = renderHitlEmailAddresses(emailConfig.to, renderTemplate);
+    assertRenderedHitlEmailRecipients(emailTo);
+    const result = await connectorExecutor.execute({
+      connectorType: 'email',
+      connectorNameOrId: emailConfig['connector-id'],
+      input: buildHitlEmailConnectorInput({
+        emailConfig: {
+          ...emailConfig,
+          to: emailTo,
+          cc: renderHitlEmailAddresses(emailConfig.cc, renderTemplate),
+          bcc: renderHitlEmailAddresses(emailConfig.bcc, renderTemplate),
+        },
+        subject: resolveHitlEmailSubject(
+          emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
+          'approval'
+        ),
+        message: buildDefaultHitlApprovalEmailMessage(linkParams),
+        footerLinkPath: buildHitlExecutionFooterPath({ spaceId, workflowId, executionId }),
+      }),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const slack2Config = channels.slack2;
+  const slack2ConnectorId = slack2Config?.['connector-id'];
+  const slack2Channels = slack2Config?.channels;
+  if (slack2ConnectorId && slack2Channels?.length) {
+    const text = buildSlackMessage(linkParams);
+    for (const channel of slack2Channels) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack2',
+        connectorNameOrId: slack2ConnectorId,
+        input: buildSlack2SendMessageInput(channel, text),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
+    const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(
+        table,
+        sysId,
+        buildServiceNowApprovalComment(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }

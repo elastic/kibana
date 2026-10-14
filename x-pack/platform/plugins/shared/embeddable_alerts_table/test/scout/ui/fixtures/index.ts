@@ -5,34 +5,8 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { EmbeddableAlertsTablePage } from './page_objects';
+import { test } from '@kbn/scout';
 
-export interface ExtScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
-    embeddableAlertsTable: EmbeddableAlertsTablePage;
-  };
-}
-
-export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: ExtScoutTestFixtures['pageObjects'];
-      page: ExtScoutTestFixtures['page'];
-    },
-    use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    const extendedPageObjects = {
-      ...pageObjects,
-      embeddableAlertsTable: createLazyPageObject(EmbeddableAlertsTablePage, page),
-    };
-
-    await use(extendedPageObjects);
-  },
-});
-
+// `pageObjects.embeddableAlertsTable` comes from @kbn/scout, nothing to extend here.
+export { test };
 export * as testData from './constants';

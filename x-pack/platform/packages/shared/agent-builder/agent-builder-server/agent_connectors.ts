@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isSelectedActionEnabled, isToolAction } from '@kbn/connector-specs';
+import type { SelectedActions } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
 interface MinimalActionsClient {
   getAll(): Promise<Array<{ id: string; name: string; actionTypeId: string }>>;
-  get(opts: { id: string }): Promise<{ id: string; name: string; actionTypeId: string }>;
+  get(opts: { id: string }): Promise<{
+    id: string;
+    name: string;
+    actionTypeId: string;
+    config?: Record<string, unknown>;
+  }>;
 }
 
 export interface ConnectorSummary {
@@ -77,8 +83,10 @@ export const getAgentConnectorDetail = async (
   const spec = getConnectorSpec(connector.actionTypeId);
   if (!spec) return null;
 
+  const selectedActions = connector.config?.selectedActions as SelectedActions;
+
   const subActions: ConnectorSubActionDetail[] = Object.entries(spec.actions)
-    .filter(([name]) => isToolAction(spec, name))
+    .filter(([name]) => isToolAction(spec, name) && isSelectedActionEnabled(name, selectedActions))
     .map(([name, action]) => ({
       name,
       description: action.description ?? name,

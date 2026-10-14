@@ -17,6 +17,9 @@ export type { CoreAuditService } from './src/audit';
 export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
+  ServiceAccountWorkloadDetails,
+  ServiceAccountWorkloadLocator,
+  ServiceAccountWorkloadResolver,
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
@@ -27,21 +30,25 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
 export type {
+  AuthenticatedPrincipal,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
+  CoreSecurityDelegateHandle,
+  CoreSecurityDelegateServiceAccounts,
+  ResolvedServiceAccountWorkload,
+  ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
@@ -71,6 +78,7 @@ export {
   isMissingApiKey,
   isRevokedApiKey,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,

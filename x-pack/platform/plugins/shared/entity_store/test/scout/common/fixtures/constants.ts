@@ -45,6 +45,8 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
+    ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/enable`,
+    DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/disable`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
     CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
@@ -60,6 +62,9 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
+    START: `${INTERNAL_BASE}/start`,
+    STOP: `${INTERNAL_BASE}/stop`,
+    ENGINE_CONFIG: (entityType: string) => `${INTERNAL_BASE}/${entityType}`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE}/force_history_snapshot`,

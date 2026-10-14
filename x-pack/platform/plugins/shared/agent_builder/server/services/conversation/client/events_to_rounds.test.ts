@@ -17,8 +17,14 @@ import {
   EventActorType,
   TimelineEventType,
   TimelineTriggerType,
+  ZERO_MODEL_USAGE,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  pauseState,
+  promptResponseEvent as promptResponse,
+  userMessageEvent as userMessage,
+} from '../../../test_utils/timeline';
 import { eventsToRounds } from './events_to_rounds';
 
 const usage: RoundModelUsageStats = {
@@ -108,6 +114,391 @@ const executionEvents = ({
     },
   ] as TimelineEvent[];
 };
+
+/** Local sibling of `executionEvents`: started + step events + failed/aborted terminal. */
+const interruptedExecutionEvents = ({
+  roundId,
+  executionId,
+  triggerEventId,
+  triggerType,
+  steps,
+  interruption,
+  createdAt,
+  modelUsage,
+  timeToFirstToken,
+}: {
+  roundId: string;
+  executionId: string;
+  triggerEventId: string;
+  triggerType: TimelineTriggerType;
+  steps: ConversationRoundStep[];
+  interruption:
+    | { type: 'failed'; error: { code: string; message: string } }
+    | { type: 'aborted'; aborted_by?: { source: 'api' } };
+  createdAt: string;
+  modelUsage?: RoundModelUsageStats;
+  timeToFirstToken?: number;
+}): TimelineEvent[] => {
+  const idPrefix = executionId === `${roundId}::execution` ? roundId : executionId;
+  const summary = {
+    time_to_last_token: 100,
+    ...(modelUsage ? { model_usage: modelUsage } : {}),
+    ...(timeToFirstToken !== undefined ? { time_to_first_token: timeToFirstToken } : {}),
+  };
+  return [
+    {
+      id: `${idPrefix}::execution_started`,
+      type: TimelineEventType.executionStarted,
+      created_at: createdAt,
+      actor: agentActor,
+      execution_id: executionId,
+      trigger_event_id: triggerEventId,
+      data: { trigger_type: triggerType },
+    },
+    ...steps.map((s, i) => ({
+      id: `${idPrefix}::step::${i}`,
+      type: TimelineEventType.executionStep as const,
+      created_at: createdAt,
+      actor: agentActor,
+      execution_id: executionId,
+      trigger_event_id: triggerEventId,
+      data: { step: s, sequence: i },
+    })),
+    interruption.type === 'failed'
+      ? {
+          id: `${idPrefix}::execution_failed`,
+          type: TimelineEventType.executionFailed,
+          created_at: createdAt,
+          actor: agentActor,
+          execution_id: executionId,
+          trigger_event_id: triggerEventId,
+          data: { ...summary, error: interruption.error },
+        }
+      : {
+          id: `${idPrefix}::execution_aborted`,
+          type: TimelineEventType.executionAborted,
+          created_at: createdAt,
+          actor: agentActor,
+          execution_id: executionId,
+          trigger_event_id: triggerEventId,
+          data: {
+            ...summary,
+            ...(interruption.aborted_by ? { aborted_by: interruption.aborted_by } : {}),
+          },
+        },
+  ] as TimelineEvent[];
+};
+
+describe('eventsToRounds — interrupted executions', () => {
+  const T0 = '2026-01-01T00:00:00.000Z';
+  const T1 = '2026-01-01T00:01:00.000Z';
+  const boom = { code: 'internalError', message: 'boom' };
+
+  it('folds a failed exec_0 into a completed round with interruption, steps and defaults', () => {
+    const rounds = eventsToRounds([
+      userMessage('r1', T0),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [reasoningStep('thinking'), toolStep('tc1', [])],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T0,
+      }),
+    ]);
+    expect(rounds).toHaveLength(1);
+    expect(rounds[0]).toMatchObject({
+      id: 'r1',
+      status: ConversationRoundStatus.completed,
+      response: { message: '' },
+      interruption: { type: 'failed', error: boom },
+      time_to_first_token: 0,
+      time_to_last_token: 100,
+      model_usage: ZERO_MODEL_USAGE,
+    });
+    expect(rounds[0].steps).toHaveLength(2);
+    expect(rounds[0].state).toBeUndefined();
+    expect(rounds[0].pending_prompts).toBeUndefined();
+  });
+
+  it('folds an aborted exec_0 keeping aborted_by and the terminal model usage', () => {
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [],
+        interruption: { type: 'aborted', aborted_by: { source: 'api' } },
+        createdAt: T0,
+        modelUsage: usage,
+      }),
+    ]);
+    expect(round.interruption).toEqual({ type: 'aborted', aborted_by: { source: 'api' } });
+    expect(round.model_usage).toEqual(usage);
+  });
+
+  it('exec_0 paused + exec_1 interrupted → completed with interruption, merged steps, summed usage, prompt consumed', () => {
+    const rounds = eventsToRounds([
+      userMessage('r1', T0),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [toolStep('tc1', [])],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ id: 'p', type: AgentPromptType.confirmation, tool_call_id: 'tc1' } as never],
+        },
+        createdAt: T0,
+      }),
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [
+          toolStep('tc1', [{ type: 'other', tool_result_id: 'x', data: {} }]),
+          reasoningStep('after'),
+        ],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T1,
+        modelUsage: usage,
+      }),
+    ]);
+    expect(rounds).toHaveLength(1);
+    const [round] = rounds;
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    expect(round.interruption).toEqual({ type: 'failed', error: boom });
+    expect(round.pending_prompts).toBeUndefined();
+    expect(round.state).toBeUndefined();
+    expect(
+      round.steps.map(
+        (s) =>
+          (s as { tool_call_id?: string; reasoning?: string }).tool_call_id ??
+          (s as { reasoning: string }).reasoning
+      )
+    ).toEqual(['tc1', 'after']);
+    expect(round.model_usage.llm_calls).toBe(2);
+    expect(round.time_to_first_token).toBe(10);
+  });
+
+  it('exec_0 paused with no prompt_response stays awaiting_prompt', () => {
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [],
+        outcome: { type: 'prompt_requested', prompts: [] },
+        createdAt: T0,
+      }),
+    ]);
+    expect(round.status).toBe(ConversationRoundStatus.awaitingPrompt);
+  });
+
+  it('a dangling prompt_response consumes the pause (completed, empty response)', () => {
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [],
+        outcome: { type: 'prompt_requested', prompts: [] },
+        createdAt: T0,
+      }),
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+    ]);
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    expect(round.response).toEqual({ message: '' });
+    expect(round.pending_prompts).toBeUndefined();
+    expect(round.interruption).toBeUndefined();
+  });
+
+  it('skips an orphan interrupted exec_k and an in-progress round', () => {
+    expect(
+      eventsToRounds([
+        promptResponse('r1', 1, 'r1::execution_terminated', T1),
+        ...interruptedExecutionEvents({
+          roundId: 'r1',
+          executionId: 'r1::execution::1',
+          triggerEventId: 'r1::prompt_response::1',
+          triggerType: TimelineTriggerType.promptResponse,
+          steps: [],
+          interruption: { type: 'failed', error: boom },
+          createdAt: T1,
+        }),
+      ])
+    ).toEqual([]);
+    expect(eventsToRounds([userMessage('r1', T0)])).toEqual([]);
+  });
+
+  it('old shape: exec_0 paused, exec_1 failed, exec_2 paused → awaiting_prompt on exec_2', () => {
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [],
+        outcome: { type: 'prompt_requested', prompts: [] },
+        createdAt: T0,
+      }),
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T1,
+      }),
+      promptResponse('r1', 2, 'r1::execution_terminated', T1),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::2',
+        triggerEventId: 'r1::prompt_response::2',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ id: 'p2', type: AgentPromptType.ask_user_question, questions: [] } as never],
+        },
+        createdAt: T1,
+      }),
+    ]);
+    expect(round.status).toBe(ConversationRoundStatus.awaitingPrompt);
+    expect(round.pending_prompts?.[0].id).toBe('p2');
+    expect(round.interruption).toBeUndefined();
+  });
+
+  it('marks the paused calls an interrupted resume never reached, leaves an unmarked empty return alone', () => {
+    const pausedTerminal = executionEvents({
+      roundId: 'r1',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+      triggerType: TimelineTriggerType.userMessage,
+      steps: [toolStep('tc1', []), toolStep('tc2', [])],
+      outcome: { type: 'prompt_requested', prompts: [] },
+      createdAt: T0,
+    });
+    // attach the pause state naming both calls to the terminal
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+      data: Record<string, unknown>;
+    };
+    terminated.data = { ...terminated.data, state: pauseState(['tc1', 'tc2']) };
+
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...pausedTerminal,
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        // tc2 has an unmarked copy with an empty return; tc1 has no copy
+        steps: [toolStep('tc2', [])],
+        interruption: { type: 'aborted' },
+        createdAt: T1,
+      }),
+    ]);
+    const byId = new Map(round.steps.map((s) => [(s as { tool_call_id: string }).tool_call_id, s]));
+    expect((byId.get('tc1') as { interrupted?: true }).interrupted).toBe(true);
+    expect((byId.get('tc2') as { interrupted?: true }).interrupted).toBeUndefined();
+  });
+
+  it('a successful retry after an interrupted resume clears the mark on the resolved call (legacy history)', () => {
+    // Before interrupted executions folded into rounds, a failed resume left the round awaiting
+    // the prompt and the user answered again: exec_0 paused, exec_1 failed, exec_2 completed.
+    const T2 = '2026-01-01T00:02:00.000Z';
+    const pausedTerminal = executionEvents({
+      roundId: 'r1',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+      triggerType: TimelineTriggerType.userMessage,
+      steps: [toolStep('tc1', [])],
+      outcome: { type: 'prompt_requested', prompts: [] },
+      createdAt: T0,
+    });
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+      data: Record<string, unknown>;
+    };
+    terminated.data = { ...terminated.data, state: pauseState(['tc1']) };
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...pausedTerminal,
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T1,
+      }),
+      promptResponse('r1', 2, 'r1::execution_terminated', T2),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::2',
+        triggerEventId: 'r1::prompt_response::2',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [toolStep('tc1', [{ ok: true }])],
+        outcome: { type: 'responded', response: { message: 'done' } },
+        createdAt: T2,
+      }),
+    ]);
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    expect(round.interruption).toBeUndefined();
+    expect(round.response.message).toBe('done');
+    expect(round.steps).toHaveLength(1);
+    expect(round.steps[0]).not.toHaveProperty('interrupted');
+    expect((round.steps[0] as { results: unknown[] }).results).toEqual([{ ok: true }]);
+  });
+
+  it('a setup-window failure (no exec_k steps) marks every paused call', () => {
+    const pausedTerminal = executionEvents({
+      roundId: 'r1',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+      triggerType: TimelineTriggerType.userMessage,
+      steps: [toolStep('tc1', [])],
+      outcome: { type: 'prompt_requested', prompts: [] },
+      createdAt: T0,
+    });
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+      data: Record<string, unknown>;
+    };
+    terminated.data = { ...terminated.data, state: pauseState(['tc1']) };
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...pausedTerminal,
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T1,
+      }),
+    ]);
+    expect((round.steps[0] as { interrupted?: true }).interrupted).toBe(true);
+    expect(round.model_usage).toEqual(usage); // exec_0's usage + ZERO
+  });
+});
 
 describe('eventsToRounds — multi-execution HITL fold', () => {
   it('ignores an orphan resume without its initial execution', () => {

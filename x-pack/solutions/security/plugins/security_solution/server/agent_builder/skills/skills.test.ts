@@ -17,14 +17,13 @@ import {
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
 } from './siem_migration';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 
 const endpointAppContextService = createMockEndpointAppContext().service;
-const getStartServices = jest.fn();
 const elasticDefendPolicyManagementSkill = createElasticDefendPolicyManagementSkill({
   endpointAppContextService,
-  getStartServices,
 });
 
 const ALL_SKILLS = [
@@ -36,6 +35,7 @@ const ALL_SKILLS = [
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
   elasticDefendPolicyManagementSkill,
 ];
 
@@ -268,6 +268,32 @@ describe('Security Skills', () => {
       expect(automaticMigrationRulesStartMigrationSkill.description).not.toContain(
         'SIEM migration'
       );
+    });
+  });
+
+  describe('automatic-migration-rules-install-rules skill', () => {
+    it('validates and registers the complete install workflow tool set', async () => {
+      await expect(
+        validateSkillDefinition(automaticMigrationRulesInstallRulesSkill)
+      ).resolves.toBeDefined();
+
+      expect(automaticMigrationRulesInstallRulesSkill.getRegistryTools!()).toEqual([
+        'security.siem_migration.get_all_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_translation_stats',
+        'security.siem_migration.get_migration_rules',
+        'security.build_redirect_url',
+        'security.siem_migration.install_migration_rules',
+      ]);
+    });
+
+    it('documents result semantics, linked sample, and follow-up choices', () => {
+      const { content } = automaticMigrationRulesInstallRulesSkill;
+
+      expect(content).toContain('Rules: All');
+      expect(content).toContain('processed N rules');
+      expect(content).toContain('/app/security/rules/id/');
+      expect(content).toContain('Sample of installed rules');
     });
   });
 

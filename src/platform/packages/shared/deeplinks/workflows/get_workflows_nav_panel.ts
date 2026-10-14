@@ -53,11 +53,11 @@ interface WorkflowsNavNode {
 export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavNode[] => {
   const libraryEnabled = core.settings.globalClient.get<boolean>(
     WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-    false
+    true
   );
   const executionsViewEnabled = core.settings.globalClient.get<boolean>(
     WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
-    false
+    true
   );
 
   const links: NonNullable<WorkflowsNavNode['children']> = [];

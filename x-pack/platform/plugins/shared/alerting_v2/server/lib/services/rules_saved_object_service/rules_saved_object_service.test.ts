@@ -338,6 +338,23 @@ describe('RulesSavedObjectService', () => {
       );
     });
 
+    it('aggregates metadata.tags by default and metadata.routing_tags when asked', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'sre' }]));
+
+      await rulesSavedObjectService.findTags();
+      await rulesSavedObjectService.findTags({ field: 'routing_tags' });
+
+      const [defaultCall, routingCall] = mockSavedObjectsClient.find.mock.calls.map(
+        ([args]) => args
+      );
+      expect((defaultCall.aggs as any).tags.terms.field).toBe(
+        `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`
+      );
+      expect((routingCall.aggs as any).tags.terms.field).toBe(
+        `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`
+      );
+    });
+
     it('does not include an include pattern when search is absent', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
 

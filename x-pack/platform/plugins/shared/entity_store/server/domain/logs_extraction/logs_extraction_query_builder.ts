@@ -17,10 +17,7 @@ import {
   type EntityType,
   type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import {
-  getEuidEsqlEvaluation,
-  getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -70,6 +67,7 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  samplingRate?: number;
 }
 
 export function buildLogsExtractionEsqlQuery({
@@ -82,8 +80,16 @@ export function buildLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  samplingRate,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
+
+  if (
+    samplingRate !== undefined &&
+    (!Number.isFinite(samplingRate) || samplingRate <= 0 || samplingRate > 1)
+  ) {
+    throw new Error(`samplingRate must be in (0, 1], got ${samplingRate}`);
+  }
 
   const parts = [];
 
@@ -101,12 +107,20 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
+  // Right after the source filter and before any computation: the only position where sampling
+  // reduces the rows entering EVAL/STATS/LOOKUP JOIN rather than dropping finished entity rows.
+  if (samplingRate !== undefined && samplingRate < 1) {
+    parts.push(`| SAMPLE ${samplingRate}`);
+  }
+
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
-    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
-    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
-      withTypeId: false,
-    });
+    const fieldEvalsEsql = getFieldEvaluationsEsql(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+      { withTypeId: false }
+    );
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 

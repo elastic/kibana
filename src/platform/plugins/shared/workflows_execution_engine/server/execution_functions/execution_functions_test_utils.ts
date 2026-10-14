@@ -66,7 +66,12 @@ export interface MockWorkflowExecutionRepository {
 }
 
 export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRepository => ({
-  getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+  getWorkflowExecutionById: jest.fn().mockResolvedValue({
+    id: 'test-workflow-run-id',
+    workflowId: 'workflow',
+    spaceId: 'default',
+    status: ExecutionStatus.PENDING,
+  }),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
 
@@ -74,6 +79,7 @@ export const createMockStepExecutionRepository = (): jest.Mocked<StepExecutionRe
   ({
     bulkUpsert: jest.fn().mockResolvedValue(undefined),
     markNonTerminalStepsFailed: jest.fn().mockResolvedValue(undefined),
+    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<StepExecutionRepository>);
 
 export interface MockTelemetryClient {
@@ -99,7 +105,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowLogger: {},
     nodesFactory: {},
     workflowExecutionGraph: {},
-    workflowTaskManager: {},
+    workflowTaskManager: { removeTasksForExecution: jest.fn().mockResolvedValue(undefined) },
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
     telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
@@ -118,11 +124,12 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
+  eventQueue: undefined,
   nodesFactory: {},
   workflowExecutionGraph: {},
   esClient: {},
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
   signal: options.signal,
-  workflowTaskManager: {},
+  workflowTaskManager: { removeTasksForExecution: expect.any(Function) },
 });

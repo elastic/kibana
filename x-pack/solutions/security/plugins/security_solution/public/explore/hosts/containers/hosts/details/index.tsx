@@ -16,8 +16,17 @@ import { HostsQueries } from '../../../../../../common/search_strategy/security_
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+
+const HOST_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'host_details'
+);
 
 export const ID = 'hostsDetailsQuery';
 
@@ -91,7 +100,10 @@ export const useHostDetails = ({
     // For entity store v2, resolve the entity via an indexed-field identity filter built from the
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
-    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('host', entityRecord);
+    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
     if (recordFilter) {
       return recordFilter;
     }
@@ -99,7 +111,7 @@ export const useHostDetails = ({
     if (hostName) {
       return { term: { 'host.name': hostName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, euidApi]);
 
   const {
     loading,
@@ -114,6 +126,7 @@ export const useHostDetails = ({
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
     abort: shouldSkip,
+    executionContext: HOST_DETAILS_CONTEXT,
   });
 
   const hostDetailsResponse = useMemo(

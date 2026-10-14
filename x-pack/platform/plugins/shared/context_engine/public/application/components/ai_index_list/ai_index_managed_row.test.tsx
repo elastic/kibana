@@ -20,11 +20,13 @@ import { AiIndexManagedRow } from './ai_index_managed_row';
 const buildManagedAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'elastic',
   managed: true,
+  memory_enabled: false,
   description:
     'Kibana resources available for use in Agent Builder, including dashboards, visualizations, connectors, workflows, alerting rules, action policies, and significant events.',
   dest: { type: 'index', value: 'ai-index-idx-sml-data' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -65,9 +67,7 @@ describe('AiIndexManagedRow', () => {
 
     expect(screen.getByTestId('contextAiIndexManagedRowTitle')).toHaveTextContent('elastic');
     expect(screen.getByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent('Managed');
-    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
-      'Elastic (built-in)'
-    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexManagedRowActions')).toBeInTheDocument();
 
     await waitFor(() =>

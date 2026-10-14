@@ -27,6 +27,7 @@ import {
 } from '../screens/lists';
 import { EUI_INLINE_SAVE_BUTTON } from '../screens/common/controls';
 import { rootRequest } from './api_calls/common';
+import { closeAppMenuOverflow, openAppMenuOverflow } from './app_menu';
 
 export const KNOWN_VALUE_LIST_FILES = {
   TEXT: 'value_list.txt',
@@ -55,11 +56,14 @@ export const waitForListsIndex = () => {
 };
 
 export const waitForValueListsModalToBeLoaded = () => {
+  openAppMenuOverflow();
   cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('exist');
   cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('not.be.disabled');
+  closeAppMenuOverflow();
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  openAppMenuOverflow();
   return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click({ force: true });
 };
 

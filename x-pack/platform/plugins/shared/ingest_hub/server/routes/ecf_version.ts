@@ -7,7 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { ECF_LATEST_VERSION_API_PATH } from '../../common/ecf_version_api';
+import { ECF_LATEST_VERSION_API_PATH } from '../../common/providers/aws/ecf_version_api';
 import { getLatestEcfVersion } from '../services/ecf_version';
 
 /**

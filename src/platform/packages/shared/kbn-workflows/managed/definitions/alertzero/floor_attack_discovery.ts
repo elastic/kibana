@@ -10,6 +10,10 @@
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import {
+  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  upgradeStoredWorkerSettings,
+} from './worker_settings_defaults';
+import {
   renderScheduledWorkerYaml,
   type ScheduledWorkerTemplateValues,
 } from './worker_template_values';
@@ -23,7 +27,10 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 7,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
-    renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, values),
+    renderScheduledWorkerYaml(
+      FLOOR_ATTACK_DISCOVERY_YAML,
+      upgradeStoredWorkerSettings(ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
