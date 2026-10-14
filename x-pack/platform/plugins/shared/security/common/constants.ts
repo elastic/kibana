@@ -137,6 +137,12 @@ export const API_VERSIONS = {
 };
 
 /**
+ * Name prefixes of predefined roles that Serverless hides from role listings. These roles are meant only
+ * for internal workloads, such as the service accounts of AlertZero workers.
+ */
+export const HIDDEN_PREDEFINED_ROLE_NAME_PREFIXES = ['_alertzero_'] as const;
+
+/**
  * Privileges that define the superuser role or the role equivalent to the superuser role.
  */
 export const SUPERUSER_PRIVILEGES = {
