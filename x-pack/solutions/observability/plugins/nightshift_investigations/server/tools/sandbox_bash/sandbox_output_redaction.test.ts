@@ -109,6 +109,104 @@ describe('withSandboxOutputRedaction', () => {
     });
   });
 
+  describe('credentials the connector resolver hands out', () => {
+    // E.g. a token the connector framework issues: it never appears in any connector's raw
+    // `secrets`, so only the resolver knows it.
+    const ISSUED_TOKEN = 'framework-issued-access-token';
+
+    const runWithResolver = async ({
+      resolveConnectorCredentials,
+      connectorIds,
+      stdout,
+    }: {
+      resolveConnectorCredentials: jest.Mock;
+      connectorIds: string[];
+      stdout: string;
+    }) => {
+      const handler = jest.fn().mockResolvedValue({
+        results: [{ type: ToolResultType.other, data: { stdout } }],
+      });
+      const tool = { id: 'sandbox_tool', schema, handler } as unknown as BuiltinToolDefinition<
+        typeof schema
+      >;
+      const wrapped = withSandboxOutputRedaction(tool, {
+        getOutputRedactor: createSandboxOutputRedactorProvider({
+          getDeps: () => ({
+            actions: { inMemoryConnectors: [] } as unknown as ActionsPluginStart,
+            sandboxSecretsClient: { getRedactionValues: jest.fn().mockResolvedValue([]) },
+          }),
+          resolveConnectorCredentials,
+        }),
+        logger: loggingSystemMock.createLogger(),
+      });
+      const request = httpServerMock.createKibanaRequest();
+      const result = await (
+        wrapped.handler as unknown as (p: unknown, c: unknown) => Promise<unknown>
+      )({}, { request, agentConfiguration: { connector_ids: connectorIds } });
+      return { result, handler, request };
+    };
+
+    it("redacts every value the resolver returns for the agent's connectors", async () => {
+      const resolveConnectorCredentials = jest.fn().mockResolvedValue({
+        env: { CONNECTOR_SECRET_TOKEN: ISSUED_TOKEN },
+        secretValues: [ISSUED_TOKEN],
+      });
+
+      const { result, request } = await runWithResolver({
+        resolveConnectorCredentials,
+        connectorIds: ['github', 'jira'],
+        stdout: `token=${ISSUED_TOKEN}`,
+      });
+
+      expect(result).toEqual({
+        results: [
+          { type: ToolResultType.other, data: { stdout: `token=${REDACTED_PLACEHOLDER}` } },
+        ],
+      });
+      const callContext = { request, allowedConnectorIds: ['github', 'jira'] };
+      expect(resolveConnectorCredentials).toHaveBeenCalledTimes(2);
+      expect(resolveConnectorCredentials).toHaveBeenCalledWith('github', callContext);
+      expect(resolveConnectorCredentials).toHaveBeenCalledWith('jira', callContext);
+    });
+
+    it('skips connectors the resolver denies', async () => {
+      const resolveConnectorCredentials = jest.fn().mockResolvedValue({
+        errorMessage: 'Not authorized',
+      });
+
+      const { result, handler } = await runWithResolver({
+        resolveConnectorCredentials,
+        connectorIds: ['github'],
+        stdout: 'plain output',
+      });
+
+      expect(handler).toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [{ type: ToolResultType.other, data: { stdout: 'plain output' } }],
+      });
+    });
+
+    it('does not run the tool when resolving connector credentials fails', async () => {
+      const resolveConnectorCredentials = jest.fn().mockRejectedValue(new Error('boom'));
+
+      const { result, handler } = await runWithResolver({
+        resolveConnectorCredentials,
+        connectorIds: ['github'],
+        stdout: ISSUED_TOKEN,
+      });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: expect.stringContaining('Sandbox tools are unavailable') },
+          },
+        ],
+      });
+    });
+  });
+
   it('does not run the tool when stored secrets cannot be loaded', async () => {
     const { run, handler, logger } = setup({
       getRedactionValues: jest.fn().mockRejectedValue(new Error('Unable to decrypt')),

@@ -266,6 +266,7 @@ export class NightshiftInvestigationsPlugin
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+            resolveConnectorCredentials,
           }),
           logger: sandboxLogger.get('output_redaction'),
         };
