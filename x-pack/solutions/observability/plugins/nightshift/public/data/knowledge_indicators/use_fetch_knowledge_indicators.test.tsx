@@ -13,10 +13,12 @@ import {
   type Feature,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { RUNNING_POLL_INTERVAL_MS } from '../../common/constants';
+import { ONBOARDING_START_GRACE_MS, RUNNING_POLL_INTERVAL_MS } from '../../common/constants';
 import { useFetchKnowledgeIndicators } from './use_fetch_knowledge_indicators';
 
-let mockSources = [{ id: 'source-1' }];
+let mockSources: Array<{ id: string; enabled?: boolean; esql_updated_at?: string }> = [
+  { id: 'source-1' },
+];
 let mockFeatures: Feature[] = [];
 let mockStatus: SignificantEventsWorkflowStatusResult;
 const mockFetchFeatures = jest.fn(async () => ({ features: mockFeatures }));
@@ -146,6 +148,36 @@ describe('useFetchKnowledgeIndicators onboarding refresh', () => {
     await advancePoll();
     await advancePoll();
     expect(mockGetOnboardingStatuses).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps polling a just-edited source until its run starts', async () => {
+    mockSources = [{ id: 'source-1', enabled: true, esql_updated_at: new Date().toISOString() }];
+    mockStatus = { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
+    const { result } = renderHook(() => useFetchKnowledgeIndicators(), { wrapper });
+    await waitFor(() => expect(mockGetOnboardingStatuses).toHaveBeenCalledTimes(1));
+
+    await advancePoll();
+    expect(mockGetOnboardingStatuses).toHaveBeenCalledTimes(2);
+
+    mockFeatures = [makeFeature('generated')];
+    mockStatus = { status: SignificantEventsWorkflowStatus.InProgress, executionId: 'run-2' };
+    await advancePoll();
+    await waitFor(() => expect(result.current.knowledgeIndicators).toHaveLength(1));
+  });
+
+  it('stops polling a just-edited source when no run starts within the grace period', async () => {
+    mockSources = [{ id: 'source-1', enabled: true, esql_updated_at: new Date().toISOString() }];
+    mockStatus = { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
+    renderHook(() => useFetchKnowledgeIndicators(), { wrapper });
+    await waitFor(() => expect(mockGetOnboardingStatuses).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      jest.advanceTimersByTime(ONBOARDING_START_GRACE_MS + RUNNING_POLL_INTERVAL_MS);
+    });
+    const statusReadsAfterGrace = mockGetOnboardingStatuses.mock.calls.length;
+    await advancePoll();
+    await advancePoll();
+    expect(mockGetOnboardingStatuses).toHaveBeenCalledTimes(statusReadsAfterGrace);
   });
 
   it('does not request onboarding status for an empty catalog', async () => {

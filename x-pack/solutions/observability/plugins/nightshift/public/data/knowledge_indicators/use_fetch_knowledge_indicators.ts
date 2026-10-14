@@ -12,7 +12,7 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { useCallback, useMemo } from 'react';
-import { RUNNING_POLL_INTERVAL_MS } from '../../common/constants';
+import { ONBOARDING_START_GRACE_MS, RUNNING_POLL_INTERVAL_MS } from '../../common/constants';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { useFetchFeatures } from './use_fetch_features';
 import { useFetchDiscoveryQueries } from '../rules/use_fetch_discovery_queries';
@@ -22,6 +22,24 @@ import { SOURCE_ONBOARDING_STATUS_QUERY_KEY } from '../query_keys';
 
 const QUERIES_MAX_PER_PAGE = 1000;
 const ONBOARDING_STATUS_BATCH_SIZE = 1000;
+
+interface OnboardingSource {
+  id: string;
+  enabled: boolean;
+  esql_updated_at: string;
+}
+
+// A source changed within the grace period may not have its run scheduled yet.
+const isAwaitingRunStart = (
+  sources: OnboardingSource[],
+  statuses: Record<string, SignificantEventsWorkflowStatusResult>
+): boolean =>
+  sources.some(
+    ({ id, enabled, esql_updated_at: queryVersion }) =>
+      enabled &&
+      Date.now() - Date.parse(queryVersion) < ONBOARDING_START_GRACE_MS &&
+      !KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statuses[id]?.status)
+  );
 
 export function useFetchKnowledgeIndicators() {
   const { data: sources } = useFetchSources();
@@ -96,10 +114,10 @@ export function useFetchKnowledgeIndicators() {
       return statuses;
     },
     enabled: sourceIds.length > 0,
-    refetchInterval: (statuses) =>
-      Object.values(statuses ?? {}).some(({ status }) =>
+    refetchInterval: (statuses = {}) =>
+      Object.values(statuses).some(({ status }) =>
         KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(status)
-      )
+      ) || isAwaitingRunStart(sources ?? [], statuses)
         ? RUNNING_POLL_INTERVAL_MS
         : false,
     // Refresh on the terminal response too, including a run that finished while navigating here.

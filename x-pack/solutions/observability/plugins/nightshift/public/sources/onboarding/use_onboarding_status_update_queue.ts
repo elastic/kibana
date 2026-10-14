@@ -10,7 +10,7 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { useCallback, useRef } from 'react';
-import { ONBOARDING_START_GRACE_MS } from './constants';
+import { ONBOARDING_START_GRACE_MS } from '../../common/constants';
 import { useOnboardingApi } from '../../data/sources/use_onboarding_api';
 
 type SourceOnboardingStatusUpdateCallback = (
