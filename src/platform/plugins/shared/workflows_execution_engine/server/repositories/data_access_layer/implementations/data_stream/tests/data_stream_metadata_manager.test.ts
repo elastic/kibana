@@ -65,6 +65,20 @@ describe('DataStreamMetadataManager', () => {
     expect(() => manager.getMeta()).toThrow(/not loaded/);
   });
 
+  it('getMetaOrLoad() fetches metadata when the initial load failed', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(new Error('es down'));
+    const manager = createManager();
+
+    await manager.init();
+    expect(() => manager.getMeta()).toThrow(/not loaded/);
+
+    await expect(manager.getMetaOrLoad()).resolves.toEqual({
+      retentionTime: '90d',
+      backingIndexes: ['.ds-test-ds-000001'],
+      writableIndex: '.ds-test-ds-000001',
+    });
+  });
+
   it('loads backing indexes and retention on init()', async () => {
     const manager = createManager('executions-ds');
 

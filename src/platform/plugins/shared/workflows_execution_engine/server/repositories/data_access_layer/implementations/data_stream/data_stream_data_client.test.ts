@@ -27,12 +27,14 @@ describe('DataStreamDataClient', () => {
       bulkGetCachedVersions: jest.fn().mockReturnValue({}),
       setVersion: jest.fn(),
     };
+    const meta = {
+      retentionTime: '90d',
+      backingIndexes: [BACKING_INDEX],
+      writableIndex: BACKING_INDEX,
+    };
     const metadataManager = {
-      getMeta: () => ({
-        retentionTime: '90d',
-        backingIndexes: [BACKING_INDEX],
-        writableIndex: BACKING_INDEX,
-      }),
+      getMeta: () => meta,
+      getMetaOrLoad: () => Promise.resolve(meta),
     };
     const dataAccess = new DataStreamDataClient<{
       id: string;

@@ -26,8 +26,8 @@ import type {
 
 export class DataStreamDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
-  private workflowMetadataManager!: DataStreamMetadataManager;
-  private stepMetadataManager!: DataStreamMetadataManager;
+  private workflowMetadataManager: DataStreamMetadataManager | undefined;
+  private stepMetadataManager: DataStreamMetadataManager | undefined;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
 
@@ -80,21 +80,27 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   async stop(): Promise<void> {
-    this.workflowMetadataManager.dispose();
-    this.stepMetadataManager.dispose();
+    this.workflowMetadataManager?.dispose();
+    this.stepMetadataManager?.dispose();
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
+    const { workflowMetadataManager } = this;
+    if (!workflowMetadataManager) {
+      throw new Error(
+        'DataStreamDataClientBundle.initStart() must complete before creating clients'
+      );
+    }
     return new DataStreamDataClient<EsWorkflowExecution>({
       esClient: this.esClient,
       dataStreamName: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
         dataStreamName: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION.name,
-        metadataManager: this.workflowMetadataManager,
+        metadataManager: workflowMetadataManager,
         additionalIndexesToQuery: ['.workflows-executions'],
       }),
-      metadataManager: this.workflowMetadataManager,
+      metadataManager: workflowMetadataManager,
       additionalIndexesToQuery: ['.workflows-executions'],
       logger: this.deps.logger,
       dateField: 'createdAt',
@@ -102,16 +108,22 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
+    const { stepMetadataManager } = this;
+    if (!stepMetadataManager) {
+      throw new Error(
+        'DataStreamDataClientBundle.initStart() must complete before creating clients'
+      );
+    }
     return new DataStreamDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
       dataStreamName: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
         dataStreamName: STEP_EXECUTIONS_DATA_STREAM_DEFINITION.name,
-        metadataManager: this.stepMetadataManager,
+        metadataManager: stepMetadataManager,
         additionalIndexesToQuery: ['.workflows-step-executions'],
       }),
-      metadataManager: this.stepMetadataManager,
+      metadataManager: stepMetadataManager,
       additionalIndexesToQuery: ['.workflows-step-executions'],
       logger: this.deps.logger,
       dateField: 'startedAt',

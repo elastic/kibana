@@ -73,6 +73,14 @@ export class DataStreamMetadataManager {
     return this.metadata;
   }
 
+  /** Returns the cached metadata, or fetches it once when the initial load failed. */
+  async getMetaOrLoad(): Promise<DataStreamMetadata> {
+    if (!this.metadata) {
+      this.metadata = await this.fetchMetadata();
+    }
+    return this.metadata;
+  }
+
   dispose(): void {
     this.disposed = true;
     if (this.refreshTimer !== undefined) {

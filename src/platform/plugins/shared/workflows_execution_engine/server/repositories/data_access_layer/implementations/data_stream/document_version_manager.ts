@@ -79,7 +79,8 @@ export class DocumentVersionManager {
       return {};
     }
 
-    const resolvedWriteIndex = writeIndex ?? this.deps.metadataManager.getMeta().writableIndex;
+    const resolvedWriteIndex =
+      writeIndex ?? (await this.deps.metadataManager.getMetaOrLoad()).writableIndex;
     const result: Record<string, Required<DocumentVersionFields>> = {};
 
     const mgetResponse = await this.deps.esClient.mget({

@@ -102,7 +102,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
 
     let backingIndexesForFallback: string[] = [];
     if (uncachedIds.length > 0) {
-      const { backingIndexes } = this.deps.metadataManager.getMeta();
+      const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
       backingIndexesForFallback = backingIndexes.slice(-2);
     }
 
@@ -315,7 +315,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       return { items: [], errors: false };
     }
 
-    const { backingIndexes } = this.deps.metadataManager.getMeta();
+    const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
     const fallbackIndexes = backingIndexes.slice(-2).concat(this.additionalIndexesToQuery);
 
     const result = new Array<BulkItemResponse>(request.items.length);
