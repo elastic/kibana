@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/proposals-plugin'
   - '@kbn/proposals-common'
+  - '@kbn/core-security-common'
 tags:
   - plugin
   - prod
