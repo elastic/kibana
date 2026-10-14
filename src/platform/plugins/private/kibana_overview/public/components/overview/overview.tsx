@@ -160,49 +160,12 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     return applications;
   }, [application.capabilities]);
 
-<<<<<<< HEAD
-=======
   // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
   // and sample data both need.
   const canIngestData =
     application.capabilities.navLinks.integrations === true ||
     application.capabilities.fileUpload?.show === true;
 
-  const menu = useMemo<AppHeaderMenu>(() => {
-    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
-      application.capabilities.navLinks;
-    const items: NonNullable<AppHeaderMenu['items']> = [];
-
-    if (managementHref && isManagementEnabled) {
-      items.push({
-        id: 'manage',
-        label: i18n.translate('kibanaOverview.header.stackManagementButtonLabel', {
-          defaultMessage: 'Manage',
-        }),
-        iconType: 'gear',
-        href: managementHref,
-        testId: 'homeManage',
-        order: 0,
-      });
-    }
-
-    if (devToolsHref && !!devTools && isDevToolsEnabled) {
-      items.push({
-        id: 'devTools',
-        label: i18n.translate('kibanaOverview.header.devToolsButtonLabel', {
-          defaultMessage: 'Dev tools',
-        }),
-        iconType: 'wrench',
-        href: devToolsHref,
-        testId: 'homeDevTools',
-        order: 1,
-      });
-    }
-
-    return { items };
-  }, [application.capabilities.navLinks, devTools, devToolsHref, managementHref]);
-
->>>>>>> 7bd8fd1d3b21 ([Analytics overview] Hide "Ingest your data" for users who can't add data (#297717))
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
   };
