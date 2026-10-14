@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type MobilePropertyType, MobileProperty, MobileErrorType } from '@kbn/apm-types';
+import { type MobilePropertyType, type MobileErrorType, MobileProperty } from '@kbn/apm-types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDeviceOSApp } from './get_device_os_app';
 import { getNCT } from './get_nct';
@@ -40,7 +40,7 @@ export async function getMobileFilters({
     apmEventClient,
     serviceName,
     transactionType,
-    isCrash: errorType === MobileErrorType.Crash,
+    errorType,
     environment,
     start,
     end,

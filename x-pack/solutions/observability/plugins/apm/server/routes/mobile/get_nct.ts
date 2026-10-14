@@ -6,18 +6,19 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { MobileErrorType } from '@kbn/apm-types';
-import { ERROR_TYPE, NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
+import type { MobileErrorType } from '@kbn/apm-types';
+import { NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { mobileErrorTypeQuery } from './mobile_error_type_query';
 
 export async function getNCT({
   kuery,
   apmEventClient,
   serviceName,
-  isCrash,
+  errorType,
   environment,
   start,
   end,
@@ -26,7 +27,7 @@ export async function getNCT({
   kuery: string;
   apmEventClient: APMEventClient;
   serviceName: string;
-  isCrash?: boolean;
+  errorType?: MobileErrorType;
   environment: string;
   start: number;
   end: number;
@@ -36,7 +37,7 @@ export async function getNCT({
     apm: {
       sources: [
         {
-          documentType: isCrash ? ApmDocumentType.ErrorEvent : ApmDocumentType.SpanEvent,
+          documentType: errorType ? ApmDocumentType.ErrorEvent : ApmDocumentType.SpanEvent,
           rollupInterval: RollupInterval.None,
         },
       ],
@@ -47,7 +48,7 @@ export async function getNCT({
       bool: {
         filter: [
           ...termQuery(SERVICE_NAME, serviceName),
-          ...(isCrash ? termQuery(ERROR_TYPE, MobileErrorType.Crash) : []),
+          ...mobileErrorTypeQuery(errorType),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),

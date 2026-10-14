@@ -74,18 +74,26 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
-  // `mobileErrorTabId` only exists on the errors-and-crashes route, so it can't
-  // be destructured from the union above. Read it separately (undefined on the
-  // other tabs) to scope filters to crash documents only on the crashes tab.
-  const mobileErrorTabId = useMaybeApmParams('/mobile-services/{serviceName}/errors-and-crashes')
-    ?.query.mobileErrorTabId;
+  // `mobileErrorTabId` only exists on the errors-and-crashes route, so it can't be
+  // destructured from the union above. Read the whole params object separately: it is
+  // undefined on the other screens, which is how we tell "not on this route" apart from
+  // "on this route with the tab defaulted".
+  const errorsAndCrashesParams = useMaybeApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  );
 
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  // On the crashes tab, scope the filter dropdown options to crash documents so
-  // they only list values that appear in actual crashes (not transactions/spans).
-  const errorType = mobileErrorTabId === 'crashes' ? MobileErrorType.Crash : undefined;
+  // Scope the dropdown options to the documents the active tab actually lists, so they
+  // can't offer values that match nothing. Undefined on overview/transactions, where
+  // transaction and span documents are the right source. The errors tab is the default,
+  // so on this route anything that isn't `crashes` is the errors tab.
+  const errorType = errorsAndCrashesParams
+    ? errorsAndCrashesParams.query.mobileErrorTabId === 'crashes'
+      ? MobileErrorType.Crash
+      : MobileErrorType.Error
+    : undefined;
 
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {

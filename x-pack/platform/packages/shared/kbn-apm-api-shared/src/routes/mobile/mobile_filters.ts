@@ -29,10 +29,11 @@ export const mobileFiltersRoute = defineRoute<MobileFiltersRouteResponse>()({
       query: z
         .object({
           transactionType: z.string().optional(),
-          // When set to `crash`, the filter dropdown options are sourced from
-          // crash error documents instead of transaction/span documents. Used
-          // by the crashes tab so its filters only list values present in crashes.
-          errorType: z.enum([MobileErrorType.Crash]).optional(),
+          // Scopes the filter dropdown options to the documents the caller lists:
+          // `crash` for the crashes tab, `error` for the errors tab (error documents
+          // that are not crashes). Omitted on the overview and transactions screens,
+          // where transaction and span documents are the right source.
+          errorType: z.enum([MobileErrorType.Crash, MobileErrorType.Error]).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

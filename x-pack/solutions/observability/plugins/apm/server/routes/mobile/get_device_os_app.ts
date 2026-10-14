@@ -6,10 +6,9 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { MobileErrorType } from '@kbn/apm-types';
+import type { MobileErrorType } from '@kbn/apm-types';
 import {
   DEVICE_MODEL_IDENTIFIER,
-  ERROR_TYPE,
   HOST_OS_VERSION,
   SERVICE_NAME,
   SERVICE_VERSION,
@@ -19,13 +18,14 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { mobileErrorTypeQuery } from './mobile_error_type_query';
 
 export async function getDeviceOSApp({
   kuery,
   apmEventClient,
   serviceName,
   transactionType,
-  isCrash,
+  errorType,
   environment,
   start,
   end,
@@ -35,7 +35,7 @@ export async function getDeviceOSApp({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
-  isCrash?: boolean;
+  errorType?: MobileErrorType;
   environment: string;
   start: number;
   end: number;
@@ -45,7 +45,7 @@ export async function getDeviceOSApp({
     apm: {
       sources: [
         {
-          documentType: isCrash ? ApmDocumentType.ErrorEvent : ApmDocumentType.TransactionEvent,
+          documentType: errorType ? ApmDocumentType.ErrorEvent : ApmDocumentType.TransactionEvent,
           rollupInterval: RollupInterval.None,
         },
       ],
@@ -56,10 +56,10 @@ export async function getDeviceOSApp({
       bool: {
         filter: [
           ...termQuery(SERVICE_NAME, serviceName),
-          // The transactionType filter is only relevant for transaction
-          // documents; crash error documents are scoped by error.type instead.
-          ...(isCrash
-            ? termQuery(ERROR_TYPE, MobileErrorType.Crash)
+          // The transactionType filter is only relevant for transaction documents;
+          // error documents are scoped by error.type instead.
+          ...(errorType
+            ? mobileErrorTypeQuery(errorType)
             : termQuery(TRANSACTION_TYPE, transactionType)),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),

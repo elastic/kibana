@@ -81,7 +81,7 @@ describe('mobileFiltersRoute params', () => {
     expectParseSuccess(result);
   });
 
-  it('rejects a query with an unsupported errorType', () => {
+  it('accepts a query with errorType set to error', () => {
     const result = mobileFiltersRoute.params!.safeParse({
       path: { serviceName: 'opbeans-swift' },
       query: {
@@ -89,6 +89,20 @@ describe('mobileFiltersRoute params', () => {
         kuery: '',
         environment: 'production',
         errorType: 'error',
+      },
+    });
+
+    expectParseSuccess(result);
+  });
+
+  it('rejects a query with an unsupported errorType', () => {
+    const result = mobileFiltersRoute.params!.safeParse({
+      path: { serviceName: 'opbeans-swift' },
+      query: {
+        ...range,
+        kuery: '',
+        environment: 'production',
+        errorType: 'anr',
       },
     });
 

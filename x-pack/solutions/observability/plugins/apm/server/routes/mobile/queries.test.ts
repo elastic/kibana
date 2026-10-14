@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MobileErrorType } from '@kbn/apm-types';
 import { getDeviceOSApp } from './get_device_os_app';
 import { getNCT } from './get_nct';
 import type { SearchParamsMock } from '../../utils/test_helpers';
@@ -22,6 +23,10 @@ const baseParams = {
   transactionType: 'mobile',
 };
 
+const crashTerm = { term: { 'error.type': 'crash' } };
+const transactionTypeTerm = { term: { 'transaction.type': 'mobile' } };
+const notCrash = { bool: { must_not: [crashTerm] } };
+
 describe('mobile filters queries', () => {
   let mock: SearchParamsMock;
 
@@ -30,38 +35,51 @@ describe('mobile filters queries', () => {
   });
 
   describe('getDeviceOSApp', () => {
-    it('queries transaction events when isCrash is not set', async () => {
+    it('queries transaction events when no error type is given', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getDeviceOSApp({ ...baseParams, apmEventClient: mockApmEventClient })
       );
 
       expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.TransactionEvent);
-      expect(mock.params.query.bool.filter).toContainEqual({
-        term: { 'transaction.type': 'mobile' },
-      });
+      expect(mock.params.query.bool.filter).toContainEqual(transactionTypeTerm);
       expect(mock.params).toMatchSnapshot();
     });
 
-    it('queries crash error events when isCrash is true', async () => {
+    it('queries crash documents when the error type is crash', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getDeviceOSApp({
           ...baseParams,
-          isCrash: true,
+          errorType: MobileErrorType.Crash,
           apmEventClient: mockApmEventClient,
         })
       );
 
       expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.ErrorEvent);
-      expect(mock.params.query.bool.filter).toContainEqual({ term: { 'error.type': 'crash' } });
-      expect(mock.params.query.bool.filter).not.toContainEqual({
-        term: { 'transaction.type': 'mobile' },
-      });
+      expect(mock.params.query.bool.filter).toContainEqual(crashTerm);
+      expect(mock.params.query.bool.filter).not.toContainEqual(transactionTypeTerm);
+      expect(mock.params).toMatchSnapshot();
+    });
+
+    it('excludes crash documents when the error type is error', async () => {
+      mock = await inspectSearchParams(({ mockApmEventClient }) =>
+        getDeviceOSApp({
+          ...baseParams,
+          errorType: MobileErrorType.Error,
+          apmEventClient: mockApmEventClient,
+        })
+      );
+
+      // Same document type as the crash case, so the must_not is what distinguishes them.
+      expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.ErrorEvent);
+      expect(mock.params.query.bool.filter).toContainEqual(notCrash);
+      expect(mock.params.query.bool.filter).not.toContainEqual(crashTerm);
+      expect(mock.params.query.bool.filter).not.toContainEqual(transactionTypeTerm);
       expect(mock.params).toMatchSnapshot();
     });
   });
 
   describe('getNCT', () => {
-    it('queries span events when isCrash is not set', async () => {
+    it('queries span events when no error type is given', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getNCT({ ...baseParams, apmEventClient: mockApmEventClient })
       );
@@ -70,13 +88,32 @@ describe('mobile filters queries', () => {
       expect(mock.params).toMatchSnapshot();
     });
 
-    it('queries crash error events when isCrash is true', async () => {
+    it('queries crash documents when the error type is crash', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
-        getNCT({ ...baseParams, isCrash: true, apmEventClient: mockApmEventClient })
+        getNCT({
+          ...baseParams,
+          errorType: MobileErrorType.Crash,
+          apmEventClient: mockApmEventClient,
+        })
       );
 
       expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.ErrorEvent);
-      expect(mock.params.query.bool.filter).toContainEqual({ term: { 'error.type': 'crash' } });
+      expect(mock.params.query.bool.filter).toContainEqual(crashTerm);
+      expect(mock.params).toMatchSnapshot();
+    });
+
+    it('excludes crash documents when the error type is error', async () => {
+      mock = await inspectSearchParams(({ mockApmEventClient }) =>
+        getNCT({
+          ...baseParams,
+          errorType: MobileErrorType.Error,
+          apmEventClient: mockApmEventClient,
+        })
+      );
+
+      expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.ErrorEvent);
+      expect(mock.params.query.bool.filter).toContainEqual(notCrash);
+      expect(mock.params.query.bool.filter).not.toContainEqual(crashTerm);
       expect(mock.params).toMatchSnapshot();
     });
   });

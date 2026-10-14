@@ -18,7 +18,12 @@ export type MobilePropertyType =
   | MobileProperty.AppVersion
   | MobileProperty.NetworkConnectionType;
 
-/** Values of the `error.type` field on mobile error documents. */
+/**
+ * Which mobile documents a request is scoped to. `Crash` maps to `error.type: crash`;
+ * `Error` means error documents that are *not* crashes, so it is not itself an
+ * `error.type` value.
+ */
 export enum MobileErrorType {
   Crash = 'crash',
+  Error = 'error',
 }

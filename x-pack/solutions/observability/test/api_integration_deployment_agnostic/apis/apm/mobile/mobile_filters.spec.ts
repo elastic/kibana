@@ -10,7 +10,7 @@ import { apm, timerange } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { MobileProperty } from '@kbn/apm-types';
+import { MobileProperty, MobileErrorType } from '@kbn/apm-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 type MobileFilters = APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/filters'>;
@@ -121,6 +121,9 @@ async function generateData({
             .timestamp(timestamp)
             .duration(20)
             .success()
+            // Only huaweiP2 has a non-crash error, so the crash-scoped and error-scoped
+            // filters are disjoint subsets of the transaction-scoped ones.
+            .errors(huaweiP2.error({ message: 'error 1' }).timestamp(timestamp))
             .children(
               huaweiP2
                 .httpSpan({
@@ -155,7 +158,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     environment?: string;
     kuery?: string;
     serviceName: string;
-    errorType?: 'crash';
+    errorType?: MobileErrorType;
   }) {
     return await apmApiClient
       .readUser({
@@ -259,7 +262,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         response = await getMobileFilters({
           serviceName: 'synth-android',
           environment: 'production',
-          errorType: 'crash',
+          errorType: MobileErrorType.Crash,
         });
       });
 
@@ -286,6 +289,46 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // `network.connection.*` onto http spans only, never onto error
         // documents. Asserted regardless: if the aggregation regressed to
         // querying spans, span-derived values would show up here.
+        expect(getOptions(response, MobileProperty.NetworkConnectionType)).to.eql([]);
+      });
+    });
+
+    describe('when scoped to errors', () => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+        });
+        response = await getMobileFilters({
+          serviceName: 'synth-android',
+          environment: 'production',
+          errorType: MobileErrorType.Error,
+        });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+      let response: MobileFilters;
+
+      it('only returns the device with a non-crash error', () => {
+        // galaxy10 ('SM-G973F') only ever crashes, so it must not leak in here.
+        expect(getOptions(response, MobileProperty.Device)).to.eql(['HUAWEI P2-0000']);
+      });
+
+      it('only returns the app version with a non-crash error', () => {
+        // galaxy10 runs '1.1'.
+        expect(getOptions(response, MobileProperty.AppVersion)).to.eql(['2.3']);
+      });
+
+      it('only returns the os version with a non-crash error', () => {
+        // galaxy10 runs os version '10'.
+        expect(getOptions(response, MobileProperty.OsVersion)).to.eql(['11']);
+      });
+
+      it('returns no network connection types', () => {
+        // Same synthtrace limitation as the crash-scoped case above.
         expect(getOptions(response, MobileProperty.NetworkConnectionType)).to.eql([]);
       });
     });
