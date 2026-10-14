@@ -10,6 +10,9 @@ import {
   buildEcfUnifiedCloudFormationUrl,
   buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
+  isEcfStackArnValid,
+  buildEcfStackConsoleUrl,
+  ensureOtlpPort,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
@@ -67,9 +70,9 @@ describe('getEcfServiceConfigs()', () => {
         enabledDataStreams: ['waf'],
         varsByDataStream: {
           waf: {
-            enabledInputs: ['aws-cloudwatch'],
+            enabledInputs: ['aws-s3'],
             varsByInput: {
-              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
             },
           },
         },
@@ -82,8 +85,29 @@ describe('getEcfServiceConfigs()', () => {
     expect(vpcConfig?.logGroupArns).toEqual([]);
 
     const wafConfig = result.find((c) => c.serviceId === 'waf');
-    expect(wafConfig?.logGroupArns).toEqual(['arn:aws:logs:us-east-1:123:log-group:waf']);
-    expect(wafConfig?.bucketArns).toEqual([]);
+    expect(wafConfig?.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig?.logGroupArns).toEqual([]);
+  });
+
+  it('never routes a WAF CloudWatch log group through ECF (agent-based only)', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      waf: {
+        enabledDataStreams: ['waf'],
+        varsByDataStream: {
+          waf: {
+            enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
+              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+            },
+          },
+        },
+      },
+    };
+    const [wafConfig] = getEcfServiceConfigs([inst('waf')], serviceVars);
+
+    expect(wafConfig.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig.logGroupArns).toEqual([]);
   });
 
   it('collects ARNs from duplicate instances into a single config entry', () => {
@@ -393,15 +417,15 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
     expect(url).toContain('stackName=my-otel-stack');
   });
 
-  it('uses S3SourceBuckets (not S3Buckets) for bucket ARNs', () => {
+  it('uses S3Buckets for bucket ARNs', () => {
     const url = buildEcfOtelCloudFormationUrl({
       ecfConfigs: otelConfigs,
       region: 'us-east-1',
       version: TEST_VERSION,
     });
     const hash = decodeURIComponent(url.split('#')[1]);
-    expect(hash).toContain('param_S3SourceBuckets=');
-    expect(hash).not.toContain('param_S3Buckets=');
+    expect(hash).toContain('param_S3Buckets=');
+    expect(hash).not.toContain('param_S3SourceBuckets=');
   });
 
   it('builds the comma-separated LogTypes param from service configs', () => {
@@ -422,6 +446,81 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
       otlpEndpoint: 'https://otlp.example.com',
     });
     expect(url).not.toContain('APIKey');
+  });
+
+  it('appends :443 to https OTLPEndpoint when port is missing', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:443');
+  });
+
+  it('does not modify OTLPEndpoint when port is already present', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com:4317',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:4317');
+  });
+});
+
+// ── ensureOtlpPort ────────────────────────────────────────────────────────────
+
+describe('ensureOtlpPort()', () => {
+  it('appends 443 to https URL without port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com')).toBe('https://ingest.example.com:443');
+  });
+
+  it('appends 80 to http URL without port', () => {
+    expect(ensureOtlpPort('http://ingest.example.com')).toBe('http://ingest.example.com:80');
+  });
+
+  it('preserves existing port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:4317')).toBe(
+      'https://ingest.example.com:4317'
+    );
+  });
+
+  it('does not double-append when the explicit port equals the scheme default', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:443')).toBe('https://ingest.example.com:443');
+    expect(ensureOtlpPort('http://ingest.example.com:80')).toBe('http://ingest.example.com:80');
+  });
+
+  it('preserves path and query when appending port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com/v1/logs')).toBe(
+      'https://ingest.example.com:443/v1/logs'
+    );
+  });
+
+  it('preserves hostname casing when appending port', () => {
+    expect(ensureOtlpPort('https://INGEST.EXAMPLE.COM')).toBe('https://INGEST.EXAMPLE.COM:443');
+  });
+
+  it('preserves existing port for uppercase scheme', () => {
+    expect(ensureOtlpPort('HTTPS://ingest.example.com:4317')).toBe(
+      'HTTPS://ingest.example.com:4317'
+    );
+  });
+
+  it('preserves existing port for IPv6 bracketed host', () => {
+    expect(ensureOtlpPort('https://[::1]:4317')).toBe('https://[::1]:4317');
+  });
+
+  it('appends port when query immediately follows host (no path slash)', () => {
+    expect(ensureOtlpPort('https://ingest.example.com?token=abc')).toBe(
+      'https://ingest.example.com:443?token=abc'
+    );
+  });
+
+  it('returns the original string unchanged when URL is invalid', () => {
+    expect(ensureOtlpPort('not-a-url')).toBe('not-a-url');
   });
 });
 
@@ -484,5 +583,132 @@ describe('buildEcfCrowdstrikeCloudFormationUrl()', () => {
     });
     expect(url).toContain('console.aws.amazon.com/cloudformation/home');
     expect(url).toContain('/stacks/quickcreate');
+  });
+});
+
+// ── isEcfStackArnValid ─────────────────────────────────────────────────────────
+
+describe('isEcfStackArnValid()', () => {
+  it('accepts a standard aws partition ARN', () => {
+    expect(
+      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123')
+    ).toBe(true);
+  });
+
+  it('accepts a GovCloud (aws-us-gov) partition ARN', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws-us-gov:cloudformation:us-gov-east-1:123456789012:stack/my-stack/abc123'
+      )
+    ).toBe(true);
+  });
+
+  it('accepts a China (aws-cn) partition ARN', () => {
+    expect(
+      isEcfStackArnValid('arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123')
+    ).toBe(true);
+  });
+
+  it('trims surrounding whitespace before validating', () => {
+    expect(
+      isEcfStackArnValid('  arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123  ')
+    ).toBe(true);
+  });
+
+  it('rejects an empty string', () => {
+    expect(isEcfStackArnValid('')).toBe(false);
+  });
+
+  it('rejects a plain stack name (no ARN prefix)', () => {
+    expect(isEcfStackArnValid('my-stack')).toBe(false);
+  });
+
+  it('rejects an ARN for a different service (IAM)', () => {
+    expect(isEcfStackArnValid('arn:aws:iam::123456789012:role/my-role')).toBe(false);
+  });
+
+  it('rejects a CloudFormation ARN that is missing the stack path segment', () => {
+    expect(
+      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:changeSet/cs/abc')
+    ).toBe(false);
+  });
+
+  it('rejects a bare stack/ prefix with no stack name', () => {
+    expect(isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/')).toBe(false);
+  });
+
+  it('rejects trailing garbage after the unique ID', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123/extra-segment'
+      )
+    ).toBe(false);
+  });
+
+  it('rejects a unique ID containing an embedded space', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123 trailing'
+      )
+    ).toBe(false);
+  });
+});
+
+// ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────
+
+describe('buildEcfStackConsoleUrl()', () => {
+  const VALID_ARN = 'arn:aws:cloudformation:us-west-2:123456789012:stack/my-stack/abc123-def456';
+
+  it('returns a URL pointing at the CloudFormation console stack info page', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toBeDefined();
+    expect(url).toContain('console.aws.amazon.com/cloudformation/home');
+    expect(url).toContain('/stacks/stackinfo');
+  });
+
+  it('includes the region extracted from the ARN as a query param', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toContain('region=us-west-2');
+  });
+
+  it('URL-encodes the stack ARN in the hash', () => {
+    const url = buildEcfStackConsoleUrl(VALID_ARN);
+    expect(url).toContain(encodeURIComponent(VALID_ARN));
+  });
+
+  it('returns undefined for an invalid ARN', () => {
+    expect(buildEcfStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+
+  it('returns undefined for an empty string', () => {
+    expect(buildEcfStackConsoleUrl('')).toBeUndefined();
+  });
+
+  it('uses the GovCloud console hostname for aws-us-gov ARNs', () => {
+    const govArn = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/my-stack/abc123';
+    const url = buildEcfStackConsoleUrl(govArn);
+    expect(url).toContain('console.amazonaws-us-gov.com');
+    expect(url).toContain('region=us-gov-west-1');
+    expect(url).not.toContain('console.aws.amazon.com');
+  });
+
+  it('uses the China console hostname for aws-cn ARNs', () => {
+    const cnArn = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123';
+    const url = buildEcfStackConsoleUrl(cnArn);
+    expect(url).toContain('console.amazonaws.cn');
+    expect(url).toContain('region=cn-north-1');
+    expect(url).not.toContain('console.aws.amazon.com');
+  });
+
+  it('returns undefined for a bare stack/ prefix with no stack name', () => {
+    expect(
+      buildEcfStackConsoleUrl('arn:aws:cloudformation:us-east-1:123456789012:stack/')
+    ).toBeUndefined();
+  });
+
+  it('trims surrounding whitespace from the input ARN', () => {
+    const url = buildEcfStackConsoleUrl(`  ${VALID_ARN}  `);
+    expect(url).toBeDefined();
+    expect(url).toContain('region=us-west-2');
   });
 });

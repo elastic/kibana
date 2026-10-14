@@ -9,15 +9,16 @@ export { InvestigationOutput } from './src/investigation_output';
 export { HypothesisRow } from './src/hypothesis_row';
 export { FinalResults } from './src/final_results';
 export {
-  useInvestigationState,
-  type UseInvestigationStateResult,
-} from './src/use_investigation_state';
+  useInvestigation,
+  INVESTIGATION_POLL_INTERVAL_MS,
+  type UseInvestigationResult,
+} from './src/use_investigation';
 export type { InvestigationOutputProps, InvestigationStatus } from './src/types';
-export { EvidenceList, type EvidenceListProps } from './src/evidence_list';
 export {
-  buildEvidenceDiscoverParams,
-  buildCodeReferenceUrl,
-  formatCodeReferenceDetail,
-  formatCodeReferenceLabel,
-  type InvestigationDiscoverParams,
-} from './src/evidence_links';
+  EvidenceList,
+  EvidenceItem,
+  type EvidenceListProps,
+  type EvidenceItemProps,
+} from './src/evidence_list';
+export { EvidenceChart, type EvidenceChartProps } from './src/evidence_chart';
+export { ImpactSection, type ImpactSectionProps } from './src/impact_section';

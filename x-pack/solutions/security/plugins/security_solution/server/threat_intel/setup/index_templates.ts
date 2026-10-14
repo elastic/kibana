@@ -1012,6 +1012,17 @@ const migrateExistingCoreEnrichmentMappings = async (
                   },
                 },
                 iocs: {
+                  // `extracted.iocs` is `nested` on every index this migration ever
+                  // runs against (declared by the template, or backfilled by an
+                  // earlier iocs migration below). Omitting `type` here defaults
+                  // the merge fragment to `object`, and Elasticsearch rejects
+                  // merging a non-nested fragment into an existing nested field:
+                  // `can't merge a non-nested mapping [extracted.iocs] with a
+                  // nested mapping`. That rejection fails this whole migration,
+                  // which fails `assertMigratedSchemaIsUsable`, which keeps
+                  // threat-intel bootstrap (and everything gated on it: workflow
+                  // install, task scheduling) permanently unready.
+                  type: 'nested',
                   properties: {
                     deferred_unreviewed: { type: 'boolean' },
                   },

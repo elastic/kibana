@@ -22,17 +22,27 @@ export const visorStyles = (
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
-  const borderRadius = euiTheme.border.radius.medium;
+  // Outlined AiButton hover fill. Selected keeps it; idle applies it only while hovering.
+  const aiButtonHoverBackground = `linear-gradient(
+    180deg,
+    ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+    ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+  )`;
 
   return {
     visorContainer: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
+      position: relative;
+      z-index: ${euiTheme.levels.menu};
       ${isInline
         ? `
           min-height: ${isVisible ? euiTheme.size.xl : '0'};
-          height: ${isVisible ? 'auto' : '0'};
-          max-height: ${isVisible ? NL_TEXTAREA_MAX_HEIGHT : '0'};
+          height: ${isVisible ? euiTheme.size.xl : '0'};
+          max-height: ${isVisible ? euiTheme.size.xl : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
@@ -40,16 +50,14 @@ export const visorStyles = (
         `
         : `min-height: ${euiTheme.size.xl};`}
     `,
-    visorWrapper: css`
-      width: 100%;
+    inputSlot: css`
+      flex: 1;
+      min-width: 0;
+      position: relative;
     `,
     searchWrapper: css`
-      justify-content: center;
-      position: relative;
-      min-width: 0;
-
       .euiFormControlLayout--group {
-        border-radius: ${borderRadius};
+        border-radius: ${euiTheme.border.radius.control};
       }
 
       .euiFormControlLayout__append {
@@ -59,35 +67,31 @@ export const visorStyles = (
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${borderRadius} !important;
+        border-radius: ${euiTheme.border.radius.control} !important;
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;
       }
     `,
-    searchInner: css`
-      width: 100%;
-    `,
-    submitButtonWrapper: css`
-      padding-left: ${euiTheme.size.xs};
-      flex-shrink: 0;
-    `,
-    modeToggleWrapper: css`
-      padding-left: ${euiTheme.size.xs};
-      flex-shrink: 0;
+    generating: css`
       display: flex;
       align-items: center;
+      gap: ${euiTheme.size.xs};
+      flex-shrink: 0;
+      padding-inline-start: ${euiTheme.size.xs};
     `,
     modeToggle: css`
       position: relative;
       display: inline-flex;
       align-items: center;
+      flex-shrink: 0;
       box-sizing: border-box;
       gap: ${euiTheme.size.xs};
+      margin-inline-start: ${euiTheme.size.xs};
       block-size: ${euiTheme.size.xl};
       max-block-size: ${euiTheme.size.xl};
       padding: ${euiTheme.size.xs};
-      border-radius: ${euiTheme.border.radius.small};
+      border-radius: ${euiTheme.border.radius.control};
 
       &::after {
         content: '';
@@ -97,17 +101,34 @@ export const visorStyles = (
         border-radius: inherit;
         pointer-events: none;
       }
+
+      .euiButton,
+      .euiButtonEmpty,
+      .euiButtonIcon {
+        border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+      }
     `,
-    kqlModeButton: css`
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      inline-size: ${euiTheme.size.l};
-      block-size: ${euiTheme.size.l};
-      border-radius: ${euiTheme.border.radius.small};
+    modeIconButton: css`
+      &.euiButtonIcon {
+        inline-size: ${euiTheme.size.l};
+        block-size: ${euiTheme.size.l};
+        border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+        background-color: transparent;
+
+        &:hover,
+        &:focus,
+        &:focus-visible {
+          background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+        }
+      }
     `,
-    kqlModeButtonActive: css`
-      background-color: ${euiTheme.colors.backgroundLightText};
+    modeIconButtonActive: css`
+      &.euiButtonIcon,
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible {
+        background-color: ${euiTheme.colors.backgroundLightText};
+      }
     `,
     aiButtonSparkleHover: css`
       overflow: visible;
@@ -115,12 +136,6 @@ export const visorStyles = (
       block-size: ${euiTheme.size.l};
       max-block-size: ${euiTheme.size.l};
 
-      /* The group already draws the border. Keep the outlined gradient on the icon and label. */
-      &::after {
-        content: none;
-      }
-
-      /* Starts at the resting icon so hover eases in instead of snapping to the dim frame. */
       @keyframes esqlVisorSparkleTwinkle {
         0%,
         100% {
@@ -155,29 +170,50 @@ export const visorStyles = (
         }
       }
     `,
-    aiButtonSelected: css`
-      /* Same gradient AiButton outlined uses on hover, so the selected fill stays visible at size xs. */
-      background: linear-gradient(
-        180deg,
-        ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-        ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-      ) !important;
+    aiButtonIdleHover: css`
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus-visible {
+        background: ${aiButtonHoverBackground} !important;
+
+        /* EUI paints hover with an opaque ::before overlay. Drop it so the AI gradient shows. */
+        &::before {
+          background-color: transparent !important;
+        }
+      }
     `,
-    nlInputWrapper: css`
-      justify-content: center;
-      min-width: 0;
+    aiButtonSelected: css`
+      /* Same gradient AiButton outlined uses on hover, held while this mode is active. */
+      background: ${aiButtonHoverBackground} !important;
+
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible,
+      &.euiButtonIcon:active {
+        background: ${aiButtonHoverBackground} !important;
+
+        &::before {
+          background-color: transparent !important;
+        }
+      }
     `,
     nlInput: css`
+      position: relative;
+      width: 100%;
+      height: ${euiTheme.size.xl};
+
       .euiTextArea {
-        box-sizing: border-box;
         height: ${euiTheme.size.xl};
         min-height: ${euiTheme.size.xl};
-        padding-block-start: ${euiTheme.size.xxs};
-        padding-block-end: 0;
-        padding-inline: ${euiTheme.size.s};
         font-size: ${fontSize};
-        line-height: calc(${euiTheme.size.xl} - (${euiTheme.border.width.thin} * 2));
         overflow: hidden;
+      }
+
+      .euiTextArea:focus {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        overflow: auto;
+        max-height: ${NL_TEXTAREA_MAX_HEIGHT};
       }
     `,
   };

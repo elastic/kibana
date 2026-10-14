@@ -42,3 +42,5 @@ export * from './use_var_group_cloud_connector';
 export * from './use_disabled_identity_federation_providers';
 export * from './use_upgrade_review_actions';
 export * from './use_iac_provisioner';
+export * from './use_restart_agent_action';
+export * from './use_kafka_auth_methods';

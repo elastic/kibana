@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
@@ -48,8 +48,9 @@ const makeDeps = () => {
 
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
-  const uiSettingsClient = { get: jest.fn() };
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
   const context = {
+    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: uiSettingsClient },
@@ -91,13 +92,13 @@ describe('registerHuntBehaviorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('resolves the reasoning tier model rather than the deployment default', async () => {
+  it('resolves the frontier tier model rather than the deployment default', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(resolveScopedModelMock).toHaveBeenCalledWith(
-      expect.objectContaining({ featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID })
+      expect.objectContaining({ featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID })
     );
   });
 

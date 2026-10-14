@@ -53,7 +53,8 @@ describe('Create Default Policy tests ', () => {
   } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
-    config?: AnyPolicyCreateConfig
+    config?: AnyPolicyCreateConfig,
+    experimentalFeaturesOverride: ExperimentalFeatures = experimentalFeatures
   ): Promise<PolicyConfig> => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
@@ -65,7 +66,7 @@ describe('Create Default Policy tests ', () => {
       esClientInfo,
       productFeaturesService,
       telemetryConfigProviderMock,
-      experimentalFeatures
+      experimentalFeaturesOverride
     );
   };
 
@@ -257,7 +258,10 @@ describe('Create Default Policy tests ', () => {
 
     it('Should return the default config without enterprise features when preset is EDR Complete on platinum', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
-      const policy = await createDefaultPolicyCallback(config);
+      const policy = await createDefaultPolicyCallback(config, {
+        ...experimentalFeatures,
+        perOsPolicySettings: true,
+      });
       const license = 'platinum';
       const isCloud = true;
       const defaultPolicy = policyFactoryWithoutPaidEnterpriseFeatures(
@@ -277,7 +281,10 @@ describe('Create Default Policy tests ', () => {
       licenseEmitter.next(Enterprise);
 
       const config = createEndpointConfig({ preset: 'EDRComplete' });
-      const policy = await createDefaultPolicyCallback(config);
+      const policy = await createDefaultPolicyCallback(config, {
+        ...experimentalFeatures,
+        perOsPolicySettings: true,
+      });
       const license = 'enterprise';
       const isCloud = true;
       const defaultPolicy = policyFactory({
@@ -425,22 +432,30 @@ describe('Create Default Policy tests ', () => {
       ['enterprise', Enterprise],
     ];
     const presets: Preset[] = ['DataCollection', 'NGAV', 'EDREssential', 'EDRComplete'];
+    const perOsFlagStates = [false, true];
 
-    // Cross product, so a failure names the exact (tier, preset) pair.
-    const cases: Array<[tier: string, preset: Preset, license: ILicense]> = tiers.flatMap(
-      ([tier, license]) =>
-        presets.map((preset): [string, Preset, ILicense] => [tier, preset, license])
-    );
+    // Cross product, so a failure names the exact (tier, preset, flag) triple.
+    const cases: Array<[tier: string, preset: Preset, perOs: boolean, license: ILicense]> =
+      tiers.flatMap(([tier, license]) =>
+        presets.flatMap((preset) =>
+          perOsFlagStates.map((perOs): [string, Preset, boolean, ILicense] => [
+            tier,
+            preset,
+            perOs,
+            license,
+          ])
+        )
+      );
 
     it.each(cases)(
-      'should create a policy that satisfies isEndpointPolicyValidForLicense on %s with the %s preset',
-      async (_tier, preset, license) => {
+      'should create a policy that satisfies isEndpointPolicyValidForLicense on %s with the %s preset (perOsPolicySettings: %s)',
+      async (_tier, preset, perOs, license) => {
         licenseEmitter.next(license);
 
-        const policy = await createDefaultPolicyCallback({
-          type: 'endpoint',
-          endpointConfig: { preset },
-        });
+        const policy = await createDefaultPolicyCallback(
+          { type: 'endpoint', endpointConfig: { preset } },
+          { ...experimentalFeatures, perOsPolicySettings: perOs }
+        );
 
         expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
       }
@@ -450,6 +465,95 @@ describe('Create Default Policy tests ', () => {
     // (Device Control on) is what Platinum used to be created with, and it must fail.
     it('should not consider a raw policyFactory() output valid for a platinum license', () => {
       expect(isEndpointPolicyValidForLicense(policyFactory(), Platinum)).toBe(false);
+    });
+  });
+
+  describe('macOS ransomware default', () => {
+    type Preset = PolicyCreateEndpointConfig['endpointConfig']['preset'];
+
+    const perOsExperimentalFeatures: ExperimentalFeatures = {
+      ...experimentalFeatures,
+      perOsPolicySettings: true,
+    };
+    const createEndpointConfig = (preset: Preset): PolicyCreateEndpointConfig => ({
+      type: 'endpoint',
+      endpointConfig: { preset },
+    });
+
+    it.each<Preset>(['EDRComplete', 'EDREssential', 'NGAV'])(
+      'should enable macOS ransomware prevention for the %s preset when perOsPolicySettings is on',
+      async (preset) => {
+        const policy = await createDefaultPolicyCallback(
+          createEndpointConfig(preset),
+          perOsExperimentalFeatures
+        );
+
+        expect(policy.mac.ransomware).toEqual({ mode: ProtectionModes.prevent, supported: true });
+        expect(policy.mac.popup.ransomware.enabled).toBe(true);
+        expect(policy.windows.ransomware.mode).toBe(ProtectionModes.prevent);
+      }
+    );
+
+    it('should enable macOS ransomware prevention on an Enterprise license', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(
+        createEndpointConfig('EDRComplete'),
+        perOsExperimentalFeatures
+      );
+
+      expect(policy.mac.ransomware.mode).toBe(ProtectionModes.prevent);
+    });
+
+    it.each<[name: string, config: AnyPolicyCreateConfig | undefined]>([
+      ['the DataCollection preset', createEndpointConfig('DataCollection')],
+      ['no integration config', undefined],
+      ['a cloud config', { type: 'cloud' }],
+    ])('should keep macOS ransomware off for %s', async (_name, config) => {
+      const policy = await createDefaultPolicyCallback(config, perOsExperimentalFeatures);
+
+      expect(policy.mac.ransomware.mode).toBe(ProtectionModes.off);
+      expect(policy.mac.popup.ransomware.enabled).toBe(false);
+    });
+
+    it.each<[tier: string, license: ILicense]>([
+      ['gold', Gold],
+      ['basic', Basic],
+    ])(
+      'should keep macOS ransomware off and unsupported on a %s license',
+      async (_tier, license) => {
+        licenseEmitter.next(license);
+
+        const policy = await createDefaultPolicyCallback(
+          createEndpointConfig('EDRComplete'),
+          perOsExperimentalFeatures
+        );
+
+        expect(policy.mac.ransomware).toEqual({ mode: ProtectionModes.off, supported: false });
+      }
+    );
+
+    it('should keep macOS ransomware off when the endpointPolicyProtections product feature is disabled', async () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointPolicyProtections
+        )
+      );
+
+      const policy = await createDefaultPolicyCallback(
+        createEndpointConfig('EDRComplete'),
+        perOsExperimentalFeatures
+      );
+
+      expect(policy.mac.ransomware.mode).toBe(ProtectionModes.off);
+    });
+
+    // Without the per-OS form, macOS ransomware has no card, so it must stay opt-in.
+    it('should keep macOS ransomware off when perOsPolicySettings is off', async () => {
+      const policy = await createDefaultPolicyCallback(createEndpointConfig('EDRComplete'));
+
+      expect(policy.mac.ransomware).toEqual({ mode: ProtectionModes.off, supported: true });
+      expect(policy.windows.ransomware.mode).toBe(ProtectionModes.prevent);
     });
   });
 

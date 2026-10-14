@@ -152,16 +152,37 @@ export const getPolicySettingsFormTestSubjects = (
         row: perOsMemoryTestSubj('windows'),
         modeSelect: perOsMemoryTestSubj('windows-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('windows-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('windows-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'windows-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'windows-customYaraSignatures-tooltipIcon'
+        ),
       },
       mac: {
         row: perOsMemoryTestSubj('mac'),
         modeSelect: perOsMemoryTestSubj('mac-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('mac-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('mac-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'mac-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'mac-customYaraSignatures-tooltipIcon'
+        ),
       },
       linux: {
         row: perOsMemoryTestSubj('linux'),
         modeSelect: perOsMemoryTestSubj('linux-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('linux-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('linux-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'linux-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'linux-customYaraSignatures-tooltipIcon'
+        ),
       },
     },
     behaviour: {

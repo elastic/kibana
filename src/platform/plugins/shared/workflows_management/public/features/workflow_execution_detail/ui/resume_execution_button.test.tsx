@@ -429,6 +429,15 @@ describe('ResumeExecutionButton', () => {
       expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
     });
 
+    it('renders a markdown message inside the scroll region, with the actions outside it', () => {
+      renderComponent({ ...approvalProps, resumeMessage: '**Approve** this' });
+      const message = screen.getByTestId('waitForApprovalMessage');
+      expect(message.querySelector('strong')).toHaveTextContent('Approve');
+      expect(message).toHaveTextContent('Approve this');
+      expect(message).not.toContainElement(screen.getByTestId('approveActionButton'));
+      expect(message).not.toContainElement(screen.getByTestId('rejectActionButton'));
+    });
+
     it('submits approved=true when Approve is clicked', async () => {
       renderComponent(approvalProps);
       fireEvent.click(screen.getByTestId('approveActionButton'));

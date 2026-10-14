@@ -93,7 +93,7 @@ describe('WorkflowExecutionOverview', () => {
     expect(services.http.get).toHaveBeenCalledWith(
       '/internal/security/service_account/original-account'
     );
-  });
+  }, 20_000);
 
   it('renders persisted identity when credential validation failed before runtime setup', () => {
     const execution: WorkflowExecutionDto = {

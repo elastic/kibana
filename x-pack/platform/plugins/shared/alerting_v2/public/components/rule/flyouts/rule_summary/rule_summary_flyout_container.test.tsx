@@ -56,14 +56,18 @@ jest.mock('./rule_summary_flyout', () => ({
 }));
 
 jest.mock('../../../loading_flyout', () => ({
-  LoadingFlyout: ({ type }: { type?: string }) => (
-    <div data-test-subj="mockLoadingFlyout" data-type={type} />
+  LoadingFlyout: ({ type, ownFocus }: { type?: string; ownFocus?: boolean }) => (
+    <div data-test-subj="mockLoadingFlyout" data-type={type} data-own-focus={String(ownFocus)} />
   ),
 }));
 
 jest.mock('../../../entity_not_found_flyout', () => ({
-  EntityNotFoundFlyout: ({ type }: { type?: string }) => (
-    <div data-test-subj="mockEntityNotFoundFlyout" data-type={type} />
+  EntityNotFoundFlyout: ({ type, ownFocus }: { type?: string; ownFocus?: boolean }) => (
+    <div
+      data-test-subj="mockEntityNotFoundFlyout"
+      data-type={type}
+      data-own-focus={String(ownFocus)}
+    />
   ),
 }));
 
@@ -130,6 +134,7 @@ describe('RuleSummaryFlyoutContainer', () => {
 
       expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
       expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
+      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-own-focus', 'false');
     });
 
     it('renders the fetched rule', () => {
@@ -163,6 +168,10 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
         'data-type',
         'overlay'
+      );
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
+        'data-own-focus',
+        'false'
       );
       expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
     });
@@ -207,6 +216,7 @@ describe('RuleSummaryFlyoutContainer', () => {
 
       expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
       expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-type', 'overlay');
+      expect(screen.getByTestId('mockLoadingFlyout')).toHaveAttribute('data-own-focus', 'false');
     });
 
     it('renders entity not found when the source cannot resolve the rule', () => {
@@ -219,6 +229,10 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
         'data-type',
         'overlay'
+      );
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toHaveAttribute(
+        'data-own-focus',
+        'false'
       );
     });
 

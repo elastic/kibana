@@ -10,11 +10,7 @@ import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type {
-  DeviceControlAccessLevel,
-  Immutable,
-  PolicyConfig,
-} from '../../../../../../../common/endpoint/types';
+import type { Immutable, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import {
   DeviceControlAccessLevel as DeviceControlAccessLevelEnum,
   PolicyOperatingSystem,
@@ -29,7 +25,11 @@ import { useGetDeviceControlUpsellComponent } from '../hooks/use_get_device_cont
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
-import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
+import type { PerOsDeviceControlSelectValue } from './per_os_device_control_access_level_select';
+import {
+  DEVICE_CONTROL_DISABLED,
+  PerOsDeviceControlAccessLevelSelect,
+} from './per_os_device_control_access_level_select';
 import { PerOsDeviceControlNotifyUserOption } from './per_os_device_control_notify_user_option';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 import { createDeviceControlPolicyAccessor } from './policy_accessor';
@@ -65,17 +65,8 @@ export const PerOsDeviceControlCard = memo(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isEnterprise = useLicense().isEnterprise();
     const DeviceControlUpsellingComponent = useGetDeviceControlUpsellComponent();
-    // Both OS branches are independently optional, so the master switch is on only when every
-    // supported OS has a defined `device_control` and at least one of them is enabled.
-    const osDeviceControls = DEVICE_CONTROL_OS_VALUES.map(
-      (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control
-    );
-    const deviceControlExists = osDeviceControls.every(
-      (deviceControl) => deviceControl !== undefined
-    );
-    const selected = Boolean(
-      deviceControlExists &&
-        osDeviceControls.some((deviceControl) => deviceControl?.enabled === true)
+    const selected = DEVICE_CONTROL_OS_VALUES.some(
+      (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control?.enabled === true
     );
 
     if (DeviceControlUpsellingComponent) {
@@ -194,16 +185,16 @@ const PerOsDeviceControlRow = memo<PerOsDeviceControlRowProps>(
   ({ os, accessor, onChange, mode, isLast, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const deviceControl = accessor.read().device_control;
-    const accessLevel: DeviceControlAccessLevel =
-      deviceControl?.usb_storage ?? DeviceControlAccessLevelEnum.audit;
+    const selectedValue: PerOsDeviceControlSelectValue = deviceControl?.enabled
+      ? deviceControl.usb_storage
+      : DEVICE_CONTROL_DISABLED;
     const handleAccessLevelChange = useCallback(
-      (nextAccessLevel: DeviceControlAccessLevel) => {
+      (nextAccessLevel: PerOsDeviceControlSelectValue) => {
         const updatedPolicy = accessor.update((currentOsPolicy) => {
-          currentOsPolicy.device_control ??= {
-            enabled: true,
-            usb_storage: nextAccessLevel,
-          };
-          currentOsPolicy.device_control.usb_storage = nextAccessLevel;
+          currentOsPolicy.device_control =
+            nextAccessLevel === DEVICE_CONTROL_DISABLED
+              ? { enabled: false, usb_storage: DeviceControlAccessLevelEnum.audit }
+              : { enabled: true, usb_storage: nextAccessLevel };
           // Create the branch rather than skip the sync, matching the master toggle: an OS whose
           // popup branch is missing would otherwise keep a disabled notification after Block all.
           currentOsPolicy.popup.device_control ??= {
@@ -223,9 +214,9 @@ const PerOsDeviceControlRow = memo<PerOsDeviceControlRowProps>(
         os={POLICY_OS_TO_OPERATING_SYSTEM[os]}
         primaryControl={
           <PerOsDeviceControlAccessLevelSelect
-            accessLevel={accessLevel}
+            accessLevel={selectedValue}
             onAccessLevelChange={handleAccessLevelChange}
-            disabled={mode !== 'edit' || !deviceControl?.enabled}
+            disabled={mode !== 'edit'}
             data-test-subj={getTestId('accessLevel')}
           />
         }

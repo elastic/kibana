@@ -206,14 +206,14 @@ const ActionPolicyFormPageContent = ({
   );
 
   const onSubmitUpdate = useCallback(
-    (id: string, values: ActionPolicyFormState, version: string) =>
+    (id: string, values: ActionPolicyFormState) =>
       submitWithInlineWorkflows(values, (destinations) =>
-        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }, version) })
+        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }) })
       ),
     [submitWithInlineWorkflows, updatePolicy]
   );
 
-  const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
+  const { methods, isEditMode, handleSubmit } = useActionPolicyForm({
     initialValues: initialPolicy,
     onSubmitCreate,
     onSubmitUpdate,
@@ -282,7 +282,7 @@ const ActionPolicyFormPageContent = ({
             fill
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!isSubmitEnabled || !isLicenseValid}
+            disabled={!isLicenseValid}
             data-test-subj="submitButton"
           >
             {isEditMode ? (

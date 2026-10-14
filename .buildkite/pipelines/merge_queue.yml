@@ -137,6 +137,7 @@ steps:
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
+      preemptible: true
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -152,6 +153,7 @@ steps:
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
+      preemptible: true
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -167,6 +169,7 @@ steps:
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
+      preemptible: true
     key: check_types
     timeout_in_minutes: 60
     env:

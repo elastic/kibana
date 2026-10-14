@@ -8,11 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { concat, of, shareReplay } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
   ConverseInput,
@@ -56,7 +58,7 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { serializeExecutionError } from './utils';
+import { resolveExecutionConnectorId, serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -110,6 +112,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       executionId: providedExecutionId,
       useTaskManager,
+      requestImmediateClaim = false,
       abortSignal,
       metadata,
       interactive,
@@ -118,8 +121,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
-
     const executionClient = this.createExecutionClient();
+
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
+      const connector = await this.resolveExecutionConnector({
+        agentId,
+        connectorId: params.connectorId,
+        request,
+      });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
+    }
 
     const conversationClient = await this.getConversationClient({
       request,
@@ -220,6 +236,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          // The run reads the conversation by id (real-time). The conversation is already listed,
+          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
+          appendRefresh: false,
         });
       } catch (err) {
         try {
@@ -257,7 +276,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
     const result = useScheduledTask
-      ? await this.executeWithScheduledTask({ executionId, agentId, request })
+      ? await this.executeWithScheduledTask({
+          executionId,
+          agentId,
+          request,
+          requestImmediateClaim,
+        })
       : await this.executeLocally({ execution, request, interactivity });
 
     if (!conversation) {
@@ -451,24 +475,41 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId,
     agentId,
     request,
+    requestImmediateClaim,
   }: {
     executionId: string;
     agentId: string;
     request: ExecuteAgentParams['request'];
+    requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
+    const task = this.buildRunAgentTask(executionId);
     // ensureScheduled tolerates the task already existing: a concurrent idempotent
     // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+    await this.deps.taskManager.ensureScheduled(task, {
       request,
       cloneApiKey: true,
     });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
+    if (requestImmediateClaim) {
+      this.requestImmediateClaim(task.id);
+    }
+
     return {
       executionId,
       events$: this.followExecution(executionId),
     };
+  }
+
+  private requestImmediateClaim(taskId: string): void {
+    // Not awaited: regular polling still picks the task up when this fails, including when a
+    // poll claimed the task first and runSoon rejects it as already running.
+    this.deps.taskManager.runSoon(taskId, { requestImmediateClaim: true }).catch((error) => {
+      this.logger.debug(
+        `Could not request an immediate claim for task ${taskId}: ${error.message}`
+      );
+    });
   }
 
   /**
@@ -677,6 +718,60 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
   }
 
+  private async isIdempotentReplay({
+    executionClient,
+    executionId,
+    metadata,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    metadata?: Record<string, string>;
+  }): Promise<boolean> {
+    if (!metadata?.execution_idempotency_key) {
+      return false;
+    }
+    return (await executionClient.peek(executionId)) !== undefined;
+  }
+
+  private async resolveExecutionConnector({
+    agentId,
+    connectorId,
+    request,
+  }: {
+    agentId: string;
+    connectorId?: string;
+    request: KibanaRequest;
+  }): Promise<InferenceConnector | undefined> {
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
+    return (
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
+        )
+        // Leaves resolution failures to the runner, which records them against the execution
+        .catch(() => undefined)
+    );
+  }
+
   private async resolveConversationRequest({
     params,
     request,
@@ -717,6 +812,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    appendRefresh,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -725,6 +821,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    appendRefresh?: Refresh;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author);
@@ -735,6 +832,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       eventId,
       author,
+      appendRefresh,
       ...(origin ? { origin } : {}),
     };
 

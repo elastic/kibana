@@ -592,6 +592,53 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION 
   }
 );
 
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentIds',
+  {
+    defaultMessage: 'The IDs of the attachments that were deleted (all of the same type).',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentType',
+  {
+    defaultMessage:
+      'The type of the attachments that were deleted (e.g. "comment", "security.alert", "observability.alert", "stack.alert", "security.event"). Legacy attachments can report "alert" or "event"; to match any alert or event type, use event.alertIds: * or event.eventIds: *.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.alertIds',
+  {
+    defaultMessage:
+      'The IDs of the alerts referenced by the deleted attachments. Only present for alert attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.alertIndices',
+  {
+    defaultMessage:
+      'The indices of the alerts referenced by the deleted attachments, index-aligned with alertIds. Only present for alert attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.eventIds',
+  {
+    defaultMessage:
+      'The IDs of the events referenced by the deleted attachments. Only present for event attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.eventIndices',
+  {
+    defaultMessage:
+      'The indices of the events referenced by the deleted attachments, index-aligned with eventIds. Only present for event attachments.',
+  }
+);
+
 export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.commentsAdded.eventSchema.commentIds',
   {
@@ -716,6 +763,28 @@ export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step deletes the specified observable from the case. The step echoes back the case_id and observable_id that were removed.',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.label',
+  {
+    defaultMessage: 'Cases - Bulk delete observables',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.description',
+  {
+    defaultMessage: 'Removes multiple observables from a case in one step',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.documentation.details',
+  {
+    defaultMessage:
+      'This step deletes the specified observables from the case. The operation is atomic: if any of the observable IDs is not found on the case, the step fails and no observables are deleted. The step echoes back the case_id and the observable_ids that were requested.',
   }
 );
 

@@ -20,6 +20,7 @@ import { getLocationFromClassname, getReportNameFromClassname } from './get_fail
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssueComment } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { withTestHistoryDashboardLink } from './test_history_dashboard';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
   const escaped = suffix.replace(/\./g, '\\.');
@@ -209,7 +210,10 @@ function createJUnitBody(
     metadata['test.type'] = failure.testType;
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), metadata);
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), metadata),
+    failure
+  );
 }
 
 /**
@@ -265,12 +269,15 @@ function createScoutBody(
     }
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-    'test.type': 'scout',
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+      'test.type': 'scout',
+    }),
+    failure
+  );
 }
 
 async function createJUnitFailureIssue(
@@ -321,16 +328,18 @@ function createJUnitComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  errorMessage: ErrorMessageForComment
+  errorMessage: ErrorMessageForComment,
+  failure?: TestFailure
 ): string {
   /*
    * The error message is only included when it has not been reported on the
    * issue before (see getErrorMessageForComment), so repeat failures with a
    * known error stay compact while genuinely new errors surface immediately.
    */
-  return `New failure: [${
-    pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const prefix =
+    branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 function createScoutComment(
@@ -365,9 +374,11 @@ function createScoutComment(
    * previous comment), a short note replaces the code block. When no message
    * was available to compare, only the link line is posted.
    */
-  return `New failure for "${failure.target}" target: [${
+  const buildLink = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  } - ${branch}](${buildUrl})`;
+  const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 async function updateJUnitFailureIssue(
@@ -379,9 +390,12 @@ async function updateJUnitFailureIssue(
   failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = failure
+    ? withTestHistoryDashboardLink(
+        updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+        failure
+      )
+    : updateIssueMetadata(issue.github.body, { 'test.failCount': newCount });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
@@ -395,7 +409,7 @@ async function updateJUnitFailureIssue(
     );
   }
 
-  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage);
+  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -410,9 +424,10 @@ async function updateScoutFailureIssue(
   failure: ScoutTestFailureExtended
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = withTestHistoryDashboardLink(
+    updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+    failure
+  );
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 

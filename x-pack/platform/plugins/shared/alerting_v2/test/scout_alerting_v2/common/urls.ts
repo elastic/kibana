@@ -95,6 +95,11 @@ export const getFindRuleTemplatesUrl = (
   return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
 };
 
+export const getRuleTemplateTagsUrl = (search?: string): string => {
+  const path = `${RULE_TEMPLATE_API_PATH}/tags`;
+  return search === undefined ? path : `${path}?${toQueryString({ search })}`;
+};
+
 const getSeriesActionUrl = (groupHash: string, suffix: string) =>
   `${SERIES_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 

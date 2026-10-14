@@ -12,6 +12,7 @@ import {
   internalStateActions,
   type InternalStateDispatch,
   type RuntimeStateManager,
+  getTabDataView,
   selectTabRuntimeState,
   type TabState,
   type DiscoverInternalState,
@@ -20,6 +21,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
+import { isNonEmptyEsqlQuery } from './is_non_empty_esql_query';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -29,6 +31,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg, sendResetMsg } from '../../hooks/use_saved_search_messages';
+import { resolveEsqlSource } from '../../data_fetching/resolve_esql_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -87,6 +90,20 @@ export const buildStateSubscribe =
       }
     }
 
+    if (isEsqlMode && queryChanged && isNonEmptyEsqlQuery(nextState.query)) {
+      const tabId = getCurrentTab().id;
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const previousSource = currentDataSource$.getValue();
+      const { esqlSource } = await resolveEsqlSource({
+        esql: nextState.query.esql,
+        services,
+        esqlVariables: getCurrentTab().esqlVariables,
+        timeRange: services.data.query.timefilter.timefilter.getTime(),
+        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      });
+      dispatch(internalStateActions.assignNextDataSource({ tabId, dataSource: esqlSource }));
+    }
+
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
@@ -104,10 +121,9 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        currentDataView: selectTabRuntimeState(
-          runtimeStateManager,
-          getCurrentTab().id
-        )?.currentDataView$.getValue(),
+        currentDataView: getTabDataView(
+          selectTabRuntimeState(runtimeStateManager, getCurrentTab().id)
+        ),
         isEsqlMode,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
@@ -153,7 +169,10 @@ export const buildStateSubscribe =
       // reset() uses getInitialFetchStatus() for the new language. After refresh,
       // skipInitialFetch is gone and empty ES|QL is no longer the current query,
       // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
-      if (dataState.data$.main$.getValue().fetchStatus !== FetchStatus.UNINITIALIZED) {
+      // Re-read after await resolveEsqlSource: do not overwrite COMPLETE/ERROR
+      // that landed while the source was resolving.
+      const currentStatus = dataState.data$.main$.getValue().fetchStatus;
+      if (currentStatus === FetchStatus.LOADING) {
         sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
       }
       return;

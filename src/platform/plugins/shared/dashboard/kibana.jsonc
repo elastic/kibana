@@ -39,7 +39,8 @@
       "observabilityAIAssistant",
       "lens",
       "security",
-      "cps"
+      "cps",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaReact",
