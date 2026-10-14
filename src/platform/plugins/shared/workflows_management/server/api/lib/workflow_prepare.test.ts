@@ -117,14 +117,14 @@ describe('applyFieldUpdates', () => {
   it.each([{ tags: ['action'] }, { tags: [] }, { tags: ['action', 'new-delegation-tag'] }])(
     'synchronizes field-only tags with YAML and the definition: %j',
     ({ tags }) => {
-      const definition: WorkflowYaml = {
+      const definition = {
         name: 'Original',
         enabled: true,
         version: '1',
         triggers: [{ type: 'manual' }],
         steps: [],
         tags: ['action', 'auto-approvable'],
-      };
+      } satisfies WorkflowYaml;
       const source = {
         ...baseSource,
         definition,
