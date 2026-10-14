@@ -31,11 +31,16 @@ import {
 } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
-  useAlertBasedTiles,
-  useEntitiesWithAnomaliesCount,
-  useNewEntityCount,
-  useRiskMoversCount,
-  useNewlyHighCriticalCount,
+  useAlertBasedTilesWithDelta as useAlertBasedTiles,
+  useAlertBasedTilesSeries,
+  useEntitiesWithAnomaliesSeries,
+  useNewEntitySeries,
+  useNewlyHighCriticalSeries,
+  useRiskMoversSeries,
+  useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
+  useNewEntityCountWithDelta as useNewEntityCount,
+  useRiskMoversCountWithDelta as useRiskMoversCount,
+  useNewlyHighCriticalCountWithDelta as useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
@@ -131,9 +136,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const {
     severeAlertsCount: alertsCount,
+    severeAlertsDelta: alertsDelta,
     severeAlertsEntityIds: alertsEntityIds,
     watchlistedCount,
+    watchlistedDelta,
     watchlistedEntityIds,
+    isDeltaLoading,
     isLoading: alertBasedLoading,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -141,47 +149,100 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityFilters,
     skip: skipTileQueries,
   });
+
+  // The sparklines start after the counts and their deltas, so they never delay them.
+  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !alertBasedLoading && !isDeltaLoading,
+    severeAlertsCount: alertsCount,
+    watchlistedCount,
+  });
   const {
     count: anomaliesCount,
+    delta: anomaliesDelta,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    isDeltaLoading: anomaliesDeltaLoading,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
     skip: skipTileQueries,
   });
+  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !anomaliesLoading && !anomaliesDeltaLoading,
+    count: anomaliesCount,
+  });
   const {
     count: newEntityCount,
+    delta: newEntityDelta,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
+    isDeltaLoading: newEntityDeltaLoading,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
     skip: skipTileQueries,
   });
+  const { trend: newEntityTrend } = useNewEntitySeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !newEntityLoading && !newEntityDeltaLoading,
+    count: newEntityCount,
+  });
   const {
     count: riskMoversCount,
+    delta: riskMoversDelta,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
+    isDeltaLoading: riskMoversDeltaLoading,
+    isHistoryMissing: riskMoversHistoryMissing,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
     skip: skipTileQueries,
   });
+  const { trend: riskMoversTrend } = useRiskMoversSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !riskMoversLoading && !riskMoversDeltaLoading,
+    count: riskMoversCount,
+  });
   const {
     count: newlyHCCount,
+    delta: newlyHCDelta,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
+    isDeltaLoading: newlyHCDeltaLoading,
+    isHistoryMissing: newlyHCHistoryMissing,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
     skip: skipTileQueries,
+  });
+  const { trend: newlyHCTrend } = useNewlyHighCriticalSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !newlyHCLoading && !newlyHCDeltaLoading,
+    count: newlyHCCount,
   });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
@@ -265,11 +326,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: alertsCount,
+        delta: alertsDelta,
+        isDeltaLoading,
+        trend: alertsTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
+            defaultMessage:
+              'Entities with at least one high or critical alert in the last {timeRange}',
             values: { timeRange },
           }
         ),
@@ -290,6 +355,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: anomaliesCount,
+        delta: anomaliesDelta,
+        isDeltaLoading: anomaliesDeltaLoading,
+        trend: anomaliesTrend,
         isLoading: anomaliesLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -315,6 +383,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: riskMoversCount,
+        delta: riskMoversDelta,
+        isDeltaLoading: riskMoversDeltaLoading,
+        isDeltaUnavailable: riskMoversHistoryMissing,
+        trend: riskMoversTrend,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -353,6 +425,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: newlyHCCount,
+        delta: newlyHCDelta,
+        isDeltaLoading: newlyHCDeltaLoading,
+        isDeltaUnavailable: newlyHCHistoryMissing,
+        trend: newlyHCTrend,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -395,6 +471,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: watchlistedCount,
+        delta: watchlistedDelta,
+        isDeltaLoading,
+        trend: watchlistedTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -417,6 +496,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           defaultMessage: 'New entity',
         }),
         value: newEntityCount,
+        delta: newEntityDelta,
+        isDeltaLoading: newEntityDeltaLoading,
+        trend: newEntityTrend,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -437,16 +519,35 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ],
     [
       alertsCount,
+      alertsDelta,
+      alertsTrend,
       alertBasedLoading,
+      isDeltaLoading,
       anomaliesCount,
+      anomaliesDelta,
+      anomaliesDeltaLoading,
+      anomaliesTrend,
       anomaliesLoading,
       riskMoversCount,
+      riskMoversDelta,
+      riskMoversDeltaLoading,
+      riskMoversHistoryMissing,
+      riskMoversTrend,
       riskMoversLoading,
       newlyHCCount,
+      newlyHCDelta,
+      newlyHCDeltaLoading,
+      newlyHCHistoryMissing,
+      newlyHCTrend,
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
+      watchlistedDelta,
+      watchlistedTrend,
       newEntityCount,
+      newEntityDelta,
+      newEntityDeltaLoading,
+      newEntityTrend,
       newEntityLoading,
       riskMoversMissingIndex,
       timeRange,
