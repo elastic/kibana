@@ -6,6 +6,10 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import {
+  REVIEW_GATED_AUTONOMY_LEVELS,
+  WORKER_AUTONOMY_LEVELS,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -82,6 +86,38 @@ export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_e
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
+/** Read-only Hunt Watch threat-intel supply status for the current space. */
+export const HUNT_THREAT_INTEL_SUPPLY_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/threat_intel_supply` as const;
+
+/** Re-enable drifted TI supply while Continuous Threat Hunt is on. */
+export const HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL =
+  `${HUNT_THREAT_INTEL_SUPPLY_URL}/restore` as const;
+
+export type HuntThreatIntelSupplyScope = 'deployment' | 'space';
+export type HuntThreatIntelSupplyWorkflowKey = 'ingest' | 'enrich' | 'attribute';
+
+export interface HuntThreatIntelSupplyWorkflowStatus {
+  key: HuntThreatIntelSupplyWorkflowKey;
+  workflowId: string;
+  enabled: boolean;
+  installed: boolean;
+  scope: HuntThreatIntelSupplyScope;
+  inUseElsewhere?: boolean;
+}
+
+export interface HuntThreatIntelSupplyHardGate {
+  ok: boolean;
+  reasonCodes: string[];
+}
+
+export interface HuntThreatIntelSupplyStatus {
+  workflows: HuntThreatIntelSupplyWorkflowStatus[];
+  hardGate: HuntThreatIntelSupplyHardGate;
+  drift: boolean;
+  huntEnabled: boolean;
+}
+
 export interface ScanFailureWorker {
   workerId: string;
   watchId: string;
@@ -124,14 +160,13 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
  * watch, composed with per-callable gates and the org-wide floor. Only the *selected* level varies
  * per watch. See https://github.com/elastic/security-team/issues/18718.
  */
-export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
+export const WATCH_AUTONOMY_LEVELS = WORKER_AUTONOMY_LEVELS;
 
 /**
  * The review-gated subset of the dial: every action passes a human review gate, so the Worker
- * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
- * never leave these declarations behind.
+ * offers no unattended (supervised) level.
  */
-export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+export const WATCH_AUTONOMY_REVIEW_GATED = REVIEW_GATED_AUTONOMY_LEVELS;
 
 /**
  * Presentation metadata for the managed watch catalog.
@@ -291,18 +326,18 @@ export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
  * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
  * `workflow.execute` inputs. A new Worker usually costs no new tier.
  *
- * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * Tiers are named for the class of model a call needs rather than the task it happens to serve
  * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
- * same fast model that gates an alert also enriches a threat report. Other Security features are
- * expected to pin to these rather than register per-feature rows of their own.
+ * same efficient model that checks detection coverage also gates a threat report. Other Security
+ * features are expected to pin to these rather than register per-feature rows of their own.
  */
 export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
-/** Low latency, high volume, lightweight judgment. */
-export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
-/** Deeper single-shot thinking on a self-contained task. */
-export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
-/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
-export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
+/** Quick, lightweight judgment on calls that run often. Small, low-cost model. */
+export const ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID = 'alertzero_efficient' as const;
+/** Accuracy matters but the call runs often or uses tools over many steps. Strong mid-size model. */
+export const ALERTZERO_BALANCED_INFERENCE_FEATURE_ID = 'alertzero_balanced' as const;
+/** Complex, single-pass work where output quality matters most. Most capable model. */
+export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

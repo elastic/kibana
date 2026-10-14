@@ -28,6 +28,8 @@ export class ActionPolicyFormPage {
   public readonly nameInput: Locator;
   /** Toggle button for the Advanced Matching accordion. */
   public readonly advancedMatchingToggle: Locator;
+  /** Routing tags combo box backing `matcher.tags`. */
+  public readonly routingTagsSelector: Locator;
   /** KQL query bar (`QueryStringInput`) backing the `matcher` field. */
   public readonly matcherInput: Locator;
   public readonly submitButton: Locator;
@@ -41,6 +43,7 @@ export class ActionPolicyFormPage {
     this.nameInput = this.container.getByTestId('nameInput');
     this.advancedMatchingToggle = this.container.getByTestId('advancedMatchingAccordionToggle');
     this.matcherInput = this.container.getByTestId('matcherInput');
+    this.routingTagsSelector = this.container.getByTestId('routingTagsSelector');
     this.submitButton = this.container.getByTestId('submitButton');
     this.cancelButton = this.container.getByTestId('cancelButton');
     this.workflowsDisabledCallout = this.container.getByTestId('workflowsDisabledCallout');
@@ -76,6 +79,13 @@ export class ActionPolicyFormPage {
     // Typing opens the KQL suggestions popover, which overlays the rest of the
     // form and would swallow the submit click.
     await this.matcherInput.press('Escape');
+  }
+
+  /** Picks a routing tag from the selector's suggestions (the "Recommended" group). */
+  async selectRoutingTag(tag: string) {
+    await this.page.components
+      .comboBox('routingTagsSelector', this.container)
+      .setSelectedOptions([tag], { timeout: WORKFLOW_OPTIONS_TIMEOUT });
   }
 
   async selectWorkflow(workflowName: string) {

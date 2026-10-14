@@ -14,6 +14,27 @@ import type {
   Severity,
 } from '../../common';
 
+/** How many handled events a thread keeps; the oldest are dropped first. */
+export const MAX_THREAD_SEEN_EVENTS = 50;
+
+/** A delivered event and the workflow execution handling it. */
+export interface InvestigationThreadEvent {
+  event_id: string;
+  execution_id: string;
+}
+
+/** The chat thread an investigation belongs to, when it was started from one. */
+export interface InvestigationThread {
+  surface: 'slack';
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+  /** The thread's status message; every run edits it in place. */
+  status_message_ts?: string;
+  /** The events already handled, oldest first, so a redelivery runs once. */
+  seen_events?: InvestigationThreadEvent[];
+}
+
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
   title: string;
   status: InvestigationStatus;
@@ -24,10 +45,14 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   concurrency_key?: string;
   created_at: string;
   started_at?: string;
-  completed_at?: string;
+  /** `null` once a settled investigation is reopened. */
+  completed_at?: string | null;
   executed_by?: string;
-  error?: string;
+  error?: string | null;
   conversation_id?: string;
+  /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
+  execution_id?: string;
+  thread?: InvestigationThread;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -48,10 +73,13 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   title?: string;
   status?: InvestigationStatus;
   started_at?: string;
-  completed_at?: string;
+  /** `null` clears the field; a partial update ignores `undefined`. */
+  completed_at?: string | null;
   executed_by?: string;
-  error?: string;
+  error?: string | null;
   conversation_id?: string;
+  execution_id?: string;
+  thread?: InvestigationThread;
 }
 
 export interface FindInvestigationsQuery<

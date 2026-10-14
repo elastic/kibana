@@ -42,6 +42,29 @@ export const DEFAULT_FILE_EXCLUSIONS = [
 
 export const DEFAULT_DATETIME_FORMAT = 'strict_date_optional_time';
 export const DEFAULT_COLUMN_PREFIX = 'col';
+export const DEFAULT_ENCODING = 'UTF-8';
+export const DEFAULT_SKIP_ROWS = '0';
+export const DEFAULT_MAX_ERROR_RATIO = '0.0';
+export const DEFAULT_SCHEMA_RESOLUTION: Exclude<DatasetSchemaResolutionFormValue, ''> =
+  'first_file_wins';
+export const DEFAULT_PARTITION_DETECTION: Exclude<DatasetPartitionDetectionFormValue, ''> = 'auto';
+export const DEFAULT_ERROR_MODE: Exclude<DatasetErrorModeFormValue, ''> = 'fail_fast';
+export const DEFAULT_HEADER_ROW: Exclude<DatasetBooleanFormValue, ''> = 'true';
+export const DEFAULT_TRIM_SPACES: Exclude<DatasetBooleanFormValue, ''> = 'false';
+
+interface CsvTsvFormatDefaults {
+  delimiter: string;
+  mode: Exclude<DatasetModeFormValue, ''>;
+}
+
+const CSV_TSV_DEFAULTS_BY_FORMAT: Readonly<Record<'csv' | 'tsv', CsvTsvFormatDefaults>> = {
+  csv: { delimiter: ',', mode: 'quoted' },
+  tsv: { delimiter: '\t', mode: 'plain' },
+};
+
+/** Delimiter and quote mode defaults for a CSV-family format; anything other than TSV uses CSV's. */
+export const getCsvTsvFormatDefaults = (format: DatasetFormatFormValue): CsvTsvFormatDefaults =>
+  CSV_TSV_DEFAULTS_BY_FORMAT[format === 'tsv' ? 'tsv' : 'csv'];
 
 const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<Record<string, '\\t' | '\\n' | '\\r'>> = {
   '\t': '\\t',

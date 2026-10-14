@@ -7,8 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import { AgentExecutionMode, isApiAutoApproved, ToolType } from '@kbn/agent-builder-common';
-import type { ApiTarget } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  API_STATE_CHANGED_UI_EVENT,
+  isApiAutoApproved,
+  ToolType,
+} from '@kbn/agent-builder-common';
+import type { ApiStateChangedEventData, ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
@@ -77,7 +82,17 @@ The response is the raw API response body.`,
     schema: executeSchema,
     handler: async (
       { target, api, params = {} },
-      { esClient, request, spaceId, logger, prompts, callContext, executionMode, interactivity }
+      {
+        esClient,
+        request,
+        spaceId,
+        logger,
+        prompts,
+        callContext,
+        executionMode,
+        interactivity,
+        events,
+      }
     ) => {
       const preparedApiRequest = await prepareApiRequest({ target, api, params, spaceId });
       if (preparedApiRequest.status !== 'prepared') {
@@ -94,7 +109,7 @@ The response is the raw API response body.`,
         };
       }
 
-      const { request: apiRequest, destructive } = preparedApiRequest;
+      const { request: apiRequest, destructive, readOnly } = preparedApiRequest;
       const { method, path } = apiRequest;
 
       const preApproved = destructive && isApiAutoApproved({ interactivity, target, api });
@@ -107,7 +122,8 @@ The response is the raw API response body.`,
               createNonInteractiveDeclinedResult(
                 `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
                   `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
-                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
+                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run, ` +
+                  `or it can be added to the agent's auto-approved APIs so that it is pre-approved for every run of this agent.`,
                 { target, api, method, path }
               ),
             ],
@@ -167,6 +183,13 @@ The response is the raw API response body.`,
           selfClient,
           request,
         });
+
+        if (!readOnly && executionMode !== AgentExecutionMode.standalone) {
+          events.sendUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData>(
+            API_STATE_CHANGED_UI_EVENT,
+            { target, api, method, path }
+          );
+        }
 
         const data: ApiExecuteResultData = {
           target,

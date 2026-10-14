@@ -16,6 +16,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { getServicesAlerts } from './get_service_alerts';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
 interface QueryFilter {
@@ -75,6 +76,33 @@ describe('getServicesAlerts', () => {
       expect.arrayContaining([{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }])
     );
     expect(filters.find((f) => f.range)).toBeDefined();
+  });
+
+  it('extends a past end to now so currently-active alerts are not missed', async () => {
+    const client = createMockAlertsClient();
+    const nowMs = Date.parse('2026-05-12T13:00:00.000Z');
+    const start = nowMs - 3600000;
+    const pastEnd = nowMs - 60000;
+    const realDateNow = Date.now;
+    Date.now = jest.fn(() => nowMs);
+
+    try {
+      await getServicesAlerts({
+        apmAlertsClient: client as unknown as ApmAlertsClient,
+        start,
+        end: pastEnd,
+      });
+    } finally {
+      Date.now = realDateNow;
+    }
+
+    const rangeFilter = getFilters(client).find((f) => f.range);
+    expect(rangeFilter?.range?.['@timestamp']).toEqual(
+      expect.objectContaining({
+        gte: start,
+        lte: nowMs,
+      })
+    );
   });
 
   it('filters by serviceName when provided', async () => {
@@ -147,10 +175,7 @@ describe('getServicesAlerts', () => {
     );
     expect(sloClause!.bool!.minimum_should_match).toBe(1);
 
-    const standardEnvClause = envFilter!.bool!.should!.find(
-      (s) => s.term?.[SERVICE_ENVIRONMENT] === 'production'
-    );
-    expect(standardEnvClause).toBeDefined();
+    expect(envFilter!.bool!.should).toEqual(expect.arrayContaining(environmentQuery('production')));
   });
 
   it('does not add SLO-specific environment filter when environment is ENVIRONMENT_ALL', async () => {

@@ -21,7 +21,10 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_PATCH_SEMANTICS_DESCRIPTION,
+} from '../route_descriptions';
 import {
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_VERSION_CONFLICT_DESCRIPTION,
@@ -40,6 +43,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     access: 'public' as const,
     summary: 'Update a rule',
+    description: RULE_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {

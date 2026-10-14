@@ -10,6 +10,7 @@ import type {
   GetResponse,
   SortResults,
   QueryDslQueryContainer,
+  Refresh,
 } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -34,7 +35,6 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -111,6 +111,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { currentUserActor } from './rounds_to_events';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
 import {
   describeConversationWrite,
@@ -144,7 +145,11 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
-    options: ConversationWriteOptions & { access?: ConversationAccess }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      /** Defaults to `wait_for`, so list searches made after the write see it. */
+      refresh?: Refresh;
+    }
   ): Promise<Conversation>;
   addCustomEvents(
     request: { id: string; events: ConversationAddEventInput[] },
@@ -221,6 +226,7 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'agent_id',
   'user_id',
   'user_name',
+  'user_type',
   'title',
   'created_at',
   'updated_at',
@@ -258,6 +264,8 @@ interface ConversationListEsResponse {
   };
 }
 
+export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
+
 export const createClient = ({
   space,
   logger,
@@ -266,6 +274,7 @@ export const createClient = ({
   agentRegistry,
   conversationEvents,
   eventEmitter,
+  onConversationCreated,
 }: {
   space: string;
   logger: Logger;
@@ -274,6 +283,7 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
+  onConversationCreated?: OnConversationCreated;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -285,6 +295,7 @@ export const createClient = ({
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
   });
 };
 
@@ -319,6 +330,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
+  private readonly onConversationCreated?: OnConversationCreated;
 
   constructor({
     storage,
@@ -329,6 +341,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -338,6 +351,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
+    onConversationCreated?: OnConversationCreated;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -347,6 +361,7 @@ class ConversationClientImpl implements ConversationClient {
     this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
+    this.onConversationCreated = onConversationCreated;
   }
 
   /**
@@ -749,6 +764,11 @@ class ConversationClientImpl implements ConversationClient {
         source,
       })
     );
+    try {
+      this.onConversationCreated?.({ conversationId: id, agentId: conversation.agent_id });
+    } catch (error) {
+      this.logger.warn(`Failed to notify creation of conversation "${id}": ${error}`);
+    }
 
     return this.get(id);
   }
@@ -784,12 +804,7 @@ class ConversationClientImpl implements ConversationClient {
     },
     { source }: ConversationWriteOptions
   ): Promise<ConversationEvent[]> {
-    const { id: userId, username } = this.getUser();
-    const actor = {
-      type: EventActorType.user,
-      id: userId ?? username,
-      ...(username ? { username } : {}),
-    };
+    const actor = currentUserActor(this.getUser());
     const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
       events: validatedEvents,
@@ -803,7 +818,11 @@ class ConversationClientImpl implements ConversationClient {
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
-    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
+    {
+      access = 'converse',
+      source,
+      refresh,
+    }: ConversationWriteOptions & { access?: ConversationAccess; refresh?: Refresh }
   ): Promise<Conversation> {
     const {
       id: conversationId,
@@ -823,6 +842,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      refresh,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1216,7 +1236,7 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    { access = 'owner', source }: ConversationWriteOptions & { access?: ConversationAccess }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
@@ -1279,9 +1299,9 @@ class ConversationClientImpl implements ConversationClient {
       return originAuthor;
     }
 
-    const { id, username } = this.getUser();
+    const { id, username, type } = this.getUser();
 
-    return id === undefined ? undefined : { id, username };
+    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1432,14 +1452,16 @@ class ConversationClientImpl implements ConversationClient {
     access,
     fields,
     maxRetries = 5,
+    refresh,
     ...emission
   }: {
     conversationId: string;
     access: ConversationAccess;
     fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
+    refresh?: Refresh;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries });
+    const writer = this.createWriter({ access, maxRetries, refresh });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1489,9 +1511,11 @@ class ConversationClientImpl implements ConversationClient {
   private createWriter({
     access,
     maxRetries,
+    refresh,
   }: {
     access: ConversationAccess;
     maxRetries: number;
+    refresh?: Refresh;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
@@ -1510,6 +1534,7 @@ class ConversationClientImpl implements ConversationClient {
           ...(ifSeqNo != null && ifPrimaryTerm != null
             ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
             : {}),
+          ...(refresh !== undefined ? { refresh } : {}),
         });
 
         return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };

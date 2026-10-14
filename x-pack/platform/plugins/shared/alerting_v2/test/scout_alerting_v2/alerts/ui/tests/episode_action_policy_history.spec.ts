@@ -13,7 +13,7 @@ const GROUP_HASH = 'episode-policy-history-series-1';
 const EPISODE_ID = 'episode-policy-history-ep-1';
 
 test.describe(
-  'Episode details — action policy history tab',
+  'Alert details — action policy history tab',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {

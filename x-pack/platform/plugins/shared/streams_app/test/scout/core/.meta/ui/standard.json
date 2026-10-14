@@ -1,5 +1,5 @@
 {
-  "sha1": "5a9fc2b19686ab204fba3e84b4f4b728711794bd",
+  "sha1": "f90228ff7474c73264322c182ee6c3ae58e180e7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -77,6 +77,70 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
         "line": 163,
         "column": 7
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-49ef58db17578f3",
+      "title": "Stream canvas - search pivots from a destination row into a pre-filled canvas search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 112,
+        "column": 13
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-149218c17e65358",
+      "title": "Stream canvas - search filters the canvas while typing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 131,
+        "column": 75
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-c4b5930df20ec69",
+      "title": "Stream canvas - search applies a search from the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 140,
+        "column": 13
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-4514d5616fcb5bf",
+      "title": "Stream canvas - search explains when nothing matches the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 143,
+        "column": 83
       }
     },
     {

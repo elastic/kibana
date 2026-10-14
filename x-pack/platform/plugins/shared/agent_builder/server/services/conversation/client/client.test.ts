@@ -1108,7 +1108,11 @@ describe('ConversationClient', () => {
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
   describe('getAuthor', () => {
-    const createClientForUser = (user: { id?: string; username: string }) =>
+    const createClientForUser = (user: {
+      id?: string;
+      username: string;
+      type?: 'user' | 'service_account';
+    }) =>
       createClient({
         space: testSpace,
         logger: loggerMock.create(),
@@ -1130,6 +1134,16 @@ describe('ConversationClient', () => {
 
     it('assigns no author when the user has no profile id', () => {
       expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+
+    it('types a service account author', () => {
+      const serviceAccount = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      expect(createClientForUser(serviceAccount).getAuthor()).toEqual(serviceAccount);
     });
   });
 
@@ -2269,6 +2283,64 @@ describe('ConversationClient', () => {
         status: 'open', // pre-existing key preserved
         severity: 'high', // new key added
         notified: 'true', // TOGGLE serialized to string
+      });
+    });
+
+    describe('access', () => {
+      const otherUserDocument = (accessMode: ConversationAccessControlMode): Document => {
+        const document = createConversationDocumentWithTemplate({ templateId: 'tmpl-a' });
+
+        return {
+          ...document,
+          _source: {
+            ...document._source,
+            user_id: 'other-user-id',
+            user_name: 'other-user',
+            access_control: { access_mode: accessMode },
+          },
+        } as Document;
+      };
+
+      beforeEach(() => {
+        getTemplateMock.mockReturnValue(
+          makeTemplate('tmpl-a', {
+            severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+          })
+        );
+      });
+
+      it('lets a non-owner patch metadata on a public conversation by default', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Public));
+
+        await client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'workflow' });
+
+        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+          severity: 'high',
+        });
+      });
+
+      it('rejects a non-owner on a private conversation', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Private));
+
+        await expect(
+          client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'workflow' })
+        ).rejects.toThrow('Conversation conversation-1 not found');
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('stays owner-only when owner access is requested', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Public));
+
+        await expect(
+          client.patchMetadata(
+            'conversation-1',
+            { severity: 'high' },
+            { access: 'owner', source: 'workflow' }
+          )
+        ).rejects.toThrow('Conversation conversation-1 not found');
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
       });
     });
 
@@ -4152,6 +4224,33 @@ describe('ConversationClient', () => {
       expect(indexed.conversation_rounds).toHaveLength(1);
     });
 
+    it('appendEvents writes with the requested refresh, the storage default otherwise', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+      const append = (eventId: string, refresh?: false) =>
+        client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [
+              {
+                id: eventId,
+                type: TimelineEventType.userMessage,
+                created_at: '2026-09-22T10:00:00.000Z',
+                actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+                data: { message: 'hello' },
+              },
+            ],
+          },
+          { source: 'execution', ...(refresh !== undefined ? { refresh } : {}) }
+        );
+
+      await append('9c2e0f11-0000-4000-8000-000000000002', false);
+      await append('9c2e0f11-0000-4000-8000-000000000003');
+
+      const [[withRefresh], [withDefault]] = mockEsClient.index.mock.calls;
+      expect(withRefresh).toEqual(expect.objectContaining({ refresh: false }));
+      expect(withDefault).not.toHaveProperty('refresh');
+    });
+
     it('round-trips attachment_refs through the stored events projection', async () => {
       mockGetReturnsIndexedDocument();
       const attachmentRefs = [
@@ -4715,6 +4814,105 @@ describe('ConversationClient', () => {
       expect(result[0].type).toBe('text_note');
       expect(result[0].actor.type).toBe(EventActorType.user);
       expect(result[0].actor.id).toBe('user-1');
+      expect(result[0].actor).not.toHaveProperty('principal_type');
+    });
+
+    it('attributes events a service account adds to a public conversation to it', async () => {
+      const serviceAccountClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+          isAdmin: false,
+        },
+      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const result = await serviceAccountClient.addCustomEvents(
+        { id: 'conversation-1', events: [{ type: 'text_note', data: { text: 'hello' } }] },
+        { source: 'http_api' }
+      );
+
+      expect(result[0].actor).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        principal_type: 'service_account',
+      });
+    });
+  });
+
+  describe('onConversationCreated', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetDocumentResponse(createConversationDocument());
+    });
+
+    it('reports a created conversation to the listener', async () => {
+      const onConversationCreated = jest.fn();
+      const notifyingClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onConversationCreated,
+      });
+
+      await notifyingClient.create(
+        {
+          id: 'conversation-1',
+          agent_id: 'agent-1',
+          title: 'T',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(onConversationCreated).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        agentId: 'agent-1',
+      });
+    });
+
+    it('does not fail the write when the listener throws', async () => {
+      const onConversationCreated = jest.fn(() => {
+        throw new Error('audit unavailable');
+      });
+      const notifyingClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onConversationCreated,
+      });
+
+      await expect(
+        notifyingClient.create(
+          {
+            id: 'conversation-1',
+            agent_id: 'agent-1',
+            title: 'T',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
+      ).resolves.toBeDefined();
     });
   });
 });

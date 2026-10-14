@@ -53,6 +53,7 @@ import { RegionOptions } from './region_options';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
+import { DataRetention } from './data_retention';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -180,6 +181,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         defaultMessage: 'End-of-life date',
       }),
       description: modelEOLDate,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.dataRetentionLabel', {
+        defaultMessage: 'Data retention',
+      }),
+      description: <DataRetention metadata={modelMetadata} />,
     },
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {

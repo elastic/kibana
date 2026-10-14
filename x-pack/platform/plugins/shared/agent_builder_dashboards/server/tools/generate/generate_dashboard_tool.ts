@@ -18,20 +18,20 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
+  executeDashboardOperations,
+  getErrorMessage,
+  hasValidCreateMetadataOperations,
+  dashboardOperationSchema,
+} from '@kbn/dashboard-agent-authoring';
+import {
   dashboardTools,
   DASHBOARD_UPDATED_UI_EVENT,
   type DashboardUpdatedUiEventData,
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import {
-  createAttachmentPanelResolver,
-  createControlFieldCapabilitiesResolver,
-  createPanelResolver,
-  executeDashboardOperations,
-  getErrorMessage,
-  hasValidCreateMetadataOperations,
-  dashboardOperationSchema,
-} from './core';
+import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
