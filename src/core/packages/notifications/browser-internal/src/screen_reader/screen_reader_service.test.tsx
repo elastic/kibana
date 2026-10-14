@@ -12,6 +12,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { ANNOUNCEMENT_SETTLE_MS, estimateReadingTimeMs } from './announcement_queue';
 import type { InternalScreenReaderStart } from './screen_reader_service';
 import { ScreenReaderService } from './screen_reader_service';
+import { mockOpenNativeModal } from './test_helpers';
 
 describe('ScreenReaderService', () => {
   let service: ScreenReaderService;
@@ -36,6 +37,7 @@ describe('ScreenReaderService', () => {
   const getLiveRegion = () => screen.getByTestId('screenReaderAnnouncer');
 
   beforeEach(() => {
+    mockOpenNativeModal();
     jest.useFakeTimers();
     service = new ScreenReaderService();
     targetDomElement = document.createElement('div');
@@ -45,6 +47,7 @@ describe('ScreenReaderService', () => {
   afterEach(() => {
     act(() => service.stop());
     jest.useRealTimers();
+    jest.restoreAllMocks();
     document.body.innerHTML = '';
   });
 

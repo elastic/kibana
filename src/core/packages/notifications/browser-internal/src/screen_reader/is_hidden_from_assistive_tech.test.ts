@@ -8,12 +8,15 @@
  */
 
 import { isHiddenFromAssistiveTech } from './is_hidden_from_assistive_tech';
+import { mockOpenNativeModal } from './test_helpers';
 
 describe('isHiddenFromAssistiveTech', () => {
   let container: HTMLElement;
   let element: HTMLElement;
+  let nativeModal: ReturnType<typeof mockOpenNativeModal>;
 
   beforeEach(() => {
+    nativeModal = mockOpenNativeModal();
     container = document.createElement('div');
     element = document.createElement('div');
     container.appendChild(element);
@@ -21,11 +24,16 @@ describe('isHiddenFromAssistiveTech', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
   it('returns false when nothing hides the element', () => {
     expect(isHiddenFromAssistiveTech(element)).toBe(false);
+  });
+
+  it('returns false when there is no element', () => {
+    expect(isHiddenFromAssistiveTech(null)).toBe(false);
   });
 
   // JAWS, NVDA and Narrator still read live regions outside of `aria-modal` elements
@@ -44,5 +52,22 @@ describe('isHiddenFromAssistiveTech', () => {
     container.setAttribute(attribute, value);
 
     expect(isHiddenFromAssistiveTech(element)).toBe(true);
+  });
+
+  it('returns true outside of an open native modal dialog, which makes the rest of the page inert', () => {
+    const dialog = document.createElement('dialog');
+    document.body.appendChild(dialog);
+    nativeModal.setOpenModal(dialog);
+
+    expect(isHiddenFromAssistiveTech(element)).toBe(true);
+  });
+
+  it('returns false inside an open native modal dialog', () => {
+    const dialog = document.createElement('dialog');
+    dialog.appendChild(container);
+    document.body.appendChild(dialog);
+    nativeModal.setOpenModal(dialog);
+
+    expect(isHiddenFromAssistiveTech(element)).toBe(false);
   });
 });
