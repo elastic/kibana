@@ -61,6 +61,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
+  elasticsearchHome: 2777
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -133,7 +134,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 2362
+  nightshift: 2762
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -185,24 +186,24 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 9436
-  serverlessWorkplaceAI: 3723
+  serverlessVectordb: 8809
   sessionView: 647
   share: 379
   shared-core: 311749
   shared-misc: 155260
   shared-packages: 5513030
   shared-plugins: 13536562
-  shared-solution-packages: 392658
+  shared-solution-packages: 386709
   significantEvents: 4439
-  significantEventsApp: 5212
+  significantEventsApp: 5759
   slo: 19531
   snapshotRestore: 16909
   spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
-  streams: 4563
+  streams: 6955
   streamsApp: 55882
+  subscriptionStatus: 5000
   synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
@@ -218,7 +219,7 @@ pageLoadAssetSize:
   urlForwarding: 1412
   usageCollection: 223
   ux: 2687
-  vendors: 4591364
+  vendors: 5052492
   vendors-heavy: 2182280
   visDefaultEditor: 738
   visTypeGauge: 7638
@@ -237,4 +238,3 @@ pageLoadAssetSize:
   watcher: 5497
   workflowsExtensions: 38186
   workflowsManagement: 36613
-  workplaceAIApp: 1800

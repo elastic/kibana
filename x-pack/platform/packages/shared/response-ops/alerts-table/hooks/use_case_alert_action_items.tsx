@@ -37,6 +37,7 @@ export const useCaseAlertActionItems = ({
   const { handleAddToCaseClick } = useCaseActions({
     alerts: [alert],
     cases,
+    owner,
     onAddToCase: onAddToCase ?? refresh,
   });
 

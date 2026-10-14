@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   createTriggerFormValues,
@@ -67,5 +67,43 @@ describe('SlackTriggerEditor', () => {
       target: { value: 'outage' },
     });
     expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('outage');
+  });
+
+  describe('message filter', () => {
+    const openMessageFilter = async () => {
+      fireEvent.click(screen.getByTestId('automationSlackTriggerMessage'));
+      return screen.findByTestId('automationSlackTriggerMessageInput');
+    };
+
+    it('closes the popover on Enter', async () => {
+      render(<Editor kind="slack_message" />);
+      const input = await openMessageFilter();
+
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('automationSlackTriggerMessageInput')).not.toBeInTheDocument()
+      );
+    });
+
+    it('keeps the popover open on Enter while composing', async () => {
+      render(<Editor kind="slack_message" />);
+      const input = await openMessageFilter();
+
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+
+      expect(screen.getByTestId('automationSlackTriggerMessageInput')).toBeInTheDocument();
+    });
+
+    it('strips newlines from the message filter', async () => {
+      render(<Editor kind="slack_message" />);
+      const input = await openMessageFilter();
+
+      fireEvent.change(input, { target: { value: 'foo\r\nbar' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ messageFilter: 'foobar' })
+      );
+    });
   });
 });

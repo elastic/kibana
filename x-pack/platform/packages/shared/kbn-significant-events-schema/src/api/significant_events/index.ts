@@ -36,7 +36,7 @@ interface SignificantEventOccurrence {
 type QueryWithOccurrences = StreamQuery & {
   /** Alerting rule UUID (`QueryLink.rule_id`); optional during rolling upgrades. */
   rule_uuid?: string;
-  stream_name: string;
+  source_id: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
@@ -74,7 +74,8 @@ interface LifecycleDetection {
   rule_name: string;
   /** Alerting rule that produced the detection; used to match event evidence. */
   rule_uuid?: string;
-  stream_name: string;
+  /** Absent when the stored signal or detection carries no source. */
+  source_id?: string;
   change_point_type: ChangePointType;
   '@timestamp': string;
 }

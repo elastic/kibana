@@ -167,6 +167,11 @@ steps:
             # missing hunt output (the step errored outright) has nothing to compare, so this
             # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
             expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
+            # What a clean run cannot leave on an attachment: the datasets the report points
+            # at and the executed behaviors. Packaging derives the coverage KI's `data_sources`
+            # and `validated_esql` from them.
+            reportIntentTargets: "${{ steps.hunt.output.report_intent_targets | compact }}"
+            behaviors: "${{ steps.hunt.output.behaviors | compact }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by

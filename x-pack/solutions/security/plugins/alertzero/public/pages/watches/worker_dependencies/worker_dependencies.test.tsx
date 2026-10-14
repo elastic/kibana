@@ -56,6 +56,7 @@ describe('getDisableConfirmation', () => {
   it.each([
     ['Continuous Threat Hunt', HUNT, RULE_COVERAGE],
     ['Attack Discovery', ATTACK_DISCOVERY, ENDPOINT_ANALYSIS],
+    ['Endpoint Analysis', ENDPOINT_ANALYSIS, ATTACK_DISCOVERY],
   ])('asks before turning off %s while its dependent is enabled', (name, provider, dependent) => {
     const confirmation = getDisableConfirmation(
       provider,
@@ -74,6 +75,20 @@ describe('getDisableConfirmation', () => {
     render(<I18nProvider>{confirmation?.paragraphs[0].message}</I18nProvider>);
 
     expect(screen.getByText('Rule Coverage', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it("says Attack Discovery's handoffs won't be analyzed when Endpoint Analysis is turned off", () => {
+    const confirmation = getDisableConfirmation(
+      ENDPOINT_ANALYSIS,
+      enabledById({ [ENDPOINT_ANALYSIS]: true, [ATTACK_DISCOVERY]: true })
+    );
+    const { container } = render(
+      <I18nProvider>{confirmation?.paragraphs[0].message}</I18nProvider>
+    );
+
+    expect(container).toHaveTextContent(
+      "Attack Discovery is enabled and hands attacks it can't rule out as false positives to this Worker. While Endpoint Analysis is off, those handoffs aren't analyzed and their Investigations stay open."
+    );
   });
 
   it('does not ask when every dependent is off', () => {
@@ -182,6 +197,17 @@ describe('getWorkerWarningReasons', () => {
       'Endpoint Analysis is enabled but has nothing to analyze while this Worker is off.',
     ]);
   });
+
+  it('uses the Endpoint Analysis → Attack Discovery copy', () => {
+    const state = enabledById({ [ENDPOINT_ANALYSIS]: false, [ATTACK_DISCOVERY]: true });
+
+    expect(messages(warnings(subject(ATTACK_DISCOVERY), state))).toEqual([
+      "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed.",
+    ]);
+    expect(messages(warnings(subject(ENDPOINT_ANALYSIS), state))).toEqual([
+      "Attack Discovery is enabled but its handoffs aren't analyzed while this Worker is off.",
+    ]);
+  });
 });
 
 describe('getBlockedAfterSaveNotices', () => {
@@ -198,6 +224,23 @@ describe('getBlockedAfterSaveNotices', () => {
     expect(notices.map(({ workerId }) => workerId)).toEqual([RULE_COVERAGE]);
     expect(messages(notices[0].reasons)).toEqual([
       'Continuous Threat Hunt is disabled — no gap signals to act on.',
+    ]);
+  });
+
+  it('notifies when the save turns Attack Discovery on while Endpoint Analysis is off', () => {
+    const enabledAfterSave = enabledById({
+      [ATTACK_DISCOVERY]: true,
+      [ENDPOINT_ANALYSIS]: false,
+    });
+    const notices = getBlockedAfterSaveNotices(
+      enabledById({ [ATTACK_DISCOVERY]: false, [ENDPOINT_ANALYSIS]: false }),
+      enabledAfterSave,
+      saved(enabledAfterSave, [ATTACK_DISCOVERY])
+    );
+
+    expect(notices.map(({ workerId }) => workerId)).toEqual([ATTACK_DISCOVERY]);
+    expect(messages(notices[0].reasons)).toEqual([
+      "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed.",
     ]);
   });
 

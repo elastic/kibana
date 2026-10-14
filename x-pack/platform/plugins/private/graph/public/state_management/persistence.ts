@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
-import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
-import type { GraphStoreDependencies, GraphState } from '.';
+import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
 import { submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
@@ -30,6 +28,8 @@ import type { SaveWorkspaceHandler } from '../services/save_modal';
 import { openSaveModal } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 export interface LoadSavedWorkspacePayload {
   dataViews: DataViewListItem[];
@@ -44,135 +44,133 @@ export const saveWorkspace = actionCreator<GraphWorkspaceSavedObject>('SAVE_WORK
 export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
 
 /**
- * Saga handling loading of a saved workspace.
+ * Listener handling loading of a saved workspace.
  *
  * It will load the index pattern associated with the saved object and deserialize all properties
  * into the store. Existing state will be overwritten.
  */
-export const loadingSaga = ({
-  createWorkspace,
-  notifications,
-  indexPatternProvider,
-}: GraphStoreDependencies) => {
-  function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>): Generator {
-    const { dataViews, savedWorkspace, urlQuery } = action.payload;
-    const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, dataViews);
-    if (!migrationStatus.success) {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
-          defaultMessage: 'Data view "{name}" not found',
-          values: {
-            name: migrationStatus.missingIndexPattern,
-          },
+export const registerPersistenceListeners = (
+  startListening: StartGraphListening,
+  deps: GraphStoreDependencies
+) => {
+  startListening({
+    matcher: matchesAction(loadSavedWorkspace),
+    effect: async (action: MatchedAction<LoadSavedWorkspacePayload>, listenerApi) => {
+      listenerApi.cancelActiveListeners();
+      const { dataViews, savedWorkspace, urlQuery } = action.payload;
+      const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, dataViews);
+      if (!migrationStatus.success) {
+        deps.notifications.toasts.addDanger(
+          i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+            defaultMessage: 'Data view "{name}" not found',
+            values: { name: migrationStatus.missingIndexPattern },
+          })
+        );
+        return;
+      }
+
+      const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
+      let indexPattern: DataView;
+      try {
+        indexPattern = await deps.indexPatternProvider.get(selectedIndexPatternId);
+        listenerApi.throwIfCancelled();
+      } catch (error) {
+        if (listenerApi.signal.aborted) {
+          return;
+        }
+        deps.notifications.toasts.addDanger(
+          i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+            defaultMessage: 'Data view "{name}" not found',
+            values: { name: selectedIndexPatternId },
+          })
+        );
+        return;
+      }
+
+      const createdWorkspace = deps.createWorkspace(
+        indexPattern.title,
+        settingsSelector(listenerApi.getState())
+      );
+      const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
+        savedWorkspace,
+        indexPattern,
+        createdWorkspace
+      );
+
+      // put everything in the store
+      listenerApi.dispatch(
+        updateMetaData({
+          title: savedWorkspace.title,
+          description: savedWorkspace.description,
+          savedObjectId: savedWorkspace.id,
         })
       );
-      return;
-    }
-
-    const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
-    let indexPattern;
-    try {
-      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as DataView;
-    } catch (e) {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
-          defaultMessage: 'Data view "{name}" not found',
-          values: {
-            name: selectedIndexPatternId,
-          },
-        })
+      listenerApi.dispatch(
+        setDatasource({ type: 'indexpattern', id: indexPattern.id!, title: indexPattern.title })
       );
-      return;
-    }
-    const initialSettings = settingsSelector((yield select()) as GraphState);
+      listenerApi.dispatch(loadFields(allFields));
+      listenerApi.dispatch(updateSettings(advancedSettings));
+      listenerApi.dispatch(loadTemplates(urlTemplates));
+      if (urlQuery) {
+        listenerApi.dispatch(submitSearch(urlQuery));
+      }
+      createdWorkspace.runLayout();
+    },
+  });
 
-    const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);
+  /**
+   * Listener handling saving of current state.
+   *
+   * It will serialize everything and save it using the saved objects client
+   */
+  startListening({
+    matcher: matchesAction(saveWorkspace),
+    effect: async (action: MatchedAction<GraphWorkspaceSavedObject>, listenerApi) => {
+      listenerApi.cancelActiveListeners();
+      const state = listenerApi.getState();
+      const workspace = deps.getWorkspace();
+      const selectedDatasource = datasourceSelector(state).current;
+      if (!workspace || selectedDatasource.type === 'none') {
+        return;
+      }
 
-    const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
-      savedWorkspace,
-      indexPattern,
-      createdWorkspace
-    );
-
-    // put everything in the store
-    yield put(
-      updateMetaData({
-        title: savedWorkspace.title,
-        description: savedWorkspace.description,
-        savedObjectId: savedWorkspace.id,
-      })
-    );
-    yield put(
-      setDatasource({
-        type: 'indexpattern',
-        id: indexPattern.id!,
-        title: indexPattern.title,
-      })
-    );
-    yield put(loadFields(allFields));
-    yield put(updateSettings(advancedSettings));
-    yield put(loadTemplates(urlTemplates));
-
-    if (urlQuery) {
-      yield put(submitSearch(urlQuery));
-    }
-
-    createdWorkspace.runLayout();
-  }
-
-  return function* () {
-    yield takeLatest(loadSavedWorkspace.match, deserializeWorkspace);
-  };
+      const savedObjectId = await Promise.race([
+        showModal({
+          deps,
+          workspace,
+          savedWorkspace: action.payload,
+          state,
+          selectedDatasource,
+        }),
+        new Promise<undefined>((resolve) => {
+          listenerApi.signal.addEventListener('abort', () => resolve(undefined), { once: true });
+        }),
+      ]);
+      if (!listenerApi.signal.aborted && savedObjectId) {
+        listenerApi.dispatch(updateMetaData({ savedObjectId }));
+      }
+    },
+  });
 };
 
-/**
- * Saga handling saving of current state.
- *
- * It will serialize everything and save it using the saved objects client
- */
-export const savingSaga = (deps: GraphStoreDependencies) => {
-  function* persistWorkspace(action: Action<GraphWorkspaceSavedObject>) {
-    const savedWorkspace = action.payload;
-    const state: GraphState = yield select();
-    const workspace = deps.getWorkspace();
-    const selectedDatasource = datasourceSelector(state).current;
-    if (!workspace || selectedDatasource.type === 'none') {
-      return;
-    }
+function showModal({
+  deps,
+  workspace,
+  savedWorkspace,
+  state,
+  selectedDatasource,
+}: {
+  deps: GraphStoreDependencies;
+  workspace: Workspace;
+  savedWorkspace: GraphWorkspaceSavedObject;
+  state: GraphState;
+  selectedDatasource: IndexpatternDatasource;
+}): Promise<string | undefined> {
+  let resolveSavedObjectId: (id?: string) => void;
+  const savedObjectIdPromise = new Promise<string | undefined>((resolve) => {
+    resolveSavedObjectId = resolve;
+  });
 
-    const savedObjectId = (yield cps(showModal, {
-      deps,
-      workspace,
-      savedWorkspace,
-      state,
-      selectedDatasource,
-    })) as string;
-    if (savedObjectId) {
-      yield put(updateMetaData({ savedObjectId }));
-    }
-  }
-
-  return function* () {
-    yield takeLatest(saveWorkspace.match, persistWorkspace);
-  };
-};
-
-function showModal(
-  {
-    deps,
-    workspace,
-    savedWorkspace,
-    state,
-    selectedDatasource,
-  }: {
-    deps: GraphStoreDependencies;
-    workspace: Workspace;
-    savedWorkspace: GraphWorkspaceSavedObject;
-    state: GraphState;
-    selectedDatasource: IndexpatternDatasource;
-  },
-  savingCallback: (error: unknown, id?: string) => void
-) {
   const saveWorkspaceHandler: SaveWorkspaceHandler = async (
     saveOptions,
     userHasConfirmedSaveWorkspaceData,
@@ -214,9 +212,10 @@ function showModal(
           deps.changeUrl(getEditPath(savedWorkspace));
         }
       }
-      savingCallback(null, id);
+      resolveSavedObjectId(id);
       return { id };
     } catch (error) {
+      resolveSavedObjectId(undefined);
       deps.notifications.toasts.addDanger(
         i18n.translate('xpack.graph.saveWorkspace.savingErrorMessage', {
           defaultMessage: 'Failed to save workspace: {message}',
@@ -235,5 +234,8 @@ function showModal(
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
     services: deps,
+    onClose: () => resolveSavedObjectId(undefined),
   });
+
+  return savedObjectIdPromise;
 }

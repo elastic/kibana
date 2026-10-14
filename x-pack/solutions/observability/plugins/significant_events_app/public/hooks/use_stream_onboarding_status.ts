@@ -13,12 +13,12 @@ import {
 import { RUNNING_POLL_INTERVAL_MS } from '../constants';
 import { useOnboardingApi } from './use_onboarding_api';
 
-export const useStreamOnboardingStatus = (streamName: string) => {
+export const useStreamOnboardingStatus = (sourceId: string) => {
   const { getOnboardingStatus } = useOnboardingApi();
 
   const { data } = useQuery<SignificantEventsWorkflowStatusResult, Error>({
-    queryKey: ['streamOnboardingStatus', streamName],
-    queryFn: () => getOnboardingStatus(streamName),
+    queryKey: ['streamOnboardingStatus', sourceId],
+    queryFn: () => getOnboardingStatus(sourceId),
     refetchInterval: (result) => {
       const status = result?.status;
       if (status && KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(status)) {

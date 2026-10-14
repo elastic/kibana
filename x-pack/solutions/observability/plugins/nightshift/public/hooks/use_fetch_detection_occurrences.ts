@@ -22,7 +22,7 @@ interface DetectionOccurrencesRequest {
   from: string;
   to: string;
   ruleUuids: string[];
-  streamNames: string[];
+  sourceIds: string[];
 }
 
 export const buildDetectionOccurrencesRequest = (
@@ -42,11 +42,11 @@ export const buildDetectionOccurrencesRequest = (
     from: new Date(Math.min(...fetchableDetections.map(({ range }) => range.from))).toISOString(),
     to: new Date(Math.max(...fetchableDetections.map(({ range }) => range.to))).toISOString(),
     ruleUuids: [...new Set(fetchableDetections.map(({ ruleUuid }) => ruleUuid))].sort(),
-    streamNames: [
+    sourceIds: [
       ...new Set(
         fetchableDetections
-          .map(({ detection }) => detection.stream_name)
-          .filter((streamName): streamName is string => Boolean(streamName))
+          .map(({ detection }) => detection.source_id)
+          .filter((sourceId): sourceId is string => Boolean(sourceId))
       ),
     ].sort(),
   };
@@ -108,7 +108,7 @@ export const useFetchDetectionOccurrences = (
               to: request.to,
               bucketSize: DETECTION_OCCURRENCE_BUCKET_SIZE,
               rule_uuid: request.ruleUuids,
-              streamNames: request.streamNames,
+              sourceIds: request.sourceIds,
             },
           },
           signal: signal ?? null,
