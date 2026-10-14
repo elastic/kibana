@@ -1228,3 +1228,85 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors putting pri
     });
   },
 });
+
+describe('when the run is cancelled', () => {
+  const orphanedNames = Array.from({ length: 40 }, (_, index) =>
+    privilegeNameOfLength(`feature_orphan${index}.`, 100)
+  );
+
+  const setup = () => {
+    const abortController = new AbortController();
+    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient.asInternalUser.security.getPrivileges.mockResolvedValue(
+      toExistingPrivileges(['all', ...orphanedNames])
+    );
+    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
+    const run = () =>
+      registerPrivilegesWithCluster(
+        mockLogger,
+        { get: jest.fn().mockReturnValue(globalAllOnly.privilegeMap) },
+        application,
+        mockClusterClient,
+        abortController.signal
+      );
+
+    const expectStoppedQuietly = async () => {
+      await expect(run()).rejects.toMatchObject({ name: 'AbortError' });
+      expect(mockClusterClient.asInternalUser.security.putPrivileges).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        `Cancelled registering Kibana Privileges with Elasticsearch for ${application}`
+      );
+      expect(securityTelemetry.recordPrivilegeRegistrationDuration).not.toHaveBeenCalled();
+    };
+
+    return { abortController, mockClusterClient, expectStoppedQuietly };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it(`doesn't call Elasticsearch when aborted before it starts`, async () => {
+    const { abortController, mockClusterClient, expectStoppedQuietly } = setup();
+    abortController.abort();
+
+    await expectStoppedQuietly();
+    expect(mockClusterClient.asInternalUser.security.getPrivileges).not.toHaveBeenCalled();
+    expect(mockClusterClient.asInternalUser.security.deletePrivileges).not.toHaveBeenCalled();
+  });
+
+  it(`doesn't delete or put privileges when aborted while getting privileges`, async () => {
+    const { abortController, mockClusterClient, expectStoppedQuietly } = setup();
+    mockClusterClient.asInternalUser.security.getPrivileges.mockImplementation((async () => {
+      abortController.abort();
+      return toExistingPrivileges(['all', ...orphanedNames]);
+    }) as any);
+
+    await expectStoppedQuietly();
+    expect(mockClusterClient.asInternalUser.security.deletePrivileges).not.toHaveBeenCalled();
+  });
+
+  it('stops between delete batches', async () => {
+    const { abortController, mockClusterClient, expectStoppedQuietly } = setup();
+    mockClusterClient.asInternalUser.security.deletePrivileges.mockImplementation((async () => {
+      abortController.abort();
+    }) as any);
+
+    await expectStoppedQuietly();
+    expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledTimes(1);
+  });
+
+  it(`doesn't put privileges when aborted during the last delete batch`, async () => {
+    const { abortController, mockClusterClient, expectStoppedQuietly } = setup();
+    mockClusterClient.asInternalUser.security.deletePrivileges.mockImplementation((async () => {
+      if (mockClusterClient.asInternalUser.security.deletePrivileges.mock.calls.length === 3) {
+        abortController.abort();
+      }
+    }) as any);
+
+    await expectStoppedQuietly();
+    expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledTimes(3);
+  });
+});

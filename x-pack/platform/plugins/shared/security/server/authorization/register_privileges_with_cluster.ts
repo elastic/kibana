@@ -59,7 +59,8 @@ export async function registerPrivilegesWithCluster(
   logger: Logger,
   privileges: PrivilegesService,
   application: string,
-  clusterClient: IClusterClient
+  clusterClient: IClusterClient,
+  signal?: AbortSignal
 ) {
   const startTime = performance.now();
 
@@ -102,6 +103,8 @@ export async function registerPrivilegesWithCluster(
   logger.debug(`Registering Kibana Privileges with Elasticsearch for ${application}`);
 
   try {
+    signal?.throwIfAborted();
+
     // we only want to post the privileges when they're going to change as Elasticsearch has
     // to clear the role cache to get these changes reflected in the _has_privileges API
     const existingPrivileges = await clusterClient.asInternalUser.security.getPrivileges({
@@ -114,6 +117,7 @@ export async function registerPrivilegesWithCluster(
 
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
     for (const batch of batchPrivilegeNames(privilegesToDelete)) {
+      signal?.throwIfAborted();
       const names = batch.join(', ');
       logger.debug(`Deleting Kibana Privileges ${names} from Elasticsearch for ${application}`);
       try {
@@ -129,6 +133,7 @@ export async function registerPrivilegesWithCluster(
       }
     }
 
+    signal?.throwIfAborted();
     await clusterClient.asInternalUser.security.putPrivileges({ body: expectedPrivileges });
     logger.debug(`Updated Kibana Privileges with Elasticsearch for ${application}`);
 
@@ -138,6 +143,11 @@ export async function registerPrivilegesWithCluster(
       deletedPrivileges: privilegesToDelete.length,
     });
   } catch (err) {
+    if (signal?.aborted) {
+      logger.debug(`Cancelled registering Kibana Privileges with Elasticsearch for ${application}`);
+      throw err;
+    }
+
     logger.error(
       `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`
     );
