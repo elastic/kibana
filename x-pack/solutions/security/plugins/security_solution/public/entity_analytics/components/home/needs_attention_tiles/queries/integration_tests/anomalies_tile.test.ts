@@ -138,8 +138,16 @@ describe('entities with anomalies tile on Elasticsearch', () => {
     await esServer?.stop();
   });
 
+  /** The previous period returns only the count; this adds the ids back to check WHICH entities counted. */
+  const withEntityIds = (query: string) =>
+    query.replace(
+      '| STATS value = COUNT(effective_id)',
+      '| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
+    );
+
   const runTile = async (period: 'current' | 'previous') => {
-    const query = buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '7d', [], JOBS, period);
+    const built = buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '7d', [], JOBS, period);
+    const query = period === 'previous' ? withEntityIds(built) : built;
     const { columns, values } = await client.esql.query({ query });
     const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
     return {
@@ -154,6 +162,13 @@ describe('entities with anomalies tile on Elasticsearch', () => {
 
   it('counts the previous period as the 7 days before that', async () => {
     expect(await runTile('previous')).toEqual({ count: 2, ids: ['host:b', 'host:c'] });
+  });
+
+  it('returns only the count for the previous period, not the entity ids', async () => {
+    const { columns } = await client.esql.query({
+      query: buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '7d', [], JOBS, 'previous'),
+    });
+    expect(columns.map(({ name }) => name)).toEqual(['value']);
   });
 
   it('gives the delta as the current count minus the previous count', async () => {

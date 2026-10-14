@@ -71,15 +71,28 @@ describe('buildNewEntityCountQuery for the previous period', () => {
     );
   });
 
-  it('changes nothing but the first_seen condition', () => {
+  // Before the first STATS the previous period is the current query with its own first_seen window.
+  const upToFirstStats = (query: string) => query.slice(0, query.indexOf('| STATS'));
+
+  it('changes nothing before the counts but the first_seen condition', () => {
     const filters = ['| WHERE x'];
     const current = buildNewEntityCountQuery('.entities-v1', '7d', filters, 'current');
     const previous = buildNewEntityCountQuery('.entities-v1', '7d', filters, 'previous');
-    expect(
-      previous.replace(
-        'entity.lifecycle.first_seen >= NOW() - 14 days AND entity.lifecycle.first_seen < NOW() - 7 days',
-        'entity.lifecycle.first_seen >= NOW() - 7 days'
-      )
-    ).toBe(current);
+    const withCurrentCondition = previous.replace(
+      'entity.lifecycle.first_seen >= NOW() - 14 days AND entity.lifecycle.first_seen < NOW() - 7 days',
+      'entity.lifecycle.first_seen >= NOW() - 7 days'
+    );
+    expect(upToFirstStats(withCurrentCondition)).toBe(upToFirstStats(current));
+  });
+
+  it('counts only: the previous period leaves out the entity id list the current one returns', () => {
+    const current = buildNewEntityCountQuery('.entities-v1', '7d', [], 'current');
+    const previous = buildNewEntityCountQuery('.entities-v1', '7d', [], 'previous');
+    expect(current).toContain('entity_ids = VALUES(entity.id) BY effective_id');
+    expect(previous).not.toContain('VALUES');
+    expect(previous).not.toContain('entity_ids');
+    expect(previous.endsWith('| STATS BY effective_id\n| STATS value = COUNT(effective_id)')).toBe(
+      true
+    );
   });
 });

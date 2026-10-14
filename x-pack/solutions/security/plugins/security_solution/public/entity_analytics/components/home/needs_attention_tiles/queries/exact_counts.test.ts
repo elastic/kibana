@@ -29,7 +29,6 @@ describe('exact tile counts', () => {
       expect(last).not.toContain('COUNT_DISTINCT');
       expect(last).toContain('severe_alerts_count      = COUNT(severe_id)');
       expect(last).toContain('watchlisted_count        = COUNT(watchlisted_id)');
-      expect(last).toContain('new_alerting_count       = COUNT(new_alerting_id)');
     });
 
     it('keeps one row per resolved entity before the alert based tile counts', () => {
@@ -52,8 +51,11 @@ describe('exact tile counts', () => {
       RANGES.forEach((range) => {
         const query = build('default', INDEX, range, [], period);
         expect(query).not.toContain('COUNT_DISTINCT');
+        // The current period also returns the entity ids for the table filter; the previous only counts.
         expect(query).toContain(
-          '| STATS BY effective_id\n| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
+          period === 'current'
+            ? '| STATS BY effective_id\n| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
+            : '| STATS BY effective_id\n| STATS value = COUNT(effective_id)'
         );
       });
     });

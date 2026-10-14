@@ -13,7 +13,7 @@ import { EMPTY_ENTITY_FILTERS } from '../../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../../entities_grid/queries/entity_filters';
 import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
 import { buildNewlyHighCriticalCountQuery } from '../tile_newly_high_critical_query';
-import { buildRiskHistoryExistsQuery } from '../risk_previous_period';
+import { buildRiskHistoryReachesBackQuery } from '../risk_previous_period';
 import { buildRiskMoversCountQuery } from '../tile_risk_movers_query';
 
 /*
@@ -239,6 +239,13 @@ const startCluster = async () => {
   return { esServer, client: esServer.getClient() as Client };
 };
 
+/** The previous period returns only the count; this adds the ids back to check WHICH entities counted. */
+const withEntityIds = (query: string) =>
+  query.replace(
+    '| STATS value = COUNT(effective_id)',
+    '| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
+  );
+
 const runTile = async (client: Client, query: string) => {
   const { columns, values } = await client.esql.query({ query });
   const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
@@ -258,13 +265,24 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     await esServer?.stop();
   });
 
-  const movers = (period: 'current' | 'previous', filters: string[] = []) =>
-    runTile(client, buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '7d', filters, period));
-  const newly = (period: 'current' | 'previous', filters: string[] = []) =>
-    runTile(
-      client,
-      buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, '7d', filters, period)
-    );
+  const movers = (period: 'current' | 'previous', filters: string[] = []) => {
+    const query = buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '7d', filters, period);
+    return runTile(client, period === 'previous' ? withEntityIds(query) : query);
+  };
+  const newly = (period: 'current' | 'previous', filters: string[] = []) => {
+    const query = buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, '7d', filters, period);
+    return runTile(client, period === 'previous' ? withEntityIds(query) : query);
+  };
+
+  it.each([
+    ['risk movers', buildRiskMoversCountQuery],
+    ['newly high/critical', buildNewlyHighCriticalCountQuery],
+  ] as const)('returns only the count for the previous period of %s', async (_name, build) => {
+    const { columns } = await client.esql.query({
+      query: build(NAMESPACE, ENTITY_INDEX, '7d', [], 'previous'),
+    });
+    expect(columns.map(({ name }) => name)).toEqual(['value']);
+  });
 
   describe('risk movers', () => {
     it('counts the previous period from the history at its start and its end', async () => {
@@ -314,11 +332,11 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     });
   });
 
-  it('finds the risk history at the start of the previous period', async () => {
+  it('finds the risk history at the start and the end of the previous period', async () => {
     const { values } = await client.esql.query({
-      query: buildRiskHistoryExistsQuery(NAMESPACE, '7d'),
+      query: buildRiskHistoryReachesBackQuery(NAMESPACE, '7d'),
     });
-    expect(Number(values[0][0])).toBeGreaterThan(0);
+    expect(values[0][0]).toBe(true);
   });
 });
 
@@ -337,8 +355,8 @@ describe('risk tiles when the history does not reach back two ranges', () => {
 
   it('finds no risk history at the start of the previous period', async () => {
     const { values } = await client.esql.query({
-      query: buildRiskHistoryExistsQuery(NAMESPACE, '7d'),
+      query: buildRiskHistoryReachesBackQuery(NAMESPACE, '7d'),
     });
-    expect(Number(values[0][0])).toBe(0);
+    expect(values[0][0]).toBe(false);
   });
 });

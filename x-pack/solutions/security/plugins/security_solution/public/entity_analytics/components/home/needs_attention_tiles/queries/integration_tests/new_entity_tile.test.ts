@@ -97,8 +97,16 @@ describe('New entity tile on Elasticsearch', () => {
     await esServer?.stop();
   });
 
+  /** The previous period returns only the count; this adds the ids back to check WHICH entities counted. */
+  const withEntityIds = (query: string) =>
+    query.replace(
+      '| STATS BY effective_id\n| STATS value = COUNT(effective_id)',
+      '| STATS entity_ids = VALUES(entity.id) BY effective_id\n| STATS value = COUNT(effective_id), entity_ids = VALUES(entity_ids)'
+    );
+
   const runTile = async (period: 'current' | 'previous') => {
-    const query = buildNewEntityCountQuery(ENTITY_INDEX, '7d', [], period);
+    const built = buildNewEntityCountQuery(ENTITY_INDEX, '7d', [], period);
+    const query = period === 'previous' ? withEntityIds(built) : built;
     const { columns, values } = await client.esql.query({ query });
     const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
     return { count: Number(row.value), ids: [row.entity_ids ?? []].flat().map(String).sort() };
@@ -114,6 +122,13 @@ describe('New entity tile on Elasticsearch', () => {
 
   it('counts the previous period as the entities first seen in the 7 days before that', async () => {
     expect(await runTile('previous')).toEqual({ count: 1, ids: ['host:b', 'host:e'] });
+  });
+
+  it('returns only the count for the previous period, not the entity ids', async () => {
+    const { columns } = await client.esql.query({
+      query: buildNewEntityCountQuery(ENTITY_INDEX, '7d', [], 'previous'),
+    });
+    expect(columns.map(({ name }) => name)).toEqual(['value']);
   });
 
   it('gives the delta as the current count minus the previous count', async () => {

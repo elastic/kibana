@@ -28,15 +28,26 @@ describe('buildEntitiesWithAnomaliesCountQuery for the previous period', () => {
     );
   });
 
-  it('changes nothing but the time condition', () => {
+  // The last STATS is the tile aggregate; everything before it is shared with the current period.
+  const upToTileCount = (query: string) => query.slice(0, query.lastIndexOf('| STATS'));
+
+  it('changes nothing before the count but the time condition', () => {
     const filters = ['| WHERE x'];
     const current = buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', filters, JOBS, 'current');
     const previous = buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', filters, JOBS, 'previous');
-    expect(
-      previous.replace(
-        '@timestamp >= NOW() - 14 days AND @timestamp < NOW() - 7 days',
-        '@timestamp >= NOW() - 7 days'
-      )
-    ).toBe(current);
+    const withCurrentCondition = previous.replace(
+      '@timestamp >= NOW() - 14 days AND @timestamp < NOW() - 7 days',
+      '@timestamp >= NOW() - 7 days'
+    );
+    expect(upToTileCount(withCurrentCondition)).toBe(upToTileCount(current));
+  });
+
+  it('counts only: the previous period leaves out the entity id list the current one returns', () => {
+    const current = buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', [], JOBS, 'current');
+    const previous = buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', [], JOBS, 'previous');
+    expect(current).toContain('entity_ids = VALUES(effective_id)');
+    expect(previous).not.toContain('VALUES');
+    expect(previous).not.toContain('entity_ids');
+    expect(previous.endsWith('| STATS value = COUNT(effective_id)')).toBe(true);
   });
 });
