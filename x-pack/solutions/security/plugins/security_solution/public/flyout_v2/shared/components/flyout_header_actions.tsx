@@ -54,12 +54,7 @@ export const FlyoutHeaderActions: FC<FlyoutHeaderActionsProps> = memo(({ childre
   `;
 
   return (
-    <EuiFlexGroup
-      css={headerButtonsStyles(euiTheme)}
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-    >
+    <EuiFlexGroup css={headerButtonsStyles} gutterSize="xs" alignItems="center" responsive={false}>
       {children}
       {showSettings && (
         <EuiFlexItem grow={false}>
