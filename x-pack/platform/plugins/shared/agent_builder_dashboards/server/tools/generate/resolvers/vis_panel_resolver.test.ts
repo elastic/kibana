@@ -61,7 +61,6 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
       index: 'logs-*',
@@ -100,7 +99,6 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
-        operationType: 'add_panels',
         identifier: 'show total requests',
         nlQuery: 'show total requests',
         index: 'logs-*',
@@ -125,7 +123,6 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
-      operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
       preserveESQL: true,
@@ -160,7 +157,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
       identifier: 'a small multiples chart',
       nlQuery: 'a small multiples chart',
       index: 'logs-*',
@@ -187,7 +183,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
       identifier: 'total requests',
       nlQuery: 'total requests',
       chartType: SupportedChartType.Metric,
@@ -210,7 +205,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
       preserveESQL: true,
@@ -241,7 +235,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
       renderer: 'vega',

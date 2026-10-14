@@ -20,10 +20,10 @@ import {
 
 import {
   arrangeDashboardLayout,
-  executeDashboardOperations,
+  executeDashboardUpsert,
   getErrorMessage,
-  hasValidCreateMetadataOperations,
-  dashboardOperationSchema,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
   type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
 import {
@@ -38,14 +38,15 @@ import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
-const newDashboardMetadataErrorMessage =
-  'New dashboards require a set_metadata operation with a non-empty title.';
+const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
 const noDashboardCreatedErrorMessage =
   'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
 
+/** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
-  panels.length === 0 && (pinnedPanels ?? []).length === 0;
+  panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
+  (pinnedPanels ?? []).length === 0;
 
 const generateDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -55,17 +56,7 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z
-    .array(dashboardOperationSchema)
-    .describe('Operations applied in order. May be empty when only `layout` is set.'),
-  layout: z
-    .string()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe(
-      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically from the operations, so do not describe where your changes go.'
-    ),
+  ...upsertDashboardSchema.shape,
 });
 
 /**
@@ -120,7 +111,7 @@ export interface GenerateDashboardToolDeps {
 /**
  * Kibana dashboard generation tool.
  *
- * Wraps the environment-agnostic {@link executeDashboardOperations} core with
+ * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
@@ -135,30 +126,28 @@ export const generateDashboardTool = ({
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Generate or update a dashboard from ordered operations.
+    description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
-Use operations[] to:
-1. set metadata
-2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
-3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
-4. move panels between sections
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+- \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
+- \`sections\`: sections to create or update.
+- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
+- \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider).
+- \`remove\`: ids of panels, sections, or controls to remove.
+- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
 
-Panel positions and sizes are set automatically after the operations run; \`layout\` only carries the user's own arrangement request, and the summary shows the resulting \`grid\` of every panel.`,
+Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created and updated, so a mistyped id that created a new panel instead of updating one is visible.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations, layout },
+      { dashboardAttachmentId: previousAttachmentId, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
 
-        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+        if (isNewDashboard && !hasValidNewDashboardMetadata(upsert)) {
           logger.error(newDashboardMetadataErrorMessage);
           return missingNewDashboardMetadataErrorResult;
         }
@@ -166,11 +155,13 @@ Panel positions and sizes are set automatically after the operations run; \`layo
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const {
           dashboardData: validatedDashboardData,
+          created,
+          updated,
           failures,
           panelAuthoringNotes,
-        } = await executeDashboardOperations({
+        } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
-          operations,
+          upsert,
           logger,
           resolvePanelContent: createPanelResolver({
             logger,
@@ -190,7 +181,7 @@ Panel positions and sizes are set automatically after the operations run; \`layo
           await arrangeDashboardLayout({
             originalPanels: latestVersion?.data.panels ?? [],
             dashboardData: validatedDashboardData,
-            instructions: layout,
+            instructions: upsert.layout,
             arrangeLayout: createLayoutArranger({ modelProvider }),
             logger,
           });
@@ -219,6 +210,8 @@ Panel positions and sizes are set automatically after the operations run; \`layo
                     ])
                   )
                 ),
+                created,
+                updated,
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

@@ -49,6 +49,31 @@ export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
   }, 0);
 };
 
+export const getSectionsById = ({
+  panels,
+}: DashboardAttachmentData): Map<string, DashboardSection> =>
+  new Map(panels.filter(isSection).map((section) => [section.id, section]));
+
+/** Section id of every panel, or null for panels at the top level. */
+export const getSectionIdByPanelId = ({
+  panels,
+}: DashboardAttachmentData): Map<string, string | null> =>
+  new Map(
+    panels.flatMap(
+      (widget): Array<[string, string | null]> =>
+        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
+    )
+  );
+
+type DashboardControl = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
+
+export const getControlId = (control: DashboardControl): string | undefined =>
+  (control as { id?: string }).id;
+
+export const getControlIds = ({
+  pinned_panels: controls = [],
+}: DashboardAttachmentData): string[] => controls.flatMap((control) => getControlId(control) ?? []);
+
 /** Height of a new panel until the layout call places it. */
 const PLACEHOLDER_HEIGHT = 10;
 

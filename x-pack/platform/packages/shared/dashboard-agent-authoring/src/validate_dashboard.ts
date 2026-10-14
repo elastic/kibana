@@ -69,10 +69,6 @@ const appendIssue = <Key>(
   issue: DashboardValidationIssue
 ) => issuesByKey.set(key, [...(issuesByKey.get(key) ?? []), issue]);
 
-/** Names a panel by its title when it has one, since the agent never saw the id of a new panel. */
-const getPanelIdentifier = ({ id, config: { title } }: AttachmentPanel): string =>
-  typeof title === 'string' && title ? `"${title}" (${id})` : id;
-
 const getAllPanels = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
   panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
 
@@ -167,15 +163,11 @@ export const discardInvalidChanges = ({
 
     discardedPanelIds.add(panel.id);
     if (!originalPanel) {
-      failures.push(toFailure(getPanelIdentifier(panel), problems, 'Panel was not added'));
+      failures.push(toFailure(panel.id, problems, 'Panel was not added'));
       return [];
     }
     failures.push(
-      toFailure(
-        getPanelIdentifier(panel),
-        problems,
-        'Panel was reverted to its state before this call'
-      )
+      toFailure(panel.id, problems, 'Panel was reverted to its state before this call')
     );
     // Keep the new position, so a panel moved into or out of a section stays where it was moved.
     return [{ ...originalPanel, grid: panel.grid }];
