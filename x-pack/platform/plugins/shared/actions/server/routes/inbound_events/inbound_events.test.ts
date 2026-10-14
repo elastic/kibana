@@ -55,9 +55,14 @@ describe('inboundEventsRoute', () => {
             stability: 'experimental',
           },
           body: expect.objectContaining({
-            accepts: expect.arrayContaining(['application/x-www-form-urlencoded']),
+            accepts: [
+              'application/json',
+              'application/*+json',
+              'application/x-www-form-urlencoded',
+              'text/plain',
+              '*/*',
+            ],
             maxBytes: 1024 * 1024,
-            accepts: ['application/json', 'application/*+json', 'text/plain', '*/*'],
           }),
         }),
       })
@@ -69,7 +74,7 @@ describe('inboundEventsRoute', () => {
         validate: expect.objectContaining({
           response: expect.objectContaining({
             200: expect.objectContaining({
-              description: expect.stringMatching(/handshake/i),
+              description: expect.stringMatching(/plain-text/i),
             }),
             202: expect.anything(),
             404: expect.anything(),
