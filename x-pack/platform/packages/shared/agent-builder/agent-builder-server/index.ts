@@ -11,6 +11,11 @@ export type {
   ProcessedRoundInput,
 } from './processed_input';
 export type {
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './processed_timeline';
+export type {
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -69,6 +74,7 @@ export type {
 export {
   getToolResultId,
   createErrorResult,
+  createNonInteractiveDeclinedResult,
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
@@ -76,6 +82,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -87,6 +94,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
@@ -104,13 +113,26 @@ export type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  AfterExecutionHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export type {
+  CycleContext,
+  CycleHandler,
+  CycleHookApi,
+  CycleHookDefinition,
+  CycleHookExecutionContext,
+  CycleTrigger,
+  ExecutionSummary,
+  InjectedContextInput,
+} from './hooks/cycle';
+export { DEFAULT_CYCLE_HOOK_TIMEOUT_MS, MAX_CYCLE_HOOK_TIMEOUT_MS } from './hooks/cycle';
 export {
   applyHookResultByLifecycle,
   applyBeforeAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
+  applyAfterExecutionResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
@@ -129,6 +151,8 @@ export type {
   ExecuteAgentResult,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './execution';
 export type {
@@ -141,6 +165,14 @@ export type {
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
 export type {
+  ConversationEventTypeDefinition,
+  ConversationEventPayloadOf,
+  ConversationEventOf,
+  ConversationEventFormatContext,
+  ConversationEventRepresentation,
+  TextConversationEventRepresentation,
+} from './conversation_events';
+export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   TopSnippetsConfig,
@@ -148,6 +180,7 @@ export type {
   ToolsStart,
   AttachmentsSetup,
   RenderersSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -156,11 +189,33 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
+  ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
+  AttachmentsStart,
 } from './plugin_contract';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  AttachmentPublicClient,
+  AttachmentWriteAccess,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
+} from './attachments';
+export type {
+  ConversationPublicClient,
+  ConversationCreatePublicRequest,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
+} from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
@@ -168,3 +223,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';

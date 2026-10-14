@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -16,7 +17,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsTagsRoute } from './set_alert_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import { MAX_ALERTS_PER_TRIGGER, MAX_TAG_LENGTH } from '../../../../../common/workflows/triggers';
 
 const makeSearchResponse = (
   hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
@@ -227,10 +228,20 @@ describe('set unified alerts tags', () => {
     });
 
     test('emits alertTagsChanged for detection alert documents', async () => {
+      // Both docs already have 'tag-remove' so it genuinely gets removed;
+      // neither has 'tag-add' so it genuinely gets added.
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-remove'] },
+          },
+          {
+            _id: 'alert-2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-remove'] },
+          },
         ])
       );
       const request = requestMock.create({
@@ -247,8 +258,8 @@ describe('set unified alerts tags', () => {
         expect.anything(),
         expect.objectContaining({
           alertIds: ['alert-1', 'alert-2'],
-          tagsToAdd: ['tag-add'],
-          tagsToRemove: ['tag-remove'],
+          tagsAdded: ['tag-add'],
+          tagsRemoved: ['tag-remove'],
           truncated: false,
         })
       );
@@ -275,8 +286,8 @@ describe('set unified alerts tags', () => {
         expect.anything(),
         expect.objectContaining({
           attackIds: ['attack-1'],
-          tagsToAdd: ['tag-add'],
-          tagsToRemove: [],
+          tagsAdded: ['tag-add'],
+          tagsRemoved: [],
           truncated: false,
         })
       );
@@ -534,7 +545,7 @@ describe('set unified alerts tags', () => {
         { length: MAX_ALERTS_PER_TRIGGER },
         (_, i) => `tag-${i}`
       ).slice(0, 100);
-      const tagsToAdd = [...existingTags, 'tag-new-101'];
+      const tagsAdded = [...existingTags, 'tag-new-101'];
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         makeSearchResponse([
           {
@@ -549,7 +560,7 @@ describe('set unified alerts tags', () => {
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
         body: {
           ids: ['alert-1'],
-          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+          tags: { tags_to_add: tagsAdded, tags_to_remove: [] },
         },
       });
       await server.inject(request, requestContextMock.convertContext(context));
@@ -561,7 +572,7 @@ describe('set unified alerts tags', () => {
     });
 
     test('sets truncated=true when tags_to_add exceeds MAX_TAGS_PER_OPERATION', async () => {
-      const tagsToAdd = Array.from({ length: 101 }, (_, i) => `tag-${i}`);
+      const tagsAdded = Array.from({ length: 101 }, (_, i) => `tag-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         makeSearchResponse([
           {
@@ -576,7 +587,7 @@ describe('set unified alerts tags', () => {
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
         body: {
           ids: ['alert-1'],
-          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+          tags: { tags_to_add: tagsAdded, tags_to_remove: [] },
         },
       });
       await server.inject(request, requestContextMock.convertContext(context));
@@ -584,6 +595,128 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ truncated: true })
+      );
+    });
+
+    test('computes actual delta — filters already-present tags from tagsAdded', async () => {
+      // Encoding WHY: the event must not report 'already-there' as added because alert-1
+      // already has it. Only 'new-tag' is genuinely absent and should appear in tagsAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['already-there'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: ['already-there', 'new-tag'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
+      );
+    });
+
+    test('emits for a detection alert when the only changed tag is over-length — empty payload and truncated=true', async () => {
+      // Encoding WHY: collectChangedIdsByFamily must use raw request arrays, not allValid*.
+      // An over-length-only change must still trigger the event for the correct family; the
+      // length filter applies only to the schema-bounded payload.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: { ids: ['alert-1'], tags: { tags_to_add: [overLengthTag], tags_to_remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'], tagsAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits for an attack discovery document when the only changed tag is over-length — empty payload and truncated=true', async () => {
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: { ids: ['attack-1'], tags: { tags_to_add: [overLengthTag], tags_to_remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'], tagsAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('mixed-family: computes independent per-family deltas — attack emit and alert emit do not share sources', async () => {
+      // Encoding WHY (regression): a shared delta over all hits causes a tag already present
+      // on every attack doc to be absent from actualAdded when the alert emit should still
+      // report it as added, and vice versa. Each family must use its own sources.
+      const ATTACK_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['alert-tag'] }, // alert already has alert-tag
+          },
+          {
+            _id: 'attack-1',
+            _index: ATTACK_INDEX,
+            _source: { 'kibana.alert.workflow_tags': ['attack-tag'] }, // attack already has attack-tag
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          tags: { tags_to_add: ['alert-tag', 'attack-tag'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      // alert-1 already has alert-tag → only attack-tag is new for the alert family
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['attack-tag'], tagsRemoved: [] })
+      );
+      // attack-1 already has attack-tag → only alert-tag is new for the attack family
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['alert-tag'], tagsRemoved: [] })
       );
     });
   });

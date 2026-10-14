@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { sourceWithSlug } from '../../utils/test_helpers';
+import { validateEsqlQueryForSourceOrThrow } from '../../../lib/significant_events/validate_esql_query';
+import { createQueryKnowledgeIndicatorToolHandler } from './handler';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'generated-query-id'),
+}));
+
+jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
+  ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
+  validateEsqlQueryForSourceOrThrow: jest.fn(),
+}));
+
+describe('createQueryKnowledgeIndicatorToolHandler', () => {
+  const logger = loggingSystemMock.createLogger();
+  const source = sourceWithSlug('logs.test', { view_name: 'logs.test' });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates query KI with provided id and upserts it', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await createQueryKnowledgeIndicatorToolHandler({
+      kiClient: kiClient as never,
+      source,
+      queryInput: {
+        id: 'provided-id',
+        title: 'Suspicious query',
+        description: 'Find suspicious events',
+        esql: { query: 'FROM logs.test, logs.test.* | stats c = count()' },
+        severity_score: 70,
+      },
+      logger,
+    });
+
+    expect(result).toEqual({ id: 'provided-id' });
+    expect(validateEsqlQueryForSourceOrThrow).toHaveBeenCalledWith({
+      esqlQuery: 'FROM logs.test, logs.test.* | stats c = count()',
+      viewName: source.view_name,
+    });
+    expect(kiClient.upsertQuery).toHaveBeenCalledWith(
+      source.id,
+      expect.objectContaining({
+        id: 'provided-id',
+        type: 'stats',
+        title: 'Suspicious query',
+        description: 'Find suspicious events',
+        esql: { query: 'FROM logs.test, logs.test.* | stats c = count()' },
+        severity_score: 70,
+      })
+    );
+  });
+
+  it('generates id when missing', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await createQueryKnowledgeIndicatorToolHandler({
+      kiClient: kiClient as never,
+      source,
+      queryInput: {
+        title: 'Suspicious query',
+        description: 'Find suspicious events',
+        esql: { query: 'FROM logs.test, logs.test.*' },
+      },
+      logger,
+    });
+
+    expect(result).toEqual({ id: 'generated-query-id' });
+    expect(kiClient.upsertQuery).toHaveBeenCalledWith(
+      source.id,
+      expect.objectContaining({
+        id: 'generated-query-id',
+      })
+    );
+  });
+
+  it('rejects an over-broad multi-word full-text predicate', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await expect(
+      createQueryKnowledgeIndicatorToolHandler({
+        kiClient: kiClient as never,
+        source,
+        queryInput: {
+          title: 'Over-broad',
+          description: 'ORed terms',
+          esql: { query: 'FROM logs.test, logs.test.* | WHERE message : "request failed"' },
+        },
+        logger,
+      })
+    ).rejects.toThrow('MATCH_PHRASE');
+
+    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('throws when query upsert fails', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
+    };
+
+    await expect(
+      createQueryKnowledgeIndicatorToolHandler({
+        kiClient: kiClient as never,
+        source,
+        queryInput: {
+          title: 'Suspicious query',
+          description: 'Find suspicious events',
+          esql: { query: 'FROM logs.test, logs.test.*' },
+        },
+        logger,
+      })
+    ).rejects.toThrow('upsert failed');
+
+    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+});

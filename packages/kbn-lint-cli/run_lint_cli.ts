@@ -17,27 +17,40 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
+// `oxlint.config.mjs` with `warn` rules off. Oxlint's `--fix` also fixes warnings and `--quiet`
+// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did.
+const FIX_CONFIG = 'oxlint.fix.config.mjs';
+
+interface LintOptions {
+  fix: boolean;
+  quiet: boolean;
+  paths: string[];
+}
+
 run(
   async ({ log, flagsReader, procRunner, addCleanupTask }) => {
     const paths = flagsReader.getPositionals().map((t) => Path.resolve(t));
     const fix = flagsReader.boolean('fix');
+    const quiet = flagsReader.boolean('quiet');
     const watch = flagsReader.boolean('watch');
+    const options: LintOptions = { fix, quiet, paths };
 
     if (watch) {
-      await watchAndLintFiles({ procRunner, log, addCleanupTask, options: { fix, paths } });
+      await watchAndLintFiles({ procRunner, log, addCleanupTask, options });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options: { fix, paths } });
+      await lintFiles({ procRunner, options });
       log.success('Linting files completed');
     }
   },
   {
-    usage: `node scripts/lint [paths...] [--fix] [--watch]`,
+    usage: `node scripts/lint [paths...] [--fix] [--quiet] [--watch]`,
     flags: {
-      boolean: ['fix', 'watch'],
+      boolean: ['fix', 'quiet', 'watch'],
       alias: { f: 'fix', w: 'watch' },
       help: `
         --fix              Automatically fix some issues in tsconfig.json files
+        --quiet            Only report errors, not warnings
         --watch            Watch for changes and re-run linting
       `,
     },
@@ -47,17 +60,24 @@ run(
 
 async function lintFiles({
   procRunner,
-  options,
+  options: { fix, quiet, paths },
 }: {
   procRunner: ProcRunner;
-  options: { fix: boolean; paths: string[] };
+  options: LintOptions;
 }) {
-  await procRunner.run('oxlint', {
-    cmd: 'oxlint',
-    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json', ...options.paths],
-    cwd: REPO_ROOT,
-    wait: true,
-  });
+  const runOxlint = (args: string[]) =>
+    procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
+
+  if (fix) {
+    // The errors-only config reports exactly what `--quiet` shows, so with `--quiet` one run is
+    // enough. Errors left after fixing fail this run before warnings are reported.
+    await runOxlint(['--fix', '--quiet', '--config', FIX_CONFIG, ...paths]);
+    if (quiet) {
+      return;
+    }
+  }
+
+  await runOxlint([...(quiet ? ['--quiet'] : []), '--config', 'oxlint.config.mjs', ...paths]);
 }
 
 async function watchAndLintFiles({
@@ -69,7 +89,7 @@ async function watchAndLintFiles({
   procRunner: ProcRunner;
   log: ToolingLog;
   addCleanupTask: (task: CleanupTask) => void;
-  options: { fix: boolean; paths: string[] };
+  options: LintOptions;
 }) {
   log.info('Linting files in watch mode...');
 
@@ -120,7 +140,7 @@ async function watchAndLintFiles({
 
           isLinting = true;
 
-          await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
+          await lintFiles({ procRunner, options });
         } catch {
           log.debug('Lint run failed, continuing to watch...');
         } finally {
@@ -138,7 +158,7 @@ async function watchAndLintFiles({
   });
 
   try {
-    await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
+    await lintFiles({ procRunner, options });
   } catch {
     log.warning('Lint run failed, continuing to watch...');
   }

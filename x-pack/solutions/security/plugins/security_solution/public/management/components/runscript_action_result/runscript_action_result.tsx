@@ -7,9 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { EndpointHostExecutionResponseOutput } from '../endpoint_host_execution_response_output';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 import type {
   ActionDetails,
   MaybeImmutable,
@@ -28,10 +30,12 @@ export interface RunscriptActionResultProps {
   /** Defaults to the first agent on the list if left undefined */
   agentId?: string;
   'data-test-subj'?: string;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
 }
 
 /**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ *
  * Represents the result of a run script action rendered as a memoized React component.
  *
  * This component is used to display a downloadable link for a response action file.
@@ -44,10 +48,16 @@ export interface RunscriptActionResultProps {
  * @param {string} [props['data-test-subj']] - An optional data-test subject attribute for testing purposes.
  *
  * @returns {React.Element} A React component that renders a text block with a file download link.
+ *
+ * @deprecated
  */
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
+    const { wasSuccessful } = useMemo(
+      () => (agentId ? getAgentActionState(action, agentId) : action),
+      [action, agentId]
+    );
     const showFile = action.agentType !== 'crowdstrike';
     const executionOutput = useMemo(() => {
       if (action.agentType === 'microsoft_defender_endpoint') {
@@ -88,31 +98,43 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
     }, [action, agentId, dataTestSubj, textSize]);
 
     return (
-      <>
-        {showFile && (
-          <EuiFlexItem>
-            <ResponseActionFileDownloadLink
-              action={action}
-              canAccessFileDownloadLink={
-                (action.agentType === 'sentinel_one' ||
-                  action.agentType === 'microsoft_defender_endpoint' ||
-                  action.agentType === 'endpoint') &&
-                canWriteExecuteOperations
-              }
-              data-test-subj={`${dataTestSubj}-download`}
-              agentId={agentId}
-              textSize={textSize}
-              showPasscode={action.agentType === 'sentinel_one' || action.agentType === 'endpoint'}
-            />
-          </EuiFlexItem>
-        )}
-        {executionOutput && (
+      <div data-test-subj={dataTestSubj}>
+        {wasSuccessful ? (
           <>
-            <EuiSpacer size="l" />
-            {executionOutput}
+            {showFile && (
+              <EuiFlexItem>
+                <ResponseActionFileDownloadLink
+                  action={action}
+                  canAccessFileDownloadLink={
+                    (action.agentType === 'sentinel_one' ||
+                      action.agentType === 'microsoft_defender_endpoint' ||
+                      action.agentType === 'endpoint') &&
+                    canWriteExecuteOperations
+                  }
+                  data-test-subj={`${dataTestSubj}-download`}
+                  agentId={agentId}
+                  textSize={textSize}
+                  showPasscode={
+                    action.agentType === 'sentinel_one' || action.agentType === 'endpoint'
+                  }
+                />
+              </EuiFlexItem>
+            )}
+            {executionOutput && (
+              <>
+                <EuiSpacer size="l" />
+                {executionOutput}
+              </>
+            )}
           </>
+        ) : (
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={`${dataTestSubj}-outputFailureMessage`}
+          />
         )}
-      </>
+      </div>
     );
   }
 );

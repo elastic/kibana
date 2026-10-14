@@ -3,10 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
-  "exclude": ["target/**/*"],
+  "include": ["common/**/*", "public/**/*", "scripts/**/*", "server/**/*"],
+  // The scripts/*.js entry points are `require` shims; checking them pulls in @kbn/setup-node-env.
+  "exclude": ["target/**/*", "scripts/*.js"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-cli-runner",
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",

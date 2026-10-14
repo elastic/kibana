@@ -75,6 +75,19 @@ actions:
         description: Workflows documentation
         url: https://www.elastic.co/docs/explore-analyze/workflows
       x-displayName: 'Workflows'
+  - target: '$.tags[?(@.name=="context engine")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Use the Context Engine APIs to manage AI Indices, query them with ES|QL, and describe them for an agent.
+        An AI Index attaches a name, sources, traces, and automations to a single data stream or index.
+
+
+        In each space, these APIs return a 404 until the `contextEngine:enabled` advanced setting is turned on for that space.
+      externalDocs:
+        description: Context Engine documentation
+        url: https://www.elastic.co/docs/explore-analyze/ai-features/context-engine
+      x-displayName: 'Context Engine'
 # Remove APM source maps - not supported in Serverless
   - target: "$.paths['/api/apm/sourcemaps']"
     description: Remove APM source maps - not supported in Serverless

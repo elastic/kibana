@@ -58,7 +58,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
       return { status: alertEpisodeStatus.pending };
     }
 
-    const stateRules = this.getStateMachine(rule.no_data_strategy, currentAlertEpisodeStatus);
+    const stateRules = this.getStateMachine(rule.no_data?.strategy, currentAlertEpisodeStatus);
 
     if (!stateRules) {
       return { status: alertEpisodeStatus.pending };
@@ -70,7 +70,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
   }
 
   private getStateMachine(
-    noDataStrategy: RuleResponse['no_data_strategy'],
+    noDataStrategy: NonNullable<RuleResponse['no_data']>['strategy'] | undefined,
     currentStatus: AlertEpisodeStatus
   ): Record<AlertEventStatus, AlertEpisodeStatus> | undefined {
     const base = this.baseTransitions[currentStatus];
@@ -78,11 +78,12 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
       return undefined;
     }
 
-    // for all other no_data_strategy types return the last known episode status
+    // `keep_last` — and any strategy that never reaches here — holds the
+    // current status.
     let noData: AlertEpisodeStatus = currentStatus;
-    if (noDataStrategy === 'emit') {
+    if (noDataStrategy === 'alert') {
       noData = alertEpisodeStatus.active;
-    } else if (noDataStrategy === 'recover') {
+    } else if (noDataStrategy === 'resolve') {
       noData = alertEpisodeStatus.inactive;
     }
 

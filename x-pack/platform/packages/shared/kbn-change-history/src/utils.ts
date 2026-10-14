@@ -6,7 +6,7 @@
  */
 
 import crypto from 'node:crypto';
-import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
+import { isPlainObject } from 'lodash';
 import type { ChangeHistoryFieldsToMask } from './types';
 
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
@@ -23,21 +23,36 @@ export interface SanitizeFieldsOpts {
 const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
   !!fields && Object.keys(fields).length > 0;
 
-const matcher = (fields: ChangeHistoryFieldsToMask) => {
-  const flat = flatten(fields);
-  return (key: string) =>
-    Object.entries(flat).some(([k, v]) => Boolean(v) && (key === k || key.startsWith(`${k}.`)));
+type MaskNode = boolean | ChangeHistoryFieldsToMask | undefined;
+
+/**
+ * Resolves the mask that applies to `key` one level down. A `true` mask matches
+ * the whole subtree, so it propagates as-is. Mask keys match snapshot keys
+ * verbatim (dots included); nesting expresses paths.
+ */
+const childMask = (mask: MaskNode, key: string): MaskNode => {
+  if (mask === true) {
+    return true;
+  }
+  if (isPlainObject(mask)) {
+    return (mask as ChangeHistoryFieldsToMask)[key];
+  }
+  return undefined;
 };
 
 /**
  * Masks sensitive string fields in a snapshot, by hashing or redacting. Redaction wins when a
  * field matches both maps. Returns a new snapshot when anything changes.
  *
+ * Snapshot keys are preserved verbatim, including keys that contain dots. Mask keys match
+ * snapshot keys literally (a mask key `'first.name'` matches only a snapshot key named
+ * `'first.name'`); use nesting to select nested fields.
+ *
  * @param snapshot - The snapshot to process.
  * @param opts.fieldsToHash - Field paths to replace with a salted SHA-256 digest (high-entropy secrets only).
  * @param opts.fieldsToRedact - Field paths to replace with a `[redacted]` placeholder (low-entropy data).
  * @param opts.salt - Salt for the hash, use the object.id. Required only when hashing.
- * @returns The flattened paths that were hashed/redacted and the masked snapshot.
+ * @returns The dot-joined paths that were hashed/redacted and the masked snapshot.
  * @example
  *   const snapshot = { api: { key: 'sk-9f8a7b6c5d4e' }, owner: { email: 'bob@example.com' } };
  *   const result = sanitizeFields(snapshot, {
@@ -64,26 +79,41 @@ export function sanitizeFields(
   if (shouldHash && !salt) {
     throw new Error('sanitizeFields: salt missing when hashing fields, please use the object.id');
   }
-  const flatSnapshot = flatten(snapshot);
-  const matchHash = fieldsToHash ? matcher(fieldsToHash) : () => false;
-  const matchRedact = fieldsToRedact ? matcher(fieldsToRedact) : () => false;
 
-  for (const key of Object.keys(flatSnapshot)) {
-    const value = flatSnapshot[key];
-    if (typeof value !== 'string') {
-      continue;
+  const walk = (
+    node: Record<string, any>,
+    hashMask: MaskNode,
+    redactMask: MaskNode,
+    parentPath: string
+  ): Record<string, any> => {
+    const result: Record<string, any> = {};
+    for (const key of Object.keys(node)) {
+      const value = node[key];
+      const path = parentPath ? `${parentPath}.${key}` : key;
+      const hashChild = childMask(hashMask, key);
+      const redactChild = childMask(redactMask, key);
+      if (typeof value === 'string' && redactChild === true) {
+        redacted.push(path);
+        result[key] = REDACTED;
+      } else if (typeof value === 'string' && hashChild === true) {
+        hashed.push(path);
+        result[key] = sha256(salt + value).slice(-12);
+      } else if (isPlainObject(value) && (hashChild || redactChild)) {
+        result[key] = walk(value, hashChild, redactChild, path);
+      } else {
+        result[key] = value;
+      }
     }
-    if (matchRedact(key)) {
-      redacted.push(key);
-      flatSnapshot[key] = REDACTED;
-    } else if (matchHash(key)) {
-      hashed.push(key);
-      flatSnapshot[key] = sha256(salt + value).slice(-12);
-    }
-  }
+    return result;
+  };
 
   return {
     fields: { hashed, redacted },
-    snapshot: unflatten(flatSnapshot),
+    snapshot: walk(
+      snapshot,
+      shouldHash ? fieldsToHash : undefined,
+      shouldRedact ? fieldsToRedact : undefined,
+      ''
+    ),
   };
 }

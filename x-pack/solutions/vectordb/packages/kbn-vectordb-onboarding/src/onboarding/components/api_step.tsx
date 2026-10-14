@@ -29,17 +29,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
-import { DEFAULT_LANGUAGE, LANGUAGES } from '../constants/languages';
+import { LANGUAGES } from '../constants/languages';
 import { fillPlaceholders } from '../utils/fill_placeholders';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
-import type {
-  DocsPanelProps,
-  Language,
-  OnboardingPill,
-  SnippetSet,
-  VectorPath,
-  WizardStep,
-} from '../types';
+import { useSelectedLanguage } from '../../hooks/use_selected_language';
+import type { DocsPanelProps, OnboardingPill, SnippetSet, VectorPath, WizardStep } from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
 import { OnboardingPills } from './onboarding_pills';
 
@@ -66,7 +61,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
     services: { application, share, console: consolePlugin, cloud },
   } = useKibana();
   const { elasticsearchUrl, apiKey } = useOnboardingCredentials();
-  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
+  const [language, setLanguage] = useSelectedLanguage();
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
 
@@ -81,7 +76,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
     apiKey ?? undefined
   );
 
-  const telemetryPrefix = `vectordbOnboarding-${step}-${path}`;
+  const telemetryPrefix = getWizardTelemetryPrefix(path, step);
 
   const isInTrial = cloud?.isInTrial() ?? false;
   const visiblePills = isInTrial ? pills : pills.filter(({ trialOnly }) => !trialOnly);
@@ -124,14 +119,14 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
         {visiblePills.length > 0 && (
           <>
-            <EuiPanel paddingSize="s" color="transparent">
+            <EuiPanel paddingSize="s" color="transparent" hasBorder={false}>
               <OnboardingPills pills={visiblePills} telemetryPrefix={telemetryPrefix} />
             </EuiPanel>
             <EuiSpacer size="s" />
           </>
         )}
         <EuiPanel paddingSize="none" hasBorder={false} hasShadow={true} color="plain">
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent">
+          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" hasBorder={false}>
             <EuiFlexGroup
               justifyContent="spaceBetween"
               alignItems="center"

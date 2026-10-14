@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEntityFromStore } from './use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 const mockFetchEntitiesListV2 = jest.fn();
 const mockGetEuidFilterBasedOnDocument = jest.fn();
@@ -18,6 +23,8 @@ jest.mock('@kbn/entity-store/public', () => ({
         getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
       },
     },
+    getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+      .getBuiltInEntityDefinition,
   }),
 }));
 
@@ -66,7 +73,7 @@ describe('useEntityFromStore', () => {
 
       // Partition semantics must be disabled for the lookup (wiring check, #278276).
       expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-        'host',
+        getBuiltInEntityDefinition('host'),
         { 'host.name': 'web01' },
         { excludeHigherRankedFields: false }
       );
@@ -77,6 +84,54 @@ describe('useEntityFromStore', () => {
       const mustClauses = parsed?.bool?.must ?? [];
       const hasHostIdExclusion = JSON.stringify(mustClauses).includes('host.id');
       expect(hasHostIdExclusion).toBe(false);
+    });
+  });
+
+  describe('executionContext propagation', () => {
+    it('forwards the caller-supplied executionContext to fetchEntitiesListV2', async () => {
+      const executionContext = buildExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+        'host_entity_from_store'
+      );
+
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+            executionContext,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toEqual({
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:entity_details_flyout',
+          id: 'host_entity_from_store',
+        },
+      });
+    });
+
+    it('omits context when the caller does not supply executionContext', async () => {
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toBeUndefined();
     });
   });
 });

@@ -1,0 +1,22 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        deleteParametersRequestExample1:
+          description: Run `POST /api/synthetics/params/_bulk_delete` to delete multiple parameters.
+          value:
+            ids: [param1-id, param2-id]
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../oas_schemas.yaml#/deleteResult'
+        examples:
+          deleteParametersResponseExample1:
+            value:
+              - id: param1-id
+                deleted: true

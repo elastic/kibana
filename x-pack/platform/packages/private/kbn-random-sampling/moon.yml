@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/random-sampling'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/random-sampling'
   description: Moon project for @kbn/random-sampling
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/packages/private/kbn-random-sampling
 dependsOn:
   - '@kbn/i18n-react'

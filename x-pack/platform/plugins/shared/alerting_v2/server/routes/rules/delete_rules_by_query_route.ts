@@ -33,6 +33,7 @@ export class DeleteRulesByQueryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Delete rules matching a query (dry-run by default)',
     oasOperationObject: deleteRulesByQueryOasExamples,
   } as const;

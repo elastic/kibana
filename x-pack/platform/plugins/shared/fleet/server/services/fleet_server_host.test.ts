@@ -408,6 +408,103 @@ describe('delete fleetServerHost', () => {
     );
     expect(soClientMock.delete).toHaveBeenCalledWith(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, 'test1');
   });
+
+  describe('cross-space authorization', () => {
+    const mockRequest = {} as any;
+    const mockAtSpaces = jest.fn();
+
+    function mockSecurity(hasAllRequested = true) {
+      mockAtSpaces.mockResolvedValue({ hasAllRequested });
+      jest.mocked(mockedAppContextService.getSecurity).mockReturnValue({
+        authz: {
+          mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+          actions: { api: { get: (name: string) => `api:${name}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+        },
+      } as any);
+    }
+
+    beforeEach(() => {
+      mockAtSpaces.mockReset();
+      jest.mocked(agentPolicyService.getSpacesForPoliciesUsingFleetServerHost).mockResolvedValue({
+        spaceIds: new Set(['default']),
+        truncated: false,
+      });
+    });
+
+    it('skips authz check when request is not provided', async () => {
+      mockSecurity(false);
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await fleetServerHostService.delete(esClientMock, 'test1', {});
+
+      expect(mockAtSpaces).not.toHaveBeenCalled();
+    });
+
+    it('skips space collection and authz check when RBAC is inactive', async () => {
+      jest.mocked(mockedAppContextService.getSecurity).mockReturnValue({
+        authz: {
+          mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+          actions: { api: { get: (name: string) => `api:${name}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+        },
+      } as any);
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await fleetServerHostService.delete(esClientMock, 'test1', { request: mockRequest });
+
+      expect(
+        jest.mocked(agentPolicyService.getSpacesForPoliciesUsingFleetServerHost)
+      ).not.toHaveBeenCalled();
+      expect(mockAtSpaces).not.toHaveBeenCalled();
+      expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalled();
+    });
+
+    it('allows delete when caller holds required privileges', async () => {
+      mockSecurity(true);
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(
+        fleetServerHostService.delete(esClientMock, 'test1', { request: mockRequest })
+      ).resolves.not.toThrow();
+      expect(mockAtSpaces).toHaveBeenCalled();
+      expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalled();
+    });
+
+    it('blocks delete and does not call removeFleetServerHostFromAll when caller lacks privileges', async () => {
+      mockSecurity(false);
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(
+        fleetServerHostService.delete(esClientMock, 'test1', { request: mockRequest })
+      ).rejects.toThrow('Insufficient privileges to delete Fleet Server host test1');
+      expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).not.toHaveBeenCalled();
+    });
+
+    it('throws when policy list is truncated and does not mutate', async () => {
+      mockSecurity(true);
+      jest.mocked(agentPolicyService.getSpacesForPoliciesUsingFleetServerHost).mockResolvedValue({
+        spaceIds: new Set(['default']),
+        truncated: true,
+      });
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(
+        fleetServerHostService.delete(esClientMock, 'test1', { request: mockRequest })
+      ).rejects.toThrow(/too many agent policies/);
+      expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('bulkGet', () => {

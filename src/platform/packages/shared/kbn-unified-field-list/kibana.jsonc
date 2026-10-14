@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/unified-field-list",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",

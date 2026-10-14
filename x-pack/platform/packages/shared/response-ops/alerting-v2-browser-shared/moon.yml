@@ -17,11 +17,18 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared
 dependsOn:
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/date-range-picker'
   - '@kbn/date-range-picker-presets'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/use-observable'
 tags:
   - shared-browser

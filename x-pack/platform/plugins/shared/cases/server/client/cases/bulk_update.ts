@@ -38,13 +38,19 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_USER_ACTIONS_PER_CASE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
 import { createCaseError, isSOError } from '../../common/error';
-import { createAlertUpdateStatusRequest, flattenCaseSavedObject } from '../../common/utils';
+import {
+  createAlertUpdateStatusRequest,
+  createAttackUpdateStatusRequest,
+  flattenCaseSavedObject,
+} from '../../common/utils';
 import {
   isAlertAttachmentType,
+  isAttackAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../common/utils/attachments';
 import { getCaseToUpdate, buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
@@ -213,16 +219,17 @@ function getID(
 }
 
 /**
- * Gets all the alert comments (generated or user alerts) for the requested cases.
+ * Gets the attachments whose referenced documents participate in the case status sync: alert
+ * attachments (legacy `alert` plus the unified alert types) and attack attachments. Attacks are
+ * queried alongside alerts to keep this to a single search, but they are kept apart from here on
+ * so they never count as alerts.
  */
-async function getAlertComments({
+async function getSyncableComments({
   casesToSync,
   caseService,
-  isCasesAttachmentsEnabled,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
@@ -235,7 +242,7 @@ async function getAlertComments({
     [
       legacyAlertFilter,
       buildFilter({
-        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        filters: [...UNIFIED_ALERT_TYPES_ARRAY, SECURITY_ATTACK_ATTACHMENT_TYPE],
         field: 'type',
         operator: 'or',
         type: CASE_ATTACHMENT_SAVED_OBJECT,
@@ -249,21 +256,20 @@ async function getAlertComments({
     options: {
       filter: alertFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
 /**
- * Returns what status the alert comment should have based on whether it is associated to a case.
+ * Returns what status the attachment should have based on whether it is associated to a case.
  */
 function getSyncStatusForComment({
-  alertComment,
+  attachment,
   casesToSyncToStatus,
 }: {
-  alertComment: SavedObjectsFindResult<AttachmentAttributes>;
+  attachment: SavedObjectsFindResult<AttachmentAttributes>;
   casesToSyncToStatus: Map<string, [CaseStatuses, string?]>;
 }): [CaseStatuses, string?] {
-  const id = getID(alertComment, CASE_SAVED_OBJECT);
+  const id = getID(attachment, CASE_SAVED_OBJECT);
 
   if (!id) {
     return [CaseStatuses.open, undefined];
@@ -272,22 +278,25 @@ function getSyncStatusForComment({
   return casesToSyncToStatus.get(id) ?? [CaseStatuses.open, undefined];
 }
 
+interface SyncRequestsByCaseId {
+  alertsToUpdateByCaseId: Map<string, UpdateAlertStatusRequest[]>;
+  attacksToUpdateByCaseId: Map<string, UpdateAlertStatusRequest[]>;
+}
+
 /**
- * Updates the alert ID's status field based on the patch requests
- * Returns a map of case ids to the number of alerts synced
+ * Updates the status of the alert and attack documents attached to the patched cases.
+ * Returns a map of case ids to the number of alerts synced — attacks are excluded from that count.
  */
 async function updateAlerts({
   casesWithSyncSettingChangedToOn,
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
-  isCasesAttachmentsEnabled,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -309,39 +318,58 @@ async function updateAlerts({
     return acc;
   }, new Map<string, [CaseStatuses, string?]>());
 
-  // get all the alerts for all the alert comments for all cases
-  const totalAlerts = await getAlertComments({
+  // get all the attachments that take part in the status sync, for all cases
+  const syncableComments = await getSyncableComments({
     casesToSync,
     caseService,
-    isCasesAttachmentsEnabled,
   });
 
-  const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
-    (acc: Map<string, UpdateAlertStatusRequest[]>, alertComment) => {
-      if (isAlertAttachmentType(alertComment.attributes.type)) {
-        const caseId = getID(alertComment, CASE_SAVED_OBJECT);
-        if (caseId == null) {
-          return acc;
-        }
+  const { alertsToUpdateByCaseId, attacksToUpdateByCaseId } = syncableComments.saved_objects.reduce(
+    (acc: SyncRequestsByCaseId, attachment) => {
+      const { type } = attachment.attributes;
+      const isAlert = isAlertAttachmentType(type);
+      const isAttack = isAttackAttachmentType(type);
 
-        const statusAndReason = getSyncStatusForComment({
-          alertComment,
-          casesToSyncToStatus,
-        });
-
-        const existingAlerts = acc.get(caseId) ?? [];
-        const alertsToUpdate = createAlertUpdateStatusRequest({
-          comment: alertComment.attributes,
-          status: statusAndReason[0],
-          closingReason: statusAndReason[1],
-        });
-
-        acc.set(caseId, [...existingAlerts, ...alertsToUpdate]);
+      if (!isAlert && !isAttack) {
+        return acc;
       }
+
+      const caseId = getID(attachment, CASE_SAVED_OBJECT);
+      if (caseId == null) {
+        return acc;
+      }
+
+      const [status, closingReason] = getSyncStatusForComment({
+        attachment,
+        casesToSyncToStatus,
+      });
+
+      const target = isAlert ? acc.alertsToUpdateByCaseId : acc.attacksToUpdateByCaseId;
+      const buildRequest = isAlert
+        ? createAlertUpdateStatusRequest
+        : createAttackUpdateStatusRequest;
+
+      target.set(caseId, [
+        ...(target.get(caseId) ?? []),
+        ...buildRequest({ comment: attachment.attributes, status, closingReason }),
+      ]);
 
       return acc;
     },
-    new Map<string, UpdateAlertStatusRequest[]>()
+    {
+      alertsToUpdateByCaseId: new Map<string, UpdateAlertStatusRequest[]>(),
+      attacksToUpdateByCaseId: new Map<string, UpdateAlertStatusRequest[]>(),
+    }
+  );
+
+  /**
+   * Attacks are synced in their own call so their updated document count never lands in
+   * `syncedAlertCount`, which drives the "N alerts synced" user action and update summary.
+   */
+  await Promise.all(
+    Array.from(attacksToUpdateByCaseId.values()).map((attacksToUpdate) =>
+      alertsService.updateAlertsStatus(attacksToUpdate)
+    )
   );
 
   if (alertsToUpdateByCaseId.size === 0) {
@@ -560,10 +588,7 @@ export const bulkUpdate = async (
     logger,
     authorization,
     closeReasonValidator,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -704,6 +729,28 @@ export const bulkUpdate = async (
       )
     );
 
+    // Pre-fetch all field definitions once per owner for cases that have extended_fields with an
+    // effective template. validateCaseExtendedFields uses these to resolve $ref entries; without
+    // pre-fetching, every case in the Promise.all below would issue an identical SO query.
+    const uniqueOwnersNeedingAllFields = [
+      ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
+        if (!updateReq.extended_fields) return owners;
+        const hasEffectiveTemplate =
+          updateReq.template !== null &&
+          (updateReq.template != null || originalCase.attributes.template != null);
+        if (hasEffectiveTemplate) owners.add(originalCase.attributes.owner);
+        return owners;
+      }, new Set<string>()),
+    ];
+    const allFieldDefinitionsByOwner = new Map(
+      await Promise.all(
+        uniqueOwnersNeedingAllFields.map(async (owner) => {
+          const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+          return [owner, fieldDefinitions] as const;
+        })
+      )
+    );
+
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
@@ -712,6 +759,7 @@ export const bulkUpdate = async (
           templatesService,
           fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+          fieldDefinitions: allFieldDefinitionsByOwner.get(originalCase.attributes.owner),
         })
       )
     );
@@ -907,7 +955,6 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
-      isCasesAttachmentsEnabled,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({

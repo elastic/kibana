@@ -8,11 +8,13 @@
 import {
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
-  shouldAddMissingUiamKeyTag,
-  addMissingUiamKeyTagIfNeeded,
+  updateMissingUiamKeyTag,
 } from './api_key_as_alert_attributes';
-import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
+import {
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+  MISSING_UIAM_API_KEY_TAG,
+} from '../../application/rule/constants';
+import { ApiKeyType } from '../../task_runner/types';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {
@@ -27,11 +29,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
     });
   });
@@ -43,11 +47,13 @@ describe('apiKeyAsAlertAttributes', () => {
           apiKeysEnabled: false,
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKeyCreatedByUser: null,
     });
   });
@@ -64,11 +70,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
     });
   });
@@ -90,11 +98,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
       uiamApiKey: 'NDU2OmRlZg==',
       uiamApiKeyExternal: false,
@@ -113,11 +123,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'NDU2OmRlZg==',
       uiamApiKeyExternal: false,
@@ -135,11 +147,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'essu_user_created_key',
       uiamApiKeyExternal: false,
@@ -158,11 +172,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'essu_user_created_key',
       uiamApiKeyExternal: true,
@@ -179,7 +195,8 @@ describe('apiKeyAsAlertAttributes', () => {
         uiamResult: { id: '456', name: '456', api_key: 'def' },
       },
       'test',
-      false
+      false,
+      'u_profile_test'
     );
 
     expect(properties.uiamApiKeyExternal).toBe(false);
@@ -196,11 +213,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
     });
   });
@@ -222,7 +241,8 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toThrow(
       'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
@@ -230,110 +250,55 @@ describe('apiKeyAsAlertAttributes', () => {
   });
 });
 
-const featureFlags = coreFeatureFlagsMock.createStart();
-
-describe('shouldAddMissingUiamKeyTag', () => {
-  test('returns true when all conditions are met: serverless, feature flag enabled, no uiamApiKey, apiKeyCreatedByUser is false', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, false, true, featureFlags)).toBe(true);
-  });
-
-  test('returns true when uiamApiKey is undefined and other conditions are met', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(undefined, false, true, featureFlags)).toBe(true);
-  });
-
-  test('returns false when not serverless', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, false, false, featureFlags)).toBe(false);
-  });
-
-  test('returns false when feature flag is disabled', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    expect(await shouldAddMissingUiamKeyTag(null, false, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when uiamApiKey exists', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag('some-key', false, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when apiKeyCreatedByUser is true', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, true, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when apiKeyCreatedByUser is null', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, null, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when apiKeyCreatedByUser is undefined', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, undefined, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when neither serverless nor feature flag are enabled', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    expect(await shouldAddMissingUiamKeyTag(null, false, false, featureFlags)).toBe(false);
-  });
-});
-
-describe('addMissingUiamKeyTagIfNeeded', () => {
-  test('adds tag when all conditions are met', async () => {
+describe('updateMissingUiamKeyTag', () => {
+  test('adds tag when all conditions are met', () => {
     const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, true, featureFlags);
-    expect(result).toEqual(['existing-tag', MISSING_UIAM_API_KEY_TAG]);
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
   });
 
-  test('does not add tag when not serverless', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, false, featureFlags);
-    expect(result).toEqual(['existing-tag']);
+  test('removes the current and legacy tags when the UIAM API key exists', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG, MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, 'some-key', true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+    ]);
   });
 
-  test('does not add tag when feature flag is disabled', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, true, featureFlags);
-    expect(result).toEqual(['existing-tag']);
+  test('replaces the legacy tag when the UIAM API key is missing', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
   });
 
-  test('does not add tag when uiamApiKey exists', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, 'some-key', false, true, featureFlags);
-    expect(result).toEqual(['existing-tag']);
-  });
-
-  test('does not add tag when apiKeyCreatedByUser is true', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, true, featureFlags);
-    expect(result).toEqual(['existing-tag']);
-  });
-
-  test('does not add duplicate tag if tag already exists', async () => {
+  test('does not duplicate the current tag', () => {
     const tags = ['existing-tag', MISSING_UIAM_API_KEY_TAG];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, true, featureFlags);
-    expect(result).toEqual(['existing-tag', MISSING_UIAM_API_KEY_TAG]);
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
   });
 
-  test('works with empty tags array', async () => {
-    const tags: string[] = [];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, true, featureFlags);
-    expect(result).toEqual([MISSING_UIAM_API_KEY_TAG]);
+  test('preserves the current tag position', () => {
+    const tags = [MISSING_UIAM_API_KEY_TAG, 'existing-tag'];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
   });
 
-  test('does not mutate original tags array', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, true, featureFlags);
-    expect(tags).toEqual(['existing-tag']);
+  test.each([
+    ['non-serverless deployments', false, true, ApiKeyType.UIAM],
+    ['deployments that do not grant UIAM keys', true, false, ApiKeyType.UIAM],
+    ['deployments where rules use ES API keys', true, true, ApiKeyType.ES],
+  ])('leaves tags unchanged in %s', (_description, isServerless, shouldGrantUiam, apiKeyType) => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, null, isServerless, shouldGrantUiam, apiKeyType)).toBe(
+      tags
+    );
+  });
+
+  test('does not mutate original tags array', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    const result = updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM);
+    expect(tags).toEqual(['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG]);
     expect(result).not.toBe(tags);
   });
 });

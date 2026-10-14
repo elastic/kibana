@@ -240,7 +240,6 @@ export const InsightsTabCsp = memo(
         {showSubTabs && (
           <>
             <EuiButtonGroup
-              color="primary"
               legend={i18n.translate(
                 'xpack.securitySolution.flyout.left.insights.optionsButtonGroups',
                 {

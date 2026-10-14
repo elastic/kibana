@@ -229,7 +229,11 @@ export const GroupGridItem = ({
         />
       ) : null}
       {view === 'compactView' ? (
-        <MonitorsTable items={groupMonitors} setFlyoutConfigCallback={setFlyoutConfigCallback} />
+        <MonitorsTable
+          items={groupMonitors}
+          setFlyoutConfigCallback={setFlyoutConfigCallback}
+          enableServerPagination={false}
+        />
       ) : null}
     </EuiAccordion>
   );

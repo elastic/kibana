@@ -9,7 +9,12 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql, type EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
+import {
+  rowsFromEsql,
+  toEpisodeActionActor,
+  type EpisodeActionHistoryEntry,
+} from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsHistoryQuery,
   DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
@@ -57,7 +62,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
       });
       return rowsFromEsql(esqlQuery, raw);
     },
-    getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
+    getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
     enabled: Boolean(episodeId) && Boolean(groupHash),
   });
@@ -65,10 +70,18 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const entries = useMemo(() => {
     const seen = new Set<string>();
     const deduped: EpisodeActionHistoryEntry[] = [];
-    for (const entry of query.data?.pages.flat() ?? []) {
-      if (seen.has(entry._id)) continue;
-      seen.add(entry._id);
-      deduped.push(entry);
+    for (const row of query.data?.pages.flat() ?? []) {
+      if (seen.has(row._id)) continue;
+      seen.add(row._id);
+      const { 'actor.type': actorType, 'actor.profile_uid': actorProfileUid, tags, ...rest } = row;
+      deduped.push({
+        ...rest,
+        actor: toEpisodeActionActor({
+          'actor.type': actorType,
+          'actor.profile_uid': actorProfileUid,
+        }),
+        tags: normalizeTags(tags),
+      });
     }
     return deduped;
   }, [query.data]);

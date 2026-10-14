@@ -7,6 +7,7 @@
 
 import { COLUMN_GAP } from './canvas_constants';
 import { applyLayout, layoutGraph } from './layout';
+import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('layoutGraph', () => {
   it('returns an empty map for no nodes', () => {
@@ -24,7 +25,8 @@ describe('layoutGraph', () => {
 
     expect(source.x).toBe(0);
     expect(destination.x).toBe(COLUMN_GAP);
-    // A 1:1 chain shares a row so the connector is a straight horizontal line.
+    // Untyped nodes fall back to a single height estimate, so sharing a row also
+    // means sharing a top edge.
     expect(source.y).toBe(destination.y);
   });
 
@@ -83,19 +85,24 @@ describe('applyLayout', () => {
 
   it('repositions every node and preserves other node properties', () => {
     const nodes = [
-      { id: 'source', position: { x: 999, y: 999 }, type: 'source', data: { keep: true } },
-      { id: 'destination', position: { x: -50, y: 5 }, type: 'destination' },
+      {
+        id: 'source',
+        position: { x: 999, y: 999 },
+        type: SOURCE_NODE_TYPE,
+        data: { keep: true },
+      },
+      { id: 'destination', position: { x: -50, y: 5 }, type: DESTINATION_NODE_TYPE },
     ];
 
     const result = applyLayout(nodes, edges);
     const source = result.find((node) => node.id === 'source')!;
     const destination = result.find((node) => node.id === 'destination')!;
 
-    expect(source.position).toEqual({ x: 0, y: 0 });
+    expect(source.position.x).toBe(0);
+    expect(source.position).not.toEqual({ x: 999, y: 999 });
     expect(destination.position.x).toBe(COLUMN_GAP);
-    expect(source.position.y).toBe(destination.position.y);
     // Non-position fields survive the re-layout.
-    expect(source.type).toBe('source');
+    expect(source.type).toBe(SOURCE_NODE_TYPE);
     expect(source.data).toEqual({ keep: true });
   });
 

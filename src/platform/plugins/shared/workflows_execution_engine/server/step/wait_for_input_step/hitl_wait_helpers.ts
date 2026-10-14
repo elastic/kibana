@@ -51,8 +51,10 @@ export function resumeHitlWaitStep({
   stepExecutionRuntime.finishStep(enrichedOutput);
 
   if (context != null && typeof context === 'object' && 'resumeInput' in context) {
-    const { resumeInput: _cleared, ...restContext } = context as Record<string, unknown>;
-    stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
+    // ES merges partial context updates; omitting the key would retain the consumed approval.
+    stepExecutionRuntime.updateWorkflowExecution({
+      context: { ...context, resumeInput: null, pendingInteractiveResume: false },
+    });
   }
 
   workflowLogger.logDebug(`Workflow ${executionId} resumed by ${resumedBy}`, {

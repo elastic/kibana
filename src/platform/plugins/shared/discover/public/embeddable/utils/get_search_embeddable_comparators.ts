@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  DiscoverSessionApiEmbeddableByReferenceConfig,
+  DiscoverSessionApiEmbeddableByValueConfig,
+} from '@kbn/as-code-discover-schema';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { isEqual, isUndefined, omit, omitBy } from 'lodash';
-import type {
-  DiscoverSessionEmbeddableByReferenceProps,
-  DiscoverSessionEmbeddableByValueProps,
-} from '../../../server';
 
 export function getDiscoverSessionEmbeddableComparators(
   isByValue: boolean,
   shouldSkipTabComparators: boolean
 ): StateComparators<
-  DiscoverSessionEmbeddableByValueProps | DiscoverSessionEmbeddableByReferenceProps
+  DiscoverSessionApiEmbeddableByValueConfig | DiscoverSessionApiEmbeddableByReferenceConfig
 > {
   return isByValue
     ? {

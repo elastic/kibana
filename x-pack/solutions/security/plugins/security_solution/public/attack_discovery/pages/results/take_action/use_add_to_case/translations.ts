@@ -14,13 +14,6 @@ export const ADD_TO_CASE_SUCCESS = i18n.translate(
   }
 );
 
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.addToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
 export const CREATE_A_CASE_FOR_ATTACK_DISCOVERY = (title: string) =>
   i18n.translate(
     'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.createACaseForAttackDiscoveryHeaderText',

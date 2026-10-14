@@ -23,7 +23,6 @@ export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
-  nextTabId: string;
   artifactName: string;
 
   /** The siem version from which the artifact privilege is available.
@@ -63,7 +62,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
     tabId: 'trustedApps',
-    nextTabId: 'eventFilters',
     artifactName: 'Trusted application name',
     privilegePrefix: 'trusted_applications_',
     create: {
@@ -189,7 +187,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
     tabId: 'eventFilters',
-    nextTabId: 'blocklists',
     artifactName: 'Event filter name',
     privilegePrefix: 'event_filters_',
     create: {
@@ -304,7 +301,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
     tabId: 'blocklists',
-    nextTabId: 'hostIsolationExceptions',
     artifactName: 'Blocklist name',
     privilegePrefix: 'blocklist_',
     create: {
@@ -427,7 +423,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
     tabId: 'hostIsolationExceptions',
-    nextTabId: 'trustedApps',
     artifactName: 'Host Isolation exception name',
     privilegePrefix: 'host_isolation_exceptions_',
     create: {
@@ -523,7 +518,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Trusted devices',
     pagePrefix: 'trustedDevicesList',
     tabId: 'trustedDevices',
-    nextTabId: 'trustedApps',
     artifactName: 'Trusted device name',
     firstSiemVersion: 'siemV3',
     privilegePrefix: 'trusted_devices_',
@@ -636,7 +630,6 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Endpoint exceptions',
     pagePrefix: 'endpointExceptionsListPage',
     tabId: 'endpointExceptions',
-    nextTabId: 'protectionUpdates',
     artifactName: 'Endpoint exception name',
     firstSiemVersion: 'siemV4',
     privilegePrefix: 'endpoint_exceptions_',

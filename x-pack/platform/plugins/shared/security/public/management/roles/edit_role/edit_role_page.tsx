@@ -398,6 +398,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   ...startServices
 }) => {
   const isDarkMode = useKibanaIsDarkMode();
+  // Gate Data Federation-related RBAC UI on plugin enablement (xpack.dataFederation.enabled).
+  // When disabled, the Data Federation plugin does not register its feature, so its capability key is absent.
+  const isDataFederationEnabled = uiCapabilities.data_federation !== undefined;
 
   if (!dataViews) {
     // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
@@ -677,6 +680,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         builtinESPrivileges={builtInESPrivileges}
         license={license}
         docLinks={docLinks}
+        isDataFederationEnabled={isDataFederationEnabled}
         canUseRemoteIndices={
           buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
         }

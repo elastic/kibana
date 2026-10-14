@@ -1,0 +1,257 @@
+{
+  "attributes": {
+    "allowHidden": false,
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "logstash-*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-09-17T11:13:03.201Z",
+  "id": "9561110c-88b3-4b7d-8708-4df35a8070c0",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2026-09-17T11:13:03.201Z",
+  "version": "WzcsMV0="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "color": "auto",
+        "icon": "triangle",
+        "id": "27be1f34-55d5-4c49-8503-5f8ff10188d9",
+        "key": {
+          "timestamp": "2015-09-21T12:00:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "my description",
+    "ignoreGlobalFilters": true,
+    "title": "library annotation group"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-09-17T11:13:26.359Z",
+  "created_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "id": "958ff46d-89f4-46b1-bbb6-6f4be5865e82",
+  "managed": false,
+  "references": [
+    {
+      "id": "9561110c-88b3-4b7d-8708-4df35a8070c0",
+      "name": "event-annotation-group_dataView-ref-9561110c-88b3-4b7d-8708-4df35a8070c0",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2026-09-17T11:13:26.359Z",
+  "updated_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "version": "WzksMV0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "cd56b4ae-5510-496e-985a-e22011eca4b9": {
+              "columnOrder": [
+                "e481606e-4aba-4dd8-a82e-9a9e18c52f90",
+                "77bee15d-e746-4623-9431-8685690b9962"
+              ],
+              "columns": {
+                "77bee15d-e746-4623-9431-8685690b9962": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "sourceField": "___records___"
+                },
+                "e481606e-4aba-4dd8-a82e-9a9e18c52f90": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "auto"
+                  },
+                  "sourceField": "@timestamp"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": false,
+          "yLeft": true,
+          "yRight": true
+        },
+        "fittingFunction": "Linear",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "labelsOrientation": {
+          "x": 0,
+          "yLeft": 0,
+          "yRight": 0
+        },
+        "layers": [
+          {
+            "accessors": [
+              "77bee15d-e746-4623-9431-8685690b9962"
+            ],
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "elastic_line_optimized",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rules": [
+                    {
+                      "type": "other"
+                    }
+                  ],
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "cd56b4ae-5510-496e-985a-e22011eca4b9",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "line",
+            "showGridlines": false,
+            "xAccessor": "e481606e-4aba-4dd8-a82e-9a9e18c52f90"
+          },
+          {
+            "annotationGroupRef": "ref-e169cd39-b1c9-4186-b343-1e1ebcf52505",
+            "layerId": "e169cd39-b1c9-4186-b343-1e1ebcf52505",
+            "layerType": "annotations",
+            "persistanceType": "byReference"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "layout": "list",
+          "position": "bottom"
+        },
+        "preferredSeriesType": "line",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide"
+      }
+    },
+    "title": "first visualization",
+    "version": 2,
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-09-17T11:13:28.199Z",
+  "created_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "id": "42bc3c17-05db-48e3-a7b4-ea1fbab5b01c",
+  "managed": false,
+  "references": [
+    {
+      "id": "9561110c-88b3-4b7d-8708-4df35a8070c0",
+      "name": "indexpattern-datasource-layer-cd56b4ae-5510-496e-985a-e22011eca4b9",
+      "type": "index-pattern"
+    },
+    {
+      "id": "958ff46d-89f4-46b1-bbb6-6f4be5865e82",
+      "name": "ref-e169cd39-b1c9-4186-b343-1e1ebcf52505",
+      "type": "event-annotation-group"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "10.1.0",
+  "updated_at": "2026-09-17T11:13:28.199Z",
+  "updated_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "version": "WzEwLDFd"
+}
+
+{
+  "accessControl": {
+    "accessMode": "default",
+    "owner": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0"
+  },
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"autoApplyFilters\":true,\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"syncCursor\":true}",
+    "panelsJSON": "[{\"type\":\"vis\",\"embeddableConfig\":{\"drilldowns\":[]},\"panelIndex\":\"b83de4c6-d1a7-445b-8e2c-dee13c814c40\",\"gridData\":{\"y\":0,\"x\":0,\"w\":24,\"h\":15,\"i\":\"b83de4c6-d1a7-445b-8e2c-dee13c814c40\"}},{\"type\":\"vis\",\"embeddableConfig\":{\"attributes\":{\"references\":[{\"name\":\"indexpattern-datasource-layer-cd56b4ae-5510-496e-985a-e22011eca4b9\",\"type\":\"index-pattern\",\"id\":\"9561110c-88b3-4b7d-8708-4df35a8070c0\"},{\"name\":\"ref-e169cd39-b1c9-4186-b343-1e1ebcf52505\",\"type\":\"event-annotation-group\",\"id\":\"958ff46d-89f4-46b1-bbb6-6f4be5865e82\"}],\"title\":\"first visualization\",\"description\":\"\",\"visualizationType\":\"lnsXY\",\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"layout\":\"list\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"axisTitlesVisibilitySettings\":{\"x\":false,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"cd56b4ae-5510-496e-985a-e22011eca4b9\",\"accessors\":[\"77bee15d-e746-4623-9431-8685690b9962\"],\"position\":\"top\",\"seriesType\":\"line\",\"showGridlines\":false,\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"elastic_line_optimized\",\"colorMode\":{\"type\":\"categorical\"}},\"xAccessor\":\"e481606e-4aba-4dd8-a82e-9a9e18c52f90\"},{\"persistanceType\":\"byReference\",\"layerId\":\"e169cd39-b1c9-4186-b343-1e1ebcf52505\",\"layerType\":\"annotations\",\"annotationGroupRef\":\"ref-e169cd39-b1c9-4186-b343-1e1ebcf52505\"}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"cd56b4ae-5510-496e-985a-e22011eca4b9\":{\"columns\":{\"e481606e-4aba-4dd8-a82e-9a9e18c52f90\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"77bee15d-e746-4623-9431-8685690b9962\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"sourceField\":\"___records___\",\"params\":{\"emptyAsNull\":true}}},\"columnOrder\":[\"e481606e-4aba-4dd8-a82e-9a9e18c52f90\",\"77bee15d-e746-4623-9431-8685690b9962\"],\"incompleteColumns\":{},\"sampling\":1}}},\"indexpattern\":{\"layers\":{}},\"textBased\":{\"layers\":{}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":2},\"title\":\"first visualization (copy)\",\"drilldowns\":[]},\"panelIndex\":\"49a0fc4a-60b2-440d-8a15-3344492b1df5\",\"gridData\":{\"y\":0,\"x\":24,\"w\":24,\"h\":15,\"i\":\"49a0fc4a-60b2-440d-8a15-3344492b1df5\"}}]",
+    "timeRestore": false,
+    "title": "annotation sync test dashboard"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-09-17T11:13:39.860Z",
+  "created_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "id": "27b674aa-ab54-4ed1-bbbf-53c3e75ef3e6",
+  "managed": false,
+  "references": [
+    {
+      "id": "42bc3c17-05db-48e3-a7b4-ea1fbab5b01c",
+      "name": "b83de4c6-d1a7-445b-8e2c-dee13c814c40:savedObjectRef",
+      "type": "lens"
+    },
+    {
+      "id": "9561110c-88b3-4b7d-8708-4df35a8070c0",
+      "name": "49a0fc4a-60b2-440d-8a15-3344492b1df5:indexpattern-datasource-layer-cd56b4ae-5510-496e-985a-e22011eca4b9",
+      "type": "index-pattern"
+    },
+    {
+      "id": "958ff46d-89f4-46b1-bbb6-6f4be5865e82",
+      "name": "49a0fc4a-60b2-440d-8a15-3344492b1df5:ref-e169cd39-b1c9-4186-b343-1e1ebcf52505",
+      "type": "event-annotation-group"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-09-17T11:13:39.860Z",
+  "updated_by": "u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0",
+  "version": "WzEyLDFd"
+}

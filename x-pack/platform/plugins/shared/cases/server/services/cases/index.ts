@@ -885,7 +885,6 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
@@ -895,7 +894,6 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
-          mode,
         });
       }
 
@@ -906,7 +904,6 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -923,7 +920,6 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
@@ -945,7 +941,6 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);

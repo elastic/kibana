@@ -6,37 +6,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyAttachmentData,
+  ActionPolicyGrouping,
+  GroupingMode,
+  ThrottleStrategy,
+} from '@kbn/alerting-v2-schemas';
 import {
   actionPolicyDestinationSchema,
   createActionPolicyDataSchema,
   groupingModeSchema,
   throttleStrategySchema,
   durationSchema,
-  tagsSchema,
-  PER_EPISODE_STRATEGIES,
+  policyMatcherSchema,
+  needsInterval,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
-
-// Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
-// local to avoid forcing an export purely for this guard.
-const MAX_ACTION_POLICY_TAGS = 20;
-
-/**
- * Ensures the agent-builder provenance tag is present without clobbering any
- * tags the user or LLM already set. Skips silently if the tag cap is already
- * reached, so we never push a payload that fails schema validation.
- */
-const withAgentBuilderTag = (tags: string[] | undefined | null): string[] => {
-  const existing = tags ?? [];
-  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_ACTION_POLICY_TAGS) {
-    return existing;
-  }
-  return [...existing, AGENT_BUILDER_TAG];
-};
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Derived from shared alerting-v2-schemas so tool-level validation stays
@@ -47,11 +35,8 @@ export const setMetadataOperationSchema = z
     operation: z.literal('set_metadata'),
     name: z.string().min(1).max(256).optional().describe('The action policy name.'),
     description: z.string().max(1024).optional().describe('A description of the action policy.'),
-    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
   })
-  .describe(
-    'Use `set_metadata` to name the action policy and add a description or tags so the user can filter by it later.'
-  );
+  .describe('Use `set_metadata` to name the action policy and add a description.');
 
 export const setDestinationsOperationSchema = z
   .object({
@@ -69,14 +54,12 @@ export const setDestinationsOperationSchema = z
 export const setMatcherOperationSchema = z
   .object({
     operation: z.literal('set_matcher'),
-    matcher: z
-      .string()
-      .max(4096)
+    matcher: policyMatcherSchema
       .nullable()
-      .describe('A KQL query to match alert episodes, or null for a catch-all.'),
+      .describe('Structured matcher for alerts, or null for a catch-all.'),
   })
   .describe(
-    'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'
+    'Use `set_matcher` to limit which alerts this policy notifies on. A null matcher matches all alerts in the space; an empty matcher is rejected, so use null instead.'
   );
 
 export const setGroupingOperationSchema = z
@@ -88,17 +71,23 @@ export const setGroupingOperationSchema = z
       .max(10)
       .optional()
       .nullable()
-      .describe('Fields used to group alerts (required when groupingMode is per_field).'),
+      .describe(
+        'Fields used to group alerts. Required by `per_field`, and rejected by the other modes, which group on no field.'
+      ),
   })
   .describe(
-    'Use `set_grouping` to batch matched episodes into notifications — one per episode, one for all matching episodes, or grouped by field.'
+    'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
   );
 
 export const setThrottleOperationSchema = z
   .object({
     operation: z.literal('set_throttle'),
     strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-    interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
+    interval: durationSchema
+      .optional()
+      .describe(
+        'The throttle interval (e.g. 5m, 1h). Required by `per_status_interval` and `time_interval`, and rejected by the other strategies, which do not notify on a schedule.'
+      ),
   })
   .describe(
     'Use `set_throttle` to limit how often notifications fire so the user is not flooded by repeat alerts.'
@@ -138,25 +127,82 @@ export class ActionPolicyOperationValidationError extends Error {
 
 function validateThrottleGroupingCompat(
   groupingMode: string | undefined | null,
-  strategy: string | undefined,
-  interval: string | null | undefined
+  strategy: string | undefined
 ): void {
   if (!strategy) return;
 
-  const mode = groupingMode ?? 'per_episode';
-  const allowed = mode === 'per_episode' ? PER_EPISODE_STRATEGIES : AGGREGATE_STRATEGIES;
+  const mode = groupingMode ?? 'per_alert';
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
   if (!allowed.has(strategy)) {
     throw new ActionPolicyOperationValidationError(
       `Throttle strategy "${strategy}" is not valid for grouping mode "${mode}". ` +
         `Allowed strategies: ${[...allowed].join(', ')}`
     );
   }
+}
 
-  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !interval) {
+type ThrottleDraft = NonNullable<ActionPolicyAttachmentData['throttle']>;
+
+/**
+ * Builds the grouping variant the mode names. Fields carry over only to the mode that groups on
+ * them, so switching away from `per_field` needs no extra operation; fields the agent spells out
+ * for another mode are an error rather than a value the server would have to discard.
+ */
+function buildGroupingDraft(
+  mode: GroupingMode,
+  explicitFields: string[] | undefined | null,
+  stored: ActionPolicyGrouping | undefined
+): ActionPolicyGrouping {
+  if (mode !== 'per_field') {
+    if (explicitFields?.length) {
+      throw new ActionPolicyOperationValidationError(
+        `Grouping mode "${mode}" does not group on fields. Omit groupBy, or use "per_field".`
+      );
+    }
+    return { mode };
+  }
+
+  const fields = explicitFields ?? (stored?.mode === 'per_field' ? stored.fields : undefined);
+
+  if (!fields?.length) {
+    throw new ActionPolicyOperationValidationError(
+      'groupBy fields are required when groupingMode is "per_field".'
+    );
+  }
+
+  return { mode, fields };
+}
+
+/**
+ * Builds the throttle variant the strategy names. An interval carries over only to a strategy that
+ * uses one, so switching to an intervalless strategy needs no extra operation; one the agent spells
+ * out for such a strategy is an error rather than a value the server would have to discard.
+ */
+function buildThrottleDraft(
+  strategy: ThrottleStrategy,
+  explicitInterval: string | undefined,
+  stored: ThrottleDraft | undefined
+): ThrottleDraft {
+  if (!needsInterval(strategy)) {
+    if (explicitInterval !== undefined) {
+      throw new ActionPolicyOperationValidationError(
+        `Throttle strategy "${strategy}" does not take an interval. Omit it, or use one of: ` +
+          `${[...STRATEGIES_REQUIRING_INTERVAL].join(', ')}.`
+      );
+    }
+    return { strategy };
+  }
+
+  const interval =
+    explicitInterval ?? (stored && 'interval' in stored ? stored.interval : undefined);
+
+  if (!interval) {
     throw new ActionPolicyOperationValidationError(
       `Throttle strategy "${strategy}" requires an interval to be defined.`
     );
   }
+
+  return { strategy, interval };
 }
 
 // ─── Execution ────────────────────────────────────────────────────────────────
@@ -176,7 +222,6 @@ export const executeActionPolicyOperations = (
           ...next,
           name: mergedName,
           ...(op.description !== undefined ? { description: op.description } : {}),
-          ...(op.tags !== undefined ? { tags: op.tags } : {}),
         };
         break;
       }
@@ -186,33 +231,28 @@ export const executeActionPolicyOperations = (
         break;
 
       case 'set_matcher':
-        next = { ...next, matcher: op.matcher };
+        next = { ...next, matcher: op.matcher ?? undefined };
         break;
 
       case 'set_grouping': {
-        if (op.groupingMode === 'per_field' && (!op.groupBy || op.groupBy.length === 0)) {
+        const mode = op.groupingMode ?? next.grouping?.mode ?? 'per_alert';
+        next = { ...next, grouping: buildGroupingDraft(mode, op.groupBy, next.grouping) };
+        break;
+      }
+
+      case 'set_throttle': {
+        const strategy = op.strategy ?? next.throttle?.strategy;
+        if (strategy === undefined) {
           throw new ActionPolicyOperationValidationError(
-            'groupBy fields are required when groupingMode is "per_field".'
+            'strategy is required when the policy has no throttle yet.'
           );
         }
         next = {
           ...next,
-          ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { group_by: op.groupBy } : {}),
+          throttle: buildThrottleDraft(strategy, op.interval, next.throttle),
         };
         break;
       }
-
-      case 'set_throttle':
-        next = {
-          ...next,
-          throttle: {
-            ...next.throttle,
-            ...(op.strategy !== undefined ? { strategy: op.strategy } : {}),
-            ...(op.interval !== undefined ? { interval: op.interval ?? null } : { interval: null }),
-          },
-        };
-        break;
 
       case 'validate': {
         const payload = attachmentDataToActionPolicyPayload(next);
@@ -230,24 +270,13 @@ export const executeActionPolicyOperations = (
     }
   }
 
-  // Stamp the agent-builder provenance tag on every action policy created or
-  // edited via Agent Builder so they can be measured (telemetry) and filtered
-  // alongside agent-created rules. Merged after all operations so it never
-  // overwrites user/LLM-provided tags. Applied on edits too, so a policy that
-  // loses the tag regains it whenever the agent touches it.
-  next = { ...next, tags: withAgentBuilderTag(next.tags) };
-
   if (isNew && !next.name) {
     throw new ActionPolicyOperationValidationError(
       'A name is required when creating a new action policy. Use a set_metadata operation with a name.'
     );
   }
 
-  validateThrottleGroupingCompat(
-    next.grouping_mode,
-    next.throttle?.strategy,
-    next.throttle?.interval
-  );
+  validateThrottleGroupingCompat(next.grouping?.mode, next.throttle?.strategy);
 
   return next;
 };

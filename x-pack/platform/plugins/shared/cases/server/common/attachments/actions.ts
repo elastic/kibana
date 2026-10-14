@@ -40,7 +40,7 @@ const DEFAULT_LEGACY_AGENT_TYPE = 'endpoint' as const;
  * to be a non-empty string, so we emit an explicit sentinel that makes the
  * synthetic origin discoverable in logs and the UI.
  *
- * Note on aggregations: every migrated legacy `actions` row shares this `attachmentId`,
+ * Note on aggregations: every legacy `actions` row shares this `attachmentId`,
  * so any `terms` aggregation on `cases-attachments.attributes.attachmentId` (e.g.
  * `getAllAlertIds` in services/attachments/operations/get.ts) will bucket them together.
  * Today those aggregations always include a type filter that excludes
@@ -92,7 +92,7 @@ function buildUnifiedMetadata(legacyActions: LegacyActionsAttributes['actions'])
  *
  * This is the only *asymmetric* transformer in the attachments pipeline: the
  * legacy `actions` top-level type is being retired and must never be re-emitted.
- * Forward migration (legacy → unified) is performed here; the reverse path
+ * Forward conversion (legacy → unified) is performed here; the reverse path
  * (unified → legacy) is delegated to `externalReferenceAttachmentTransformer`,
  * which projects unified `security.endpoint` payloads back to `externalReference +
  * externalReferenceAttachmentTypeId: 'endpoint'`. Inputs that are already in a
@@ -149,7 +149,7 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
 
   /**
    * Legacy `actions` persisted rows are left untouched (they are already in a
-   * legacy shape); migrated `security.endpoint` rows are projected back to the
+   * legacy shape); `security.endpoint` rows are projected back to the
    * legacy `externalReference` shape by the external-reference transformer so
    * we never re-emit the deprecated `actions` top-level type.
    */
@@ -162,7 +162,7 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   isUnifiedType(_attributes: unknown): boolean {
-    // The actions transformer has no unified type of its own; once migrated, attachments
+    // The actions transformer has no unified type of its own; after transformation, attachments
     // carry the `security.endpoint` unified type which is owned by the external-reference
     // transformer.
     return false;
@@ -176,7 +176,7 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyActionsShape(attachment);
   },
 
-  isUnifiedPayload(_attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(_attachment: AttachmentRequestV2): _attachment is UnifiedAttachmentPayload {
     return false;
   },
 

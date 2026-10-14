@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
+import { OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { CollectionChooser } from './collection_chooser';
 import { FleetCardsProvider } from './fleet_cards_provider';
 
@@ -105,12 +107,13 @@ const renderChooser = ({
 }: {
   collection?: string;
   searchTerm?: string;
-}) =>
+}) => {
+  const core = coreMock.createStart();
   render(
     <I18nProvider>
-      <KibanaContextProvider services={coreMock.createStart()}>
+      <KibanaContextProvider services={core}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>
+          <FleetCardsProvider>
             <CollectionChooser
               collection={collection}
               searchTerm={searchTerm}
@@ -122,6 +125,8 @@ const renderChooser = ({
       </KibanaContextProvider>
     </I18nProvider>
   );
+  return core;
+};
 
 const memberHrefs = () =>
   screen
@@ -197,6 +202,27 @@ describe('CollectionChooser', () => {
     expect(badges).toHaveLength(1);
     expect(screen.getByTestId('collectionVariantRow-epr:mysql_input_otel')).toContainElement(
       badges[0]
+    );
+  });
+
+  it('reports the picked variant with its collection and the recommendation', async () => {
+    const user = userEvent.setup();
+    const core = renderChooser({ collection: 'mysql' });
+
+    await screen.findByTestId('collectionFlyout');
+    await user.click(
+      within(screen.getByTestId('collectionVariantRow-epr:mysql_input_otel')).getByRole('link')
+    );
+
+    expect(core.analytics.reportEvent).toHaveBeenCalledWith(
+      OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType,
+      {
+        tile_id: 'epr:mysql_input_otel',
+        surface: 'collection_variant',
+        collection_id: 'mysql',
+        is_recommended: true,
+        has_search_term: false,
+      }
     );
   });
 

@@ -104,6 +104,7 @@ import {
   FleetError,
   fleetErrorToResponseOptions,
   PackagePolicyValidationError,
+  PackageFipsIncompatibleError,
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -171,6 +172,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
+import { isPackageFipsIncompatible } from './epm/packages/filter_fips_packages';
 import {
   compileTemplate,
   getMetaVariables,
@@ -242,6 +244,7 @@ import { getInputsWithIds } from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
+  hasAgentVersionCondition,
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
@@ -683,6 +686,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         prerelease: true,
       }));
 
+    assertFipsCompatiblePackageOrThrow(enrichedPackagePolicy, pkgInfo, options?.force);
+
     let inputs = getInputsWithIds(enrichedPackagePolicy, packagePolicyId, undefined, pkgInfo);
 
     // Check if it is a limited package, and if so, check that the corresponding agent policy does not
@@ -769,7 +774,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -845,10 +850,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy: PackagePolicy,
     agentVersions?: string[]
   ) {
-    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-      return;
-    }
-    if (!hasAgentVersionConditionInInputTemplate(assetsMap)) {
+    // Covers both manifest level (`conditions.agent.version`) and template level conditions, and
+    // checks the `enableVersionSpecificPolicies` feature flag.
+    if (!hasAgentVersionCondition(packageInfo, assetsMap)) {
       return;
     }
     return withActiveSpan(
@@ -1056,8 +1060,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        // eslint-disable-next-line prefer-const
-        let { id, ...pkgPolicyWithoutId } = packagePolicy;
+        const {
+          id,
+          spaceIds: _spaceIds,
+          ...pkgPolicyWithoutIdInit
+        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1069,6 +1077,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         const { pkgInfo, assetsMap } = packageInfoAndAsset;
+
+        assertFipsCompatiblePackageOrThrow(packagePolicy, pkgInfo, options?.force);
 
         let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
@@ -1659,6 +1669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     this.keepPolicyIdInSync(packagePolicyUpdate);
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
+    const { version } = packagePolicyUpdate;
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: SecretReference[] | undefined;
     let secretsToDelete: SecretReference[] | undefined;
@@ -1726,8 +1737,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       spaceId: soClient.getCurrentNamespace(),
     });
 
-    // eslint-disable-next-line prefer-const
-    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+    // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
+    const {
+      version: _version,
+      id: _id,
+      spaceIds: _spaceIds,
+      ...restOfPackagePolicyInit
+    } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+    let restOfPackagePolicy = restOfPackagePolicyInit;
 
     // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
     // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
@@ -1753,6 +1770,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+
+    assertFipsCompatiblePackageOrThrow(
+      { inputs },
+      pkgInfo,
+      options?.force,
+      oldPackagePolicy.inputs
+    );
 
     _validateRestrictedFieldsNotModifiedOrThrow({
       oldPackagePolicy,
@@ -1869,7 +1893,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          // The condition is derived from the package below, never taken from the request.
+          ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1888,7 +1913,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
-          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
+          // See bulkUpdate: clear a stale condition with '' only when there is one to clear.
+          ...((pkgInfo?.conditions?.agent?.version !== undefined ||
+            oldPackagePolicy.package_agent_version_condition) && {
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? '',
+          }),
         },
         {
           version,
@@ -2001,7 +2030,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         await deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: a package policy in another Space may reference one, and the
+          // request-scoped client only sees its own Space.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretsToDelete.map((s) => s.id),
           agentPolicyIds: [...associatedPolicyIds],
         });
@@ -2207,9 +2239,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
-        // id and version are not part of the saved object attributes
-        // eslint-disable-next-line prefer-const
-        let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+        // id, version, and spaceIds are not part of the saved object attributes
+        const {
+          version: _version,
+          id: _id,
+          spaceIds: _spaceIds,
+          ...restOfPackagePolicyInit
+        } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+        let restOfPackagePolicy = restOfPackagePolicyInit;
 
         if (restOfPackagePolicy.vars === undefined) {
           restOfPackagePolicy.vars = oldPackagePolicy.vars;
@@ -2235,6 +2272,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+
+        assertFipsCompatiblePackageOrThrow(
+          { inputs },
+          pkgInfo,
+          options?.force,
+          oldPackagePolicy.inputs
+        );
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
@@ -2314,11 +2358,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
         }
 
+        const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
+
         policiesToUpdate.push({
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -2337,6 +2383,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
+            // A partial SO update drops undefined keys, so a stale condition would survive an
+            // upgrade to a package without one. Write an empty string (falsy, and valid for the
+            // frozen model version schemas) to clear it, but only when there is a stale value, to
+            // avoid adding the key to policies that never had a condition.
+            ...((targetAgentVersionCondition !== undefined ||
+              oldPackagePolicy.package_agent_version_condition) && {
+              package_agent_version_condition: targetAgentVersionCondition ?? '',
+            }),
           },
           version,
         });
@@ -2481,7 +2535,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const runDelete = () =>
         deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: see the single update above.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretIdsToDelete,
           agentPolicyIds: agentPolicyIdsForDelete,
         });
@@ -2846,7 +2902,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
     return _packagePoliciesBulkUpgrade({
@@ -3312,6 +3368,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       );
     }
+  }
+
+  /**
+   * Returns the set of space IDs for package policies that reference the given output ID.
+   * Used for pre-deletion authz checks.
+   */
+  public async getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['spaceIds'],
+        searchFields: ['output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
 
   async fetchAllItemIds(
@@ -3861,6 +3945,61 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
+  }
+}
+
+// Same resolution rule as _compilePackagePolicyInput: inputs without a policy template use the first one.
+function resolveInputPolicyTemplateName(
+  input: Pick<PackagePolicyInput, 'policy_template'>,
+  pkgInfo: PackageInfo
+) {
+  return input.policy_template ?? pkgInfo.policy_templates?.[0]?.name;
+}
+
+// When `oldInputs` is passed (update), only inputs that were not already enabled are checked,
+// so existing policies keep working and can still be edited.
+function assertFipsCompatiblePackageOrThrow(
+  packagePolicy: Pick<NewPackagePolicy, 'inputs'>,
+  pkgInfo: PackageInfo,
+  force?: boolean,
+  oldInputs?: Array<Pick<PackagePolicyInput, 'type' | 'name' | 'policy_template' | 'enabled'>>
+) {
+  if (force || !appContextService.getIsFipsEnabled()) {
+    return;
+  }
+  const action = oldInputs ? 'update' : 'create';
+  if (!oldInputs && isPackageFipsIncompatible(pkgInfo.policy_templates)) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot create a package policy for ${pkgInfo.name}: the integration is not FIPS compatible`
+    );
+  }
+  const nonFipsTemplates = new Set(
+    (pkgInfo.policy_templates ?? [])
+      .filter((template) => template.fips_compatible === false)
+      .map((template) => template.name)
+  );
+  const nonFipsInput = packagePolicy.inputs.find((input) => {
+    const templateName = resolveInputPolicyTemplateName(input, pkgInfo);
+    if (!input.enabled || !templateName || !nonFipsTemplates.has(templateName)) {
+      return false;
+    }
+    return !oldInputs?.some(
+      (oldInput) =>
+        oldInput.enabled &&
+        oldInput.type === input.type &&
+        getInputEffectiveName(oldInput) === getInputEffectiveName(input) &&
+        resolveInputPolicyTemplateName(oldInput, pkgInfo) === templateName
+    );
+  });
+  if (nonFipsInput) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot ${action} a package policy for ${
+        pkgInfo.name
+      }: the policy template ${resolveInputPolicyTemplateName(
+        nonFipsInput,
+        pkgInfo
+      )} is not FIPS compatible`
+    );
   }
 }
 

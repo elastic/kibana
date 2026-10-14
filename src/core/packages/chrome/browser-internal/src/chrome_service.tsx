@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, type Observable } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -70,6 +70,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private docTitleParts$!: Observable<readonly string[]>;
   private readonly projectNavigation: ProjectNavigationService;
   private readonly sidebar: SidebarService;
   private readonly logger: Logger;
@@ -83,8 +84,9 @@ export class ChromeService {
   }
 
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
-    const docTitle = this.docTitle.setup({ document: window.document });
-    registerAnalyticsContextProvider(analytics, docTitle.title$);
+    const { title$, titleParts$ } = this.docTitle.setup({ document: window.document });
+    this.docTitleParts$ = titleParts$;
+    registerAnalyticsContextProvider(analytics, title$);
 
     return {
       sidebar: this.sidebar.setup(),
@@ -181,6 +183,7 @@ export class ChromeService {
         basePath: http.basePath,
         legacyActionMenu$: application.currentActionMenu$,
         capabilities: application.capabilities,
+        docTitleParts$: this.docTitleParts$,
       },
     });
 

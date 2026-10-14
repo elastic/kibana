@@ -27,13 +27,13 @@ describe('registerBuiltinArtifactTypes', () => {
   it('registers runbook and dashboard', () => {
     expect(registry.get(RUNBOOK_ARTIFACT_TYPE)).toBeDefined();
     expect(registry.get(DASHBOARD_ARTIFACT_TYPE)?.references).toEqual([
-      { field: 'dashboardId', savedObjectType: 'dashboard' },
+      { field: 'dashboard_id', savedObjectType: 'dashboard' },
     ]);
   });
 
   it('accepts valid data', () => {
     expect(() => validate(RUNBOOK_ARTIFACT_TYPE, { content: '# Steps' })).not.toThrow();
-    expect(() => validate(DASHBOARD_ARTIFACT_TYPE, { dashboardId: 'my-dashboard' })).not.toThrow();
+    expect(() => validate(DASHBOARD_ARTIFACT_TYPE, { dashboard_id: 'my-dashboard' })).not.toThrow();
   });
 
   describe('reports actionable messages', () => {
@@ -43,8 +43,8 @@ describe('registerBuiltinArtifactTypes', () => {
       expect(() => validate(RUNBOOK_ARTIFACT_TYPE, { content: '   ' })).toThrow(
         'content: must not be empty or contain only whitespace'
       );
-      expect(() => validate(DASHBOARD_ARTIFACT_TYPE, { dashboardId: '' })).toThrow(
-        'dashboardId: must not be empty or contain only whitespace'
+      expect(() => validate(DASHBOARD_ARTIFACT_TYPE, { dashboard_id: '' })).toThrow(
+        'dashboard_id: must not be empty or contain only whitespace'
       );
     });
 
@@ -73,7 +73,7 @@ describe('registerBuiltinArtifactTypes', () => {
 
     it('names a missing field', () => {
       expect(() => validate(DASHBOARD_ARTIFACT_TYPE, {})).toThrow(
-        'dashboardId: Invalid input: expected string, received undefined'
+        'dashboard_id: Invalid input: expected string, received undefined'
       );
     });
   });

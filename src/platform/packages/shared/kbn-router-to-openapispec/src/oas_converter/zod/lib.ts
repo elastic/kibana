@@ -203,7 +203,7 @@ const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boole
     return true;
   }
 
-  // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
+  // "string" covers both z.string() and isoDateTime(), z.email(), etc.
   return defType === 'string';
 };
 
@@ -457,7 +457,9 @@ interface ZodSchemaMeta {
 }
 
 const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
-  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+  ((typeof schema.meta === 'function' ? schema.meta() : undefined) ??
+    z.globalRegistry.get(schema) ??
+    {}) as ZodSchemaMeta;
 
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
@@ -642,6 +644,11 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
+    // Keep an existing definition (e.g. extracted from `$defs`) rather than
+    // overwriting it with a partial inline copy of the same component.
+    if (Object.hasOwn(shared, name)) {
+      return { $ref: `#/components/schemas/${name}` };
+    }
     const {
       [COMPONENT_ID_MARKER]: _idMarker,
       [OAS_EXTENSIONS_MARKER]: oasExt,
@@ -804,6 +811,24 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
   if (result.type === 'null') {
     delete result.type;
     result.nullable = true;
+  }
+
+  // Zod 4.5+ compacts simple nullable unions into a type array,
+  // e.g. `type: ['string', 'null']` — OAS 3.0 does not support type arrays.
+  if (Array.isArray(result.type)) {
+    const types = (result.type as unknown[]).filter((t) => t !== 'null');
+    const isNullable = types.length !== (result.type as unknown[]).length;
+    if (types.length === 1) {
+      result.type = types[0];
+    } else {
+      delete result.type;
+      if (types.length > 1) {
+        result.anyOf = types.map((t) => ({ type: t }));
+      }
+    }
+    if (isNullable) {
+      result.nullable = true;
+    }
   }
 
   if (nullable) {

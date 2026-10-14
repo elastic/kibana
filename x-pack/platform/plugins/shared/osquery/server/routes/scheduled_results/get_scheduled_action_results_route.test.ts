@@ -142,6 +142,7 @@ describe('getScheduledActionResultsRoute', () => {
       );
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
         },
@@ -206,6 +207,7 @@ describe('getScheduledActionResultsRoute', () => {
         .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
         },
@@ -233,6 +235,7 @@ describe('getScheduledActionResultsRoute', () => {
         .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {},
       } as unknown as OsqueryAppContext;
 
@@ -261,7 +264,7 @@ describe('getScheduledActionResultsRoute', () => {
       const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
 
       const mockOsqueryContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -297,7 +300,7 @@ describe('getScheduledActionResultsRoute', () => {
       const contextSearchFn = jest.fn();
 
       const cpsContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -333,6 +336,7 @@ describe('getScheduledActionResultsRoute', () => {
         .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
@@ -364,6 +368,7 @@ describe('getScheduledActionResultsRoute', () => {
         .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
@@ -420,6 +425,7 @@ describe('getScheduledActionResultsRoute', () => {
       );
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -462,6 +468,7 @@ describe('getScheduledActionResultsRoute', () => {
       );
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -508,6 +515,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -546,6 +554,7 @@ describe('getScheduledActionResultsRoute', () => {
       const soGet = jest.fn().mockRejectedValue(new Error('Saved object not found'));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -584,6 +593,7 @@ describe('getScheduledActionResultsRoute', () => {
       const soGet = jest.fn();
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -615,6 +625,7 @@ describe('getScheduledActionResultsRoute', () => {
         .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -653,6 +664,7 @@ describe('getScheduledActionResultsRoute', () => {
       );
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -685,6 +697,7 @@ describe('getScheduledActionResultsRoute', () => {
   describe('pagination limit', () => {
     it('should return bad request when pagination exceeds limit', async () => {
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },
@@ -719,6 +732,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
 
       const mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },

@@ -38,25 +38,23 @@ export const getRuleDetailMenu = ({
   onViewChangeHistory,
   onUpdateApiKey,
 }: GetRuleDetailMenuParams): AppHeaderMenu => {
-  const viewChangeHistoryItems: RuleDetailMenuItem[] = onViewChangeHistory
-    ? [
-        {
-          id: 'viewChangeHistory',
-          label: i18n.translate('xpack.alertingV2.ruleDetails.viewChangeHistoryButtonLabel', {
-            defaultMessage: 'View change history',
-          }),
-          iconType: 'clockCounter',
-          order: 2,
-          run: onViewChangeHistory,
-          testId: 'ruleDetailsViewChangeHistoryButton',
-          overflow: true,
-        },
-      ]
-    : [];
+  const viewChangeHistoryItem: RuleDetailMenuItem | undefined = onViewChangeHistory
+    ? {
+        id: 'viewChangeHistory',
+        label: i18n.translate('xpack.alertingV2.ruleDetails.viewChangeHistoryButtonLabel', {
+          defaultMessage: 'View change history',
+        }),
+        iconType: 'clockCounter',
+        order: 2,
+        run: onViewChangeHistory,
+        testId: 'ruleDetailsViewChangeHistoryButton',
+        overflow: true,
+      }
+    : undefined;
 
   // Read-only users only get read actions; no write affordances.
   if (!canWrite) {
-    return { items: viewChangeHistoryItems };
+    return { items: viewChangeHistoryItem ? [viewChangeHistoryItem] : [] };
   }
 
   return {
@@ -84,11 +82,13 @@ export const getRuleDetailMenu = ({
       disabled: isToggleLoading,
       'data-test-subj': 'ruleDetailsEnabledSwitch',
     },
+    // Order mirrors the rules list overflow: Run / Clone | View change history / Update API key | Delete.
+    // Feedback stays a global static item (app menu draws its own separator above it).
     items: [
       {
         id: 'runRule',
         label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
-          defaultMessage: 'Run rule',
+          defaultMessage: 'Run',
         }),
         iconType: 'play',
         order: 0,
@@ -105,7 +105,7 @@ export const getRuleDetailMenu = ({
       {
         id: 'cloneRule',
         label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
-          defaultMessage: 'Clone rule',
+          defaultMessage: 'Clone',
         }),
         iconType: 'copy',
         order: 1,
@@ -113,13 +113,16 @@ export const getRuleDetailMenu = ({
         testId: 'ruleDetailsCloneButton',
         overflow: true,
       },
+      ...(viewChangeHistoryItem ? [{ ...viewChangeHistoryItem, separator: 'above' as const }] : []),
       {
         id: 'updateRuleApiKey',
         label: i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyButtonLabel', {
           defaultMessage: 'Update API key',
         }),
         iconType: 'key',
-        order: 1,
+        order: 3,
+        // When change history is absent, still divide primary actions from API key.
+        ...(viewChangeHistoryItem ? {} : { separator: 'above' as const }),
         run: onUpdateApiKey,
         testId: 'ruleDetailsUpdateApiKeyButton',
         overflow: true,
@@ -130,14 +133,15 @@ export const getRuleDetailMenu = ({
               defaultMessage: 'Enable the rule to update its API key',
             }),
       },
-      ...viewChangeHistoryItems,
       {
         id: 'deleteRule',
         label: i18n.translate('xpack.alertingV2.ruleDetails.deleteRuleButtonLabel', {
-          defaultMessage: 'Delete rule',
+          defaultMessage: 'Delete',
         }),
         iconType: 'trash',
-        order: 3,
+        order: 4,
+        separator: 'above',
+        isDestructive: true,
         run: onDelete,
         testId: 'ruleDetailsDeleteButton',
         overflow: true,

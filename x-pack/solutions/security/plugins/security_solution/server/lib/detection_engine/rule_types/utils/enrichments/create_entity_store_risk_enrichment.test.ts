@@ -10,16 +10,18 @@ import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    getEuidFromObject: jest.fn(),
+    getEuidFromObjectForSearch: jest.fn(),
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
-const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
+const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
 
 const makeEntity = (id: string, extraFields: Record<string, unknown> = {}) => ({
   entity: { id },
@@ -40,11 +42,11 @@ describe('createEntityStoreEnrichment', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     logger = ruleExecutionLogMock.forExecutors.create();
-    mockGetEuidFromObject.mockReset();
+    mockGetEuidForSearch.mockReset();
   });
 
   it('returns empty object when no events have a computable EUID', async () => {
-    mockGetEuidFromObject.mockReturnValue(undefined);
+    mockGetEuidForSearch.mockReturnValue(undefined);
     const crudClient = makeEntityStoreCrudClient();
 
     const result = await createEntityStoreEnrichment({
@@ -62,7 +64,7 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('returns only the EUID stamp when listEntities finds no matching entities', async () => {
-    mockGetEuidFromObject.mockReturnValue('host:server1');
+    mockGetEuidForSearch.mockReturnValue('host:server1');
     const crudClient = makeEntityStoreCrudClient();
 
     const result = await createEntityStoreEnrichment({
@@ -86,7 +88,7 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('returns enriched map for events whose EUID matches an entity', async () => {
-    mockGetEuidFromObject.mockImplementation((_, doc) =>
+    mockGetEuidForSearch.mockImplementation((_, doc) =>
       doc?.host?.name ? `host:${doc.host.name}` : undefined
     );
 
@@ -123,7 +125,7 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('enriches all events sharing the same EUID', async () => {
-    mockGetEuidFromObject.mockReturnValue('host:server1');
+    mockGetEuidForSearch.mockReturnValue('host:server1');
 
     const crudClient = makeEntityStoreCrudClient([makeEntity('host:server1')]);
 
@@ -157,11 +159,11 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('enriches multiple events sharing the EUIDs', async () => {
-    mockGetEuidFromObject.mockReturnValueOnce('host:server1');
-    mockGetEuidFromObject.mockReturnValueOnce('host:server1');
-    mockGetEuidFromObject.mockReturnValueOnce('host:server1');
-    mockGetEuidFromObject.mockReturnValueOnce('host:server2');
-    mockGetEuidFromObject.mockReturnValueOnce('host:server2');
+    mockGetEuidForSearch.mockReturnValueOnce('host:server1');
+    mockGetEuidForSearch.mockReturnValueOnce('host:server1');
+    mockGetEuidForSearch.mockReturnValueOnce('host:server1');
+    mockGetEuidForSearch.mockReturnValueOnce('host:server2');
+    mockGetEuidForSearch.mockReturnValueOnce('host:server2');
 
     const crudClient = makeEntityStoreCrudClient([
       makeEntity('host:server1'),
@@ -206,7 +208,7 @@ describe('createEntityStoreEnrichment', () => {
     const events = Array.from({ length: totalEvents }, (_, i) =>
       createAlert(String(i), { host: { name: `server${i}` } })
     );
-    mockGetEuidFromObject.mockImplementation((_, doc) =>
+    mockGetEuidForSearch.mockImplementation((_, doc) =>
       doc?.host?.name ? `host:${doc.host.name}` : undefined
     );
 
@@ -240,7 +242,7 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('returns only the EUID stamp and does not throw when listEntities throws', async () => {
-    mockGetEuidFromObject.mockReturnValue('host:server1');
+    mockGetEuidForSearch.mockReturnValue('host:server1');
 
     const crudClient = {
       listEntities: jest.fn().mockRejectedValue(new Error('ES error')),
@@ -264,7 +266,7 @@ describe('createEntityStoreEnrichment', () => {
   });
 
   it('returns empty object and logs a warning when an error is thrown outside listEntities', async () => {
-    mockGetEuidFromObject.mockImplementation(() => {
+    mockGetEuidForSearch.mockImplementation(() => {
       throw new Error('unexpected error');
     });
 
@@ -286,7 +288,7 @@ describe('createEntityStoreEnrichment', () => {
 
   describe('EUID stamping', () => {
     const runHostEnrichment = async (events: Array<ReturnType<typeof createAlert>>) => {
-      mockGetEuidFromObject.mockImplementation((_, doc) =>
+      mockGetEuidForSearch.mockImplementation((_, doc) =>
         doc?.host?.name ? `host:${doc.host.name}` : undefined
       );
       const crudClient = makeEntityStoreCrudClient([makeEntity('host:server1')]);
@@ -358,6 +360,16 @@ describe('createEntityStoreEnrichment', () => {
 
       const enriched = applyAll(event, result['2']);
       expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:not-in-store']);
+    });
+
+    it('resolves the EUID with the search variant, not the creation gate', async () => {
+      // Gating here would leave IdP-namespace entities with no stamp and no enrichment.
+      await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);
+
+      expect(mockGetEuidForSearch).toHaveBeenCalledWith(
+        getBuiltInEntityDefinition('host'),
+        expect.any(Object)
+      );
     });
   });
 });

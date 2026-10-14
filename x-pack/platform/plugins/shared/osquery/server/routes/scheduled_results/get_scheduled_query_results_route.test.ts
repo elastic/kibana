@@ -67,6 +67,7 @@ describe('getScheduledQueryResultsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
       },
@@ -275,6 +276,7 @@ describe('getScheduledQueryResultsRoute', () => {
           of({ edges: [], rawResponse: { hits: { total: 0 } }, inspect: { dsl: [] } })
         );
       mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(false),
         service: {
           getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
           ...(getActiveSpace ? { getActiveSpace } : {}),
@@ -335,7 +337,7 @@ describe('getScheduledQueryResultsRoute', () => {
         );
       const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
       mockOsqueryContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {
           getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
@@ -377,7 +379,7 @@ describe('getScheduledQueryResultsRoute', () => {
       const contextSearchFn = jest.fn();
 
       mockOsqueryContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {
           getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),

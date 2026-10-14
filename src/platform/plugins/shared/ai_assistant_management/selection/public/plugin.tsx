@@ -246,7 +246,7 @@ export class AIAssistantManagementPlugin
         };
       };
 
-      coreStart.chrome.next.aiButton.register({
+      coreStart.chrome.controls.aiButton.register({
         content: mountAiPicker,
       });
     }

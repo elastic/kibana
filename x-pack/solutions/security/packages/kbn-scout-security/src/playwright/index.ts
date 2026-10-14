@@ -6,4 +6,8 @@
  */
 
 export * from './fixtures';
-export type { SecurityPageObjects, ThreatMatchRuleCreatePage } from './fixtures/test/page_objects';
+export type {
+  SecurityPageObjects,
+  RuleCreateWizardPage,
+  ThreatMatchRuleCreatePage,
+} from './fixtures/test/page_objects';

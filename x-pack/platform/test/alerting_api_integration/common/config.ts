@@ -374,6 +374,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
+          // Task Manager keeps the keys it granted queued for an hour by default, which is longer
+          // than any test can wait for a key to actually be revoked.
+          '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           `--xpack.alerting.rules.run.alerts.max=${maxAlerts}`,

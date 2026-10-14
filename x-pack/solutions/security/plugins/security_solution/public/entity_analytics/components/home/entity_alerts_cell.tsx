@@ -45,8 +45,17 @@ import {
   parseAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { getFormattedAlertStats } from '../../../flyout_v2/document/main/components/alert_count_insight';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 
 const QUERY_KEY_ENTITY_ALERTS_BY_STATUS = 'entity-analytics-alerts-by-status';
+
+const ENTITY_ALERTS_CELL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entity_alerts_cell'
+);
 
 // Local aliases — the source of truth lives in ./constants and is shared with the
 // entity flyout insights section to keep both time windows in sync.
@@ -84,20 +93,26 @@ export const EntityAlertsCell: React.FC<{
 
   const entityFilters = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
       if (filter != null) {
         return [filter];
       }
     }
     return [{ term: { [filterField]: entityName } }];
-  }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
+  }, [euidApi, filterField, entityName, entityType, entityRecord]);
 
   const euidKqlEntityFilter = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
     }
     return undefined;
-  }, [euidApi?.euid, entityType, entityRecord]);
+  }, [euidApi, entityType, entityRecord]);
 
   const queryEnabled = Boolean(signalIndexName && entityName && entityType);
   const {
@@ -132,6 +147,7 @@ export const EntityAlertsCell: React.FC<{
           // to a fresh controller so the call type-checks when react-query
           // hasn't supplied one.
           signal: signal ?? new AbortController().signal,
+          context: ENTITY_ALERTS_CELL_CONTEXT,
         });
         endTracking('success');
         return response;

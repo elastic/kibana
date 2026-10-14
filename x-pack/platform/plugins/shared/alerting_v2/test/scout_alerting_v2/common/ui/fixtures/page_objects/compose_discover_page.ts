@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { EuiSuperSelectObject, Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+
+// Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
+// which Playwright's test-listing phase cannot handle (see compose_discover_flyout.spec.ts).
+// Mirror its `QueryTab` / `RecoveryStrategy` value unions here instead.
+// Source: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/compose_discover/types.ts
+type QueryTab = 'base' | 'alert' | 'recovery';
+type RecoveryStrategyValue = 'no_breach' | 'condition' | 'query' | 'manual';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -44,6 +51,7 @@ export class ComposeDiscoverPage {
   public readonly ruleNameInput: Locator;
   /** Tags combobox on the Details step. */
   public readonly tagsInput: Locator;
+  public readonly routingTagsInput: Locator;
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
   public readonly relatedDashboardsInput: Locator;
@@ -62,6 +70,14 @@ export class ComposeDiscoverPage {
   public readonly emptyQueryCallout: Locator;
   public readonly confirmBuilderToEsqlModal: Locator;
   public readonly switchToEsqlToggle: Locator;
+  /** "YAML MODE" badge shown in the flyout header while in YAML view. */
+  public readonly yamlBadge: Locator;
+  /** Form/YAML view toggle in the flyout header. */
+  public readonly editModeToggle: Locator;
+  /** "Edit recovery query" CTA on the Outcome step's Custom recovery summary. */
+  public readonly editRecoveryButton: Locator;
+  /** Recovery-strategy dropdown on the Outcome step. */
+  public readonly recoveryTypeSelect: EuiSuperSelectObject;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -84,6 +100,7 @@ export class ComposeDiscoverPage {
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
     this.tagsInput = this.flyout.locator('[data-test-subj="ruleTagsInput"]');
+    this.routingTagsInput = this.flyout.locator('[data-test-subj="ruleRoutingTagsInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
     this.relatedDashboardsInput = this.flyout.locator(
@@ -101,6 +118,10 @@ export class ComposeDiscoverPage {
       'alertingV2ConfirmBuilderToEsqlModal'
     );
     this.switchToEsqlToggle = this.page.testSubj.locator('composeDiscoverSwitchToEsql');
+    this.yamlBadge = this.page.testSubj.locator('composeDiscoverYamlBadge');
+    this.editModeToggle = this.page.testSubj.locator('composeDiscoverEditModeToggle');
+    this.editRecoveryButton = this.page.testSubj.locator('composeDiscoverEditRecovery');
+    this.recoveryTypeSelect = this.page.components.superSelect('composeDiscoverRecoveryType');
   }
 
   /**
@@ -164,12 +185,18 @@ export class ComposeDiscoverPage {
     await this.codeEditor.setCodeEditorValue(query, 0);
   }
 
-  /** Reads the YAML editor buffer (the only Monaco model in YAML-only mode). */
+  /**
+   * Reads the YAML editor buffer (the only Monaco model in YAML-only mode).
+   * @deprecated prefer {@link getYamlText} instead.
+   */
   async getYamlEditorValue(): Promise<string> {
     return this.codeEditor.getCodeEditorValue(0);
   }
 
-  /** Replaces the YAML editor buffer. */
+  /**
+   * Replaces the YAML editor buffer.
+   * @deprecated Use {@link setYamlText} instead.
+   */
   async setYamlEditorValue(value: string): Promise<string> {
     return this.codeEditor.setCodeEditorValue(value, 0);
   }
@@ -204,6 +231,18 @@ export class ComposeDiscoverPage {
     await this.tagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
   }
 
+  /** Types a routing tag on the Actions step and presses Enter to add it. */
+  async addRoutingTag(tag: string) {
+    const input = this.routingTagsInput.locator('[data-test-subj="comboBoxSearchInput"]');
+    await input.fill(tag);
+    await input.press('Enter');
+  }
+
+  /** Removes every selected routing tag via the combobox clear button. */
+  async clearAllRoutingTags() {
+    await this.routingTagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
+  }
+
   /**
    * Switches Alert / Signal kind on the Outcome step. The sandbox must be closed
    * first — KindSelect is disabled while the query sandbox is open.
@@ -235,5 +274,47 @@ export class ComposeDiscoverPage {
     const runbookModal = this.page.getByRole('dialog', { name: 'Add Runbook' });
     await runbookModal.getByLabel('Runbook').fill(text);
     await runbookModal.getByRole('button', { name: 'Add Runbook' }).click();
+  }
+
+  /** Toggles the flyout between Form view and YAML view. */
+  async toggleEditMode(mode: 'yaml' | 'form') {
+    await this.editModeToggle.locator(`[data-test-subj="${mode}"]`).click();
+  }
+
+  /** Returns the sandbox tab button for the given tab id. */
+  sandboxTab(tab: QueryTab): Locator {
+    return this.page.testSubj.locator(`querySandboxTab-${tab}`);
+  }
+
+  async selectSandboxTab(tab: QueryTab) {
+    await this.sandboxTab(tab).click();
+  }
+
+  /** Reads the full text of the "Rule definition" YAML editor. */
+  async getYamlText(): Promise<string> {
+    return this.codeEditor.getCodeEditorValueByTestSubj('ruleV2FormYamlEditor');
+  }
+
+  /** Overwrites the full text of the "Rule definition" YAML editor. */
+  async setYamlText(yaml: string): Promise<void> {
+    await this.codeEditor.setCodeEditorValueByTestSubj('ruleV2FormYamlEditor', yaml);
+  }
+
+  /** Types an ES|QL query into the sandbox's recovery block editor. */
+  async setRecoveryBlockQuery(segment: string) {
+    await this.codeEditor.setCodeEditorValueByTestSubj(
+      'composeDiscoverBlockEditor-recovery',
+      segment
+    );
+  }
+
+  /** Selects a recovery-strategy dropdown option by its API value. */
+  async selectRecoveryType(strategy: RecoveryStrategyValue) {
+    await this.recoveryTypeSelect.selectOptionByValue(strategy);
+  }
+
+  /** Reads the recovery-strategy dropdown's committed value. */
+  async getSelectedRecoveryType(): Promise<string> {
+    return this.recoveryTypeSelect.getSelectedValue();
   }
 }

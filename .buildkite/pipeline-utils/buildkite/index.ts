@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client';
-export * from './types';
-export * from './utils';
+export * from './client.ts';
+export * from './kibana_distributable.ts';
+export * from './types/index.ts';
+export * from './utils.ts';

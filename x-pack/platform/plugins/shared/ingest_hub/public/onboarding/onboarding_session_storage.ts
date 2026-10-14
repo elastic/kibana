@@ -13,6 +13,7 @@ export const SESSION_KEY_SUFFIXES = [
   'serviceSettingsStep',
   'stepState',
   'ecfLaunchStep',
+  'hydratedDeploymentId',
 ] as const;
 
 export type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { MouseEvent } from 'react';
 import type { BulkActionsProps } from './use_bulk_action_items';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -56,21 +57,25 @@ describe('useBulkActionItems', () => {
   it('should return "mark as open" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'open-alert-status'
+      )
     ).not.toBeUndefined();
   });
 
   it('should return "mark as acknowledged" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'acknowledged-alert-status'
+      )
     ).not.toBeUndefined();
   });
 
   it('should return "mark as closed" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find(
+      result.current.groups.statusItems.find(
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).not.toBeUndefined();
@@ -82,16 +87,61 @@ describe('useBulkActionItems', () => {
     const { result } = renderUseBulkActionItems();
 
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'open-alert-status'
+      )
     ).toBeUndefined();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'acknowledged-alert-status'
+      )
     ).toBeUndefined();
     expect(
-      result.current.items.find(
+      result.current.groups.statusItems.find(
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).toBeUndefined();
+  });
+
+  it('exposes custom actions for composed bulk action menus', () => {
+    const onClick = jest.fn();
+    // Use a neutral icon value — 'briefcase' is NOT set here because icon decoration for
+    // the add-to-case action is the responsibility of EventsTableBulkActionMenu, not this hook.
+    const { result } = renderUseBulkActionItems({
+      customBulkActions: [
+        {
+          key: 'some-custom-action',
+          label: 'Custom action',
+          icon: 'gear',
+          onClick,
+        },
+      ],
+    });
+
+    const customAction = result.current.groups.customItems.find(
+      ({ key }) => key === 'some-custom-action'
+    );
+    customAction?.onClick?.({} as MouseEvent<HTMLHRElement>);
+
+    expect(onClick).toHaveBeenCalledWith(['mockEventId']);
+    expect(customAction?.icon).toBe('gear');
+  });
+
+  it('partitions custom actions by their declared group', () => {
+    const { result } = renderUseBulkActionItems({
+      customBulkActions: [
+        { key: 'case-action', label: 'Case action', groupId: 'cases', onClick: jest.fn() },
+        {
+          key: 'timeline-action',
+          label: 'Timeline action',
+          groupId: 'timeline',
+          onClick: jest.fn(),
+        },
+      ],
+    });
+
+    expect(result.current.groups.casesItems.map(({ key }) => key)).toEqual(['case-action']);
+    expect(result.current.groups.timelineItems.map(({ key }) => key)).toEqual(['timeline-action']);
   });
 
   describe('workflow actions', () => {
@@ -112,7 +162,7 @@ describe('useBulkActionItems', () => {
       });
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).not.toBeUndefined();
@@ -128,7 +178,7 @@ describe('useBulkActionItems', () => {
       const { result } = renderUseBulkActionItems();
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).toBeUndefined();
@@ -152,7 +202,7 @@ describe('useBulkActionItems', () => {
       });
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).toBeUndefined();

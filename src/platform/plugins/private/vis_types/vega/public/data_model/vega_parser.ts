@@ -61,6 +61,7 @@ export class VegaParser {
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
+  approximationApplied?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
   useMap?: boolean;
@@ -661,6 +662,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       await Promise.all(
         pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
+      this.approximationApplied = (this._urlParsers.esql as EsqlQueryParser).approximationApplied;
     }
   }
 
@@ -748,7 +750,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       // https://github.com/vega/vega/issues/1083
       const markDefaults = [
         ['arc', 'fill', defaultColor],
-        ['area', 'fill', defaultAreaFill],
+        // we don't apply the gradient in plain Vega, because we can't add the line on top using configuration
+        ['area', 'fill', defaultColor],
         ['line', 'stroke', defaultColor],
         ['path', 'stroke', defaultColor],
         ['rect', 'fill', defaultColor],
@@ -776,9 +779,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
     this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
-    this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
-    this._setDefaultValue(null, 'config', 'view', 'stroke');
+    // this only applies to Vega-Lite, in plain Vega, the line on top needs to be added as an extra mark.
     this._setDefaultValue(true, 'config', 'area', 'line');
+
+    if (this.isVegaLite) {
+      this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
+    } else {
+      // because we can't add the line on top using configuration in plain Vega, we up the fill opacity to 0.5
+      this._setDefaultValue(0.5, 'config', 'area', 'fillOpacity');
+    }
+
+    this._setDefaultValue(null, 'config', 'view', 'stroke');
     this._setDefaultValue(1.5, 'config', 'area', 'line', 'strokeWidth');
     this._setDefaultValue('transparent', 'config', 'background');
   }

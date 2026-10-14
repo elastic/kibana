@@ -13,6 +13,7 @@ import type {
   RunAgentParams,
   ToolHandlerFn,
   RunApprovals,
+  AgentHandlerContext,
 } from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -30,6 +31,7 @@ import {
   createToolRegistryMock,
 } from '../../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createEmptyConversation } from '../../../test_utils/conversations';
 import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -37,6 +39,7 @@ import { HookLifecycle } from '@kbn/agent-builder-common';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
@@ -320,6 +323,34 @@ describe('AgentBuilder runner', () => {
       });
     });
 
+    describe('conversation access', () => {
+      const runWith = async (params: Partial<RunAgentParams>) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: {
+            nextInput: { message: 'dolly' },
+            conversation: createEmptyConversation({ id: 'conversation-1' }),
+          },
+          request: scopedRunnerDeps.request,
+          ...params,
+        } as RunAgentParams);
+        return (agentHandler.mock.calls[0][1] as AgentHandlerContext).conversationAccess;
+      };
+
+      it('defaults to readWrite', async () => {
+        expect(await runWith({})).toBe('readWrite');
+      });
+
+      it.each(['readWrite', 'readOnly', 'none'] as const)(
+        'passes %s to the agent handler',
+        async (conversationAccess) => {
+          expect(await runWith({ conversationAccess })).toBe(conversationAccess);
+        }
+      );
+    });
+
     it.each([
       {
         experimentalEnabled: false,
@@ -357,6 +388,9 @@ describe('AgentBuilder runner', () => {
             if (settingId === AGENT_BUILDER_BASH_SUPPORT_SETTING_ID) {
               return Promise.resolve(false);
             }
+            if (settingId === AGENT_BUILDER_API_DISCOVERY_SETTING_ID) {
+              return Promise.resolve(false);
+            }
             return Promise.resolve(false);
           }),
         } as any);
@@ -373,6 +407,46 @@ describe('AgentBuilder runner', () => {
           expect.objectContaining({
             experimentalFeatures: expect.objectContaining({
               aiIndices: expectedAiIndices,
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([
+      { experimentalEnabled: false, apiDiscoveryEnabled: false },
+      { experimentalEnabled: true, apiDiscoveryEnabled: false },
+      { experimentalEnabled: false, apiDiscoveryEnabled: true },
+      { experimentalEnabled: true, apiDiscoveryEnabled: true },
+    ])(
+      'tracks API discovery from its own setting ($apiDiscoveryEnabled) when experimental=$experimentalEnabled',
+      async ({ experimentalEnabled, apiDiscoveryEnabled }) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) => {
+            if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
+              return Promise.resolve(experimentalEnabled);
+            }
+            if (settingId === AGENT_BUILDER_API_DISCOVERY_SETTING_ID) {
+              return Promise.resolve(apiDiscoveryEnabled);
+            }
+            return Promise.resolve(false);
+          }),
+        } as any);
+
+        const runner = createRunner(runnerDeps);
+        await runner.runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' } },
+          request: scopedRunnerDeps.request,
+        });
+
+        expect(agentHandler).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            experimentalFeatures: expect.objectContaining({
+              apiDiscovery: apiDiscoveryEnabled,
             }),
           })
         );

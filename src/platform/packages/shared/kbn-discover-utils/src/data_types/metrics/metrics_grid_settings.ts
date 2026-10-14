@@ -11,18 +11,17 @@ import { FunctionNames } from '@kbn/esql-language';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 /**
- * Derived from `@kbn/esql-language`'s `FunctionNames` enum (rather than a
- * hand-rolled string union) so this type tracks the canonical ES|QL function
- * names. Using a template-literal type (instead of the enum members
- * themselves) keeps the resulting type a plain string literal union --
- * assignable from either `FunctionNames.AVG` or the literal `'avg'` -- since
- * TypeScript string enums are otherwise nominally typed.
+ * Aggregations supported by the metrics grid.
+ * Values come from ES|QL's FunctionNames enum and are converted to plain string literals.
  */
-export type SimpleAggregation =
-  | `${FunctionNames.AVG}`
-  | `${FunctionNames.SUM}`
-  | `${FunctionNames.MIN}`
-  | `${FunctionNames.MAX}`;
+export const METRICS_GRID_SIMPLE_AGGREGATIONS = [
+  `${FunctionNames.AVG}`,
+  `${FunctionNames.SUM}`,
+  `${FunctionNames.MIN}`,
+  `${FunctionNames.MAX}`,
+] as const;
+
+export type SimpleAggregation = (typeof METRICS_GRID_SIMPLE_AGGREGATIONS)[number];
 
 export enum HistogramPercentileValue {
   P50 = 'p50',
@@ -32,6 +31,14 @@ export enum HistogramPercentileValue {
   P99 = 'p99',
 }
 
+export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
+  `${HistogramPercentileValue.P50}`,
+  `${HistogramPercentileValue.P75}`,
+  `${HistogramPercentileValue.P90}`,
+  `${HistogramPercentileValue.P95}`,
+  `${HistogramPercentileValue.P99}`,
+] as const;
+
 /**
  * Which percentile bucket to use when the metric's aggregation is
  * `PERCENTILE(field, N)`. There is no per-percentile ES|QL function name to
@@ -40,7 +47,7 @@ export enum HistogramPercentileValue {
  * literal union; the function name itself is sourced from `FunctionNames`
  * wherever it's used to build the aggregation expression.
  */
-export type HistogramPercentile = `${HistogramPercentileValue}`;
+export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[number];
 
 export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;

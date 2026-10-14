@@ -53,7 +53,7 @@ for f in *; do [ -f "$f" ] && n=$(echo "$f" | sed 's/-/_/g' | tr '[:upper:]' '[:
 
 ```bash
 cd x-pack/solutions/security/plugins/elastic_assistant
-yarn encode-security-labs-content
+pnpm encode-security-labs-content
 ```
 
 Files are encoded due to this [issue](https://github.com/elastic/kibana/issues/202114).

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DashboardAgentTaskOutput } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput } from './types';
+import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
@@ -26,7 +27,7 @@ const evaluateOutput = async (
 ) =>
   evaluator.evaluate({
     input: { question: 'question' },
-    expected: { expected: 'expected' },
+    expected: {},
     metadata: undefined,
     output,
   });
@@ -37,7 +38,12 @@ describe('skill selection evaluators', () => {
       {
         type: 'tool_call',
         tool_id: 'filestore.read',
-        params: { path: 'skills/platform/dashboard/dashboard-management' },
+        params: { path: 'skills/platform/dashboard/dashboards' },
+      },
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
       },
       {
         type: 'tool_call',
@@ -45,8 +51,58 @@ describe('skill selection evaluators', () => {
       },
     ]);
 
-    expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboard-management']);
-    expect(getToolIds(output)).toEqual(['filestore.read', 'platform.dashboard.generate_dashboard']);
+    expect(getSkillReadPaths(output)).toEqual([
+      'skills/platform/dashboard/dashboards',
+      '/skills/platform/dashboard/dashboards/enhance.md',
+    ]);
+    expect(getToolIds(output)).toEqual([
+      'filestore.read',
+      'read_file',
+      'platform.dashboard.generate_dashboard',
+    ]);
+  });
+
+  it('requires enhance examples to read the enhance file', async () => {
+    const enhance = { mode: 'appearance' as const, asksMode: false, defects: [] };
+    const skillOnly = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/SKILL.md' },
+      },
+    ]);
+    const withEnhanceFile = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
+      },
+    ]);
+
+    const missed = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(missed.score).toBe(0);
+    expect(missed.explanation).toContain('dashboards/enhance.md');
+
+    const read = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: withEnhanceFile,
+    });
+    expect(read.score).toBe(1);
+
+    const creation = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Create a dashboard' },
+      expected: { route: 'dashboard' },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(creation.score).toBe(1);
   });
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
@@ -56,7 +112,7 @@ describe('skill selection evaluators', () => {
         {
           type: 'tool_call',
           tool_id: 'filestore.read',
-          params: { path: 'skills/platform/dashboard/dashboard-management' },
+          params: { path: 'skills/platform/dashboard/dashboards' },
         },
       ])
     );
@@ -65,7 +121,7 @@ describe('skill selection evaluators', () => {
     expect(result.label).toBe('PASS');
   });
 
-  it('passes when visualization skill loads without dashboard management', async () => {
+  it('passes when visualization skill loads without the dashboards skill', async () => {
     const result = await evaluateOutput(
       visualizationSkillWithoutDashboardEvaluator,
       createOutput([
@@ -91,7 +147,7 @@ describe('skill selection evaluators', () => {
     );
   });
 
-  it('fails visualization routing when dashboard management is used', async () => {
+  it('fails visualization routing when the dashboards skill is used', async () => {
     const result = await evaluateOutput(
       visualizationSkillWithoutDashboardEvaluator,
       createOutput([
@@ -111,7 +167,7 @@ describe('skill selection evaluators', () => {
     expect(result.metadata).toEqual(expect.objectContaining({ dashboardToolCalled: true }));
   });
 
-  it('passes when dashboard management is not activated for data exploration', async () => {
+  it('passes when the dashboards skill is not activated for data exploration', async () => {
     const result = await evaluateOutput(
       dashboardSkillNotActivatedEvaluator,
       createOutput([

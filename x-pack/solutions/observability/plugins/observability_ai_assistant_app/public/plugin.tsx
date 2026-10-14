@@ -144,7 +144,7 @@ export class ObservabilityAIAssistantAppPlugin
         };
       };
 
-      coreStart.chrome.next.aiButton.register({
+      coreStart.chrome.controls.aiButton.register({
         content: mountObsAiAssistant,
       });
     }

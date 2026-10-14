@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/agent-builder-dashboards-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -15,7 +15,6 @@
       "dashboardMarkdown",
       "data",
       "agentBuilderSml",
-      "files",
       "share",
       "uiActions",
       "unifiedSearch"

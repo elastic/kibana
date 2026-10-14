@@ -412,6 +412,53 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons();
     });
 
+    it('preserves existing data source privileges when data federation is disabled and the role is saved', async () => {
+      const roleWithDataSourcePrivileges: Role = {
+        name: 'my custom role',
+        description: 'a role',
+        metadata: {},
+        elasticsearch: {
+          cluster: ['all'],
+          indices: [],
+          run_as: ['*'],
+          global: {
+            application: { manage: { applications: [] } },
+            data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+          },
+        },
+        kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+      };
+
+      const props = getProps({ action: 'edit', role: roleWithDataSourcePrivileges });
+
+      render(
+        <TestProviders>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </TestProviders>
+      );
+
+      await waitForRender();
+
+      const elasticsearchPrivilegesProps = MockedElasticsearchPrivileges.mock.calls.at(-1)?.[0];
+      expect(elasticsearchPrivilegesProps?.isDataFederationEnabled).toBe(false);
+
+      fireEvent.change(screen.getByTestId('roleFormDescriptionInput'), {
+        target: { value: 'a different role' },
+      });
+      fireEvent.click(screen.getByTestId('roleFormSaveButton'));
+
+      await waitFor(() => {
+        expect(props.rolesAPIClient.saveRole).toHaveBeenCalled();
+      });
+
+      const savedRole = props.rolesAPIClient.saveRole.mock.calls[0][0].role as Role;
+      expect(savedRole.elasticsearch.global?.data_source).toEqual(
+        roleWithDataSourcePrivileges.elasticsearch.global?.data_source
+      );
+    });
+
     it('can render when creating a new role', async () => {
       render(
         <TestProviders>

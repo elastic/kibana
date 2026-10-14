@@ -12,6 +12,7 @@ import type {
   ArtifactEntryCardDecoratorProps,
   ArtifactEntryCardProps,
 } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
@@ -227,7 +228,7 @@ describe.each([
     });
 
     describe('when clicked', () => {
-      it('should show popup menu with list of associated policies, with `View details` button when has Policy privilege', async () => {
+      it('should show popup menu with list of associated policies when has Policy privilege', async () => {
         render({ policies });
         await act(async () => {
           await fireEvent.click(
@@ -239,16 +240,14 @@ describe.each([
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
         ).not.toBeNull();
 
-        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-          'Policy one titleView details'
-        );
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one title');
 
         expect((renderResult.getByTestId('policyMenuItem') as HTMLAnchorElement).href).toEqual(
           policies!['policy-1'].href
         );
       });
 
-      it('should show popup menu with list of associated policies, without `View details` button when does NOT have Policy privilege', async () => {
+      it('should show popup menu with list of associated policies when does NOT have Policy privilege', async () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
         });
@@ -306,6 +305,16 @@ describe.each([
 
       expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
       expect(passedItem).toBe(item);
+    });
+
+    it('should replace criteria conditions when CriteriaComponent is provided', () => {
+      const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+      MockCriteria.displayName = 'MockCriteria';
+
+      render({ CriteriaComponent: MockCriteria });
+
+      expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
     });
   });
 

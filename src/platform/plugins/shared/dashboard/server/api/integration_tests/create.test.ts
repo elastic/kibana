@@ -91,7 +91,7 @@ describe(`create`, () => {
     expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {
@@ -136,7 +136,7 @@ describe(`create`, () => {
     expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {

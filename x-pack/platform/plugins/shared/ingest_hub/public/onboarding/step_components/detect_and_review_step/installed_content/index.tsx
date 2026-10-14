@@ -36,24 +36,31 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
   const [search, setSearch] = useState('');
   const contentId = useGeneratedHtmlId({ prefix: 'installedContent' });
 
-  const { dashboards, detectionRules, esAssets } = useInstalledContent({
+  const { categories, esAssets } = useInstalledContent({
     installedKibana,
     installedEs,
   });
 
   const q = search.toLowerCase();
-  const filteredDashboards = dashboards.filter((a) => a.title.toLowerCase().includes(q));
-  const filteredRules = detectionRules.filter((a) => a.title.toLowerCase().includes(q));
+
+  const filteredCategories = categories
+    .map((cat) => ({
+      ...cat,
+      assets: cat.assets.filter((a) => a.title.toLowerCase().includes(q)),
+    }))
+    .filter((cat) => cat.assets.length > 0);
+
   const filteredEsAssets = esAssets.filter((a) => a.id.toLowerCase().includes(q));
 
   // Assets come from the AWS package installation, which is shared across every selected service —
   // nothing in `installed_kibana` records which policy_template an asset came from, so this count
   // can't be per-service today. Tracked by https://github.com/elastic/ingest-dev/issues/9343.
+  const totalAssets = categories.reduce((acc, cat) => acc + cat.assets.length, 0) + esAssets.length;
   const assetCount = i18n.translate(
     'xpack.ingestHub.detectAndReviewStep.installedContent.assetCount',
     {
       defaultMessage: '{count, plural, one {# asset} other {# assets}}',
-      values: { count: dashboards.length + detectionRules.length + esAssets.length },
+      values: { count: totalAssets },
     }
   );
 
@@ -127,31 +134,12 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
             />
             <EuiSpacer size="m" />
 
-            {filteredDashboards.length > 0 && (
-              <>
-                <AssetCategory
-                  categoryId="dashboards"
-                  titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.dashboards"
-                  defaultTitle="Dashboards"
-                  iconType="dashboardApp"
-                  assets={filteredDashboards}
-                />
+            {filteredCategories.map((cat) => (
+              <React.Fragment key={cat.type}>
+                <AssetCategory categoryId={cat.type} title={cat.title} assets={cat.assets} />
                 <EuiSpacer size="m" />
-              </>
-            )}
-
-            {filteredRules.length > 0 && (
-              <>
-                <AssetCategory
-                  categoryId="detectionRules"
-                  titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.detectionRules"
-                  defaultTitle="Detection rules"
-                  iconType="securityApp"
-                  assets={filteredRules}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
+              </React.Fragment>
+            ))}
 
             {filteredEsAssets.length > 0 && <RequiredAssets esAssets={filteredEsAssets} />}
           </EuiPanel>

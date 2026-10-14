@@ -18,6 +18,11 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Must not debounce.
    */
   anyStateChange$: Observable<void>;
+  /**
+   * latestState$ is added to the interface so that we can reduce the amount of times that
+   * serializedState is called, since serializedState can be expensive to compute.
+   */
+  latestState$: Observable<SerializedState>;
 
   /**
    * Serializes all state into a format that can be saved into
@@ -35,6 +40,7 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
   return Boolean(
     (api as HasSerializableState)?.serializeState &&
       (api as HasSerializableState)?.applySerializedState &&
-      (api as HasSerializableState)?.anyStateChange$
+      (api as HasSerializableState)?.anyStateChange$ &&
+      (api as HasSerializableState)?.latestState$
   );
 };

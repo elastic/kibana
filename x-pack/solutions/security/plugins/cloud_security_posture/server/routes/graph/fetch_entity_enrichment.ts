@@ -11,6 +11,7 @@ import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 export interface EntityEnrichmentFields {
   name?: string | null;
@@ -18,6 +19,15 @@ export interface EntityEnrichmentFields {
   subType?: string | null;
   hostIps?: string[];
   engineType?: string | null;
+  /** Normalized 0-100 risk score (`entity.risk.calculated_score_norm`). */
+  riskScore?: number | null;
+  /** Raw asset criticality level (`asset.criticality`), e.g. "extreme_impact". */
+  assetCriticality?: string | null;
+  /**
+   * Integrations / datasets the entity was derived from (`entity.source`). Multi-value when
+   * the entity store merged events from several integrations onto one entity.
+   */
+  sources?: string[];
   sourceFields?: Record<string, string | string[]>;
 }
 
@@ -32,6 +42,9 @@ const BASE_ENRICHMENT_COLUMNS = new Set([
   'entity.sub_type',
   'entity.EngineMetadata.Type',
   'host.ip',
+  'entity.risk.calculated_score_norm',
+  'asset.criticality',
+  'entity.source',
 ]);
 
 // Additional entity-store columns needed to reconstruct sourceFields, beyond the base set.
@@ -44,6 +57,21 @@ const EXTRA_SOURCE_FIELD_COLUMNS = [
     ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
   ]),
 ].filter((col) => !BASE_ENRICHMENT_COLUMNS.has(col));
+
+/**
+ * Normalizes a possibly multi-valued ES|QL column to a single value, preserving null.
+ * Entity-store scalars are single-valued in practice, but ES|QL can return an array for
+ * any column; taking the first value keeps a stray multi-value from leaking an array into
+ * a scalar DTO field.
+ */
+const firstValue = <T>(value: T | T[] | null | undefined): T | null => {
+  if (value == null) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+};
+
+/** Drops asset criticality levels the graph does not model, so they never reach the DTO. */
+const knownCriticality = (level: string | null): string | null =>
+  level != null && isKnownAssetCriticalityLevel(level) ? level : null;
 
 /**
  * Builds a sourceFields object for an entity from its entity-store record columns.
@@ -125,7 +153,7 @@ export const fetchEntityEnrichment = async ({
       const query = `SET unmapped_fields="nullify";
 FROM ${indexName}
 | WHERE entity.id IN (${paramNames})
-| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip${
+| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip, \`entity.risk.calculated_score_norm\`, asset.criticality, entity.source${
         EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
       }`;
 
@@ -145,6 +173,9 @@ FROM ${indexName}
                 'entity.sub_type'?: string | null;
                 'entity.EngineMetadata.Type'?: string | null;
                 'host.ip'?: string | string[] | null;
+                'entity.risk.calculated_score_norm'?: number | null;
+                'asset.criticality'?: string | null;
+                'entity.source'?: string | string[] | null;
               } & Record<string, unknown>
             >(),
         {
@@ -180,6 +211,11 @@ FROM ${indexName}
               ? rawHostIp.map(String)
               : [String(rawHostIp)]
             : [];
+        const rawSources = record['entity.source'];
+        const sources =
+          rawSources != null
+            ? (Array.isArray(rawSources) ? rawSources : [rawSources]).map(String)
+            : [];
         const sourceFields = buildSourceFields(id, record);
         result.set(id, {
           name: record['entity.name'] ?? null,
@@ -187,6 +223,16 @@ FROM ${indexName}
           subType: record['entity.sub_type'] ?? null,
           engineType: record['entity.EngineMetadata.Type'] ?? null,
           hostIps,
+          // `null` is preserved rather than defaulted: an entity with no risk score is
+          // unscored, which is not the same as scoring zero.
+          riskScore: firstValue(record['entity.risk.calculated_score_norm']),
+          // Levels the graph does not model are dropped here rather than at each consumer, so
+          // no path (node aggregation *or* per-entity documentsData) can surface a value the
+          // client's four-level label map has no entry for.
+          assetCriticality: knownCriticality(firstValue(record['asset.criticality'])),
+          // entity.source is genuinely multi-value (collectValues in the entity store), so
+          // unlike the scalars above it is normalized to an array rather than a first value.
+          ...(sources.length > 0 ? { sources } : {}),
           ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
         });
       }

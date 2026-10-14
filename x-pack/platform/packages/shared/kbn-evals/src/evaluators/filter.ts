@@ -6,10 +6,10 @@
  */
 
 import type { Evaluator, Example, TaskOutput } from '../types';
-import { isKSpecificRagEvaluator, matchesEvaluatorPattern } from './patterns';
+import { isKSpecificIrEvaluator, matchesEvaluatorPattern } from './patterns';
 
 function matchesSelectedEvaluator(evaluatorName: string, selectedPattern: string): boolean {
-  if (isKSpecificRagEvaluator(selectedPattern)) {
+  if (isKSpecificIrEvaluator(selectedPattern)) {
     return false;
   }
   return matchesEvaluatorPattern(evaluatorName, selectedPattern);

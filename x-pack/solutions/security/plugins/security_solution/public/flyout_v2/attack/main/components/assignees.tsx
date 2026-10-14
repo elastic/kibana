@@ -29,6 +29,8 @@ import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/u
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { withActionIcons } from '../../../../common/utils/action_menu_items';
+import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
 import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 import { useAttacksPrivileges } from '../../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -123,6 +125,7 @@ export const Assignees = memo(({ hit, onAttackUpdated }: AssigneesProps) => {
     onSuccess,
     telemetrySource: 'attacks_page_flyout_header',
   });
+  const decoratedItems = useMemo(() => withActionIcons(items, ACTION_ICONS_BY_ID), [items]);
 
   const uids = useMemo(() => new Set(assignees), [assignees]);
   const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
@@ -189,7 +192,7 @@ export const Assignees = memo(({ hit, onAttackUpdated }: AssigneesProps) => {
                 )}
               </EuiPopoverTitle>
               <EuiContextMenu
-                panels={[{ id: 0, items }, ...panels]}
+                panels={[{ id: 0, items: decoratedItems }, ...panels]}
                 initialPanelId={0}
                 data-test-subj="attack-flyout-v2-header-assignees-context-menu"
               />

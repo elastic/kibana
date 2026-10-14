@@ -119,4 +119,27 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     AND host.target.entity.id IS NOT NULL`,
     targetEvalOverride: `CONCAT("host:", host.target.entity.id)`,
   },
+  {
+    kind: 'standard',
+    id: 'crowdstrike_fdr',
+    name: 'CrowdStrike FDR',
+    indexPattern: (ns) => `logs-crowdstrike.fdr-${ns}`,
+    relationshipKey: 'communicates_with',
+    targetEntityType: 'host',
+    requireTargetEntityIdExists: true,
+    // See accesses/configs.ts crowdstrike_fdr entry for field-level rationale
+    // (LogonType exclusion list, NULL tolerance, machine-account guard).
+    customActor: { fields: ['user.name'] },
+    esqlWhereClause: `event.action == "UserLogon"
+    AND MV_CONTAINS(TO_STRING(event.category), "authentication")
+    AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN ("3", "4", "5", "8"))
+    AND event.outcome == "success"
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})
+    AND NOT user.name LIKE "*$"`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['UserLogon'] } },
+      SUCCESSFUL_OUTCOME_FILTER,
+    ],
+    hostScopedUsersOnly: true,
+  },
 ];

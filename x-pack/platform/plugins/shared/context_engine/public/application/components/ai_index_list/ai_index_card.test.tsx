@@ -7,18 +7,20 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AiIndexCard } from './ai_index_card';
-import { AI_INDEX_TYPE_LABEL } from './labels';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -26,12 +28,13 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 
 const renderAiIndexCard = (
   aiIndex: AiIndexHttpItem,
-  href = '/app/context_engine/ai_index/my-ai-index'
+  href = '/app/context_engine/ai_index/my-ai-index',
+  onDeleteClick = jest.fn()
 ) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <AiIndexCard aiIndex={aiIndex} href={href} />
+        <AiIndexCard aiIndex={aiIndex} href={href} onDeleteClick={onDeleteClick} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -45,22 +48,35 @@ describe('AiIndexCard', () => {
 
     const link = screen.getByRole('link', { name: /support-tickets/ });
     expect(link).toHaveAttribute('href', '/app/context_engine/ai_index/support-tickets');
+    expect(link).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(link).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD
+    );
     expect(screen.getByTestId('contextAiIndexCard')).toBeInTheDocument();
   });
 
-  it.each([
-    ['index', 'index' as const],
-    ['data_stream', 'data_stream' as const],
-  ])('renders the type label for dest type %s', (_label, destType) => {
-    renderAiIndexCard(
-      buildAiIndex({
-        id: 'typed-index',
-        dest: { type: destType, value: 'backing-store' },
-      })
-    );
+  // `1fr` grid tracks size to the card's min-content width, so an unbreakable id stretches the grid.
+  it('keeps a long id breakable and clamped to one line', () => {
+    const id = 'a'.repeat(256);
 
-    expect(screen.getByTestId('contextAiIndexCardType')).toHaveTextContent(
-      AI_INDEX_TYPE_LABEL[destType]
+    renderAiIndexCard(buildAiIndex({ id }));
+
+    const title = screen.getByTestId('contextAiIndexCardTitle');
+    expect(title).toHaveClass('euiTextBlockTruncate', 'eui-textBreakWord');
+    // The clamp hides most of a long id, so the full value stays reachable on hover.
+    expect(title).toHaveAttribute('title', id);
+  });
+
+  it('keeps a long description breakable', () => {
+    renderAiIndexCard(buildAiIndex({ description: `See https://example.com/${'x'.repeat(200)}` }));
+
+    expect(screen.getByTestId('contextAiIndexCardDescription').firstElementChild).toHaveClass(
+      'euiTextBlockTruncate',
+      'eui-textBreakWord'
     );
   });
 
@@ -72,10 +88,20 @@ describe('AiIndexCard', () => {
     );
   });
 
-  it('omits the description block when there is no description', () => {
-    renderAiIndexCard(buildAiIndex({ description: undefined }));
+  it('reserves two lines of description space for user indexes without a description', () => {
+    renderAiIndexCard(buildAiIndex({ description: undefined, managed: false }));
 
-    expect(screen.queryByTestId('contextAiIndexCardDescription')).not.toBeInTheDocument();
+    const description = screen.getByTestId('contextAiIndexCardDescription');
+    expect(description).toHaveTextContent('');
+    expect(description).toHaveStyle({ minHeight: '2lh' });
+  });
+
+  it('reserves five lines of description space for managed indexes without a description', () => {
+    renderAiIndexCard(buildAiIndex({ description: undefined, managed: true }));
+
+    const description = screen.getByTestId('contextAiIndexCardDescription');
+    expect(description).toHaveTextContent('');
+    expect(description).toHaveStyle({ minHeight: '5lh' });
   });
 
   describe('source and automation counts', () => {
@@ -115,16 +141,88 @@ describe('AiIndexCard', () => {
   });
 
   it('shows the managed badge and hides the updated footer when managed is true', () => {
-    renderAiIndexCard(buildAiIndex({ managed: true }));
+    renderAiIndexCard(
+      buildAiIndex({
+        managed: true,
+        sources: [{ type: 'esql', value: 'FROM logs' }],
+        automations: [{ type: 'workflow', value: 'workflow-1' }],
+      })
+    );
 
     expect(screen.getByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardSources')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardAutomations')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardType')).not.toBeInTheDocument();
   });
 
   it('shows the updated footer and no managed badge when managed is false', () => {
-    renderAiIndexCard(buildAiIndex({ managed: false }));
+    renderAiIndexCard(
+      buildAiIndex({
+        managed: false,
+        automations: [{ type: 'workflow', value: 'workflow-1' }],
+      })
+    );
 
-    expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent('Updated');
+    expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent(/^Updated /);
     expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardNeedsSetup')).not.toBeInTheDocument();
+  });
+
+  it('shows the needs setup badge when there are no automations on a user index', () => {
+    renderAiIndexCard(buildAiIndex({ managed: false, automations: [] }));
+
+    expect(screen.getByTestId('contextAiIndexCardNeedsSetup')).toHaveTextContent('Needs setup');
+    expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+  });
+
+  it('does not show the needs setup badge on managed indices', () => {
+    renderAiIndexCard(buildAiIndex({ managed: true, automations: [] }));
+
+    expect(screen.getByTestId('contextAiIndexCardManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardNeedsSetup')).not.toBeInTheDocument();
+  });
+
+  it('calls onDeleteClick when the delete action is selected', () => {
+    const onDeleteClick = jest.fn();
+    renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
+
+    const actionsButton = screen.getByTestId('contextAiIndexCardActionsButton');
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(actionsButton).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CARD_ACTIONS_MENU
+    );
+
+    fireEvent.click(actionsButton);
+
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard
+    );
+    expect(deleteAction).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE
+    );
+    fireEvent.click(deleteAction);
+
+    expect(onDeleteClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a tooltip explaining why the delete action is disabled for managed indices', async () => {
+    renderAiIndexCard(buildAiIndex({ managed: true }));
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+    const deleteAction = screen.getByTestId('contextAiIndexCardDeleteAction');
+    expect(deleteAction).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.mouseOver(deleteAction.parentElement ?? deleteAction);
+
+    expect(
+      await screen.findByText('This AI index is managed and cannot be deleted.')
+    ).toBeInTheDocument();
   });
 });

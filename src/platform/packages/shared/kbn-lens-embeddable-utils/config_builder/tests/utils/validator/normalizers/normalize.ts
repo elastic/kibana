@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only helpers for composing Lens attribute normalizers.
+ */
+
 import { flow, get, unset } from 'lodash';
 
 import type { LensAttributes } from '../../../../types';

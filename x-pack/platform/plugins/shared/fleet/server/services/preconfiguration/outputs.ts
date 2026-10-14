@@ -9,7 +9,8 @@ import crypto from 'node:crypto';
 import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { stringify } from 'yaml';
 import pMap from 'p-map';
 
@@ -44,7 +45,9 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { checkOtlpOutputAllowed } from '../outputs/helpers';
+import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
+import { usesKafkaOAuth2 } from '../outputs/kafka_auth';
+import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -55,8 +58,28 @@ import { applyAllowEditOverrides, isDifferent } from './utils';
 
 export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
 
-const PRIVATELINK_ALLOW_EDIT = ['is_default', 'is_default_monitoring'];
-const PRIVATELINK_OUTPUT_IDS = new Set([
+// Fields that project-controller grants on es-default-output (fleet_config.go).
+// We mirror the same list here so that es-private-output (which project-controller
+// currently ships with allow_edit: []) reaches parity with its sibling.
+// This constant is applied as a union on top of whatever project-controller sends,
+// so adding a field here is safe even if project-controller later updates its own list.
+//
+// Connectivity fields (hosts, ssl, ca_*, secrets, proxy_id) are intentionally absent —
+// they remain locked on both managed outputs.
+//
+// Note: the constant name is intentionally broad — these IDs include the serverless
+// default output (SERVERLESS_DEFAULT_OUTPUT_ID) as well as the PrivateLink private
+// output (SERVERLESS_PRIVATE_OUTPUT_ID). The union is a no-op for fields already
+// granted by project-controller on the default output.
+export const SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT = [
+  'is_default',
+  'is_default_monitoring',
+  'shipper',
+  'config_yaml',
+  'preset',
+  'write_to_logs_streams',
+];
+const SERVERLESS_MANAGED_OUTPUT_IDS = new Set([
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 ]);
@@ -132,20 +155,23 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
       : []),
   ]);
 
-  // Ensure the serverless PrivateLink default and private outputs both allow their
-  // is_default / is_default_monitoring fields to be changed at runtime (via the PrivateLink
-  // toggle in the Fleet Settings UI). Without this, _validateFieldsAreEditable rejects any
-  // PUT that touches those fields on a preconfigured output.
+  // Ensure both serverless managed outputs (es-default-output and es-private-output)
+  // carry the same editable-field set, matching the list that project-controller ships
+  // on es-default-output (fleet_config.go). This brings es-private-output to parity
+  // with its sibling, which currently ships with allow_edit: [] from project-controller.
   //
-  // We set allow_edit here (rather than requiring it in every config that defines these
-  // outputs) so that the behaviour is consistent regardless of how the output was defined
-  // (hardcoded above or passed in via config.outputs in the serverless YAML).
+  // The merge is a union — fields project-controller already grants are preserved;
+  // fields it omits are added here. This is applied regardless of whether
+  // privateElasticsearchHost is set, because es-default-output is always present in
+  // serverless and deserves the same guarantee.
   return outputs.map((output) => {
-    if (!PRIVATELINK_OUTPUT_IDS.has(output.id)) {
+    if (!SERVERLESS_MANAGED_OUTPUT_IDS.has(output.id)) {
       return output;
     }
     const existingAllowEdit = output.allow_edit ?? [];
-    const merged = Array.from(new Set([...existingAllowEdit, ...PRIVATELINK_ALLOW_EDIT]));
+    const merged = Array.from(
+      new Set([...existingAllowEdit, ...SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT])
+    );
     return { ...output, allow_edit: merged };
   });
 }
@@ -205,9 +231,19 @@ export async function createOrUpdatePreconfiguredOutputs(
     ? await checkOtlpOutputAllowed(esClient, soClient)
     : { result: true as const };
 
+  // Same for the Kafka outputs using OAuth2.
+  const kafkaOAuth2Check = outputs.some(usesKafkaOAuth2)
+    ? await checkKafkaOAuth2Allowed(esClient, soClient)
+    : { result: true as const, error: undefined };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
     if (isOtlpOutput(output) && !otlpCheck.result) {
       logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
+      return;
+    }
+
+    if (usesKafkaOAuth2(output) && !kafkaOAuth2Check.result) {
+      logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${kafkaOAuth2Check.error}`);
       return;
     }
 
@@ -305,11 +341,10 @@ async function hashSecrets(output: PreconfiguredOutput) {
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
 
-    if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await hashSecret(kafkaOutput.secrets?.password);
-      secrets = {
-        password,
-      };
+    for (const { path, value } of getKafkaSecretLeaves(kafkaOutput.secrets)) {
+      if (typeof value === 'string') {
+        set(secrets, path, await hashSecret(value));
+      }
     }
   }
 
@@ -495,10 +530,17 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       return false;
     }
 
-    const passwordHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.password,
-      existingOutput.secrets?.password
+    // every secret of the preconfigured and of the existing output, whatever its depth
+    const secretPaths = new Set([
+      ...getKafkaSecretLeaves(preconfiguredOutput.secrets).map(({ path }) => path),
+      ...getKafkaSecretLeaves(existingOutput.secrets).map(({ path }) => path),
+    ]);
+    const secretsDifferences = await Promise.all(
+      [...secretPaths].map((path) =>
+        isSecretDifferent(get(preconfiguredOutput.secrets, path), get(existingOutput.secrets, path))
+      )
     );
+    const secretsAreDifferent = secretsDifferences.some(Boolean);
 
     return (
       isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
@@ -511,6 +553,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.username, preconfiguredOutput.username) ||
       isDifferent(existingOutput.password, preconfiguredOutput.password) ||
       isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.oauth2, preconfiguredOutput.oauth2) ||
       isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
@@ -524,7 +567,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.write_to_logs_streams,
         preconfiguredOutput.write_to_logs_streams
       ) ||
-      passwordHashIsDifferent
+      secretsAreDifferent
     );
   };
 

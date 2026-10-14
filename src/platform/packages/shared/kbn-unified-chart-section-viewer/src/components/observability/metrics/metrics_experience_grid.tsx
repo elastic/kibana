@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -25,6 +26,7 @@ import type { UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
+  useExitFullscreenOnEmptyResults,
   useMetricFieldsFilter,
   useMetricsSort,
   useResetPageOnDimensionsChange,
@@ -49,6 +51,7 @@ export const MetricsExperienceGrid = ({
     searchTerm,
     isFullscreen,
     onToggleFullscreen,
+    onExitFullscreen,
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
@@ -56,15 +59,27 @@ export const MetricsExperienceGrid = ({
     profileId,
     gridSettings,
     onGridSettingsChange,
+    onFlyoutStateChange,
     recentlyExploredMetrics,
   } = useMetricsExperienceState();
   const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
+
+  const onOpenGridSettings = useCallback(() => {
+    onFlyoutStateChange(undefined);
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricGridSettings);
+    toggleGridSettingsFlyout(true);
+  }, [onFlyoutStateChange, toggleGridSettingsFlyout]);
+
+  const onCloseGridSettings = useCallback(() => {
+    toggleGridSettingsFlyout(false);
+  }, [toggleGridSettingsFlyout]);
   const {
     metricItems,
     allDimensions,
     activeDimensions,
     loading: isDiscoverLoading,
     error: metricsInfoError,
+    loadedFetchParams,
   } = useFetchMetricsData({
     fetchParams,
     services,
@@ -103,6 +118,14 @@ export const MetricsExperienceGrid = ({
     onSelectedDimensionsChange: onDimensionsChange,
   });
 
+  useExitFullscreenOnEmptyResults({
+    isFullscreen,
+    isLoading: isDiscoverLoading,
+    isComponentVisible,
+    hasMetrics: metricItems.length > 0,
+    onExitFullscreen,
+  });
+
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
     if (!isDiscoverLoading && metricItems.length > 0) {
@@ -131,7 +154,7 @@ export const MetricsExperienceGrid = ({
     renderToggleActions,
     onDimensionsChange,
     isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
+    onOpenGridSettings,
   });
 
   const onKeyDown = useCallback(
@@ -181,6 +204,7 @@ export const MetricsExperienceGrid = ({
         <MetricsExperienceGridContent
           metricItems={sortedMetricItems}
           activeDimensions={activeDimensions}
+          loadedFetchParams={loadedFetchParams}
           services={services}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -190,13 +214,14 @@ export const MetricsExperienceGrid = ({
           histogramCss={histogramCss}
           isDiscoverLoading={isDiscoverLoading}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </ChartsGrid>
       {isGridSettingsFlyoutOpen && (
         <GridSettingsFlyout
           gridSettings={gridSettings}
           onGridSettingsChange={onGridSettingsChange}
-          onClose={toggleGridSettingsFlyout}
+          onClose={onCloseGridSettings}
         />
       )}
     </>

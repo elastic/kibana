@@ -12,10 +12,10 @@ import type { StartPlugins, OsqueryPluginStart } from '../types';
 export const getScopedSearch = async (
   context: DataRequestHandlerContext,
   request: KibanaRequest,
-  cpsEnabled: boolean,
+  cpsActive: boolean,
   getStartServices: CoreSetup<StartPlugins, OsqueryPluginStart>['getStartServices']
 ): Promise<IScopedSearchClient> => {
-  if (cpsEnabled) {
+  if (cpsActive) {
     const [, { data }] = await getStartServices();
 
     return data.search.asScoped(request, { projectRouting: 'space' });

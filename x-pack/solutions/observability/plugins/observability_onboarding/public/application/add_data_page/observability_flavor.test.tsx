@@ -12,11 +12,14 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
+import { OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { FleetCardsProvider } from './fleet_cards_provider';
 import {
   useObservabilityCuratedCategories,
   useObservabilityMiniTiles,
 } from './observability_flavor';
+
+const TILE_CLICK_EVENT = OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType;
 
 const mockUseAvailablePackages = jest.fn();
 
@@ -27,6 +30,17 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
   useGetSettingsQuery: () => ({ data: undefined }),
 }));
+
+const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
+  ({
+    button: 0,
+    metaKey: false,
+    altKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    preventDefault: jest.fn(),
+    ...overrides,
+  } as unknown as React.MouseEvent);
 
 const makeCollectionCard = (groupId: string, memberCount: number) => ({
   id: `collection:${groupId}`,
@@ -78,7 +92,7 @@ const buildServices = ({
   return {
     ...core,
     featureFlags: {
-      getBooleanValue: jest.fn(
+      useBooleanValue: jest.fn(
         (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
       ),
     },
@@ -104,12 +118,12 @@ const createWrapper = (services: ReturnType<typeof buildServices> = buildService
 
 // The plain `createWrapper` has no FleetCardsProvider, so those tests double
 // as the fallback proof: no collection data means unchanged tile navigation.
-const createProviderWrapper = () => {
+const createProviderWrapper = (services: ReturnType<typeof buildServices> = buildServices()) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
-      <KibanaContextProvider services={buildServices()}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>{children}</FleetCardsProvider>
+          <FleetCardsProvider>{children}</FleetCardsProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -172,7 +186,33 @@ describe('useObservabilityCuratedCategories', () => {
     const tiles = result.current.flatMap((category) => category.tiles);
     const aws = tiles.find((tile) => tile.id === 'aws');
     expect(aws?.href).toBe('/app/onboarding/aws');
-    expect(aws?.onClick).toBeUndefined();
+
+    const event = plainLeftClick();
+    aws?.onClick?.(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('onboarding', {
+      path: '/aws',
+      state: { newSession: true },
+    });
+  });
+
+  it('leaves a modified click on the AWS tile to the browser so it opens in a new tab', () => {
+    const services = buildServices({
+      featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
+    });
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(services),
+      }
+    );
+    const tiles = result.current.flatMap((category) => category.tiles);
+    const aws = tiles.find((tile) => tile.id === 'aws');
+
+    const event = plainLeftClick({ metaKey: true });
+    aws?.onClick?.(event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('wires EPR-backed tiles to the integrations detail page', () => {
@@ -261,6 +301,46 @@ describe('useObservabilityCuratedCategories', () => {
     expect(opentelemetry?.onClick).toBeDefined();
     expect(apm?.href).toBe('/app/apm/onboarding');
   });
+
+  it('reports a link-only curated tile click and leaves navigation to the link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const azure = result.current
+      .flatMap((category) => category.tiles)
+      .find((tile) => tile.id === 'azure');
+
+    const event = plainLeftClick();
+    azure?.onClick?.(event);
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'azure',
+      surface: 'tile',
+      has_search_term: false,
+    });
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('leaves collection_id out when a grouped tile falls back to its link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const docker = result.current
+      .flatMap((category) => category.tiles)
+      .find((tile) => tile.id === 'docker');
+
+    docker?.onClick?.(plainLeftClick());
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'docker',
+      surface: 'tile',
+      has_search_term: false,
+    });
+  });
 });
 
 describe('useObservabilityMiniTiles', () => {
@@ -281,7 +361,26 @@ describe('useObservabilityMiniTiles', () => {
     expect(result.current[0]['data-test-subj']).toBe(
       'observabilityOnboardingIntegrationMiniTile-prometheus'
     );
-    expect(result.current[0].onClick).toBeUndefined();
+  });
+
+  it('reports a link-only mini tile click and leaves navigation to the link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const prometheus = result.current.find((tile) => tile.id === 'prometheus');
+    expect(prometheus?.href).toContain('/app/integrations/detail/prometheus/overview');
+
+    const event = plainLeftClick();
+    prometheus?.onClick?.(event);
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'prometheus',
+      surface: 'mini_tile',
+      has_search_term: false,
+    });
+    expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
   it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
@@ -375,8 +474,9 @@ describe('collection chooser tiles', () => {
 
   it('turns the docker tile into a badged chooser opener when Fleet provides the group', async () => {
     const onOpenCollection = jest.fn();
+    const services = buildServices();
     const { result } = renderHook(() => useObservabilityCuratedCategories({ onOpenCollection }), {
-      wrapper: createProviderWrapper(),
+      wrapper: createProviderWrapper(services),
     });
 
     await waitFor(() => {
@@ -393,6 +493,12 @@ describe('collection chooser tiles', () => {
 
     docker?.onClick?.(clickEvent);
     expect(onOpenCollection).toHaveBeenCalledWith('docker');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'docker',
+      surface: 'tile',
+      collection_id: 'docker',
+      has_search_term: false,
+    });
   });
 
   // The tile spends a moment before Fleet's packages land and must stay usable.
@@ -413,8 +519,9 @@ describe('collection chooser tiles', () => {
 
   it('turns the prometheus mini tile into a chooser opener when Fleet provides the group', async () => {
     const onOpenCollection = jest.fn();
+    const services = buildServices();
     const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection }), {
-      wrapper: createProviderWrapper(),
+      wrapper: createProviderWrapper(services),
     });
 
     await waitFor(() => {
@@ -426,6 +533,12 @@ describe('collection chooser tiles', () => {
 
     result.current.find((tile) => tile.id === 'prometheus')?.onClick?.(clickEvent);
     expect(onOpenCollection).toHaveBeenCalledWith('prometheus');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'prometheus',
+      surface: 'mini_tile',
+      collection_id: 'prometheus',
+      has_search_term: false,
+    });
   });
 
   it('keeps the other tiles navigating even with collection data present', async () => {

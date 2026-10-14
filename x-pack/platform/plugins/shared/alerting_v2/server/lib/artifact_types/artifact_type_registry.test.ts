@@ -49,17 +49,27 @@ describe('ArtifactTypeRegistry', () => {
     expect(() =>
       registry.register({
         type: 'custom.type',
-        dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
+        dataSchema: z.object({ dashboard_id: z.string().max(64) }).strict(),
         references: [{ field: 'dash:board', savedObjectType: 'dashboard' }],
       })
-    ).toThrow(/only letters, digits, and underscores/);
+    ).toThrow(/must be snake_case/);
+  });
+
+  it('rejects a reference field that is not snake_case', () => {
+    expect(() =>
+      registry.register({
+        type: 'custom.type',
+        dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
+        references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
+      })
+    ).toThrow(/must be snake_case/);
   });
 
   it('is immune to the caller mutating its descriptors after registration', () => {
-    const references = [{ field: 'dashboardId', savedObjectType: 'dashboard' }];
+    const references = [{ field: 'dashboard_id', savedObjectType: 'dashboard' }];
     registry.register({
       type: 'custom.type',
-      dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
+      dataSchema: z.object({ dashboard_id: z.string().max(64) }).strict(),
       references,
     });
 
@@ -67,7 +77,7 @@ describe('ArtifactTypeRegistry', () => {
     references.length = 0;
 
     expect(registry.get('custom.type')?.references).toEqual([
-      { field: 'dashboardId', savedObjectType: 'dashboard' },
+      { field: 'dashboard_id', savedObjectType: 'dashboard' },
     ]);
   });
 
@@ -102,7 +112,7 @@ describe('ArtifactTypeRegistry', () => {
     registerBuiltinArtifactTypes(registry);
     expect(registry.get('runbook')).toBeDefined();
     expect(registry.get('dashboard')?.references?.[0]).toEqual({
-      field: 'dashboardId',
+      field: 'dashboard_id',
       savedObjectType: 'dashboard',
     });
   });

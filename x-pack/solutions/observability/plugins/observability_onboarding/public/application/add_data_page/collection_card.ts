@@ -10,9 +10,9 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 /**
  * Fleet collapses packages sharing a `group` manifest id into one collection
  * card (elastic/kibana#283107, behind Fleet's `enableIntegrationCollectionTiles`
- * experimental flag), which is where `isCollectionCard` and `groupMembers` on
- * `IntegrationCardItem` come from. Narrowing to this type is what lets the
- * rendering code treat members as present.
+ * experimental flag, default-on since #287372), which is where `isCollectionCard`
+ * and `groupMembers` on `IntegrationCardItem` come from. Narrowing to this type
+ * is what lets the rendering code treat members as present.
  */
 export type CollectionCardItem = IntegrationCardItem & {
   groupMembers: IntegrationCardItem[];

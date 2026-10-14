@@ -6,39 +6,61 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  buildSemconvQuery,
-  buildEcsQuery,
-  buildHostsKpisQuery,
-  parseKpiRow,
-} from './use_hosts_kpis_esql';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldTypeIndex } from './use_hosts_kpis_esql';
+import { buildHostsKpisQuery, indexFieldTypes, parseKpiRow } from './use_hosts_kpis_esql';
 
-const SEMCONV_FIELDS = new Set([
-  'state',
-  'metrics.system.cpu.utilization',
-  'metrics.system.cpu.load_average.1m',
-  'metrics.system.cpu.logical.count',
-  'system.memory.utilization',
-  'metrics.system.filesystem.usage',
-]);
+const HOST_NAME = 'host.name';
+const STATE = 'state';
 
-const ECS_FIELDS = new Set([
-  'system.cpu.total.norm.pct',
-  'system.load.1',
-  'system.load.cores',
-  'system.memory.actual.used.pct',
-  'system.filesystem.used.pct',
-]);
+const SEMCONV_CPU = 'metrics.system.cpu.utilization';
+const SEMCONV_LOAD = 'metrics.system.cpu.load_average.1m';
+const SEMCONV_CORES = 'metrics.system.cpu.logical.count';
+const SEMCONV_MEMORY = 'system.memory.utilization';
+const SEMCONV_DISK = 'metrics.system.filesystem.usage';
+const SEMCONV_METRICS = [SEMCONV_CPU, SEMCONV_LOAD, SEMCONV_CORES, SEMCONV_MEMORY, SEMCONV_DISK];
 
-// The builders gate on a field predicate; tests express availability as a Set.
-const has =
-  (fields: Set<string>) =>
-  (field: string): boolean =>
-    fields.has(field);
+const ECS_CPU = 'system.cpu.total.norm.pct';
+const ECS_LOAD = 'system.load.1';
+const ECS_CORES = 'system.load.cores';
+const ECS_MEMORY = 'system.memory.actual.used.pct';
+const ECS_DISK = 'system.filesystem.used.pct';
+const ECS_METRICS = [ECS_CPU, ECS_LOAD, ECS_CORES, ECS_MEMORY, ECS_DISK];
 
-describe('use_hosts_kpis_esql query builders', () => {
+// Kibana collapses a field's mapping types to a single `type`, so a conflict is
+// expressed as several `esTypes` behind that collapsed name. `esTypes` is left
+// off entirely for a field with no mapping behind it (a runtime field).
+const field = (name: string, type: string, esTypes?: string[]): FieldSpec => ({
+  name,
+  type,
+  ...(esTypes ? { esTypes } : {}),
+  aggregatable: true,
+  searchable: true,
+});
+
+// The field list as the data view reports it: `host.name` and `state` keywords
+// plus the listed metric fields as plain doubles. Overrides replace a field
+// with the mapping types a test needs; dropping a field is expressed by leaving
+// it out of `metricFields`.
+const fieldTypes = (metricFields: string[], ...overrides: FieldSpec[]): FieldTypeIndex => {
+  const overridden = new Set(overrides.map(({ name }) => name));
+  const defaults: FieldSpec[] = [
+    field(HOST_NAME, 'string', ['keyword']),
+    field(STATE, 'string', ['keyword']),
+    ...metricFields.map((name) => field(name, 'number', ['double'])),
+  ];
+  return indexFieldTypes([...defaults.filter(({ name }) => !overridden.has(name)), ...overrides]);
+};
+
+const semconvQuery = (fields: FieldTypeIndex, limit = 100, indexPattern = 'metrics-*') =>
+  buildHostsKpisQuery({ schema: 'semconv', indexPattern, limit, fields });
+
+const ecsQuery = (fields: FieldTypeIndex, limit = 100, indexPattern = 'metrics-*') =>
+  buildHostsKpisQuery({ schema: 'ecs', indexPattern, limit, fields });
+
+describe('buildHostsKpisQuery', () => {
   it('aggregates per host then averages across the first `limit` hosts (semconv)', () => {
-    const query = buildSemconvQuery('metrics-*,metricbeat-*', 100, has(SEMCONV_FIELDS));
+    const query = semconvQuery(fieldTypes(SEMCONV_METRICS), 100, 'metrics-*,metricbeat-*');
 
     expect(query).toContain('FROM metrics-*,metricbeat-*');
     expect(query).toContain('BY host.name');
@@ -52,65 +74,143 @@ describe('use_hosts_kpis_esql query builders', () => {
   });
 
   it('threads the limit through the ECS variant', () => {
-    expect(buildEcsQuery('metrics-*,metricbeat-*', 500, has(ECS_FIELDS))).toContain('LIMIT 500');
-    expect(buildEcsQuery('metrics-*,metricbeat-*', 50, has(ECS_FIELDS))).toContain(
-      'FROM metrics-*,metricbeat-*'
-    );
+    const fields = fieldTypes(ECS_METRICS);
+
+    expect(ecsQuery(fields, 500, 'metrics-*,metricbeat-*')).toContain('LIMIT 500');
+    expect(ecsQuery(fields, 50, 'metrics-*,metricbeat-*')).toContain('FROM metrics-*,metricbeat-*');
   });
 
   it('reduces ECS disk usage with a cross-host MAX (mirrors the `max(...)` formula)', () => {
-    const query = buildEcsQuery('metrics-*,metricbeat-*', 100, has(ECS_FIELDS));
+    const query = ecsQuery(fieldTypes(ECS_METRICS));
+
     expect(query).toContain('diskUsage = MAX(host_diskUsage)');
     expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
     expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
   });
 
-  it('casts metric fields to double so mixed CCS mappings resolve as a union type', () => {
-    const semconv = buildSemconvQuery('metrics-*', 100, has(SEMCONV_FIELDS))!;
-    expect(semconv).toContain('AVG(metrics.system.cpu.utilization::double)');
+  it('casts plain numeric metrics to double so mixed CCS mappings resolve', () => {
+    const semconv = semconvQuery(fieldTypes(SEMCONV_METRICS))!;
+    expect(semconv).toContain('AVG(`metrics.system.cpu.utilization`::double)');
     expect(semconv).toContain('AVG(`metrics.system.cpu.load_average.1m`::double)');
-    expect(semconv).toContain('MAX(metrics.system.cpu.logical.count::double)');
+    expect(semconv).toContain('MAX(`metrics.system.cpu.logical.count`::double)');
 
-    const ecs = buildEcsQuery('metrics-*', 100, has(ECS_FIELDS))!;
-    expect(ecs).toContain('AVG(system.cpu.total.norm.pct::double)');
+    const ecs = ecsQuery(fieldTypes(ECS_METRICS))!;
+    expect(ecs).toContain('AVG(`system.cpu.total.norm.pct`::double)');
     expect(ecs).toContain('AVG(`system.load.1`::double)');
-    expect(ecs).toContain('MAX(system.filesystem.used.pct::double)');
+    expect(ecs).toContain('MAX(`system.filesystem.used.pct`::double)');
   });
 
-  it('drops only the metrics whose fields are absent (avoids unknown-column failure)', () => {
+  it('aggregates a downsampled metric as-is (`::double` has no aggregate_metric_double cast)', () => {
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(SEMCONV_CPU, 'number', ['aggregate_metric_double']))
+    )!;
+
+    expect(query).toContain('AVG(`metrics.system.cpu.utilization`)');
+    expect(query).not.toContain('metrics.system.cpu.utilization`::');
+    // The other KPIs keep their double cast.
+    expect(query).toContain('AVG(`system.memory.utilization`::double)');
+  });
+
+  it('resolves a metric downsampled in some indices and raw in others', () => {
+    // Both mapping types collapse to Kibana's `number`, so only `esTypes`
+    // reveals the union ES|QL would reject.
+    const query = semconvQuery(
+      fieldTypes(
+        SEMCONV_METRICS,
+        field(SEMCONV_CPU, 'number', ['aggregate_metric_double', 'double'])
+      )
+    )!;
+
+    expect(query).toContain('AVG(`metrics.system.cpu.utilization`::aggregate_metric_double)');
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
+    expect(query).toContain('diskUsage = AVG(host_diskUsage)');
+  });
+
+  it('casts a union of mixed numeric widths to double', () => {
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(SEMCONV_CPU, 'number', ['float', 'long']))
+    )!;
+
+    expect(query).toContain('AVG(`metrics.system.cpu.utilization`::double)');
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
+  });
+
+  it('casts a metric dynamically mapped as keyword in some indices to double', () => {
+    // Values that do not parse become null, which the aggregations skip.
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(SEMCONV_DISK, 'conflict', ['float', 'keyword']))
+    )!;
+
+    expect(query).toContain('`metrics.system.filesystem.usage`::double');
+    expect(query).not.toContain('::keyword');
+    expect(query).toContain('diskUsage = AVG(host_diskUsage)');
+  });
+
+  it('drops a metric with no numeric mapping behind it', () => {
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(SEMCONV_DISK, 'string', ['keyword', 'text']))
+    )!;
+
+    expect(query).not.toContain('metrics.system.filesystem.usage');
+    expect(query).not.toContain('diskUsage');
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
+  });
+
+  it('drops a metric whose union holds a type no cast resolves', () => {
+    // Casting is restricted to mapping types known to convert: emitting a cast
+    // ES|QL might reject would fail the whole query, not just this KPI.
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(SEMCONV_DISK, 'conflict', ['double', 'date']))
+    )!;
+
+    expect(query).not.toContain('metrics.system.filesystem.usage');
+    expect(query).not.toContain('diskUsage');
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(query).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
+  });
+
+  it("reads a metric with no mapping behind it from Kibana's own field type", () => {
+    // A runtime field defined on the data view reports no `esTypes`.
+    const numeric = semconvQuery(fieldTypes(SEMCONV_METRICS, field(SEMCONV_CPU, 'number')))!;
+    expect(numeric).toContain('AVG(`metrics.system.cpu.utilization`::double)');
+
+    const nonNumeric = semconvQuery(fieldTypes(SEMCONV_METRICS, field(SEMCONV_CPU, 'string')))!;
+    expect(nonNumeric).not.toContain('metrics.system.cpu.utilization');
+    expect(nonNumeric).not.toContain('cpuUsage');
+  });
+
+  it('drops only the metrics the data view does not report (semconv)', () => {
     // No filesystem field: disk is dropped, the rest stay.
-    const noDisk = new Set(SEMCONV_FIELDS);
-    noDisk.delete('metrics.system.filesystem.usage');
-    const semconvNoDisk = buildSemconvQuery('metrics-*', 100, has(noDisk))!;
+    const semconvNoDisk = semconvQuery(
+      fieldTypes(SEMCONV_METRICS.filter((name) => name !== SEMCONV_DISK))
+    )!;
     expect(semconvNoDisk).not.toContain('metrics.system.filesystem.usage');
     expect(semconvNoDisk).not.toContain('diskUsage');
     expect(semconvNoDisk).toContain('cpuUsage = AVG(host_cpuUsage)');
     expect(semconvNoDisk).toContain('memoryUsage = AVG(host_memoryUsage)');
 
     // No cpu utilization (e.g. warm-up): cpu is dropped but load/memory survive.
-    const noCpu = new Set(SEMCONV_FIELDS);
-    noCpu.delete('metrics.system.cpu.utilization');
-    const semconvNoCpu = buildSemconvQuery('metrics-*', 100, has(noCpu))!;
+    const semconvNoCpu = semconvQuery(
+      fieldTypes(SEMCONV_METRICS.filter((name) => name !== SEMCONV_CPU))
+    )!;
     expect(semconvNoCpu).not.toContain('metrics.system.cpu.utilization');
     expect(semconvNoCpu).not.toContain('cpuUsage');
     expect(semconvNoCpu).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
     expect(semconvNoCpu).toContain('memoryUsage = AVG(host_memoryUsage)');
   });
 
-  it('drops only the metrics whose fields are absent (ECS)', () => {
+  it('drops only the metrics the data view does not report (ECS)', () => {
     // No filesystem field: disk is dropped, the rest stay.
-    const noDisk = new Set(ECS_FIELDS);
-    noDisk.delete('system.filesystem.used.pct');
-    const ecsNoDisk = buildEcsQuery('metrics-*', 100, has(noDisk))!;
+    const ecsNoDisk = ecsQuery(fieldTypes(ECS_METRICS.filter((name) => name !== ECS_DISK)))!;
     expect(ecsNoDisk).not.toContain('system.filesystem.used.pct');
     expect(ecsNoDisk).not.toContain('diskUsage');
     expect(ecsNoDisk).toContain('cpuUsage = AVG(host_cpuUsage)');
     expect(ecsNoDisk).toContain('memoryUsage = AVG(host_memoryUsage)');
 
     // No cpu field: cpu is dropped but load/memory/disk survive.
-    const noCpu = new Set(ECS_FIELDS);
-    noCpu.delete('system.cpu.total.norm.pct');
-    const ecsNoCpu = buildEcsQuery('metrics-*', 100, has(noCpu))!;
+    const ecsNoCpu = ecsQuery(fieldTypes(ECS_METRICS.filter((name) => name !== ECS_CPU)))!;
     expect(ecsNoCpu).not.toContain('system.cpu.total.norm.pct');
     expect(ecsNoCpu).not.toContain('cpuUsage');
     expect(ecsNoCpu).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
@@ -118,57 +218,57 @@ describe('use_hosts_kpis_esql query builders', () => {
   });
 
   it('drops the state pre-filter when only normalized load remains', () => {
-    const query = buildSemconvQuery(
-      'metrics-*',
-      100,
-      has(new Set(['metrics.system.cpu.load_average.1m', 'metrics.system.cpu.logical.count']))
-    )!;
+    const query = semconvQuery(fieldTypes([SEMCONV_LOAD, SEMCONV_CORES]))!;
+
     expect(query).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
     expect(query).not.toContain('WHERE state');
   });
 
-  it('returns undefined when no KPI field is mapped', () => {
-    expect(buildSemconvQuery('metrics-*', 100, () => false)).toBeUndefined();
-    expect(buildEcsQuery('metrics-*', 100, () => false)).toBeUndefined();
-  });
-});
+  it('drops the state-scoped KPIs when `state` is an object in some indices', () => {
+    // `state` is referenced bare inside `WHERE`, so no cast can resolve it.
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(STATE, 'conflict', ['keyword', 'object']))
+    )!;
 
-describe('buildHostsKpisQuery', () => {
-  it('builds from the mapped fields when available', () => {
-    const query = buildHostsKpisQuery({
-      schema: 'semconv',
-      indexPattern: 'metrics-*',
-      limit: 100,
-      availableFields: SEMCONV_FIELDS,
-      schemaHasData: true,
-    });
-    expect(query).toContain('WHERE state');
+    expect(query).not.toContain('WHERE state');
+    expect(query).not.toContain('cpuUsage');
+    expect(query).not.toContain('memoryUsage');
+    expect(query).not.toContain('diskUsage');
+    expect(query).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
   });
 
-  it('falls back to the full query for a stale field list when the schema has data', () => {
-    const query = buildHostsKpisQuery({
-      schema: 'semconv',
-      indexPattern: 'metrics-*',
-      limit: 100,
-      availableFields: new Set<string>(),
-      schemaHasData: true,
-    });
-    expect(query).toContain('WHERE state');
+  it('casts a union-typed `host.name` into the grouping key', () => {
+    const query = semconvQuery(
+      fieldTypes(SEMCONV_METRICS, field(HOST_NAME, 'string', ['keyword', 'text']))
+    )!;
+
+    expect(query).toContain('| EVAL host_name = `host.name`::keyword');
+    expect(query).toContain('BY host_name');
+    expect(query).toContain('SORT host_name ASC');
+    // The cast must be evaluated before the per-host STATS reads it.
+    expect(query.indexOf('EVAL host_name')).toBeLessThan(query.indexOf('BY host_name'));
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
   });
 
-  it('returns undefined instead of the fallback when the schema has no data in scope', () => {
-    // e.g. after narrowing the CPS project scope: fields absent AND metadata
-    // reports no data for the schema — a fallback query would fail ES|QL
-    // analysis with "Unknown column".
+  it('casts a `text`-only `host.name`, which is not groupable either', () => {
+    const query = semconvQuery(fieldTypes(SEMCONV_METRICS, field(HOST_NAME, 'string', ['text'])))!;
+
+    expect(query).toContain('| EVAL host_name = `host.name`::keyword');
+    expect(query).toContain('BY host_name');
+  });
+
+  it('builds no query without a usable grouping key', () => {
+    // `host.name` absent from the data view.
+    expect(semconvQuery(indexFieldTypes([field(STATE, 'string', ['keyword'])]))).toBeUndefined();
+    // A `host.name` conflict no string cast resolves.
     expect(
-      buildHostsKpisQuery({
-        schema: 'semconv',
-        indexPattern: 'metrics-*',
-        limit: 100,
-        availableFields: new Set<string>(),
-        schemaHasData: false,
-      })
+      semconvQuery(fieldTypes(SEMCONV_METRICS, field(HOST_NAME, 'conflict', ['keyword', 'object'])))
     ).toBeUndefined();
+  });
+
+  it('builds no query when no KPI field is queryable', () => {
+    expect(semconvQuery(fieldTypes([]))).toBeUndefined();
+    expect(ecsQuery(fieldTypes([]))).toBeUndefined();
   });
 
   it('returns undefined without a schema, index pattern, or limit', () => {
@@ -176,12 +276,29 @@ describe('buildHostsKpisQuery', () => {
       schema: 'ecs' as const,
       indexPattern: 'metrics-*',
       limit: 100,
-      availableFields: ECS_FIELDS,
-      schemaHasData: true,
+      fields: fieldTypes(ECS_METRICS),
     };
     expect(buildHostsKpisQuery({ ...base, schema: undefined })).toBeUndefined();
     expect(buildHostsKpisQuery({ ...base, indexPattern: undefined })).toBeUndefined();
     expect(buildHostsKpisQuery({ ...base, limit: 0 })).toBeUndefined();
+  });
+});
+
+describe('indexFieldTypes', () => {
+  it('keeps every mapping type behind a field, and its collapsed Kibana type', () => {
+    const fields = indexFieldTypes([
+      field(HOST_NAME, 'string', ['keyword']),
+      field(SEMCONV_CPU, 'number', ['aggregate_metric_double', 'double']),
+      field(SEMCONV_DISK, 'number'),
+    ]);
+
+    expect(fields.get(HOST_NAME)).toEqual({ kbnType: 'string', esTypes: ['keyword'] });
+    expect(fields.get(SEMCONV_CPU)).toEqual({
+      kbnType: 'number',
+      esTypes: ['aggregate_metric_double', 'double'],
+    });
+    // A field reporting no mapping types keeps an empty list, not `undefined`.
+    expect(fields.get(SEMCONV_DISK)).toEqual({ kbnType: 'number', esTypes: [] });
   });
 });
 

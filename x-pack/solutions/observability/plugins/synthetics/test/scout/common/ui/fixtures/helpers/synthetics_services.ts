@@ -13,7 +13,7 @@ import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs'
 const SYNTHETICS_API_URLS = {
   SYNTHETICS_ENABLEMENT: '/internal/synthetics/service/enablement',
   SYNTHETICS_MONITORS: '/api/synthetics/monitors',
-  GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
+  GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{id}',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
 } as const;
@@ -560,6 +560,12 @@ function createSyntheticsServices(
       return { id: existing[0].id, label: existing[0].label };
     }
 
+    // Recreate Fleet settings if a peer Scout config wiped them, so the agent-policy SO type stays stable between this create and the later lookup during the project push (issue #289546).
+    await kbnClient.request({
+      path: '/api/fleet/setup',
+      method: 'POST',
+    });
+
     // Skip system + elastic_agent install — these tests only need an empty agent policy.
     const policyResponse = await kbnClient.request({
       path: '/api/fleet/agent_policies',
@@ -591,8 +597,7 @@ function createSyntheticsServices(
   const getMonitor = async (monitorId: string) => {
     const { data } = await kbnClient.request({
       path:
-        SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
-        '?internal=true',
+        SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{id}', monitorId) + '?internal=true',
       method: 'GET',
       headers: PUBLIC_API_HEADERS,
     });

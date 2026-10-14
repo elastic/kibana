@@ -33,9 +33,7 @@ const nlToEsqlToolSchema = z.object({
   index: z
     .string()
     .optional()
-    .describe(
-      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
-    ),
+    .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
   context: z
     .string()
     .optional()
@@ -83,8 +81,13 @@ export const generateEsqlTool = ({
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description:
-      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    description: `Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+
+## Writing the \`query\`
+
+Describe the data and the result to return, and whether it is over time (such as for a line chart) or a single value per group, not how to compute it: leave out ES|QL or PromQL syntax, functions, formulas, range selectors such as [5m] and steps, unless the user provided them.
+
+Set the time range with \`time_range\` rather than describing it in \`query\`, unless \`disable_named_params\` is true: \`time_range\` only provides the ?_tstart and ?_tend parameters, so without them, describe the time range in \`query\`.`,
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
@@ -102,7 +105,7 @@ export const generateEsqlTool = ({
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
+      { esClient, modelProvider, logger, events, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -110,12 +113,14 @@ export const generateEsqlTool = ({
         nlQuery,
         index,
         additionalContext: context,
-        executeQuery,
+        execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
+        includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });
@@ -134,23 +139,28 @@ export const generateEsqlTool = ({
             message: esqlResponse.error,
           },
         });
-      } else {
-        if (esqlResponse.query) {
-          toolResults.push({
-            type: ToolResultType.query,
-            data: {
-              esql: esqlResponse.query,
-            },
-          });
-        }
-        if (esqlResponse.answer) {
-          toolResults.push({
-            type: ToolResultType.other,
-            data: {
-              answer: esqlResponse.answer,
-            },
-          });
-        }
+      } else if (esqlResponse.query) {
+        toolResults.push({
+          type: ToolResultType.query,
+          data: {
+            esql: esqlResponse.query,
+          },
+        });
+      }
+
+      // Returned on failure as well as success. `error` can be as unhelpful as "No query was
+      // generated", while the model's own response explains what actually went wrong — for
+      // instance that the question needs data the target index does not hold. Without it the
+      // caller cannot tell a transient failure from an impossible request. A query that failed is
+      // still not offered as a `query` result, so the caller has nothing it can hand to
+      // `execute_esql` (the prose may quote it, but not as a usable output).
+      if (esqlResponse.answer) {
+        toolResults.push({
+          type: ToolResultType.other,
+          data: {
+            answer: esqlResponse.answer,
+          },
+        });
       }
 
       return {

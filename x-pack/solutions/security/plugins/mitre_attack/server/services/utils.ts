@@ -13,7 +13,7 @@ import type {
   MitreEntityType,
   MitreEntityStatus,
 } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../saved_objects';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 
 export const getEmptyMitreEntityCollection = (
   framework: MitreFramework
@@ -23,17 +23,6 @@ export const getEmptyMitreEntityCollection = (
   techniques: [],
   subtechniques: [],
 });
-
-/** Builds the deterministic saved-object ID for a MITRE entity. */
-export const buildSoId = ({
-  framework,
-  frameworkVersion,
-  id,
-}: {
-  framework: MitreFramework;
-  frameworkVersion: string;
-  id: string;
-}): string => `${framework}:${frameworkVersion}:${id}`;
 
 /**
  * Builds the KQL filter string for the MITRE SO list() method

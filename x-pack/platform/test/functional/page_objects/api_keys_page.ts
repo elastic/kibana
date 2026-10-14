@@ -80,6 +80,17 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async isPromptPage() {
+      // The grid shows a "Loading API keys…" state first, then settles on either the
+      // empty prompt (apiKeysCreatePromptButton) or the populated table
+      // (apiKeysCreateTableButton). Wait for one to render before deciding, otherwise a
+      // check made mid-load wrongly reports "not prompt" and the caller clicks a button
+      // that never appears.
+      await retry.waitFor('API keys grid to finish loading', async () => {
+        return (
+          (await testSubjects.exists('apiKeysCreatePromptButton')) ||
+          (await testSubjects.exists('apiKeysCreateTableButton'))
+        );
+      });
       return await testSubjects.exists('apiKeysCreatePromptButton');
     },
 

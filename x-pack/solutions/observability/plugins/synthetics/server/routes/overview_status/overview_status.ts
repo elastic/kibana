@@ -6,7 +6,11 @@
  */
 import { OverviewStatusService } from './overview_status_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import type { OverviewStaleStatus, OverviewStatusState } from '../../../common/runtime_types';
+import type {
+  OverviewStaleStatus,
+  OverviewStatusState,
+  PaginatedOverviewStatus,
+} from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { OverviewStatusSchema, OverviewStatusStaleBodySchema } from '../common';
 
@@ -16,7 +20,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => 
   validate: {
     query: OverviewStatusSchema,
   },
-  handler: async (routeContext): Promise<OverviewStatusState> => {
+  handler: async (routeContext): Promise<OverviewStatusState | PaginatedOverviewStatus> => {
     const statusOverview = new OverviewStatusService(routeContext);
     return await statusOverview.getOverviewStatus();
   },

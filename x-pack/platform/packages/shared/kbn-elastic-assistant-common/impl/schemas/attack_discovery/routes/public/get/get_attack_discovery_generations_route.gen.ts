@@ -24,19 +24,36 @@ export const GetAttackDiscoveryGenerationsRequestQuery = lazySchema(() =>
     /**
      * End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
      */
-    end: z.string().optional(),
+    end: z
+      .string()
+      .optional()
+      .describe(
+        'End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").'
+      ),
     /**
      * The maximum number of generations to retrieve
      */
-    size: z.coerce.number().min(1).optional().default(50),
+    size: z.coerce
+      .number()
+      .min(1)
+      .optional()
+      .default(50)
+      .describe('The maximum number of generations to retrieve'),
     /**
      * Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
      */
-    scheduled: BooleanFromString.optional(),
+    scheduled: BooleanFromString.optional().describe(
+      'Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.'
+    ),
     /**
      * Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
      */
-    start: z.string().optional(),
+    start: z
+      .string()
+      .optional()
+      .describe(
+        'Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").'
+      ),
   })
 );
 export type GetAttackDiscoveryGenerationsRequestQuery = z.infer<
@@ -51,7 +68,9 @@ export const GetAttackDiscoveryGenerationsResponse = lazySchema(() =>
     /**
      * List of Attack Discovery generations
      */
-    generations: z.array(AttackDiscoveryGeneration),
+    generations: z
+      .array(AttackDiscoveryGeneration)
+      .describe('List of Attack Discovery generations'),
   })
 );
 export type GetAttackDiscoveryGenerationsResponse = z.infer<
