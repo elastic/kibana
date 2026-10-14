@@ -18,7 +18,7 @@ import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverAppState, TabState } from './types';
+import type { DiscoverAppState, StoredAppStateDefaults, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
 import { extractEsqlVariables, parseControlGroupJson } from './utils';
@@ -59,15 +59,23 @@ export const fromSavedObjectTabToAppState = ({
   );
 };
 
+export const readStoredAppStateDefaults = (): StoredAppStateDefaults => ({
+  esqlApproximation: esqlApproximationStorage.get() ?? false,
+});
+
 /**
- * Seeds `esqlApproximation` from the stored preference for ES|QL tabs that do not set it,
- * so fetches use the same value the approximation toggle displays.
+ * Seeds app state from stored preferences for fields the tab does not set, so fetches use the same
+ * values the UI displays. Pass the defaults snapshotted at load time when rebuilding a baseline,
+ * so later preference writes cannot change it.
  */
-export const withStoredAppStateDefaults = (appState: DiscoverAppState): DiscoverAppState => {
+export const withStoredAppStateDefaults = (
+  appState: DiscoverAppState,
+  storedDefaults: StoredAppStateDefaults = readStoredAppStateDefaults()
+): DiscoverAppState => {
   if (
     appState.esqlApproximation !== undefined ||
     !isOfAggregateQueryType(appState.query) ||
-    !esqlApproximationStorage.get()
+    !storedDefaults.esqlApproximation
   ) {
     return appState;
   }
@@ -79,14 +87,17 @@ export const fromSavedObjectTabToTabState = ({
   existingTab,
   initialAppState,
   profileStateRegistry,
+  storedDefaults = readStoredAppStateDefaults(),
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
   profileStateRegistry: ProfileStateRegistry;
+  storedDefaults?: StoredAppStateDefaults;
 }): TabState => {
   const appState: DiscoverAppState = withStoredAppStateDefaults(
-    initialAppState ?? fromSavedObjectTabToAppState({ tab })
+    initialAppState ?? fromSavedObjectTabToAppState({ tab }),
+    storedDefaults
   );
 
   const globalState = {
@@ -121,6 +132,7 @@ export const fromSavedObjectTabToTabState = ({
       tabType: tab.tabTypeState?.type,
     },
     appState,
+    storedAppStateDefaults: storedDefaults,
     previousAppState: existingTab?.appState ?? appState,
     globalState,
     esqlVariables,
