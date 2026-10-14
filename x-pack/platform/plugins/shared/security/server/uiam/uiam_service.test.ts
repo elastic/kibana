@@ -461,17 +461,14 @@ describe('UiamService', () => {
         'bearer essu_access-token',
         'ApiKey essu_api-key',
         'apikey essu_api-key',
-      ])(
-        'preserves the incoming authorization header %j',
-        async (authorization) => {
-          fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+      ])('preserves the incoming authorization header %j', async (authorization) => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
 
-          await run(uiamService, createUiamRequest(undefined, authorization));
+        await run(uiamService, createUiamRequest(undefined, authorization));
 
-          expect(fetchSpy).toHaveBeenCalledTimes(1);
-          expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe(authorization);
-        }
-      );
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe(authorization);
+      });
 
       it('omits client authentication for a real API key without an attestation', async () => {
         fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });

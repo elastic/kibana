@@ -39,10 +39,7 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import {
-  assertUiamCredential,
-  getUiamCredentialsFromRequest,
-} from './get_uiam_credentials';
+import { assertUiamCredential, getUiamCredentialsFromRequest } from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
