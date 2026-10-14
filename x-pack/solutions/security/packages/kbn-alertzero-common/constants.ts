@@ -326,18 +326,18 @@ export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
  * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
  * `workflow.execute` inputs. A new Worker usually costs no new tier.
  *
- * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * Tiers are named for the class of model a call needs rather than the task it happens to serve
  * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
- * same fast model that gates an alert also enriches a threat report. Other Security features are
- * expected to pin to these rather than register per-feature rows of their own.
+ * same efficient model that checks detection coverage also gates a threat report. Other Security
+ * features are expected to pin to these rather than register per-feature rows of their own.
  */
 export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
-/** Low latency, high volume, lightweight judgment. */
-export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
-/** Deeper single-shot thinking on a self-contained task. */
-export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
-/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
-export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
+/** Quick, lightweight judgment on calls that run often. Small, low-cost model. */
+export const ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID = 'alertzero_efficient' as const;
+/** Accuracy matters but the call runs often or uses tools over many steps. Strong mid-size model. */
+export const ALERTZERO_BALANCED_INFERENCE_FEATURE_ID = 'alertzero_balanced' as const;
+/** Complex, single-pass work where output quality matters most. Most capable model. */
+export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

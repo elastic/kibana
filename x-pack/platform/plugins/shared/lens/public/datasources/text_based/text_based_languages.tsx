@@ -16,7 +16,6 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
@@ -46,6 +45,7 @@ import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
+import { createEsqlAdHocDataView } from '../../data_views_service/create_esql_ad_hoc_data_view';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
@@ -933,10 +933,10 @@ export function getTextBasedDatasource({
 
       for (const { query } of Object.values(state.layers)) {
         if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview({
-            dataViewsService,
+          const esqlAdhocDataview = await createEsqlAdHocDataView({
+            dataViews: dataViewsService,
             query: query.esql,
-            options: { skipFetchFields: true },
+            skipFetchFields: true,
           });
           indexPatterns.push(esqlAdhocDataview);
         }
