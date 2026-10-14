@@ -11,7 +11,7 @@ import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
@@ -41,6 +41,7 @@ import {
   getUiamAuthorizationSchemeFromRequest,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
+import { isExternalApiKey } from './is_external_api_key';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -461,6 +462,8 @@ interface UiamServiceOptions {
   elasticsearchUrl?: string;
   /** The Kibana version, used to set the User-Agent header on outbound UIAM requests. */
   kibanaVersion: string;
+  /** Returns the user authenticated on the request, when available. */
+  getCurrentUser?: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 /**
@@ -473,12 +476,14 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+  readonly #getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
     this.#kibanaServerResourceURL = options.kibanaServerResourceURL;
     this.#elasticsearchUrl = options.elasticsearchUrl;
     this.#userAgentHeader = `Kibana/${options.kibanaVersion}`;
+    this.#getCurrentUser = options.getCurrentUser ?? (() => null);
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl, unsafe = {} } = config;
@@ -530,8 +535,12 @@ export class UiamService implements UiamServicePublic {
    */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
     const scheme = getUiamAuthorizationSchemeFromRequest(request);
+    const clientAuthentication =
+      scheme === 'ApiKey' && isExternalApiKey(this.#getCurrentUser(request))
+        ? null
+        : getUiamClientAuthentication(request);
     return {
-      ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
+      ...this.#getClientAuthenticationHeaders(clientAuthentication),
       Authorization: `${scheme} ${getUiamCredentialsFromRequest(request)}`,
     };
   }

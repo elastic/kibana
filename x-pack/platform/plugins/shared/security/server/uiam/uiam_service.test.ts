@@ -55,12 +55,14 @@ describe('UiamService', () => {
   let readFileSyncSpy: jest.SpyInstance;
   let agentSpy: jest.SpyInstance;
   let fetchSpy: jest.SpyInstance;
+  let getCurrentUser: jest.Mock;
   beforeEach(() => {
     readFileSyncSpy = jest
       .spyOn(fs, 'readFileSync')
       .mockImplementation((path) => `mocked file content for ${path}`);
     agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
     fetchSpy = jest.spyOn(window, 'fetch');
+    getCurrentUser = jest.fn().mockReturnValue(null);
 
     uiamService = new UiamService(
       loggingSystemMock.createLogger(),
@@ -80,6 +82,7 @@ describe('UiamService', () => {
           'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp',
         elasticsearchUrl: 'https://es.example.com',
         kibanaVersion: '9.0.0',
+        getCurrentUser,
       }
     );
   });
@@ -461,6 +464,28 @@ describe('UiamService', () => {
           expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe(authorization);
         }
       );
+
+      it('omits client authentication for an external API key', async () => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+        getCurrentUser.mockReturnValue({ api_key: { internal: false } });
+        const request = createUiamRequest(undefined, 'ApiKey essu_external-key');
+
+        await run(uiamService, request);
+
+        expect(getCurrentUser).toHaveBeenCalledWith(request);
+        expect(fetchSpy.mock.calls[0][1].headers).not.toHaveProperty(
+          ES_CLIENT_AUTHENTICATION_HEADER
+        );
+      });
+
+      it("uses Kibana's client authentication for an internal API key", async () => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+        getCurrentUser.mockReturnValue({ api_key: { internal: true } });
+
+        await run(uiamService, createUiamRequest(undefined, 'ApiKey essu_internal-key'));
+
+        expect(fetchSpy.mock.calls[0][1].headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe('secret');
+      });
     });
 
     const clientAuthenticationRequestOperations: RequestOperation[] = [

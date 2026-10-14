@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import {
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
+} from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -62,6 +65,24 @@ apiTest.describe(
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
             [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(Array.isArray(response.body.clients)).toBe(true);
+      }
+    );
+
+    apiTest(
+      'omits client authentication for an external API key on direct UIAM calls',
+      async ({ apiClient, samlAuth }) => {
+        await samlAuth.asInteractiveUser('admin');
+
+        const response = await apiClient.get('internal/security/oauth/clients', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
           },
           responseType: 'json',
         });

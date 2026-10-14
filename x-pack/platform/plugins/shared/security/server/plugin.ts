@@ -536,6 +536,7 @@ export class SecurityPlugin
           kibanaServerResourceURL,
           elasticsearchUrl: this.elasticsearchUrl,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
+          getCurrentUser: core.security.authc.getCurrentUser,
         })
       : undefined;
 
