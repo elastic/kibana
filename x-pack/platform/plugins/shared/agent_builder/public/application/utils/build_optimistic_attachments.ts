@@ -26,6 +26,8 @@ export interface OptimisticAttachments {
 /**
  * What the user's message shows for its attachments before the server has saved them: new
  * attachments as fallback data at version 1, re-sent existing ones as a ref to the next version.
+ * An existing one sent without data (a pdf that was read before Send) adds no version, so its ref
+ * points to the current one.
  */
 export const buildOptimisticAttachments = ({
   attachments,
@@ -57,7 +59,7 @@ export const buildOptimisticAttachments = ({
       const existing = existingById.get(inputId)!;
       attachmentRefs.push({
         attachment_id: inputId,
-        version: existing.current_version + 1,
+        version: input.data === undefined ? existing.current_version : existing.current_version + 1,
         operation: ATTACHMENT_REF_OPERATION.updated,
         actor: ATTACHMENT_REF_ACTOR.user,
       });

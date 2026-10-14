@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -28,10 +29,15 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
   defaultMessage: 'Remove attachment',
 });
 
+const readingPdfLabel = i18n.translate('xpack.agentBuilder.attachmentPill.readingPdfLabel', {
+  defaultMessage: 'Reading PDF...',
+});
+
 export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
+  isLoading?: boolean;
 }
 
 const DEFAULT_ICON = 'document';
@@ -40,6 +46,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
   isHighlighted = false,
+  isLoading = false,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
@@ -97,13 +104,30 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
+      data-test-subj={
+        isLoading
+          ? `agentBuilderLoadingPdfPill-${attachment.id}`
+          : `agentBuilderAttachmentPill-${attachment.id}`
+      }
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div css={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
-          </div>
+          {isLoading ? (
+            <EuiToolTip content={readingPdfLabel} disableScreenReaderOutput>
+              <div
+                css={iconContainerStyles}
+                role="status"
+                aria-label={readingPdfLabel}
+                tabIndex={0}
+              >
+                <EuiLoadingSpinner size="m" />
+              </div>
+            </EuiToolTip>
+          ) : (
+            <div css={iconContainerStyles}>
+              <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
+            </div>
+          )}
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="xs" css={titleStyles}>

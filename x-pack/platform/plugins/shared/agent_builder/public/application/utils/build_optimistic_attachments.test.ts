@@ -68,6 +68,32 @@ describe('buildOptimisticAttachments', () => {
     ]);
   });
 
+  it('refs the current version when an existing attachment is sent without data', () => {
+    const conversationAttachments = [
+      createVersionedAttachment({
+        id: 'pdf-1',
+        type: 'pdf',
+        data: { file_id: 'file-1', name: 'invoice.pdf', text: 'hello' },
+        currentVersion: 3,
+      }),
+    ];
+    const attachments: AttachmentInput[] = [
+      { id: 'pdf-1', type: 'pdf', origin: 'file-1', description: 'invoice.pdf' },
+    ];
+
+    const result = buildOptimisticAttachments({ attachments, conversationAttachments });
+
+    expect(result.fallbackAttachments).toEqual([]);
+    expect(result.attachmentRefs).toEqual([
+      {
+        attachment_id: 'pdf-1',
+        version: 3,
+        operation: ATTACHMENT_REF_OPERATION.updated,
+        actor: ATTACHMENT_REF_ACTOR.user,
+      },
+    ]);
+  });
+
   it('skips creating attachments when the content already exists', () => {
     const data = { value: 'same' };
     const conversationAttachments = [

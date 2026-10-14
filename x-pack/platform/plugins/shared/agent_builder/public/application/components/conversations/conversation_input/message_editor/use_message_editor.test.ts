@@ -101,6 +101,18 @@ describe('useMessageEditor setContent', () => {
     expect(result.current.controller.getPlaceholderNames()).toEqual(['photo.png']);
   });
 
+  it('restores a serialized pdf placeholder as a pdf chip', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('[invoice.pdf](pdf://invoice.pdf)');
+    });
+
+    expect(result.current.controller.getPlaceholderNames('pdf')).toEqual(['invoice.pdf']);
+    expect(result.current.controller.getPlaceholderNames()).toEqual([]);
+  });
+
   it('is not empty when the message only holds an image attachment', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);

@@ -16,8 +16,11 @@ import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  CHAT_ATTACHMENT_PDFS_FILE_KIND,
   MAX_IMAGE_BYTES,
+  MAX_PDF_BYTES,
   SUPPORTED_IMAGE_MIME_TYPES,
+  SUPPORTED_PDF_MIME_TYPE,
 } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
@@ -147,6 +150,12 @@ export class AgentBuilderPlugin
       maxSizeBytes: MAX_IMAGE_BYTES,
     });
 
+    deps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_PDFS_FILE_KIND,
+      allowedMimeTypes: [SUPPORTED_PDF_MIME_TYPE],
+      maxSizeBytes: MAX_PDF_BYTES,
+    });
+
     registerApp({
       core,
       getServices: () => {
@@ -189,6 +198,9 @@ export class AgentBuilderPlugin
 
     const filesClient = startDependencies.files.filesClientFactory.asScoped(
       CHAT_ATTACHMENT_IMAGES_FILE_KIND
+    );
+    const pdfFilesClient = startDependencies.files.filesClientFactory.asScoped(
+      CHAT_ATTACHMENT_PDFS_FILE_KIND
     );
 
     const agentService = new AgentService({ http });
@@ -279,6 +291,7 @@ export class AgentBuilderPlugin
 
     const internalServices: AgentBuilderInternalService = {
       filesClient,
+      pdfFilesClient,
       agentService,
       attachmentsService,
       renderersService,

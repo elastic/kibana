@@ -53,6 +53,24 @@ describe('AttachmentsService HTTP methods', () => {
     expect(res).toEqual({ id: 'a1' });
   });
 
+  it('create passes the abort signal to http and keeps it out of the body', async () => {
+    const { http, service } = setup();
+    http.post.mockResolvedValue({ attachment: { id: 'a1' } });
+    const { signal } = new AbortController();
+    await service.create({ conversationId: 'c1', type: 'pdf', origin: 'file-1', signal });
+    expect(http.post).toHaveBeenCalledWith(
+      expect.stringContaining('/conversations/c1/attachments'),
+      { body: JSON.stringify({ type: 'pdf', origin: 'file-1' }), signal }
+    );
+  });
+
+  it('isPdfAvailable GETs the availability route and unwraps `available`', async () => {
+    const { http, service } = setup();
+    http.get.mockResolvedValue({ available: true });
+    expect(await service.isPdfAvailable()).toBe(true);
+    expect(http.get).toHaveBeenCalledWith('/internal/agent_builder/attachments/pdf/_available');
+  });
+
   it('update PUTs the body and unwraps `attachment`', async () => {
     const { http, service } = setup();
     http.put.mockResolvedValue({ attachment: { id: 'a1' }, new_version: 2 });
