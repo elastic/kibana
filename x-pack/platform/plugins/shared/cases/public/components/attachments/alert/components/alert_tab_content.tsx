@@ -14,9 +14,9 @@ import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGetFeatureIds } from '../../../../containers/use_get_feature_ids';
 import { getManualAlertIds } from '../../../../../common/utils/attachments/manual_alert_ids';
-import type { CommonAttachmentTabViewProps } from '../../../../client/attachment_framework/types';
+import type { CommonAttachmentListViewProps } from '../../../../client/attachment_framework/types';
 
-export const StackAlertTabContent = ({ caseData }: CommonAttachmentTabViewProps) => {
+export const StackAlertTabContent = ({ caseData }: CommonAttachmentListViewProps) => {
   const { services } = useKibana();
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;

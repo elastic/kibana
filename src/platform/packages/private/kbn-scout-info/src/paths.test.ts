@@ -127,13 +127,13 @@ describe('Scout path globs', () => {
       'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/index.ts',
       'src/platform/plugins/shared/my_plugin/test/scout/api/fixtures/params.ts',
       // page objects (live under fixtures/)
-      'src/platform/plugins/shared/inspector/test/scout/ui/fixtures/page_objects/inspector.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/page_objects/my_page.ts',
       // namespace nested under fixtures
       'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts',
       // namespace before the category (matches the second glob form)
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/data.ts',
       // custom scout_<server> scope
-      'src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/fixtures/page_objects/workflow_list_page.ts',
+      'src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/fixtures/index.ts',
     ];
 
     const shouldNotMatch = [

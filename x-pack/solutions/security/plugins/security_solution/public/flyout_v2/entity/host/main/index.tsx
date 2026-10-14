@@ -117,7 +117,13 @@ export const Host: FC<HostProps> = memo(function Host({
 
   // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('host'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -144,13 +150,13 @@ export const Host: FC<HostProps> = memo(function Host({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'host',
+          euidApi.getBuiltInEntityDefinition('host'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -277,7 +283,6 @@ export const Host: FC<HostProps> = memo(function Host({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]
@@ -311,6 +316,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityId: entityStoreEntityId,
             onShowEntity: onShowHost,
             title: hostName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
@@ -441,7 +447,8 @@ export const Host: FC<HostProps> = memo(function Host({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons

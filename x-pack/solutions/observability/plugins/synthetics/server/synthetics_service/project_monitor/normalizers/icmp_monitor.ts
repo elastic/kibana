@@ -30,6 +30,7 @@ export const getNormalizeICMPFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<ICMPFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.ICMP];
   const errors = [];
@@ -42,6 +43,7 @@ export const getNormalizeICMPFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   // Add common erros to errors arary

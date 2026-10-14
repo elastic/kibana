@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export function MonitoringSetupModeProvider({ getService }) {
+export function MonitoringSetupModeProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const { appMenu } = getPageObjects(['appMenu']);
 
   const SUBJ_SETUP_MODE_BTN = 'monitoringSetupModeBtn';
   const SUBJ_SETUP_MODE_BOTTOM_BAR = 'monitoringSetupModeBottomBar';
@@ -17,11 +18,11 @@ export function MonitoringSetupModeProvider({ getService }) {
 
   return new (class SetupMode {
     async doesSetupModeBtnAppear() {
-      return await testSubjects.exists(SUBJ_SETUP_MODE_BTN);
+      return await appMenu.menuItemExists(SUBJ_SETUP_MODE_BTN);
     }
 
     async clickSetupModeBtn() {
-      return await testSubjects.click(SUBJ_SETUP_MODE_BTN);
+      return await appMenu.clickMenuItem(SUBJ_SETUP_MODE_BTN);
     }
 
     async doesBottomBarAppear() {

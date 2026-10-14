@@ -12,17 +12,21 @@ import { getEndpointAttachmentType } from './endpoint';
 import { getEventAttachmentType } from './event';
 import { getIndicatorAttachmentType } from './indicator';
 import { getEntityAttachmentType } from './entity';
+import { getAttackAttachmentType } from './attack';
 import { getTimelineAttachmentType } from './timeline';
 
 export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework'],
   experimentalFeatures: ExperimentalFeatures
 ): void => {
-  attachmentFramework.registerUnified(getEndpointAttachmentType());
-  attachmentFramework.registerUnified(getEventAttachmentType());
-  attachmentFramework.registerUnified(getIndicatorAttachmentType());
+  attachmentFramework.registerAttachment(getEndpointAttachmentType());
+  attachmentFramework.registerAttachment(getEventAttachmentType());
+  attachmentFramework.registerAttachment(getIndicatorAttachmentType());
   if (experimentalFeatures.entityAttachmentsEnabled) {
-    attachmentFramework.registerUnified(getEntityAttachmentType());
+    attachmentFramework.registerAttachment(getEntityAttachmentType());
   }
-  attachmentFramework.registerUnified(getTimelineAttachmentType());
+  if (experimentalFeatures.attackAttachmentsEnabled) {
+    attachmentFramework.registerAttachment(getAttackAttachmentType());
+  }
+  attachmentFramework.registerAttachment(getTimelineAttachmentType());
 };

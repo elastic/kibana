@@ -60,17 +60,12 @@ const mockHit: DataTableRecord = {
 
 const mockOnShowAlert = jest.fn();
 
-const renderCorrelationsDetailsView = ({
-  isRulePreview = false,
-}: {
-  isRulePreview?: boolean;
-} = {}) =>
+const renderCorrelationsDetailsView = () =>
   render(
     <TestProviders>
       <CorrelationsDetailsView
         hit={mockHit}
         scopeId="test-scope"
-        isRulePreview={isRulePreview}
         onShowAlert={mockOnShowAlert}
         useLegacyExpandableFlyout={false}
       />

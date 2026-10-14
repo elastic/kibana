@@ -161,12 +161,14 @@ const getOptionsListDslSuggestions = async ({
     ? {}
     : validationBuilder.buildAggregation(suggestionRequest);
 
+  const searchFilter = suggestionBuilder.buildSearchFilter?.(suggestionRequest);
+
   const body: SearchRequest = {
     size: 0,
     ...timeoutSettings,
     query: {
       bool: {
-        filter: filters,
+        filter: [...(filters ?? []), ...(searchFilter ? [searchFilter] : [])],
       },
     },
     aggs: {
@@ -203,6 +205,7 @@ const getOptionsListDslSuggestions = async ({
     suggestions: results.suggestions,
     totalCardinality,
     invalidSelections,
+    isPartial: Boolean(rawEsResult.terminated_early || rawEsResult.timed_out),
   };
 };
 

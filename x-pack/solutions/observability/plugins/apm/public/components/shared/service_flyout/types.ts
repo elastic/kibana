@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { ServiceFlyoutSource } from './constants';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+
+export interface ServiceFlyoutService {
+  name: string;
+  agentName?: AgentName;
+}
 
 export interface ServiceFlyoutOptions {
-  initialTransactionType?: string;
+  transactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  kuery?: string;
-  source?: ServiceFlyoutSource;
+  /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
+  latencyAggregationType?: LatencyAggregationType;
 }

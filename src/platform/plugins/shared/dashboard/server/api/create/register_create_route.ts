@@ -32,6 +32,9 @@ export function registerCreateRoute(
   const createRoute = router.post({
     path: basePath,
     summary: 'Create a dashboard',
+    // Only the public route carries a curated ID. The dashboard-app route is
+    // internal and keeps its derived one.
+    ...(isDashboardAppRequest ? {} : { operationId: 'create-dashboard' }),
     ...routeConfig,
     description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
   });
@@ -69,7 +72,7 @@ export function registerCreateRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const result = await create(
             ctx,

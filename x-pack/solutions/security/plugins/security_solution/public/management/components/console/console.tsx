@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
+import { ConsoleInfo } from './components/console_info';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -112,6 +113,7 @@ export const Console = memo<ConsoleProps>(
     TitleComponent,
     storagePrefix,
     managedKey,
+    apiRef,
     ...commonProps
   }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
@@ -154,6 +156,7 @@ export const Console = memo<ConsoleProps>(
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
         storagePrefix={storagePrefix}
+        apiRef={apiRef}
       >
         <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
@@ -193,6 +196,7 @@ export const Console = memo<ConsoleProps>(
                               { defaultMessage: 'Command output history' }
                             )}
                           >
+                            <ConsoleInfo data-test-subj={getTestId('consoleAboutPanel')} />
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>

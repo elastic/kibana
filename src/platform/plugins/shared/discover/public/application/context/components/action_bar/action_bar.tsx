@@ -16,13 +16,11 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
+  EuiText,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 
@@ -35,11 +33,6 @@ export interface ActionBarProps {
    * the number of docs to be displayed
    */
   docCount: number;
-  /**
-   *  the number of documents that are  available
-   *  display warning when it's lower than docCount
-   */
-  docCountAvailable: number;
   /**
    * is true while the anchor record is fetched
    */
@@ -66,7 +59,6 @@ export interface ActionBarProps {
 export function ActionBar({
   defaultStepSize,
   docCount,
-  docCountAvailable,
   isDisabled,
   isLoading,
   onChangeCount,
@@ -74,7 +66,6 @@ export function ActionBar({
 }: ActionBarProps) {
   const styles = useMemoCss(componentStyles);
 
-  const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
   const canLoadMore = defaultStepSize > 0 || newDocCount !== docCount;
@@ -92,10 +83,7 @@ export function ActionBar({
   }, [docCount, newDocCount]);
   return (
     <form onSubmit={onSubmit}>
-      {isSuccessor && <EuiSpacer size="s" />}
-      {isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
-      {isSuccessor && showWarning && <EuiSpacer size="s" />}
-      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj={`${type}LoadMoreButton`}
@@ -108,44 +96,43 @@ export function ActionBar({
                 onChangeCount(type, value);
               }
             }}
-            flush="right"
+            size="s"
+            flush="both"
           >
             <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="center">
-            <EuiFieldNumber
-              aria-label={
-                isSuccessor
-                  ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
-                      defaultMessage: 'Number of older documents',
-                    })
-                  : i18n.translate('discover.context.newerDocumentsAriaLabel', {
-                      defaultMessage: 'Number of newer documents',
-                    })
+          <EuiFieldNumber
+            aria-label={
+              isSuccessor
+                ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
+                    defaultMessage: 'Number of older documents',
+                  })
+                : i18n.translate('discover.context.newerDocumentsAriaLabel', {
+                    defaultMessage: 'Number of newer documents',
+                  })
+            }
+            compressed
+            css={styles.cxtSizePicker}
+            data-test-subj={`${type}CountPicker`}
+            disabled={isDisabled}
+            min={MIN_CONTEXT_SIZE}
+            max={MAX_CONTEXT_SIZE}
+            onChange={(ev) => {
+              setNewDocCount(ev.target.valueAsNumber);
+            }}
+            onBlur={() => {
+              if (newDocCount !== docCount && isValid(newDocCount)) {
+                onChangeCount(type, newDocCount);
               }
-              compressed
-              css={styles.cxtSizePicker}
-              data-test-subj={`${type}CountPicker`}
-              disabled={isDisabled}
-              min={MIN_CONTEXT_SIZE}
-              max={MAX_CONTEXT_SIZE}
-              onChange={(ev) => {
-                setNewDocCount(ev.target.valueAsNumber);
-              }}
-              onBlur={() => {
-                if (newDocCount !== docCount && isValid(newDocCount)) {
-                  onChangeCount(type, newDocCount);
-                }
-              }}
-              type="number"
-              value={newDocCount >= 0 ? newDocCount : ''}
-            />
-          </EuiFormRow>
+            }}
+            type="number"
+            value={newDocCount >= 0 ? newDocCount : ''}
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow display="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
             {isSuccessor ? (
               <FormattedMessage
                 id="discover.context.olderDocumentsDescription"
@@ -157,12 +144,9 @@ export function ActionBar({
                 defaultMessage="newer documents"
               />
             )}
-          </EuiFormRow>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {!isSuccessor && showWarning && <EuiSpacer size="s" />}
-      {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
-      <EuiSpacer size="s" />
     </form>
   );
 }

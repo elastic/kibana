@@ -6,8 +6,10 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { useNavigation } from '../hooks/use_navigation';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 
@@ -17,12 +19,18 @@ export const CreateAiIndexButton = () => {
   return (
     <EuiButton
       fill
+      iconType="plusCircle"
       data-test-subj="contextCreateAiIndexButton"
       href={createContextEngineUrl(CONTEXT_ENGINE_PATHS.create)}
-    >
-      {i18n.translate('xpack.contextEngine.createAiIndexButton', {
-        defaultMessage: 'Create AI Index',
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+        action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
       })}
+    >
+      <FormattedMessage
+        id="xpack.contextEngine.createAiIndexButton"
+        defaultMessage="Create AI Index"
+      />
     </EuiButton>
   );
 };

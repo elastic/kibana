@@ -16,7 +16,6 @@ const SERVERLESS_TAGS = [
   ...tags.serverless.search,
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,
-  ...tags.serverless.workplaceai,
   ...tags.serverless.vectordb,
 ];
 
@@ -75,16 +74,7 @@ apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
     });
 
     expect(setResponse).toHaveStatusCode(200);
-
-    const verifyResponse = await apiClient.get('/internal/kibana/settings', {
-      headers: {
-        ...INTERNAL_HEADERS,
-        ...sessionCredentials.cookieHeader,
-      },
-    });
-
-    expect(verifyResponse).toHaveStatusCode(200);
-    expect(verifyResponse.body.settings[TEST_SETTING].userValue).toBe(999);
+    expect(setResponse.body.settings[TEST_SETTING].userValue).toBe(999);
   });
 
   apiTest('set many validates value', async ({ apiClient }) => {
@@ -114,16 +104,7 @@ apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
     });
 
     expect(setResponse).toHaveStatusCode(200);
-
-    const verifyResponse = await apiClient.get('/internal/kibana/settings', {
-      headers: {
-        ...INTERNAL_HEADERS,
-        ...sessionCredentials.cookieHeader,
-      },
-    });
-
-    expect(verifyResponse).toHaveStatusCode(200);
-    expect(verifyResponse.body.settings[TEST_SETTING].userValue).toBe(500);
+    expect(setResponse.body.settings[TEST_SETTING].userValue).toBe(500);
   });
 
   apiTest('deletes setting', async ({ apiClient }) => {
@@ -135,15 +116,6 @@ apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
     });
 
     expect(deleteResponse).toHaveStatusCode(200);
-
-    const verifyResponse = await apiClient.get('/internal/kibana/settings', {
-      headers: {
-        ...INTERNAL_HEADERS,
-        ...sessionCredentials.cookieHeader,
-      },
-    });
-
-    expect(verifyResponse).toHaveStatusCode(200);
-    expect(verifyResponse.body.settings[TEST_SETTING]).toBeUndefined();
+    expect(deleteResponse.body.settings[TEST_SETTING]).toBeUndefined();
   });
 });

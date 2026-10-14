@@ -125,6 +125,13 @@ export const DISABLE_PIN = (isAlert: boolean) =>
       'This {isAlert, select, true{alert} other{event}} may not be pinned while editing a template Timeline',
   });
 
+export const DISABLE_PIN_SUPER_TIMELINE = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.body.pinning.disablePinSuperTimelineTooltip', {
+    values: { isAlert },
+    defaultMessage:
+      'This {isAlert, select, true{alert} other{event}} may not be pinned in a read-only Super Timeline',
+  });
+
 export const PINNED_WITH_NOTES = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip', {
     values: { isAlert },

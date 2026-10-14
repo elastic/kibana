@@ -11,13 +11,18 @@ import { createEventLogService } from '../../services/event_log_service/event_lo
 import {
   createActionGroup,
   createActionPolicy,
-  createAlertEpisode,
+  createAlert,
+  createDispatchFailure,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
-import type { ActionPolicy, ActionPolicyId, Rule, RuleId } from '../types';
+import type { ActionPolicy, ActionPolicyId, DispatchFailure, Rule, RuleId } from '../types';
 import { StoreExecutionHistoryStep } from './store_execution_history_step';
+import { DISPATCH_FAILURE_REASONS } from './constants';
+
+const logger = createStepLogger();
 
 describe('StoreExecutionHistoryStep', () => {
   let eventLogger: ReturnType<typeof eventLoggerMock.create>;
@@ -29,34 +34,34 @@ describe('StoreExecutionHistoryStep', () => {
     step = new StoreExecutionHistoryStep(eventLogService);
   });
 
-  it('emits one dispatched summary per policy with aggregated episode/rule/group counts', async () => {
+  it('emits one dispatched summary per policy with aggregated alert/rule/group counts', async () => {
     const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'default' });
-    const episodes = [
-      createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-1' }),
-      createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-2' }),
-      createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-3' }),
+    const alerts = [
+      createAlert({ rule_id: 'rule-a', alert_id: 'ep-1' }),
+      createAlert({ rule_id: 'rule-a', alert_id: 'ep-2' }),
+      createAlert({ rule_id: 'rule-b', alert_id: 'ep-3' }),
     ];
     const group1 = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
       spaceId: 'default',
-      episodes: [episodes[0], episodes[1]],
+      alerts: [alerts[0], alerts[1]],
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
     const group2 = createActionGroup({
       id: 'group-2',
       policyId: 'policy-1',
       spaceId: 'default',
-      episodes: [episodes[2]],
+      alerts: [alerts[2]],
       destinations: [{ type: 'workflow', id: 'wf-b' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
-        dispatchable: episodes,
+        dispatchable: alerts,
         rules: new Map<RuleId, Rule>([
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
@@ -66,7 +71,8 @@ describe('StoreExecutionHistoryStep', () => {
           ['group-1', ['exec-a']],
           ['group-2', ['exec-b']],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -96,8 +102,8 @@ describe('StoreExecutionHistoryStep', () => {
       },
     ]);
     expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 3,
-      episode_ids: ['ep-1', 'ep-2', 'ep-3'],
+      alert_count: 3,
+      alert_ids: ['ep-1', 'ep-2', 'ep-3'],
       rule_count: 2,
       action_group_count: 2,
       action_group_ids: ['group-1', 'group-2'],
@@ -111,20 +117,21 @@ describe('StoreExecutionHistoryStep', () => {
     const rule = createRule({ id: 'rule-1' });
     const policyA = createActionPolicy({ id: 'policy-a' });
     const policyB = createActionPolicy({ id: 'policy-b' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
-    const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', episodes: [episode] });
-    const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', episodes: [episode] });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', alerts: [alert] });
+    const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', alerts: [alert] });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [groupA, groupB],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([
           [policyA.id, policyA],
           [policyB.id, policyB],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -137,21 +144,22 @@ describe('StoreExecutionHistoryStep', () => {
   it('emits a throttled summary with the same shape as dispatched', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [alert],
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         throttled: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -159,8 +167,8 @@ describe('StoreExecutionHistoryStep', () => {
     expect(event?.event?.action).toBe('throttled');
     expect(event?.event?.outcome).toBe('success');
     expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 1,
-      episode_ids: ['ep-1'],
+      alert_count: 1,
+      alert_ids: ['ep-1'],
       rule_count: 1,
       action_group_count: 1,
       action_group_ids: ['group-1'],
@@ -170,12 +178,12 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('emits one unmatched summary per rule with episode_ids for that rule', async () => {
+  it('emits one unmatched summary per rule with alert_ids for that rule', async () => {
     const ruleA = createRule({ id: 'rule-a' });
     const ruleB = createRule({ id: 'rule-b' });
-    const unmatchedA1 = createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-a1' });
-    const unmatchedA2 = createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-a2' });
-    const unmatchedB1 = createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-b1' });
+    const unmatchedA1 = createAlert({ rule_id: 'rule-a', alert_id: 'ep-a1' });
+    const unmatchedA2 = createAlert({ rule_id: 'rule-a', alert_id: 'ep-a2' });
+    const unmatchedB1 = createAlert({ rule_id: 'rule-b', alert_id: 'ep-b1' });
 
     await step.execute(
       createDispatcherPipelineState({
@@ -184,7 +192,8 @@ describe('StoreExecutionHistoryStep', () => {
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -204,35 +213,36 @@ describe('StoreExecutionHistoryStep', () => {
       },
     ]);
     expect(eventA?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 2,
-      episode_ids: ['ep-a1', 'ep-a2'],
+      alert_count: 2,
+      alert_ids: ['ep-a1', 'ep-a2'],
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
 
     const eventB = byRuleId.get('rule-b');
     expect(eventB?.kibana?.alerting_v2?.dispatcher).toEqual({
-      episode_count: 1,
-      episode_ids: ['ep-b1'],
+      alert_count: 1,
+      alert_ids: ['ep-b1'],
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
     expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('alert');
   });
 
-  it('excludes episodes handled by dispatch or throttled from the unmatched set', async () => {
+  it('excludes alerts handled by dispatch or throttled from the unmatched set', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const dispatched = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-dispatched' });
-    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-throttled' });
-    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-unmatched' });
+    const dispatched = createAlert({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
+    const throttledEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-throttled' });
+    const unmatchedEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
 
     await step.execute(
       createDispatcherPipelineState({
-        dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', episodes: [dispatched] })],
-        throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', episodes: [throttledEp] })],
+        dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', alerts: [dispatched] })],
+        throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', alerts: [throttledEp] })],
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -241,26 +251,27 @@ describe('StoreExecutionHistoryStep', () => {
     const outcomes = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.outcome);
     expect(outcomes).toEqual(['success', 'success', 'success']);
     const unmatchedEvent = eventLogger.logEvent.mock.calls[2][0];
-    expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toEqual(['ep-unmatched']);
+    expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.alert_ids).toEqual(['ep-unmatched']);
   });
 
   it('stamps the same execution.uuid on every event emitted in a single run', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const dispatched = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-dispatched' });
-    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-throttled' });
-    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-unmatched' });
+    const dispatched = createAlert({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
+    const throttledEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-throttled' });
+    const unmatchedEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
     const executionUuid = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
 
     await step.execute(
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({ executionUuid }),
-        dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', episodes: [dispatched] })],
-        throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', episodes: [throttledEp] })],
+        dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', alerts: [dispatched] })],
+        throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', alerts: [throttledEp] })],
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -271,29 +282,210 @@ describe('StoreExecutionHistoryStep', () => {
   });
 
   it('short-circuits when there is nothing to record', async () => {
-    const result = await step.execute(createDispatcherPipelineState({}));
+    const result = await step.execute(createDispatcherPipelineState({}), logger);
 
     expect(result).toEqual({ type: 'continue' });
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
   });
 
-  it('sets namespace and space_ids for non-default spaces', async () => {
-    const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
-    const policy = createActionPolicy({ id: 'policy-1', spaceId: 'my-space' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+  it('does not emit dispatch_failed events when all dispatches succeed', async () => {
+    const rule = createRule({ id: 'rule-1' });
+    const policy = createActionPolicy({ id: 'policy-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
+      id: 'group-1',
       policyId: 'policy-1',
-      spaceId: 'my-space',
-      episodes: [episode],
+      alerts: [alert],
+      destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+        dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
+      }),
+      logger
+    );
+
+    const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+    expect(actions).not.toContain('dispatch_failed');
+  });
+
+  it('emits a dispatch_failed event for a failed action-group → workflow attempt', async () => {
+    const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
+    const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      alerts: [
+        createAlert({ rule_id: 'rule-a', alert_id: 'ep-1' }),
+        createAlert({ rule_id: 'rule-b', alert_id: 'ep-2' }),
+      ],
+      reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
+      message: 'Workflow wf-a is disabled, enable it to dispatch for group group-1',
+    };
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatchFailures: [failure],
+        rules: new Map<RuleId, Rule>([
+          [ruleA.id, ruleA],
+          [ruleB.id, ruleB],
+        ]),
+      }),
+      logger
+    );
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event?.action).toBe('dispatch_failed');
+    expect(event?.event?.outcome).toBe('failure');
+    expect(event?.error?.message).toBe(
+      'Workflow wf-a is disabled, enable it to dispatch for group group-1'
+    );
+    expect(event?.kibana?.saved_objects).toEqual([
+      {
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        id: 'policy-1',
+        rel: 'primary',
+        namespace: undefined,
+      },
+      {
+        type: RULE_SAVED_OBJECT_TYPE,
+        type_id: 'alert',
+        id: 'rule-a',
+        rel: 'primary',
+        namespace: undefined,
+      },
+      {
+        type: RULE_SAVED_OBJECT_TYPE,
+        type_id: 'alert',
+        id: 'rule-b',
+        rel: 'primary',
+        namespace: undefined,
+      },
+    ]);
+    expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
+      failure_reason: 'workflow_disabled',
+      action_group_count: 1,
+      action_group_ids: ['group-1'],
+      workflow_ids: ['wf-a'],
+      alert_count: 2,
+      alert_ids: ['ep-1', 'ep-2'],
+      rule_count: 2,
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
+    });
+  });
+
+  it('emits dispatch_failed events even when nothing else was recorded', async () => {
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      alerts: [createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' })],
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'boom',
+    };
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatch_failed');
+  });
+
+  it('emits a dispatch_failed event with the license_not_supported reason', async () => {
+    const failure = createDispatchFailure({
+      reason: DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED,
+      message: 'license not supported',
+    });
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event).toEqual({ action: 'dispatch_failed', outcome: 'failure' });
+    expect(event?.error?.message).toBe('license not supported');
+    expect(event?.kibana?.alerting_v2?.dispatcher?.failure_reason).toBe('license_not_supported');
+  });
+
+  it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'my-space',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      alerts: [createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' })],
+      reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
+      message: 'not found',
+    };
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatchFailures: [failure],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+      }),
+      logger
+    );
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.kibana?.space_ids).toEqual(['my-space']);
+    expect(event?.kibana?.saved_objects?.[0]?.namespace).toBe('my-space');
+    expect(event?.kibana?.saved_objects?.[1]?.namespace).toBe('my-space');
+  });
+
+  it('spills failure rule ids beyond the SO-ref cap into dispatcher.rule_ids', async () => {
+    const ruleIds = Array.from({ length: 55 }, (_, i) => `rule-${i}`);
+    const rules = new Map<RuleId, Rule>(
+      ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
+    );
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      alerts: ruleIds.map((rule_id, i) => createAlert({ rule_id, alert_id: `ep-${i}` })),
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'boom',
+    };
+
+    await step.execute(
+      createDispatcherPipelineState({ dispatchFailures: [failure], rules }),
+      logger
+    );
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    const refs = event?.kibana?.saved_objects ?? [];
+    const ruleRefs = refs.filter((ref) => ref?.type === RULE_SAVED_OBJECT_TYPE);
+    expect(ruleRefs).toHaveLength(50);
+    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(55);
+    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toHaveLength(5);
+  });
+
+  it('sets namespace and space_ids for non-default spaces', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
+    const policy = createActionPolicy({ id: 'policy-1', spaceId: 'my-space' });
+    const alert = createAlert({ rule_id: 'rule-1' });
+    const group = createActionGroup({
+      policyId: 'policy-1',
+      spaceId: 'my-space',
+      alerts: [alert],
+    });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [group],
+        dispatchable: [alert],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -305,11 +497,11 @@ describe('StoreExecutionHistoryStep', () => {
   it('deduplicates workflow_ids across an active policy multiple action groups', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group1 = createActionGroup({
       id: 'g1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [alert],
       destinations: [
         { type: 'workflow', id: 'wf-a' },
         { type: 'workflow', id: 'wf-b' },
@@ -318,7 +510,7 @@ describe('StoreExecutionHistoryStep', () => {
     const group2 = createActionGroup({
       id: 'g2',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [alert],
       destinations: [
         { type: 'workflow', id: 'wf-a' },
         { type: 'workflow', id: 'wf-c' },
@@ -328,10 +520,11 @@ describe('StoreExecutionHistoryStep', () => {
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -340,17 +533,18 @@ describe('StoreExecutionHistoryStep', () => {
 
   it('stamps @timestamp from pipeline input.startedAt', async () => {
     const rule = createRule({ id: 'rule-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
 
     await step.execute(
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
-          previousStartedAt: new Date('2027-06-01T12:00:00.000Z'),
+          eventWatermark: new Date('2027-06-01T12:00:00.000Z'),
         }),
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -363,22 +557,21 @@ describe('StoreExecutionHistoryStep', () => {
     const rules = new Map<RuleId, Rule>(
       ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
     );
-    const episodes = ruleIds.map((rule_id, i) =>
-      createAlertEpisode({ rule_id, episode_id: `ep-${i}` })
-    );
+    const alerts = ruleIds.map((rule_id, i) => createAlert({ rule_id, alert_id: `ep-${i}` }));
     const group = createActionGroup({
       id: 'big-group',
       policyId: 'policy-1',
-      episodes,
+      alerts,
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: episodes,
+        dispatchable: alerts,
         rules,
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -395,23 +588,318 @@ describe('StoreExecutionHistoryStep', () => {
   it('does not set rule_ids when rule count fits within the SO-ref cap', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [alert],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
     expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toBeUndefined();
+  });
+
+  describe('partial and total dispatch failures', () => {
+    it('partial group failure: excludes the failed workflow from the dispatched summary', async () => {
+      const rule = createRule({ id: 'rule-1' });
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const group = createActionGroup({
+        id: 'g1',
+        policyId: 'policy-1',
+        alerts: [alert],
+        destinations: [
+          { type: 'workflow', id: 'wf-a' },
+          { type: 'workflow', id: 'wf-b' },
+        ],
+      });
+      const failure = createDispatchFailure({
+        policyId: 'policy-1',
+        actionGroupId: 'g1',
+        workflowId: 'wf-b',
+        alerts: [alert],
+        reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
+        message: 'Workflow wf-b is disabled',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [group],
+          dispatchable: [alert],
+          dispatchedExecutions: new Map([['g1', ['exec-a']]]),
+          dispatchFailures: [failure],
+          rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+          policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        }),
+        logger
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const calls = eventLogger.logEvent.mock.calls;
+      const dispatched = calls.find(([event]) => event?.event?.action === 'dispatched')?.[0];
+      const failed = calls.find(([event]) => event?.event?.action === 'dispatch_failed')?.[0];
+
+      expect(dispatched?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+        action_group_ids: ['g1'],
+        workflow_ids: ['wf-a'],
+        workflow_execution_ids: ['exec-a'],
+        alert_ids: ['ep-1'],
+      });
+      expect(failed?.kibana?.alerting_v2?.dispatcher?.workflow_ids).toEqual(['wf-b']);
+    });
+
+    it('total group failure: emits no dispatched event and no unmatched event', async () => {
+      const rule = createRule({ id: 'rule-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const group = createActionGroup({
+        id: 'g1',
+        policyId: 'policy-1',
+        alerts: [alert],
+        destinations: [
+          { type: 'workflow', id: 'wf-a' },
+          { type: 'workflow', id: 'wf-b' },
+        ],
+      });
+      const failures = [
+        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-a', alerts: [alert] }),
+        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-b', alerts: [alert] }),
+      ];
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [group],
+          dispatchable: [alert],
+          dispatchFailures: failures,
+          rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        }),
+        logger
+      );
+
+      const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(actions).not.toContain('dispatched');
+      expect(actions).not.toContain('unmatched');
+      expect(actions.filter((a) => a === 'dispatch_failed')).toHaveLength(2);
+    });
+
+    it('same workflow in two groups: success for g1 is not suppressed by g2 failure', async () => {
+      const rule = createRule({ id: 'rule-1' });
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
+      const group1 = createActionGroup({
+        id: 'g1',
+        policyId: 'policy-1',
+        alerts: [alert1],
+        destinations: [{ type: 'workflow', id: 'wf-a' }],
+      });
+      const group2 = createActionGroup({
+        id: 'g2',
+        policyId: 'policy-1',
+        alerts: [alert2],
+        destinations: [{ type: 'workflow', id: 'wf-a' }],
+      });
+      const failure = createDispatchFailure({
+        policyId: 'policy-1',
+        actionGroupId: 'g2',
+        workflowId: 'wf-a',
+        alerts: [alert2],
+        reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
+        message: 'Workflow wf-a not found',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [group1, group2],
+          dispatchable: [alert1, alert2],
+          dispatchedExecutions: new Map([['g1', ['exec-a']]]),
+          dispatchFailures: [failure],
+          rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+          policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        }),
+        logger
+      );
+
+      const calls = eventLogger.logEvent.mock.calls;
+      const dispatched = calls.find(([event]) => event?.event?.action === 'dispatched')?.[0];
+
+      expect(dispatched?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+        action_group_ids: ['g1'],
+        workflow_ids: ['wf-a'],
+        workflow_execution_ids: ['exec-a'],
+        alert_ids: ['ep-1'],
+      });
+    });
+
+    it('mixed groups in one policy: fully-failed group alerts excluded from dispatched summary', async () => {
+      const rule = createRule({ id: 'rule-1' });
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
+      const failedGroup = createActionGroup({
+        id: 'g1',
+        policyId: 'policy-1',
+        alerts: [alert1],
+        destinations: [{ type: 'workflow', id: 'wf-a' }],
+      });
+      const successGroup = createActionGroup({
+        id: 'g2',
+        policyId: 'policy-1',
+        alerts: [alert2],
+        destinations: [{ type: 'workflow', id: 'wf-b' }],
+      });
+      const failure = createDispatchFailure({
+        policyId: 'policy-1',
+        actionGroupId: 'g1',
+        workflowId: 'wf-a',
+        alerts: [alert1],
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [failedGroup, successGroup],
+          dispatchable: [alert1, alert2],
+          dispatchedExecutions: new Map([['g2', ['exec-b']]]),
+          dispatchFailures: [failure],
+          rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+          policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        }),
+        logger
+      );
+
+      const calls = eventLogger.logEvent.mock.calls;
+      const dispatched = calls.find(([event]) => event?.event?.action === 'dispatched')?.[0];
+
+      // Only g2's contributions should appear in the dispatched event.
+      expect(dispatched?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+        action_group_count: 1,
+        action_group_ids: ['g2'],
+        workflow_ids: ['wf-b'],
+        alert_count: 1,
+        alert_ids: ['ep-2'],
+        rule_count: 1,
+      });
+    });
+
+    it('throttled summary is not affected by dispatch failures referencing the same group id', async () => {
+      const rule = createRule({ id: 'rule-1' });
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const throttledGroup = createActionGroup({
+        id: 'g1',
+        policyId: 'policy-1',
+        alerts: [alert],
+        destinations: [
+          { type: 'workflow', id: 'wf-a' },
+          { type: 'workflow', id: 'wf-b' },
+        ],
+      });
+      // A failure referencing the same group id as the throttled group should
+      // not affect the throttled summary — throttled groups are never dispatched.
+      const failure = createDispatchFailure({
+        policyId: 'policy-1',
+        actionGroupId: 'g1',
+        workflowId: 'wf-a',
+        alerts: [alert],
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          throttled: [throttledGroup],
+          dispatchable: [alert],
+          dispatchFailures: [failure],
+          rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+          policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        }),
+        logger
+      );
+
+      const calls = eventLogger.logEvent.mock.calls;
+      const throttled = calls.find(([event]) => event?.event?.action === 'throttled')?.[0];
+
+      expect(throttled?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+        action_group_ids: ['g1'],
+        workflow_ids: ['wf-a', 'wf-b'],
+      });
+    });
+  });
+
+  describe('external alert handling', () => {
+    it('two external alerts from different vendors produce separate unmatched events', async () => {
+      const pdAlert = createAlert({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        alert_id: 'pd-1',
+      });
+      const ddAlert = createAlert({
+        source: 'datadog',
+        rule_id: null,
+        space_id: 'default',
+        alert_id: 'dd-1',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatchable: [pdAlert, ddAlert],
+        }),
+        logger
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(actions).toEqual(['unmatched', 'unmatched']);
+      const alertSets = eventLogger.logEvent.mock.calls.map(
+        ([event]) => event?.kibana?.alerting_v2?.dispatcher?.alert_ids
+      );
+      expect(alertSets).toContainEqual(['pd-1']);
+      expect(alertSets).toContainEqual(['dd-1']);
+    });
+
+    it('same vendor in two spaces produces separate unmatched events', async () => {
+      const alerts = ['space-a', 'space-b'].map((spaceId) =>
+        createAlert({
+          source: 'pagerduty',
+          rule_id: null,
+          space_id: spaceId,
+          alert_id: `pd-${spaceId}`,
+        })
+      );
+
+      await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), logger);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
+      expect(spaces).toEqual([['space-a'], ['space-b']]);
+    });
+
+    it('external alert uses alert.space_id for the event space, not a rule space', async () => {
+      const pdAlert = createAlert({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'my-space',
+        alert_id: 'pd-1',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatchable: [pdAlert],
+        }),
+        logger
+      );
+
+      const [[event]] = eventLogger.logEvent.mock.calls;
+      expect(event?.kibana?.space_ids).toEqual(['my-space']);
+      expect(event?.kibana?.saved_objects).toEqual([]);
+    });
   });
 });

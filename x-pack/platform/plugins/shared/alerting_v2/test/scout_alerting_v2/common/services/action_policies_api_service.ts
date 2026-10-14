@@ -9,7 +9,7 @@ import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   ActionPolicyResponse,
-  BulkActionActionPoliciesResponse,
+  BulkResponse,
   CreateActionPolicyDataInput,
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
@@ -17,19 +17,33 @@ import type {
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
 
+export interface ActionPolicyApiSpaceOptions {
+  spaceId?: string;
+}
+
 export interface ActionPoliciesApiService {
-  create: (data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
+  create: (
+    data: CreateActionPolicyDataInput,
+    options?: ActionPolicyApiSpaceOptions
+  ) => Promise<ActionPolicyResponse>;
   upsert: (id: string, data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
   get: (id: string) => Promise<ActionPolicyResponse>;
-  list: (query?: Record<string, string | number | boolean>) => Promise<FindActionPoliciesResponse>;
+  list: (
+    query?: Record<string, string | number | boolean>,
+    options?: ActionPolicyApiSpaceOptions
+  ) => Promise<FindActionPoliciesResponse>;
   patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   enable: (id: string) => Promise<ActionPolicyResponse>;
   disable: (id: string) => Promise<ActionPolicyResponse>;
   snooze: (id: string, snoozedUntil: string) => Promise<ActionPolicyResponse>;
   unsnooze: (id: string) => Promise<void>;
   delete: (id: string) => Promise<void>;
-  cleanUp: () => Promise<void>;
+  bulkDelete: (ids: string[]) => Promise<BulkResponse>;
+  cleanUp: (options?: ActionPolicyApiSpaceOptions) => Promise<void>;
 }
+
+const withSpace = (path: string, spaceId: string | undefined): string =>
+  spaceId ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
 
 export const getActionPoliciesApiService = ({
   log,
@@ -47,37 +61,48 @@ export const getActionPoliciesApiService = ({
       return response.data;
     });
 
-  const list: ActionPoliciesApiService['list'] = (query = {}) =>
+  const list: ActionPoliciesApiService['list'] = (query = {}, options) =>
     measurePerformanceAsync(log, 'actionPolicies.list', async () => {
       const response = await kbnClient.request<FindActionPoliciesResponse>({
         method: 'GET',
-        path: ALERTING_V2_ACTION_POLICY_API_PATH,
+        path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
         query,
+      });
+      return response.data;
+    });
+
+  const postBulk = (
+    operation: string,
+    body: Record<string, unknown>,
+    options?: ActionPolicyApiSpaceOptions
+  ) =>
+    measurePerformanceAsync(log, `actionPolicies.${operation}`, async () => {
+      const response = await kbnClient.request<BulkResponse>({
+        method: 'POST',
+        path: withSpace(`${ALERTING_V2_ACTION_POLICY_API_PATH}/_${operation}`, options?.spaceId),
+        headers: COMMON_HEADERS,
+        body,
       });
       return response.data;
     });
 
   const patch: ActionPoliciesApiService['patch'] = (id, data) =>
     measurePerformanceAsync(log, 'actionPolicies.patch', async () => {
-      const current = await get(id);
-      if (!current.version) {
-        throw new Error(`Action policy "${id}" has no version; cannot patch.`);
-      }
       const response = await kbnClient.request<ActionPolicyResponse>({
         method: 'PATCH',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
         headers: COMMON_HEADERS,
-        body: { ...data, version: current.version },
+        body: data,
       });
       return response.data;
     });
 
   return {
-    create: (data) =>
+    create: (data, options) =>
       measurePerformanceAsync(log, 'actionPolicies.create', async () => {
         const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
-          path: ALERTING_V2_ACTION_POLICY_API_PATH,
+          path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
           headers: COMMON_HEADERS,
           body: data,
         });
@@ -123,7 +148,7 @@ export const getActionPoliciesApiService = ({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
           headers: COMMON_HEADERS,
-          body: { snoozedUntil },
+          body: { snoozed_until: snoozedUntil },
         });
         return response.data;
       }),
@@ -153,19 +178,14 @@ export const getActionPoliciesApiService = ({
         });
       }),
 
-    cleanUp: () =>
+    bulkDelete: (ids) => postBulk('bulk_delete', { ids }),
+
+    cleanUp: (options) =>
       measurePerformanceAsync(log, 'actionPolicies.cleanUp', async () => {
-        const { items } = await list({ perPage: 100 });
+        const { items } = await list({ per_page: 100 }, options);
         if (items.length === 0) return;
 
-        await kbnClient.request<BulkActionActionPoliciesResponse>({
-          method: 'POST',
-          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk`,
-          headers: COMMON_HEADERS,
-          body: {
-            actions: items.map((item) => ({ id: item.id, action: 'delete' as const })),
-          },
-        });
+        await postBulk('bulk_delete', { ids: items.map((item) => item.id) }, options);
       }),
   };
 };

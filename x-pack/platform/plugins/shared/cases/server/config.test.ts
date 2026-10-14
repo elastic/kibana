@@ -19,18 +19,16 @@ describe('config validation', () => {
           },
           "analyticsV2": Object {
             "enableAdminRoutes": false,
-            "enabled": false,
+            "enabled": true,
             "reconciliationIntervalMinutes": 30,
             "resetPageDelayMs": 0,
             "resetTaskTimeoutMinutes": 60,
           },
-          "attachments": Object {
+          "assigneeIdentity": Object {
             "enabled": true,
           },
-          "casesRedesign": Object {
-            "details": true,
-            "list": true,
-            "settings": true,
+          "attachments": Object {
+            "enabled": true,
           },
           "chat": Object {
             "enabled": true,
@@ -136,6 +134,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "runWorkflows": Object {
+            "enabled": true,
+          },
           "stack": Object {
             "enabled": true,
           },
@@ -171,6 +172,21 @@ describe('config validation', () => {
       expect(config.chat.enabled).toBe(false);
     });
 
+    it('sets analyticsV2.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: true } });
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: false } });
+      expect(config.analyticsV2.enabled).toBe(false);
+    });
+
     it('sets templates.enabled default to true', () => {
       const config = ConfigSchema.validate({});
       expect(config.templates.enabled).toBe(true);
@@ -179,6 +195,16 @@ describe('config validation', () => {
     it('allows templates.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ templates: { enabled: false } });
       expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets runWorkflows.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.runWorkflows.enabled).toBe(true);
+    });
+
+    it('allows runWorkflows.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: false } });
+      expect(config.runWorkflows.enabled).toBe(false);
     });
   });
 });

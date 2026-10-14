@@ -42,11 +42,11 @@ export const ReviewRuleUpgradeSortItem = lazySchema(() =>
       /**
        * Field to sort by.
        */
-      field: FindRulesSortField,
+      field: FindRulesSortField.describe('Field to sort by.'),
       /**
        * Sort order.
        */
-      order: SortOrder,
+      order: SortOrder.describe('Sort order.'),
     })
     .strict()
 );
@@ -71,19 +71,19 @@ export const RuleUpgradeStatsForReview = lazySchema(() =>
       /**
        * Deprecated. Always 0.
        */
-      num_rules_to_upgrade_total: z.number().int(),
+      num_rules_to_upgrade_total: z.number().int().describe('Deprecated. Always 0.'),
       /**
        * Deprecated. Always 0.
        */
-      num_rules_with_conflicts: z.number().int(),
+      num_rules_with_conflicts: z.number().int().describe('Deprecated. Always 0.'),
       /**
        * Deprecated. Always 0.
        */
-      num_rules_with_non_solvable_conflicts: z.number().int(),
+      num_rules_with_non_solvable_conflicts: z.number().int().describe('Deprecated. Always 0.'),
       /**
        * Deprecated. Always an empty array.
        */
-      tags: RuleTagArray,
+      tags: RuleTagArray.describe('Deprecated. Always an empty array.'),
     })
     .strict()
 );
@@ -104,7 +104,12 @@ export const PartialThreeWayRuleDiff = lazySchema(() =>
       /**
        * Map keyed by rule field name, where each value is a per-field three-way diff object.
        */
-      fields: z.object({}).catchall(z.unknown()),
+      fields: z
+        .object({})
+        .catchall(z.unknown())
+        .describe(
+          'Map keyed by rule field name, where each value is a per-field three-way diff object.'
+        ),
     })
     .catchall(z.unknown())
 );
@@ -122,23 +127,29 @@ export const RuleUpgradeInfoForReview = lazySchema(() =>
       /**
        * Currently installed version of the rule.
        */
-      current_rule: RuleResponse,
+      current_rule: RuleResponse.describe('Currently installed version of the rule.'),
       /**
        * Target version of the rule available for upgrade.
        */
-      target_rule: RuleResponse,
+      target_rule: RuleResponse.describe('Target version of the rule available for upgrade.'),
       /**
        * Partial three-way diff between current, base, and target rule versions.
        */
-      diff: PartialThreeWayRuleDiff,
+      diff: PartialThreeWayRuleDiff.describe(
+        'Partial three-way diff between current, base, and target rule versions.'
+      ),
       /**
        * Current revision of the installed rule.
        */
-      revision: z.number().int(),
+      revision: z.number().int().describe('Current revision of the installed rule.'),
       /**
        * Whether the base (originally installed) version of the rule is available for diffing.
        */
-      has_base_version: z.boolean(),
+      has_base_version: z
+        .boolean()
+        .describe(
+          'Whether the base (originally installed) version of the rule is available for diffing.'
+        ),
     })
     .strict()
 );
@@ -150,28 +161,40 @@ export const ReviewRuleUpgradeResponseBody = lazySchema(() =>
       /**
        * Current page number.
        */
-      page: z.number().int(),
+      page: z.number().int().describe('Current page number.'),
       /**
        * Rules per page.
        */
-      per_page: z.number().int(),
+      per_page: z.number().int().describe('Rules per page.'),
       /**
        * The total number of rules available for upgrade that match the filter criteria.
        */
-      total: z.number().int(),
+      total: z
+        .number()
+        .int()
+        .describe(
+          'The total number of rules available for upgrade that match the filter criteria.'
+        ),
       stats: RuleUpgradeStatsForReview,
       /**
        * Info about individual rules; one object per each rule available for upgrade.
        */
-      rules: z.array(RuleUpgradeInfoForReview),
+      rules: z
+        .array(RuleUpgradeInfoForReview)
+        .describe('Info about individual rules; one object per each rule available for upgrade.'),
       /**
        * Facet counts per category requested in `aggregations.counts`.
        */
-      counts: FacetCounts.optional(),
+      counts: FacetCounts.optional().describe(
+        'Facet counts per category requested in `aggregations.counts`.'
+      ),
       /**
        * Warnings produced while serving the request.
        */
-      warnings: z.array(WarningSchema).optional(),
+      warnings: z
+        .array(WarningSchema)
+        .optional()
+        .describe('Warnings produced while serving the request.'),
     })
     .strict()
 );
@@ -183,35 +206,48 @@ export const ReviewRuleUpgradeRequestBody = lazySchema(() =>
       /**
        * Page number starting from 1.
        */
-      page: z.number().int().min(1).optional().default(1),
+      page: z.number().int().min(1).optional().default(1).describe('Page number starting from 1.'),
       /**
        * Rules per page.
        */
-      per_page: z.number().int().min(0).max(500).optional().default(20),
+      per_page: z.number().int().min(0).max(500).optional().default(20).describe('Rules per page.'),
       /**
        * String filter expression interpreted according to `mode`.
        */
-      filter: GranularRulesFilter.optional(),
+      filter: GranularRulesFilter.optional().describe(
+        'String filter expression interpreted according to `mode`.'
+      ),
       /**
        * Free-text search combined with the KQL `filter`.
        */
-      search: GranularRulesSearch.optional(),
+      search: GranularRulesSearch.optional().describe(
+        'Free-text search combined with the KQL `filter`.'
+      ),
       /**
       * Aggregation options computed over the filtered + searched set of
 upgradeable rules.
 
       */
-      aggregations: SearchRulesAggregations.optional(),
+      aggregations: SearchRulesAggregations.optional().describe(
+        'Aggregation options computed over the filtered + searched set of\nupgradeable rules.\n'
+      ),
       /**
       * Ordered sort criteria applied to the upgradeable rule set.
 
       */
-      sort: ReviewRuleUpgradeSort.optional(),
+      sort: ReviewRuleUpgradeSort.optional().describe(
+        'Ordered sort criteria applied to the upgradeable rule set.\n'
+      ),
       /**
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(z.string().max(256)).optional(),
+      fields: z
+        .array(z.string().max(256))
+        .optional()
+        .describe(
+          'Subset of top-level `RuleResponse` keys used to narrow rule response payloads.\n'
+        ),
     })
     .strict()
 );

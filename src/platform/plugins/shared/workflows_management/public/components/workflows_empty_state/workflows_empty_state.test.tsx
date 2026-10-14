@@ -75,16 +75,10 @@ describe('WorkflowsEmptyState', () => {
     expect(screen.getByText('Read documentation')).toBeInTheDocument();
   });
 
-  it('renders the illustration image', () => {
-    renderWithProviders(<WorkflowsEmptyState />);
+  it('renders the illustration', () => {
+    const { container } = renderWithProviders(<WorkflowsEmptyState />);
 
-    const images = screen.getAllByRole('presentation');
-    const mainImage = images.find((img) => img.tagName === 'IMG');
-    expect(mainImage).toBeInTheDocument();
-    expect(mainImage).toHaveAttribute(
-      'src',
-      '/mock-base-path/plugins/workflowsManagement/assets/empty_state.svg'
-    );
+    expect(container.querySelector('.euiIllustration')).toBeInTheDocument();
   });
 
   it('renders the "Example workflows" GitHub link when the library is disabled', () => {

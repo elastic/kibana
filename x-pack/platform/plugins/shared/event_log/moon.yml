@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/event_log
 dependsOn:
+  - '@kbn/core-spaces-common'
   - '@kbn/core'
   - '@kbn/spaces-plugin'
   - '@kbn/es-query'

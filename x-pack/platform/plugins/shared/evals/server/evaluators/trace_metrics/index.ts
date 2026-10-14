@@ -55,6 +55,8 @@ export const latencyEvaluatorDef: EvaluatorDefinition = {
   name: 'latency',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns total trace latency in seconds.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -88,6 +90,8 @@ export const inputTokensEvaluatorDef: EvaluatorDefinition = {
   name: 'input_tokens',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed prompt/input token usage across the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -120,6 +124,8 @@ export const outputTokensEvaluatorDef: EvaluatorDefinition = {
   name: 'output_tokens',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'minimize',
   description: 'Returns summed completion/output token usage across the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -152,6 +158,8 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
   name: 'tool_calls',
   version: '1.0.0',
   kind: 'code',
+  origin: 'built_in',
+  direction: 'neutral',
   description: 'Returns count of TOOL spans associated with the trace.',
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
@@ -161,7 +169,7 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
       traceId: accessor.traceId,
       resolveMetricValue: async () => {
         const { aggregations } = await accessor.runSearch<{
-          tool_calls?: { doc_count?: number };
+          tool_calls?: { distinct_spans?: { value?: number } };
         }>('traces', {
           size: 0,
           aggs: {
@@ -171,11 +179,18 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
                   'attributes.elastic.inference.span.kind': 'TOOL',
                 },
               },
+              aggs: {
+                distinct_spans: {
+                  cardinality: {
+                    field: 'span_id',
+                  },
+                },
+              },
             },
           },
         });
 
-        return aggregations?.tool_calls?.doc_count;
+        return aggregations?.tool_calls?.distinct_spans?.value;
       },
       log,
     });

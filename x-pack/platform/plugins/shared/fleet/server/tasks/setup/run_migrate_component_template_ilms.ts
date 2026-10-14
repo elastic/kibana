@@ -19,10 +19,10 @@ import {
 import { throwIfAborted } from '../utils';
 
 export async function runMigrateComponentTemplateILMs(params: {
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }) {
-  const { logger, abortController } = params;
+  const { logger, signal } = params;
   const isILMPoliciesDisabled =
     appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (isILMPoliciesDisabled) {
@@ -35,7 +35,7 @@ export async function runMigrateComponentTemplateILMs(params: {
   const ilmPolicies = await getILMPolicies(DATA_STREAM_TYPES_DEPRECATED_ILMS);
 
   for (const dataStreamType of DATA_STREAM_TYPES_DEPRECATED_ILMS) {
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
 
     const ilmPolicy = ilmPolicies.get(dataStreamType);
     // Migrate existing component templates if none of the ILM policies are modified or the migration was already done
@@ -56,7 +56,7 @@ export async function runMigrateComponentTemplateILMs(params: {
       }
     );
     for (const [, componentTemplate] of Object.entries(componentTemplates.component_templates)) {
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
 
       const settings = componentTemplate.component_template.template.settings ?? {};
       if (settings.index.lifecycle?.name === dataStreamType) {

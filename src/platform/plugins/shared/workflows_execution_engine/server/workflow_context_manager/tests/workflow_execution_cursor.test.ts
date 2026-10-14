@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
+import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
+
+describe('WorkflowExecutionCursor', () => {
+  let workflowExecutionCursor: WorkflowExecutionCursor;
+  let workflowExecutionGraph: WorkflowRuntimeGraph;
+
+  beforeEach(() => {
+    const topologicalOrder = ['node1', 'node2', 'node3'];
+    const graphNodes: Record<string, GraphNodeUnion> = {
+      node1: { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion,
+      node2: { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion,
+      node3: { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion,
+    };
+    workflowExecutionGraph = {
+      topologicalOrder,
+      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+        const index = topologicalOrder.findIndex((id) => id === nodeId);
+        if (index >= 0 && index < topologicalOrder.length - 1) {
+          return graphNodes[topologicalOrder[index + 1]];
+        }
+        return undefined;
+      }),
+      getNode: jest.fn().mockImplementation((nodeId: string) => {
+        return graphNodes[nodeId];
+      }),
+      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
+      insertSyntheticScope: jest.fn(),
+    } as unknown as WorkflowRuntimeGraph;
+
+    workflowExecutionCursor = new WorkflowExecutionCursor({
+      nodeId: 'node1',
+      workflowExecutionGraph,
+    });
+  });
+
+  it('starts with isExecuting true before start/stop', () => {
+    expect(workflowExecutionCursor.isExecuting).toBe(true);
+  });
+
+  it('start sets isExecuting true', () => {
+    workflowExecutionCursor.stop();
+    workflowExecutionCursor.start();
+    expect(workflowExecutionCursor.isExecuting).toBe(true);
+  });
+
+  it('stop clears isExecuting', () => {
+    workflowExecutionCursor.stop();
+    expect(workflowExecutionCursor.isExecuting).toBe(false);
+  });
+
+  it('currentNode returns graph node for current node id', () => {
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+  });
+
+  it('navigateToNode sets pending next node', () => {
+    workflowExecutionCursor.navigateToNode('node3');
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node3' }));
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+  });
+
+  it('navigateToNode throws when node is missing', () => {
+    (workflowExecutionGraph.getNode as jest.Mock).mockReturnValueOnce(undefined);
+    expect(() => workflowExecutionCursor.navigateToNode('missing')).toThrow(
+      'Node with ID missing is not part of the workflow graph'
+    );
+  });
+
+  it('navigateToNextNode advances from current node', () => {
+    workflowExecutionCursor.navigateToNextNode();
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
+  });
+
+  it('navigateToAfterNode sets next after given id', () => {
+    workflowExecutionCursor.navigateToAfterNode('node1');
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
+  });
+
+  it('commitPendingNavigation promotes next to current', () => {
+    workflowExecutionCursor.navigateToNode('node3');
+    workflowExecutionCursor.commitPendingNavigation();
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node3' }));
+  });
+
+  it('defaults to first topological node when nodeId is omitted', () => {
+    const entryCursor = new WorkflowExecutionCursor({ workflowExecutionGraph });
+    expect(entryCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+  });
+
+  describe('captureError', () => {
+    it('stores an Error instance directly', () => {
+      const err = new Error('step failed');
+      workflowExecutionCursor.captureError(err);
+      expect(workflowExecutionCursor.error).toBe(err);
+    });
+
+    it('wraps a non-Error value in an Error with the stringified message', () => {
+      workflowExecutionCursor.captureError('something went wrong');
+      expect(workflowExecutionCursor.error).toBeInstanceOf(Error);
+      expect(workflowExecutionCursor.error?.message).toBe('something went wrong');
+    });
+
+    it('wraps a non-Error object using String()', () => {
+      workflowExecutionCursor.captureError({ code: 42 });
+      expect(workflowExecutionCursor.error).toBeInstanceOf(Error);
+      expect(workflowExecutionCursor.error?.message).toBe('[object Object]');
+    });
+
+    it('clearError removes a previously captured error', () => {
+      workflowExecutionCursor.captureError(new Error('boom'));
+      workflowExecutionCursor.clearError();
+      expect(workflowExecutionCursor.error).toBeUndefined();
+    });
+  });
+});

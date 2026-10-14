@@ -9,7 +9,10 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash/fp';
-import { selectIsPinnedEventInTimeline } from '../../../timelines/store/selectors';
+import {
+  selectIsPinnedEventInTimeline,
+  selectIsSuperTimeline,
+} from '../../../timelines/store/selectors';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import type { TimelineType } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
@@ -34,9 +37,12 @@ export const getPinTooltipContent = (
   isAlert: boolean,
   isPinned: boolean,
   noteIds: string[],
-  timelineType: TimelineType
+  timelineType: TimelineType,
+  isSuperTimeline: boolean = false
 ): string => {
-  if (timelineType === TimelineTypeEnum.template) {
+  if (isSuperTimeline) {
+    return i18n.DISABLE_PIN_SUPER_TIMELINE(isAlert);
+  } else if (timelineType === TimelineTypeEnum.template) {
     return i18n.DISABLE_PIN(isAlert);
   } else if (eventHasNotes(noteIds)) {
     return i18n.PINNED_WITH_NOTES(isAlert);
@@ -102,10 +108,11 @@ export const PinEventAction = memo(
 
     const isPinnedSelector = useMemo(() => selectIsPinnedEventInTimeline(), []);
     const isPinned = useSelector((state: State) => isPinnedSelector(state, timelineId, eventId));
+    const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
 
     const tooltipContent = useMemo(
-      () => getPinTooltipContent(isAlert, isPinned, noteIds, timelineType),
-      [timelineType, noteIds, isPinned, isAlert]
+      () => getPinTooltipContent(isAlert, isPinned, noteIds, timelineType, isSuperTimeline),
+      [timelineType, noteIds, isPinned, isAlert, isSuperTimeline]
     );
 
     const handlePinClicked = useCallback(() => {
@@ -131,9 +138,10 @@ export const PinEventAction = memo(
     const isDisabled = useMemo(
       () =>
         !timelinePrivileges.crud ||
+        isSuperTimeline ||
         timelineType === TimelineTypeEnum.template ||
         eventHasNotes(noteIds),
-      [noteIds, timelinePrivileges.crud, timelineType]
+      [isSuperTimeline, noteIds, timelinePrivileges.crud, timelineType]
     );
 
     return (

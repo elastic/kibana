@@ -20,6 +20,15 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundErrorResponseExample:
+            description: 'Example of a not found error response'
+            value:
+              message: 'Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found'
   409:
     description: 'Conflict'
     content:

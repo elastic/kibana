@@ -79,6 +79,13 @@ export const createSmlSearchTool = ({
     'To bring a result into the conversation as an attachment, pass its entry_id to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
+  annotations: {
+    title: 'Search SML',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'global',
     // SML lives inside Agent Builder, so it requires only the Agent Builder
@@ -99,14 +106,13 @@ export const createSmlSearchTool = ({
     const agentBuilderSml = getAgentBuilderSml();
     const { spaceId, esClient, request, agentConfiguration } = context;
 
-    // Runtime-imposed scoping: the connector allow-list comes from the
-    // resolved agent configuration. The LLM has no say in this — it's part
-    // of the trust boundary.
-    const connectorIds = agentConfiguration?.connector_ids;
-    const scoping =
-      connectorIds !== undefined
-        ? { [SmlSearchFilterType.connector]: { ids: connectorIds } }
-        : undefined;
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration. The LLM has no say in this — it's part of the trust boundary.
+    // When an agent configuration is present, undefined/null connector_ids means no
+    // connectors are assigned; scoping is omitted only when there is no agent context at all.
+    const scoping = agentConfiguration
+      ? { [SmlSearchFilterType.connector]: { ids: agentConfiguration.connector_ids ?? [] } }
+      : undefined;
 
     // Agent-discoverable filters: forwarded only when the LLM supplied them.
     const filters =

@@ -21,6 +21,8 @@ import { mockContextDependencies } from '../server/execution_functions/__mock__/
 import { createMockWorkflowExecutionEngineConfig } from '../server/execution_functions/execution_functions_test_utils';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { workflowsExecutionEngineMock } from '../server/mocks';
+import type { StepExecutionRepository } from '../server/repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../server/repositories/workflow_execution_repository';
 
 // Mock the repository classes so setupDependencies uses our mocks
 jest.mock('../server/repositories/workflow_execution_repository');
@@ -49,11 +51,23 @@ export class WorkflowRunFixture {
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
+  private readonly workflowExecutionRepository = this
+    .workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
+  private readonly stepExecutionRepository = this
+    .stepExecutionRepositoryMock as unknown as StepExecutionRepository;
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
 
   constructor() {
+    jest
+      .mocked(this.dependencies.coreStart.elasticsearch.client.asInternalUser.search)
+      .mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+      });
     // Mock repository constructors to return our mock instances
     const workflowRepoModule = jest.requireMock(
       '../server/repositories/workflow_execution_repository'
@@ -115,27 +129,42 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
+  }
+
+  public async resumeWorkflowAtScheduledTime() {
+    const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+    if (!resumeTask?.runAt) throw new Error('Expected a scheduled wait deadline');
+    jest.useFakeTimers({ now: new Date(resumeTask.runAt) });
+    try {
+      return await this.resumeWorkflow();
+    } finally {
+      jest.useRealTimers();
+    }
   }
 
   public resumeWorkflow() {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 
@@ -173,13 +202,15 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 

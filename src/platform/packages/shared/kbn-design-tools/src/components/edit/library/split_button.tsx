@@ -57,7 +57,7 @@ export const SplitButtonRegular = () => {
     <EuiSplitButton>
       <EuiSplitButton.ActionPrimary>Save</EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         aria-label="More save options"
         onClick={popover.open}
         popoverProps={{
@@ -77,7 +77,7 @@ export const SplitButtonFill = () => {
     <EuiSplitButton fill>
       <EuiSplitButton.ActionPrimary>Save</EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         aria-label="More save options"
         onClick={popover.open}
         popoverProps={{
@@ -94,14 +94,14 @@ export const SplitButtonFill = () => {
 export const SplitButtonSmall = () => (
   <EuiSplitButton size="s">
     <EuiSplitButton.ActionPrimary>Save</EuiSplitButton.ActionPrimary>
-    <EuiSplitButton.ActionSecondary iconType="arrowDown" aria-label="More save options" />
+    <EuiSplitButton.ActionSecondary iconType="chevronSingleDown" aria-label="More save options" />
   </EuiSplitButton>
 );
 
 export const SplitButtonDisabled = () => (
   <EuiSplitButton isDisabled>
     <EuiSplitButton.ActionPrimary>Save</EuiSplitButton.ActionPrimary>
-    <EuiSplitButton.ActionSecondary iconType="arrowDown" aria-label="More save options" />
+    <EuiSplitButton.ActionSecondary iconType="chevronSingleDown" aria-label="More save options" />
   </EuiSplitButton>
 );
 
@@ -111,7 +111,7 @@ export const SplitButtonWithIcon = () => {
     <EuiSplitButton fill>
       <EuiSplitButton.ActionPrimary iconType="download">Export</EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         aria-label="More export options"
         onClick={popover.open}
         popoverProps={{

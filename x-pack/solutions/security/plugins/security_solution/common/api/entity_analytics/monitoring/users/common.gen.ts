@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const UserName = lazySchema(() =>
   z.object({
@@ -23,7 +23,7 @@ export const UserName = lazySchema(() =>
         /**
          * The name of the user.
          */
-        name: z.string().max(512).optional(),
+        name: z.string().max(512).optional().describe('The name of the user.'),
       })
       .optional(),
     /**
@@ -40,21 +40,26 @@ export const UserName = lazySchema(() =>
               /**
                * The field name for the label
                */
-              field: z.string().max(256).optional(),
+              field: z.string().max(256).optional().describe('The field name for the label'),
               /**
                * The value of the label
                */
-              value: z.string().max(256).optional(),
+              value: z.string().max(256).optional().describe('The value of the label'),
               /**
                * The source where this label was created (api, csv, or index_sync)
                */
-              source: z.enum(['api', 'csv', 'index_sync']).optional(),
+              source: z
+                .enum(['api', 'csv', 'index_sync'])
+                .optional()
+                .describe('The source where this label was created (api, csv, or index_sync)'),
             })
           )
           .max(100)
-          .optional(),
+          .optional()
+          .describe('Array of labels associated with the user'),
       })
-      .optional(),
+      .optional()
+      .describe('Entity analytics monitoring configuration for the user'),
   })
 );
 export type UserName = z.infer<typeof UserName>;
@@ -77,7 +82,7 @@ export const MonitoredUserUpdateDoc = lazySchema(() =>
         /**
          * Indicates if the user is privileged.
          */
-        is_privileged: z.boolean().optional(),
+        is_privileged: z.boolean().optional().describe('Indicates if the user is privileged.'),
       })
       .optional(),
     labels: z
@@ -101,18 +106,18 @@ export const MonitoredUserDoc = lazySchema(() =>
     z.object({
       event: z
         .object({
-          ingested: z.string().datetime().optional(),
-          '@timestamp': z.string().datetime().optional(),
+          ingested: isoDateTime().optional(),
+          '@timestamp': isoDateTime().optional(),
         })
         .optional(),
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': isoDateTime().optional(),
       user: z
         .object({
           name: z.string().optional(),
           /**
            * Indicates if the user is privileged.
            */
-          is_privileged: z.boolean().optional(),
+          is_privileged: z.boolean().optional().describe('Indicates if the user is privileged.'),
           entity: z
             .object({
               attributes: z
@@ -120,7 +125,10 @@ export const MonitoredUserDoc = lazySchema(() =>
                   /**
                    * Indicates if the user is privileged.
                    */
-                  Privileged: z.boolean().optional(),
+                  Privileged: z
+                    .boolean()
+                    .optional()
+                    .describe('Indicates if the user is privileged.'),
                 })
                 .optional(),
             })

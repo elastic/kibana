@@ -21,8 +21,8 @@ import type {
 export interface Services {
   /** True if the cluster contains data, false otherwise. */
   hasESData: () => Promise<boolean>;
-  /** True if Kibana instance contains user-created data view, false otherwise. */
-  hasUserDataView: () => Promise<boolean>;
+  /** True if Kibana instance contains a data view, false otherwise. */
+  hasDataView: () => Promise<boolean>;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
 }
@@ -36,7 +36,7 @@ export interface KibanaDependencies {
   dataViews: {
     hasData: {
       hasESData: () => Promise<boolean>;
-      hasUserDataView: () => Promise<boolean>;
+      hasDataView: () => Promise<boolean>;
     };
   };
 }

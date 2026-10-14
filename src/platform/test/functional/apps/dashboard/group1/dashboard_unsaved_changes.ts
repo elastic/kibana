@@ -148,6 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.clickUnsavedChangesContinueEditing('few panels');
         await header.waitUntilLoadingHasFinished();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
       });
     });

@@ -54,7 +54,7 @@ plugins/
     ],
    "optionalPlugins": ["alerting"],
    "requiredBundles": ["anotherPlugin"],
-   "group": "workplaceai",
+   "group": "search",
    "visibility": "shared"
   }
 }
@@ -80,7 +80,7 @@ plugins/
 
 `plugin.requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
 
-`group` - [Required] A field used to distinguish between solution and platform categories. Typical values include "search", "security", "observability", "platform", or "workplaceai".
+`group` - [Required] A field used to distinguish between solution and platform categories. Typical values include "search", "security", "observability", "vectordb", or "platform".
 
 `visibility` - [Optional] Determines plugin accessibility: "private": The plugin is only accessible from plugins that belong to the same group or "shared": The plugin is accessible from plugins from any group. This only applies to plugins with group: 'platform', as solution plugins are private by definition.
 
@@ -314,7 +314,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 }
 ```
 
-With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup and/or start:
+With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup or start:
 
 ```ts
 import type { CoreSetup, CoreStart } from '@kbn/core/server';

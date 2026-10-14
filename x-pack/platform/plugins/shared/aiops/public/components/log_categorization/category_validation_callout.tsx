@@ -10,7 +10,7 @@ import React from 'react';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -27,10 +27,8 @@ export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
   }
 
   return (
-    <EuiCallOut
-      color="warning"
+    <KbnWarningCallout
       size="s"
-      iconType={'alert'}
       title={i18n.translate('xpack.aiops.logCategorization.fieldValidationTitle', {
         defaultMessage: 'The selected field is possibly not suitable for pattern analysis',
       })}
@@ -40,6 +38,6 @@ export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
         .map((check) => (
           <div key={check.id}>{check.message}</div>
         ))}
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

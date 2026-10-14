@@ -19,7 +19,11 @@ import type {
 } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
-import type { AppliesFilters, AppliesTimeslice } from '@kbn/presentation-publishing';
+import type {
+  AppliesFilters,
+  AppliesTimeslice,
+  PublishesProjectRouting,
+} from '@kbn/presentation-publishing';
 
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
@@ -27,6 +31,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
   HasEditorConfig &
   Pick<AppliesFilters, 'appliedFilters$'> &
   PublishesESQLVariables &
+  PublishesProjectRouting &
   AppliesTimeslice & {
     reload: () => void;
 

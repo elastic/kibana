@@ -22,6 +22,7 @@ import {
   DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FLYOUT_HEADER_CREATE_TITLE,
   RULE_FLYOUT_HEADER_EDIT_TITLE,
+  RULE_FLYOUT_STEPS_ARIA_LABEL,
 } from '../translations';
 import type { RuleFormData, RuleFormState } from '../types';
 import { hasRuleErrors } from '../validation';
@@ -149,10 +150,21 @@ export const RuleFlyoutBody = ({
             {isEdit ? RULE_FLYOUT_HEADER_EDIT_TITLE : RULE_FLYOUT_HEADER_CREATE_TITLE}
           </h3>
         </EuiTitle>
-        {isEdit && <RuleFlyoutEditTabs steps={steps} />}
+        {isEdit ? (
+          <RuleFlyoutEditTabs steps={steps} />
+        ) : (
+          <>
+            <EuiSpacer size="m" />
+            <EuiStepsHorizontal
+              size="xs"
+              steps={steps}
+              aria-label={RULE_FLYOUT_STEPS_ARIA_LABEL}
+              data-test-subj="ruleFlyoutCreateSteps"
+            />
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody onClick={onInteraction} onKeyDown={onInteraction}>
-        {!isEdit && <EuiStepsHorizontal size="xs" steps={steps} />}
         {hasActionsDisabled && (
           <>
             <EuiCallOut

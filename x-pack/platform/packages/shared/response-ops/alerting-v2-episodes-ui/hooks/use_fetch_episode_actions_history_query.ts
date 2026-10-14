@@ -9,12 +9,16 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
+import {
+  rowsFromEsql,
+  toEpisodeActionActor,
+  type EpisodeActionHistoryEntry,
+} from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsHistoryQuery,
   DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
-  type EpisodeActionHistoryEntry,
 } from '../queries/episode_actions_history_query';
-import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -44,20 +48,21 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', groupHash ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
+      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
+        before: pageParam,
+        limit: pageSize,
+      });
       const raw = await runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
-            before: pageParam,
-            limit: pageSize,
-          }).print('basic'),
+          query: esqlQuery.print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       });
-      return esqlResponseToObjectRows<EpisodeActionHistoryEntry>(raw);
+      return rowsFromEsql(esqlQuery, raw);
     },
-    getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
+    getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
     enabled: Boolean(episodeId) && Boolean(groupHash),
   });
@@ -65,10 +70,18 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const entries = useMemo(() => {
     const seen = new Set<string>();
     const deduped: EpisodeActionHistoryEntry[] = [];
-    for (const entry of query.data?.pages.flat() ?? []) {
-      if (seen.has(entry._id)) continue;
-      seen.add(entry._id);
-      deduped.push(entry);
+    for (const row of query.data?.pages.flat() ?? []) {
+      if (seen.has(row._id)) continue;
+      seen.add(row._id);
+      const { 'actor.type': actorType, 'actor.profile_uid': actorProfileUid, tags, ...rest } = row;
+      deduped.push({
+        ...rest,
+        actor: toEpisodeActionActor({
+          'actor.type': actorType,
+          'actor.profile_uid': actorProfileUid,
+        }),
+        tags: normalizeTags(tags),
+      });
     }
     return deduped;
   }, [query.data]);

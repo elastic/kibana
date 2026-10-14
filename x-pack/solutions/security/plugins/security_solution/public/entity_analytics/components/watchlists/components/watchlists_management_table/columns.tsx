@@ -112,7 +112,7 @@ const WatchlistsActionsMenu = ({
       disableScreenReaderOutput
     >
       <EuiButtonIcon
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         aria-label={i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
           {
@@ -126,6 +126,12 @@ const WatchlistsActionsMenu = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
+        {
+          defaultMessage: 'Watchlist actions',
+        }
+      )}
       button={button}
       isOpen={isOpen}
       closePopover={closePopover}

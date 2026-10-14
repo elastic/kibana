@@ -25,15 +25,15 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
     }),
   },
   {
-    id: 'deploy-settings',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
-      defaultMessage: 'Deploy Settings & Auth',
+    id: 'authenticate-and-deploy',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.authenticateAndDeploy.title', {
+      defaultMessage: 'Authenticate & Deploy',
     }),
   },
   {
-    id: 'deploy-and-detect',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.deployment.title', {
-      defaultMessage: 'Deploy and Detect',
+    id: 'detect-and-review',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.detectAndReview.title', {
+      defaultMessage: 'Detect & Review',
     }),
   },
 ];

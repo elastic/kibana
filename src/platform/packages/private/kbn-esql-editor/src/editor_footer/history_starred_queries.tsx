@@ -43,6 +43,10 @@ import { getReducedSpaceStyling, swapArrayElements } from './history_starred_que
 import type { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
 import { useRestorableState } from '../restorable_state';
+import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
+import { useCanCreateView } from '../save_as_view/use_can_create_view';
+import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -160,7 +164,7 @@ export const getTableColumns = (
             );
         }
       },
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '55px',
       css: { height: '100%' }, // Vertically align icon
     },
     {
@@ -220,6 +224,7 @@ export function QueryList({
   tableCaption,
   dataTestSubj,
   isStarredTab = false,
+  enableCreateView = false,
 }: {
   listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
@@ -230,10 +235,14 @@ export function QueryList({
   tableCaption?: string;
   dataTestSubj?: string;
   isStarredTab?: boolean;
+  enableCreateView?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
+  const [queryToSave, setQueryToSave] = useState<string>();
+  const applySavedView = useApplySavedView();
+  const canCreateView = useCanCreateView(enableCreateView);
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const starredQueriesCount = starredQueries.length;
 
@@ -313,32 +322,43 @@ export function QueryList({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
+              {canCreateView && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="tablePlus"
+                      aria-label={createViewLabel}
+                      data-test-subj="ESQLEditor-history-create-view-button"
+                      role="button"
+                      iconSize="m"
+                      onClick={() => setQueryToSave(item.queryString)}
+                      css={css`
+                        cursor: pointer;
+                      `}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiCopy
                   textToCopy={item.queryString}
                   beforeMessage={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy) => (
-                    <EuiToolTip
-                      content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                    <EuiButtonIcon
+                      iconType="copy"
+                      iconSize="m"
+                      onClick={copy}
+                      css={css`
+                        cursor: pointer;
+                      `}
+                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="copy"
-                        iconSize="m"
-                        onClick={copy}
-                        css={css`
-                          cursor: pointer;
-                        `}
-                        aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
-                          defaultMessage: 'Copy query to clipboard',
-                        })}
-                      />
-                    </EuiToolTip>
+                    />
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -347,7 +367,13 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit, starredQueriesCount, starredQueriesService]);
+  }, [
+    canCreateView,
+    onUpdateAndSubmit,
+    setQueryToSave,
+    starredQueriesCount,
+    starredQueriesService,
+  ]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
@@ -399,6 +425,14 @@ export function QueryList({
             (await starredQueriesService?.onDiscardModalClose(dismissFlag, removeQuery)) ??
             Promise.resolve()
           }
+        />
+      )}
+      {queryToSave !== undefined && (
+        <CreateViewModal
+          query={queryToSave}
+          onClose={() => setQueryToSave(undefined)}
+          onSaved={applySavedView}
+          source={ViewCreatedSource.QUERY_HISTORY}
         />
       )}
     </div>
@@ -492,6 +526,7 @@ export function HistoryAndStarredQueriesTabs({
   onClose,
   height,
   starredQueriesService = null,
+  enableCreateView = false,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
@@ -500,6 +535,7 @@ export function HistoryAndStarredQueriesTabs({
   isSpaceReduced?: boolean;
   height: number;
   starredQueriesService: EsqlStarredQueriesService | null;
+  enableCreateView?: boolean;
 }) {
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>(() =>
@@ -562,6 +598,7 @@ export function HistoryAndStarredQueriesTabs({
           defaultMessage: 'Queries history table',
         })}
         starredQueriesService={starredQueriesService ?? undefined}
+        enableCreateView={enableCreateView}
       />
     ),
     [
@@ -571,6 +608,7 @@ export function HistoryAndStarredQueriesTabs({
       height,
       filteredHistoryItems,
       starredQueriesService,
+      enableCreateView,
     ]
   );
 
@@ -588,6 +626,7 @@ export function HistoryAndStarredQueriesTabs({
         })}
         starredQueriesService={starredQueriesService ?? undefined}
         isStarredTab={true}
+        enableCreateView={enableCreateView}
       />
     ),
     [
@@ -597,6 +636,7 @@ export function HistoryAndStarredQueriesTabs({
       height,
       filteredStarredQueries,
       starredQueriesService,
+      enableCreateView,
     ]
   );
 

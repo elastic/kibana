@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { BasicPrettyPrinter, Builder } from '@elastic/esql';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 
@@ -25,7 +26,7 @@ export const getTimeSeriesCountRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {

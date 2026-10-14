@@ -7,6 +7,7 @@
 
 import { decode, encode } from '@kbn/rison';
 import { timelineFlyoutHistoryKey } from '../constants/flyout_history';
+import type { FlyoutOrigin } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 /**
  * URL parameter that carries the currently-open flyout chain for the page (non-Timeline) context.
@@ -134,7 +135,6 @@ export interface DocumentCorrelationsDescriptor {
   documentId: string;
   indexName: string;
   scopeId: string;
-  isRulePreview: boolean;
 }
 
 export interface DocumentPrevalenceDescriptor {
@@ -239,6 +239,7 @@ export interface EntityRiskInputsDescriptor {
   entityType: string;
   entityName: string;
   entityId?: string;
+  subTab?: string;
 }
 
 export interface EntityAnomalyInsightsDescriptor {
@@ -362,7 +363,7 @@ export interface CspVulnerabilityDescriptor {
 // Discriminated union
 // ---------------------------------------------------------------------------
 
-export type FlyoutDescriptor =
+export type FlyoutDescriptor = (
   | DocumentDescriptor
   | DocumentFromPatternDescriptor
   | AnalyzerDescriptor
@@ -395,7 +396,11 @@ export type FlyoutDescriptor =
   | RuleDescriptor
   | IocDescriptor
   | CspMisconfigurationDescriptor
-  | CspVulnerabilityDescriptor;
+  | CspVulnerabilityDescriptor
+) & {
+  /** UI trigger to attribute when this descriptor is restored from URL state. */
+  origin?: FlyoutOrigin;
+};
 
 /** Ordered array of up to 2 descriptors representing the current open flyout chain. */
 export type FlyoutV2UrlParamValue = FlyoutDescriptor[];
@@ -408,6 +413,22 @@ const KNOWN_KINDS = new Set<string>(Object.values(FLYOUT_DESCRIPTOR_KIND));
 
 const isKnownKind = (kind: unknown): kind is FlyoutDescriptorKind =>
   typeof kind === 'string' && KNOWN_KINDS.has(kind);
+
+/**
+ * Narrows a structural descriptor array to the public {@link FlyoutV2UrlParamValue} union.
+ * Returns null when the array is empty/missing or any entry has an unknown `kind`.
+ */
+export const toFlyoutV2UrlParamValue = (
+  value: ReadonlyArray<{ kind: string }> | null | undefined
+): FlyoutV2UrlParamValue | null => {
+  if (!value?.length) return null;
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object' || !isKnownKind(entry.kind)) return null;
+  }
+
+  return value as FlyoutV2UrlParamValue;
+};
 
 // ---------------------------------------------------------------------------
 // Encode / decode

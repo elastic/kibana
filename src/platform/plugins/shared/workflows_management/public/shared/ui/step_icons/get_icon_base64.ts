@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IconType } from '@elastic/eui';
+import { type EuiThemeColorModeStandard, type IconType } from '@elastic/eui';
 import {
   getConnectorSpecIcon,
   getDataUrlFromReactComponent,
-  HardcodedIcons,
+  HardcodedIconDataUrls,
   resolveIconToDataUrl,
 } from '@kbn/workflows-ui';
 
@@ -26,15 +26,17 @@ export interface GetIconBase64Params {
   icon?: IconType;
   fromRegistry?: boolean;
   kind: 'trigger' | 'step';
+  /** The data URL bakes in the resolved fill, so each color mode needs its own. */
+  colorMode?: EuiThemeColorModeStandard;
 }
 
-const DEFAULT_CONNECTOR_DATA_URL = HardcodedIcons.default;
+const DEFAULT_CONNECTOR_DATA_URL = HardcodedIconDataUrls.default;
 
 const triggerIconDataUrlCache = new Map<string, string>();
 
 function defaultFallbackForStep(params: GetIconBase64Params): string {
   if (params.fromRegistry) {
-    return HardcodedIcons.kibana;
+    return HardcodedIconDataUrls.kibana;
   }
   return DEFAULT_CONNECTOR_DATA_URL;
 }
@@ -45,46 +47,48 @@ function defaultFallbackForStep(params: GetIconBase64Params): string {
  * depends on fromRegistry and actionTypeId.
  */
 export async function getIconBase64(params: GetIconBase64Params): Promise<string> {
-  const { actionTypeId, icon, kind } = params;
+  const { actionTypeId, icon, kind, colorMode = 'LIGHT' } = params;
 
   if (kind === 'trigger') {
+    // Keyed by color mode too: the same trigger resolves to a different URL per theme.
+    const cacheKey = `${actionTypeId}:${colorMode}`;
     if (actionTypeId) {
-      const cached = triggerIconDataUrlCache.get(actionTypeId);
+      const cached = triggerIconDataUrlCache.get(cacheKey);
       if (cached !== undefined) {
         return cached;
       }
     }
     const setCacheAndReturn = (value: string): string => {
       if (actionTypeId) {
-        triggerIconDataUrlCache.set(actionTypeId, value);
+        triggerIconDataUrlCache.set(cacheKey, value);
       }
       return value;
     };
     try {
-      const resolved = await resolveIconToDataUrl(icon, HardcodedIcons.trigger);
+      const resolved = await resolveIconToDataUrl(icon, HardcodedIconDataUrls.trigger, colorMode);
       return setCacheAndReturn(resolved);
     } catch {
-      return setCacheAndReturn(HardcodedIcons.trigger);
+      return setCacheAndReturn(HardcodedIconDataUrls.trigger);
     }
   }
 
   try {
     if (actionTypeId === 'elasticsearch') {
-      return getDataUrlFromReactComponent(ElasticsearchLogo, DEFAULT_CONNECTOR_DATA_URL);
+      return getDataUrlFromReactComponent(ElasticsearchLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
     }
     if (actionTypeId === 'kibana') {
-      return getDataUrlFromReactComponent(KibanaLogo, DEFAULT_CONNECTOR_DATA_URL);
+      return getDataUrlFromReactComponent(KibanaLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
     }
-    const hardcodedIcon = HardcodedIcons[actionTypeId];
+    const hardcodedIcon = HardcodedIconDataUrls[actionTypeId];
     if (hardcodedIcon) {
       return hardcodedIcon;
     }
     const connectorSpecIcon = getConnectorSpecIcon(actionTypeId);
     if (connectorSpecIcon) {
-      return resolveIconToDataUrl(connectorSpecIcon, defaultFallbackForStep(params));
+      return resolveIconToDataUrl(connectorSpecIcon, defaultFallbackForStep(params), colorMode);
     }
     if (icon) {
-      return resolveIconToDataUrl(icon, defaultFallbackForStep(params));
+      return resolveIconToDataUrl(icon, defaultFallbackForStep(params), colorMode);
     }
     return defaultFallbackForStep(params);
   } catch {
@@ -94,5 +98,5 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
 
 /** Sync bolt fallback data URL for default trigger styling (e.g. when async resolution is not needed). */
 export function getTriggerBoltFallbackDataUrl(): string {
-  return HardcodedIcons.trigger;
+  return HardcodedIconDataUrls.trigger;
 }

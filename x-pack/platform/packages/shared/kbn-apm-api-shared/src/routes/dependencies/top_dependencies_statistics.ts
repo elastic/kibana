@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
@@ -37,12 +37,14 @@ const dependencyNamesJsonSchema = z
 export const topDependenciesStatisticsRoute =
   defineRoute<DependenciesTimeseriesStatisticsResponse>()({
     endpoint: 'POST /internal/apm/dependencies/top_dependencies/statistics',
-    params: z.object({
-      query: environmentSchema
-        .merge(kuerySchema)
-        .merge(rangeSchema)
-        .merge(offsetSchema)
-        .merge(z.object({ numBuckets: z.coerce.number() })),
-      body: z.object({ dependencyNames: dependencyNamesJsonSchema }),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: environmentSchema
+          .merge(kuerySchema)
+          .merge(rangeSchema)
+          .merge(offsetSchema)
+          .merge(z.object({ numBuckets: z.coerce.number() })),
+        body: z.object({ dependencyNames: dependencyNamesJsonSchema }),
+      })
+    ),
   });

@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiCallOut,
   EuiText,
   EuiToolTip,
   EuiIcon,
@@ -26,6 +25,7 @@ import {
 import type SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { documentationService } from '../../../../../../services/documentation';
 import type { FormHook } from '../../../../shared_imports';
 import { Form, FormDataProvider } from '../../../../shared_imports';
@@ -195,7 +195,7 @@ export const EditField = React.memo(
         <EuiFlyoutFooter>
           {form.isSubmitted && !form.isValid && (
             <>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
@@ -203,8 +203,6 @@ export const EditField = React.memo(
                     defaultMessage: 'Fix errors in form before continuing.',
                   }
                 )}
-                color="danger"
-                iconType="cross"
                 data-test-subj="formError"
               />
               <EuiSpacer size="m" />

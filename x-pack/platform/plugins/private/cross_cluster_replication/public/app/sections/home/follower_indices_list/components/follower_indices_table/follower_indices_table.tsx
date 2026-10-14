@@ -13,16 +13,7 @@ import type {
   EuiInMemoryTableProps,
   EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
-import {
-  EuiHealth,
-  EuiButton,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiLoadingLogo,
-  EuiOverlayMask,
-} from '@elastic/eui';
-
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { EuiHealth, EuiInMemoryTable, EuiLink, EuiLoadingLogo, EuiOverlayMask } from '@elastic/eui';
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
@@ -91,11 +82,13 @@ export interface FollowerIndicesTableProps {
   followerIndices: FollowerIndexWithPausedStatus[];
   selectFollowerIndex: (name: string) => void;
   apiStatusDelete: ApiStatus;
+  selectedItems: FollowerIndexWithPausedStatus[];
+  onSelectionChange: (selectedItems: FollowerIndexWithPausedStatus[]) => void;
+  resetSelection: () => void;
 }
 
 interface FollowerIndicesTableState {
   prevFollowerIndices: FollowerIndexWithPausedStatus[];
-  selectedItems: FollowerIndexWithPausedStatus[];
   filteredIndices: FollowerIndexWithPausedStatus[];
   queryText: string;
 }
@@ -127,7 +120,6 @@ export class FollowerIndicesTable extends PureComponent<
 
     this.state = {
       prevFollowerIndices: props.followerIndices,
-      selectedItems: [],
       filteredIndices: props.followerIndices,
       queryText: '',
     };
@@ -302,8 +294,8 @@ export class FollowerIndicesTable extends PureComponent<
   };
 
   render() {
-    const { selectedItems, filteredIndices } = this.state;
-    const reactRouter = routing.reactRouterOrThrow;
+    const { filteredIndices } = this.state;
+    const { selectedItems, onSelectionChange, resetSelection } = this.props;
 
     const sorting = {
       sort: {
@@ -318,27 +310,18 @@ export class FollowerIndicesTable extends PureComponent<
     };
 
     const selection = {
-      onSelectionChange: (newSelectedItems: FollowerIndexWithPausedStatus[]) =>
-        this.setState({ selectedItems: newSelectedItems }),
+      selected: selectedItems,
+      onSelectionChange,
     };
 
     const search: EuiInMemoryTableProps<FollowerIndexWithPausedStatus>['search'] = {
       toolsLeft: selectedItems.length ? (
-        <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
+        <ContextMenu
+          followerIndices={selectedItems}
+          testSubj="contextMenuButton"
+          onActionComplete={resetSelection}
+        />
       ) : undefined,
-      toolsRight: (
-        <EuiButton
-          {...reactRouterNavigate(reactRouter.history, `/follower_indices/add`)}
-          fill
-          iconType="plusCircle"
-          data-test-subj="createFollowerIndexButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-            defaultMessage="Create a follower index"
-          />
-        </EuiButton>
-      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

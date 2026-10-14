@@ -1,0 +1,5 @@
+java.lang.RuntimeException: Line outside range
+	at com.example.synthetic.RangelessOnly.method1(RangelessOnly.kt:42)
+	at com.example.synthetic.RangelessOnly.method1(RangelessOnly.kt:42)
+	at com.example.synthetic.RangedOnly.a(RangedOnly.kt:27)
+	at com.example.synthetic.RangedOnly.method2(RangedOnly.kt)

@@ -7,7 +7,7 @@
 
 import { type PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 
 export function registerConnectorTypesFromSpecs({
@@ -15,8 +15,16 @@ export function registerConnectorTypesFromSpecs({
 }: {
   actions: ActionsPluginSetupContract;
 }) {
-  // Register connector specs
-  for (const spec of Object.values(connectorsSpecs)) {
+  const configUtils = actions.getActionsConfigurationUtilities();
+  const inboundEventsEnabled = configUtils.isInboundEventsEnabled();
+  const connectorSigningKeysEnabled = configUtils.isConnectorSigningKeysEnabled();
+  const specsToRegister = Object.values(connectorsSpecs).filter(
+    (spec) =>
+      (inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec)) &&
+      (connectorSigningKeysEnabled || !spec.signingKey)
+  );
+
+  for (const spec of specsToRegister) {
     actions.registerType(createConnectorTypeFromSpec(spec, actions));
   }
 }

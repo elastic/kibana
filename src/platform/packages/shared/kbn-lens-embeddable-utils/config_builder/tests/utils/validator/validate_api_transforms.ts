@@ -37,11 +37,11 @@ export function validateApiTransformsFn(
 
   return function validateApiTransforms(apiConfig: LensApiConfig, excludedFields?: string[]) {
     expect(() => {
-      schema.validate(apiConfig);
+      schema.parse(apiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiConfigSchema.validate(apiConfig);
+      lensApiConfigSchema.parse(apiConfig);
     }).not.toThrow();
 
     const lensStateConfig = builder.fromAPIFormat(apiConfig);
@@ -49,11 +49,11 @@ export function validateApiTransformsFn(
     const newApiConfig = builder.toAPIFormat(lensStateConfig);
 
     expect(() => {
-      schema.validate(newApiConfig);
+      schema.parse(newApiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiConfigSchema.validate(newApiConfig);
+      lensApiConfigSchema.parse(newApiConfig);
     }).not.toThrow();
 
     const filteredApiConfig = structuredClone(apiConfig);

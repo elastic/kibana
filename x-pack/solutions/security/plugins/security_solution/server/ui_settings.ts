@@ -803,7 +803,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledLabel', {
       defaultMessage: 'Enable alert analysis workflow',
     }),
-    value: true,
+    value: false,
     description: i18n.translate(
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledDescription',
       {
@@ -941,7 +941,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationDescription',
       {
         defaultMessage:
-          'When enabled, the AI agent step creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from being created.',
+          'When enabled, the AI agent step creates a new conversation for each batch of alerts it analyzes. Disable to prevent large numbers of conversations from being created.',
       }
     ),
     type: 'boolean',

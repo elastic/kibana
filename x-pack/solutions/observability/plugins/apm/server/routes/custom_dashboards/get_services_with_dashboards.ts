@@ -8,6 +8,7 @@
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/core/server';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type {
   APMEventClient,
@@ -36,40 +37,49 @@ export async function getServicesWithDashboards({
   serviceName,
   start,
   end,
+  logger,
 }: {
   apmEventClient: APMEventClient;
   allLinkedCustomDashboards: SavedApmCustomDashboard[];
   serviceName: string;
   start: number;
   end: number;
+  logger: Logger;
 }): Promise<SavedApmCustomDashboard[]> {
-  const allKueryPerDashboard = allLinkedCustomDashboards.map(({ kuery }) => ({
-    kuery,
-  }));
-  const allSearches = allKueryPerDashboard.map((dashboard) =>
-    getSearchRequest([
-      ...kqlQuery(dashboard.kuery),
-      ...termQuery(SERVICE_NAME, serviceName),
-      ...rangeQuery(start, end),
-    ])
-  );
-
-  const filteredDashboards = [];
-
-  if (allSearches.length > 0) {
-    const allResponses = (
-      await apmEventClient.msearch('get_services_with_dashboards', ...allSearches)
-    ).responses;
-
-    for (let index = 0; index < allLinkedCustomDashboards.length; index++) {
-      const responsePerDashboard = allResponses[index];
-      const dashboard = allLinkedCustomDashboards[index];
-
-      if (responsePerDashboard.hits.hits.length > 0) {
-        filteredDashboards.push(dashboard);
-      }
+  // A single unparseable stored kuery must not fail the whole request, otherwise one broken link
+  // hides the linked dashboards of every service. See https://github.com/elastic/kibana/issues/245023
+  const searchesPerDashboard = allLinkedCustomDashboards.flatMap((dashboard) => {
+    try {
+      return [
+        {
+          dashboard,
+          search: getSearchRequest([
+            ...kqlQuery(dashboard.kuery),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(start, end),
+          ]),
+        },
+      ];
+    } catch {
+      logger.warn(
+        `Skipping APM custom dashboard "${dashboard.id}": stored filter is not a valid KQL expression ("${dashboard.kuery}"). Re-link the dashboard to repair it.`
+      );
+      return [];
     }
+  });
+
+  if (searchesPerDashboard.length === 0) {
+    return [];
   }
 
-  return filteredDashboards;
+  const allResponses = (
+    await apmEventClient.msearch(
+      'get_services_with_dashboards',
+      ...searchesPerDashboard.map(({ search }) => search)
+    )
+  ).responses;
+
+  return searchesPerDashboard
+    .filter((_, index) => allResponses[index].hits.hits.length > 0)
+    .map(({ dashboard }) => dashboard);
 }

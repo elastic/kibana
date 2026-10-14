@@ -39,6 +39,7 @@ import {
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -307,7 +308,6 @@ export const projectTypeToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 
@@ -359,7 +359,6 @@ export async function createUiamSessionTokens({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -390,17 +389,12 @@ export async function createUiamSessionTokens({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -451,7 +445,7 @@ export async function createUiamSessionTokens({
 export async function createUiamOAuthAccessToken({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   audience,
   fullName,
@@ -467,6 +461,7 @@ export async function createUiamOAuthAccessToken({
   email?: string;
   accessTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -475,7 +470,6 @@ export async function createUiamOAuthAccessToken({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -506,17 +500,12 @@ export async function createUiamOAuthAccessToken({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,

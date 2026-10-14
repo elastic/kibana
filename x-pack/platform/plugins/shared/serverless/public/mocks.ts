@@ -9,7 +9,6 @@ import { of } from 'rxjs';
 import type { ServerlessPluginStart } from './types';
 
 const startMock = (): jest.Mocked<ServerlessPluginStart> => ({
-  initNavigation: jest.fn(),
   setBreadcrumbs: jest.fn(),
   getNavigationCards$: jest.fn().mockReturnValue(of(undefined)),
 });

@@ -47,8 +47,21 @@ export const CaseUserProfileRt = rt.strict({
 
 export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
 
+export const CaseAssigneeRt = rt.exact(
+  rt.intersection([
+    rt.type({ uid: rt.string }),
+    rt.partial({
+      username: rt.union([rt.string, rt.null]),
+      full_name: rt.union([rt.string, rt.null]),
+      email: rt.union([rt.string, rt.null]),
+    }),
+  ])
+);
+
+export type CaseAssignee = rt.TypeOf<typeof CaseAssigneeRt>;
+
 /**
  * Assignees
  */
-export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
+export const CaseAssigneesRt = rt.array(CaseAssigneeRt);
 export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;

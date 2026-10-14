@@ -64,20 +64,15 @@ describe('bulk action hooks', () => {
 
   const refresh = jest.fn();
   const clearSelection = jest.fn();
-  const mockOpenNewCase = jest.fn();
   const setIsBulkActionsLoading = jest.fn();
 
   const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
-    getAttachments({ theCase: { id: caseId } });
+    getAttachments({ theCase: { id: caseId, owner: 'cases' } });
   });
 
   mockCasesService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
   mockCasesService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
 
-  const mockAddNewCase = mockCasesService.hooks.useCasesAddToNewCaseFlyout.mockReturnValue({
-    open: mockOpenNewCase,
-    close: jest.fn(),
-  });
   const mockAddExistingCase = mockCasesService.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
     {
       open: mockOpenExistingCase,
@@ -88,26 +83,6 @@ describe('bulk action hooks', () => {
   describe('useBulkAddToCaseActions', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    it('should refetch when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
-      renderHook(
-        () =>
-          useBulkAddToCaseActions({
-            casesConfig,
-            refresh,
-            clearSelection,
-            http,
-            notifications,
-            casesService: mockCasesService,
-          }),
-        {
-          wrapper,
-        }
-      );
-
-      mockAddNewCase.mock.calls[0][0]!.onSuccess();
-      expect(refresh).toHaveBeenCalled();
     });
 
     it('should refetch when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
@@ -126,7 +101,7 @@ describe('bulk action hooks', () => {
         }
       );
 
-      mockAddExistingCase.mock.calls[0][0]!.onSuccess();
+      mockAddExistingCase.mock.calls[0][0]!.onSuccess({ id: caseId, owner: 'cases' }, false);
       expect(refresh).toHaveBeenCalled();
     });
 
@@ -155,29 +130,6 @@ describe('bulk action hooks', () => {
       });
     });
 
-    it('should open the case flyout', async () => {
-      const { result } = renderHook(
-        () =>
-          useBulkAddToCaseActions({
-            casesConfig,
-            refresh,
-            clearSelection,
-            http,
-            notifications,
-            casesService: mockCasesService,
-          }),
-        {
-          wrapper,
-        }
-      );
-
-      // @ts-expect-error: cases do not need all arguments
-      result.current[0].onClick([]);
-
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalled();
-      expect(mockOpenNewCase).toHaveBeenCalled();
-    });
-
     it('should open the case modal', async () => {
       const { result } = renderHook(
         () =>
@@ -195,7 +147,7 @@ describe('bulk action hooks', () => {
       );
 
       // @ts-expect-error: cases do not need all arguments
-      result.current[1].onClick([]);
+      result.current[0].onClick([]);
 
       expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalled();
       expect(mockOpenExistingCase).toHaveBeenCalled();
@@ -253,9 +205,9 @@ describe('bulk action hooks', () => {
       );
 
       // @ts-expect-error: cases do not need all arguments
-      result.current[1].onClick(alerts);
+      result.current[0].onClick(alerts);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts);
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts, 'cases');
     });
 
     it('should remove alerts that are already attached to the case', async () => {
@@ -275,7 +227,7 @@ describe('bulk action hooks', () => {
       );
 
       // @ts-expect-error: cases do not need all arguments
-      result.current[1].onClick([
+      result.current[0].onClick([
         {
           _id: 'alert0',
           _index: 'idx0',
@@ -306,22 +258,62 @@ describe('bulk action hooks', () => {
         },
       ]);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith([
-        {
-          _id: 'alert1',
-          _index: 'idx1',
-          data: [
-            {
-              field: 'kibana.alert.case_ids',
-              value: ['test-case-2'],
-            },
-          ],
-          ecs: {
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+        [
+          {
             _id: 'alert1',
             _index: 'idx1',
+            data: [
+              {
+                field: 'kibana.alert.case_ids',
+                value: ['test-case-2'],
+              },
+            ],
+            ecs: {
+              _id: 'alert1',
+              _index: 'idx1',
+            },
           },
-        },
-      ]);
+        ],
+        'cases'
+      );
+    });
+
+    it('should not create attachments when the case owner is unavailable', () => {
+      const getAttachmentsResult = jest.fn();
+      mockOpenExistingCase.mockImplementationOnce(({ getAttachments }) => {
+        getAttachmentsResult(getAttachments({ theCase: { id: caseId } }));
+      });
+
+      const { result } = renderHook(
+        () =>
+          useBulkAddToCaseActions({
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        { wrapper }
+      );
+
+      result.current[0].onClick?.(
+        [
+          {
+            _id: 'alert0',
+            _index: 'idx0',
+            data: [],
+            ecs: { _id: 'alert0', _index: 'idx0' },
+          },
+        ],
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      expect(getAttachmentsResult).toHaveBeenCalledWith([]);
+      expect(mockCasesService.helpers.groupAlertsByRule).not.toHaveBeenCalled();
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {
@@ -617,19 +609,11 @@ describe('bulk action hooks', () => {
             "id": 0,
             "items": Array [
               Object {
-                "data-test-subj": "attach-new-case",
+                "data-test-subj": "alerts-table-add-to-case",
                 "disableOnQuery": true,
-                "disabledLabel": "Add to new case",
-                "key": "attach-new-case",
-                "label": "Add to new case",
-                "onClick": [Function],
-              },
-              Object {
-                "data-test-subj": "attach-existing-case",
-                "disableOnQuery": true,
-                "disabledLabel": "Add to existing case",
-                "key": "attach-existing-case",
-                "label": "Add to existing case",
+                "disabledLabel": "Add to case",
+                "key": "alerts-table-add-to-case",
+                "label": "Add to case",
                 "onClick": [Function],
               },
               Object {
@@ -695,19 +679,11 @@ describe('bulk action hooks', () => {
             "id": 0,
             "items": Array [
               Object {
-                "data-test-subj": "attach-new-case",
+                "data-test-subj": "alerts-table-add-to-case",
                 "disableOnQuery": true,
-                "disabledLabel": "Add to new case",
-                "key": "attach-new-case",
-                "label": "Add to new case",
-                "onClick": [Function],
-              },
-              Object {
-                "data-test-subj": "attach-existing-case",
-                "disableOnQuery": true,
-                "disabledLabel": "Add to existing case",
-                "key": "attach-existing-case",
-                "label": "Add to existing case",
+                "disabledLabel": "Add to case",
+                "key": "alerts-table-add-to-case",
+                "label": "Add to case",
                 "onClick": [Function],
               },
             ],

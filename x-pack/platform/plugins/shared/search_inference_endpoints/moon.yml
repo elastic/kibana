@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-inference-endpoints'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-inference-endpoints'
   description: Moon project for @kbn/search-inference-endpoints
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
 dependsOn:
   - '@kbn/config-schema'
@@ -52,6 +52,9 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
   - '@kbn/scout'
   - '@kbn/search-api-panels'
   - '@kbn/usage-collection-plugin'
@@ -59,6 +62,9 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/core-http-browser'
   - '@kbn/es-errors'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

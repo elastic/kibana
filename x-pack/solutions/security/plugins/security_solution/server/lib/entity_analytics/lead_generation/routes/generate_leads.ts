@@ -63,6 +63,10 @@ export const generateLeadsRoute = (
 
           const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
+          const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+            esClient,
+            spaceId
+          );
           const { connectorId } = request.body;
 
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
@@ -91,6 +95,7 @@ export const generateLeadsRoute = (
               ml,
               request,
               soClient,
+              relationshipsClient,
             },
           });
 

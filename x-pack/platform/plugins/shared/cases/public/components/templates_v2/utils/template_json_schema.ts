@@ -26,7 +26,12 @@ interface OverrideCtx {
   path: (string | number)[];
 }
 
-function applySchemaOverrides(ctx: OverrideCtx) {
+/**
+ * Field-level schema overrides shared by every editor that authors field YAML — the template
+ * editor (fields inside a template definition) and the field library editor (a standalone field
+ * definition). Keeping one pipeline prevents the editors' autocomplete/validation from drifting.
+ */
+export function applyFieldSchemaOverrides(ctx: OverrideCtx) {
   removeNullFromEditorSchema(ctx);
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addBranchPropertyEnumHints(ctx);
@@ -35,6 +40,10 @@ function applySchemaOverrides(ctx: OverrideCtx) {
   addTitlesToOneOfBranches(ctx);
   disallowUnknownMetadataKeys(ctx);
   convertFieldUnionToIfThenChain(ctx);
+}
+
+function applySchemaOverrides(ctx: OverrideCtx) {
+  applyFieldSchemaOverrides(ctx);
   addRequiredRootKeys(ctx);
 }
 

@@ -7,7 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CapabilitiesProvider } from './src/services/capabilities';
+export {
+  CapabilitiesProvider,
+  CapabilitiesResolver,
+  CapabilitiesSwitcher,
+  type ICapabilitiesResolver,
+  type ICapabilitiesSwitcher,
+} from './src/services/capabilities';
+export {
+  ElasticsearchClient,
+  InternalElasticsearchClient,
+  type IScopedClusterClientFactory,
+  ScopedClusterClient,
+  ScopedClusterClientFactory,
+} from './src/services/elasticsearch';
 export {
   Request,
   Response,
@@ -23,3 +36,10 @@ export {
   SavedObjectsTypeRegistry,
 } from './src/services/saved_objects';
 export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
+export { AuditLogger, CurrentUser, RedactedSessionId } from './src/services/security';
+export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/ui_settings';
+export {
+  CurrentUserProfileId,
+  type IUserProfileFactory,
+  UserProfileFactory,
+} from './src/services/user_profile';

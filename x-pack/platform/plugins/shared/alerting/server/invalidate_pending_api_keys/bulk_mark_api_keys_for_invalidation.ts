@@ -8,6 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { isUiamCredential } from '@kbn/core-security-server';
+import { decodeStoredApiKey } from '@kbn/task-manager-plugin/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
@@ -16,28 +17,35 @@ export const bulkMarkApiKeysForInvalidation = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
-    if (apiKeys.length === 0) {
+    // Raw `essu_` values are user-created Cloud API keys stored as-is (no `base64(id:key)`
+    // encoding and no key id). They are never managed by alerting, and every invalidation
+    // call site is gated on `apiKeyCreatedByUser` — this filter is defense-in-depth so a
+    // future caller cannot enqueue an undecodable invalidation entry.
+    const decodableApiKeys = apiKeys.filter((key) => {
+      if (isUiamCredential(key)) {
+        logger.warn(
+          'Skipping invalidation for a user-created UIAM API key; user-created API keys are not managed by alerting.'
+        );
+        return false;
+      }
+      return true;
+    });
+
+    if (decodableApiKeys.length === 0) {
       return;
     }
 
-    const apiKeysToInvalidate = apiKeys.map((key) => {
-      let apiKeyId;
-      let apiKeyValue;
-
-      const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-
-      if (apiKey && isUiamCredential(apiKey)) {
-        apiKeyId = id;
-        apiKeyValue = apiKey;
-      } else {
-        apiKeyId = id;
-      }
+    const apiKeysToInvalidate = decodableApiKeys.map((key) => {
+      // A UIAM key is queued under its own id, so the in-use guard has to match it against the
+      // `uiamApiKeyId` attribute that pending jobs record it in, not against `apiKeyId`.
+      const { id: apiKeyId, secret } = decodeStoredApiKey(key);
+      const uiamApiKey = secret && isUiamCredential(secret) ? secret : undefined;
 
       return {
         attributes: {
           apiKeyId,
           createdAt: new Date().toISOString(),
-          ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+          ...(uiamApiKey ? { uiamApiKey } : {}),
         },
         type: API_KEY_PENDING_INVALIDATION_TYPE,
       };
@@ -47,7 +55,7 @@ export const bulkMarkApiKeysForInvalidation = async (
       await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       logger.error(
-        `Failed to bulk mark list of API keys [${apiKeys
+        `Failed to bulk mark list of API keys [${decodableApiKeys
           .map((key) => `"${key}"`)
           .join(', ')}] for invalidation: ${e.message}`,
         {

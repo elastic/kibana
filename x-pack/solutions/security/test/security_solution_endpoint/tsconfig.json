@@ -32,5 +32,6 @@
     "@kbn/es-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-spaces-common",
+    "@kbn/core-saved-objects-server",
   ]
 }

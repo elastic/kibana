@@ -23,7 +23,7 @@ From the Kibana repo root:
 node scripts/generate_plugin --name hello_world
 ```
 
-You'll be prompted for a description, ownership, and whether to generate UI and/or server code.
+You'll be prompted for a description, ownership, and whether to generate UI or server code.
 
 When it finishes, your plugin is at `plugins/hello_world/` with:
 
@@ -39,17 +39,17 @@ In one terminal, from inside your plugin directory, build and watch the browser 
 
 ```sh
 cd plugins/hello_world
-yarn dev --watch
+pnpm dev --watch
 ```
 
 In another terminal, from the Kibana repo root, boot Elasticsearch and Kibana:
 
 ```sh
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 ```
 
 ```sh
-yarn start
+pnpm start
 ```
 
 When Kibana picks up your plugin, you'll see it in the startup logs:
@@ -187,12 +187,12 @@ export function plugin() {
 In-repo example plugins are discovered via the workspace's package map, so you must bootstrap after creating the manifest:
 
 ```sh
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
-In one terminal, run `yarn es snapshot --license trial` to boot up Elasticsearch.
+In one terminal, run `pnpm es snapshot --license trial` to boot up Elasticsearch.
 
-In another terminal, run `yarn start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
+In another terminal, run `pnpm start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
 
 If you built it manually, it will look something like this:
 

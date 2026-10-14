@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages';
+import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages/index.ts';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -40,8 +40,8 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/migrator-test-kit',
   '@kbn/evals',
   '@kbn/evals-extensions',
-  '@kbn/evals-phoenix-executor',
   '@kbn/performance-testing-dataset-extractor',
+  '@kbn/dependency-ownership',
 
   // Lint
   '@kbn/eslint-config',
@@ -66,12 +66,14 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_tests_server.js',
   'scripts/functional_test_runner.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
 ];
 
-/** Uncategorized-only diffs: skip FTR when every file matches. */
+/** Skip FTR when every changed file matches, regardless of owning module. */
 export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'docs/**',
   '**/docs/**',
@@ -106,6 +108,8 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/*.jpg',
   '**/*.jpeg',
   '**/*.webp',
+  // Scout (Playwright) test trees never affect FTR, whichever module owns them.
+  '**/test/scout{_*,}/**',
 ];
 
 /** True when this PR should omit FTR configs. */
@@ -121,6 +125,10 @@ export function shouldSkipFtrTests(
     return false;
   }
 
+  if (allChangedFilesInScope(changedFiles, FTR_IRRELEVANT_PATHS)) {
+    return true;
+  }
+
   if (affectedModules.size > 0) {
     for (const id of affectedModules) {
       if (!FTR_EXCLUDED_MODULES.has(id)) {
@@ -130,5 +138,5 @@ export function shouldSkipFtrTests(
     return true;
   }
 
-  return allChangedFilesInScope(changedFiles, FTR_IRRELEVANT_PATHS);
+  return false;
 }

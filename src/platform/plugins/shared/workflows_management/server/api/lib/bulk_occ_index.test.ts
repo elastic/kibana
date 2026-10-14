@@ -156,7 +156,7 @@ describe('bulkIndexWithOccRetry', () => {
     expect(mutate).toHaveBeenCalledWith(makeOccHit('wf-1', 7, 2));
   });
 
-  it('bumps document version when bumpVersion is enabled', async () => {
+  it('preserves document version when bumpVersion is enabled but YAML is unchanged', async () => {
     const client = makeClient();
     client.bulk.mockResolvedValue(bulkResponse([bulkIndexItem('wf-1', 200)]));
 
@@ -164,6 +164,23 @@ describe('bulkIndexWithOccRetry', () => {
       client,
       hits: [makeOccHit('wf-1', 7, 2, { version: 4 })],
       mutate: (hit) => hit._source,
+      bumpVersion: true,
+      retryDelayMs: 0,
+    });
+
+    expectIndexOperation(client.bulk.mock.calls[0][0].operations[0], {
+      document: expect.objectContaining({ version: 4 }),
+    });
+  });
+
+  it('bumps document version when bumpVersion is enabled and YAML changed', async () => {
+    const client = makeClient();
+    client.bulk.mockResolvedValue(bulkResponse([bulkIndexItem('wf-1', 200)]));
+
+    await bulkIndexWithOccRetry({
+      client,
+      hits: [makeOccHit('wf-1', 7, 2, { version: 4 })],
+      mutate: (hit) => ({ ...hit._source, yaml: 'name: Changed\nenabled: true' }),
       bumpVersion: true,
       retryDelayMs: 0,
     });

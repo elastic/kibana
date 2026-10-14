@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { recurse } from 'cypress-recurse';
 import 'cypress-network-idle';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
@@ -81,7 +80,6 @@ import {
   OPTION_LISTS_LOADING,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
-import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import { openFilterGroupContextMenu } from './common/filter_group';
@@ -92,8 +90,7 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
@@ -399,14 +396,10 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 export const clickAlertsHistogramLegend = (ruleName: string) => {
   cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
 
-  recurse(
-    () => {
-      cy.get('body').type('{esc}');
-      cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
-      return cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName));
-    },
-    ($el) => $el.is(':visible')
-  ).click();
+  cy.get('body').type('{esc}');
+  cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
+  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).should('be.visible');
+  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).click();
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
@@ -422,17 +415,11 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  recurse(
-    () => {
-      // To clear focus
-      cy.get('body').type('{esc}');
-      cy.get(propertySelector).eq(rowIndex).should('be.visible');
-      cy.get(propertySelector).eq(rowIndex).realHover();
-      return cy.get(actionSelector).first();
-    },
-    ($el) => $el.is(':visible')
-  );
-
+  // To clear focus
+  cy.get('body').type('{esc}');
+  cy.get(propertySelector).eq(rowIndex).should('be.visible');
+  cy.get(propertySelector).eq(rowIndex).realHover();
+  cy.get(actionSelector).first().should('be.visible');
   cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
@@ -449,13 +436,9 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
-  recurse(
-    () => {
-      clickExpandActions(propertySelector, rowIndex);
-      return cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first();
-    },
-    ($el) => $el.is(':visible')
-  );
+  // The expand button toggles the actions popover, so click it once; the assertion below waits
+  // for the opening transition.
+  clickExpandActions(propertySelector, rowIndex);
 
   hideMessageTooltip();
 
@@ -465,7 +448,11 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  // `.should('not.be.true')` on a jQuery collection is always true (a jQuery object is
+  // never strictly `=== true`), so this used to be a silent no-op regardless of whether
+  // the data grid was mid-refresh. Assert on absence of the element instead so Cypress
+  // actually retries until the in-progress indicator is gone.
+  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.exist');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };

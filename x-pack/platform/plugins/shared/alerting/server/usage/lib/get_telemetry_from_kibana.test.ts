@@ -678,7 +678,11 @@ describe('kibana index telemetry', () => {
           yield mockedResponse;
         }),
       });
-      const telemetry = await getMWTelemetry({ savedObjectsClient, logger });
+      const telemetry = await getMWTelemetry({
+        savedObjectsClient,
+        logger,
+        maintenanceWindowsEnabled: true,
+      });
 
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -702,7 +706,11 @@ describe('kibana index telemetry', () => {
         }),
       });
 
-      const telemetry = await getMWTelemetry({ savedObjectsClient, logger });
+      const telemetry = await getMWTelemetry({
+        savedObjectsClient,
+        logger,
+        maintenanceWindowsEnabled: true,
+      });
 
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -736,7 +744,12 @@ describe('kibana index telemetry', () => {
           yield mockedResponse;
         }),
       });
-      const telemetry = await getMWTelemetry({ savedObjectsClient, logger, maxDocuments: 1 });
+      const telemetry = await getMWTelemetry({
+        savedObjectsClient,
+        logger,
+        maintenanceWindowsEnabled: true,
+        maxDocuments: 1,
+      });
 
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -750,6 +763,25 @@ describe('kibana index telemetry', () => {
         count_mw_with_filter_alert_toggle_on: 1,
         hasErrors: false,
       });
+    });
+
+    test('should return empty results without querying when maintenance windows are disabled', async () => {
+      savedObjectsClient.createPointInTimeFinder = jest.fn();
+
+      const telemetry = await getMWTelemetry({
+        savedObjectsClient,
+        logger,
+        maintenanceWindowsEnabled: false,
+      });
+
+      expect(savedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+      expect(telemetry).toStrictEqual({
+        count_mw_total: 0,
+        count_mw_with_repeat_toggle_on: 0,
+        count_mw_with_filter_alert_toggle_on: 0,
+        hasErrors: false,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

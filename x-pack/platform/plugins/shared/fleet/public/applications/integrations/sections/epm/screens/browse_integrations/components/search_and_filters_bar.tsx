@@ -230,7 +230,7 @@ const SetupMethodFilter: React.FC<{
       button={
         <EuiFilterButton
           data-test-subj="browseIntegrations.searchBar.setupMethodBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={activeCount}
@@ -329,7 +329,7 @@ const SignalFilter: React.FC<{
       button={
         <EuiFilterButton
           data-test-subj="browseIntegrations.searchBar.signalBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={activeCount}
@@ -647,7 +647,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                       <EuiButtonIcon
                         display="base"
                         onClick={() => setIsSubCategoryPopoverOpen((prev) => !prev)}
-                        iconType="boxesHorizontal"
+                        iconType="boxesVertical"
                         aria-label={i18n.translate(
                           'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.showMoreSubCategories',
                           { defaultMessage: 'Show more subcategories' }

@@ -163,6 +163,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             <EuiButtonEmpty
               size="s"
               color="primary"
+              iconType="gear"
               onClick={redirectToDfaJobManagement}
               disabled={!canGetDataFrameAnalytics}
               data-test-subj="mlJobSelectorManageJobsButton"

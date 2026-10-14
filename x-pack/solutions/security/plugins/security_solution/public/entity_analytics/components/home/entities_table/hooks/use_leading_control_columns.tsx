@@ -61,7 +61,10 @@ const InvestigateInTimelineRowControl = ({
       return;
     }
 
-    const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(entityType, record.raw);
+    const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      record.raw
+    );
     if (kqlFilter) {
       investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
       return;
@@ -104,6 +107,11 @@ export const useLeadingControlColumns = ({
     if (canUseTimeline) {
       columns.push({
         id: 'entity-analytics-timeline-action',
+        // Widen the actions column so its "Actions" header renders as text rather than
+        // collapsing to an info icon. UnifiedDataTable's ActionsHeader only shows the label
+        // when the column is wider than the rendered word, and the default single-icon width
+        // (24px) is too narrow.
+        width: 48,
         render: (Control, { record }) => (
           <InvestigateInTimelineRowControl Control={Control} record={record} tableId={tableId} />
         ),

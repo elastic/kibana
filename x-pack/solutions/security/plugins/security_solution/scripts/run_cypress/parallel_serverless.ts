@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -438,13 +438,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // This can take so much time that the job can fail by timeout in CI.
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+        : globbySync(specPattern); // convert the glob pattern to concrete file paths
 
       const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
       const lbConfig: LoadBalancerConfig | undefined = resolveLoadBalancerConfig();
@@ -461,8 +460,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const failedSpecFilePaths: string[] = [];

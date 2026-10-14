@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "y1",
+  "original_class": "androidx.collection.ArrayMap$EntrySet",
+  "source_file": "ArrayMap.java",
+  "methods": {
+    "size": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            2
+          ],
+          "orig_range": [
+            267,
+            267
+          ],
+          "method": "size"
+        },
+        {
+          "obf_range": [
+            3,
+            5
+          ],
+          "orig_range": [
+            657,
+            657
+          ],
+          "method": "size",
+          "class": "androidx.collection.SimpleArrayMap",
+          "source_file": "SimpleArrayMap.kt"
+        },
+        {
+          "obf_range": [
+            3,
+            5
+          ],
+          "orig_range": [
+            267,
+            267
+          ],
+          "method": "size",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.rewriteFrame",
+              "conditions": [
+                "throws(Ljava/lang/NullPointerException;)"
+              ],
+              "actions": [
+                "removeInnerFrames(1)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

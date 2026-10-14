@@ -9,7 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
-import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
+import {
+  mockInferenceEndpoints,
+  mockNoRegionPolicy,
+  unmockInferenceEndpoints,
+  unmockRegionPolicy,
+} from '../fixtures/mocks';
 
 test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -113,6 +118,10 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.addEndpointCancelButton).toBeVisible();
     });
 
+    await test.step('reasoning toggle is wired into the modal for chat_completion', async () => {
+      await expect(eisModels.addEndpointReasoningToggle).toBeVisible();
+    });
+
     await test.step('cancel closes the modal', async () => {
       await eisModels.addEndpointCancelButton.click();
       await expect(eisModels.addEndpointModal).toBeHidden();
@@ -145,6 +154,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the EOL model', async () => {
+      await eisModels.showEndOfLifeModels();
       await eisModels.modelCard('OpenAI Davinci').click();
       await expect(eisModels.flyout).toBeVisible();
     });
@@ -158,7 +168,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('flyout shows geo region badges for a model with regions', async ({ pageObjects }) => {
+  test('flyout shows region options for a model with regions', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for Anthropic Claude Sonnet 3.7', async () => {
@@ -166,36 +176,20 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('Regions row is visible with badges', async () => {
-      await expect(eisModels.flyoutRegionBadges).toBeVisible();
-    });
-
-    await test.step('US and APAC badges are shown with correct X/Y counts', async () => {
-      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
-      await expect(eisModels.flyoutRegionBadge('apac')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('apac')).toContainText('APAC (1/1)');
-    });
-
-    await test.step('EU badge is not shown (model has no EU regions)', async () => {
-      await expect(eisModels.flyoutRegionBadge('eu')).toBeHidden();
+    await test.step("Region options lists this model's geographies and regions", async () => {
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toHaveText('Asia Pacific');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('geo-eu')).toBeHidden();
+      await expect(eisModels.flyoutRegionOption('region-aws-ap-southeast-1')).toHaveText(
+        'ap-southeast-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
     });
   });
 
-  test('flyout shows no region badges for a model without regions', async ({ pageObjects }) => {
-    const { eisModels } = pageObjects;
-
-    await test.step('open flyout for OpenAI GPT-4.1 (no regions in metadata)', async () => {
-      await eisModels.modelCard('OpenAI GPT-4.1').click();
-      await expect(eisModels.flyout).toBeVisible();
-    });
-
-    await test.step('Regions row is not shown', async () => {
-      await expect(eisModels.flyoutRegionBadges).toBeHidden();
-    });
-  });
-
-  test('flyout shows correct region badges for ELSER v2', async ({ pageObjects }) => {
+  test('flyout shows region options for ELSER', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for Elastic ELSER v2', async () => {
@@ -203,15 +197,34 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('EU and US badges are shown with correct X/Y counts', async () => {
-      await expect(eisModels.flyoutRegionBadge('eu')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('eu')).toContainText('EU (1/1)');
-      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
+    await test.step('Region options lists Europe and North America, not Asia Pacific', async () => {
+      await expect(eisModels.flyoutRegionOption('geo-eu')).toHaveText('Europe');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toBeHidden();
+      await expect(eisModels.flyoutRegionOption('region-aws-eu-west-1')).toHaveText(
+        'eu-west-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
+    });
+  });
+
+  test('flyout says region options are not available when the model has no regions', async ({
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for OpenAI GPT-4.1', async () => {
+      await eisModels.modelCard('OpenAI GPT-4.1').click();
+      await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('APAC badge is not shown (ELSER has no APAC regions)', async () => {
-      await expect(eisModels.flyoutRegionBadge('apac')).toBeHidden();
+    await test.step('Region options explains that none are available', async () => {
+      await expect(eisModels.flyoutRegionOptionsUnavailable).toHaveText(
+        'Region options are not available for this model.'
+      );
+      await expect(eisModels.flyoutRegionOptions).toBeHidden();
     });
   });
 
@@ -240,6 +253,158 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await test.step('close the view modal', async () => {
       await eisModels.addEndpointCloseButton.click();
       await expect(eisModels.addEndpointModal).toBeHidden();
+    });
+  });
+
+  test('shows region preferences unavailable callout when the model is denied by region policy', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock endpoints denied by region policy', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
+    });
+
+    await test.step('open flyout for a denied model', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
+      await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('unavailable callout is visible and every region option remains', async () => {
+      await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toHaveText('Asia Pacific');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('region-aws-ap-southeast-1')).toHaveText(
+        'ap-southeast-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
+    });
+  });
+
+  test('Edit Region preferences button in blocked callout opens manage regions modal', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock endpoints denied by region policy and region policy API', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await mockNoRegionPolicy(page);
+      await eisModels.goto();
+    });
+
+    await test.step('open flyout for a denied model', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
+      await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('expand callout details to reveal the button', async () => {
+      await eisModels.flyoutViewDetailsButton.click();
+    });
+
+    await test.step('click Edit Region preferences button', async () => {
+      await eisModels.flyoutEditRegionPreferencesButton.click();
+    });
+
+    await test.step('manage regions modal opens', async () => {
+      await expect(eisModels.manageRegionsModal).toBeVisible();
+      await eisModels.manageRegionsCancelButton.click();
+    });
+
+    await unmockRegionPolicy(page);
+  });
+
+  test('EOL model flyout shows the EOL callout with date', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('show EOL models and open flyout', async () => {
+      await eisModels.showEndOfLifeModels();
+      await eisModels.modelCard('OpenAI Davinci').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('EOL callout is visible in the flyout body', async () => {
+      await expect(eisModels.flyoutEolCallout).toBeVisible();
+    });
+
+    await test.step('expand details and verify the EOL date is rendered', async () => {
+      await eisModels.flyoutEolViewDetailsButton.click();
+      await expect(eisModels.flyoutEolDescription).toBeVisible();
+      await expect(eisModels.flyoutEolDescription).toContainText('2020');
+    });
+  });
+
+  test('preview model flyout shows the preview callout', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('show preview models and open flyout', async () => {
+      await eisModels.showPreviewModels();
+      await eisModels.modelCard('Elastic Preview Model').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('preview callout is visible in the flyout body', async () => {
+      await expect(eisModels.flyoutPreviewCallout).toBeVisible();
+    });
+  });
+
+  test('blocked callout suppresses lifecycle callouts', async ({ page, pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock preview model as also denied by region policy', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'elastic-preview-model'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
+    });
+
+    await test.step('show preview and outside-region models, then open flyout', async () => {
+      await eisModels.showPreviewModels();
+      await eisModels.showModelsOutsideRegionPreferences();
+      await eisModels.modelCard('Elastic Preview Model').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('blocked callout is visible but preview callout is not', async () => {
+      await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+      await expect(eisModels.flyoutPreviewCallout).toBeHidden();
     });
   });
 });

@@ -7,8 +7,16 @@
 
 export type * from './types';
 export * from './create_episode_actions';
-export { bulkCreateAlertActions } from './bulk_create_alert_actions';
-export type { BulkCreateAlertActionsResponse } from './bulk_create_alert_actions';
+export {
+  bulkAckEpisodeActions,
+  bulkActivateEpisodeActions,
+  bulkAssignEpisodeActions,
+  bulkDeactivateEpisodeActions,
+  bulkSnoozeSeriesActions,
+  bulkTagEpisodeActions,
+  bulkUnackEpisodeActions,
+  bulkUnsnoozeSeriesActions,
+} from './bulk_create_alert_actions';
 export { createAckAction } from './ack';
 export { createUnackAction } from './unack';
 export { createSnoozeAction } from './snooze';
@@ -16,5 +24,14 @@ export { createUnsnoozeAction } from './unsnooze';
 export { createResolveAction } from './resolve';
 export { createUnresolveAction } from './unresolve';
 export { createEditTagsAction } from './edit_tags';
-export { createEditAssigneeAction } from './edit_assignee';
+export { createEditAssigneeAction, EDIT_EPISODE_ASSIGNEE_ACTION_ID } from './edit_assignee';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+export {
+  createCompositeEpisodeAction,
+  type CompositeActionDef,
+  type CompositeActionDeps,
+} from './create_composite_episode_action';
+export {
+  executeCompositeAction,
+  type ExecuteCompositeActionParams,
+} from './execute_composite_action';

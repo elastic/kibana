@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/private/cross_cluster_replication
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/licensing-plugin'
   - '@kbn/management-plugin'
   - '@kbn/remote-clusters-plugin'
@@ -39,6 +40,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/index-management-shared-types'
   - '@kbn/core-http-browser'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

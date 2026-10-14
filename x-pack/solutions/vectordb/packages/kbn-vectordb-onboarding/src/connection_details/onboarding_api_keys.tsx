@@ -56,7 +56,7 @@ const ApiKeySplitButton = ({
       {label}
     </EuiSplitButton.ActionPrimary>
     <EuiSplitButton.ActionSecondary
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       aria-label={i18n.translate('vectordbOnboarding.pathSelection.moreOptions', {
         defaultMessage: 'More options',
       })}

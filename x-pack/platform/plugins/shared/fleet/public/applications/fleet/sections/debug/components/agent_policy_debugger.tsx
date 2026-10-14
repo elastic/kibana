@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiComboBox,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useQuery } from '@kbn/react-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -72,12 +72,16 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   if (status === 'error') {
     return (
-      <EuiCallOut announceOnMount title="Error" color="danger">
-        <FormattedMessage
-          id="xpack.fleet.debug.agentPolicyDebugger.fetchError"
-          defaultMessage="Error fetching Agent Policies"
-        />
-      </EuiCallOut>
+      <KbnDangerCallout
+        announceOnMount
+        title="Error"
+        text={
+          <FormattedMessage
+            id="xpack.fleet.debug.agentPolicyDebugger.fetchError"
+            defaultMessage="Error fetching Agent Policies"
+          />
+        }
+      />
     );
   }
 

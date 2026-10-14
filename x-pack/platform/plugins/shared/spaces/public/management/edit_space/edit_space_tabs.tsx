@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
@@ -21,13 +20,11 @@ export interface EditSpaceTab {
   id: string;
   name: string;
   content: JSX.Element;
-  append?: JSX.Element;
   href?: string;
 }
 
 export interface GetTabsProps {
   space: Space;
-  rolesCount?: number;
   isRoleManagementEnabled: boolean;
   features: KibanaFeature[];
   history: ScopedHistory;
@@ -69,7 +66,6 @@ export const getTabs = ({
   features,
   history,
   capabilities,
-  rolesCount,
   isRoleManagementEnabled,
   isSecurityEnabled,
   enableSecurityLink,
@@ -105,11 +101,6 @@ export const getTabs = ({
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
         defaultMessage: 'Permissions',
       }),
-      append: (
-        <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {rolesCount ?? 0}
-        </EuiNotificationBadge>
-      ),
       content: isSecurityEnabled ? (
         <SuspenseEditSpaceAssignedRolesTab
           space={space}

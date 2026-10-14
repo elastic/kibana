@@ -15,7 +15,6 @@ import {
 import { stringify } from 'yaml';
 import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { generateAgentConfigTar } from './generate_agent_config';
-import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import {
   assertFlowOwnership,
@@ -328,7 +327,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     query: t.union([
       t.partial({
         metricsEnabled: t.string,
-        writeToLogsStreams: t.string,
       }),
       t.undefined,
     ]),
@@ -382,14 +380,12 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const metricsEnabled = params.query?.metricsEnabled === 'true';
-    const writeToLogsStreams = params.query?.writeToLogsStreams === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient,
-        metricsEnabled,
-        writeToLogsStreams
+        metricsEnabled
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -445,15 +441,11 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
-    const shouldWriteToLogsStreams =
-      writeToLogsStreams &&
-      installedIntegrations.some((integration) => integration.installSource === 'custom');
-
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations, shouldWriteToLogsStreams),
+      body: generateAgentConfigTar(output, installedIntegrations),
     });
   },
 });
@@ -479,8 +471,7 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient,
-  metricsEnabled: boolean = true,
-  writeToLogsStreams: boolean = false
+  metricsEnabled: boolean = true
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -494,10 +485,7 @@ async function ensureInstalledIntegrations(
           pkg.version,
           (input) =>
             !['httpjson', 'winlog'].includes(input.type) &&
-            (metricsEnabled || !input.type.endsWith('/metrics')),
-          undefined, // prerelease
-          undefined, // ignoreUnverified
-          false // injectWiredStreamsRouting (only custom logs should route to /logs)
+            (metricsEnabled || !input.type.endsWith('/metrics'))
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
@@ -521,7 +509,6 @@ async function ensureInstalledIntegrations(
       };
 
       const processors = [
-        ...(writeToLogsStreams ? [createWiredStreamsRoutingProcessor()] : []),
         {
           add_fields: {
             target: 'service',

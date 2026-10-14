@@ -64,7 +64,7 @@ export interface SmlSearchHttpResponse {
 /**
  * Per-hit shape returned by `POST /sml/_search`.
  * Baseline always includes id, type, title, origin, description. Optional fields
- * (content, tags, references, spaces, permissions) are included only when
+ * (content, tags, references) are included only when
  * explicitly requested via the `fields[]` parameter.
  */
 export interface SmlSearchHttpResultItem {
@@ -100,26 +100,4 @@ export interface SmlAutocompleteHttpResultItem {
   type: string;
   origin: { uri: string };
   title: string;
-  /**
-   * The specific `discovery_labels` entries that matched the typed prefix,
-   * with their `kind` so the UI can render the matched label in context
-   * (e.g. for `kind: 'title'` the UI may bold the matched span in the title;
-   * for `kind: 'tagline'` it may render the value as a chip).
-   *
-   * Title and type are reachable as discovery_labels (indexer auto-prepends
-   * `{value: title, kind: 'title'}` and `{value: type, kind: 'type'}`).
-   */
-  matched_discovery_labels?: SmlMatchedDiscoveryLabel[];
-}
-
-interface SmlMatchedDiscoveryLabel {
-  value: string;
-  kind: string;
-  /**
-   * The matched span within `value`, wrapped in `<em>...</em>` tags. Present
-   * when ES returned a highlight snippet for this entry. UI renders the tags
-   * as appropriate (e.g. mapping `<em>` to a bolded span). Example: typed
-   * prefix `"git"` against value `"github"` produces `"<em>git</em>hub"`.
-   */
-  highlighted?: string;
 }

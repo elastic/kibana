@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ProfileStateDefinition } from '../profile_state';
-import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
+import {
+  ProfileStateRegistry,
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../common/context_awareness';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-export interface TestProfileState {
+export interface TestProfileState extends SerializableRecord {
   uiValue: string;
   urlValue: string;
   persistentValue: string;

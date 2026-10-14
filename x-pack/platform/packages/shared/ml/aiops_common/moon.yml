@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-common'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/aiops-common'
   description: Moon project for @kbn/aiops-common
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ml/aiops_common
 dependsOn:
   - '@kbn/ml-is-populated-object'

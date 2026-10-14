@@ -19,6 +19,7 @@ import {
 import dateMath from '@kbn/datemath';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
 import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { UnifiedHistogramFetchParamsExternal } from '@kbn/unified-histogram';
 import {
@@ -26,24 +27,48 @@ import {
   UnifiedHistogramChart,
   UnifiedBreakdownFieldSelector,
 } from '@kbn/unified-histogram';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
-import {
-  buildEpisodesHistogramQuery,
-  type EpisodesFilterState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
+import type { ApplicationStart, CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EPISODES_HISTOGRAM_CAP_WARNING,
   EPISODES_HISTOGRAM_QUERY_ERROR,
   EPISODES_HISTOGRAM_RETRY,
 } from '../../translations';
 
+interface EpisodesHistogramServices {
+  application: ApplicationStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  expressions: ExpressionsStart;
+  fieldFormats: FieldFormatsStart;
+  http: HttpStart;
+  notifications?: CoreStart['notifications'];
+  lens: LensPublicStart;
+  spaces: SpacesPluginStart;
+  storage: Storage;
+  uiActions: UiActionsStart;
+  uiSettings: IUiSettingsClient;
+}
+
 export interface EpisodesHistogramProps {
-  services: AlertEpisodesKibanaServices;
+  services: EpisodesHistogramServices;
   dataView: DataView | undefined;
   filterState: EpisodesFilterState;
   timeRange: TimeRange;
@@ -70,6 +95,9 @@ export const EpisodesHistogram = ({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId(services.spaces);
   const histogramSessionId = useMemo(() => `alerting_v2_histogram_${Date.now()}`, []);
+  // Lens treats a present `abortController` prop as owned. Unified histogram always
+  // forwards the prop, so an undefined value crashes the embeddable before it draws.
+  const abortController = useMemo(() => new AbortController(), []);
   const [bucketInterval, setBucketInterval] = useState(() => autoInterval(timeRange));
   const prevTimeRange = useRef(timeRange);
 
@@ -87,7 +115,12 @@ export const EpisodesHistogram = ({
     error,
     refetch,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces },
+    services: {
+      expressions: services.expressions,
+      spaces: services.spaces,
+      http: services.http,
+      notifications: services.notifications,
+    },
     filterState,
     timeRange,
     bucketInterval,
@@ -137,19 +170,38 @@ export const EpisodesHistogram = ({
     if (interval && interval !== 'auto') setBucketInterval(interval);
   }, []);
 
-  const { isInitialized, api, chartProps } = useUnifiedHistogram({
-    services: unifiedHistogramServices,
-    isChartLoading: isDataLoading || !dataView,
-    onBrushEnd,
-    onTimeIntervalChange,
-  });
-
   const esqlQuery = useMemo<AggregateQuery>(
     () => ({
       esql: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
     }),
     [spaceId, filterState, breakdownField]
   );
+
+  const hasDataView = Boolean(dataView);
+  const timeFieldName = dataView?.timeFieldName;
+  const [esqlSource, setEsqlSource] = useState<EsqlSource>();
+  useEffect(() => {
+    if (!table || !hasDataView) return;
+    let isCancelled = false;
+    EsqlSource.create({
+      query: esqlQuery.esql,
+      timeFieldName,
+      resultColumns: table.columns,
+    }).then((source) => {
+      if (!isCancelled) setEsqlSource(source.withColumns(table.columns));
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [esqlQuery, table, timeFieldName, hasDataView]);
+
+  const { isInitialized, api, chartProps } = useUnifiedHistogram({
+    services: unifiedHistogramServices,
+    isChartLoading: isDataLoading || !dataView || !esqlSource,
+    onBrushEnd,
+    onTimeIntervalChange,
+    withLensActions: false,
+  });
 
   const getModifiedVisAttributes = useCallback(
     (
@@ -161,14 +213,15 @@ export const EpisodesHistogram = ({
   );
 
   useEffect(() => {
-    if (!table || !dataView) return;
+    // the source is rebuilt asynchronously, so skip the render where it still has the previous columns
+    if (!table || !esqlSource || esqlSource.resultColumns !== table.columns) return;
     api.fetch({
       requestAdapter: undefined,
+      abortController,
       searchSessionId: histogramSessionId,
-      dataView,
+      dataSource: esqlSource,
       query: esqlQuery,
       table,
-      columns: table.columns,
       breakdownField,
       timeInterval: bucketInterval,
       timeRange,
@@ -176,8 +229,9 @@ export const EpisodesHistogram = ({
       getModifiedVisAttributes,
     });
   }, [
+    abortController,
     api,
-    dataView,
+    esqlSource,
     esqlQuery,
     histogramSessionId,
     table,
@@ -213,15 +267,15 @@ export const EpisodesHistogram = ({
 
   const renderBreakdownSelector = useCallback(
     () =>
-      dataView ? (
+      esqlSource ? (
         <UnifiedBreakdownFieldSelector
-          dataView={dataView}
+          dataSource={esqlSource}
           breakdown={{ field: breakdownDataViewField }}
           esqlColumns={HISTOGRAM_BREAKDOWN_COLUMNS}
           onBreakdownFieldChange={handleBreakdownFieldChange}
         />
       ) : undefined,
-    [dataView, breakdownDataViewField, handleBreakdownFieldChange]
+    [esqlSource, breakdownDataViewField, handleBreakdownFieldChange]
   );
 
   return (
@@ -229,6 +283,7 @@ export const EpisodesHistogram = ({
       {error ? (
         <EuiCallOut
           announceOnMount
+          data-test-subj="episodesHistogramError"
           title={EPISODES_HISTOGRAM_QUERY_ERROR}
           color="danger"
           iconType="error"
@@ -254,13 +309,6 @@ export const EpisodesHistogram = ({
             gutterSize="none"
             css={css`
               height: 192px;
-              /*
-               * TODO: Replace these selectors with a proper prop on UnifiedHistogramChart (e.g. withLensActions={false})
-               */
-              [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
-              [data-test-subj='unifiedHistogramSaveVisualization'] {
-                display: none;
-              }
             `}
           >
             <EuiFlexItem>

@@ -245,7 +245,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Test 4',
                   expectedStatus: 'passed',
                   location: { file: 'test4.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in tags.deploymentAgnostic
+                  tags: ['@cloud-serverless-vectordb'], // Only serverless, not in tags.deploymentAgnostic
                 },
               ],
             },
@@ -426,7 +426,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has local/cloud-stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
-    // pluginB has serverless-workplaceai which is NOT in tags.deploymentAgnostic, it should be excluded
+    // pluginB has serverless-vectordb which is NOT in tags.deploymentAgnostic, it should be excluded
     // packageA has local/cloud-stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
 
     const infoCalls = log.info.mock.calls;
@@ -445,7 +445,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has @cloud-serverless-observability_complete, @cloud-serverless-security_complete, @cloud-serverless-search
-    // pluginB has @cloud-serverless-workplaceai
+    // pluginB has @cloud-serverless-vectordb
     // packageA has @cloud-serverless-observability_complete
 
     const infoCalls = log.info.mock.calls;
@@ -485,7 +485,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-*
     // pluginA parallel has @cloud-serverless-search which does NOT match @local-*
-    // pluginB has @cloud-serverless-workplaceai which does NOT match @local-*
+    // pluginB has @cloud-serverless-vectordb which does NOT match @local-*
     // packageA has @local-stateful-classic which matches @local-*
 
     const infoCalls = log.info.mock.calls;
@@ -549,7 +549,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-stateful-*
     // pluginA parallel has @cloud-serverless-search which does NOT match
-    // pluginB has @cloud-serverless-workplaceai which does NOT match
+    // pluginB has @cloud-serverless-vectordb which does NOT match
     // pluginLocalServerless has @local-serverless-search which does NOT match @local-stateful-*
     // packageA has @local-stateful-classic which matches @local-stateful-*
 
@@ -805,7 +805,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Test No Match',
                   expectedStatus: 'passed',
                   location: { file: 'test.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Not in ESS_ONLY
+                  tags: ['@cloud-serverless-vectordb'], // Not in ESS_ONLY
                 },
               ],
             },
@@ -907,7 +907,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginB has @cloud-serverless-workplaceai which doesn't match @cloud-stateful-*, it should be filtered out
+    // pluginB has @cloud-serverless-vectordb which doesn't match @cloud-stateful-*, it should be filtered out
     const infoCalls = log.info.mock.calls;
     const moduleLogs = infoCalls.filter(
       (call) => call[0].includes('] plugin:') || call[0].includes('] package:')
@@ -975,7 +975,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toBe('No Playwright config files found');
   });
 
-  it('only collects tags from passed spec files', () => {
+  it('only collects tags from runnable tests', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
@@ -1017,8 +1017,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   id: 'test3',
                   title: 'Test 3',
                   expectedStatus: 'passed',
-                  location: { file: 'test3.ts', line: 1, column: 1 }, // Not a .spec.ts file
-                  tags: ['@cloud-serverless-search'], // Should NOT be included (not .spec.ts)
+                  location: { file: 'parallel_tests/global.setup.ts', line: 1, column: 1 },
+                  tags: ['@cloud-serverless-search'], // Should NOT be included (setup hook)
                 },
                 {
                   id: 'test4',
@@ -1063,7 +1063,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
     expect(configLogCall![0]).toContain('@local-stateful-classic');
     expect(configLogCall![0]).toContain('@cloud-serverless-observability_complete');
-    // Should NOT contain tags from failed tests or non-spec files
+    // Should NOT contain tags from failed tests or global setup hooks
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-search');
   });

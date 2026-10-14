@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-defend-workflows'
   sourceRoot: x-pack/platform/plugins/shared/osquery
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/navigation-plugin'
@@ -91,6 +92,8 @@ dependsOn:
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-security-server'
   - '@kbn/rrule'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

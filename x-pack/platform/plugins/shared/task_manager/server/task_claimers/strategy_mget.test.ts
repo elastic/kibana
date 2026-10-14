@@ -16,6 +16,7 @@ import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
+  TaskClaimCandidate,
 } from '../task';
 import { TaskStatus, TaskPriority, TaskCost } from '../task';
 import type { SearchOpts, StoreOpts } from '../task_store';
@@ -280,6 +281,51 @@ describe('TaskClaiming', () => {
       };
     }
 
+    test('does not claim and returns NoTasksClaimed when execution is paused', async () => {
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {},
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: true, pausedTaskTypes: [] }),
+        },
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      expect(isOk(resultOrErr)).toBe(false);
+      expect(unwrap(resultOrErr)).toEqual('NoTasksClaimed');
+      expect(store.msearch).not.toHaveBeenCalled();
+    });
+
+    test('merges runtime paused task types into the excluded task types', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: { title: 'foo', createTaskRunner: jest.fn() },
+        bar: { title: 'bar', createTaskRunner: jest.fn() },
+      });
+
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: { definitions },
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: false, pausedTaskTypes: ['bar'] }),
+        },
+        excludedTaskTypes: ['foobar'],
+        hits: [generateFakeTasks(1)],
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      // 'bar' is excluded at claim time, so only 'foo' is queried for.
+      const queriedTypes = store.msearch.mock.calls
+        .flatMap(([searches]) => searches ?? [])
+        .flatMap((search) => JSON.stringify(search));
+      expect(queriedTypes.some((s) => s.includes('"foo"'))).toBe(true);
+      expect(queriedTypes.some((s) => s.includes('"bar"'))).toBe(false);
+    });
+
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
@@ -335,7 +381,7 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           createTaskRunner: jest.fn(),
         },
         bar: {
@@ -471,6 +517,82 @@ describe('TaskClaiming', () => {
         tasksLeftUnclaimed: 3,
       });
       expect(result.docs.length).toEqual(3);
+    });
+
+    test('should claim from slim candidates and take state, params and API keys from bulkGet', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const candidates = [
+        mockClaimCandidate({ id: 'id-1', taskType: 'report', version: '42' }),
+        mockClaimCandidate({ id: 'id-2', taskType: 'report', version: '42' }),
+      ];
+
+      // the winners' bulkGet is the only place the full documents come from
+      const fullTasks = candidates.map((candidate, index) =>
+        mockInstance({
+          ...candidate,
+          state: { stateFor: candidate.id },
+          params: { paramsFor: candidate.id },
+          apiKey: `decryptedKey-${index}`,
+        })
+      );
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fullTasks);
+      store.msearch.mockResolvedValueOnce({ docs: candidates, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkPartialUpdate.mockResolvedValueOnce(candidates.map(getPartialUpdateResult));
+      store.bulkGet.mockResolvedValueOnce(fullTasks.map(asOk));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      // the claim update is built field by field, so a slim candidate claims the same way a
+      // full task instance would
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith(
+        candidates.map((candidate) => ({
+          id: candidate.id,
+          version: candidate.version,
+          scheduledAt: candidate.runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        }))
+      );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2']);
+
+      expect(result.stats).toEqual({
+        tasksClaimed: 2,
+        tasksConflicted: 0,
+        tasksErrors: 0,
+        tasksUpdated: 2,
+        staleTasks: 0,
+        tasksLeftUnclaimed: 0,
+      });
+      expect(result.docs.map((doc) => doc.state)).toEqual([
+        { stateFor: 'id-1' },
+        { stateFor: 'id-2' },
+      ]);
+      expect(result.docs.map((doc) => doc.params)).toEqual([
+        { paramsFor: 'id-1' },
+        { paramsFor: 'id-2' },
+      ]);
+      expect(result.docs.map((doc) => doc.apiKey)).toEqual(['decryptedKey-0', 'decryptedKey-1']);
     });
 
     test('should handle no tasks to claim', async () => {
@@ -2596,7 +2718,7 @@ function generateFakeTasks(count: number = 1) {
   return _.times(count, (index) => mockInstance({ id: `task:id-${index}` }));
 }
 
-function getPartialUpdateResult(task: ConcreteTaskInstance) {
+function getPartialUpdateResult(task: Pick<ConcreteTaskInstance, 'id' | 'version' | 'runAt'>) {
   return asOk({
     id: task.id,
     version: task.version,
@@ -2605,6 +2727,11 @@ function getPartialUpdateResult(task: ConcreteTaskInstance) {
     retryAt: task.runAt,
     status: 'claiming',
   } as PartialConcreteTaskInstance);
+}
+
+// Mirrors what the candidate msearch returns now: metadata only, no state, params or API keys.
+function mockClaimCandidate(candidate: Partial<ConcreteTaskInstance> = {}): TaskClaimCandidate {
+  return _.omit(mockInstance(candidate), 'state', 'params') as TaskClaimCandidate;
 }
 
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {

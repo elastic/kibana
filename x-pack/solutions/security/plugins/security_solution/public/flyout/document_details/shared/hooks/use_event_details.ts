@@ -98,7 +98,7 @@ export const useEventDetails = ({
     pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
 
   const { dataView } = useDataView(sourcererScope);
-  const browserFields = useBrowserFields(sourcererScope);
+  const browserFields = useBrowserFields(dataView);
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =

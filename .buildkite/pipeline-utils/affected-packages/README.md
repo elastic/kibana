@@ -130,9 +130,15 @@ const filteredFiles = filterFilesByPackages(
 
 **Performance**: ~5-7 seconds
 
-## PR Jest selective testing
+## PR and merge-queue Jest selective testing
 
 On pull request builds, Jest unit and integration test groups are narrowed to configs under affected packages (see `pick_test_group_run_order` in CI stats). Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.
+
+Merge-queue builds select Jest unit tests affected by changes since the group's pinned base (`BUILDKITE_MERGE_QUEUE_BASE_COMMIT`), not the live target-branch comparison (`MERGE_QUEUE_MERGE_BASE`). If that base is missing or invalid, or CI cannot determine the comparison range, test selection fails.
+
+### Always-run integration configs
+
+Some integration suites boot a full Kibana and snapshot a *global registry* (rule-type params, connector types, task types, …) populated at runtime by downstream publishers that sit **upstream** of the suite's own package. `includeDownstream` expansion never reaches them, so a publisher-only change can silently skip the snapshot. Configs listed in `ALWAYS_RUN_JEST_INTEGRATION_CONFIGS` (`const.ts`) are re-added after affected-filtering so they run on every PR regardless of the graph. Keep the list tiny — it is a deliberate escape hatch.
 
 ## Scout selective testing: git -> Moon (shadow mode)
 

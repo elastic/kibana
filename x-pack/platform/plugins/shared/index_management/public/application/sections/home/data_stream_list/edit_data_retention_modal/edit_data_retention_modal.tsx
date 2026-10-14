@@ -17,8 +17,8 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -188,7 +188,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               ds.lifecycle.data_retention,
               `${formData.dataRetention}${formData.timeUnit}`
             )) ||
-          (ds.lifecycle?.effective_retention &&
+          (typeof ds.lifecycle?.effective_retention === 'string' &&
             isRetentionBiggerThan(
               ds.lifecycle.effective_retention,
               `${formData.dataRetention}${formData.timeUnit}`
@@ -356,7 +356,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <EuiSpacer />
 
           {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
@@ -364,39 +364,40 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                   defaultMessage: 'Some data will be deleted',
                 }
               )}
-              color="danger"
-              iconType="warning"
               data-test-subj="reducedDataRetentionCallout"
-            >
-              <p>
-                {isBulkEdit ? (
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.affectedDataStreamsCalloutText"
-                    defaultMessage="The retention period will be reduced for {affectedDataStreamCount} {affectedDataStreamCount, plural, one {data stream} other {data streams}}. Data older than then new
-                retention period will be permanently deleted."
-                    values={{
-                      affectedDataStreamCount: affectedDataStreams.length,
-                    }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.affectedDataStreamsSingleCalloutText"
-                    defaultMessage="The retention period will be reduced. Data older than then new retention period will be permanently deleted."
-                  />
-                )}
-              </p>
-              {isBulkEdit && affectedDataStreams.length <= 10 && (
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
-                    defaultMessage="Affected data streams: {affectedDataStreams}"
-                    values={{
-                      affectedDataStreams: <b>{affectedDataStreams.join(', ')}</b>,
-                    }}
-                  />
-                </p>
-              )}
-            </EuiCallOut>
+              text={
+                <>
+                  <p>
+                    {isBulkEdit ? (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.affectedDataStreamsCalloutText"
+                        defaultMessage="The retention period will be reduced for {affectedDataStreamCount} {affectedDataStreamCount, plural, one {data stream} other {data streams}}. Data older than then new
+                    retention period will be permanently deleted."
+                        values={{
+                          affectedDataStreamCount: affectedDataStreams.length,
+                        }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.affectedDataStreamsSingleCalloutText"
+                        defaultMessage="The retention period will be reduced. Data older than then new retention period will be permanently deleted."
+                      />
+                    )}
+                  </p>
+                  {isBulkEdit && affectedDataStreams.length <= 10 && (
+                    <p>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
+                        defaultMessage="Affected data streams: {affectedDataStreams}"
+                        values={{
+                          affectedDataStreams: <b>{affectedDataStreams.join(', ')}</b>,
+                        }}
+                      />
+                    </p>
+                  )}
+                </>
+              }
+            />
           )}
         </EuiModalBody>
 

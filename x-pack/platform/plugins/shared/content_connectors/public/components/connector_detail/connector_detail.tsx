@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderTab, type AppHeaderTitle } from '@kbn/app-header';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EuiTabProps } from '@elastic/eui';
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
-import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
+import { CONNECTOR_DETAIL_TAB_PATH, CONNECTORS_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 
@@ -26,12 +25,13 @@ import { ConnectorDetailOverview } from './overview';
 import { generateEncodedPath } from '../shared/encode_path_params';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
-import { ConnectorName } from './connector_name';
-import { ConnectorDescription } from './connector_description';
 import { SearchConnectorsPageTemplateWrapper } from '../shared/page_template';
 import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { getContentConnectorsUrl } from '../../utils/get_content_connectors_url';
+import { putConnectorNameAndDescription } from '../../api/connector/update_connector_name_and_description_api_logic';
+import { flashSuccessToast } from '../shared/flash_messages';
 
 export enum ConnectorDetailTabId {
   // all indices
@@ -66,9 +66,8 @@ export const ConnectorDetail: React.FC = () => {
   const { hasFilteringFeature, index, connector, isLoading } = useValues(
     ConnectorViewLogic({ http })
   );
-  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } = useActions(
-    ConnectorViewLogic({ http })
-  );
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll, updateConnectorData } =
+    useActions(ConnectorViewLogic({ http }));
   useEffect(() => {
     stopConnectorPoll();
     fetchConnectorApiReset();
@@ -80,142 +79,172 @@ export const ConnectorDetail: React.FC = () => {
     tabId?: string;
   }>();
 
-  const ALL_INDICES_TABS = [
-    {
-      content: <ConnectorDetailOverview />,
-      id: ConnectorDetailTabId.OVERVIEW,
-      isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
-      label: i18n.translate('xpack.contentConnectors.connectors.connectorDetail.overviewTabLabel', {
-        defaultMessage: 'Overview',
-      }),
-      onClick: () => {
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.OVERVIEW,
-          })}`,
-        });
+  const tabs = useMemo(() => {
+    const getTabHref = (nextTabId: ConnectorDetailTabId) =>
+      getContentConnectorsUrl(
+        application?.getUrlForApp,
+        generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          connectorId,
+          tabId: nextTabId,
+        })
+      );
+
+    return [
+      {
+        content: <ConnectorDetailOverview />,
+        id: ConnectorDetailTabId.OVERVIEW,
+        isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.overviewTabLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.OVERVIEW),
       },
-    },
-    {
-      content: <SearchIndexDocuments />,
-      disabled: !index,
-      id: ConnectorDetailTabId.DOCUMENTS,
-      isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
-      label: i18n.translate(
-        'xpack.contentConnectors.connectors.connectorDetail.documentsTabLabel',
-        {
-          defaultMessage: 'Documents',
-        }
-      ),
-      onClick: () => {
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.DOCUMENTS,
-          })}`,
-        });
+      {
+        content: <SearchIndexDocuments />,
+        disabled: !index,
+        id: ConnectorDetailTabId.DOCUMENTS,
+        isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.documentsTabLabel',
+          {
+            defaultMessage: 'Documents',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.DOCUMENTS),
       },
+      {
+        content: <SearchIndexIndexMappings />,
+        disabled: !index,
+        id: ConnectorDetailTabId.INDEX_MAPPINGS,
+        isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.indexMappingsTabLabel',
+          {
+            defaultMessage: 'Mappings',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.INDEX_MAPPINGS),
+      },
+      {
+        content: <ConnectorSyncRules />,
+        disabled: !index || !hasFilteringFeature,
+        id: ConnectorDetailTabId.SYNC_RULES,
+        isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
+          {
+            defaultMessage: 'Sync rules',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.SYNC_RULES),
+      },
+      {
+        content: <ConnectorScheduling />,
+        disabled: !connector?.index_name,
+        id: ConnectorDetailTabId.SCHEDULING,
+        isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.schedulingTabLabel',
+          {
+            defaultMessage: 'Scheduling',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.SCHEDULING),
+      },
+      {
+        content: <ConnectorConfiguration />,
+        id: ConnectorDetailTabId.CONFIGURATION,
+        isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
+        label: i18n.translate(
+          'xpack.contentConnectors.connectors.connectorDetail.configurationTabLabel',
+          {
+            defaultMessage: 'Configuration',
+          }
+        ),
+        href: getTabHref(ConnectorDetailTabId.CONFIGURATION),
+      },
+    ];
+  }, [
+    application?.getUrlForApp,
+    connector?.index_name,
+    connectorId,
+    hasFilteringFeature,
+    index,
+    tabId,
+  ]);
+
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId, tabs]);
+
+  const onSaveTitle = useCallback(
+    async (nextTitle: string) => {
+      if (!connector) {
+        return;
+      }
+
+      const name = nextTitle.trim();
+      if (!name) {
+        return i18n.translate('xpack.contentConnectors.nameAndDescription.name.error.empty', {
+          defaultMessage: 'Connector name cannot be empty',
+        });
+      }
+
+      try {
+        await putConnectorNameAndDescription({
+          connectorId: connector.id,
+          description: connector.description,
+          http,
+          name,
+        });
+        updateConnectorData({ name });
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.contentConnectors.content.indices.configurationConnector.nameAndDescription.successToast.title',
+            { defaultMessage: 'Connector name and description updated' }
+          )
+        );
+      } catch {
+        return i18n.translate(
+          'xpack.contentConnectors.connectors.nameAndDescription.name.error.saveFailed',
+          { defaultMessage: 'Unable to update connector name' }
+        );
+      }
     },
-    {
-      content: <SearchIndexIndexMappings />,
-      disabled: !index,
-      id: ConnectorDetailTabId.INDEX_MAPPINGS,
-      isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
-      label: i18n.translate(
-        'xpack.contentConnectors.connectors.connectorDetail.indexMappingsTabLabel',
+    [connector, http, updateConnectorData]
+  );
+
+  const headerTitle = useMemo<AppHeaderTitle>(
+    () => ({
+      ariaLabel: i18n.translate(
+        'xpack.contentConnectors.connectors.nameAndDescription.name.ariaLabel',
         {
-          defaultMessage: 'Mappings',
+          defaultMessage: 'Edit connector name',
         }
       ),
-      onClick: () =>
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
-          })}`,
-        }),
-    },
-  ];
-
-  const CONNECTOR_TABS = [
-    {
-      content: <ConnectorSyncRules />,
-      disabled: !index || !hasFilteringFeature,
-      id: ConnectorDetailTabId.SYNC_RULES,
-      isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
-      label: i18n.translate(
-        'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
-        {
-          defaultMessage: 'Sync rules',
-        }
+      onSave: onSaveTitle,
+      placeholder: i18n.translate(
+        'xpack.contentConnectors.connectors.nameAndDescription.name.placeholder',
+        { defaultMessage: 'Add a name to your connector' }
       ),
-      onClick: () =>
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.SYNC_RULES,
-          })}`,
-        }),
-    },
+      text: connector?.name ?? '',
+    }),
+    [connector?.name, onSaveTitle]
+  );
 
-    {
-      content: <ConnectorScheduling />,
-      disabled: !connector?.index_name,
-      id: ConnectorDetailTabId.SCHEDULING,
-      isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
-      label: i18n.translate(
-        'xpack.contentConnectors.connectors.connectorDetail.schedulingTabLabel',
-        {
-          defaultMessage: 'Scheduling',
-        }
-      ),
-      onClick: () =>
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.SCHEDULING,
-          })}`,
-        }),
-    },
-  ];
-
-  const CONFIG_TAB = [
-    {
-      content: <ConnectorConfiguration />,
-      id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate(
-        'xpack.contentConnectors.connectors.connectorDetail.configurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      onClick: () =>
-        application?.navigateToApp(MANAGEMENT_APP_ID, {
-          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })}`,
-        }),
-    },
-  ];
-
-  interface TabMenuItem {
-    content: JSX.Element;
-    disabled?: boolean;
-    id: string;
-    label: string;
-    onClick?: () => void;
-    prepend?: React.ReactNode;
-    route?: string;
-    testSubj?: string;
-  }
-
-  const tabs: TabMenuItem[] = [...ALL_INDICES_TABS, ...CONNECTOR_TABS, ...CONFIG_TAB];
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        'data-test-subj': `contentConnectorsConnectorDetail-${tab.id}Tab`,
+        disabled: tab.disabled,
+        href: tab.href,
+        id: tab.id,
+        isSelected: tab.isSelected,
+        label: tab.label,
+      })),
+    [tabs]
+  );
 
   if (!connector || connector?.deleted) {
     return (
@@ -249,16 +278,19 @@ export const ConnectorDetail: React.FC = () => {
   return (
     <SearchConnectorsPageTemplateWrapper
       isLoading={isLoading}
-      pageHeader={{
-        description: connector ? <ConnectorDescription connector={connector} /> : '...',
-        pageTitle: connector ? <ConnectorName connector={connector} /> : '...',
-        rightSideGroupProps: {
-          gutterSize: 's',
-          responsive: false,
-          wrap: false,
-        },
-        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
-      }}
+      appHeader={
+        <AppHeader
+          title={headerTitle}
+          back={{
+            href: getContentConnectorsUrl(application?.getUrlForApp, CONNECTORS_PATH),
+            label: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
+              defaultMessage: 'Content Connectors',
+            }),
+          }}
+          tabs={headerTabs}
+          spacing="bleed"
+        />
+      }
     >
       {selectedTab?.content || null}
     </SearchConnectorsPageTemplateWrapper>

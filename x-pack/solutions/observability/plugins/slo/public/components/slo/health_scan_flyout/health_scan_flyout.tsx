@@ -46,7 +46,7 @@ export function HealthScanFlyout({ onClose }: Props) {
           {selectedScanId && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 onClick={handleBackToList}
                 data-test-subj="healthScanBackButton"
                 size="s"

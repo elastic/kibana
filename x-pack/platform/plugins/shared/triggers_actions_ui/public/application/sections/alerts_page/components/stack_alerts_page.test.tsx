@@ -159,4 +159,60 @@ describe('StackAlertsPage', () => {
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();
   });
+
+  describe('alert details navigation based on observability access', () => {
+    // Independent of the observability-access gate under test: keep the page's own
+    // "authorized to read any rules" check satisfied so the alerts table renders.
+    beforeEach(() => {
+      mockLoadRuleTypes.mockResolvedValue(Array.from(ruleTypesIndex.values()));
+    });
+
+    const noObservabilityAccessCapabilities = (core: ReturnType<typeof coreMock.createStart>) => ({
+      ...core.application.capabilities,
+      navLinks: {
+        ...core.application.capabilities.navLinks,
+        apm: false,
+        metrics: false,
+        uptime: false,
+        synthetics: false,
+        slo: false,
+      },
+      logs: { show: false },
+      [STACK_ALERTS_ONLY_FEATURE_ID]: { show: false },
+      [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: false },
+    });
+
+    it('does not set alertDetailsNavigation when the user has no observability capabilities', async () => {
+      const core = coreMock.createStart();
+      core.application.capabilities = noObservabilityAccessCapabilities(core);
+      const renderer = createAppMockRenderer({
+        additionalServices: { application: core.application },
+      });
+      renderer.render(<StackAlertsPage />);
+
+      expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({ alertDetailsNavigation: undefined })
+      );
+    });
+
+    it('sets alertDetailsNavigation when the user has the observabilityAlerts capability', async () => {
+      const core = coreMock.createStart();
+      core.application.capabilities = {
+        ...noObservabilityAccessCapabilities(core),
+        [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: true },
+      };
+      const renderer = createAppMockRenderer({
+        additionalServices: { application: core.application },
+      });
+      renderer.render(<StackAlertsPage />);
+
+      expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertDetailsNavigation: expect.objectContaining({ appId: 'observability' }),
+        })
+      );
+    });
+  });
 });

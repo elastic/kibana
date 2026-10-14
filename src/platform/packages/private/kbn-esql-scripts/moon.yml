@@ -6,17 +6,15 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-scripts'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
-  javascript:
-    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/esql-scripts'
   description: Moon project for @kbn/esql-scripts
   channel: ''
-  owner: '@elastic/kibana-esql'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/private/kbn-esql-scripts
 dependsOn:
   - '@kbn/repo-info'

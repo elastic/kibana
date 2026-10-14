@@ -9,14 +9,13 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
   getReferenceAttachmentId,
@@ -46,6 +45,7 @@ const getDeleteLabelTitle = ({
     registry: unifiedAttachmentTypeRegistry,
     getId: () => resolveUnifiedAttachmentType(comment, owner),
     getAttachmentProps: () => ({
+      savedObjectId: userAction.commentId ?? userAction.id,
       attachmentId: getReferenceAttachmentId(comment),
       metadata: 'metadata' in comment ? comment.metadata : undefined,
     }),
@@ -80,7 +80,7 @@ const getDeleteLabelFromRegistry = ({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };
@@ -119,9 +119,10 @@ const getCreateCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   attachment,
+  isDeleted,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -130,32 +131,15 @@ const getCreateCommentUserAction = ({
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
+  isDeleted: boolean;
 } & Omit<
   UserActionBuilderArgs,
-  | 'comments'
-  | 'index'
-  | 'handleOutlineComment'
-  | 'currentUserProfile'
-  | 'persistableStateAttachmentTypeRegistry'
+  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
+  // External-reference / `actions` attachments are projected to their
+  // unified shape by the cases server before reaching the client, so
+  // legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
-    // Legacy `actions` attachments are projected to the unified `security.endpoint`
-    // type by the cases server before reaching the client (UI reads always use
-    // `mode: 'unified'`), so they fall through to the unified branch below
-    // rather than needing a dedicated cases-side renderer.
-    if (attachment.type === AttachmentType.externalReference) {
-      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
-        userAction,
-        userProfiles,
-        attachment,
-        externalReferenceAttachmentTypeRegistry,
-        caseData,
-        isLoading: loadingCommentIds.includes(attachment.id),
-        handleDeleteComment,
-      });
-
-      return externalReferenceBuilder.build();
-    }
     return [];
   }
 
@@ -172,8 +156,10 @@ const getCreateCommentUserAction = ({
       userProfiles,
       attachment,
       unifiedAttachmentTypeRegistry,
+      permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
+      isDeleted,
       handleDeleteComment,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
@@ -188,13 +174,29 @@ const getCreateCommentUserAction = ({
   return [];
 };
 
+/** Rebuilds a deleted attachment from its create user action payload. */
+const buildAttachmentFromPayload = (
+  userAction: SnakeToCamelCase<CommentUserAction>
+): AttachmentUIV2 =>
+  ({
+    ...userAction.payload.comment,
+    id: userAction.commentId ?? userAction.id,
+    createdAt: userAction.createdAt,
+    createdBy: userAction.createdBy,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: '',
+  } as AttachmentUIV2);
+
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
   caseData,
   casesConfiguration,
   userProfiles,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -218,21 +220,21 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const attachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
-
-    if (attachment == null) {
-      return [];
-    }
     if (attachmentUserAction.action === UserActionActions.create) {
-      const commentAction = getCreateCommentUserAction({
+      const liveAttachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
+      const isDeleted = liveAttachment == null;
+      const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
+
+      return getCreateCommentUserAction({
         appId,
         caseData,
         casesConfiguration,
         userProfiles,
         userAction: attachmentUserAction,
-        externalReferenceAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
+        permissions,
         attachment,
+        isDeleted,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
@@ -241,8 +243,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseConnectors,
         attachments,
       });
-
-      return commentAction;
     }
 
     const label = getUpdateLabelTitle();

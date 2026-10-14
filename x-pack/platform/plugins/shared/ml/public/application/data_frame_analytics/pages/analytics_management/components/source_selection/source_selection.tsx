@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -112,7 +113,7 @@ export const SourceSelection: FC = () => {
         <EuiPanel hasShadow={false} hasBorder>
           {isCcsCallOut && (
             <>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 data-test-subj="analyticsCreateSourceIndexModalCcsErrorCallOut"
                 title={i18n.translate(
@@ -121,10 +122,8 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data views using cross-cluster search are not supported.',
                   }
                 )}
-                color="danger"
-              >
-                {typeof ccsCallOutBodyText === 'string' && <p>{ccsCallOutBodyText}</p>}
-              </EuiCallOut>
+                text={typeof ccsCallOutBodyText === 'string' ? ccsCallOutBodyText : undefined}
+              />
               <EuiSpacer size="m" />
             </>
           )}

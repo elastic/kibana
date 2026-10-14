@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -24,6 +23,7 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { isEqual } from 'lodash';
 import type { SyntheticsCCSSettings } from '../../../../../../common/runtime_types';
@@ -170,21 +170,18 @@ export const RemoteClustersForm = () => {
 
       {!canEdit && (
         <>
-          <EuiCallOut announceOnMount title={READ_ONLY_MESSAGE} iconType="lock" size="s" />
+          <KbnInfoCallout announceOnMount title={READ_ONLY_MESSAGE} size="s" />
           <EuiSpacer size="m" />
         </>
       )}
 
       {hasNoClusters && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={NO_CLUSTERS_TITLE}
-            iconType="iInCircle"
-            color="warning"
-          >
-            <p>{NO_CLUSTERS_DESCRIPTION}</p>
-          </EuiCallOut>
+            text={NO_CLUSTERS_DESCRIPTION}
+          />
           <EuiSpacer size="m" />
         </>
       )}

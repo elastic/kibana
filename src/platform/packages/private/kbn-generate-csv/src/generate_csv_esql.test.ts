@@ -317,7 +317,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
@@ -396,7 +396,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
@@ -580,6 +580,67 @@ describe('CsvESQLGenerator', () => {
           },
           abortSignal: expect.any(AbortSignal),
         }
+      );
+    });
+
+    it('passes params to the query when only the job names the time field', async () => {
+      const query = {
+        esql: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)',
+      };
+      // The event.ingested range must be ignored, proving the job's time field picks the range
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              'event.ingested': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-01T00:00:00.000Z',
+                lte: '2025-06-02T00:00:00.000Z',
+              },
+            },
+          },
+        },
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2026-01-01T00:00:00.000Z',
+                lte: '2026-01-02T00:00:00.000Z',
+              },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters, timeFieldName: '@timestamp' }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: expect.objectContaining({
+            params: [
+              { _tstart: '2026-01-01T00:00:00.000Z' },
+              { _tend: '2026-01-02T00:00:00.000Z' },
+            ],
+          }),
+        },
+        expect.anything()
       );
     });
 
@@ -925,6 +986,63 @@ describe('CsvESQLGenerator', () => {
           ],
         ]
       `);
+    });
+  });
+
+  describe('forceNow anchors _tstart/_tend for scheduled reports', () => {
+    it('resolves relative date math filters to forceNow-anchored absolute times for _tstart/_tend', async () => {
+      const forceNow = '2025-06-18T06:00:00.000Z';
+      const query = {
+        esql: 'FROM custom-metrics | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
+      };
+      // Relative filter — as stored in a scheduled report payload.
+      // Uses meta: {} to match buildEsQuery expectations in the test mock environment.
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: 'now-1h',
+                lte: 'now',
+              },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters, forceNow, timeFieldName: '@timestamp' }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      (mockDataClient.search as jest.Mock).mockClear();
+      await generateCsv.generateData();
+
+      const callArgs = (mockDataClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = callArgs.params;
+
+      // The ES range filter should have resolved, absolute times anchored to forceNow
+      const rangeFilter = searchParams.filter.bool.filter[0].range['@timestamp'];
+      expect(rangeFilter.gte).toBe('2025-06-18T05:00:00.000Z'); // forceNow - 1h
+      expect(rangeFilter.lte).toBe(forceNow); // forceNow exactly (roundUp on 'now')
+
+      // The _tstart/_tend named params should also use the forceNow-resolved values
+      // (they come from extractTimeRange on the already-resolved currentFilters)
+      const tstart = searchParams.params.find((p: Record<string, string>) => '_tstart' in p);
+      const tend = searchParams.params.find((p: Record<string, string>) => '_tend' in p);
+      expect(tstart._tstart).toBe('2025-06-18T05:00:00.000Z');
+      expect(tend._tend).toBe(forceNow);
     });
   });
 });

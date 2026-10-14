@@ -19,15 +19,17 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDashboardViewPath, isDetectionsPath, isRuleChangesHistoryPath } from '../../../helpers';
+import {
+  isDashboardViewPath,
+  isDetectionsPath,
+  isRuleChangesHistoryPath,
+  isRulesManagementPath,
+} from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import {
-  getScopeFromPath,
-  showDataViewPickerByPath,
-} from '../../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath, showDataViewPickerByPath } from '../../../data_view_manager/utils/paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
@@ -61,6 +63,7 @@ export const GlobalHeader = React.memo(() => {
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
+  const rulesManagementPath = isRulesManagementPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -69,7 +72,9 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    if (changesHistoryPath) {
+    // The Rules page app header renders its own actions (ML job settings, Add integrations),
+    // so clear the global header action menu there to avoid duplicating them.
+    if (changesHistoryPath || rulesManagementPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -97,6 +102,7 @@ export const GlobalHeader = React.memo(() => {
     kibanaServiceI18n,
     dashboardViewPath,
     changesHistoryPath,
+    rulesManagementPath,
   ]);
 
   return (

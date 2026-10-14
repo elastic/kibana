@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -47,7 +47,9 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       query,
     }: {
       filters: Filter[];
-      query: Query | AggregateQuery;
+      // `state.query` only holds chart-scoped KQL/Lucene filters; ES|QL queries
+      // live on the text-based datasource layers and must not be injected here
+      query: Query;
     }): LensAttributes | null => {
       if (!attributes) {
         return null;
@@ -74,7 +76,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       }: {
         timeRange: TimeRange;
         filters: Filter[];
-        query: Query | AggregateQuery;
+        query: Query;
         lastReloadRequestTime?: number;
       }) =>
       (openInNewTab: boolean) => {
@@ -105,7 +107,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
-      query?: Query | AggregateQuery;
+      query?: Query;
       lastReloadRequestTime?: number;
     }) => {
       const openInLens = getOpenInLensAction(

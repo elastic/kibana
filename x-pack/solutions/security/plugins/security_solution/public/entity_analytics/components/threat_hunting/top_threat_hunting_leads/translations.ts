@@ -261,7 +261,22 @@ export const VIEW_ENTITY_DETAILS = i18n.translate(
   { defaultMessage: 'View entity details' }
 );
 
-export const VIEW_LEADS_ARCHIVE_INDEX = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewLeadsArchiveIndex',
-  { defaultMessage: 'View leads archive index' }
+export const EXPLORATORY_BADGE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.exploratoryBadgeLabel',
+  { defaultMessage: 'Exploratory' }
+);
+
+export const EXPLORATORY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.exploratoryBadgeTooltip',
+  {
+    defaultMessage: 'This lead was surfaced by an LLM rather than a deterministic rule.',
+  }
+);
+
+export const EXPLORATORY_ICON_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.exploratoryIconTooltip',
+  {
+    defaultMessage:
+      'Exploratory: this lead was surfaced by an LLM rather than a deterministic rule.',
+  }
 );

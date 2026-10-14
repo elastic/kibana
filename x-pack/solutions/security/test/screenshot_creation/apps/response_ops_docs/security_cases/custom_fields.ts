@@ -24,8 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
+      await retry.waitFor('cases-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-settings-panel');
       });
       await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories);
 

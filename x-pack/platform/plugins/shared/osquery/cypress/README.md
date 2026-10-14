@@ -28,7 +28,7 @@ Initialization:
 
 ```shell
 # bootstrap kibana from the project root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
@@ -37,19 +37,19 @@ node scripts/build_kibana_platform_plugins
 You can either run all the tests:
 ```shell
 # ess
-yarn --cwd x-pack/platform/plugins/shared/osquery cypress:run
+pnpm --dir x-pack/platform/plugins/shared/osquery cypress:run
 
 # serverless
-yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:run
+pnpm --dir x-pack/platform/plugins/shared/osquery cypress:serverless:run
 ```
 
 Or open the Cypress test runner to run tests in an interactive way.
 ```shell
 # ess
-yarn --cwd x-pack/platform/plugins/shared/osquery cypress:open
+pnpm --dir x-pack/platform/plugins/shared/osquery cypress:open
 
 # serverless
-yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:open
+pnpm --dir x-pack/platform/plugins/shared/osquery cypress:serverless:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.

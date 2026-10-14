@@ -1,0 +1,90 @@
+# ES|QL Score Query Templates — Model Plot, Forecasts, Score Reassessment, Snapshots
+
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind `?param` values via `params`. Never call with an empty argument object — `query` is required; omit the `params` field when unused.
+
+**Time fields:** never use `@timestamp`. Always filter on `timestamp` (the anomaly bucket time). Using `` `event.ingested` `` (the indexing timestamp) is wrong for investigation queries — batch jobs processing historical data have a current ingest time but historical bucket timestamps, so `event.ingested` filters return zero results for the analysis window. `event.ingested` is only appropriate for operational/polling use cases (e.g. "has this job written new output in the last hour?"), not for finding anomalies in a time window.
+
+- Record / bucket / influencer queries use `FROM .ml-anomalies`. Use `score` / `initial_score` (not `record_score` / `anomaly_score` / `influencer_score`). `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` on older clusters, maps the raw per-type score fields, and keeps only `result_type IN ("bucket", "influencer", "record")`.
+- `model_plot`, `model_forecast`, and `model_snapshot` are **not** on the materialized view — query `FROM .ml-anomalies-*` and filter on `timestamp`.
+
+Only `record` / `bucket` / `influencer` fields listed in `esql-read-queries` exist on `.ml-anomalies`. Do not select `causes`, `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*`.
+
+---
+
+## ad_get_model_plot
+
+Get model bounds (upper/lower/median) to explain why something was or was not flagged as anomalous. If `actual` is within bounds, no anomaly; if outside, anomaly score depends on distance.
+
+**Parameters:** `job_id` (string), `start_time` (ISO 8601), `end_time` (ISO 8601)
+
+```esql
+FROM .ml-anomalies-*
+| WHERE result_type == "model_plot"
+  AND job_id == ?job_id
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| SORT timestamp ASC
+| KEEP job_id, timestamp, model_lower, model_upper, model_median,
+       actual, partition_field_value, by_field_value
+| LIMIT 500
+```
+
+---
+
+## ad_get_forecast_results
+
+Retrieve forecast predictions with upper/lower bounds for capacity planning.
+
+**Parameters:** `job_id` (string)
+
+```esql
+FROM .ml-anomalies-*
+| WHERE result_type == "model_forecast"
+  AND job_id == ?job_id
+| SORT timestamp ASC
+| KEEP job_id, timestamp, forecast_prediction, forecast_upper, forecast_lower, bucket_span
+| LIMIT 200
+```
+
+---
+
+## ad_rca_score_reassessment
+
+Find anomalies where the model has significantly changed its assessment due to renormalization. Defines `score_drift = initial_score - score`.
+
+- Large positive drift (initial >> current): renormalization lowered the score
+- Large negative drift: upward reconsideration
+- Persistent high scores: anomalies the model never explained away
+
+**Parameters:** `job_id_pattern` (LIKE wildcards), `min_drift` (number, default 20), `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND job_id LIKE ?job_id_pattern
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| EVAL score_drift = initial_score - score
+| WHERE ABS(score_drift) >= ?min_drift
+| SORT ABS(score_drift) DESC
+| LIMIT 30
+| KEEP job_id, timestamp, initial_score, score, score_drift,
+       function, function_description, field_name, by_field_value, partition_field_value
+```
+
+---
+
+## ad_get_model_snapshots
+
+List available model snapshots for a job. Used for model revert operations.
+
+**Parameters:** `job_id` (string)
+
+```esql
+FROM .ml-anomalies-*
+| WHERE result_type == "model_snapshot"
+  AND job_id == ?job_id
+| SORT timestamp DESC
+| KEEP job_id, timestamp, description, snapshot_doc_count
+| LIMIT 20
+```

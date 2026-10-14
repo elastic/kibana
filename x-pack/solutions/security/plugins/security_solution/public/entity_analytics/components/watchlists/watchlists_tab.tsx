@@ -85,7 +85,7 @@ export const WatchlistsTab: React.FC = () => {
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <EuiText size="s">{calloutBody}</EuiText>
       </EuiCallOut>
@@ -133,7 +133,7 @@ export const WatchlistsTab: React.FC = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
             onClick={handleCreateClick}
             isDisabled={isLoading || !!error || !hasAllRequired}

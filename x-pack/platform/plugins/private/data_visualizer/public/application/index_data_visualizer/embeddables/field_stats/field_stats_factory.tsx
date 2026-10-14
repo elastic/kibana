@@ -6,7 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,8 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -58,10 +59,6 @@ import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
-export interface EmbeddableFieldStatsChartStartServices {
-  data: DataPublicPluginStart;
-}
-
 const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
 
 const ERROR_MSG = {
@@ -74,29 +71,6 @@ const ERROR_MSG = {
       defaultMessage: 'Error updating settings for field statistics.',
     }
   ),
-};
-
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<
-    DataVisualizerStartDependencies,
-    DataVisualizerPluginStart
-  >
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
 };
 
 export const getFieldStatsChartEmbeddableFactory = (
@@ -400,18 +374,14 @@ export const getFieldStatsChartEmbeddableFactory = (
           if (isEsqlMode && !isEsqlEnabled) {
             return (
               <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
-                        defaultMessage="ES|QL is disabled"
-                      />
-                    </h3>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
+                      defaultMessage="ES|QL is disabled"
+                    />
                   }
-                  color="warning"
-                  iconType="warning"
                 />
               </EuiFlexItem>
             );

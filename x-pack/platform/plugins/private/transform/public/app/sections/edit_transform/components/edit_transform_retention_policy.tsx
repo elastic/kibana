@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, type FC } from 'react';
+import React, { useEffect, useMemo, useState, type FC } from 'react';
 
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 
 import type { PostTransformsPreviewRequestSchema } from '../../../../../server/routes/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
 import { getErrorMessage } from '../../../../../common/utils/errors';
 
-import { useToastNotifications } from '../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../app_dependencies';
 import { useGetTransformsPreview } from '../../../hooks';
+import {
+  isLinkedProjectScopedSourceIndexUnavailableError,
+  isProjectScopedSourceIndexUnavailableError,
+} from '../../../hooks/use_transform_config_data';
 import { useToastNotificationText } from '../../../components';
 
 import {
@@ -28,14 +33,43 @@ import { useRetentionPolicyField } from '../state_management/selectors/retention
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
+export const getRetentionPolicyHelpText = ({
+  isRetentionPolicyAvailable,
+  isSourceIndexUnavailable,
+}: {
+  isRetentionPolicyAvailable: boolean;
+  isSourceIndexUnavailable: boolean;
+}): string => {
+  if (isRetentionPolicyAvailable) {
+    return '';
+  }
+
+  if (isSourceIndexUnavailable) {
+    return i18n.translate(
+      'xpack.transform.transformList.editFlyoutFormRetentionPolicySourceUnavailableError',
+      {
+        defaultMessage:
+          'Retention policy settings are unavailable because no source indices match this transform project scope.',
+      }
+    );
+  }
+
+  return i18n.translate('xpack.transform.transformList.editFlyoutFormRetentionPolicyError', {
+    defaultMessage: 'Retention policy settings are not available for indices without date fields.',
+  });
+};
+
 export const EditTransformRetentionPolicy: FC = () => {
+  const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const getToastNotificationText = useToastNotificationText();
+  const cpsManager = cps?.cpsManager;
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
   const formSections = useFormSections();
   const retentionPolicyField = useRetentionPolicyField();
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
+  const [isSourceIndexUnavailable, setIsSourceIndexUnavailable] = useState(false);
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
@@ -61,18 +95,81 @@ export const EditTransformRetentionPolicy: FC = () => {
   }, [transformPreview]);
 
   useEffect(() => {
-    if (transformsPreviewError !== null) {
+    if (transformsPreviewError === null) {
+      setIsSourceIndexUnavailable(false);
+      return;
+    }
+
+    const addPreviewErrorToast = () => {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.errorGettingTransformPreview', {
           defaultMessage: 'An error occurred fetching the transform preview',
         }),
         ...getToastNotificationText(getErrorMessage(transformsPreviewError)),
       });
+    };
+
+    const projectRouting = config.source.project_routing;
+    const isProjectScopedSourceIndexError = isProjectScopedSourceIndexUnavailableError(
+      transformsPreviewError,
+      projectRouting
+    );
+
+    if (!isProjectScopedSourceIndexError) {
+      setIsSourceIndexUnavailable(false);
+      addPreviewErrorToast();
+      return;
     }
+
+    if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+      setIsSourceIndexUnavailable(false);
+      addPreviewErrorToast();
+      return;
+    }
+
+    setIsSourceIndexUnavailable(false);
+
+    if (!cpsManager) {
+      addPreviewErrorToast();
+      return;
+    }
+
+    let isMounted = true;
+
+    void cpsManager
+      .fetchProjects(PROJECT_ROUTING.ORIGIN)
+      .then((projectsData) => {
+        const shouldSuppressErrorToast = isLinkedProjectScopedSourceIndexUnavailableError(
+          transformsPreviewError,
+          projectRouting,
+          projectsData?.origin?._id
+        );
+
+        if (isMounted) {
+          setIsSourceIndexUnavailable(shouldSuppressErrorToast);
+        }
+
+        if (isMounted && !shouldSuppressErrorToast) {
+          addPreviewErrorToast();
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          addPreviewErrorToast();
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformsPreviewError]);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
+  const retentionPolicyHelpText = getRetentionPolicyHelpText({
+    isRetentionPolicyAvailable,
+    isSourceIndexUnavailable,
+  });
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(destIndexAvailableTimeFields)
       ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
@@ -81,16 +178,7 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   return (
     <>
-      <EuiFormRow
-        helpText={
-          isRetentionPolicyAvailable === false
-            ? i18n.translate('xpack.transform.transformList.editFlyoutFormEetentionPolicyError', {
-                defaultMessage:
-                  'Retention policy settings are not available for indices without date fields.',
-              })
-            : ''
-        }
-      >
+      <EuiFormRow helpText={retentionPolicyHelpText}>
         <EuiSwitch
           name="transformEditRetentionPolicySwitch"
           label={i18n.translate(

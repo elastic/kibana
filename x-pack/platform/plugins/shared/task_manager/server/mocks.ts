@@ -79,8 +79,9 @@ const createTaskMock = (overrides: Partial<ConcreteTaskInstance> = {}): Concrete
  */
 const createRunContextMock = (overrides: Partial<RunContext> = {}): RunContext => ({
   taskInstance: createTaskMock(),
-  abortController: new AbortController(),
+  signal: new AbortController().signal,
   executionUuid: 'test-execution-uuid',
+  setCustomTaskRunEventFields: jest.fn(),
   ...overrides,
 });
 

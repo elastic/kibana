@@ -39,20 +39,14 @@ beforeEach(() => {
 
 describe('toNavigationItems', () => {
   const {
-    logoItem,
     navItems: { footerItems, primaryItems },
   } = createNavigationItems();
 
-  it('should return logo node from navigation tree', () => {
-    expect(logoItem).toMatchInlineSnapshot(`
-      Object {
-        "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home nav-item-home",
-        "href": "/jom/app/security/get_started",
-        "iconType": "logoSecurity",
-        "id": "security_solution_home",
-        "label": "Security",
-      }
-    `);
+  it('keeps the home node as a regular primary item', () => {
+    const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
+    expect(homeItem).toBeDefined();
+    expect(homeItem?.label).toBe('Home');
+    expect(homeItem?.iconType).toBe('home');
   });
 
   it('should return primary items from navigation tree', () => {
@@ -123,12 +117,12 @@ describe('isActive', () => {
     expect(activeItemId).toBe(primaryNode.id);
   });
 
-  it('logo node active state should be less priority for active state', () => {
-    const logoNode = navigationTree.body[0];
-    const deeperNode = navigationTree.footer![0]!;
+  it('home node as primary item has equal priority; earliest same-level active wins', () => {
+    const homeNode = navigationTree.body[0];
+    const footerNode = navigationTree.footer![0]!;
 
-    const { activeItemId } = createNavigationItems(navigationTree, [[logoNode], [deeperNode]]);
-    expect(activeItemId).toBe(deeperNode.id);
+    const { activeItemId } = createNavigationItems(navigationTree, [[homeNode], [footerNode]]);
+    expect(activeItemId).toBe(homeNode.id);
   });
 
   it('same level nodes, earliest take priority', () => {
@@ -164,21 +158,8 @@ describe('isActive', () => {
   });
 });
 
-describe('logo node', () => {
-  test('should return logo node with correct properties', () => {
-    const { logoItem } = createNavigationItems(navigationTree);
-    expect(logoItem).toMatchInlineSnapshot(`
-      Object {
-        "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home nav-item-home",
-        "href": "/jom/app/security/get_started",
-        "iconType": "logoSecurity",
-        "id": "security_solution_home",
-        "label": "Security",
-      }
-    `);
-  });
-
-  test('Logo node can be active', () => {
+describe('home node', () => {
+  test('home node can be active as a primary item', () => {
     const { activeItemId } = createNavigationItems(navigationTree, [[navigationTree.body[0]]]);
     expect(activeItemId).toBe(navigationTree.body[0].id);
   });
@@ -288,35 +269,5 @@ describe('hidden panel link', () => {
 
     // But management panel is considered active
     expect(activeItemId).toBe('stack_management');
-  });
-});
-
-describe('Chrome Next mode (isNextChrome)', () => {
-  const createChromeNextNavigationItems = (
-    tree: NavigationTreeDefinitionUI = navigationTree,
-    activeNodes: ChromeProjectNavigationNode[][] = []
-  ) => {
-    return toNavigationItems(tree, activeNodes, [], mockPanelStateManager, true);
-  };
-
-  it('should not extract logoItem when isNextChrome is true', () => {
-    const { logoItem } = createChromeNextNavigationItems();
-    expect(logoItem).toBeUndefined();
-  });
-
-  it('should extract logoItem when isNextChrome is false (default)', () => {
-    const { logoItem } = createNavigationItems();
-    expect(logoItem).toBeDefined();
-    expect(logoItem?.id).toBe('security_solution_home');
-  });
-
-  it('keeps the home node as a regular primary item using its declared title/icon (normalization happens in the model, not here)', () => {
-    const {
-      navItems: { primaryItems },
-    } = createChromeNextNavigationItems();
-    const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
-    expect(homeItem).toBeDefined();
-    expect(homeItem?.label).toBe('Security');
-    expect(homeItem?.iconType).toBe('logoSecurity');
   });
 });

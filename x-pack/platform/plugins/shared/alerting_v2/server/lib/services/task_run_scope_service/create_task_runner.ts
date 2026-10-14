@@ -15,14 +15,17 @@ import type {
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
+import type { Newable } from 'inversify';
+import type { PluginConfig } from '../../../config';
 
-type TaskRunnerConstructor<T> = new (...args: never[]) => T;
+type TaskRunnerConstructor<T> = Newable<T>;
 
 export interface AlertingTaskRunner {
   run(params: {
     taskInstance: RunContext['taskInstance'];
-    abortController: RunContext['abortController'];
+    signal: RunContext['signal'];
     executionUuid: RunContext['executionUuid'];
+    setCustomTaskRunEventFields: RunContext['setCustomTaskRunEventFields'];
   }): Promise<RunResult>;
 }
 
@@ -35,6 +38,7 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   taskType: string;
   title: string;
   timeout: string;
+  resolveTimeout?: (config: PluginConfig) => string;
   paramsSchema?: ObjectType;
   stateSchemaByVersion?: Record<
     number,
@@ -126,7 +130,13 @@ export function createTaskRunnerFactory({
   injectionPromise: Promise<CoreDiServiceStart>;
 }): TaskRunnerFactory {
   return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
-    return ({ taskInstance, abortController, fakeRequest, executionUuid }: RunContext) => ({
+    return ({
+      taskInstance,
+      signal,
+      fakeRequest,
+      executionUuid,
+      setCustomTaskRunEventFields,
+    }: RunContext) => ({
       run: async () => {
         if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
@@ -136,7 +146,7 @@ export function createTaskRunnerFactory({
 
         const injection = await waitForInjection(
           injectionPromise,
-          abortController.signal,
+          signal,
           taskType,
           taskInstance.id
         );
@@ -152,9 +162,14 @@ export function createTaskRunnerFactory({
 
         try {
           const runner = scope.get(taskRunnerClass);
-          return await runner.run({ taskInstance, abortController, executionUuid });
+          return await runner.run({
+            taskInstance,
+            signal,
+            executionUuid,
+            setCustomTaskRunEventFields,
+          });
         } finally {
-          await scope.unbindAll();
+          await scope.unbindAllAsync();
         }
       },
     });

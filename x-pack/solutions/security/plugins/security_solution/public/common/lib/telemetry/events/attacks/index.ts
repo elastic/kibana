@@ -101,7 +101,7 @@ export const attacksActionAddedToCaseEvent: AttacksTelemetryEvent = {
     action: {
       type: 'keyword',
       _meta: {
-        description: 'The type of case action (add_to_new_case/add_to_existing_case)',
+        description: 'The case action (add_to_new_case/add_to_existing_case)',
         optional: false,
       },
     },
@@ -257,6 +257,20 @@ export const attacksTourStepActionEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksWorkflowsPromotionCalloutActionEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.WorkflowsPromotionCalloutAction,
+  schema: {
+    action: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The action taken on the Attack Discovery Workflows promotion callout (view/enable/dismiss/learn_more)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const attacksTelemetryEvents = [
   attacksTableSortChangedEvent,
   attacksViewOptionChangedEvent,
@@ -279,4 +293,5 @@ export const attacksTelemetryEvents = [
   attacksTypeFilterChangedEvent,
   attacksTourCalloutActionEvent,
   attacksTourStepActionEvent,
+  attacksWorkflowsPromotionCalloutActionEvent,
 ];

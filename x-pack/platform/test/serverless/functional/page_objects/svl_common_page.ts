@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 interface LoginWithRoleOptions {
@@ -116,7 +117,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             );
           }
           // Verifying that we are logged in
-          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+          if (await testSubjects.waitForExists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
             return true;
           } else {
@@ -182,7 +183,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await retry.try(async () => {
+        const exists = await testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root);
+        if (!exists) {
+          throw new Error(`${CHROME_HEADER_TEST_SUBJECTS.root} is not present`);
+        }
+      });
     },
 
     async clickUserAvatar() {

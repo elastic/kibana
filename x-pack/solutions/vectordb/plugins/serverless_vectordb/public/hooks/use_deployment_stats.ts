@@ -5,72 +5,127 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import type { HttpStart } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from './use_kibana';
-import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
+import {
+  DEPLOYMENT_STATS_PATH,
+  STARRED_DASHBOARDS_COUNT_PATH,
+  VECTORDB_APP_ID,
+  WORKFLOWS_STATS_PATH,
+} from '../../common/constants';
+import type { NewIndexDetails } from '../../common/types';
 
-export interface DeploymentStats {
+interface WorkflowsStats {
+  workflows?: { enabled?: number; disabled?: number };
+}
+
+interface StarredDashboardsCountResponse {
+  count: number | null;
+}
+
+interface DeploymentStatsResponse {
   indicesCount: number | null;
-  vectorDocsCount: number | null;
+  vectorCount: number | null;
   storeSizeBytes: number | null;
-  workflowsCount: number | null;
   dashboardsCount: number | null;
+  documentsCount: number | null;
+  apiKeysCount: number | null;
+  expiringApiKeysCount: number | null;
+  newIndex: NewIndexDetails | null;
+}
+
+export interface DeploymentStats extends DeploymentStatsResponse {
+  workflowsCount: number | null;
+  workflowsRunningCount: number | null;
+  starredDashboardsCount: number | null;
 }
 
 const initialStats: DeploymentStats = {
   indicesCount: null,
-  vectorDocsCount: null,
+  vectorCount: null,
   storeSizeBytes: null,
   workflowsCount: null,
+  workflowsRunningCount: null,
   dashboardsCount: null,
+  documentsCount: null,
+  apiKeysCount: null,
+  expiringApiKeysCount: null,
+  starredDashboardsCount: null,
+  newIndex: null,
+};
+
+/**
+ * Resolves the favorited dashboard IDs against the dashboards that still exist. Deleting a
+ * dashboard does not unfavorite it, so the stored IDs on their own overcount the starred total.
+ */
+const countStarredDashboards = async (
+  http: HttpStart,
+  favoriteIds: string[] | undefined
+): Promise<number | null> => {
+  if (!favoriteIds) {
+    return null;
+  }
+
+  if (favoriteIds.length === 0) {
+    return 0;
+  }
+
+  const starredDashboards = await http
+    .post<StarredDashboardsCountResponse>(STARRED_DASHBOARDS_COUNT_PATH, {
+      body: JSON.stringify({ dashboardIds: favoriteIds }),
+    })
+    .catch(() => null);
+
+  return starredDashboards?.count ?? null;
 };
 
 export const useDeploymentStats = () => {
   const {
-    services: { http },
+    services: { http, userProfile },
   } = useKibana();
+
+  const favoritesClient = useMemo(
+    () => new FavoritesClient(VECTORDB_APP_ID, 'dashboard', { http, userProfile }),
+    [http, userProfile]
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ['deploymentStats'],
     queryFn: async () => {
-      const [esStats, workflowsResponse] = await Promise.all([
-        http
-          .get<{
-            indicesCount: number;
-            vectorDocsCount: number;
-            storeSizeBytes: number;
-            dashboardsCount: number;
-          }>(DEPLOYMENT_STATS_PATH)
-          .catch(() => null),
-        http
-          .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
-          .catch(() => null),
+      const [esStats, workflowsResponse, starredDashboardsCount] = await Promise.all([
+        http.get<DeploymentStatsResponse>(DEPLOYMENT_STATS_PATH).catch(() => null),
+        http.get<WorkflowsStats>(WORKFLOWS_STATS_PATH).catch(() => null),
+        favoritesClient
+          .getFavorites()
+          .catch(() => null)
+          .then((favoritesResponse) =>
+            countStarredDashboards(http, favoritesResponse?.favoriteIds)
+          ),
       ]);
 
       return {
         indicesCount: esStats?.indicesCount ?? null,
-        vectorDocsCount: esStats?.vectorDocsCount ?? null,
+        vectorCount: esStats?.vectorCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
+        documentsCount: esStats?.documentsCount ?? null,
+        apiKeysCount: esStats?.apiKeysCount ?? null,
+        expiringApiKeysCount: esStats?.expiringApiKeysCount ?? null,
         workflowsCount: workflowsResponse?.workflows
           ? (workflowsResponse.workflows.enabled ?? 0) + (workflowsResponse.workflows.disabled ?? 0)
           : null,
+        workflowsRunningCount: workflowsResponse?.workflows?.enabled ?? null,
         dashboardsCount: esStats?.dashboardsCount ?? null,
+        starredDashboardsCount,
+        newIndex: esStats?.newIndex ?? null,
       };
     },
-    refetchOnWindowFocus: false,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 60_000,
   });
 
   return { stats: data ?? initialStats, isLoading };
 };
-
-export const formatBytes = (bytes: number | null): string => {
-  if (bytes === null) return '—';
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
-  const value = bytes / Math.pow(1024, i);
-  return `${value.toFixed(value >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
-};
-
-export const formatNumber = (n: number | null): string =>
-  n === null ? '—' : new Intl.NumberFormat().format(n);

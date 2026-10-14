@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { useDataPhasesFlyoutStyles } from './use_data_phases_flyout_styles';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 export interface FlyoutShellProps {
   dataTestSubj: string;
@@ -29,6 +30,7 @@ export interface FlyoutShellProps {
   onClose: () => void;
   title: React.ReactNode;
   tabsRow: React.ReactNode;
+  banner?: React.ReactNode;
   children: React.ReactNode;
   isSubmitting: boolean;
   isSaving?: boolean;
@@ -42,6 +44,7 @@ export const FlyoutShell = ({
   onClose,
   title,
   tabsRow,
+  banner,
   children,
   isSubmitting,
   isSaving,
@@ -50,6 +53,9 @@ export const FlyoutShell = ({
   const { headerStyles, footerStyles } = useDataPhasesFlyoutStyles();
   const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
   const { focusProps } = usePushFlyoutFocus();
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const button = (
     <EuiButton
@@ -79,7 +85,7 @@ export const FlyoutShell = ({
 
   return (
     <EuiFlyout
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       size={400}
       paddingSize="none"
       ownFocus={false}
@@ -105,7 +111,7 @@ export const FlyoutShell = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup

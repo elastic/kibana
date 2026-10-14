@@ -11,7 +11,7 @@ import { EuiFacetButton, EuiFacetGroup, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
-import { humanizeCategoryId } from '../lib/humanize_category_id';
+import { getCategoryLabel } from '../lib/category_labels';
 
 export interface CategoryFacetsProps {
   /**
@@ -24,8 +24,9 @@ export interface CategoryFacetsProps {
 }
 
 /**
- * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
- * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`).
+ * Facet sidebar over the closed-vocabulary `categories` field. Labels come from
+ * the localized category vocabulary ({@link getCategoryLabel}), falling back to
+ * a humanized id for categories this build doesn't recognize.
  *
  * Selection is single-select like the Integrations catalog: clicking a
  * category shows only that category; "All categories" resets. The prop shape
@@ -84,7 +85,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
               css={facetWeightCss(selectedCategories.includes(id))}
               data-test-subj={`workflowLibraryCategoryFacet-${id}`}
             >
-              {humanizeCategoryId(id)}
+              {getCategoryLabel(id)}
             </EuiFacetButton>
           ))}
         </EuiFacetGroup>

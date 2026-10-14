@@ -131,7 +131,7 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, security } = services;
+    const { serverless, navigation, management, security } = services;
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
@@ -147,7 +147,7 @@ export class ServerlessSearchPlugin
         });
       })
     );
-    serverless.initNavigation('es', navigationTree$);
+    navigation.initNavigation('es', navigationTree$);
 
     this.managementCardsSubscription = serverless
       .getNavigationCards$(

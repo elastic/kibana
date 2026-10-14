@@ -11,10 +11,10 @@ import type { UserActivityObject } from '@kbn/core-user-activity-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { coreServices, taggingService } from '../kibana_services';
 import type { DashboardCreateResponseBody } from '../api/create';
 import type { DashboardDeleteResponseBody } from '../api/delete';
-import type { DashboardState } from '../api/types';
 import type { DashboardUpdateResponseBody } from '../api/update';
 
 export async function trackCreateDashboardAction(
@@ -25,7 +25,7 @@ export async function trackCreateDashboardAction(
     message: `User created dashboard "${result.data.title}" (id: ${result.id}).`,
     event: {
       action: 'dashboard_create',
-      type: 'creation',
+      type: ['creation'],
     },
     object: await getUserActivityObject(result, request),
   });
@@ -39,7 +39,7 @@ export async function trackUpdateDashboardAction(
     message: `User made edits to dashboard "${result.data.title}" (id: ${result.id}) and successfully saved it.`,
     event: {
       action: 'dashboard_update',
-      type: 'change',
+      type: ['change'],
     },
     object: await getUserActivityObject(result, request),
   });
@@ -53,7 +53,7 @@ export async function trackDeleteDashboardAction(
     message: `User deleted dashboard "${result.data.title}" (id: ${result.id}).`,
     event: {
       action: 'dashboard_delete',
-      type: 'deletion',
+      type: ['deletion'],
     },
     object: await getUserActivityObject(result, request),
   });

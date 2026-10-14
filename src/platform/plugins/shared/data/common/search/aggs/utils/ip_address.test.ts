@@ -21,7 +21,7 @@ describe('IpAddress', () => {
       ${'fffff::'}
       ${'ffff:0:0:0:0:0:0:0:0'}
     `('should throw an error on $address', ({ address }) => {
-      expect(() => new IpAddress(address)).toThrowError();
+      expect(() => new IpAddress(address)).toThrow();
     });
 
     it.each`

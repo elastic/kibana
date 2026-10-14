@@ -6,7 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ToolType } from '@kbn/agent-builder-common';
+import type { ToolType, ToolConfirmationPolicy } from '@kbn/agent-builder-common';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -25,6 +25,12 @@ const storageSettings = {
         dynamic: false,
         properties: {},
       }),
+      confirmation: types.object({
+        dynamic: false,
+        properties: {
+          askUser: types.keyword({}),
+        },
+      }),
       tags: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -38,6 +44,7 @@ export interface ToolProperties<TConfig extends object = Record<string, unknown>
   space: string;
   description: string;
   configuration: TConfig;
+  confirmation?: ToolConfirmationPolicy;
   tags: string[];
   created_at: string;
   updated_at: string;

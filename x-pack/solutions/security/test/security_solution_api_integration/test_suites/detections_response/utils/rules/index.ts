@@ -9,6 +9,7 @@ export * from './create_rule_with_exception_entries';
 export * from './create_rule_saved_object';
 export * from './create_rule_with_auth';
 export * from './create_non_security_rule';
+export * from './change_history';
 export * from './check_investigation_field_in_so';
 export * from './downgrade_immutable_rule';
 export * from './fetch_rule';
@@ -52,5 +53,6 @@ export * from './update_rule';
 export * from './get_simple_rule_as_ndjson';
 export * from './rule_gaps';
 export * from './import_rules';
+export * from './rule_task';
 
 export * from './prebuilt_rules';

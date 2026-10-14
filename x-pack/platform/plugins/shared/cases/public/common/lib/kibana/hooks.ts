@@ -50,22 +50,13 @@ export const useCasesConfig = () => {
       attachmentsEnabled: config?.attachments?.enabled ?? false,
       chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
-      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
-      // Single source of truth for the `casesRedesign.{list,details,settings}` flags so
-      // routing and layout decisions don't each re-derive this object from the raw config.
-      casesRedesign: {
-        list: config?.casesRedesign?.list ?? false,
-        details: config?.casesRedesign?.details ?? false,
-        settings: config?.casesRedesign?.settings ?? false,
-      },
+      runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
     }),
     [
       config?.attachments?.enabled,
       config?.chat?.enabled,
       config?.templates?.enabled,
-      config?.casesRedesign?.list,
-      config?.casesRedesign?.details,
-      config?.casesRedesign?.settings,
+      config?.runWorkflows?.enabled,
     ]
   );
 };

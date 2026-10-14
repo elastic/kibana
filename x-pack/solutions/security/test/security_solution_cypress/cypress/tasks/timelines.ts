@@ -18,6 +18,7 @@ import {
   TIMELINES_OVERVIEW_ONLY_FAVORITES,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
+import { ensureTimelineOverlayHidden } from './timeline';
 
 export const openTimeline = (id?: string) => {
   cy.get(id ? TIMELINE(id) : TIMELINE_NAME).click();
@@ -49,7 +50,10 @@ export const exportSelectedTimelines = () => {
  * Toggle on/off to filter for favorite timelines
  */
 export const toggleFavoriteFilter = () => {
-  cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).click();
+  // Favorite refresh can reopen the timeline overlay after closeTimeline() in setup.
+  ensureTimelineOverlayHidden();
+  cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).scrollIntoView();
+  cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).should('be.visible').click();
 };
 
 /**

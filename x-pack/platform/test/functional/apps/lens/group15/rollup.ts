@@ -53,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
+      await lens.switchDataPanelIndexPattern('lens_rolled_up_data');
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',

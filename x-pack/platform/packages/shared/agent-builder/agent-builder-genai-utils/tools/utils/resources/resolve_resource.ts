@@ -14,9 +14,10 @@ import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings } from '../mappings';
-import { processFieldCapsResponse } from '../field_caps';
+import { fetchFieldCaps, processFieldCapsResponse } from '../field_caps';
 import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 import { listDatasets, getDatasetFields } from '../datasets';
+import { listViews, getViewFields } from '../views';
 
 export interface ResolveResourceResponse {
   /** name of the resource */
@@ -27,6 +28,8 @@ export interface ResolveResourceResponse {
   fields: MappingField[];
   /** description from the meta, if available */
   description?: string;
+  /** Stored ES|QL query when the resource is a view. */
+  query?: string;
   /** whether the resource is a TSDB resource (any field has tsDimension or tsMetric) */
   isTsdb: boolean;
 }
@@ -89,9 +92,11 @@ const isTimeseriesDataStream = (definition: IndicesGetDataStreamResponse): boole
 export const resolveResource = async ({
   resourceName,
   esClient,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   if (resourceName.includes(',') || resourceName.includes('*')) {
     throw new Error(
@@ -119,7 +124,38 @@ export const resolveResource = async ({
     throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
   }
 
-  return resolveSingleResource({ resourceName, resolveRes, esClient });
+  return resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
+};
+
+/**
+ * Resolves a single ES|QL view by name, or undefined when none matches. Views are invisible to
+ * `_resolve/index`/`_field_caps`, so they're looked up via `GET _query/view` and their output
+ * columns introspected with `FROM <name> | LIMIT 0`.
+ */
+const tryResolveView = async ({
+  resourceName,
+  esClient,
+}: {
+  resourceName: string;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse | undefined> => {
+  if (resourceName.includes(',') || resourceName.includes('*')) {
+    return undefined;
+  }
+  const views = await listViews({ esClient });
+  const view = views.find((candidate) => candidate.name === resourceName);
+  if (!view) {
+    return undefined;
+  }
+  const fields = await getViewFields({ name: resourceName, esClient });
+  return {
+    name: resourceName,
+    type: EsResourceType.view,
+    fields,
+    ...(view.description ? { description: view.description } : {}),
+    query: view.query,
+    isTsdb: false,
+  };
 };
 
 /**
@@ -160,17 +196,36 @@ const EMPTY_RESOLVE_RESPONSE: IndicesResolveIndexResponse = {
  * Retrieve resource metadata for ES|QL generation.
  * Supports index patterns and comma-separated targets by using field_caps
  * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
+ * When `includeViews` is true, a name that resolves to no index falls back to an ES|QL view.
  * When `includeDatasets` is true, a name that resolves to no index falls back to an external ES|QL dataset.
  */
 export const resolveResourceForEsql = async ({
   resourceName,
   esClient,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
+  if (isCcsTarget(resourceName)) {
+    const fields = await getFieldsFromFieldCaps({
+      resource: resourceName,
+      esClient,
+      includeFrozen,
+    });
+    return {
+      name: resourceName,
+      type: EsResourceType.indexPattern,
+      fields,
+      isTsdb: deriveIsTsdb(fields),
+    };
+  }
+
   let resolveRes: IndicesResolveIndexResponse;
   try {
     resolveRes = await esClient.indices.resolveIndex({
@@ -189,6 +244,12 @@ export const resolveResourceForEsql = async ({
     resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
   if (resourceCount === 0) {
+    if (includeViews) {
+      const view = await tryResolveView({ resourceName, esClient });
+      if (view) {
+        return view;
+      }
+    }
     if (includeDatasets) {
       const dataset = await tryResolveDataset({ resourceName, esClient });
       if (dataset) {
@@ -199,13 +260,10 @@ export const resolveResourceForEsql = async ({
   }
 
   if (resourceCount === 1) {
-    return resolveSingleResource({ resourceName, resolveRes, esClient });
+    return resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
   }
 
-  const fieldCapRes = await esClient.fieldCaps({
-    index: resourceName,
-    fields: ['*'],
-  });
+  const fieldCapRes = await fetchFieldCaps({ index: resourceName, esClient, includeFrozen });
   const { fields } = processFieldCapsResponse(fieldCapRes);
 
   return {
@@ -220,10 +278,12 @@ const resolveSingleResource = async ({
   resourceName,
   resolveRes,
   esClient,
+  includeFrozen = false,
 }: {
   resourceName: string;
   resolveRes: IndicesResolveIndexResponse;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   // target is an index
   if (resolveRes.indices.length > 0) {
@@ -233,7 +293,7 @@ const resolveSingleResource = async ({
     // so we use the CCS-compatible _field_caps API instead.
     // Trade-off: _meta.description is not available via _field_caps.
     if (isCcsTarget(resourceName)) {
-      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient });
+      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient, includeFrozen });
       return {
         name: resourceName,
         type: EsResourceType.index,
@@ -266,7 +326,11 @@ const resolveSingleResource = async ({
     // and fall back to the heuristic isTsdb check.
     // Trade-off: _meta.description is not available via _field_caps.
     if (isCcsTarget(resourceName)) {
-      const fields = await getFieldsFromFieldCaps({ resource: datastream, esClient });
+      const fields = await getFieldsFromFieldCaps({
+        resource: datastream,
+        esClient,
+        includeFrozen,
+      });
       return {
         name: resourceName,
         type: EsResourceType.dataStream,
@@ -276,7 +340,7 @@ const resolveSingleResource = async ({
     }
 
     const [fields, dataStreamRes] = await Promise.all([
-      getFieldsFromFieldCaps({ resource: datastream, esClient }),
+      getFieldsFromFieldCaps({ resource: datastream, esClient, includeFrozen }),
       getDataStream({ datastreamName: datastream, esClient }),
     ]);
     return {
@@ -290,10 +354,7 @@ const resolveSingleResource = async ({
   if (resolveRes.aliases.length > 0) {
     const alias = resolveRes.aliases[0].name;
 
-    const fieldCapRes = await esClient.fieldCaps({
-      index: alias,
-      fields: ['*'],
-    });
+    const fieldCapRes = await fetchFieldCaps({ index: alias, esClient, includeFrozen });
 
     const { fields } = processFieldCapsResponse(fieldCapRes);
 

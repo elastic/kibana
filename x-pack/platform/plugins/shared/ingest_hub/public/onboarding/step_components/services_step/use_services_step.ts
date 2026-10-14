@@ -7,29 +7,28 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
-import type { ServiceCategory, SignalType } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, SignalType } from '../../aws_service_matrix';
+import { isAgentBasedOnly } from '../../aws_service_matrix';
+import type { ServiceCategory } from '../../service_categories';
+import { CATEGORY_ORDER } from '../../service_categories';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+
+export type { ServiceCategory };
+export { CATEGORY_ORDER };
 
 export type SignalFilter = SignalType | 'all';
 
-export const CATEGORY_ORDER: ServiceCategory[] = [
-  'Security, Identity and Compliance',
-  'Compute',
-  'Networking and Content Delivery',
-  'Storage',
-  'Databases',
-  'Analytics',
-  'Cloud Financial Management',
-  'Management and Governance',
-  'Application Integration',
-  'Machine Learning',
-  'Containers',
-];
-
 export function useServicesStep({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const {
+    servicesStep,
+    setSelectedServiceIds,
+    setDataFormat,
+    awsServiceMatrix: rawMatrix,
+    deploymentMethod,
+  } = useOnboardingFlow();
+  const { selectedServiceIds, dataFormat } = servicesStep;
+
+  const awsServiceMatrix = useMemo(() => rawMatrix ?? [], [rawMatrix]);
 
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,13 +36,14 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
 
   const filteredServices = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return AWS_SERVICES_MATRIX.filter(
+    return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
-        (signalFilter === 'all' || s.signalType === signalFilter) &&
+        (s.dataFormat ?? 'ecs') === dataFormat &&
+        (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
-  }, [signalFilter, searchQuery]);
+  }, [awsServiceMatrix, signalFilter, searchQuery, dataFormat]);
 
   const categories = useMemo(() => {
     const present = new Set(filteredServices.map((s) => s.category));
@@ -72,6 +72,42 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
 
   const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
 
+  // Signal-filtered but search-independent set: matches what "Select all" operates on,
+  // so total/selected in the badge stay reachable under the active signal filter.
+  const signalFilteredServices = useMemo(
+    () =>
+      awsServiceMatrix.filter(
+        (s) =>
+          s.showInUI &&
+          (s.dataFormat ?? 'ecs') === dataFormat &&
+          (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
+      ),
+    [awsServiceMatrix, signalFilter, dataFormat]
+  );
+
+  const categoryStats = useMemo(() => {
+    const stats = new Map<ServiceCategory, { total: number; selected: number; preview: string }>();
+    for (const cat of categories) {
+      const catServices = signalFilteredServices.filter((s) => s.category === cat);
+      const total = catServices.length;
+      const selected = catServices.filter((s) => selectedSet.has(s.id)).length;
+      const uniqueNames = [...new Set(catServices.map((s) => s.name))];
+      const preview = uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
+      stats.set(cat, { total, selected, preview });
+    }
+    return stats;
+  }, [categories, signalFilteredServices, selectedSet]);
+
+  const agentBasedOnlySelected = useMemo(
+    () => awsServiceMatrix?.filter((s) => selectedSet.has(s.id) && isAgentBasedOnly(s)) ?? [],
+    [awsServiceMatrix, selectedSet]
+  );
+
+  const ecfOnlySelected = useMemo(
+    () => awsServiceMatrix.filter((s) => selectedSet.has(s.id) && s.ecfOnly),
+    [awsServiceMatrix, selectedSet]
+  );
+
   const isReady = selectedServiceIds.length > 0;
 
   const handleToggle = useCallback(
@@ -84,15 +120,28 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     [selectedServiceIds, setSelectedServiceIds]
   );
 
+  // Agent-based cannot deploy ECF-only services, so they cannot be selected while it is the method.
+  const isUnavailableForMethod = useCallback(
+    (service: AwsServiceMatrixEntry) =>
+      deploymentMethod === 'agent_based' && service.ecfOnly === true,
+    [deploymentMethod]
+  );
+
+  const selectableInCategory = useMemo(
+    () => servicesInCategory.filter((s) => !isUnavailableForMethod(s)),
+    [servicesInCategory, isUnavailableForMethod]
+  );
+
   const allInCategorySelected = useMemo(
-    () => servicesInCategory.length > 0 && servicesInCategory.every((s) => selectedSet.has(s.id)),
-    [servicesInCategory, selectedSet]
+    () =>
+      selectableInCategory.length > 0 && selectableInCategory.every((s) => selectedSet.has(s.id)),
+    [selectableInCategory, selectedSet]
   );
 
   const handleSelectAllInCategory = useCallback(() => {
-    const ids = servicesInCategory.map((s) => s.id);
+    const ids = selectableInCategory.map((s) => s.id);
     setSelectedServiceIds([...new Set([...selectedServiceIds, ...ids])]);
-  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
+  }, [selectableInCategory, selectedServiceIds, setSelectedServiceIds]);
 
   const handleDeselectAllInCategory = useCallback(() => {
     const ids = new Set(servicesInCategory.map((s) => s.id));
@@ -116,11 +165,17 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     servicesInCategory,
     duplicateNamesInCategory,
     selectedSet,
+    categoryStats,
     isReady,
     handleToggle,
     allInCategorySelected,
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
+    agentBasedOnlySelected,
+    ecfOnlySelected,
+    isUnavailableForMethod,
   };
 }

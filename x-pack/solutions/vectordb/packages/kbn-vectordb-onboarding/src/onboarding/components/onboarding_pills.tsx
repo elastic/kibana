@@ -33,8 +33,9 @@ export const OnboardingPills = ({ pills, telemetryPrefix }: OnboardingPillsProps
           <EuiPopover
             button={
               <EuiBadge
-                iconType="plus"
+                iconType={openPillId === pill.id ? 'cross' : 'plus'}
                 iconSide="left"
+                fill={openPillId === pill.id ? true : false}
                 onClick={() => setOpenPillId((current) => (current === pill.id ? null : pill.id))}
                 onClickAriaLabel={i18n.translate(
                   'vectordbOnboarding.wizard.pills.toggleAriaLabel',
@@ -54,6 +55,7 @@ export const OnboardingPills = ({ pills, telemetryPrefix }: OnboardingPillsProps
             anchorPosition="downLeft"
             panelPaddingSize="m"
             panelStyle={{ maxWidth: euiTheme.base * 22.5 }}
+            panelProps={{ 'data-test-subj': `vectordbWizardPillPanel-${pill.id}` }}
             aria-label={pill.label}
           >
             <EuiText size="s">{pill.content}</EuiText>

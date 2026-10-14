@@ -12,7 +12,6 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
 import { QuickPrompts } from './quick_prompts';
 import { of } from 'rxjs';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 
 const setInput = jest.fn();
 const setIsSettingsModalVisible = jest.fn();
@@ -30,7 +29,6 @@ const mockUseAssistantContext = {
   allQuickPrompts: MOCK_QUICK_PROMPTS,
   chrome: {
     getChromeStyle$: jest.fn(() => of('classic')),
-    navControls: chromeServiceMock.createStartContract().navControls,
   },
   assistantAvailability: {
     hasAssistantPrivilege: true,

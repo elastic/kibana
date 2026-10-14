@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -27,9 +28,34 @@ export class InspectorService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly browser = this.ctx.getService('browser');
 
+  private async revealInspectorButton(): Promise<boolean> {
+    if (await this.testSubjects.exists('openInspectorButton')) {
+      return false;
+    }
+    if (!(await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton))) {
+      return false;
+    }
+    await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+    await this.testSubjects.existOrFail('openInspectorButton', { timeout: 5000 });
+    return true;
+  }
+
+  private async closeOverflowIfOpen(): Promise<void> {
+    if (await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.popover)) {
+      await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+      await this.testSubjects.missingOrFail(APP_MENU_TEST_SUBJECTS.popover, { timeout: 2000 });
+    }
+  }
+
   private async getIsEnabled(): Promise<boolean> {
-    const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
-    return ariaDisabled !== 'true';
+    await this.revealInspectorButton();
+    try {
+      const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
+      return ariaDisabled !== 'true';
+    } finally {
+      // Leave the overflow closed so later clicks are not intercepted by the popover.
+      await this.closeOverflowIfOpen();
+    }
   }
 
   /**
@@ -61,11 +87,13 @@ export class InspectorService extends FtrService {
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('app-menu-overflow-button')) {
-          await this.testSubjects.click('app-menu-overflow-button');
+        if (!(await this.testSubjects.exists(openButton))) {
+          if (await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton)) {
+            await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+          }
         }
         await this.testSubjects.click(openButton);
-        await this.testSubjects.exists('inspectorPanel');
+        await this.testSubjects.existOrFail('inspectorPanel', { timeout: 10000 });
       });
     }
   }
@@ -102,6 +130,9 @@ export class InspectorService extends FtrService {
    * @param size rows count
    */
   public async setTablePageSize(size: number): Promise<void> {
+    // open() only waits for the panel, not the data table, so wait for the table to render
+    // before touching pagination — clicking the toggle mid-render no-ops the popover.
+    await this.testSubjects.existOrFail('inspectorTable', { timeout: 20_000 });
     await this.testSubjects.click('tablePaginationPopoverButton');
     // The buttons for setting table page size are in a popover element. This popover
     // element appears as if it's part of the inspectorPanel but it's really attached
@@ -198,7 +229,7 @@ export class InspectorService extends FtrService {
     const dtsViewId = 'inspectorViewChooser' + viewId;
     const cssSelector = this.testSubjects.getCssSelector(dtsViewId);
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(dtsViewId, { timeout: 1000 }))) {
+      if (!(await this.testSubjects.exists(dtsViewId))) {
         await this.testSubjects.click('inspectorViewChooser');
       }
       const clicked = await this.browser.execute((sel: string) => {
@@ -220,7 +251,14 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
+    // A single-view inspector renders no view chooser, only the Requests view itself.
+    const hasViewChooser = await this.retry.tryForTime(5000, async () => {
+      if (await this.testSubjects.exists('inspectorViewChooser')) return true;
+      if (await this.testSubjects.exists('inspectorNoRequestsMessage')) return false;
+      if (await this.testSubjects.exists('inspectorRequestChooser')) return false;
+      throw new Error('Inspector view has not rendered');
+    });
+    if (!hasViewChooser) return;
     await this.openInspectorView('Requests');
   }
 

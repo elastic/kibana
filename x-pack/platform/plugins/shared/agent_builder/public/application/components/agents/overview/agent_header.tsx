@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -21,10 +21,12 @@ import {
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import { labels } from '../../../utils/i18n';
+import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAccessControlModeBadge } from '../list/agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from '../list/agent_type_badge';
@@ -51,37 +53,71 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   onManageAccess,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const agentList = useMemo(() => [agent], [agent]);
+  const profileMap = useOwnerProfiles(agentList);
 
   const textSubduedStyles = css`
     color: ${euiTheme.colors.textSubdued};
   `;
 
-  let createdByUsername = agent.created_by?.username;
-  if (createdByUsername === SYSTEM_USER_ID) {
-    createdByUsername = overviewLabels.createdByElastic;
-  }
-  const byAuthorLabel = createdByUsername && overviewLabels.byAuthor(createdByUsername);
+  const dividerStyles = css`
+    width: 1px;
+    height: 12px;
+    background-color: ${euiTheme.colors.borderBaseSubdued};
+    margin: 0 ${euiTheme.size.m};
+    flex-shrink: 0;
+    align-self: center;
+  `;
+
+  const byAuthorLabel = resolveOwnerLabel(agent.created_by, profileMap);
+  const lastUpdatedByLabel = resolveOwnerLabel(agent.updated_by, profileMap);
+  const createdAtRelative = agent.created_at ? moment(agent.created_at).fromNow() : undefined;
+  const createdAtAbsolute = agent.created_at ? moment(agent.created_at).format('LL LT') : undefined;
+  const updatedAtRelative = agent.updated_at ? moment(agent.updated_at).fromNow() : undefined;
+  const updatedAtAbsolute = agent.updated_at ? moment(agent.updated_at).format('LL LT') : undefined;
 
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <AgentAvatar agent={agent} size="xl" iconSize="xl" iconPaddingSize="m" />
+            <AgentAvatar agent={agent} size="xl" iconSize="xl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiTitle size="l">
                 <h1>{agent.name}</h1>
               </EuiTitle>
-              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false} wrap>
-                {byAuthorLabel && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      {byAuthorLabel}
-                    </EuiText>
-                  </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {`${overviewLabels.createdBy} `}
+                    {byAuthorLabel ?? <em>{overviewLabels.unknown}</em>}
+                    {createdAtRelative && (
+                      <EuiToolTip content={createdAtAbsolute}>
+                        <span tabIndex={0}>{`, ${createdAtRelative}`}</span>
+                      </EuiToolTip>
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+
+                {lastUpdatedByLabel && (
+                  <>
+                    <span css={dividerStyles} aria-hidden="true" />
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        {`${overviewLabels.updatedBy} `}
+                        {lastUpdatedByLabel}
+                        {updatedAtRelative && (
+                          <EuiToolTip content={updatedAtAbsolute}>
+                            <span tabIndex={0}>{`, ${updatedAtRelative}`}</span>
+                          </EuiToolTip>
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </>
                 )}
+                <span css={dividerStyles} aria-hidden="true" />
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -115,6 +151,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
+                <span css={dividerStyles} aria-hidden="true" />
                 <EuiFlexItem grow={false}>
                   <AgentAccessControlModeBadge agent={agent} />
                 </EuiFlexItem>

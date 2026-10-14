@@ -23,7 +23,10 @@ export const ImportTimelinesRequestBody = lazySchema(() =>
     /**
      * Whether the Timeline should be immutable
      */
-    isImmutable: z.enum(['true', 'false']).optional(),
+    isImmutable: z
+      .enum(['true', 'false'])
+      .optional()
+      .describe('Whether the Timeline should be immutable'),
     file: z.unknown(),
   })
 );

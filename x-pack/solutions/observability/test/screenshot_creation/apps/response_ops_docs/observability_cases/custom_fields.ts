@@ -21,12 +21,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // With the templates feature flag pinned ON for this suite, custom fields and
       // templates are managed on the dedicated v2 templates / field-library pages
       // rather than inline on the Case Settings page.
-      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
+      await cases.navigation.navigateToApp('observability/cases');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
+      await retry.waitFor('cases-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-settings-panel');
       });
 
       // Field library page — reachable when the templates flag is ON. Strip any

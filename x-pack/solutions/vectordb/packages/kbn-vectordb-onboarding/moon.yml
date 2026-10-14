@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/vectordb-onboarding'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/vectordb-onboarding'
   description: Moon project for @kbn/vectordb-onboarding
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding
 dependsOn:
   - '@kbn/core'
@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/try-in-console'
   - '@kbn/cloud'
   - '@kbn/core-doc-links-browser'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package

@@ -27,7 +27,8 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
       toArray(),
       map((events) => {
         const messageEvent = events.find(isChatCompletionMessageEvent);
-        const tokenEvent = events.find(isChatCompletionTokenCountEvent);
+        // if several token events are present, the latest reflects the final usage
+        const tokenEvent = events.findLast(isChatCompletionTokenCountEvent);
 
         if (!messageEvent) {
           throw createInferenceInternalError('No message event found');

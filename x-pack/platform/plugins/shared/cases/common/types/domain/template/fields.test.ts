@@ -7,9 +7,11 @@
 
 import {
   ConditionRuleSchema,
+  FieldSchema,
   InputTextFieldSchema,
   MarkdownFieldSchema,
   RadioGroupFieldSchema,
+  RefFieldSchema,
   TextareaFieldSchema,
   ToggleFieldSchema,
 } from './fields';
@@ -290,6 +292,46 @@ describe('ToggleFieldSchema', () => {
       metadata: { default: 'true' },
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('RefFieldSchema — display/validation overrides', () => {
+  const showWhen = {
+    combine: 'all' as const,
+    rules: [{ field: 'open_tuning_request', operator: 'eq' as const, value: true }],
+  };
+
+  it('preserves a local display.show_when override authored alongside $ref', () => {
+    const result = RefFieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      display: { show_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.display?.show_when).toEqual(showWhen);
+    }
+  });
+
+  it('preserves a local validation.required_when override authored alongside $ref', () => {
+    const result = RefFieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      validation: { required_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required_when).toEqual(showWhen);
+    }
+  });
+
+  it('resolves a $ref entry with display through the top-level FieldSchema union', () => {
+    const result = FieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      display: { show_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success && '$ref' in result.data) {
+      expect(result.data.display?.show_when).toEqual(showWhen);
+    }
   });
 });
 

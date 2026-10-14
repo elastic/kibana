@@ -29,7 +29,7 @@ import type { LocaleGrammar } from '../locale_grammar';
  */
 export const DE_DE_GRAMMAR: LocaleGrammar = {
   nowKeyword: 'jetzt',
-  delimiters: ['bis'],
+  delimiters: [{ text: 'bis' }],
   namedRanges: {
     heute: { start: 'now/d', end: 'now/d' },
     gestern: { start: 'now-1d/d', end: 'now-1d/d' },

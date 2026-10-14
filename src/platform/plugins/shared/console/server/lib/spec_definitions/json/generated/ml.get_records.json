@@ -22,6 +22,28 @@
         "-1"
       ]
     },
+    "data_autocomplete_rules": {
+      "desc": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "end": "",
+      "exclude_interim": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "page": {
+        "from": "",
+        "size": ""
+      },
+      "record_score": "",
+      "sort": "",
+      "start": ""
+    },
     "methods": [
       "GET",
       "POST"

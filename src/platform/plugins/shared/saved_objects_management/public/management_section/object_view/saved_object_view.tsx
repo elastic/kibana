@@ -111,6 +111,15 @@ export class SavedObjectEdition extends Component<
               onDeleteClick={() => this.delete()}
               viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
               title={object?.meta.title}
+              back={{
+                href: this.props.history.createHref({ pathname: '/' }),
+                label: i18n.translate(
+                  'savedObjectsManagement.objectsTable.header.savedObjectsTitle',
+                  {
+                    defaultMessage: 'Saved Objects',
+                  }
+                ),
+              }}
             />
           </EuiFlexItem>
           {notFoundType && (

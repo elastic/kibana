@@ -16,6 +16,12 @@ responses:
                 packagePolicyCount: 2
                 created_at: '2024-01-15T10:00:00.000Z'
                 updated_at: '2024-01-15T10:00:00.000Z'
+                iac_key: 'sha256:661cb7def1c7101f'
+                iac_blueprint_id: 'federated-identity'
+                iac_blueprint_version: '1.0.0'
+                iac_deployment_id: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc'
+                iac_upgrade_status: 'up_to_date'
+                iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
   400:
     description: 'Bad Request'
     content:

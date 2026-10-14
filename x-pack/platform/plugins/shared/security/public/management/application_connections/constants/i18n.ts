@@ -12,17 +12,6 @@ export const labels = {
     title: i18n.translate('xpack.security.management.applicationConnectionsTitle', {
       defaultMessage: 'Application connections',
     }),
-    techPreviewBadgeLabel: i18n.translate(
-      'xpack.security.management.applicationConnections.techPreviewBadgeLabel',
-      { defaultMessage: 'Technical preview' }
-    ),
-    techPreviewBadgeTooltip: i18n.translate(
-      'xpack.security.management.applicationConnections.techPreviewBadgeTooltip',
-      {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      }
-    ),
     pageCallout: i18n.translate('xpack.security.management.applicationConnectionsPageCallout', {
       defaultMessage:
         'Manage connections for OAuth-based applications. Currently, only MCP clients are supported.',
@@ -49,6 +38,10 @@ export const labels = {
     statusConnected: i18n.translate(
       'xpack.security.management.applicationConnections.filters.statusConnected',
       { defaultMessage: 'Connected' }
+    ),
+    statusExpired: i18n.translate(
+      'xpack.security.management.applicationConnections.filters.statusExpired',
+      { defaultMessage: 'Expired' }
     ),
     statusRevoked: i18n.translate(
       'xpack.security.management.applicationConnections.filters.statusRevoked',
@@ -80,6 +73,9 @@ export const labels = {
           'This connection is authorized. Sessions expire after 30 days of inactivity.',
       }
     ),
+    expired: i18n.translate('xpack.security.management.applicationConnections.status.expired', {
+      defaultMessage: 'Expired',
+    }),
     revoked: i18n.translate('xpack.security.management.applicationConnections.status.revoked', {
       defaultMessage: 'Revoked',
     }),
@@ -109,6 +105,10 @@ export const labels = {
     allRevokedClientLabel: i18n.translate(
       'xpack.security.management.applicationConnections.columns.allRevokedClientLabel',
       { defaultMessage: 'All connections for this client are already revoked' }
+    ),
+    noRevokedConnectionsClientLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.columns.noRevokedConnectionsClientLabel',
+      { defaultMessage: 'This client has no revoked connections to delete' }
     ),
     noConnectionsClientLabel: i18n.translate(
       'xpack.security.management.applicationConnections.columns.noConnectionsClientLabel',
@@ -144,9 +144,9 @@ export const labels = {
       'xpack.security.management.applicationConnections.connectionColumns.revokeLabel',
       { defaultMessage: 'Revoke' }
     ),
-    revokedLabel: i18n.translate(
-      'xpack.security.management.applicationConnections.connectionColumns.revokedLabel',
-      { defaultMessage: 'Revoked' }
+    deleteLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.connectionColumns.deleteLabel',
+      { defaultMessage: 'Delete' }
     ),
     selectRowLabel: (name: string) =>
       i18n.translate(
@@ -156,9 +156,19 @@ export const labels = {
           values: { name },
         }
       ),
-    revokedRowLabel: i18n.translate(
-      'xpack.security.management.applicationConnections.connectionColumns.revokedRowLabel',
-      { defaultMessage: 'This connection has already been revoked' }
+    deletableRowNotSelectableLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.connectionColumns.deletableRowNotSelectableLabel',
+      {
+        defaultMessage:
+          'This connection is already revoked. Clear your selection to delete it instead.',
+      }
+    ),
+    revocableRowNotSelectableLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.connectionColumns.revocableRowNotSelectableLabel',
+      {
+        defaultMessage:
+          'Only revoked connections can be deleted. Clear your selection to revoke this one instead.',
+      }
     ),
   },
   childTable: {
@@ -197,6 +207,11 @@ export const labels = {
   bulkRevokeButton: (count: number) =>
     i18n.translate('xpack.security.management.applicationConnections.bulkRevokeButton', {
       defaultMessage: 'Revoke {count, plural, one {# connection} other {# connections}}',
+      values: { count },
+    }),
+  bulkDeleteButton: (count: number) =>
+    i18n.translate('xpack.security.management.applicationConnections.bulkDeleteButton', {
+      defaultMessage: 'Delete {count, plural, one {# connection} other {# connections}}',
       values: { count },
     }),
   emptyPrompt: {
@@ -284,17 +299,14 @@ export const labels = {
       'xpack.security.management.applicationConnections.revoke.connectedByColumn',
       { defaultMessage: 'Connected by' }
     ),
-    calloutTitle: i18n.translate(
-      'xpack.security.management.applicationConnections.revoke.calloutTitle',
-      {
+    calloutTitle: () =>
+      i18n.translate('xpack.security.management.applicationConnections.revoke.calloutTitle', {
         defaultMessage:
           'Revoking removes these connections only. The client stays registered and can accept new connections.',
-      }
-    ),
-    reconnectionNote: i18n.translate(
-      'xpack.security.management.applicationConnections.revoke.reconnectionNote',
-      { defaultMessage: 'Applications can be reconnected at any time.' }
-    ),
+      }),
+    note: i18n.translate('xpack.security.management.applicationConnections.revoke.note', {
+      defaultMessage: 'Applications can be reconnected at any time.',
+    }),
     cancelButton: i18n.translate(
       'xpack.security.management.applicationConnections.revoke.cancelButton',
       { defaultMessage: 'Cancel' }
@@ -322,6 +334,69 @@ export const labels = {
     unexpectedErrorToast: i18n.translate(
       'xpack.security.management.applicationConnections.revoke.unexpectedErrorToast',
       { defaultMessage: 'Could not revoke connections' }
+    ),
+  },
+  delete: {
+    title: (count: number) =>
+      i18n.translate('xpack.security.management.applicationConnections.delete.title', {
+        defaultMessage: 'Permanently delete {count, plural, one {connection} other {connections}}?',
+        values: { count },
+      }),
+    intro: i18n.translate('xpack.security.management.applicationConnections.delete.intro', {
+      defaultMessage: 'Connections to delete:',
+    }),
+    tableCaption: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.tableCaption',
+      { defaultMessage: 'Connections to delete' }
+    ),
+    connectionNameColumn: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.connectionNameColumn',
+      { defaultMessage: 'Connection name' }
+    ),
+    clientNameColumn: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.clientNameColumn',
+      { defaultMessage: 'Client name' }
+    ),
+    connectedByColumn: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.connectedByColumn',
+      { defaultMessage: 'Connected by' }
+    ),
+    calloutTitle: (count: number) =>
+      i18n.translate('xpack.security.management.applicationConnections.delete.calloutTitle', {
+        defaultMessage:
+          '{count, plural, one {This connection has} other {These connections have}} already been revoked. Deleting permanently removes {count, plural, one {it} other {them}} from your organization immediately instead of waiting for the 90-day retention period.',
+        values: { count },
+      }),
+    note: i18n.translate('xpack.security.management.applicationConnections.delete.note', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    cancelButton: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.cancelButton',
+      { defaultMessage: 'Cancel' }
+    ),
+    confirmButton: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.confirmButton',
+      { defaultMessage: 'Delete permanently' }
+    ),
+    successToast: (count: number) =>
+      i18n.translate('xpack.security.management.applicationConnections.delete.successToast', {
+        defaultMessage: 'Deleted {count, plural, one {# connection} other {# connections}}',
+        values: { count },
+      }),
+    allFailedToast: (count: number) =>
+      i18n.translate('xpack.security.management.applicationConnections.delete.allFailedToast', {
+        defaultMessage: 'Could not delete {count, plural, one {connection} other {connections}}',
+        values: { count },
+      }),
+    partialFailedToast: (succeeded: number, total: number) =>
+      i18n.translate('xpack.security.management.applicationConnections.delete.partialFailedToast', {
+        defaultMessage:
+          'Deleted {succeeded} of {total} {total, plural, one {connection} other {connections}}',
+        values: { succeeded, total },
+      }),
+    unexpectedErrorToast: i18n.translate(
+      'xpack.security.management.applicationConnections.delete.unexpectedErrorToast',
+      { defaultMessage: 'Could not delete connections' }
     ),
   },
 };

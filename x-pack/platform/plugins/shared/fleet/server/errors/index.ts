@@ -74,6 +74,7 @@ export class RegistryResponseError extends RegistryError {
 // Package errors
 
 export class PackageInvalidDeploymentMode extends FleetError {}
+export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -181,6 +182,38 @@ export class CloudConnectorDeleteError extends FleetError {
 export class CloudConnectorUpdateError extends FleetError {
   constructor(message: string) {
     super(`Error updating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class IacProvisionerConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating IaC Provisioner configuration in Fleet, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner rejected the request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.unknown_blueprint`) so the
+ * route can decide whether the caller may fall back to the static template.
+ */
+export class IacProvisionerRequestError extends FleetError {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly errorCodes: string[] = []
+  ) {
+    super(`Error calling IaC Provisioner, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
+ */
+export class IacProvisionerUnavailableError extends FleetError {
+  constructor(message: string, public readonly statusCode?: number) {
+    super(`IaC Provisioner unavailable, ${message}`);
   }
 }
 

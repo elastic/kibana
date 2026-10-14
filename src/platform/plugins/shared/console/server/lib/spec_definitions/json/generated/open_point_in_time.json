@@ -24,6 +24,11 @@
         "5"
       ]
     },
+    "data_autocomplete_rules": {
+      "index_filter": {
+        "__scope_link": "GLOBAL.query"
+      }
+    },
     "methods": [
       "POST"
     ],

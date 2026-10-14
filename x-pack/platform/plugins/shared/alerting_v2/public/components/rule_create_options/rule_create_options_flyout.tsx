@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,16 +27,6 @@ export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  /**
-   * When `true`, the "Create with AI Agent" option is rendered disabled. Independent of
-   * `createWithAgentTooltipText`.
-   */
-  createWithAgentDisabled?: boolean;
-  /**
-   * Optional tooltip text for the "Create with AI Agent" option (e.g. explaining a missing
-   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
-   */
-  createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -44,8 +35,6 @@ export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
@@ -62,14 +51,26 @@ export const RuleCreateOptionsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
-                  defaultMessage="Create rule"
-                />
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
+                      defaultMessage="Create rule"
+                    />
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="ruleCreateOptionsFlyoutUniversalBadge">
+                  <FormattedMessage
+                    id="xpack.alertingV2.ruleCreateOptionsFlyout.universalBadge"
+                    defaultMessage="Universal"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -96,8 +97,6 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabled={createWithAgentDisabled}
-          createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />

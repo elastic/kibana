@@ -495,61 +495,35 @@ describe('HubSpotConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = HubSpotConnector.test;
+
     it('should return ok when contacts endpoint returns 200', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { results: [] } });
 
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.hubapi.com/crm/v3/objects/contacts',
         { params: { limit: 1 }, validateStatus: expect.any(Function) }
       );
-      expect(result).toEqual({ ok: true, message: 'Successfully connected to HubSpot API' });
+      expect(result).toEqual({});
     });
 
-    it('should return not ok when contacts endpoint returns 401', async () => {
-      mockClient.get.mockResolvedValue({ status: 401 });
+    it.each([401, 403, 429])(
+      'should throw with scope-specific message when contacts endpoint returns %i',
+      async (status) => {
+        mockClient.get.mockResolvedValue({ status, data: {} });
 
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
+        await expect(testSpec.handler(mockContext)).rejects.toThrow(
+          `HubSpot API returned status ${status}. Check that your Service Key or Private App token is valid and has the crm.objects.contacts.read scope.`
+        );
+      }
+    );
 
-      expect(result.ok).toBe(false);
-    });
-
-    it('should return not ok when contacts endpoint returns 403 (missing scope)', async () => {
-      mockClient.get.mockResolvedValue({ status: 403 });
-
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('403');
-    });
-
-    it('should return not ok when contacts endpoint returns 429 (rate limited)', async () => {
-      mockClient.get.mockResolvedValue({ status: 429 });
-
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('429');
-    });
-
-    it('should return not ok when request throws', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
 
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('ECONNREFUSED');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -380,8 +380,9 @@ describe('WorkflowManagementAuditLog', () => {
 
     it('logExecutionCanceled (success and failure)', async () => {
       const { audit, request, log } = await createAuditHarness();
-      audit.logExecutionCanceled(request, { executionId: 'x-1' });
+      audit.logExecutionCanceled(request, { executionId: 'x-1', channel: 'kibana_execution_view' });
       expect(log.mock.calls[0][0].message).toContain('[executionId=x-1]');
+      expect(log.mock.calls[0][0].message).toContain('[channel=kibana_execution_view]');
 
       const { audit: a2, request: r2, log: l2 } = await createAuditHarness();
       a2.logExecutionCanceled(r2, {
@@ -391,22 +392,37 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l2.mock.calls[0][0].event.action).toBe(
         WorkflowManagementAuditActions.CANCEL_EXECUTION
       );
+
+      const { audit: a3, request: r3, log: l3 } = await createAuditHarness();
+      a3.logExecutionCanceled(r3, {
+        workflowId: 'wf-1',
+        channel: 'kibana_execution_view',
+        error: err,
+      });
+      expect(l3.mock.calls[0][0].message).toContain('[workflowId=wf-1]');
+      expect(l3.mock.calls[0][0].message).toContain(
+        'failed to cancel all active workflow executions'
+      );
+      expect(l3.mock.calls[0][0].message).not.toContain('[executionId=');
     });
 
     it('logExecutionResumed (success and failure)', async () => {
       const { audit, request, log } = await createAuditHarness();
-      audit.logExecutionResumed(request, { executionId: 'r-1' });
+      audit.logExecutionResumed(request, { executionId: 'r-1', channel: 'agent_builder' });
       expect(log.mock.calls[0][0].event.action).toBe(
         WorkflowManagementAuditActions.RESUME_EXECUTION
       );
       expect(log.mock.calls[0][0].message).toContain('[executionId=r-1]');
+      expect(log.mock.calls[0][0].message).toContain('[channel=agent_builder]');
 
       const { audit: aEnriched, request: rEnriched, log: lEnriched } = await createAuditHarness();
       aEnriched.logExecutionResumed(rEnriched, {
         executionId: 'r-2',
         resumedBy: 'jdoe',
+        channel: 'inbox',
       });
       expect(lEnriched.mock.calls[0][0].message).toContain('[responder=jdoe]');
+      expect(lEnriched.mock.calls[0][0].message).toContain('[channel=inbox]');
 
       const { audit: a2, request: r2, log: l2 } = await createAuditHarness();
       a2.logExecutionResumed(r2, {
@@ -414,6 +430,28 @@ describe('WorkflowManagementAuditLog', () => {
         error: err,
       });
       expect(l2.mock.calls[0][0].event.outcome).toBe('failure');
+    });
+
+    it('logHitlWaiting and logHitlTimedOut use System actor without a request', async () => {
+      const { audit, systemLog } = await createAuditHarness();
+      audit.logHitlWaiting(undefined, {
+        executionId: 'e-1',
+        stepExecutionId: 's-1',
+        stepType: 'waitForInput',
+      });
+      expect(systemLog.mock.calls[0][0].event.action).toBe(
+        WorkflowManagementAuditActions.HITL_WAITING
+      );
+      expect(systemLog.mock.calls[0][0].message).toContain('System opened HITL wait');
+
+      const { audit: a2, systemLog: l2 } = await createAuditHarness();
+      a2.logHitlTimedOut(undefined, {
+        executionId: 'e-1',
+        stepExecutionId: 's-1',
+        stepType: 'waitForApproval',
+      });
+      expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.HITL_TIMED_OUT);
+      expect(l2.mock.calls[0][0].message).toContain('System timed out HITL wait');
     });
   });
 

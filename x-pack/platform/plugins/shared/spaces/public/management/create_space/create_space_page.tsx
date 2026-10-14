@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
   hexToHsv,
@@ -20,7 +19,16 @@ import {
 import { difference } from 'lodash';
 import React, { Component } from 'react';
 
-import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import { AppHeader } from '@kbn/app-header';
+import type {
+  ApplicationStart,
+  Capabilities,
+  HttpStart,
+  NotificationsStart,
+  OverlayStart,
+  ScopedHistory,
+} from '@kbn/core/public';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
@@ -33,16 +41,25 @@ import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
-import { UnauthorizedPrompt } from '../components';
+import { NavigateOnLeave, SpacesUnsavedChangesPrompt, UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
-import { toSpaceIdentifier } from '../lib';
+import { haveFormValuesChanged, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import type { CustomizeSpaceFormValues } from '../types';
+
+const spacesListTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceTitle = i18n.translate(
+  'xpack.spaces.management.manageSpacePage.createSpaceTitle',
+  { defaultMessage: 'Create space' }
+);
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -52,18 +69,26 @@ interface Props {
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   history: ScopedHistory;
+  http: HttpStart;
+  overlays: OverlayStart;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  isCpsTierEligible: boolean;
 }
 
 interface State {
   space: CustomizeSpaceFormValues;
+  /** pristine form values, used to determine whether the user has actually made any changes */
+  initialSpace?: CustomizeSpaceFormValues;
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
+  isDirty: boolean;
+  isLeaving: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
@@ -80,6 +105,8 @@ export class CreateSpacePage extends Component<Props, State> {
     this.validator = new SpaceValidator({ shouldValidate: false });
     this.state = {
       isLoading: true,
+      isDirty: false,
+      isLeaving: false,
       showAlteringActiveSpaceDialog: false,
       saveInProgress: false,
       space: {
@@ -107,7 +134,9 @@ export class CreateSpacePage extends Component<Props, State> {
         await this.loadSpace(spaceId, getFeatures());
       } else {
         const features = await getFeatures();
-        this.setState({ isLoading: false, features });
+        // capture the pristine form values with the updater form, so that any default values applied
+        // during mount (e.g. project routing) are not treated as unsaved changes
+        this.setState((state) => ({ isLoading: false, features, initialSpace: state.space }));
       }
     } catch (e) {
       notifications.toasts.addError(e, {
@@ -150,7 +179,10 @@ export class CreateSpacePage extends Component<Props, State> {
   }
 
   private canEditProjectRouting(): boolean {
-    return this.props.capabilities.project_routing?.manage_space_default === true;
+    return (
+      this.props.capabilities.project_routing?.manage_space_default === true &&
+      this.props.isCpsTierEligible === true
+    );
   }
 
   private setDefaultProjectRouting() {
@@ -175,17 +207,29 @@ export class CreateSpacePage extends Component<Props, State> {
       );
     }
 
-    if (this.state.isLoading) {
-      return this.getLoadingIndicator();
-    }
-
     return (
-      <EuiPageSection restrictWidth>
-        <EuiPageHeader pageTitle={this.getTitle()} description={getSpacesFeatureDescription()} />
+      <>
+        {/* rendered outside of the form, which is unmounted while loading, because loading the
+            space can itself fail and send the user back to the list */}
+        <NavigateOnLeave isLeaving={this.state.isLeaving} history={this.props.history} />
+
+        <AppHeader
+          title={createSpaceTitle}
+          description={getSpacesFeatureDescription()}
+          back={{
+            href: this.props.history.createHref({ pathname: '/' }),
+            label: spacesListTitle,
+          }}
+          spacing="bleed"
+        />
         <EuiSpacer size="l" />
 
-        {this.getForm()}
-      </EuiPageSection>
+        {this.state.isLoading ? (
+          this.getLoadingIndicator()
+        ) : (
+          <EuiPageSection restrictWidth>{this.getForm()}</EuiPageSection>
+        )}
+      </>
     );
   }
 
@@ -201,10 +245,19 @@ export class CreateSpacePage extends Component<Props, State> {
   );
 
   public getForm = () => {
-    const { showAlteringActiveSpaceDialog } = this.state;
+    const { showAlteringActiveSpaceDialog, isDirty, isLeaving } = this.state;
+    const { http, overlays, navigateToUrl, history } = this.props;
 
     return (
       <div data-test-subj="spaces-create-page">
+        <SpacesUnsavedChangesPrompt
+          hasUnsavedChanges={isDirty && !isLeaving}
+          http={http}
+          overlays={overlays}
+          navigateToUrl={navigateToUrl}
+          history={history}
+        />
+
         <CustomizeSpace
           space={this.state.space}
           onChange={this.onSpaceChange}
@@ -266,15 +319,6 @@ export class CreateSpacePage extends Component<Props, State> {
           />
         )}
       </div>
-    );
-  };
-
-  public getTitle = () => {
-    return (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
-      />
     );
   };
 
@@ -345,9 +389,12 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   public onSpaceChange = (updatedSpace: CustomizeSpaceFormValues) => {
-    this.setState({
+    this.setState((state) => ({
       space: updatedSpace,
-    });
+      // `initialSpace` is captured once the space has loaded, which is also when the form the user
+      // is changing here is first rendered
+      isDirty: state.initialSpace ? haveFormValuesChanged(state.initialSpace, updatedSpace) : false,
+    }));
   };
 
   public saveSpace = () => {
@@ -379,20 +426,24 @@ export class CreateSpacePage extends Component<Props, State> {
           onLoadSpace(space);
         }
 
+        const formValues: CustomizeSpaceFormValues = {
+          ...space,
+          avatarType: space.imageUrl ? 'image' : 'initials',
+          initials: space.initials || getSpaceInitials(space),
+          color: space.color || getSpaceColor(space),
+          customIdentifier: false,
+          customAvatarInitials:
+            !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+          customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+        };
+
         this.setState({
-          space: {
-            ...space,
-            avatarType: space.imageUrl ? 'image' : 'initials',
-            initials: space.initials || getSpaceInitials(space),
-            color: space.color || getSpaceColor(space),
-            customIdentifier: false,
-            customAvatarInitials:
-              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
-            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
-          },
+          space: formValues,
+          initialSpace: formValues,
           features,
           originalSpace: space,
           isLoading: false,
+          isDirty: false,
         });
       }
     } catch (error) {
@@ -426,9 +477,27 @@ export class CreateSpacePage extends Component<Props, State> {
       projectRouting,
     } = this.state.space;
 
-    const params = {
+    // Draft form id is a plain string; validate-and-brand at the create write boundary.
+    // The form validator already rejects invalid identifiers before save, but `asSpaceId`
+    // throws synchronously (before the request promise exists, so the `.catch` below can't
+    // see it). Guard against the two validators diverging by surfacing a toast rather than
+    // letting an unhandled error break the form.
+    let brandedId: SpaceId;
+    try {
+      brandedId = asSpaceId(id);
+    } catch (error) {
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle', {
+          defaultMessage: 'Error saving space: {message}',
+          values: { message: error?.message ?? '' },
+        })
+      );
+      return;
+    }
+
+    const params: Space = {
       name,
-      id,
+      id: brandedId,
       description,
       initials: avatarType !== 'image' ? initials : '',
       color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : undefined, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
@@ -494,5 +563,9 @@ export class CreateSpacePage extends Component<Props, State> {
       });
   };
 
-  private backToSpacesList = () => this.props.history.push('/');
+  // Once the user has chosen to leave — by saving or cancelling — their changes are either
+  // persisted or deliberately discarded, so the unsaved changes prompt must not fire on the way
+  // back to the spaces list. `isDirty` cannot tell the difference on its own: it compares against
+  // the form as it was first rendered, and saving does not change that.
+  private backToSpacesList = () => this.setState({ isLeaving: true });
 }

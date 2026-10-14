@@ -324,8 +324,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/delete:
     delete:
-      description: Deletes the Privilege Monitoring Engine and optionally removes all
-        associated privileged user data.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine
+        and optionally removes all associated privileged user data.'
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -357,8 +358,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
-      description: Disables the Privilege Monitoring Engine, stopping all monitoring
-        activity without removing data.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine,
+        stopping all monitoring activity without removing data.'
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -377,8 +379,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
-      description: Initializes the Privilege Monitoring Engine, setting up the
-        required resources and starting the engine.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Initializes the Privilege Monitoring
+        Engine, setting up the required resources and starting the engine.'
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -410,8 +413,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
-      description: Schedules the Privilege Monitoring Engine to run as soon as
-        possible, triggering an immediate monitoring cycle.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine
+        to run as soon as possible, triggering an immediate monitoring cycle.'
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -449,9 +453,10 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
-      description: Returns the current health status of the Privilege Monitoring
-        Engine, including engine status, error details, and user count
-        statistics.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Returns the current health status of the
+        Privilege Monitoring Engine, including engine status, error details, and
+        user count statistics.'
       operationId: PrivMonHealth
       responses:
         '200':
@@ -498,8 +503,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: Check if the current user has all required permissions for
-        Privilege Monitoring
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+
+        Check if the current user has all required permissions for Privilege
+        Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -523,7 +533,12 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
-      description: Creates a new privileged user to be monitored by the Privilege
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Creates a new privileged user to be monitored by the Privilege
         Monitoring Engine.
       operationId: CreatePrivMonUser
       requestBody:
@@ -571,8 +586,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      description: Bulk upserts privileged users by uploading a CSV file. Returns
-        per-row errors and aggregate upload statistics.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Bulk upserts privileged users by uploading a CSV file. Returns per-row
+        errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
@@ -631,7 +651,11 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
     delete:
-      description: Removes a privileged user from monitoring by their document ID.
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
       parameters:
         - description: The document ID of the monitored user to delete
@@ -667,8 +691,13 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
-      description: Updates the details of an existing monitored privileged user by
-        their document ID.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Updates the details of an existing monitored privileged user by their
+        document ID.
       operationId: UpdatePrivMonUser
       parameters:
         - description: The document ID of the monitored user to update
@@ -723,7 +752,12 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/list:
     get:
-      description: Returns a list of all privileged users currently being monitored.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+
+        Returns a list of all privileged users currently being monitored.
         Supports optional KQL filtering.
       operationId: ListPrivMonUsers
       parameters:
@@ -1726,6 +1760,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -1947,35 +1982,41 @@ components:
       properties:
         has_all_required:
           type: boolean
+        has_install_permissions:
+          type: boolean
         has_read_permissions:
           type: boolean
         has_write_permissions:
           type: boolean
+        install_privileges:
+          $ref: '#/components/schemas/EntityAnalyticsPrivilegesDetail'
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  additionalProperties:
-                    type: boolean
-                  type: object
-                index:
-                  additionalProperties:
-                    additionalProperties:
-                      type: boolean
-                    type: object
-                  type: object
-            kibana:
-              additionalProperties:
-                type: boolean
-              type: object
-          required:
-            - elasticsearch
+          $ref: '#/components/schemas/EntityAnalyticsPrivilegesDetail'
       required:
         - has_all_required
         - privileges
+    EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              additionalProperties:
+                type: boolean
+              type: object
+            index:
+              additionalProperties:
+                additionalProperties:
+                  type: boolean
+                type: object
+              type: object
+        kibana:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+        - elasticsearch
     EntityRiskLevels:
       enum:
         - Unknown
@@ -2563,6 +2604,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string

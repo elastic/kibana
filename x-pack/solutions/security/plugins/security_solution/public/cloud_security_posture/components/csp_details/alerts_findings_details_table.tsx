@@ -174,8 +174,11 @@ export const AlertsDetailsTable = memo(
       if (!euidApi?.euid) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
-    }, [euidApi?.euid, entityTypeResolved, entityRecord]);
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityTypeResolved),
+        entityRecord
+      );
+    }, [euidApi, entityTypeResolved, entityRecord]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
@@ -340,8 +343,11 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}>
-            <EuiIcon type={'expand'} aria-hidden={true} />
+          <EuiLink
+            data-test-subj="securitySolutionFlyoutAlertsFindingsTableExpandButton"
+            onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}
+          >
+            <EuiIcon type={'maximize'} aria-hidden={true} />
           </EuiLink>
         ),
       },
@@ -415,7 +421,7 @@ export const AlertsDetailsTable = memo(
 
     return (
       <>
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiLink onClick={() => openAlertsInAlertsPage()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {

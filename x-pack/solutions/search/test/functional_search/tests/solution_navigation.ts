@@ -58,37 +58,30 @@ export default function searchSolutionNavigation({
 
       const sideNavTestCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
-        breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
           link: { navId: 'agent_builder' },
-          breadcrumbs: [],
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
           link: { deepLinkId: 'discover' },
-          breadcrumbs: ['Discover'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { deepLinkId: 'dashboards' },
-          breadcrumbs: ['Dashboards'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'dev_tools' },
-          breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
@@ -97,9 +90,6 @@ export default function searchSolutionNavigation({
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await testSubjects.existOrFail(testCase.pageTestSubject);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        for (const breadcrumb of testCase.breadcrumbs) {
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
       }
 
       await expectNoPageReload();
@@ -125,27 +115,17 @@ export default function searchSolutionNavigation({
       );
     });
 
-    it('navigates to data management and query rules with correct breadcrumbs', async () => {
+    it('navigates to data management and query rules', async () => {
       await solutionNavigation.sidenav.openPanel('data_management');
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Data management',
-        'Indices and data streams',
-        'Index Management',
-        'Indices',
-      ]);
+      await testSubjects.existOrFail('indexTable');
 
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'searchQueryRules',
       });
       await testSubjects.existOrFail('queryRulesBasePage');
-      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Data management',
-        'Relevance',
-        'Query rules',
-      ]);
     });
   });
 }

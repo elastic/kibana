@@ -32,7 +32,11 @@ describe('buildClassicStreamsGraph', () => {
     expect(destination).toMatchObject({
       id: 'destination-logs-nginx-default',
       type: DESTINATION_NODE_TYPE,
-      data: { title: 'logs-nginx-default', hasProcessing: false },
+      data: {
+        streamName: 'logs-nginx-default',
+        title: 'logs-nginx-default',
+        hasProcessing: false,
+      },
     });
     expect(edges[0]).toMatchObject({
       source: 'source-logs-nginx-default',
@@ -43,7 +47,7 @@ describe('buildClassicStreamsGraph', () => {
     expect(source.position.x).toBeLessThan(destination.position.x);
   });
 
-  it('flags the destination as having processing when the stream has Streamlang steps', () => {
+  it('keeps the destination processing trigger available for classic streams', () => {
     const { nodes } = buildClassicStreamsGraph([
       createClassicStreamDefinition('logs-with-processing', { withProcessing: true }),
     ]);

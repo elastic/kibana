@@ -97,6 +97,7 @@ export const MonacoEditor = ({
   const editorDispatch = useEditorActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
+  const [selectedRequestsCount, setSelectedRequestsCount] = useState(0);
 
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
@@ -137,7 +138,8 @@ export const MonacoEditor = ({
         editor,
         setEditorActionsCss,
         highlightedLinesClassName,
-        customProvider
+        customProvider,
+        setSelectedRequestsCount
       );
       setInputEditor(provider);
       actionsProvider.current = provider;
@@ -182,7 +184,13 @@ export const MonacoEditor = ({
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const esqlCallbacks = useConsoleEsqlCallbacks({ application, http, licensing, data });
+  const esqlCallbacks = useConsoleEsqlCallbacks({
+    application,
+    http,
+    licensing,
+    data,
+    getEntitiesRefreshGeneration: autocompleteInfo.getEntitiesRefreshGeneration,
+  });
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -225,6 +233,7 @@ export const MonacoEditor = ({
       `}
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
+      data-currently-selected-requests={selectedRequestsCount}
     >
       <EuiFlexGroup
         css={styles.editorActions}
@@ -276,6 +285,12 @@ export const MonacoEditor = ({
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
+          // Only let Enter accept an auto-triggered suggestion when accepting it would actually
+          // change the text. Without this, a fully typed term (e.g. `?pretty`) keeps the widget
+          // open and Enter gets consumed by a no-op acceptance instead of inserting a new line.
+          // Snippets (e.g. conditional templates) always count as a text edit, so they are
+          // still accepted with Enter.
+          acceptSuggestionOnEnter: 'smart',
           // Force the hover views to always render below the cursor to avoid clipping
           // when the cursor is near the top of the editor.
           hover: {

@@ -22,11 +22,12 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -35,6 +36,9 @@ import {
   createComment,
   bulkCreateAttachments,
   findCaseUserActions,
+  updateComment,
+  deleteComment,
+  getCaseUserActionStats,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -128,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentUserReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq],
         });
       });
 
@@ -595,10 +599,10 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
-            postCommentActionsReq,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            postUnifiedActionsReq,
           ],
         });
 
@@ -643,14 +647,61 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(persistableState.payload.comment.type).to.eql('persistableState');
         expect(persistableState.action).to.eql('create');
 
+        // `actions` folds to `security.endpoint` and is never re-emitted, even here.
         const actions = response.userActions[3] as CommentUserAction;
 
         expect(actions.type).to.eql('comment');
-        expect(actions.payload.comment.type).to.eql('actions');
+        expect(actions.payload.comment.type).to.eql('externalReference');
         expect(actions.action).to.eql('create');
 
         expect(response.userActions[4].type).to.eql('severity');
         expect(response.userActions[4].action).to.eql('update');
+      });
+
+      it('includes comment edits and deletions in the action filter', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const caseWithComment = await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+        });
+        const comment = caseWithComment.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: theCase.id,
+          req: {
+            id: comment.id,
+            version: comment.version,
+            comment: 'updated comment',
+            type: postCommentUserReq.type,
+            owner: postCommentUserReq.owner,
+          },
+        });
+        await deleteComment({ supertest, caseId: theCase.id, commentId: comment.id });
+
+        const [actionResponse, userResponse, stats] = await Promise.all([
+          findCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: { sortOrder: 'asc', types: ['action'] },
+          }),
+          findCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: { sortOrder: 'asc', types: ['user'] },
+          }),
+          getCaseUserActionStats({ supertest, caseID: theCase.id }),
+        ]);
+
+        expect(actionResponse.userActions.map(({ type, action }) => [type, action])).to.eql([
+          ['create_case', 'create'],
+          ['comment', 'update'],
+          ['comment', 'delete'],
+        ]);
+        expect(userResponse.userActions.length).to.be(1);
+        expect(actionResponse.total).to.be(stats.total - stats.total_comment_creations);
+        expect(userResponse.total).to.be(stats.total_comment_creations);
       });
 
       it('retrieves only alert user actions', async () => {
@@ -659,7 +710,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -686,7 +737,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: theCase.id,
-          params: [postCommentUserReq, postCommentActionsReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedActionsReq, postUnifiedAlertReq],
         });
 
         const response = await findCaseUserActions({
@@ -715,13 +766,13 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: theCase.id,
           params: [
             // This one should not show up in the filter for attachments
-            postCommentUserReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
+            // Stored as `security.endpoint`; its user action is projected to `externalReference`, so it shows up here.
+            postUnifiedActionsReq,
             // This one should not show up in the filter for attachments
-            postCommentActionsReq,
-            // This one should not show up in the filter for attachments
-            postCommentAlertReq,
+            postUnifiedAlertReq,
           ],
         });
 
@@ -734,7 +785,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(2);
+        expect(response.userActions.length).to.be(3);
 
         const externalRefUserAction = response.userActions[0] as CommentUserAction;
 
@@ -747,6 +798,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(peristableStateUserAction.type).to.eql('comment');
         expect(peristableStateUserAction.action).to.eql('create');
         expect(peristableStateUserAction.payload.comment.type).to.eql('persistableState');
+
+        const legacyActionsUserAction = response.userActions[2] as CommentUserAction;
+
+        expect(legacyActionsUserAction.type).to.eql('comment');
+        expect(legacyActionsUserAction.action).to.eql('create');
+        expect(legacyActionsUserAction.payload.comment.type).to.eql('externalReference');
       });
 
       describe('filtering on multiple types', () => {

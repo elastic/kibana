@@ -10,8 +10,8 @@
 /*
  * Disallow runtime code generation from strings in Jest tests.
  *
- * In production and dev mode, Kibana runs with the V8 flag
- * --disallow-code-generation-from-strings, which causes eval() and
+ * The packaged Kibana server runs with the V8 flag
+ * --disallow-code-generation-from-strings by default, which causes eval() and
  * new Function(string) to throw:
  *
  *   "Code generation from strings disallowed for this context"
@@ -29,8 +29,10 @@
  * uses eval() or new Function() — which would also fail in production.
  * Fix the underlying code rather than removing this restriction.
  *
- * See: packages/kbn-cli-dev-mode/src/using_server_process.ts  (dev flag)
- *      src/dev/build/tasks/bin/scripts/kibana                  (prod flag)
+ * The flag is applied by the packaged launcher and is on by default; it can be
+ * disabled with KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
+ *
+ * See: src/dev/build/tasks/bin/scripts/kibana                  (prod launcher, default-on / opt-out)
  *      src/platform/packages/shared/kbn-security-hardening/    (hardening package)
  */
 

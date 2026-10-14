@@ -6,7 +6,6 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { HistogramIndicator } from '@kbn/slo-schema';
 import { histogramIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
@@ -22,10 +21,6 @@ import { GetHistogramIndicatorAggregation } from '../aggregations';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!histogramIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -39,7 +34,8 @@ export class HistogramTransformGenerator extends TransformGenerator {
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 

@@ -21,7 +21,7 @@ export const REMOVED_TIMELINE_LABEL = i18n.translate(
   }
 );
 
-export const DELETE_TIMELINE_SUCCESS_TITLE = i18n.translate(
+export const DELETE_TIMELINE_SUCCESS_TOAST = i18n.translate(
   'xpack.securitySolution.cases.timelineAttachment.deleteSuccessTitle',
   {
     defaultMessage: 'Deleted timeline attachment',
@@ -40,13 +40,6 @@ export const FAILED_TO_RETRIEVE_TIMELINE = (timelineId: string) =>
     defaultMessage: 'Failed to retrieve Timeline id: {timelineId}',
     values: { timelineId },
   });
-
-export const TIMELINE_AVATAR_ARIA = i18n.translate(
-  'xpack.securitySolution.cases.timelineAttachment.avatarAriaLabel',
-  {
-    defaultMessage: 'timeline',
-  }
-);
 
 export const TIMELINE_DISPLAY_NAME = i18n.translate(
   'xpack.securitySolution.cases.timelineAttachment.displayName',

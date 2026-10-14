@@ -117,7 +117,13 @@ export const User: FC<UserProps> = memo(function User({
   } = useFlyoutApi();
 
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('user'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -144,13 +150,13 @@ export const User: FC<UserProps> = memo(function User({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'user',
+          euidApi.getBuiltInEntityDefinition('user'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -279,7 +285,6 @@ export const User: FC<UserProps> = memo(function User({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]
@@ -313,6 +318,7 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
             title: userName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
@@ -461,7 +467,8 @@ export const User: FC<UserProps> = memo(function User({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons

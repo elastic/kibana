@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Streams, IngestStreamLifecycle, IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import {
   Streams as StreamsSchema,
@@ -21,12 +21,12 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
@@ -224,7 +224,7 @@ const getEditLifecycleMethodButton = ({
   return (
     <EuiToolTip content={tooltipLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        iconType="controlsHorizontal"
+        iconType="controls"
         size="s"
         display="base"
         color="text"
@@ -277,6 +277,7 @@ const IlmLifecycleSummary = ({
     isActive: isPreviewActive,
     timelineDownsampleSteps: previewTimelineDownsampleSteps,
     timelinePhases: previewTimelinePhases,
+    releaseHoldAfterRefresh,
   } = useLifecyclePreview();
   const shouldShowInheritedBadge = shouldShowLifecycleInheritedBadge(definition);
 
@@ -288,6 +289,19 @@ const IlmLifecycleSummary = ({
     updateStreamLifecycle,
     isMetricsStream,
   });
+
+  // Release a held preview only once the ILM stats have finished loading, otherwise the held
+  // preview would be swapped for a loading skeleton. `loading` starts false and flips true after
+  // the fetch effect runs, so release on the true->false transition, not on `!loading`. No-op
+  // unless a clear is held.
+  const wasIlmLoadingRef = useRef(ilmSummary.loading);
+  useEffect(() => {
+    const wasLoading = wasIlmLoadingRef.current;
+    wasIlmLoadingRef.current = ilmSummary.loading;
+    if (wasLoading && !ilmSummary.loading) {
+      releaseHoldAfterRefresh();
+    }
+  }, [ilmSummary.loading, releaseHoldAfterRefresh]);
 
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
   const invalidPhases = ilmSummary.flyoutInvalidPhases;
@@ -361,23 +375,20 @@ const IlmLifecycleSummary = ({
     <>
       {ilmSummary.policyMissing && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.streams.lifecycleSummary.policyMissingTitle', {
               defaultMessage: 'ILM policy not found',
             })}
-            color="warning"
-            iconType="warning"
             data-test-subj="lifecycleSummary-policyMissingCallout"
-          >
-            {i18n.translate('xpack.streams.lifecycleSummary.policyMissingDescription', {
+            text={i18n.translate('xpack.streams.lifecycleSummary.policyMissingDescription', {
               defaultMessage:
                 'The ILM policy "{policyName}" referenced by this data stream does not exist. Assign a valid ILM policy to restore lifecycle management.',
               values: {
                 policyName: (definition.effective_lifecycle as IngestStreamLifecycleILM).ilm.policy,
               },
             })}
-          </EuiCallOut>
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -412,6 +423,7 @@ const IlmLifecycleSummary = ({
             // phase/downsample clicks must not open ILM's own edit-phases flyout.
             disableInteractions: isBlockedByOtherFlyout,
             invalidPhases,
+            isPreviewActive,
           }}
         />
       )}
@@ -791,6 +803,7 @@ const NonIlmLifecycleSummary = ({
           disableInteractions: isBlockedByOtherFlyout,
           invalidStepIndices,
           invalidPhases: dataPhaseInvalidPhases,
+          isPreviewActive,
         }}
         frozenPhaseCallouts={frozenPhaseCallouts}
       />

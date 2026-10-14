@@ -1,5 +1,8 @@
 {
   "sha1": "718313231373bed707ca41e098fa84112ba573e8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "7b7f796111b9b5f-f3bf9deeeb29aa8",
@@ -11,7 +14,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/share/test/scout/ui/tests/short_urls.spec.ts",
-        "line": 25,
+        "line": 18,
         "column": 7
       }
     }

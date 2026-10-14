@@ -227,4 +227,18 @@ describe('hmr_client', () => {
     expect(EventSource).not.toHaveBeenCalled();
     expect(document.getElementById('__kbn_hmr_indicator__')).toBeNull();
   });
+
+  it('offsets the indicator above #developerToolbar via stylesheet, not inline bottom', () => {
+    loadHmrClient();
+
+    const indicator = document.getElementById('__kbn_hmr_indicator__');
+    expect(indicator).not.toBeNull();
+    expect(indicator.getAttribute('style')).not.toMatch(/(?:^|;)\s*bottom\s*:/);
+
+    const styles = document.getElementById('__kbn_hmr_indicator_styles__');
+    expect(styles).not.toBeNull();
+    expect(styles.textContent).toContain('body:has(#developerToolbar) #__kbn_hmr_indicator__');
+    expect(styles.textContent).toContain('bottom: 40px');
+    expect(styles.textContent).toMatch(/#__kbn_hmr_indicator__\s*\{[^}]*bottom:\s*16px/);
+  });
 });

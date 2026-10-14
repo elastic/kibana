@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -58,14 +57,12 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
 
   const { euiTheme } = useEuiTheme();
   const { setConversationId, resetAttachments } = useConversationContext();
-  const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
   const agentId = useAgentId();
 
   const currentAgent = agents.find((a) => a.id === agentId);
 
   const handleNewChat = () => {
-    removeAllErrors();
     setConversationId?.(undefined);
     resetAttachments?.();
     onClose();
@@ -124,7 +121,12 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" aria-label={labels.availableAgents} color="text" size="m" />
+            <EuiIcon
+              type="chevronSingleRight"
+              aria-label={labels.availableAgents}
+              color="text"
+              size="m"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

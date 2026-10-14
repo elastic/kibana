@@ -16,6 +16,9 @@ const FIGMA_API_BASE = 'https://api.figma.com';
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
 const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
 const FILE_KEY_REGEX = /^[0-9a-zA-Z_-]+$/;
+const ID_MAX_LENGTH = 200;
+const NODE_IDS_MAX_LENGTH = 10000;
+const URL_MAX_LENGTH = 2048;
 
 export const FigmaConnector: ConnectorSpec = {
   metadata: {
@@ -57,6 +60,7 @@ export const FigmaConnector: ConnectorSpec = {
     // Response always includes components and styles maps alongside the document tree.
     getFile: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a Figma file's structure, metadata, components, and styles. " +
         'File keys appear in Figma URLs as the segment after the file type: ' +
@@ -71,9 +75,11 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           fileKey: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe('File key from the Figma file URL (e.g. from figma.com/file/FILE_KEY/...)'),
           nodeIds: z
             .string()
+            .max(NODE_IDS_MAX_LENGTH)
             .optional()
             .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
           depth: z
@@ -109,6 +115,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-image
     renderNodes: {
       isTool: true,
+      scope: 'read',
       description:
         'Render Figma nodes as images. Provide a file key and one or more node IDs to get ' +
         'temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats. ' +
@@ -116,9 +123,10 @@ export const FigmaConnector: ConnectorSpec = {
         '(?node-id=1:2) or from the getFile action output.',
       input: lazySchema(() =>
         z.object({
-          fileKey: z.string().describe('File key from the Figma file URL'),
+          fileKey: z.string().max(ID_MAX_LENGTH).describe('File key from the Figma file URL'),
           nodeIds: z
             .string()
+            .max(NODE_IDS_MAX_LENGTH)
             .describe(
               'Comma-separated node IDs to render (e.g. "1:2,1:3"); find in URL ?node-id= or get_file output'
             ),
@@ -153,6 +161,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-project-files
     listProjectFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List all files in a Figma project. Returns file names, keys, thumbnail URLs, and ' +
         'last modified dates. Use the file keys from the results with the getFile or ' +
@@ -161,6 +170,7 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           projectId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe('Figma project ID (from list with type teamProjects or project URL)'),
         })
       ),
@@ -176,6 +186,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-team-projects
     listTeamProjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List all projects in a Figma team. Returns project names and IDs alongside the ' +
         'teamId (so it can be reused in later steps). Use the project IDs with listProjectFiles ' +
@@ -186,12 +197,14 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           teamId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .optional()
             .describe(
               'Figma team ID from the team page URL. If you do not have it, use url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
             ),
           url: z
             .string()
+            .max(URL_MAX_LENGTH)
             .optional()
             .describe(
               'Figma team page URL. Provide this if teamId is not available; the team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.'
@@ -223,6 +236,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the currently authenticated Figma user. Returns the user ID, handle, email, ' +
         'and profile image URL for the API credentials in use. Useful for verifying which ' +
@@ -252,22 +266,10 @@ export const FigmaConnector: ConnectorSpec = {
       defaultMessage: 'Verifies Figma API connectivity by fetching current user information',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
-        return {
-          ok: true,
-          message: `Successfully connected to Figma as ${
-            response.data.handle || response.data.email || 'user'
-          }`,
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to Figma API: ${errorMessage}`,
-        };
-      }
+      await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
+      return {};
     },
+    enabled: true,
   },
 };
 

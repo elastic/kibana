@@ -64,24 +64,35 @@ describe('Appearance settings', () => {
     seriesType: string;
     showsMissingValues?: boolean;
     showsFillOpacity?: boolean;
+    showsAreaFillOption?: boolean;
     showsPointVisibility?: boolean;
   }>([
+    {
+      seriesType: 'area',
+      showsMissingValues: true,
+      showsFillOpacity: true,
+      showsAreaFillOption: true,
+      showsPointVisibility: true,
+    },
     {
       seriesType: 'area_percentage_stacked',
       showsMissingValues: false,
       showsFillOpacity: true,
+      showsAreaFillOption: true,
       showsPointVisibility: true,
     },
     {
       seriesType: 'bar_horizontal',
       showsMissingValues: false,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: false,
     },
     {
       seriesType: 'line',
       showsMissingValues: true,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: true,
     },
   ])(
@@ -90,6 +101,7 @@ describe('Appearance settings', () => {
       seriesType,
       showsMissingValues = false,
       showsFillOpacity = false,
+      showsAreaFillOption = false,
       showsPointVisibility = false,
     }) => {
       const state = testState();
@@ -105,6 +117,11 @@ describe('Appearance settings', () => {
         expect(screen.getAllByTestId('lnsFillOpacity')).toHaveLength(2);
       } else {
         expect(screen.queryAllByTestId('lnsFillOpacity')).toHaveLength(0);
+      }
+      if (showsAreaFillOption) {
+        expect(screen.getByTestId('lnsAreaFillOption')).toBeInTheDocument();
+      } else {
+        expect(screen.queryByTestId('lnsAreaFillOption')).not.toBeInTheDocument();
       }
       if (showsPointVisibility) {
         expect(screen.getAllByTestId('lnsPointVisibilityOption')).toHaveLength(1);

@@ -11,15 +11,15 @@ import type { SavedObject } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import {
-  getMappedParams,
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -188,6 +188,10 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: originalRuleSavedObject.attributes.params,
+  });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,
@@ -322,23 +326,16 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     : originalRule.revision;
 
   const username = await context.getUserName();
-
+  const profileUid = await context.getProfileUid();
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: updateRuleData.name,
     username,
+    profileUid,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
-
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-    updateRuleData.tags,
-    apiKeyAttributes.uiamApiKey,
-    apiKeyAttributes.apiKeyCreatedByUser,
-    context.isServerless,
-    context.featureFlags
-  );
 
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
@@ -349,12 +346,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
-    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,
     revision,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
     ...(originalRule.lastRun

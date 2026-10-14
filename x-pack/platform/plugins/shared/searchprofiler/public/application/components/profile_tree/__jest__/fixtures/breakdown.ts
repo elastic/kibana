@@ -12,6 +12,8 @@ export const breakdown = {
   build_scorer_count: 2,
   create_weight: 1852,
   create_weight_count: 1,
+  into_bit_set: 0,
+  into_bit_set_count: 0,
   match: 0,
   match_count: 0,
   next_doc: 2593093,
@@ -61,6 +63,14 @@ export const normalized = [
     tip: 'The time taken to advance the iterator to the next document.',
   },
   { key: 'advance_count', time: 0, relative: 0, color: '#f5f5f5', tip: '' },
+  {
+    key: 'into_bit_set',
+    time: 0,
+    relative: 0.0,
+    color: '#f5f5f5',
+    tip: 'The time taken to collect matching document IDs into a bit set for a range of documents.',
+  },
+  { key: 'into_bit_set_count', time: 0, relative: 0, color: '#f5f5f5', tip: '' },
   {
     key: 'match',
     time: 0,

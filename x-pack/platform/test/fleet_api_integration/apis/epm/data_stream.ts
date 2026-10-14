@@ -192,6 +192,88 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage(pkgName, pkgUpdateVersion);
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/249668
+      describe('When a @custom component template adds a custom normalizer', () => {
+        const customComponentTemplateName = `${metricsTemplateName}@custom`;
+
+        const putCustomComponentTemplate = (template: any) =>
+          es.transport.request(
+            {
+              method: 'PUT',
+              path: `/_component_template/${customComponentTemplateName}`,
+              body: { template },
+            },
+            { meta: true }
+          );
+
+        afterEach(async () => {
+          // Reset the customizations so they cannot leak into other tests. The outer afterEach
+          // uninstalls the package, which removes the component template entirely.
+          await putCustomComponentTemplate({});
+        });
+
+        it('should rollover the metrics datastream on upgrade rather than fail the upgrade', async function () {
+          // Analysis settings are immutable after index creation, so referencing a normalizer
+          // that was added to the @custom component template after the write index was created
+          // makes the mappings update fail with a mapper_parsing_exception. Only a rollover can
+          // resolve it, as the new backing index picks up the normalizer from the template.
+          await putCustomComponentTemplate({
+            settings: {
+              index: {
+                analysis: {
+                  normalizer: {
+                    uppercase_normalizer: {
+                      type: 'custom',
+                      filter: ['uppercase'],
+                    },
+                  },
+                },
+              },
+            },
+            mappings: {
+              properties: {
+                normalized_field: {
+                  type: 'keyword',
+                  normalizer: 'uppercase_normalizer',
+                },
+              },
+            },
+          });
+
+          await installPackage(pkgName, pkgUpdateVersion);
+
+          // write doc as rollover is lazy
+          await writeMetricsDoc('default');
+
+          const resMetricsDatastream = await es.transport.request<any>(
+            {
+              method: 'GET',
+              path: `/_data_stream/${metricsTemplateName}-default`,
+            },
+            { meta: true }
+          );
+          const backingIndices = resMetricsDatastream.body.data_streams[0].indices;
+          expect(backingIndices.length).equal(2);
+
+          // the new write index must carry both the normalizer and the field referencing it
+          const writeIndexName = backingIndices[1].index_name;
+          const resWriteIndex = await es.transport.request<any>(
+            {
+              method: 'GET',
+              path: `/${writeIndexName}`,
+            },
+            { meta: true }
+          );
+          const writeIndex = resWriteIndex.body[writeIndexName];
+          expect(writeIndex.settings.index.analysis.normalizer.uppercase_normalizer.filter).to.eql([
+            'uppercase',
+          ]);
+          expect(writeIndex.mappings.properties.normalized_field.normalizer).to.be(
+            'uppercase_normalizer'
+          );
+        });
+      });
+
       describe('When enabling experimental data stream features', () => {
         let agentPolicyId: string;
         let packagePolicyId: string;

@@ -57,12 +57,15 @@ dependsOn:
   - '@kbn/core-analytics-browser-internal'
   - '@kbn/core-theme-browser-internal'
   - '@kbn/core-i18n-browser-internal'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/node-libs-browser-webpack-plugin'
   - '@kbn/esql-types'
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod

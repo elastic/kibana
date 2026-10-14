@@ -15,8 +15,8 @@ import {
   EuiTitle,
   EuiLink,
   EuiFlexItem,
-  useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -47,6 +47,10 @@ interface GenAiSettingsAppProps {
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
 
+const pageTitle = i18n.translate('xpack.genAiSettings.pageTitle', {
+  defaultMessage: 'GenAI Settings',
+});
+
 const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
@@ -63,7 +67,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
     showAnonymizationProfilesSection,
   } = useEnabledFeatures();
-  const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
   // Determine current chat experience (including unsaved changes)
@@ -215,18 +218,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   return (
     <>
       <div data-test-subj="genAiSettingsPage">
-        <EuiTitle size="l">
-          <h2 data-test-subj="genAiSettingsTitle">
-            <FormattedMessage id="xpack.genAiSettings.pageTitle" defaultMessage="GenAI Settings" />
-          </h2>
-        </EuiTitle>
+        <AppHeader title={pageTitle} spacing="bleed" />
+        <EuiSpacer size="l" />
 
-        <EuiPageSection
-          paddingSize="none"
-          css={{
-            paddingTop: euiTheme.size.l,
-          }}
-        >
+        <EuiPageSection paddingSize="none">
           <EuiSplitPanel.Outer hasBorder grow={false}>
             <EuiSplitPanel.Inner color="subdued">
               <EuiTitle size="s">

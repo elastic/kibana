@@ -34,7 +34,7 @@ export function registerReindexIntegrationKnowledgeTask(
       title: 'Fleet Reindex integration knowledge',
       timeout: '5m',
       maxAttempts: 3,
-      createTaskRunner: ({ abortController }: { abortController: AbortController }) => {
+      createTaskRunner: ({ signal }: { signal: AbortSignal }) => {
         return {
           async run() {
             // Check if user has appropriate license for knowledge base functionality
@@ -45,7 +45,7 @@ export function registerReindexIntegrationKnowledgeTask(
               return;
             }
 
-            await reindexIntegrationKnowledgeForInstalledPackages(abortController);
+            await reindexIntegrationKnowledgeForInstalledPackages(signal);
           },
         };
       },
@@ -69,9 +69,7 @@ export async function scheduleReindexIntegrationKnowledgeTask(
   });
 }
 
-export async function reindexIntegrationKnowledgeForInstalledPackages(
-  abortController: AbortController
-) {
+export async function reindexIntegrationKnowledgeForInstalledPackages(signal: AbortSignal) {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
   const logger = appContextService.getLogger();
@@ -79,11 +77,11 @@ export async function reindexIntegrationKnowledgeForInstalledPackages(
   await pMap(
     installedPackages.saved_objects,
     async ({ attributes: installation }) => {
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
       const knowledgeBase = await getPackageKnowledgeBase({
         esClient,
         pkgName: installation.name,
-        abortController,
+        signal,
       });
       const everyKnowledgeBaseOnCurrentPackageVersion = knowledgeBase?.items.every(
         (item) => item.version === installation.version
@@ -129,7 +127,7 @@ export async function reindexIntegrationKnowledgeForInstalledPackages(
         logger,
         { name: installation.name, version: installation.version },
         archiveIterator!,
-        abortController
+        signal
       ).catch((error) => {
         logger.error(
           `Failed reindexing knowledge base for package ${installation.name}@${installation.version}: ${error}`

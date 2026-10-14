@@ -221,7 +221,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * The `left` and `top` values represent the 'center' point of the process node.
      * Since the view has content to the left and above the 'center' point, offset the
-     * position to accomodate for that. This aligns the logical center of the process node
+     * position to accommodate for that. This aligns the logical center of the process node
      * with the correct position on the map.
      */
 
@@ -353,8 +353,14 @@ const UnstyledProcessEventDot = React.memo(
       selectors.statsTotalForNode(state.analyzer[id])(node)
     );
     const nodeName = nodeModel.nodeName(node);
+    const originTimestampMs = useSelector((state: State) =>
+      selectors.originTimestamp(state.analyzer[id])
+    );
     const processEvent = useSelector((state: State) =>
-      nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(String(node.id)))
+      nodeDataModel.eventAtOrBefore(
+        selectors.nodeDataForID(state.analyzer[id])(String(node.id)),
+        originTimestampMs
+      )
     );
     const processName = useMemo(() => {
       if (processEvent !== undefined) {
@@ -497,6 +503,7 @@ const UnstyledProcessEventDot = React.memo(
               zIndex: 45,
             }}
           >
+            {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
             <EuiButton
               iconSide={isNodeLoading ? 'right' : 'left'}
               isLoading={isNodeLoading}

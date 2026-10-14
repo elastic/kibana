@@ -86,6 +86,7 @@ export const RuleAttributesIncludedInAAD = [
 // update from AAD
 export type RuleAttributesNotPartiallyUpdatable =
   | 'apiKey'
+  | 'uiamApiKey'
   | 'enabled'
   | 'name'
   | 'tags'
@@ -219,6 +220,10 @@ export function setupSavedObjects(
         apiKeyId: {
           type: 'keyword',
         },
+        uiamApiKeyId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         createdAt: {
           type: 'date',
         },
@@ -264,8 +269,19 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
-        return `${ruleTemplateSavedObject.attributes.name}`;
+        const { attributes } = ruleTemplateSavedObject;
+        if (attributes.engine === 'v2' && 'rule' in attributes) {
+          const ruleName = (attributes.rule as { metadata?: { name?: string } }).metadata?.name;
+          if (ruleName) {
+            return ruleName;
+          }
+        }
+        if ('name' in attributes && attributes.name) {
+          return attributes.name;
+        }
+        return ruleTemplateSavedObject.id;
       },
+
       getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
         return {
           path: `${triggersActionsRoute}${createRuleFromTemplateRoute.replace(
@@ -280,7 +296,9 @@ export function setupSavedObjects(
     modelVersions: ruleTemplateModelVersions,
   });
 
-  // Serverless only saved object used to track the status of UIAM API keys provisioning.
+  // Historical saved object used to track UIAM API key provisioning status. The
+  // background provisioning tasks have been removed; this type remains so existing
+  // documents continue to migrate cleanly.
   savedObjects.registerType({
     name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
