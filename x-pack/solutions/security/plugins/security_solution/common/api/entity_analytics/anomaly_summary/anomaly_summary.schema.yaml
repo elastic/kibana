@@ -250,6 +250,7 @@ components:
       type: object
       required:
         - recordId
+        - entityId
         - jobId
         - detectorIndex
         - detectorFunction
@@ -270,6 +271,10 @@ components:
           type: string
           maxLength: 200
           description: Elasticsearch document ID of the ML anomaly record
+        entityId:
+          type: string
+          maxLength: 200
+          description: Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to
         jobId:
           type: string
           maxLength: 150

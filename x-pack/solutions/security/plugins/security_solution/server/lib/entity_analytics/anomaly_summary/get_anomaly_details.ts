@@ -36,6 +36,7 @@ const mapToAnomalySummaryEntry = (
   jobConfig: JobConfig | undefined
 ): AnomalySummaryEntry => ({
   recordId: hit._id,
+  entityId: hit.entityId,
   jobId: hit.jobId,
   jobName: jobConfig?.jobName ?? null,
   threatTactics: jobConfig?.threatTactics,

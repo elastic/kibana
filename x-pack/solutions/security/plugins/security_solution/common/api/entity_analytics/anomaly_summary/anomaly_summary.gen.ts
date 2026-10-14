@@ -36,7 +36,7 @@ export const AnomalyScoreRange = lazySchema(() =>
 export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 
 /**
- * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group), returning their anomalies together as if they were one entity.
+ * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
  */
 export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']));
 export type AnomalyEntityMode = z.infer<typeof AnomalyEntityMode>;
@@ -133,6 +133,15 @@ export const AnomalySummaryEntry = lazySchema(() =>
      * Elasticsearch document ID of the ML anomaly record
      */
     recordId: z.string().max(200).describe('Elasticsearch document ID of the ML anomaly record'),
+    /**
+     * Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to
+     */
+    entityId: z
+      .string()
+      .max(200)
+      .describe(
+        'Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to'
+      ),
     jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job (from custom_settings.security_app_display_name)
