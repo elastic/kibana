@@ -2050,6 +2050,67 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(batchVerdicts).toEqual(ids.slice(0, batchSize).map((id) => ({ id })));
   });
 
+  it('applies the batch_size cap after dropping foreign ids, not before', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const foreign = Array.from({ length: 10 }, (_, i) => ({ id: `foreign${i}` }));
+
+    // Foreign ids come first: slicing before the where_exp would evict real verdicts.
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: { batch_alert_ids: realIds },
+      steps: {
+        [agentStepName]: {
+          output: {
+            structured_output: { verdicts: [...foreign, ...realIds.map((id) => ({ id }))] },
+          },
+        },
+      },
+    });
+
+    expect(batchVerdicts).toEqual(realIds.map((id) => ({ id })));
+  });
+
+  it('keeps only the first verdict per id so duplicates cannot evict real verdicts', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const duplicates = Array.from({ length: batchSize }, (_, i) => ({
+      id: 'a0',
+      rationale: `dup${i}`,
+    }));
+
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: { batch_alert_ids: realIds },
+      steps: {
+        [agentStepName]: {
+          output: {
+            structured_output: {
+              verdicts: [
+                { id: 'a0', rationale: 'first' },
+                ...duplicates,
+                ...realIds.slice(1).map((id) => ({ id })),
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(batchVerdicts).toEqual([
+      { id: 'a0', rationale: 'first' },
+      ...realIds.slice(1).map((id) => ({ id })),
+    ]);
+  });
+
   it('reports every pending alert as missing when analysis is skipped', () => {
     const skipFallback = findStepByName(workflow.steps, 'set_missing_alert_ids_on_skip') as {
       with: { missing_alert_ids: string };
