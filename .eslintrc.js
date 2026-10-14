@@ -2139,6 +2139,14 @@ module.exports = {
       },
     },
 
+    {
+      files: '.github/scripts/**/*.{js,ts}',
+      rules: {
+        // GitHub Actions executes these files directly with Node's native TypeScript support.
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+      },
+    },
+
     /**
      * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
