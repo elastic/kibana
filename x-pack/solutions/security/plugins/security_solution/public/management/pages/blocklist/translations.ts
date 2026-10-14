@@ -170,7 +170,7 @@ export const ERRORS = {
     'xpack.securitySolution.blocklist.warnings.values.wildcardWrongOperator',
     {
       defaultMessage:
-        'Using a "*" or a "?" in the value with the "is one of" operator can make the entry ineffective. Change the operator to "Match" to ensure wildcards run properly.',
+        'Using a "*" or a "?" in the value with the "is one of" operator can make the entry ineffective. Change the operator to "Matches" to ensure wildcards run properly.',
     }
   ),
   UNNECESSARY_ESCAPING: i18n.translate(

@@ -442,7 +442,7 @@ describe('blocklist form', () => {
       render(createProps({ item: buildPathItem() }));
       await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
       await waitForEuiPopoverOpen();
-      expect(screen.queryByRole('option', { name: /^match$/i })).toBeTruthy();
+      expect(screen.queryByRole('option', { name: /^matches$/i })).toBeTruthy();
     });
 
     it('should not offer the Match operator for the Signer field', async () => {
@@ -453,7 +453,7 @@ describe('blocklist form', () => {
       render(createProps({ item }));
       await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
       await waitForEuiPopoverOpen();
-      expect(screen.queryByRole('option', { name: /^match$/i })).toBeNull();
+      expect(screen.queryByRole('option', { name: /^matches$/i })).toBeNull();
       expect(screen.queryByRole('option', { name: /^is$/i })).toBeTruthy();
     });
 
@@ -462,7 +462,7 @@ describe('blocklist form', () => {
       render(createProps({ item }));
       await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
       await waitForEuiPopoverOpen();
-      await user.click(screen.getByRole('option', { name: /^match$/i }));
+      await user.click(screen.getByRole('option', { name: /^matches$/i }));
 
       const lastCall = onChangeSpy.mock.calls.at(-1)?.[0] as
         | ArtifactFormComponentOnChangeCallbackProps
@@ -481,7 +481,7 @@ describe('blocklist form', () => {
       const selectMatchOperator = async () => {
         await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
         await waitForEuiPopoverOpen();
-        await user.click(screen.getByRole('option', { name: /^match$/i }));
+        await user.click(screen.getByRole('option', { name: /^matches$/i }));
       };
 
       const lastEntries = () => {
@@ -625,8 +625,9 @@ describe('blocklist form', () => {
         },
       ]);
       const { rerender } = render(createProps({ item }));
+      // On Windows paths only a doubled backslash is considered unnecessary escaping
       fireEvent.change(screen.getByTestId('blocklist-form-value-input'), {
-        target: { value: 'C:\\foo\\*.exe' },
+        target: { value: 'C:\\\\foo\\\\*.exe' },
       });
       rerender(<BlockListForm {...createProps({ item })} />);
       expect(screen.queryByText(ERRORS.UNNECESSARY_ESCAPING)).toBeTruthy();
