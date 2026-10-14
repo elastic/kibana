@@ -166,3 +166,85 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
     return ReportingSavedObjectNotFoundError.code;
   }
 }
+
+/**
+ * How the reporting task responds to a page-render-service failure (serverless). The service has
+ * no queue, so retrying is the caller's job: see `render_retry.ts` in the reporting plugin.
+ *
+ * - `capacity`: no render slot came free within this run's wait budget; hand the worker back.
+ * - `unavailable`: the service could not be reached, or something in front of it failed.
+ * - `render_failure`: the service tried and failed to render the page.
+ * - `unrecoverable`: retrying cannot help.
+ */
+export type RenderServiceRetryClass =
+  | 'capacity'
+  | 'unavailable'
+  | 'render_failure'
+  | 'unrecoverable';
+
+export abstract class RenderServiceError extends ReportingError {
+  public abstract get retryClass(): RenderServiceRetryClass;
+}
+
+export class RenderServiceSaturatedError extends RenderServiceError {
+  static code = 'render_service_saturated_error' as const;
+  public get code(): string {
+    return RenderServiceSaturatedError.code;
+  }
+  public get retryClass() {
+    return 'capacity' as const;
+  }
+}
+
+export class RenderServiceUnavailableError extends RenderServiceError {
+  static code = 'render_service_unavailable_error' as const;
+  public get code(): string {
+    return RenderServiceUnavailableError.code;
+  }
+  public get retryClass() {
+    return 'unavailable' as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderServiceUnavailableErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service is unavailable. Try again later.`,
+    });
+  }
+}
+
+export class RenderFailedError extends RenderServiceError {
+  static code = 'render_failed_error' as const;
+  public get code(): string {
+    return RenderFailedError.code;
+  }
+  public get retryClass() {
+    return 'render_failure' as const;
+  }
+}
+
+export class RenderRequestRejectedError extends RenderServiceError {
+  static code = 'render_request_rejected_error' as const;
+  public get code(): string {
+    return RenderRequestRejectedError.code;
+  }
+  public get retryClass() {
+    return 'unrecoverable' as const;
+  }
+}
+
+/** The rendering service stayed at capacity until the report's time ran out. */
+export class RenderCapacityTimeoutError extends RenderServiceError {
+  static code = 'render_capacity_timeout_error' as const;
+  public get code(): string {
+    return RenderCapacityTimeoutError.code;
+  }
+  public get retryClass() {
+    return 'unrecoverable' as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderCapacityTimeoutErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service was busy for too long. Try again later.`,
+    });
+  }
+}

@@ -99,7 +99,10 @@ export function createGetScreenshots({
           },
           dispatcher: getDispatcher(),
         },
-        options.taskInstanceFields.retryAt,
+        {
+          retryAt: options.taskInstanceFields.retryAt,
+          report: options.taskInstanceFields.report,
+        },
         logger
       );
 

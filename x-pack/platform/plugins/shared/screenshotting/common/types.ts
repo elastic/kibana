@@ -36,4 +36,7 @@ export interface PerformanceMetrics {
  * Timestamp metrics about a running screenshot task
  * which determine the maximum timeouts possible
  */
-export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'>;
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'> & {
+  /** The report the capture is for. The remote renderer retries against its age, not the run's. */
+  report?: { id: string; createdAt: Date };
+};

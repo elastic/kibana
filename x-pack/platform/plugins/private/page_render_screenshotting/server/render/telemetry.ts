@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { type Attributes, type Histogram, metrics, ValueType } from '@opentelemetry/api';
+
+/** Up to and past the 10-minute ceiling on waiting, with the ladder's step points as boundaries. */
+const CAPACITY_WAIT_SECONDS_BUCKETS = [1, 2.5, 5, 10, 30, 60, 120, 180, 240, 300, 420, 600, 900];
+
+class PageRenderTelemetry {
+  private readonly meter = metrics.getMeter('kibana.page_render_screenshotting');
+
+  private readonly capacityWaitHistogram: Histogram<Attributes>;
+
+  constructor() {
+    this.capacityWaitHistogram = this.meter.createHistogram(
+      'kibana.reporting.render.capacity_wait.duration',
+      {
+        description:
+          'Time from a report being created to page-render-service accepting its render, across every retry and task run.',
+        unit: 's',
+        valueType: ValueType.DOUBLE,
+        advice: { explicitBucketBoundaries: CAPACITY_WAIT_SECONDS_BUCKETS },
+      }
+    );
+  }
+
+  recordCapacityWait = (seconds: number) => {
+    this.capacityWaitHistogram.record(seconds);
+  };
+}
+
+export const pageRenderTelemetry = new PageRenderTelemetry();

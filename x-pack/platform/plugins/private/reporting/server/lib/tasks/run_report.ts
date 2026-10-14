@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import moment from 'moment';
 import { withTimeout } from '@kbn/std';
 import * as Rx from 'rxjs';
@@ -32,6 +33,7 @@ import type {
 import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
   throwRetryableError,
+  throwUnrecoverableError,
   TaskErrorSource,
   createTaskRunError,
   type ConcreteTaskInstance,
@@ -58,6 +60,9 @@ import { finishedWithNoPendingCallbacks, getContentStream } from '../content_str
 import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import type { ScheduledReportType } from '../../types';
 import { retryOnError } from '../retry_on_error';
+import type { RenderRetryState } from './render_retry';
+import { decideRenderRetry } from './render_retry';
+import { reportingTelemetry } from './reporting_telemetry';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -149,6 +154,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected abstract prepareJob(taskInstance: ConcreteTaskInstance): Promise<PrepareJobResults>;
 
   protected abstract getMaxAttempts(): MaxAttempts;
+
+  /**
+   * Whether a failed page-render-service request may reschedule this task or fail it for good
+   * (`render_retry.ts`). Off by default: rescheduling a recurring task re-runs its schedule, and
+   * an unrecoverable error deletes it.
+   */
+  protected readonly reschedulesRenderRetries: boolean = false;
 
   protected abstract notify(
     report: SavedReport,
@@ -286,6 +298,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       // event tracking of failed job
       const eventTracker = this.getEventTracker(report);
       const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      reportingTelemetry.recordDelivery(timeSinceCreation / 1000, {
+        jobType: report.jobtype,
+        outcome: 'failed',
+        errorCode: docOutput?.error_code ?? 'unknown',
+      });
       eventTracker?.failJob({
         timeSinceCreation,
         errorCode: docOutput?.error_code ?? 'unknown',
@@ -518,6 +535,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const eventTracker = this.getEventTracker(report);
     const byteSize = docOutput.size;
     const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
+    reportingTelemetry.recordDelivery(timeSinceCreation / 1000, {
+      jobType: report.jobtype,
+      outcome: 'completed',
+    });
 
     const scheduleType = report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE;
     if (output.metrics?.csv != null) {
@@ -597,6 +618,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           }
 
           const { jobtype: jobType, attempts } = report;
+          // Finds every run of a report in APM; page-render-service records the same ID.
+          apm.currentTransaction?.addLabels({ report_id: jobId });
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
@@ -661,7 +684,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 const performJobPromise = this.performJob({
                   task,
                   fakeRequest,
-                  taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                  taskInstanceFields: {
+                    retryAt: taskRetryAt,
+                    startedAt: taskStartedAt,
+                    ...(task.created_at
+                      ? { report: { id: task.id, createdAt: new Date(task.created_at) } }
+                      : {}),
+                  },
                   cancellationToken,
                   stream,
                 });
@@ -732,7 +761,29 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               },
             });
           } catch (failedToExecuteErr) {
-            const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
+            const renderRetry = this.reschedulesRenderRetries
+              ? decideRenderRetry(failedToExecuteErr, taskInstance.state as RenderRetryState)
+              : undefined;
+            if (renderRetry) {
+              reportingTelemetry.recordRenderRetry(renderRetry.reason, renderRetry.action);
+            }
+
+            if (renderRetry?.action === 'hand_back') {
+              // Waiting for capacity is not a failure: leave the report processing, record no
+              // error, and free the worker for the next run.
+              cancellationToken?.cancel();
+              this.logger.info(
+                `Job ${jobId} is waiting for render capacity and will run again: ${failedToExecuteErr.message}`,
+                { tags: [jobId] }
+              );
+              return { runAt: renderRetry.runAt, state: renderRetry.state };
+            }
+
+            const isLastAttempt = renderRetry
+              ? renderRetry.action === 'fail'
+              : taskAttempts
+              ? taskAttempts >= maxAttempts.maxTaskAttempts
+              : true;
             eventLog.logError(failedToExecuteErr);
 
             // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
@@ -766,6 +817,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
                 { tags: [jobId] }
               );
+            }
+
+            if (renderRetry?.action === 'reschedule') {
+              return { runAt: renderRetry.runAt, state: renderRetry.state };
+            }
+            if (renderRetry?.action === 'fail') {
+              // Stops Task Manager without spending the rest of the task's attempts.
+              throwUnrecoverableError(failedToExecuteErr);
             }
 
             let error = failedToExecuteErr;

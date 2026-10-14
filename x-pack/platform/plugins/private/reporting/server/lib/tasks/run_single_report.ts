@@ -18,6 +18,7 @@ import type { ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
+import type { RenderRetryState } from './render_retry';
 
 type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: ReportTaskParams;
@@ -25,12 +26,14 @@ type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
 export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   public readonly exportType = EXPORT_TYPE_SINGLE;
   protected readonly scheduleType = ScheduleType.SINGLE;
+  protected readonly reschedulesRenderRetries = true;
 
   public get TYPE() {
     return REPORTING_EXECUTE_TYPE;
   }
 
-  private async claimJob(task: ReportTaskParams): Promise<SavedReport> {
+  /** `newAttempt` is false when the last run only handed back while waiting for capacity. */
+  private async claimJob(task: ReportTaskParams, newAttempt = true): Promise<SavedReport> {
     const store = await this.opts.reporting.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
 
@@ -45,7 +48,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
     const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
-      attempts: report.attempts + 1,
+      attempts: newAttempt ? report.attempts + 1 : report.attempts,
       max_attempts: this.getMaxAttempts().maxTaskAttempts,
       started_at: startTime,
       timeout: this.queueTimeout,
@@ -65,9 +68,11 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
     );
 
     // event tracking of claimed job
-    const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.claimJob({ timeSinceCreation, scheduleType: ScheduleType.SINGLE });
+    if (newAttempt) {
+      const eventTracker = this.getEventTracker(report);
+      const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      eventTracker?.claimJob({ timeSinceCreation, scheduleType: ScheduleType.SINGLE });
+    }
 
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no!;
@@ -91,7 +96,8 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       }
 
       // Update job status to claimed
-      report = await this.claimJob(task);
+      const { waitingForCapacity } = (taskInstance.state ?? {}) as RenderRetryState;
+      report = await this.claimJob(task, !waitingForCapacity);
 
       // Track report in UI
       this.opts.reporting.trackReport(jobId);

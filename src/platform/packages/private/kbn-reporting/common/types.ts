@@ -89,7 +89,10 @@ export interface BasePayload extends BaseParams {
 /**
  * Timestamp metrics about the task lifecycle
  */
-export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'> & {
+  /** The report the run is for. The remote renderer retries against its age, not the run's. */
+  report?: { id: string; createdAt: Date };
+};
 
 export type JobId = string;
 

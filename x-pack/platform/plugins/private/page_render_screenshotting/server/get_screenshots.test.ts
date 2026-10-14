@@ -176,10 +176,11 @@ describe('createGetScreenshots', () => {
     expect(mockRenderPage).not.toHaveBeenCalled();
   });
 
-  it('passes the capture base url, dispatcher and task deadline to the render', async () => {
+  it('passes the capture base url, dispatcher, task deadline and report to the render', async () => {
     mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
     const dispatcher = new Agent();
     const retryAt = new Date('2026-01-01T00:05:00Z');
+    const report = { id: 'report-1', createdAt: new Date('2026-01-01T00:00:00Z') };
 
     const getScreenshots = createGetScreenshots({
       getServiceUrl,
@@ -190,13 +191,13 @@ describe('createGetScreenshots', () => {
       getDispatcher: () => dispatcher,
     });
     await firstValueFrom(
-      getScreenshots(pdfOptions({ taskInstanceFields: { retryAt, startedAt: null } }))
+      getScreenshots(pdfOptions({ taskInstanceFields: { retryAt, startedAt: null, report } }))
     );
 
-    const [payload, serviceConfig, deadline] = mockRenderPage.mock.calls[0];
+    const [payload, serviceConfig, context] = mockRenderPage.mock.calls[0];
     expect(payload.url).toBe('https://kibana.example.com/app/reportingRedirect');
     expect(serviceConfig).toMatchObject({ url: 'http://localhost:3001', dispatcher });
-    expect(deadline).toBe(retryAt);
+    expect(context).toEqual({ retryAt, report });
   });
 
   it('emits a dispatcher failure as an observable error', async () => {
