@@ -89,6 +89,7 @@ interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
+  isDeleted?: boolean;
 }
 
 /** Reference attachments point at another entity and may include a cached snapshot. */

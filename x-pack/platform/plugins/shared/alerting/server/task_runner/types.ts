@@ -27,6 +27,13 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { EventBus } from '../lib/events/event_bus';
+import type {
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from '../lib/workflow_extensions/events';
+import type { AlertStatusChangedOptIn } from '../lib/workflow_extensions/alert_status_changed_opt_in';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -91,6 +98,16 @@ export interface RunRuleResult {
     expired: RawRuleSnoozedInstance[];
     conditionExpired: RawRuleSnoozedInstance[];
     ruleName: string;
+  };
+  /**
+   * Alert status-change events to publish on the in-process bus after the run
+   * succeeds. Populated only for lifecycle rule types when `alertingEventBus`
+   * is configured. The bus publish happens in `run()`, not here, so a failure
+   * before `run()` returns prevents any publish.
+   */
+  alertStatusChangedBatch?: {
+    events: AlertStatusChangedV1Payload[];
+    request: KibanaRequest;
   };
 }
 
@@ -244,6 +261,18 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  /**
+   * Optional — present only when `workflowsExtensions` is loaded.
+   * Rule executions publish `alert.status.changed` events on this bus;
+   * the workflow subscriber attaches in plugin.start and forwards them.
+   */
+  alertingEventBus?: EventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  /**
+   * Opt-ins registered through `enableAlertStatusChanged`. While there are none, rule runs build
+   * and publish no status change events. The array is shared with the plugin, so opt-ins
+   * registered after the context is created still apply.
+   */
+  alertStatusChangedOptIns?: readonly AlertStatusChangedOptIn[];
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EVENT_GENERATING_ELEMENTS } from './event_generating_elements_should_be_instrumented';
+
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const eventGeneratingElementsShouldBeInstrumentedCases = {
+  valid: EVENT_GENERATING_ELEMENTS.map((element) => ({
+    filename: 'foo.tsx',
+    code: `<${element} data-test-subj="foo" />`,
+  })),
+
+  invalid: [
+    ...EVENT_GENERATING_ELEMENTS.map((element) => ({
+      filename: 'foo.tsx',
+      code: `<${element}>Value</${element}>`,
+      errors: [
+        {
+          line: 1,
+          message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
+        },
+      ],
+      output: `<${element} data-test-subj="Value${element
+        .replace('Eui', '')
+        .replace('Empty', '')
+        .replace('Icon', '')}">Value</${element}>`,
+    })),
+    // HTML entities in the text are decoded before building the suggestion
+    {
+      filename: 'foo.tsx',
+      code: `<EuiButton>Save&nbsp;changes</EuiButton>`,
+      errors: [
+        {
+          line: 1,
+          message: `<EuiButton> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
+        },
+      ],
+      output: `<EuiButton data-test-subj="SaveChangesButton">Save&nbsp;changes</EuiButton>`,
+    },
+  ],
+};

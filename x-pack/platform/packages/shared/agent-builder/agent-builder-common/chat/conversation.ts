@@ -115,6 +115,7 @@ export enum ConversationRoundStepType {
   preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
+  injectedContext = 'injected_context',
 }
 
 // tool call step
@@ -273,6 +274,32 @@ export const isSubstitutionStep = (step: ConversationRoundStep): step is Substit
   return step.type === ConversationRoundStepType.substitution;
 };
 
+/**
+ * A note a cycle hook put in front of the model. Rendered as a user-role notice at its position.
+ */
+export interface InjectedContextStepData {
+  /** Registration id of the hook that appended the step. Set by the runtime, never by the hook. */
+  hook_id: string;
+  /** What the model reads. */
+  text: string;
+  /** For the UI and analytics; never rendered to the model. */
+  data?: JsonObject;
+}
+
+export type InjectedContextStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.injectedContext,
+  InjectedContextStepData
+>;
+
+export const createInjectedContextStep = (data: InjectedContextStepData): InjectedContextStep => ({
+  type: ConversationRoundStepType.injectedContext,
+  ...data,
+});
+
+export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
+  return step.type === ConversationRoundStepType.injectedContext;
+};
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -420,7 +447,8 @@ export type ConversationRoundStep =
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
-  | SubstitutionStep;
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
