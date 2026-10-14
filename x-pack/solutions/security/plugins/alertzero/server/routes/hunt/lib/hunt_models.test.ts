@@ -1,0 +1,117 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import {
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
+import { resolveHuntModels } from './hunt_models';
+import { resolveScopedModel } from './scoped_model';
+
+jest.mock('./scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+
+const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
+
+const logger = loggingSystemMock.createLogger();
+const request = {} as KibanaRequest;
+const uiSettingsClient = { get: jest.fn() } as never;
+const inference = {} as never;
+
+const modelFor = (featureId: string) =>
+  ({ connector: { id: featureId } } as unknown as ScopedModel);
+
+const resolve = (tiers?: Array<'efficient' | 'balanced' | 'frontier'>) =>
+  resolveHuntModels({ inference, request, uiSettingsClient, logger, tiers });
+
+describe('resolveHuntModels', () => {
+  beforeEach(() => {
+    resolveScopedModelMock
+      .mockReset()
+      .mockImplementation(async ({ featureId }) => ({ ok: true, model: modelFor(featureId) }));
+  });
+
+  it('resolves every tier on its own feature id by default', async () => {
+    const { models, failures } = await resolve();
+
+    expect(failures).toEqual([]);
+    expect(models).toEqual({
+      efficient: modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID),
+      balanced: modelFor(ALERTZERO_BALANCED_INFERENCE_FEATURE_ID),
+      frontier: modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID),
+    });
+  });
+
+  it('resolves only the tiers it is asked for', async () => {
+    const { models } = await resolve(['frontier']);
+
+    expect(Object.keys(models)).toEqual(['frontier']);
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the other tiers intact when one has no usable connector', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
+        ? { ok: false, reason: 'no_connector', message: 'no balanced connector' }
+        : { ok: true, model: modelFor(featureId) }
+    );
+
+    const { models, failures } = await resolve();
+
+    expect(models).toEqual({
+      efficient: modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID),
+      frontier: modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID),
+    });
+    expect(failures).toEqual([
+      { tier: 'balanced', reason: 'no_connector', message: 'no balanced connector' },
+    ]);
+  });
+
+  it('reports the failing tier and its reason when the inference plugin is absent', async () => {
+    resolveScopedModelMock.mockResolvedValue({
+      ok: false,
+      reason: 'no_inference_plugin',
+      message: 'inference is not installed',
+    });
+
+    const { models, failures } = await resolve(['frontier', 'balanced']);
+
+    expect(models).toEqual({});
+    expect(failures.map(({ tier, reason }) => ({ tier, reason }))).toEqual([
+      { tier: 'frontier', reason: 'no_inference_plugin' },
+      { tier: 'balanced', reason: 'no_inference_plugin' },
+    ]);
+  });
+
+  it('reports a throwing resolution as a failure for that tier instead of rejecting', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) => {
+      if (featureId === ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID) {
+        throw new Error('connector store unavailable');
+      }
+      return { ok: true, model: modelFor(featureId) };
+    });
+
+    const { models, failures } = await resolve();
+
+    expect(models.efficient).toBeUndefined();
+    expect(models.balanced).toBeDefined();
+    expect(failures).toEqual([
+      { tier: 'efficient', reason: 'resolution_error', message: 'connector store unavailable' },
+    ]);
+  });
+
+  it('lists failures in the order the tiers were requested', async () => {
+    resolveScopedModelMock.mockResolvedValue({ ok: false, reason: 'no_connector', message: 'x' });
+
+    const { failures } = await resolve(['balanced', 'frontier']);
+
+    expect(failures.map(({ tier }) => tier)).toEqual(['balanced', 'frontier']);
+  });
+});
