@@ -12,7 +12,7 @@ import {
   buildRiskLevelHistoryBranch,
   buildRiskScoreHistoryBranch,
 } from './risk_history';
-import { TIME_RANGE_DAYS } from './tile_period';
+import { buildPreviousPeriodStart } from './tile_period';
 
 /*
  * The risk tiles compare an entity's risk now with its risk at the start of the period. The entity
@@ -23,10 +23,6 @@ import { TIME_RANGE_DAYS } from './tile_period';
  * name, the entity filters and alias resolution.
  */
 
-/** Returns where the previous period starts: `NOW() - 2 x range`. */
-const buildPreviousPeriodStart = (timeRange: TimeRange): string =>
-  `NOW() - ${2 * TIME_RANGE_DAYS[timeRange]} days`;
-
 export const buildJoinTail = (
   entitiesIndexName: string,
   entityFilterClauses: string[]
@@ -36,8 +32,9 @@ export const buildJoinTail = (
   ...entityFilterClauses,
   `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
   // One row per resolved entity, then a plain COUNT: exact, unlike the approximate COUNT_DISTINCT.
+  // The previous period only needs the count, not the entity ids.
   `| STATS BY effective_id`,
-  `| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`,
+  `| STATS value = COUNT(effective_id)`,
 ];
 
 /** Builds the Risk movers query for the previous period: score up by 10 or more over that period. */
@@ -93,14 +90,22 @@ export const buildPreviousNewlyHighCriticalQuery = (
 };
 
 /**
- * Builds a query that counts the risk score docs around the start of the previous period. When it
- * returns 0 the history does not reach back that far, and the previous period cannot be compared.
+ * Builds a query that tells whether the risk history reaches both ends of the previous period: it
+ * has docs in the two hours before the start (`NOW() - 2 x range`) and before the end
+ * (`NOW() - range`). It returns one boolean column, `reaches_back`. Without the start the previous
+ * period cannot be compared; without the end (for example scoring was paused then) its count would
+ * be 0 for lack of data, and the delta a false rise.
  */
-export const buildRiskHistoryExistsQuery = (spaceId: string, timeRange: TimeRange): string => {
+export const buildRiskHistoryReachesBackQuery = (spaceId: string, timeRange: TimeRange): string => {
   const start = buildPreviousPeriodStart(timeRange);
+  const end = buildLookback(timeRange);
   return [
     `FROM ${getRiskScoreIndex(spaceId)}`,
-    `| WHERE @timestamp >= ${start} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${start}`,
-    `| STATS boundary_docs = COUNT(*)`,
+    `| WHERE (@timestamp >= ${start} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${start}) OR (@timestamp >= ${end} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${end})`,
+    // The two windows do not overlap (the range is at least a day), so a doc is in one of them.
+    `| EVAL in_start = @timestamp <= ${start}, in_end = @timestamp >= ${end} - ${BOUNDARY_WINDOW_HOURS} hours`,
+    `| STATS has_start = MAX(in_start), has_end = MAX(in_end)`,
+    `| EVAL reaches_back = COALESCE(has_start, false) AND COALESCE(has_end, false)`,
+    `| KEEP reaches_back`,
   ].join('\n');
 };

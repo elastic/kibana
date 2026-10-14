@@ -23,8 +23,8 @@ import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
  * | host:b      | 100d       |             | critical 10                        | previous severe              |
  * | user:c      | 100d       |             | high 2, critical 9                 | severe in both periods       |
  * | user:d      | 100d       | yes         | low 1                              | current watchlisted          |
- * | host:e      | 10d        | yes         | medium 11                          | previous watchlisted and new |
- * | host:f      | 2d         |             | low 1                              | current new & alerting       |
+ * | host:e      | 10d        | yes         | medium 11                          | previous watchlisted |
+ * | host:f      | 2d         |             | low 1                              | current, low alert       |
  * | host:g      | 100d       |             | critical 5                         | current severe only          |
  * | host:ghost  | no entity doc | -        | high 3                             | dropped: unknown entity      |
  */
@@ -143,33 +143,37 @@ describe('alert based tiles on Elasticsearch', () => {
     const { columns, values } = await client.esql.query({ query });
     const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
     return {
+      columnNames: columns.map(({ name }) => name).sort(),
       severe: { count: Number(row.severe_alerts_count), ids: ids(row.severe_alerts_entity_ids) },
       watchlisted: { count: Number(row.watchlisted_count), ids: ids(row.watchlisted_entity_ids) },
-      newAlerting: { count: Number(row.new_alerting_count), ids: ids(row.new_alerting_entity_ids) },
     };
   };
 
   it('counts the current period as the last 7 days, with aliases collapsed into one entity', async () => {
     expect(await runTiles('current')).toEqual({
+      columnNames: [
+        'severe_alerts_count',
+        'severe_alerts_entity_ids',
+        'watchlisted_count',
+        'watchlisted_entity_ids',
+      ],
       severe: { count: 3, ids: ['host:a', 'host:g', 'user:c'] },
       watchlisted: { count: 1, ids: ['user:d'] },
-      newAlerting: { count: 1, ids: ['host:f'] },
     });
   });
 
-  it('counts the previous period as the 7 days before that, by alert and first_seen time', async () => {
+  it('counts the previous period as the 7 days before that, by alert time, and only returns the counts', async () => {
     expect(await runTiles('previous')).toEqual({
-      severe: { count: 2, ids: ['host:b', 'user:c'] },
-      watchlisted: { count: 1, ids: ['host:e'] },
-      newAlerting: { count: 1, ids: ['host:e'] },
+      columnNames: ['severe_alerts_count', 'watchlisted_count'],
+      severe: { count: 2, ids: [] },
+      watchlisted: { count: 1, ids: [] },
     });
   });
 
   it('gives the delta as the current count minus the previous count', async () => {
     const [current, previous] = [await runTiles('current'), await runTiles('previous')];
-    // Severe: host:a, host:g and user:c now, host:b and user:c before. The other two tiles are level.
+    // Severe: host:a, host:g and user:c now, host:b and user:c before. Watchlisted is level.
     expect(current.severe.count - previous.severe.count).toBe(1);
     expect(current.watchlisted.count - previous.watchlisted.count).toBe(0);
-    expect(current.newAlerting.count - previous.newAlerting.count).toBe(0);
   });
 });

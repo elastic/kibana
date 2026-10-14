@@ -107,6 +107,8 @@ export const useNewEntityCount = ({
     count: result?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     error: (error as SecurityAppError | undefined) ?? indexError,
   };
 };

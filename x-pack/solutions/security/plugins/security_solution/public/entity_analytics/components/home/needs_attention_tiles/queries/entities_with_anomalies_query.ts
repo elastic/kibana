@@ -80,7 +80,7 @@ export const buildAnomalyTileHead = ({
  * anomalies → entity-latest on the typed EUID (entity.id).
  *
  * `period` shifts the time window back by one range ('previous'), for the period-over-period
- * delta; the default 'current' builds the query exactly as before.
+ * delta. The previous period only needs the count, so it leaves out the entity id list.
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
   entitiesIndexName: string,
@@ -98,8 +98,13 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   // One row per resolved entity, because several ids can resolve to the same one. A plain COUNT of
   // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
   parts.push(`| STATS BY effective_id`);
-  // VALUES(effective_id) so tile → table IN-filter matches resolved-rows entity.id
-  parts.push(`| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`);
+  if (period === 'previous') {
+    // The previous period only needs the count, not the entity ids.
+    parts.push(`| STATS value = COUNT(effective_id)`);
+  } else {
+    // VALUES(effective_id) so tile → table IN-filter matches resolved-rows entity.id
+    parts.push(`| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`);
+  }
 
   return parts.join('\n');
 };

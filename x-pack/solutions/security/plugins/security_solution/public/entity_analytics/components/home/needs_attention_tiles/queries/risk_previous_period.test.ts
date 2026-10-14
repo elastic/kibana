@@ -8,7 +8,7 @@
 import type { TimeRange } from '../../entities_grid/common';
 import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
-import { buildRiskHistoryExistsQuery } from './risk_previous_period';
+import { buildRiskHistoryReachesBackQuery } from './risk_previous_period';
 
 const INDEX = '.entities-v1';
 const RISK_INDEX = 'risk-score.risk-score-default';
@@ -58,7 +58,10 @@ describe.each([
     expect(query).toContain(
       '| EVAL effective_id = COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)'
     );
-    expect(query).toContain('entity_ids = VALUES(effective_id)');
+    // The previous period only needs the count, not the entity ids.
+    expect(query).not.toContain('VALUES');
+    expect(query).not.toContain('entity_ids');
+    expect(query.endsWith('| STATS value = COUNT(effective_id)')).toBe(true);
   });
 });
 
@@ -77,15 +80,18 @@ describe('the previous-period conditions', () => {
   });
 });
 
-describe('buildRiskHistoryExistsQuery', () => {
+describe('buildRiskHistoryReachesBackQuery', () => {
   it.each(RANGES)(
-    'counts the risk docs around the start of the previous period for %s',
-    (range, start) => {
-      expect(buildRiskHistoryExistsQuery('default', range)).toBe(
+    'asks whether the risk history has docs before the start and before the end of the previous period for %s',
+    (range, start, end) => {
+      expect(buildRiskHistoryReachesBackQuery('default', range)).toBe(
         [
           `FROM ${RISK_INDEX}`,
-          `| WHERE @timestamp >= ${start} - 2 hours AND @timestamp <= ${start}`,
-          '| STATS boundary_docs = COUNT(*)',
+          `| WHERE (@timestamp >= ${start} - 2 hours AND @timestamp <= ${start}) OR (@timestamp >= ${end} - 2 hours AND @timestamp <= ${end})`,
+          `| EVAL in_start = @timestamp <= ${start}, in_end = @timestamp >= ${end} - 2 hours`,
+          '| STATS has_start = MAX(in_start), has_end = MAX(in_end)',
+          '| EVAL reaches_back = COALESCE(has_start, false) AND COALESCE(has_end, false)',
+          '| KEEP reaches_back',
         ].join('\n')
       );
     }

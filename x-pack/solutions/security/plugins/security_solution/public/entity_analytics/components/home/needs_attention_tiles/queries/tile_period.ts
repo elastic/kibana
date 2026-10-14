@@ -28,3 +28,7 @@ export const buildPeriodCondition = (
     : `${field} >= NOW() - ${2 * TIME_RANGE_DAYS[timeRange]} days AND ${field} < ${buildLookback(
         timeRange
       )}`;
+
+/** Returns where the previous period starts: `NOW() - 2 x range`. */
+export const buildPreviousPeriodStart = (timeRange: TimeRange): string =>
+  `NOW() - ${2 * TIME_RANGE_DAYS[timeRange]} days`;

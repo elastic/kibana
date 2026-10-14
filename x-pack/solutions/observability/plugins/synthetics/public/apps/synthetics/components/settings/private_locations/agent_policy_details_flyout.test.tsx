@@ -60,6 +60,7 @@ const locationStats: LocationAgentStats = {
       platform: 'linux',
       tags: [],
       monitorsAssigned: null,
+      complete: false,
     },
   ],
 };

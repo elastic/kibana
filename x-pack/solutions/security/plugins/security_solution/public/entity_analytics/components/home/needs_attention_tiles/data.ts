@@ -27,7 +27,7 @@ export interface SignalCardData {
   delta?: number;
   /** True while the delta query is in flight, to show a spinner in place of the badge number. */
   isDeltaLoading?: boolean;
-  /** True when the risk history is too short to compare with the previous period. */
+  /** True when the history is too short to compare with the previous period: the tile says so. */
   isDeltaUnavailable?: boolean;
   filterLabel: string;
   trend?: number[];

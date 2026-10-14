@@ -239,7 +239,6 @@ describe('tile counts above the COUNT_DISTINCT precision, on Elasticsearch', () 
       );
       expect(Number(result.severe_alerts_count)).toBe(ENTITIES);
       expect(Number(result.watchlisted_count)).toBe(WATCHLISTED);
-      expect(Number(result.new_alerting_count)).toBe(ENTITIES);
     }
   );
 
