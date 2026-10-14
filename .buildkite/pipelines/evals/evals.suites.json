@@ -33,7 +33,7 @@
     {
       "id": "agent-builder-security",
       "name": "Agent Builder Security",
-      "slackChannel": "#agent-builder-alerts",
+      "slackChannel": "#apps-security-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/security.playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
       "tags": [
