@@ -1174,6 +1174,21 @@ describe('LayerPanel', () => {
         state: { datasourceStates: { textBased: { layers } } },
       } as unknown as LayerPanelProps['attributes']);
 
+    it('renders the shared reference-line query editor in the default layer view', () => {
+      mockVisualization.getLayerType.mockReturnValue('referenceLine');
+      mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'data',
+          isOnlyLayer: false,
+          framePublicAPI: makeMixedDatasourceFrameAPI(),
+          attributes: makeTextBasedAttributes({ data: { query: esqlQuery } }),
+        },
+        preloadedState: mixedDatasourceState,
+      });
+      expect(screen.getByTestId('mockESQLEditor')).toBeInTheDocument();
+    });
+
     it('renders the editor for the selected text-based layer', () => {
       mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
       renderLayerPanel({

@@ -21,8 +21,36 @@ function getExpressionForLayer(
     return null;
   }
 
+  const staticColumns = layer.columns.filter((column) => column.valueSource?.type === 'static');
+  const queryColumns = layer.columns.filter(
+    (column) => column.valueSource?.type !== 'static' && column.valueSource?.type !== 'unconfigured'
+  );
+  if (!staticColumns.length && !queryColumns.length) return null;
+  const staticExpressions: ExpressionAstFunction[] = staticColumns.map((column) => ({
+    type: 'function',
+    function: 'mathColumn',
+    arguments: {
+      id: [column.columnId],
+      name: [column.customLabel ? column.label ?? column.fieldName : column.fieldName],
+      expression: [String(column.valueSource?.type === 'static' ? column.valueSource.value : 0)],
+    },
+  }));
+  if (!queryColumns.length) {
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'createTable',
+          arguments: { ids: [], names: [], rowCount: [1] },
+        },
+        ...staticExpressions,
+      ],
+    };
+  }
+
   let idMapper: Record<string, OriginalColumn[]> = {};
-  layer.columns.forEach((col) => {
+  queryColumns.forEach((col) => {
     // Only pick fields that OriginalColumn declares; the Omit<> drops the
     // `interval: never` discriminant that doesn't apply to text-based columns.
     const entry: OriginalColumn = {
@@ -113,7 +141,7 @@ function getExpressionForLayer(
       function: 'lens_date_histogram_textbased',
       arguments: {},
     });
-    textBasedQueryToAst.chain.push(...formatterOverrides);
+    textBasedQueryToAst.chain.push(...staticExpressions, ...formatterOverrides);
     return textBasedQueryToAst;
   } else {
     return {
@@ -139,6 +167,7 @@ function getExpressionForLayer(
           function: 'lens_date_histogram_textbased',
           arguments: {},
         },
+        ...staticExpressions,
         ...formatterOverrides,
       ],
     };

@@ -51,6 +51,70 @@ describe('toExpression', () => {
     indexPatternRefs: [{ id: '1', title: 'foo' }],
   };
 
+  it('does not produce a table for an unconfigured query dimension', () => {
+    const state: TextBasedPrivateState = {
+      ...baseState,
+      layers: {
+        a: {
+          ...baseState.layers.a,
+          columns: [
+            {
+              columnId: 'threshold',
+              fieldName: '',
+              valueSource: { type: 'unconfigured' },
+              previousStaticValue: 42,
+            },
+          ],
+        },
+      },
+    };
+    expect(toExpression(state, 'a')).toBeNull();
+  });
+
+  it('builds static thresholds locally without executing the query', () => {
+    const state: TextBasedPrivateState = {
+      ...baseState,
+      layers: {
+        a: {
+          ...baseState.layers.a,
+          columns: [
+            { columnId: 'threshold', fieldName: '42', valueSource: { type: 'static', value: 42 } },
+          ],
+        },
+      },
+    };
+    expect(toExpression(state, 'a')?.chain.map(({ function: name }) => name)).toEqual([
+      'createTable',
+      'mathColumn',
+    ]);
+    expect(
+      findExpressionFunction(toExpression(state, 'a'), 'mathColumn').arguments.expression
+    ).toEqual(['42']);
+  });
+
+  it('appends static thresholds after mapping query columns', () => {
+    const state: TextBasedPrivateState = {
+      ...baseState,
+      layers: {
+        a: {
+          ...baseState.layers.a,
+          columns: [
+            ...baseState.layers.a.columns,
+            {
+              columnId: 'threshold',
+              fieldName: '42',
+              valueSource: { type: 'static', value: 42 },
+            },
+          ],
+        },
+      },
+    };
+    expect(getIdMap(state)).not.toHaveProperty('42');
+    expect(findExpressionFunction(toExpression(state, 'a'), 'mathColumn').arguments.id).toEqual([
+      'threshold',
+    ]);
+  });
+
   it('omits dropPartials from the idMap when it is not set on the column', () => {
     const idMap = getIdMap(baseState);
 

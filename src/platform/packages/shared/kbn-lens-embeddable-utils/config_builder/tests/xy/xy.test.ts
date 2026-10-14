@@ -604,8 +604,8 @@ describe('XY', () => {
           expect(result.success).toBe(false);
         });
 
-        it('should reject ES|QL column-based reference line layers on ES|QL charts', () => {
-          const result = xyConfigSchema.safeParse({
+        it('should round-trip ES|QL column-based reference line layers', () => {
+          validator.xy.fromApi({
             type: 'xy',
             title: 'ES|QL chart with ES|QL reference line',
             layers: [
@@ -613,11 +613,29 @@ describe('XY', () => {
               {
                 type: 'reference_lines',
                 data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                ignore_global_filters: false,
+                sampling: 1,
                 thresholds: [{ column: 'threshold' }],
               },
             ],
           });
-          expect(result.success).toBe(false);
+        });
+
+        it('should round-trip mixed static and ES|QL reference thresholds', () => {
+          validator.xy.fromApi({
+            type: 'xy',
+            title: 'Mixed reference lines',
+            layers: [
+              esqlDataLayer,
+              {
+                type: 'reference_lines',
+                data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds: [{ column: 'threshold' }, { operation: 'static_value', value: 42 }],
+              },
+            ],
+          });
         });
       });
 

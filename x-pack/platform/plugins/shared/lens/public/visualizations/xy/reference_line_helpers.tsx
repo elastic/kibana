@@ -451,8 +451,10 @@ export const getReferenceConfiguration = ({
     frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
-  // ES|QL charts do not expose data views: only static values are supported for reference lines
-  const staticValueOnly = isEsqlChart(frame.datasourceLayers);
+  // Legacy form-based reference layers on ES|QL charts remain static-only.
+  const staticValueOnly =
+    isEsqlChart(frame.datasourceLayers) &&
+    !frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage();
   return {
     // Each reference lines layer panel will have sections for each available axis
     // (horizontal axis, vertical axis left, vertical axis right).

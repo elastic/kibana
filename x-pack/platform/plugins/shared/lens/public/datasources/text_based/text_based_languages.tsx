@@ -609,9 +609,34 @@ export function getTextBasedDatasource({
     // created. For metric trendline layers, this auto-initializes the time field
     // column and applies the appropriate ES|QL time bucket so the trendline has
     // time-series data without manual user configuration.
-    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
+    initializeDimension(
+      state,
+      layerId,
+      indexPatterns,
+      { columnId, groupId, autoTimeField, staticValue }
+    ) {
       const layer = state.layers[layerId];
       if (!layer) return state;
+      if (typeof staticValue === 'number') {
+        return {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: {
+              ...layer,
+              columns: [
+                ...layer.columns,
+                {
+                  columnId,
+                  fieldName: String(staticValue),
+                  valueSource: { type: 'static' as const, value: staticValue },
+                  meta: { type: 'number' as const },
+                },
+              ],
+            },
+          },
+        };
+      }
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
         let trendlineTimeField = buildTrendlineBucketExpression(tf);
@@ -794,7 +819,9 @@ export function getTextBasedDatasource({
         datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          const layerColumns = state.layers[layerId]?.columns ?? [];
+          const layerColumns = (state.layers[layerId]?.columns ?? []).filter(
+            (column) => column.valueSource?.type !== 'unconfigured'
+          );
           // Column ordering: non-metric columns (rows) before metric columns
           const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
           const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
@@ -806,7 +833,7 @@ export function getTextBasedDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
-          if (!column) {
+          if (!column || column.valueSource?.type === 'unconfigured') {
             return null;
           }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
@@ -823,6 +850,7 @@ export function getTextBasedDatasource({
             inMetricDimension: column.inMetricDimension,
             hasTimeShift: false,
             hasReducedTimeRange: false,
+            ...(column.valueSource?.type === 'static' ? { isStaticValue: true } : {}),
             ...(column.customLabel ? { customLabel: true } : {}),
             scale,
           };

@@ -212,7 +212,11 @@ export interface DimensionEditorGroupsOptions {
   enabled: boolean;
   state: boolean;
   onClick: () => void;
-  id: typeof quickFunctionsName | typeof staticValueOperationName | typeof formulaOperationName;
+  id:
+    | typeof quickFunctionsName
+    | typeof staticValueOperationName
+    | typeof formulaOperationName
+    | 'esql';
   label: string;
 }
 

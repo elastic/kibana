@@ -2937,6 +2937,62 @@ describe('xy_visualization', () => {
   });
 
   describe('#getUserMessages', () => {
+    it('warns when an ES|QL reference query returns multiple rows', () => {
+      const frame = createMockFramePublicAPI();
+      const datasource = createMockDatasource();
+      datasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+      frame.datasourceLayers = { reference: datasource.publicAPIMock };
+      frame.activeData = {
+        reference: {
+          type: 'datatable',
+          columns: [{ id: 'threshold', name: 'threshold', meta: { type: 'number' } }],
+          rows: [{ threshold: 10 }, { threshold: 20 }],
+        },
+      };
+      const state = {
+        ...exampleState(),
+        layers: [
+          { layerId: 'reference', layerType: 'referenceLine' as const, accessors: ['threshold'] },
+        ],
+      };
+      expect(xyVisualization.getUserMessages!(state, { frame })).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            uniqueId: 'xy_esql_reference_multiple_rows',
+            severity: 'warning',
+          }),
+        ])
+      );
+    });
+
+    it('warns when an ES|QL reference query returns no numeric value', () => {
+      const frame = createMockFramePublicAPI();
+      const datasource = createMockDatasource();
+      datasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+      frame.datasourceLayers = { reference: datasource.publicAPIMock };
+      frame.activeData = {
+        reference: {
+          type: 'datatable',
+          columns: [{ id: 'threshold', name: 'threshold', meta: { type: 'number' } }],
+          rows: [{ threshold: null }],
+        },
+      };
+      const state = {
+        ...exampleState(),
+        layers: [
+          { layerId: 'reference', layerType: 'referenceLine' as const, accessors: ['threshold'] },
+        ],
+      };
+      expect(xyVisualization.getUserMessages!(state, { frame })).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            uniqueId: 'xy_esql_reference_invalid_value',
+            severity: 'warning',
+          }),
+        ])
+      );
+    });
+
     describe('errors', () => {
       let mockDatasource: ReturnType<typeof createMockDatasource>;
       let frame: ReturnType<typeof createMockFramePublicAPI>;

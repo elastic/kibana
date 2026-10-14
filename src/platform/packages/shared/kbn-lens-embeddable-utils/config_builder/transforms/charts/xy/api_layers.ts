@@ -325,6 +325,15 @@ function convertReferenceLineLayerToAPI(
           ...decorationConfig,
         };
       }
+      const column = layer.columns.find(({ columnId }) => columnId === accessor);
+      if (column?.valueSource?.type === 'static') {
+        return {
+          operation: 'static_value',
+          value: column.valueSource.value,
+          ...(column.customLabel ? { label: column.label } : {}),
+          ...decorationConfig,
+        };
+      }
       const op = getValueApiColumn(accessor, layer);
       if (!op) {
         return undefined;
@@ -351,9 +360,6 @@ export function buildAPIReferenceLinesLayer(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): ReferenceLineLayerTypeNoESQL;
-/**
- * @deprecated ES|QL reference lines are not yet supported
- */
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
   layer: TextBasedLayer,

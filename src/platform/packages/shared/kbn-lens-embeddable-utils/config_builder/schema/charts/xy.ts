@@ -760,7 +760,12 @@ const referenceLineLayerSchemaESQL = lazySchema(() =>
       ...dataSourceEsqlTableSchema.shape,
       type: z.literal('reference_lines'),
       thresholds: z
-        .array(esqlColumnWithFormatSchema.extend(referenceLineLayerSharedShape))
+        .array(
+          z.union([
+            esqlColumnWithFormatSchema.extend(referenceLineLayerSharedShape),
+            staticOperationDefinitionSchema.extend(referenceLineLayerSharedShape),
+          ])
+        )
         .min(1)
         .max(100)
         .meta({ description: 'Array of ES|QL-based reference line thresholds' }),
@@ -1025,7 +1030,12 @@ const referenceLineLayerESQLStaticSchema = lazySchema(() =>
 
 const xyLayerUnionESQL = lazySchema(() =>
   z
-    .union([xyDataLayerSchemaESQL, referenceLineLayerESQLStaticSchema, annotationLayerESQLSchema])
+    .union([
+      xyDataLayerSchemaESQL,
+      referenceLineLayerESQLStaticSchema,
+      referenceLineLayerSchemaESQL,
+      annotationLayerESQLSchema,
+    ])
     .meta({
       id: 'visXyLayersESQL',
       description: 'XY chart layer types for ES|QL queries.',

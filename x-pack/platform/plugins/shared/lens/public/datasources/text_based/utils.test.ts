@@ -27,6 +27,23 @@ describe('Text based languages utils', () => {
   });
 
   describe('reconcileQueryColumns', () => {
+    it('preserves constants without matching them to query columns', () => {
+      const constant: TextBasedLayerColumn = {
+        columnId: 'threshold',
+        fieldName: '42',
+        meta: { type: 'number' },
+        valueSource: { type: 'static', value: 42 },
+      };
+      expect(
+        reconcileQueryColumns(
+          [constant],
+          [{ id: 'value', name: 'value', meta: { type: 'number' } }]
+        )
+      ).toEqual([
+        constant,
+        { columnId: 'value', fieldName: 'value', label: 'value', meta: { type: 'number' } },
+      ]);
+    });
     it('preserves configured column IDs when compatible query fields change', () => {
       const existingColumns: TextBasedLayerColumn[] = [
         {

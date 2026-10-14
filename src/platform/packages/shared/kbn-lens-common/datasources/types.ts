@@ -121,6 +121,8 @@ export interface FormBasedPrivateState {
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
+  valueSource?: { type: 'static'; value: number } | { type: 'query' } | { type: 'unconfigured' };
+  previousStaticValue?: number;
   label?: string;
   customLabel?: boolean;
   params?: {

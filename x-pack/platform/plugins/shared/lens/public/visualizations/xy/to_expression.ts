@@ -211,9 +211,18 @@ export const buildXYExpression = (
     }));
 
   // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
-  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
-    Boolean(layer.accessors.length)
-  );
+  const validReferenceLayers = getReferenceLayers(state.layers)
+    .map((layer) => {
+      const datasource = datasourceLayers[layer.layerId];
+      if (!datasource?.isTextBasedLanguage()) return layer;
+      return {
+        ...layer,
+        accessors: layer.accessors.filter((accessor) =>
+          datasource.getOperationForColumnId(accessor)
+        ),
+      };
+    })
+    .filter((layer) => Boolean(layer.accessors.length));
 
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)

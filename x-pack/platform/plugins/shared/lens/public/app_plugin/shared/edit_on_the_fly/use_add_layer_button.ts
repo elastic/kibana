@@ -40,12 +40,10 @@ export const getDatasourceIdForNewLayer = (
   isEsql: boolean
 ): LensDatasourceId | undefined => {
   if (layerType === LENS_LAYER_TYPES.REFERENCELINE) {
-    return LENS_DATASOURCE_ID.FORM_BASED;
+    return isEsql ? LENS_DATASOURCE_ID.TEXT_BASED : LENS_DATASOURCE_ID.FORM_BASED;
   }
-  // On ES|QL charts only helper layers (reference lines / annotations) are
-  // form-based; a new data layer must stay text-based even when a form-based
-  // helper layer is currently selected, otherwise the chart ends up with
-  // unsupported mixed ES|QL / non-ES|QL data layers.
+  // Existing static reference layers can still be form-based. New data layers
+  // must remain text-based even when one of those helper layers is selected.
   if (isEsql && layerType === LENS_LAYER_TYPES.DATA) {
     return LENS_DATASOURCE_ID.TEXT_BASED;
   }

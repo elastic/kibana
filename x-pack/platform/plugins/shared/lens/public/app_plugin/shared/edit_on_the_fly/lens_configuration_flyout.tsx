@@ -544,6 +544,26 @@ export function LensEditConfigurationFlyout({
     );
   }
 
+  const layerConfiguration = (
+    <LayerConfiguration
+      attributes={attributes}
+      dataLoading$={dataLoading$}
+      lensAdapters={lensAdapters}
+      getUserMessages={getUserMessages}
+      coreStart={coreStart}
+      startDependencies={startDependencies}
+      framePublicAPI={framePublicAPI}
+      setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+      updateSuggestion={updateSuggestion}
+      setCurrentAttributes={setCurrentAttributes}
+      closeFlyout={closeFlyout}
+      parentApi={parentApi}
+      panelId={panelId}
+      editorContainer={editorContainer.current || undefined}
+      onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+    />
+  );
+
   return (
     <>
       {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
@@ -667,25 +687,7 @@ export function LensEditConfigurationFlyout({
                   setIsLayerAccordionOpen(!isLayerAccordionOpen);
                 }}
               >
-                <>
-                  <LayerConfiguration
-                    attributes={attributes}
-                    dataLoading$={dataLoading$}
-                    lensAdapters={lensAdapters}
-                    getUserMessages={getUserMessages}
-                    coreStart={coreStart}
-                    startDependencies={startDependencies}
-                    framePublicAPI={framePublicAPI}
-                    setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-                    updateSuggestion={updateSuggestion}
-                    setCurrentAttributes={setCurrentAttributes}
-                    closeFlyout={closeFlyout}
-                    parentApi={parentApi}
-                    panelId={panelId}
-                    editorContainer={editorContainer.current || undefined}
-                    onTextBasedQueryStateChange={onTextBasedQueryStateChange}
-                  />
-                </>
+                {layerConfiguration}
               </EuiAccordion>
             </EuiFlexItem>
 
