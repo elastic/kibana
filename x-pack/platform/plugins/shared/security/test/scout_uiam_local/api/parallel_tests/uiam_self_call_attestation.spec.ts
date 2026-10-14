@@ -32,7 +32,6 @@ apiTest.describe(
       '@local-serverless-security_complete',
       '@local-serverless-security_essentials',
       '@local-serverless-security_ease',
-      '@local-serverless-workplaceai',
       '@local-serverless-vectordb',
     ],
   },
