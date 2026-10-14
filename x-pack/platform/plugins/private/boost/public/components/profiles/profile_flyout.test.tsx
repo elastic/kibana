@@ -85,13 +85,13 @@ describe('ProfileFlyout estimate', () => {
   it("has no estimate for a new profile, which doesn't apply to any data yet", () => {
     renderFlyout();
 
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
   it('has no estimate for a profile that no rule applies', () => {
     renderFlyout(unusedProfile);
 
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
   it("estimates an edit across the data the profile's rules apply to", async () => {
@@ -103,6 +103,6 @@ describe('ProfileFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-stale', 'true');
 
     await userEvent.click(screen.getByTestId('boostProfileOption-prewarm'));
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 });

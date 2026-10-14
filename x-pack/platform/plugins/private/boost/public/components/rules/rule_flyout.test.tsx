@@ -84,10 +84,17 @@ const renderFlyout = (flyoutRule = rule) => {
 
 describe('RuleFlyout profile picker', () => {
   it('lists profiles alphabetically within each type, whether or not they are managed', async () => {
-    const { getInput } = renderFlyout();
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout onClose={jest.fn()} />
+      </IntlProvider>
+    );
 
-    await userEvent.click(getInput());
+    await userEvent.click(
+      within(screen.getByTestId('boostRuleProfile')).getByTestId('comboBoxSearchInput')
+    );
 
+    expect(screen.getByText('Data streams')).toBeInTheDocument();
     // The list is virtualized, so this checks the indices group, which renders first.
     const labels = screen.getAllByRole('option').map(({ textContent }) => textContent);
     expect(labels.slice(0, 5)).toEqual([
@@ -97,6 +104,21 @@ describe('RuleFlyout profile picker', () => {
       'elastic-performantManaged',
       'zeta-search',
     ]);
+  });
+
+  it("only lists profiles of an edited rule's type", async () => {
+    const { getInput } = renderFlyout();
+
+    await userEvent.click(getInput());
+
+    expect(screen.getAllByRole('option').map(({ textContent }) => textContent)).toEqual([
+      'alpha-search',
+      'elastic-high-availabilityManaged',
+      'elastic-on-demandManaged',
+      'elastic-performantManaged',
+      'zeta-search',
+    ]);
+    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
   });
 
   it('can be emptied with select-all and Delete, and restores the last profile on blur', async () => {
@@ -162,6 +184,7 @@ describe('RuleFlyout profile creation', () => {
     expect(screen.queryByTestId('boostRuleProfile')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileName')).toHaveFocus();
     expect(getTypeRadio('indices')).toBeChecked();
+    expect(getTypeRadio('data_streams')).toBeDisabled();
   });
 
   it('creates the profile and selects it in the rule', async () => {
@@ -212,6 +235,7 @@ describe('RuleFlyout estimate', () => {
     renderFlyout();
 
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
   });
 
@@ -222,7 +246,7 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-stale', 'true');
 
     await blur();
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
   it("hides a new rule's estimate when its pattern matches nothing once the field is left", async () => {
@@ -231,12 +255,13 @@ describe('RuleFlyout estimate', () => {
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
 
     // Above the existing catalogs rule, so the new rule takes over its index.
     await userEvent.clear(screen.getByTestId('boostRulePriority'));
     await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
     await userEvent.type(getPattern(), 'catalog-*');
+    expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
 
     await userEvent.clear(getPattern());
@@ -244,7 +269,7 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-stale', 'true');
 
     await userEvent.click(screen.getByTestId('boostRulePriority'));
-    expect(getEstimate()).not.toBeInTheDocument();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
   it('still estimates an edited rule that matches nothing, for the data it gives up', async () => {

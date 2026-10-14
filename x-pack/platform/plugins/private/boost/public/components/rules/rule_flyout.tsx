@@ -120,6 +120,35 @@ const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileF
   defaultMessage: 'Select a boost profile to choose targets.',
 });
 
+const getProfileHelpText = (ruleType: BoostProfileType | undefined, isDefaultRule: boolean) => {
+  if (ruleType === undefined) {
+    return i18n.translate('xpack.boost.ruleForm.profileDescription', {
+      defaultMessage:
+        "The profile's type decides whether this rule applies to indices or data streams.",
+    });
+  }
+  if (isDefaultRule) {
+    return ruleType === 'indices'
+      ? i18n.translate('xpack.boost.ruleForm.defaultIndicesProfileDescription', {
+          defaultMessage:
+            "This rule applies to every index that no other rule matches. An Elastic-managed profile also sets simple mode's default for indices; a custom profile stops the two from syncing.",
+        })
+      : i18n.translate('xpack.boost.ruleForm.defaultDataStreamsProfileDescription', {
+          defaultMessage:
+            "This rule applies to every data stream that no other rule matches. An Elastic-managed profile also sets simple mode's default for data streams; a custom profile stops the two from syncing.",
+        });
+  }
+  return ruleType === 'indices'
+    ? i18n.translate('xpack.boost.ruleForm.indicesRuleProfileDescription', {
+        defaultMessage:
+          'This rule targets indices, so only indices profiles are listed. To target data streams, create another rule.',
+      })
+    : i18n.translate('xpack.boost.ruleForm.dataStreamsRuleProfileDescription', {
+        defaultMessage:
+          'This rule targets data streams, so only data streams profiles are listed. To target indices, create another rule.',
+      });
+};
+
 interface TargetPreview {
   name: string;
   /** A higher-ranked rule that still applies to this target, if any. */
@@ -184,9 +213,9 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const type = profilesByName.get(draft.profileName || lastProfileName)?.type;
   // Wording for the disabled target controls until a profile sets the type.
   const targetType = type ?? 'indices';
-  // A default rule keeps its type, so it only offers profiles of that type.
-  const defaultRuleType =
-    isDefaultRule && rule ? profilesByName.get(rule.boost_profile)?.type : undefined;
+  // A saved rule keeps its type, so its targets stay valid; it only offers profiles of that type.
+  const ruleType = rule ? profilesByName.get(rule.boost_profile)?.type : undefined;
+  const defaultRuleType = isDefaultRule ? ruleType : undefined;
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
   const draftErrors = getRuleDraftErrors(draft, isEditing ? [] : rules.map(({ name }) => name));
@@ -229,7 +258,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   };
 
   const profileOptions: Array<EuiComboBoxOptionOption<string>> = (
-    defaultRuleType ? [defaultRuleType] : PROFILE_TYPES
+    ruleType ? [ruleType] : PROFILE_TYPES
   ).map((profileType) => ({
     label: PROFILE_TYPE_LABELS[profileType],
     isGroupLabelOption: true,
@@ -420,7 +449,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           forRule={{
             ruleName: draft.name || undefined,
             type,
-            isTypeLocked: isDefaultRule,
+            isTypeLocked: isEditing,
             estimate: estimateWithNewProfile,
             onCreate: onProfileCreate,
           }}
@@ -492,22 +521,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
               </EuiLink>
             </EuiText>
           }
-          helpText={
-            defaultRuleType === 'indices'
-              ? i18n.translate('xpack.boost.ruleForm.defaultIndicesProfileDescription', {
-                  defaultMessage:
-                    "This rule applies to every index that no other rule matches. An Elastic-managed profile also sets simple mode's default for indices; a custom profile stops the two from syncing.",
-                })
-              : defaultRuleType === 'data_streams'
-              ? i18n.translate('xpack.boost.ruleForm.defaultDataStreamsProfileDescription', {
-                  defaultMessage:
-                    "This rule applies to every data stream that no other rule matches. An Elastic-managed profile also sets simple mode's default for data streams; a custom profile stops the two from syncing.",
-                })
-              : i18n.translate('xpack.boost.ruleForm.profileDescription', {
-                  defaultMessage:
-                    "The profile's type decides whether this rule applies to indices or data streams.",
-                })
-          }
+          helpText={getProfileHelpText(ruleType, isDefaultRule)}
           isInvalid={Boolean(visibleErrors.profile)}
           error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
           fullWidth
