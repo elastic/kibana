@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
@@ -18,14 +17,7 @@ import {
   type FileServiceStart,
   type FilesStart,
 } from '@kbn/files-plugin/server';
-
-const streamToBuffer = (stream: Readable): Promise<Buffer> =>
-  new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk: Buffer) => chunks.push(chunk));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
-  });
+import { streamToBuffer } from './utils/stream_to_buffer';
 
 /**
  * Get the image and make sure it is of the correct file kind.

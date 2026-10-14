@@ -13,8 +13,11 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  CHAT_ATTACHMENT_PDFS_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
+  SUPPORTED_PDF_MIME_TYPE,
   MAX_IMAGE_BYTES,
+  MAX_PDF_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import { createAttachmentPublicClient } from './services/attachments';
@@ -98,6 +101,19 @@ export class AgentBuilderPlugin
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      },
+    });
+
+    setupDeps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_PDFS_FILE_KIND,
+      allowedMimeTypes: [SUPPORTED_PDF_MIME_TYPE],
+      maxSizeBytes: MAX_PDF_BYTES,
       http: {
         create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
         download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
