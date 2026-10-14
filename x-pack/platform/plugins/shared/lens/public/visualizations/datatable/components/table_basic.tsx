@@ -6,7 +6,12 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import {
+  getFallbackDataBounds,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
+} from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -468,8 +473,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               stops: stops.map(({ stop }) => stop),
               gradient: false,
               range: defaultPalette.params?.rangeType ?? 'percent',
-              rangeMin: dataBounds.min,
-              rangeMax: dataBounds.max,
+              rangeMin: defaultPalette.params?.rangeMin ?? DEFAULT_MIN_STOP,
+              rangeMax: defaultPalette.params?.rangeMax ?? DEFAULT_MAX_STOP,
               continuity: defaultPalette.params?.continuity,
             },
           };

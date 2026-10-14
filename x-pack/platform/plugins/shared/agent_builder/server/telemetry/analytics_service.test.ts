@@ -283,6 +283,37 @@ describe('AnalyticsService', () => {
       );
     });
 
+    it('reports the workflow execution id', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        workflowExecutionId: 'workflow-run-1',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      );
+    });
+
+    it('leaves the workflow execution id unset for a round no workflow step started', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [[, payload]] = analytics.reportEvent.mock.calls;
+      expect(payload).toEqual(expect.objectContaining({ workflow_execution_id: undefined }));
+    });
+
     it('does not throw when reporting throws', () => {
       analytics.reportEvent.mockImplementation(() => {
         throw new Error('boom');
@@ -558,6 +589,82 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportCompactionTriggered', () => {
+    it('reports the CompactionTriggered event with correct field mapping', () => {
+      service.reportCompactionTriggered({
+        agentId: agentBuilderDefaultAgentId,
+        executionId: 'exec-1',
+        trigger: 'proactive',
+        tokenCountBefore: 90_000,
+        tokenCountAfter: 30_000,
+        summarizedCycleCount: 4,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        {
+          agent_id: agentBuilderDefaultAgentId,
+          execution_id: 'exec-1',
+          trigger: 'proactive',
+          token_count_before: 90_000,
+          token_count_after: 30_000,
+          summarized_cycle_count: 4,
+          model_id: 'connector-abc',
+        }
+      );
+    });
+
+    it('hashes a custom agent_id', () => {
+      service.reportCompactionTriggered({
+        agentId: 'my_custom_agent',
+        trigger: 'forced',
+        tokenCountBefore: 50_000,
+        tokenCountAfter: 10_000,
+        summarizedCycleCount: 2,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        expect.objectContaining({ agent_id: 'custom-da3031a511e7fadf', execution_id: undefined })
+      );
+    });
+
+    it('emits literal "unknown" when agentId is omitted', () => {
+      service.reportCompactionTriggered({
+        trigger: 'proactive',
+        tokenCountBefore: 1,
+        tokenCountAfter: 1,
+        summarizedCycleCount: 1,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        expect.objectContaining({ agent_id: 'unknown' })
+      );
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportCompactionTriggered({
+          agentId: 'my_custom_agent',
+          trigger: 'proactive',
+          tokenCountBefore: 1,
+          tokenCountAfter: 1,
+          summarizedCycleCount: 1,
+          modelId: 'connector-abc',
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
   describe('reportPluginImported', () => {
     it('reports source_type `url` when sourceType is "url" and hashes the plugin id', () => {
       service.reportPluginImported({
@@ -815,6 +922,15 @@ describe('AnalyticsService', () => {
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.RoundError,
         expect.objectContaining({ origin: undefined })
+      );
+    });
+
+    it('reports the workflow execution id', () => {
+      service.reportRoundError({ ...defaultArgs, workflowExecutionId: 'workflow-run-1' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
       );
     });
   });
