@@ -164,15 +164,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '7221629d3ea4194a6d04fd878b545871bad555684ef0efea7928c74ed34fd6a8',
+    schemaHash: '9c4a56800d90d397279b9e40a872a64d5cee0a3675556850dc16afa5840d3b9a',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: '364cbd9e4f78aafbf4636dabe22d6d2a1f971d9ece23abafc1fc6804fb225de2',
+    schemaHash: 'd5e9e788b13edf73d0f57d07f127e63153eb52a0b2dcb6dfdcaf80b751a428ec',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: 'c181a1cc5edb929c6426ad17250d8285736620dc4770a6056737442843b7f716',
+    schemaHash: '80cdd17e8634561e45af961d8df628f767dd02e2ed4e44c7ec2d3170bd39839b',
   },
   {
     id: 'security.alertAssigneesChanged',
