@@ -142,7 +142,7 @@ const findCaseAttachments = async (
   const response = await kbnClient.request({
     method: 'GET',
     path: buildSpacePath(spaceId, `/api/cases/${caseId}/resolve`),
-    query: { includeComments: true, mode: 'unified' },
+    query: { includeComments: true },
   });
 
   return (response.data as { case: { comments: FoundCaseAttachment[] } }).case.comments;

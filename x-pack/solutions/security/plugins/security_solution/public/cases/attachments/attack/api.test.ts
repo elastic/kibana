@@ -126,7 +126,7 @@ describe('fetchCaseAttachments', () => {
 
     expect(http.get).toHaveBeenCalledTimes(1);
     expect(http.get).toHaveBeenCalledWith('/api/cases/case-1/resolve', {
-      query: { includeComments: true, mode: 'unified' },
+      query: { includeComments: true },
       signal: undefined,
     });
     expect(attachments).toHaveLength(1);

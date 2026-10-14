@@ -146,6 +146,11 @@ export interface FetchCaseAttachmentsParams {
  * attack card's removal has no other way to see the attack and alert attachments the removal
  * scope is resolved against. The public find-attachments endpoint is no use for it: that one
  * returns the case's user comments alone, never the reference attachments an attack brought in.
+ *
+ * Sends `includeComments` only. The route's query schema rejects unknown parameters outright, so
+ * the `mode: 'unified'` this used to pass made every call fail with a 400 — leaving the removal
+ * prompt unable to resolve anything and silently keeping the alerts on the case. Unified
+ * attachments are the response shape now; `mode` was removed from the route in #287729.
  */
 export const fetchCaseAttachments = async ({
   http,
@@ -153,7 +158,7 @@ export const fetchCaseAttachments = async ({
   signal,
 }: FetchCaseAttachmentsParams): Promise<CaseAttachment[]> => {
   const response = await http.get<ResolveCaseResponse>(`${getCaseDetailsUrl(caseId)}/resolve`, {
-    query: { includeComments: true, mode: 'unified' },
+    query: { includeComments: true },
     signal,
   });
 

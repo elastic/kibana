@@ -165,7 +165,7 @@ describe('the attack activity card delete action', () => {
     expect(await screen.findByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
     await waitFor(() =>
       expect(mockedUseKibana.services.http.get).toHaveBeenCalledWith(RESOLVE_CASE_URL, {
-        query: { includeComments: true, mode: 'unified' },
+        query: { includeComments: true },
         signal: expect.anything(),
       })
     );
