@@ -390,17 +390,15 @@ describe('UiamService', () => {
     });
   });
 
-  describe('forwarded client authentication', () => {
+  describe('forwarded request authentication', () => {
     // Methods that act on behalf of a request forward the client authentication that rode in with
     // its UIAM credential, or Kibana's own shared secret when none was supplied.
-    const requestOperations: Array<{
+    interface RequestOperation {
       name: string;
       run: (service: UiamService, request: KibanaRequest) => Promise<object | void>;
-    }> = [
-      {
-        name: 'revoke API key',
-        run: (service, request) => service.revokeApiKey(request, 'key-id'),
-      },
+    }
+
+    const schemePreservingRequestOperations: RequestOperation[] = [
       {
         name: 'create OAuth client',
         run: (service, request) =>
@@ -451,7 +449,7 @@ describe('UiamService', () => {
       },
     ];
 
-    describe.each(requestOperations)('$name', ({ run }) => {
+    describe.each(schemePreservingRequestOperations)('$name', ({ run }) => {
       it.each(['Bearer essu_access-token', 'ApiKey essu_api-key'])(
         'preserves the incoming authorization header %j',
         async (authorization) => {
@@ -463,7 +461,17 @@ describe('UiamService', () => {
           expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe(authorization);
         }
       );
+    });
 
+    const clientAuthenticationRequestOperations: RequestOperation[] = [
+      {
+        name: 'revoke API key',
+        run: (service, request) => service.revokeApiKey(request, 'key-id'),
+      },
+      ...schemePreservingRequestOperations,
+    ];
+
+    describe.each(clientAuthenticationRequestOperations)('$name', ({ run }) => {
       it.each(['upstream-shared-secret', ''])(
         'preserves the incoming secret %j',
         async (sharedSecret) => {
