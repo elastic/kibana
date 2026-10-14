@@ -13,6 +13,7 @@ import type {
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import {
   AttachmentActionType,
+  getNonEmptyField,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
@@ -158,6 +159,31 @@ export const getAttackAttachment = () =>
         />
       ),
     }),
+    workflow: {
+      getActivityLabel: ({ workflowName, count }) => (
+        <FormattedMessage
+          id="xpack.securitySolution.attackDiscovery.cases.workflowActivityLabel"
+          defaultMessage="ran {name} on {count, plural, =0 {an attack} one {# attack} other {# attacks}}"
+          values={{ name: workflowName, count: count ?? 0 }}
+        />
+      ),
+    },
+    getDocumentAction: ({ id, documentId, index }) => {
+      const documentIndex = getNonEmptyField(index);
+      // The workflow origin carries only the attack's id and index, so the flyout history entry
+      // falls back to its generic label rather than the attack title.
+      return documentIndex
+        ? {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            render: () => (
+              <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                <ShowAttackButton id={id} attackId={documentId} indexName={documentIndex} />
+              </Suspense>
+            ),
+          }
+        : null;
+    },
   });
 
 const FIELD_TOKEN_OPEN = '{{';
