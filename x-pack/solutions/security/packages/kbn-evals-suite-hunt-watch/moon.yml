@@ -18,13 +18,13 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/scout'
   - '@kbn/tooling-log'
   - '@kbn/workflows'
   - '@kbn/core'
-  - '@kbn/zod'
   - '@kbn/alertzero-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/repo-info'
+  - '@kbn/proposals-common'
 tags:
   - functional-tests
   - package
