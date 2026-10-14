@@ -370,6 +370,24 @@ export const isMonochromeActionType = (actionTypeId: string): boolean =>
   MONOCHROME_PREFIXES.some((prefix) => actionTypeId.startsWith(prefix));
 
 /**
+ * Resolves every icon concurrently. Connector logos are lazy chunks, so resolving them one
+ * by one costs a network round trip each and delays the icon CSS on high-latency deployments.
+ */
+const resolveIconsConcurrently = (
+  connectorTypes: ConnectorTypeInfoMinimal[],
+  colorMode: EuiThemeColorModeStandard
+): Promise<Array<PromiseSettledResult<string>>> =>
+  Promise.allSettled(
+    connectorTypes.map((connector) =>
+      getIconBase64({
+        ...connector,
+        kind: 'isTrigger' in connector && connector.isTrigger ? 'trigger' : 'step',
+        colorMode,
+      })
+    )
+  );
+
+/**
  * Inject dynamic CSS for connector icons in Monaco autocompletion.
  * Uses targetDoc (editor's document) so styles apply when the editor is in an iframe.
  */
@@ -385,7 +403,9 @@ async function injectDynamicConnectorIcons(
 
   const suggestPrefix = '.monaco-editor .suggest-widget .monaco-list .monaco-list-row';
 
-  for (const connector of Object.values(connectorTypes)) {
+  const iconResults = await resolveIconsConcurrently(connectorTypes, colorMode);
+
+  for (const [index, connector] of connectorTypes.entries()) {
     const connectorType = connector.actionTypeId.startsWith('.')
       ? connector.actionTypeId.slice(1)
       : connector.actionTypeId;
@@ -394,16 +414,11 @@ async function injectDynamicConnectorIcons(
 
     let iconBase64: string | undefined;
     const isTrigger = 'isTrigger' in connector && connector.isTrigger;
-    try {
-      iconBase64 = await getIconBase64({
-        ...connector,
-        kind: isTrigger ? 'trigger' : 'step',
-        colorMode,
-      });
-    } catch {
-      if (isTrigger) {
-        iconBase64 = getTriggerBoltFallbackDataUrl();
-      }
+    const iconResult = iconResults[index];
+    if (iconResult.status === 'fulfilled') {
+      iconBase64 = iconResult.value;
+    } else if (isTrigger) {
+      iconBase64 = getTriggerBoltFallbackDataUrl();
     }
     if (!iconBase64 && isTrigger) {
       iconBase64 = getTriggerBoltFallbackDataUrl();
@@ -577,24 +592,21 @@ async function injectDynamicShadowIcons(
   `;
   }
 
-  for (const connector of connectorTypes) {
+  const iconResults = await resolveIconsConcurrently(connectorTypes, colorMode);
+
+  for (const [index, connector] of connectorTypes.entries()) {
     const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
     const isBuiltInTriggerId = TriggerTypes.includes(connector.actionTypeId as TriggerType);
 
     let iconBase64: string | undefined;
-    try {
-      iconBase64 = await getIconBase64({
-        ...connector,
-        kind: isTriggerConnector ? 'trigger' : 'step',
-        colorMode,
-      });
-    } catch {
-      if (isTriggerConnector && boltUrl) {
-        iconBase64 = boltUrl;
-      } else if (isBuiltInTriggerId) {
-        iconBase64 =
-          HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
-      }
+    const iconResult = iconResults[index];
+    if (iconResult.status === 'fulfilled') {
+      iconBase64 = iconResult.value;
+    } else if (isTriggerConnector && boltUrl) {
+      iconBase64 = boltUrl;
+    } else if (isBuiltInTriggerId) {
+      iconBase64 =
+        HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
     }
     if (isTriggerConnector && iconBase64 !== undefined && !isValidDataUrl(iconBase64) && boltUrl) {
       iconBase64 = boltUrl;

@@ -181,7 +181,7 @@ describe('createConversationPublicClient', () => {
     expect(internalClient.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { status: 'open' },
-      { access: 'owner', source: 'workflow' }
+      { access: 'converse', source: 'workflow' }
     );
     expect(internalClient.update).toHaveBeenCalledWith(
       { id: 'conv-1', title: 'Renamed' },

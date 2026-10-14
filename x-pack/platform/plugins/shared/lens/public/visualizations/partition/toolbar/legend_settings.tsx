@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
-import { LegendSize } from '@kbn/chart-expressions-common';
 import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
 import type {
   LensPartitionVisualizationState as PieVisualizationState,
@@ -30,8 +29,6 @@ export const PartitionLegendSettings = ({
   const layer = state.layers[0];
 
   const legendSize = layer.legendSize;
-
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -114,7 +111,6 @@ export const PartitionLegendSettings = ({
       onMaxLinesChange={onLegendMaxLinesChange}
       legendSize={legendSize}
       onLegendSizeChange={onLegendSizeChange}
-      showAutoLegendSizeOption={hadAutoLegendSize}
     />
   );
 };

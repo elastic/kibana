@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { css } from '@emotion/react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
 import {
   getEffectiveProjectRouting,
@@ -32,10 +34,10 @@ import {
   enterHintFilterLabel,
   enterHintGenerateLabel,
 } from './visor_i18n';
-import { NLInput } from './nl_input';
+import { NLInput, type NLInputApi } from './nl_input';
 import { visorStyles } from './visor.styles';
 import { SparklesIcon } from './sparkles_icon';
-import type { ESQLEditorDeps } from '../types';
+import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
@@ -51,10 +53,19 @@ function AskAiButton({
   styles: VisorStyles;
 }) {
   const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+  const hoverIconCss = css`
+    &:hover,
+    &:focus-visible {
+      .euiIcon,
+      .euiIcon [fill]:not([fill='none']) {
+        fill: url(#${gradientId}) !important;
+      }
+    }
+  `;
 
   return (
     <>
-      {isSelected && <SvgAiGradientDefs gradientId={gradientId} colors={colors} />}
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
       <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           iconType={SparklesIcon}
@@ -69,9 +80,10 @@ function AskAiButton({
           data-test-subj="esqlVisorAskAiButton"
           css={[
             styles.modeIconButton,
-            isSelected && styles.aiButtonSparkleHover,
-            isSelected && styles.aiButtonSelected,
-            isSelected && iconGradientCss,
+            isSelected
+              ? styles.aiButtonSelected
+              : [styles.aiButtonSparkleHover, styles.aiButtonIdleHover],
+            isSelected ? iconGradientCss : hoverIconCss,
           ]}
         />
       </EuiToolTip>
@@ -189,7 +201,15 @@ function NlVisorActions({
   );
 }
 
-export interface QuickSearchVisorProps {
+export interface QuickSearchVisorRestorableState {
+  // Unset until the user picks a mode
+  visorMode?: VisorMode;
+}
+
+const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<QuickSearchVisorRestorableState>();
+
+interface QuickSearchVisorPropsInternal {
   // Current ESQL query
   query: string;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
@@ -197,7 +217,7 @@ export interface QuickSearchVisorProps {
   // Whether the visor is currently visible (controls CSS transition for inline toggle)
   isVisible?: boolean;
   // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
-  onNlResult?: (generatedQuery: string) => void;
+  onNlResult?: VisorNlResultHandler;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
@@ -208,7 +228,8 @@ export interface QuickSearchVisorProps {
   onKqlSubmitted?: () => void;
 }
 
-export function QuickSearchVisor({
+// React.memo is applied inside the withRestorableState HOC (called below)
+function QuickSearchVisorInternal({
   query,
   isInline,
   isVisible = true,
@@ -217,16 +238,19 @@ export function QuickSearchVisor({
   isDisabled = false,
   disableSubmitAction = false,
   onKqlSubmitted,
-}: QuickSearchVisorProps) {
+}: QuickSearchVisorPropsInternal) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState(VisorMode.KQL);
+  const [visorMode, setVisorMode] = useRestorableState('visorMode', undefined);
   const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
   const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
+  const nlInputRef = useRef<NLInputApi>(null);
+  // No-op while the input is unmounted (KQL mode) or inert (closed inline visor)
+  const focusNlInput = useCallback(() => nlInputRef.current?.focus(), []);
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
     [core.analytics]
@@ -239,7 +263,13 @@ export function QuickSearchVisor({
     hasConnector,
     onNlSubmit: submitNl,
     onStopGeneration,
-  } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
+  } = useNlGeneration({
+    query,
+    onNlResult,
+    onNlReject: focusNlInput,
+    onUpdateAndSubmitQuery,
+    telemetryService,
+  });
   const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
@@ -278,15 +308,8 @@ export function QuickSearchVisor({
         onStopGeneration();
       }
     },
-    [onStopGeneration]
+    [setVisorMode, onStopGeneration]
   );
-
-  // License and connector are known only after the first render. Start in natural language once they are.
-  useEffect(() => {
-    if (showAskAiButton) {
-      setVisorMode(VisorMode.NaturalLanguage);
-    }
-  }, [showAskAiButton]);
 
   useEffect(() => {
     const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
@@ -335,7 +358,8 @@ export function QuickSearchVisor({
     };
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  const isKqlMode = visorMode === VisorMode.KQL;
+  // Natural language is the default once AI is available; without it there is no toggle, so KQL it is.
+  const isKqlMode = !showAskAiButton || (visorMode ?? VisorMode.NaturalLanguage) === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {
@@ -390,6 +414,7 @@ export function QuickSearchVisor({
     >
       <div css={styles.inputSlot}>
         <NLInput
+          ref={nlInputRef}
           value={nlValue}
           placeholder={nlPlaceholder}
           disabled={isNlLoading}
@@ -408,3 +433,6 @@ export function QuickSearchVisor({
     </VisorLayout>
   );
 }
+
+export const QuickSearchVisor = withRestorableState(QuickSearchVisorInternal);
+export type QuickSearchVisorProps = ComponentPropsWithoutRef<typeof QuickSearchVisor>;

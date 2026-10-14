@@ -302,7 +302,7 @@ describe('getRunStepDefinition', () => {
         input: {
           alert_retrieval_mode: 'custom_query' as const,
           alert_retrieval_workflow_ids: [],
-          feature_id: 'alertzero_reasoning',
+          feature_id: 'alertzero_frontier',
           mode: 'sync' as const,
           validation_workflow_id: '',
         },
@@ -313,7 +313,7 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithFeatureId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
-        expect.objectContaining({ featureId: 'alertzero_reasoning' })
+        expect.objectContaining({ featureId: 'alertzero_frontier' })
       );
     });
 
@@ -324,7 +324,7 @@ describe('getRunStepDefinition', () => {
         ...syncMockContext,
         input: {
           ...syncMockContext.input,
-          feature_id: 'alertzero_reasoning',
+          feature_id: 'alertzero_frontier',
         },
       };
 
