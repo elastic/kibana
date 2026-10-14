@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { APIReturnType } from '@kbn/apm-api-shared';
-import { MobileProperty } from '../../../../../../common/mobile_types';
+import { MobileProperty, MobileErrorType } from '../../../../../../common/mobile_types';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams, useMaybeApmParams } from '../../../../../hooks/use_apm_params';
@@ -85,7 +85,7 @@ export function MobileFilters() {
 
   // On the crashes tab, scope the filter dropdown options to crash documents so
   // they only list values that appear in actual crashes (not transactions/spans).
-  const errorType = mobileErrorTabId === 'crashes' ? ('crash' as const) : undefined;
+  const errorType = mobileErrorTabId === 'crashes' ? MobileErrorType.Crash : undefined;
 
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {

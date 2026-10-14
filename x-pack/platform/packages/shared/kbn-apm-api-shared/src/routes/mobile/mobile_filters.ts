@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z, lazySchema } from '@kbn/zod/v4';
-import { type MobilePropertyType } from '@kbn/apm-types';
+import { type MobilePropertyType, MobileErrorType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
@@ -32,7 +32,7 @@ export const mobileFiltersRoute = defineRoute<MobileFiltersRouteResponse>()({
           // When set to `crash`, the filter dropdown options are sourced from
           // crash error documents instead of transaction/span documents. Used
           // by the crashes tab so its filters only list values present in crashes.
-          errorType: z.enum(['crash']).optional(),
+          errorType: z.enum([MobileErrorType.Crash]).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

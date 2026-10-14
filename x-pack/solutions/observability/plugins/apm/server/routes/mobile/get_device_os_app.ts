@@ -6,6 +6,7 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { MobileErrorType } from '@kbn/apm-types';
 import {
   DEVICE_MODEL_IDENTIFIER,
   ERROR_TYPE,
@@ -24,7 +25,7 @@ export async function getDeviceOSApp({
   apmEventClient,
   serviceName,
   transactionType,
-  errorType,
+  isCrash,
   environment,
   start,
   end,
@@ -34,14 +35,12 @@ export async function getDeviceOSApp({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
-  errorType?: 'crash';
+  isCrash?: boolean;
   environment: string;
   start: number;
   end: number;
   size: number;
 }) {
-  const isCrash = errorType === 'crash';
-
   return await apmEventClient.search('get_mobile_device_os_app', {
     apm: {
       sources: [
@@ -60,7 +59,7 @@ export async function getDeviceOSApp({
           // The transactionType filter is only relevant for transaction
           // documents; crash error documents are scoped by error.type instead.
           ...(isCrash
-            ? termQuery(ERROR_TYPE, 'crash')
+            ? termQuery(ERROR_TYPE, MobileErrorType.Crash)
             : termQuery(TRANSACTION_TYPE, transactionType)),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),

@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`mobile filters queries getDeviceOSApp queries crash error events when error type is crash 1`] = `
+exports[
+  `mobile filters queries getDeviceOSApp queries crash error events when isCrash is true 1`
+] = `
 Object {
   "aggs": Object {
     "appVersions": Object {
@@ -60,7 +62,9 @@ Object {
 }
 `;
 
-exports[`mobile filters queries getDeviceOSApp queries transaction events when no error type is given 1`] = `
+exports[
+  `mobile filters queries getDeviceOSApp queries transaction events when isCrash is not set 1`
+] = `
 Object {
   "aggs": Object {
     "appVersions": Object {
@@ -120,7 +124,7 @@ Object {
 }
 `;
 
-exports[`mobile filters queries getNCT queries crash error events when error type is crash 1`] = `
+exports[`mobile filters queries getNCT queries crash error events when isCrash is true 1`] = `
 Object {
   "aggs": Object {
     "netConnectionTypes": Object {
@@ -168,7 +172,7 @@ Object {
 }
 `;
 
-exports[`mobile filters queries getNCT queries span events when no error type is given 1`] = `
+exports[`mobile filters queries getNCT queries span events when isCrash is not set 1`] = `
 Object {
   "aggs": Object {
     "netConnectionTypes": Object {

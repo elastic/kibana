@@ -17,3 +17,8 @@ export type MobilePropertyType =
   | MobileProperty.OsVersion
   | MobileProperty.AppVersion
   | MobileProperty.NetworkConnectionType;
+
+/** Values of the `error.type` field on mobile error documents. */
+export enum MobileErrorType {
+  Crash = 'crash',
+}

@@ -30,7 +30,7 @@ describe('mobile filters queries', () => {
   });
 
   describe('getDeviceOSApp', () => {
-    it('queries transaction events when no error type is given', async () => {
+    it('queries transaction events when isCrash is not set', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getDeviceOSApp({ ...baseParams, apmEventClient: mockApmEventClient })
       );
@@ -42,11 +42,11 @@ describe('mobile filters queries', () => {
       expect(mock.params).toMatchSnapshot();
     });
 
-    it('queries crash error events when error type is crash', async () => {
+    it('queries crash error events when isCrash is true', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getDeviceOSApp({
           ...baseParams,
-          errorType: 'crash',
+          isCrash: true,
           apmEventClient: mockApmEventClient,
         })
       );
@@ -61,7 +61,7 @@ describe('mobile filters queries', () => {
   });
 
   describe('getNCT', () => {
-    it('queries span events when no error type is given', async () => {
+    it('queries span events when isCrash is not set', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getNCT({ ...baseParams, apmEventClient: mockApmEventClient })
       );
@@ -70,9 +70,9 @@ describe('mobile filters queries', () => {
       expect(mock.params).toMatchSnapshot();
     });
 
-    it('queries crash error events when error type is crash', async () => {
+    it('queries crash error events when isCrash is true', async () => {
       mock = await inspectSearchParams(({ mockApmEventClient }) =>
-        getNCT({ ...baseParams, errorType: 'crash', apmEventClient: mockApmEventClient })
+        getNCT({ ...baseParams, isCrash: true, apmEventClient: mockApmEventClient })
       );
 
       expect(mock.params.apm.sources[0].documentType).toBe(ApmDocumentType.ErrorEvent);
