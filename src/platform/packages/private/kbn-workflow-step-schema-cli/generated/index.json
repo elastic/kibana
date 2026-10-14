@@ -982,6 +982,7 @@
     "alerting.ruleEventsGenerated",
     "alerting.ruleExecutionFailed",
     "alerting.ruleUpdated",
+    "alerting.v1.alertStatusChanged",
     "cases.attachmentsAdded",
     "cases.attachmentsDeleted",
     "cases.caseCreated",
@@ -1012,11 +1013,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "79003214c3f2406b2e9ae2dfdc413120e891d3bfc232f3474f82996eeadb61a6"
+      "sha256": "a6d4d20e289de5d80ba991d9ea325c70786859989985e2e44ea695d41e2f92f7"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "57175093105cb46ab4297ce461221f67e05680ed8e05038cefa3ed121a2d49db"
+      "sha256": "9c0851d08308a869d549c581bfe33e6835f31f5b0ed67f0bd72f67cb7b92eb14"
     }
   }
 }
