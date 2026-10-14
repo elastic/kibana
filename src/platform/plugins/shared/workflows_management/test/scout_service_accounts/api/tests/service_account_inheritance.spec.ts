@@ -349,6 +349,42 @@ apiTest.describe(
       );
     }
 
+    for (const asynchronous of [false, true]) {
+      apiTest(
+        `${asynchronous ? 'async' : 'sync'} field-only tag removal revokes child delegation`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(150_000);
+          const { wait } = getContext();
+          const { child, parent } = await prepareTagDelegation(apiClient, asynchronous, [
+            'action',
+            'auto-approvable',
+          ]);
+          const paused = await wait(
+            apiClient,
+            await run(apiClient, parent),
+            'waiting_for_input',
+            headers
+          );
+          const updated = await apiClient.put(
+            `api/workflows/managed/workflow/${workflowId(child)}`,
+            { headers, body: { tags: ['action'] }, responseType: 'json' }
+          );
+          expect(updated, JSON.stringify(updated.body)).toHaveStatusCode(200);
+          const saved = await apiClient.get(`api/workflows/workflow/${workflowId(child)}`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(saved).toHaveStatusCode(200);
+          expect(saved.body.tags).toStrictEqual(['action']);
+          expect(saved.body.yaml).not.toContain('auto-approvable');
+          await resume(apiClient, paused);
+          const failed = await wait(apiClient, paused.id, 'failed', headers);
+          expect(JSON.stringify(failed.stepExecutions)).toContain('not approved');
+          await expectNoChildren(apiClient, workflowId(child));
+        }
+      );
+    }
+
     apiTest(
       'requires superuser privileges for global example mutations',
       async ({ apiClient, samlAuth }) => {
