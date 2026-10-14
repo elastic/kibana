@@ -105,7 +105,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       type: DiscoverTabType.Metrics,
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
-      histogramPercentile: 'p95',
+      histogramPercentile: 'distribution',
       dimensions: [],
       searchTerm: '',
       gridSortField: 'alphabetically',

@@ -23,7 +23,7 @@ describe('grid_settings constants', () => {
     expect(METRICS_GRID_SETTINGS_DEFAULTS).toEqual({
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
-      histogramPercentile: 'p95',
+      histogramPercentile: 'distribution',
       dimensions: [],
       searchTerm: '',
     });

@@ -17,7 +17,14 @@ describe('metrics grid settings', () => {
     expect(METRICS_GRID_SIMPLE_AGGREGATIONS).toEqual(['avg', 'sum', 'min', 'max']);
   });
 
-  it('exposes exactly the five histogram percentile options', () => {
-    expect(METRICS_GRID_HISTOGRAM_PERCENTILES).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
+  it('exposes distribution and the histogram percentile options', () => {
+    expect(METRICS_GRID_HISTOGRAM_PERCENTILES).toEqual([
+      'distribution',
+      'p50',
+      'p75',
+      'p90',
+      'p95',
+      'p99',
+    ]);
   });
 });

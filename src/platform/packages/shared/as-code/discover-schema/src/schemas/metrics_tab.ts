@@ -43,7 +43,9 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
       description: 'Aggregation applied to gauge metric fields.',
     }),
     histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
-      description: 'Percentile displayed for histogram metric fields.',
+      description:
+        'How histogram metric fields are displayed. `distribution` shows a heatmap. ' +
+        'A percentile value shows that percentile as a series.',
     }),
     grid_sort_field: z
       .enum(METRICS_GRID_SORT_FIELDS)

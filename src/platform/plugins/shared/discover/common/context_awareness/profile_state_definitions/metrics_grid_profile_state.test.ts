@@ -57,7 +57,7 @@ describe('METRICS_STATE_DEF', () => {
     expect(expanded[KEY]).toEqual({
       counterAggregation: 'max',
       gaugeAggregation: 'avg',
-      histogramPercentile: 'p95',
+      histogramPercentile: 'distribution',
       sortField: 'alphabetically',
       sortDirection: 'asc',
       dimensions: [],
@@ -73,7 +73,7 @@ describe('METRICS_STATE_DEF', () => {
         [KEY]: {
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
-          histogramPercentile: 'p95',
+          histogramPercentile: 'distribution',
           sortField: 'alphabetically',
           sortDirection: 'asc',
         },

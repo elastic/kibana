@@ -419,8 +419,10 @@ const ChartItem = React.memo(
       FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
       FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
     );
+    // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
     const isHistogramDistribution =
       isHeatmapsEnabled &&
+      gridSettings.histogramPercentile === 'distribution' &&
       isHistogramMetric(
         firstNonNullable(metricItem.fieldTypes),
         firstNonNullable(metricItem.metricTypes)

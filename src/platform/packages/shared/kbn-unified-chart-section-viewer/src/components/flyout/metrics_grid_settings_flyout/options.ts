@@ -35,6 +35,12 @@ export const SIMPLE_AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
 
 /** Display labels for `HistogramPercentile` values, e.g. "50th percentile". */
 export const HISTOGRAM_PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
+  distribution: i18n.translate(
+    'metricsExperience.gridSettingsFlyout.distributionDropDownOptionLabel',
+    {
+      defaultMessage: 'Distribution',
+    }
+  ),
   p50: i18n.translate('metricsExperience.gridSettingsFlyout.p50OptionLabel', {
     defaultMessage: '50th percentile',
   }),

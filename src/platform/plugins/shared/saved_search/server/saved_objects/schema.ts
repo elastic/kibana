@@ -205,6 +205,7 @@ const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
 ]);
 
 const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
+  schema.literal(`${HistogramPercentileValue.Distribution}`),
   schema.literal(`${HistogramPercentileValue.P50}`),
   schema.literal(`${HistogramPercentileValue.P75}`),
   schema.literal(`${HistogramPercentileValue.P90}`),

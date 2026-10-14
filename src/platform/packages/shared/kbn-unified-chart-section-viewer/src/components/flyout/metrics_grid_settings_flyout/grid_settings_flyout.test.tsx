@@ -35,7 +35,7 @@ jest.mock('../../../context/ebt_telemetry_context', () => ({
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
-  histogramPercentile: 'p95',
+  histogramPercentile: 'distribution',
   dimensions: [],
   searchTerm: '',
 };
@@ -65,7 +65,7 @@ describe('GridSettingsFlyout', () => {
     ).toBeInTheDocument();
     expect(counterSelect.getSelected()).toContain('Sum');
     expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(histogramSelect.getSelected()).toContain('Distribution');
   });
 
   it('disables "Apply and close" until a selection actually changes', async () => {
@@ -132,7 +132,7 @@ describe('GridSettingsFlyout', () => {
     });
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
       metric_type: 'histogram',
-      previous_aggregation: 'p95',
+      previous_aggregation: 'distribution',
       new_aggregation: 'p99',
     });
   });

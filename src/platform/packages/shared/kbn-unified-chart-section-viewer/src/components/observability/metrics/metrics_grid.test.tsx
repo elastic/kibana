@@ -1283,6 +1283,39 @@ describe('MetricsGrid', () => {
         );
     };
 
+    it('keeps the percentile chart when a percentile is selected and the flag is on', () => {
+      enableHeatmaps();
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'sum',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p95',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[histogramItem]}
+            histogramBounds={bounds}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          heatmapConfig: undefined,
+          yAxisTitle: 'p95',
+          esqlQuery: expect.not.stringContaining('BUCKET(latency.exp'),
+        }),
+        expect.anything()
+      );
+    });
+
     it('keeps the percentile chart when the heatmaps flag is off', () => {
       renderMetricsGrid({ metricItems: [histogramItem], histogramBounds: bounds });
 
