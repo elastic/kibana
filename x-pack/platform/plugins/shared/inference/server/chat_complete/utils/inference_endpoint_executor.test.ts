@@ -7,7 +7,16 @@
 
 import { PassThrough, type Readable } from 'stream';
 import { text } from 'node:stream/consumers';
+import { catchError, last, lastValueFrom, of, toArray } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
+import {
+  ChatCompletionEventType,
+  isInferenceProviderError,
+  isOutputTokenLimitReachedError,
+} from '@kbn/inference-common';
+import { getRetryFilter } from '../../../common/utils/error_retry_filter';
+import { eventSourceStreamIntoObservable } from '../../util/event_source_stream_into_observable';
+import { processOpenAIStream } from '../adapters/openai';
 import {
   createInferenceEndpointExecutor,
   type InferenceEndpointExecutor,
@@ -15,6 +24,10 @@ import {
 
 const readSseEvent = async (stream: Readable) =>
   JSON.parse((await text(stream)).replace(/^data: /, ''));
+
+/** Runs the executor output through the same pipeline the inference endpoint adapter uses. */
+const processAsStream = (stream: Readable) =>
+  eventSourceStreamIntoObservable(stream).pipe(processOpenAIStream());
 
 describe('createInferenceEndpointExecutor', () => {
   let executor: InferenceEndpointExecutor;
@@ -357,7 +370,7 @@ describe('createInferenceEndpointExecutor', () => {
       });
     });
 
-    it('returns Elasticsearch error bodies as an SSE error event', async () => {
+    it('returns Elasticsearch error bodies as an SSE error event carrying the HTTP status', async () => {
       const body = {
         error: { code: 'bad_request', message: 'unsupported', type: 'status_exception' },
       };
@@ -367,7 +380,61 @@ describe('createInferenceEndpointExecutor', () => {
 
       const result = await executor.invoke({ body: {} });
 
-      expect(await readSseEvent(result)).toEqual(body);
+      expect(await readSseEvent(result)).toEqual({ ...body, status: 400 });
+    });
+
+    it('produces a non-retryable provider error for a 4xx once processed as a stream', async () => {
+      mockTransportRequest.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'resource_not_found_exception', reason: 'no such endpoint' } },
+          warnings: null,
+          meta: {} as never,
+        })
+      );
+
+      const error = await lastValueFrom(
+        processAsStream(await executor.invoke({ body: {} })).pipe(
+          catchError((e) => of(e)),
+          last()
+        )
+      );
+
+      expect(isInferenceProviderError(error)).toBe(true);
+      expect(error.status).toBe(404);
+      expect(error.message).toContain('no such endpoint');
+      expect(getRetryFilter()(error)).toBe(false);
+    });
+
+    it('emits the partial message and usage before failing when the token limit was hit', async () => {
+      mockTransportRequest.mockResolvedValue({
+        ...completion,
+        choices: [
+          {
+            index: 0,
+            finish_reason: 'length',
+            message: { role: 'assistant', content: 'partial answer' },
+          },
+        ],
+      });
+
+      const events = await lastValueFrom(
+        processAsStream(await executor.invoke({ body: {} })).pipe(
+          catchError((e) => of(e)),
+          toArray()
+        )
+      );
+
+      expect(events).toHaveLength(3);
+      expect(events[0]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: { prompt: 1, completion: 2, total: 3 },
+      });
+      expect(events[1]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'partial answer',
+      });
+      expect(isOutputTokenLimitReachedError(events[2])).toBe(true);
     });
 
     it('propagates other errors', async () => {

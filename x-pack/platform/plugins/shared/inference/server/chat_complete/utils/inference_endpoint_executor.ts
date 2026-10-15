@@ -64,11 +64,12 @@ export const createInferenceEndpointExecutor = ({
             { method: 'POST', path, querystring, body },
             { requestTimeout: timeout, headers, ...(signal ? { signal } : {}) }
           );
-          return toEventStream(completionToChunk(completion));
+          return toEventStream(completionToChunks(completion));
         } catch (error) {
-          // ES reports upstream failures as HTTP errors here; surface them like stream error events
+          // ES reports upstream failures as HTTP errors here; surface them like stream error
+          // events, keeping the status so non-retryable failures (4xx) are not retried
           if (error instanceof errors.ResponseError && typeof error.meta.body === 'object') {
-            return toEventStream(error.meta.body);
+            return toEventStream([{ ...error.meta.body, status: error.statusCode }]);
           }
           throw error;
         }
@@ -93,18 +94,39 @@ export const createInferenceEndpointExecutor = ({
   };
 };
 
-const toEventStream = (event: unknown): Readable =>
-  Readable.from([`data: ${JSON.stringify(event)}\n\n`]);
+const toEventStream = (events: unknown[]): Readable =>
+  Readable.from(events.map((event) => `data: ${JSON.stringify(event)}\n\n`));
 
-/** Reshapes a full chat completion as a single chunk so it flows through the streaming pipeline. */
-const completionToChunk = ({ choices, ...completion }: OpenAI.ChatCompletion) => ({
-  ...completion,
-  object: 'chat.completion.chunk',
-  choices: choices.map(({ message, ...choice }) => ({
-    ...choice,
-    delta: {
-      ...message,
-      tool_calls: message.tool_calls?.map((toolCall, index) => ({ ...toolCall, index })),
+/**
+ * Reshapes a full chat completion as chunks so it flows through the streaming pipeline.
+ * A completion cut off by the token limit is split so the partial message and usage are
+ * emitted before the `length` finish reason raises the token limit error, as in streaming.
+ */
+const completionToChunks = ({ choices, ...completion }: OpenAI.ChatCompletion) => {
+  const chunk = {
+    ...completion,
+    object: 'chat.completion.chunk',
+    choices: choices.map(({ message, ...choice }) => ({
+      ...choice,
+      delta: {
+        ...message,
+        tool_calls: message.tool_calls?.map((toolCall, index) => ({ ...toolCall, index })),
+      },
+    })),
+  };
+  if (!choices.some(({ finish_reason: finishReason }) => finishReason === 'length')) {
+    return [chunk];
+  }
+  return [
+    { ...chunk, choices: chunk.choices.map((choice) => ({ ...choice, finish_reason: null })) },
+    {
+      ...chunk,
+      usage: undefined,
+      choices: chunk.choices.map(({ index, finish_reason: finishReason }) => ({
+        index,
+        finish_reason: finishReason,
+        delta: {},
+      })),
     },
-  })),
-});
+  ];
+};
