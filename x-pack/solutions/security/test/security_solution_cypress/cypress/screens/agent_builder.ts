@@ -19,9 +19,6 @@ export const ENTITY_ATTACHMENT_OPEN_ENTITY_ANALYTICS_ACTION =
 
 export const CREATE_RULE_BUTTON = '[data-test-subj="create-rule-button"]';
 
-export const CREATE_RULE_MORE_OPTIONS_BUTTON =
-  '[data-test-subj="create-rule-button-secondary-button"]';
-
 export const CREATE_RULE_CONTEXT_MENU_POPOVER =
   '[data-test-subj="create-rule-context-menu-popover"]';
 
