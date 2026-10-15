@@ -419,47 +419,44 @@ describe('#enrichWithProfiles', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('populates full_name from resolved profiles', async () => {
+  it('populates full_name and email from resolved profiles', async () => {
     const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([profile('u1', 'Alice A.'), profile('u2', 'Bob B.')]);
+    service.bulkGet.mockResolvedValue([
+      profile('u1', 'Alice A.', 'alice@example.com'),
+      profile('u2', undefined, 'bob@example.com'),
+    ]);
     const items = [doc('u1', 'alice'), doc('u2', 'bob')];
 
     await enrichWithProfiles(items, service, logger);
 
     expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1', 'u2']) });
     expect(items[0].user.full_name).toBe('Alice A.');
-    expect(items[1].user.full_name).toBe('Bob B.');
-  });
-
-  it('populates email from resolved profiles', async () => {
-    const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([profile('u1', undefined, 'alice@example.com')]);
-    const items = [doc('u1', 'alice')];
-
-    await enrichWithProfiles(items, service, logger);
-
-    expect(items[0].user.full_name).toBeUndefined();
     expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user.full_name).toBeUndefined();
+    expect(items[1].user.email).toBe('bob@example.com');
   });
 
-  it('short-circuits and skips bulkGet when no user.id present', async () => {
+  it('only looks up and enriches items that have a user.id', async () => {
     const service = userProfileServiceMock.createStart();
-    const items = [doc(undefined, 'alice'), doc(undefined, 'bob')];
+    service.bulkGet.mockResolvedValue([profile('u1', 'Alice A.', 'alice@example.com')]);
+    const items = [doc('u1', 'alice'), doc(undefined, 'bob')];
 
     await enrichWithProfiles(items, service, logger);
 
-    expect(service.bulkGet).not.toHaveBeenCalled();
-    expect(items[0].user.full_name).toBeUndefined();
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1']) });
+    expect(items[0].user.full_name).toBe('Alice A.');
+    expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user).toEqual({ id: undefined, name: 'bob' });
   });
 
-  it('leaves full_name unset when no matching profile is returned', async () => {
+  it('leaves the user untouched when no matching profile is returned', async () => {
     const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([]);
+    service.bulkGet.mockResolvedValue([profile('u2', 'Bob B.', 'bob@example.com')]);
     const items = [doc('u1', 'alice')];
 
     await enrichWithProfiles(items, service, logger);
 
-    expect(items[0].user.full_name).toBeUndefined();
+    expect(items[0].user).toEqual({ id: 'u1', name: 'alice' });
   });
 
   it('leaves full_name unset when the profile has no full_name', async () => {
