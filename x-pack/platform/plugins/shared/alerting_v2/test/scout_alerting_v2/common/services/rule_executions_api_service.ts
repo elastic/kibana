@@ -128,11 +128,10 @@ export const getRuleExecutionsApiService = ({
   esClient: EsClient;
 }): RuleExecutionsApiService => {
   /**
-   * Returns `true` when the executor task is not currently being executed:
-   * either the task document is absent (after delete), or its `task.status`
-   * is not in `claiming`/`running`.
+   * The executor task's `task.status`, or `undefined` when the task document
+   * does not exist (e.g. not yet scheduled, or removed on disable/delete).
    */
-  const isExecutorTaskDrained = async (taskId: string): Promise<boolean> => {
+  const getExecutorTaskStatus = async (taskId: string): Promise<string | undefined> => {
     const result = await esClient.search<{ task: { status: string } }>({
       index: TASK_MANAGER_INDEX,
       query: { term: { _id: `task:${taskId}` } },
@@ -140,23 +139,22 @@ export const getRuleExecutionsApiService = ({
       _source: ['task.status'],
     });
 
-    const hit = result.hits.hits[0];
-    if (!hit) return true;
+    return result.hits.hits[0]?._source?.task?.status;
+  };
 
-    const status = hit._source?.task?.status;
+  /**
+   * `true` when the executor task is not currently being executed: either
+   * the task document is absent (after delete), or its `task.status` is not
+   * in `claiming`/`running`.
+   */
+  const isExecutorTaskDrained = async (taskId: string): Promise<boolean> => {
+    const status = await getExecutorTaskStatus(taskId);
     return !status || !RUNNING_TASK_STATUSES.includes(status);
   };
 
-  const executorTaskExists = async (taskId: string): Promise<boolean> => {
-    const result = await esClient.search({
-      index: TASK_MANAGER_INDEX,
-      query: { term: { _id: `task:${taskId}` } },
-      size: 1,
-      _source: false,
-    });
+  const executorTaskExists = async (taskId: string): Promise<boolean> =>
+    (await getExecutorTaskStatus(taskId)) !== undefined;
 
-    return result.hits.hits.length > 0;
-  };
   const findReportedRuns: RuleExecutionsApiService['findReportedRuns'] = ({
     ruleId,
     since,
