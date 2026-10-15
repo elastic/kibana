@@ -1473,6 +1473,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-
 x-pack/solutions/security/packages/navigation @elastic/security-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/security-mitre-attack-mocks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
@@ -1568,6 +1569,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # Data Discovery
 /src/platform/packages/shared/kbn-scout/src/playwright/ui_components/esql_editor @elastic/kibana-discover @elastic/appex-qa
+/src/platform/packages/shared/kbn-scout/src/playwright/page_objects/discover @elastic/kibana-discover @elastic/appex-qa
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover
@@ -1818,6 +1820,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift
 
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
@@ -3484,6 +3487,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/ @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engineering
