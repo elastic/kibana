@@ -50,10 +50,7 @@ const toCaseAlertItem = (
   ],
 });
 
-/**
- * Adds classic (v1) alerts to a case through the Cases "add to existing case"
- * modal. Compatible only when every selected row is a classic alert.
- */
+/** Adds classic (v1) alerts to a case through the Cases "add to existing case" modal. */
 export const createAddToCaseAction = <TPermissions extends CasesPermissions, TAttachment>(
   deps: AddToCaseActionDeps<TPermissions, TAttachment>
 ): EpisodeAction => ({

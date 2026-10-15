@@ -75,7 +75,6 @@ export interface OpenAddToCaseModalDeps<
    * into a fresh `KibanaContextProvider` because the modal mounts in a separate
    * React root.
    */
-  // Typed loosely to avoid coupling this package to a specific KibanaServices shape.
   kibanaServices: Record<string, unknown>;
 }
 
@@ -143,8 +142,10 @@ export const openAddToCaseModal = <TPermissions extends CasesPermissions, TAttac
   };
 
   const onClose = (theCase?: unknown, isCreateCase?: boolean) => {
-    // Creating a case closes the modal and then opens the flyout, so the root
-    // has to outlive that close.
+    /*
+     * Creating a case closes the modal and then opens the flyout, so the root
+     * has to outlive that close.
+     */
     if (isCreateCase && theCase == null) return;
     cleanup();
   };

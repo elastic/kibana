@@ -19,7 +19,6 @@ export const ADD_TO_CASE_SOURCE_INDEX = 'scout-add-to-case-threshold';
 export const ADD_TO_CASE_DATA_VIEW_ID = 'scout-add-to-case-threshold-dv';
 const ADD_TO_CASE_GROUPS = ['host-a', 'host-b'] as const;
 
-/** One classic alert is raised per group, so the table shows this many rows for the rule. */
 export const ADD_TO_CASE_ALERT_COUNT = ADD_TO_CASE_GROUPS.length;
 
 const READER_ES_PRIVILEGES: KibanaRole['elasticsearch'] = {
@@ -74,10 +73,6 @@ export const deleteAddToCaseSourceIndex = async (esClient: EsClient): Promise<vo
   await esClient.indices.delete({ index: ADD_TO_CASE_SOURCE_INDEX }, { ignore: [404] });
 };
 
-/**
- * Creates an enabled custom threshold rule grouped by host and waits until it has raised one
- * alert per group. Returns the rule id.
- */
 export const createAddToCaseRule = async ({
   apiServices,
   esClient,

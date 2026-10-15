@@ -87,12 +87,6 @@ export class ObservabilityAlertingPage {
   public readonly selectAllRowsToggle: Locator;
   public readonly bulkActionsMenuButton: Locator;
   public readonly addToCaseBulkAction: Locator;
-  public readonly addToExistingCaseModal: Locator;
-  public readonly createCaseButton: Locator;
-  public readonly createCaseFlyout: Locator;
-  public readonly createCaseTitleInput: Locator;
-  public readonly createCaseDescriptionInput: Locator;
-  public readonly createCaseSubmitButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
@@ -139,16 +133,6 @@ export class ObservabilityAlertingPage {
     this.addToCaseBulkAction = this.page.testSubj.locator(
       `episodesBulkAction-${ADD_TO_CASE_EPISODE_ACTION_ID}`
     );
-    this.addToExistingCaseModal = this.page.testSubj.locator('all-cases-modal');
-    this.createCaseButton = this.page.testSubj.locator('cases-table-add-case-filter-bar');
-    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
-    this.createCaseTitleInput = this.createCaseFlyout.locator(
-      '[data-test-subj="caseTitle"] [data-test-subj="input"]'
-    );
-    this.createCaseDescriptionInput = this.createCaseFlyout.locator(
-      'textarea.euiMarkdownEditorTextArea'
-    );
-    this.createCaseSubmitButton = this.page.testSubj.locator('create-case-submit');
   }
 
   urlFor(path: string): string {
@@ -261,24 +245,6 @@ export class ObservabilityAlertingPage {
   async clickAddToCaseBulkAction(): Promise<void> {
     await this.bulkActionsMenuButton.click();
     await this.addToCaseBulkAction.click();
-  }
-
-  caseSelectButton(caseId: string): Locator {
-    return this.page.testSubj.locator(`cases-table-row-select-${caseId}`);
-  }
-
-  async selectExistingCase(caseId: string): Promise<void> {
-    await expect(this.addToExistingCaseModal).toBeVisible();
-    await this.caseSelectButton(caseId).click();
-  }
-
-  async createCaseFromModal(title: string, description: string): Promise<void> {
-    await expect(this.addToExistingCaseModal).toBeVisible();
-    await this.createCaseButton.click();
-    await expect(this.createCaseFlyout).toBeVisible();
-    await this.createCaseTitleInput.fill(title);
-    await this.createCaseDescriptionInput.fill(description);
-    await this.createCaseSubmitButton.click();
   }
 
   tagFilterOption(tag: string): Locator {

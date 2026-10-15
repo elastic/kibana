@@ -38,12 +38,6 @@ const CASE_PAYLOAD = {
 };
 
 /*
- * Covers "Add to case" for classic (v1) alerts in the unified alerts table:
- * the row action and the bulk action, each for a new and an existing case, the
- * skip of alerts that are already attached, and the cases privilege gate.
- * One classic custom threshold rule grouped by host raises two alerts, and the
- * table is filtered to that rule so a bulk selection attaches exactly those two.
- *
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic).
  */
@@ -53,7 +47,6 @@ test.describe(
   () => {
     let ruleId: string;
 
-    /** Opens the alerts table filtered to the seeded rule, with its alerts rendered. */
     const openSeededAlerts = async (observabilityAlerting: ObservabilityAlertingPage) => {
       await observabilityAlerting.gotoInboxFilteredByRule(ruleId);
       await expect(observabilityAlerting.episodesItemCount).toHaveText(
@@ -103,13 +96,13 @@ test.describe(
     test('adds an alert to a new case from the row action', async ({
       apiServices,
       browserAuth,
-      pageObjects: { observabilityAlerting },
+      pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
       const title = `Add to case row new ${Date.now()}`;
 
       await loginAndOpen(browserAuth, observabilityAlerting, LOGS_READ_WITH_CASES_ROLE);
       await observabilityAlerting.clickAddToCaseRowAction(ADD_TO_CASE_RULE_NAME);
-      await observabilityAlerting.createCaseFromModal(title, CASE_PAYLOAD.description);
+      await addToCaseModal.createCase(title, CASE_PAYLOAD.description);
 
       await expect
         .poll(async () => {
@@ -122,7 +115,7 @@ test.describe(
     test('adds an alert to an existing case from the row action', async ({
       apiServices,
       browserAuth,
-      pageObjects: { observabilityAlerting },
+      pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
       const { data: existingCase } = await apiServices.cases.create({
         ...CASE_PAYLOAD,
@@ -131,7 +124,7 @@ test.describe(
 
       await loginAndOpen(browserAuth, observabilityAlerting, LOGS_READ_WITH_CASES_ROLE);
       await observabilityAlerting.clickAddToCaseRowAction(ADD_TO_CASE_RULE_NAME);
-      await observabilityAlerting.selectExistingCase(existingCase.id);
+      await addToCaseModal.selectExistingCase(existingCase.id);
 
       await expect
         .poll(async () => (await apiServices.cases.get(existingCase.id)).data.totalAlerts)
@@ -141,14 +134,14 @@ test.describe(
     test('adds the selected alerts to a new case from the bulk action', async ({
       apiServices,
       browserAuth,
-      pageObjects: { observabilityAlerting },
+      pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
       const title = `Add to case bulk new ${Date.now()}`;
 
       await loginAndOpen(browserAuth, observabilityAlerting, LOGS_READ_WITH_CASES_ROLE);
       await observabilityAlerting.selectAllRows(ADD_TO_CASE_ALERT_COUNT);
       await observabilityAlerting.clickAddToCaseBulkAction();
-      await observabilityAlerting.createCaseFromModal(title, CASE_PAYLOAD.description);
+      await addToCaseModal.createCase(title, CASE_PAYLOAD.description);
 
       await expect
         .poll(async () => {
@@ -161,7 +154,7 @@ test.describe(
     test('adds the selected alerts to an existing case, which is then offered as already attached', async ({
       apiServices,
       browserAuth,
-      pageObjects: { observabilityAlerting },
+      pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
       const { data: existingCase } = await apiServices.cases.create({
         ...CASE_PAYLOAD,
@@ -172,7 +165,7 @@ test.describe(
         await loginAndOpen(browserAuth, observabilityAlerting, LOGS_READ_WITH_CASES_ROLE);
         await observabilityAlerting.selectAllRows(ADD_TO_CASE_ALERT_COUNT);
         await observabilityAlerting.clickAddToCaseBulkAction();
-        await observabilityAlerting.selectExistingCase(existingCase.id);
+        await addToCaseModal.selectExistingCase(existingCase.id);
 
         await expect
           .poll(async () => (await apiServices.cases.get(existingCase.id)).data.totalAlerts)
@@ -184,8 +177,8 @@ test.describe(
         await observabilityAlerting.selectAllRows(ADD_TO_CASE_ALERT_COUNT);
         await observabilityAlerting.clickAddToCaseBulkAction();
 
-        await expect(observabilityAlerting.addToExistingCaseModal).toBeVisible();
-        await expect(observabilityAlerting.caseSelectButton(existingCase.id)).toBeDisabled();
+        await expect(addToCaseModal.modal).toBeVisible();
+        await expect(addToCaseModal.caseSelectButton(existingCase.id)).toBeDisabled();
       });
     });
 
@@ -193,7 +186,7 @@ test.describe(
       apiServices,
       browserAuth,
       page,
-      pageObjects: { observabilityAlerting },
+      pageObjects: { addToCaseModal, observabilityAlerting },
     }) => {
       const { data: existingCase } = await apiServices.cases.create({
         ...CASE_PAYLOAD,
@@ -204,7 +197,7 @@ test.describe(
 
       await test.step('attaches the first alert', async () => {
         await observabilityAlerting.clickAddToCaseRowAction(ADD_TO_CASE_RULE_NAME);
-        await observabilityAlerting.selectExistingCase(existingCase.id);
+        await addToCaseModal.selectExistingCase(existingCase.id);
         await expect
           .poll(async () => (await apiServices.cases.get(existingCase.id)).data.totalAlerts)
           .toBe(1);
@@ -220,7 +213,7 @@ test.describe(
           (request) =>
             request.method() === 'POST' && request.url().includes('/attachments/_bulk_create')
         );
-        await observabilityAlerting.selectExistingCase(existingCase.id);
+        await addToCaseModal.selectExistingCase(existingCase.id);
 
         const attachments: Array<{ attachmentId: string[] }> = (await attachRequest).postDataJSON();
         expect(attachments.flatMap(({ attachmentId }) => attachmentId)).toHaveLength(1);

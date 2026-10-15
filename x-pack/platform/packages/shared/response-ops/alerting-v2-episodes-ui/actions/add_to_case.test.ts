@@ -169,12 +169,14 @@ describe('createAddToCaseAction', () => {
       expect(items.map(({ ecs }: CaseAlertItem) => ecs._id)).toEqual(['b', 'c']);
     });
 
-    it('returns the grouped attachments, empty when everything is already attached', async () => {
-      const { options } = await run([makeClassicEpisode('a', { caseIds: ['case-1'] })]);
+    it('groups no alerts when everything is already attached', async () => {
+      const { groupAlertsByRule, options } = await run([
+        makeClassicEpisode('a', { caseIds: ['case-1'] }),
+      ]);
 
-      expect(options.getAttachments({ theCase: { id: 'case-1', owner: 'observability' } })).toEqual(
-        []
-      );
+      options.getAttachments({ theCase: { id: 'case-1', owner: 'observability' } });
+
+      expect(groupAlertsByRule).toHaveBeenCalledWith([], 'observability');
     });
 
     it("uses the chosen case's owner for the attachments", async () => {
