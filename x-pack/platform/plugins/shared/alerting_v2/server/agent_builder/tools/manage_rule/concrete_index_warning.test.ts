@@ -100,8 +100,12 @@ describe('formatBackingIndexWarning', () => {
       { index: '.ds-logs-b-default-2026.06.11-000001', baseName: 'logs-b-default' },
     ]);
 
-    expect(warning).toContain('`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)');
-    expect(warning).toContain('`.ds-logs-b-default-2026.06.11-000001` (base name `logs-b-default`)');
+    expect(warning).toContain(
+      '`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)'
+    );
+    expect(warning).toContain(
+      '`.ds-logs-b-default-2026.06.11-000001` (base name `logs-b-default`)'
+    );
   });
 
   it('instructs the model to respect an explicit request and otherwise retry', () => {
@@ -114,9 +118,7 @@ describe('formatBackingIndexWarning', () => {
   });
 
   it('uses the given query name and defaults to a generic one', () => {
-    const matches = [
-      { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
-    ];
+    const matches = [{ index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' }];
 
     expect(formatBackingIndexWarning(matches, 'The recovery query')).toMatch(
       /^The recovery query targets/
