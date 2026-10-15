@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { SignalVerdict } from '@kbn/significant-events-schema';
 import {
   MAX_CLASSIFIED_ROWS,
   classifyBatch,
+  classifyDetectionsStepDefinition,
   type ClassifyBatchParams,
 } from './classify_detections';
 import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
@@ -227,5 +229,121 @@ describe('classifyBatch', () => {
 
     expect(output.rows).toEqual(rows);
     expect(output.decisions.map(({ rule_uuid: id }) => id)).toEqual(['rule-A']);
+  });
+});
+
+describe('classifyDetectionsStepDefinition', () => {
+  const settings = {
+    space_id: 'default',
+    shadow_mode: false,
+    probe_window_minutes: 60,
+    probe_timeout_ms: 8_000,
+    probe_concurrency: 5,
+    budget_ms: 20_000,
+  };
+
+  const createDefinition = () => {
+    const logger = loggerMock.create();
+    return { definition: classifyDetectionsStepDefinition({ logger }), logger };
+  };
+
+  const membersResponse = {
+    columns: [
+      { name: '_source', type: 'object' },
+      { name: 'data_json', type: 'keyword' },
+    ],
+    values: [
+      [
+        { group_hash: 'group-1', alert: { status: 'active' }, severity: 'high' },
+        JSON.stringify({
+          event_id: 'event-1',
+          title: 'Checkout errors',
+          summary: 'Checkout is failing',
+          source_ids: ['logs.checkout'],
+          confidence: 0.8,
+          signals: [
+            {
+              type: 'detection',
+              source_id: 'logs.checkout',
+              description: 'Observed rows',
+              verdict: 'confirms',
+              metadata: { rule_uuid: 'rule-A' },
+              evidence: { esql_query: STORED_QUERY, result: 'found' },
+            },
+          ],
+        }),
+      ],
+    ],
+  };
+
+  const context = (input: unknown, esClient: unknown) =>
+    ({
+      input,
+      rawInput: input,
+      contextManager: { getScopedEsClient: jest.fn(() => esClient) },
+      abortSignal: new AbortController().signal,
+    } as never);
+
+  const runHandler = async (
+    definition: ReturnType<typeof createDefinition>['definition'],
+    input: unknown,
+    esClient: unknown
+  ) => {
+    const { output } = await definition.handler(context(input, esClient));
+    if (!output) throw new Error('The step returned no output');
+    return output;
+  };
+
+  it.each([
+    ['probe_concurrency below 1', { probe_concurrency: 0 }],
+    ['probe_concurrency above 10', { probe_concurrency: 11 }],
+    ['probe_window_minutes below 15', { probe_window_minutes: 14 }],
+    ['probe_window_minutes above 360', { probe_window_minutes: 361 }],
+    ['probe_timeout_ms below 1000', { probe_timeout_ms: 999 }],
+    ['probe_timeout_ms above 30000', { probe_timeout_ms: 30_001 }],
+    ['budget_ms below 2000', { budget_ms: 1_999 }],
+    ['budget_ms above 60000', { budget_ms: 60_001 }],
+  ])('rejects %s', (_name, override) => {
+    const { definition } = createDefinition();
+
+    expect(definition.inputSchema.safeParse({ ...settings, rows: [], ...override }).success).toBe(
+      false
+    );
+    expect(definition.inputSchema.safeParse({ ...settings, rows: [] }).success).toBe(true);
+  });
+
+  it('classifies through the scoped ES client, probes the stored query and logs once', async () => {
+    const { definition, logger } = createDefinition();
+    const query = jest.fn(async (request: { query: string }) =>
+      request.query.includes('.rule-events')
+        ? membersResponse
+        : { columns: [{ name: 'x', type: 'keyword' }], values: [['row']] }
+    );
+    const input = { ...settings, rows: [detectionRow('rule-A')] };
+
+    const output = await runHandler(definition, input, { esql: { query } });
+
+    expect(definition.outputSchema.safeParse(output).success).toBe(true);
+    expect(output.decisions).toMatchObject([
+      { rule_uuid: 'rule-A', decision: 'skip', reason: 'still_breaching', probe_status: 'ok' },
+    ]);
+    expect(output.rows).toEqual([]);
+    expect(output.skipped_rule_uuids).toEqual(['rule-A']);
+    const probeRequest = query.mock.calls
+      .map(([request]) => request as { query: string; params?: unknown })
+      .find((request) => request.query.includes('LIMIT 1'));
+    expect(probeRequest?.query).toBe(`${STORED_QUERY} | LIMIT 1`);
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('classifyDetections'));
+  });
+
+  it('issues no queries for an empty batch', async () => {
+    const { definition } = createDefinition();
+    const query = jest.fn();
+
+    const output = await runHandler(definition, { ...settings, rows: [] }, { esql: { query } });
+
+    expect(query).not.toHaveBeenCalled();
+    expect(output.decisions).toEqual([]);
   });
 });
