@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -187,9 +187,22 @@ describe('RulesTab matches', () => {
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
-    expect(popover.getByText('2 matching indices')).toBeInTheDocument();
+    expect(popover.getByText('Using selected indices')).toBeInTheDocument();
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     expect(popover.getByTestId('boostSupersedingRule')).toHaveTextContent('products-first');
+  });
+
+  it('explains a higher-ranked rule when its name is hovered', async () => {
+    renderTab('/rules');
+
+    await userEvent.click(getRow('picked').getByTestId('boostRuleMatches'));
+    // EUI's popover ignores the pointer until it finishes opening.
+    await waitFor(() => expect(screen.getByRole('dialog')).not.toHaveStyle('pointer-events: none'));
+    await userEvent.hover(within(screen.getByRole('dialog')).getByText('products-first'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      '"products-first" ranks higher, so it applies instead.'
+    );
   });
 
   it("shows a pattern rule's pattern above what it matches", async () => {
@@ -199,6 +212,7 @@ describe('RulesTab matches', () => {
 
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveTextContent('Using index pattern archives-*');
+    expect(popover).not.toHaveTextContent('Using selected');
     expect(popover).toHaveTextContent('archives-2024');
   });
 

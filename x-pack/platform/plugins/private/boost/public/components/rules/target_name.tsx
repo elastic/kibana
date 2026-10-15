@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
@@ -47,23 +53,22 @@ interface SupersedingRuleProps {
 /** The rule that applies to a target instead, after an icon for ranking higher. */
 export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProps) => {
   const { euiTheme } = useEuiTheme();
+  const tooltipId = useGeneratedHtmlId();
 
-  return (
+  const label = (
     <span
       css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}
       data-test-subj="boostSupersedingRule"
     >
       {hasTooltip ? (
-        <EuiIconTip
+        // Focusable, so keyboard users can open the tooltip, which describes it.
+        <EuiIcon
           type={SUPERSEDING_ICON}
           size="s"
           color="subdued"
-          display="flex"
-          content={i18n.translate('xpack.boost.targetName.supersedingDescription', {
-            defaultMessage: '{rule} ranks higher, so it applies instead.',
-            values: { rule },
-          })}
+          tabIndex={0}
           aria-label={SUPERSEDING_LABEL}
+          aria-describedby={tooltipId}
         />
       ) : (
         <>
@@ -75,5 +80,20 @@ export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProp
       )}
       {rule}
     </span>
+  );
+
+  // The tooltip covers the icon and the rule's name, so hovering either explains it.
+  return hasTooltip ? (
+    <EuiToolTip
+      id={tooltipId}
+      content={i18n.translate('xpack.boost.targetName.supersedingDescription', {
+        defaultMessage: '"{rule}" ranks higher, so it applies instead.',
+        values: { rule },
+      })}
+    >
+      {label}
+    </EuiToolTip>
+  ) : (
+    label
   );
 };

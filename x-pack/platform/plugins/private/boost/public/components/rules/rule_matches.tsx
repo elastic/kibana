@@ -70,20 +70,21 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { matches, matchedNames, supersededBy } = coverage;
 
-  const title =
-    type === 'data_streams'
-      ? i18n.translate('xpack.boost.ruleMatches.dataStreamsTitle', {
-          defaultMessage:
-            '{matches, plural, one {# matching data stream} other {# matching data streams}}',
-          values: { matches },
-        })
-      : i18n.translate('xpack.boost.ruleMatches.indicesTitle', {
-          defaultMessage: '{matches, plural, one {# matching index} other {# matching indices}}',
-          values: { matches },
-        });
-  // A rule with a pattern shows it, since the list is what the pattern matches today.
+  // The title says how the rule chooses what it matches; the link already says how many.
   const [pattern] = patterns;
   const hasPattern = patterns.length === 1 && pattern.includes('*');
+  const title = hasPattern
+    ? i18n.translate('xpack.boost.ruleMatches.patternLabel', {
+        defaultMessage: 'Using index pattern {pattern}',
+        values: { pattern },
+      })
+    : type === 'data_streams'
+    ? i18n.translate('xpack.boost.ruleMatches.selectedDataStreamsTitle', {
+        defaultMessage: 'Using selected data streams',
+      })
+    : i18n.translate('xpack.boost.ruleMatches.selectedIndicesTitle', {
+        defaultMessage: 'Using selected indices',
+      });
 
   return (
     <EuiPopover
@@ -104,15 +105,14 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
       }
     >
       <EuiPopoverTitle paddingSize="s">
-        {title}
-        {hasPattern && (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.boost.ruleMatches.patternSubtitle"
-              defaultMessage="Using index pattern {pattern}"
-              values={{ pattern: <EuiCode>{pattern}</EuiCode> }}
-            />
-          </EuiText>
+        {hasPattern ? (
+          <FormattedMessage
+            id="xpack.boost.ruleMatches.patternTitle"
+            defaultMessage="Using index pattern {pattern}"
+            values={{ pattern: <EuiCode>{pattern}</EuiCode> }}
+          />
+        ) : (
+          title
         )}
       </EuiPopoverTitle>
       <div
