@@ -11,14 +11,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   classifyClockSkew,
+  clockSkewMachine,
   pollEsNodesClockSkew,
   sampleClocks,
   type ClockSkew,
+  type ClockSkewEvent,
   type ClockSkewSample,
+  type ClockSkewState,
 } from './clock_skew';
+import type { ActionResult } from './state_action_machine';
 import { virtualClock } from './state_action_machine.test_helpers';
 
 const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
 const CHECK_INTERVAL = 10 * MINUTE;
 
 const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
@@ -78,6 +83,74 @@ describe('classifyClockSkew', () => {
   it('measures nothing when no node reported a timestamp', () => {
     expect(classifyClockSkew({ ...inSync, timestamps: [] })).toEqual({ type: 'unmeasured' });
   });
+});
+
+describe('the clock skew machine', () => {
+  const machine = clockSkewMachine(async () => inSync);
+  const remindAt = HOUR;
+  const states: Record<ClockSkewState['controlState'], ClockSkewState> = {
+    healthy: machine.initialState,
+    skewed: { controlState: 'skewed', remindAt },
+  };
+  const completed = (value: ClockSkewSample, completedAt = 0): ActionResult<ClockSkewSample> => ({
+    ok: true,
+    value,
+    completedAt,
+  });
+  const results: Record<string, ActionResult<ClockSkewSample>> = {
+    'a failed request': { ok: false, error: new Error('boom'), completedAt: 0 },
+    'a sample measuring nothing': completed({ ...inSync, timestamps: [] }),
+    'an in-sync sample': completed(inSync),
+    'a skewed sample': completed(behind),
+    'a skewed sample before the reminder is due': completed(behind, remindAt - 1),
+    'a skewed sample once the reminder is due': completed(behind, remindAt),
+  };
+
+  // Every step waits ten minutes. A detected or reminded skew sets the next reminder an
+  // hour after that check.
+  it.each`
+    from         | result                                          | to           | reminder     | event
+    ${'healthy'} | ${'a failed request'}                           | ${'healthy'} | ${'none'}    | ${'unavailable'}
+    ${'healthy'} | ${'a sample measuring nothing'}                 | ${'healthy'} | ${'none'}    | ${'unavailable'}
+    ${'healthy'} | ${'an in-sync sample'}                          | ${'healthy'} | ${'none'}    | ${'inSync'}
+    ${'healthy'} | ${'a skewed sample'}                            | ${'skewed'}  | ${'renewed'} | ${'skewDetected'}
+    ${'skewed'}  | ${'a failed request'}                           | ${'skewed'}  | ${'kept'}    | ${'unavailable'}
+    ${'skewed'}  | ${'a sample measuring nothing'}                 | ${'skewed'}  | ${'kept'}    | ${'unavailable'}
+    ${'skewed'}  | ${'an in-sync sample'}                          | ${'healthy'} | ${'none'}    | ${'recovered'}
+    ${'skewed'}  | ${'a skewed sample before the reminder is due'} | ${'skewed'}  | ${'kept'}    | ${'skewPersists'}
+    ${'skewed'}  | ${'a skewed sample once the reminder is due'}   | ${'skewed'}  | ${'renewed'} | ${'skewReminder'}
+  `(
+    'when $from, $result goes to $to: $event',
+    ({
+      from,
+      result,
+      to,
+      reminder,
+      event,
+    }: {
+      from: ClockSkewState['controlState'];
+      result: string;
+      to: ClockSkewState['controlState'];
+      reminder: 'none' | 'kept' | 'renewed';
+      event: ClockSkewEvent['type'];
+    }) => {
+      const { completedAt } = results[result];
+      const reached = {
+        none: { controlState: to },
+        kept: states[from],
+        renewed: { controlState: to, remindAt: completedAt + HOUR },
+      };
+
+      expect(machine.model(states[from], results[result])).toEqual({
+        state: reached[reminder],
+        event:
+          event === 'skewDetected' || event === 'skewReminder'
+            ? { type: event, skew: behindBy61s }
+            : { type: event },
+        wait: CHECK_INTERVAL,
+      });
+    }
+  );
 });
 
 describe('sampleClocks', () => {

@@ -49,11 +49,11 @@ type ClockSkewClassification =
   | { readonly type: 'inSync' }
   | { readonly type: 'skewed'; readonly skew: ClockSkew };
 
-type ClockSkewState =
+export type ClockSkewState =
   | { readonly controlState: 'healthy' }
   | { readonly controlState: 'skewed'; readonly remindAt: number };
 
-type ClockSkewEvent =
+export type ClockSkewEvent =
   /** The request failed or measured nothing. */
   | { readonly type: 'unavailable' }
   | { readonly type: 'inSync' }
@@ -175,17 +175,20 @@ export interface PollEsNodesClockSkewOptions {
   signal: AbortSignal;
 }
 
+export const clockSkewMachine = (
+  action: Action<ClockSkewSample>
+): StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> => ({
+  initialState: { controlState: 'healthy' },
+  next: () => action,
+  model: (state, result) => ({ ...model(state, result), wait: CLOCK_SKEW_CHECK_INTERVAL_MS }),
+});
+
 /** Runs the clock skew check, logging its events, until `signal` aborts. */
 export const pollEsNodesClockSkew = async (
   { internalClient, log, signal }: PollEsNodesClockSkewOptions,
   clock: Clock = realClock
 ): Promise<void> => {
-  const action = sampleClocks(internalClient);
-  const machine: StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> = {
-    initialState: { controlState: 'healthy' },
-    next: () => action,
-    model: (state, result) => ({ ...model(state, result), wait: CLOCK_SKEW_CHECK_INTERVAL_MS }),
-  };
+  const machine = clockSkewMachine(sampleClocks(internalClient));
   for await (const { event } of run(machine, clock, signal)) {
     logClockSkewEvent(log, event);
   }
