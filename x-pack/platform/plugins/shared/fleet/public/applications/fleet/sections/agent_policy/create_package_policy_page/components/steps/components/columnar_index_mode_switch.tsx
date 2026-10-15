@@ -25,10 +25,15 @@ interface Props {
   disabled?: boolean;
   onChange: () => void;
   /**
-   * Logs data streams the package explicitly marks as `unsupported`; they stay on LogsDB no
-   * matter what the toggle says, so the user is told which ones and why.
+   * Titles of the logs data streams the package explicitly marks as `unsupported`; they stay on
+   * LogsDB no matter what the toggle says. Each one also carries a note in its own section.
    */
   unsupportedDataStreams?: string[];
+  /**
+   * The integration has logs data streams but none declares columnar readiness: the switch is
+   * shown off and disabled, with an explanation.
+   */
+  notReady?: boolean;
   /**
    * The user opted in, but this package version has no columnar-ready logs data stream left:
    * the switch stays visible to tell the user the data streams go back to LogsDB.
@@ -41,6 +46,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
   disabled = false,
   onChange,
   unsupportedDataStreams = [],
+  notReady = false,
   withdrawn = false,
 }) => (
   <>
@@ -101,7 +107,25 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </>
       )}
-      {!withdrawn && unsupportedDataStreams.length > 0 && (
+      {notReady && !withdrawn && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span data-test-subj="columnarIndexModeNotReady">
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
+                  defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
+                />
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+      {!withdrawn && !notReady && unsupportedDataStreams.length > 0 && (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -112,7 +136,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
               <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
-                  defaultMessage="These data streams do not support columnar storage and use LogsDB, from the next rollover if they were columnar: {dataStreams}"
+                  defaultMessage="These data streams don't support columnar storage and stay on LogsDB: {dataStreams}"
                   values={{ dataStreams: unsupportedDataStreams.join(', ') }}
                 />
               </span>

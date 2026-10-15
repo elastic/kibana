@@ -89,9 +89,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
 
   // Columnar index mode: one choice per installed integration, stored on the installation rather
-  // than on the policy. The toggle is offered when at least one logs data stream declares
-  // readiness; data streams marked `unsupported` are listed so the user knows why they stay on
-  // LogsDB.
+  // than on the policy. Every integration with a logs data stream shows the toggle; it can be
+  // turned on when at least one logs data stream declares readiness, and is greyed out with an
+  // explanation otherwise. Data streams marked `unsupported` stay on LogsDB: they are listed
+  // under the toggle and noted in their own section.
   const columnarReadyDataStreams = useMemo(
     () =>
       packageInfo.type === 'input'
@@ -107,7 +108,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         .filter(
           (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'unsupported'
         )
-        .map((dataStream) => dataStream.dataset),
+        .map((dataStream) => dataStream.title || dataStream.dataset),
     [packageInfo]
   );
   // The pending choice wins, then the one stored on the installation, then the mode the
@@ -127,6 +128,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     packageInfo.type !== 'input' &&
     columnarReadyDataStreams.length === 0 &&
     installationInfo?.logsdb_columnar_enabled === true;
+  const hasLogsDataStreams =
+    packageInfo.type !== 'input' &&
+    (packageInfo.data_streams ?? []).some((dataStream) => dataStream.type === 'logs');
+  const isColumnarIndexModeNotReady =
+    hasLogsDataStreams && columnarReadyDataStreams.length === 0 && !isColumnarIndexModeWithdrawn;
   const toggleColumnarIndexMode = () =>
     updatePackagePolicy({
       package: {
@@ -143,11 +149,16 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     packagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
-        {(columnarReadyDataStreams.length > 0 || isColumnarIndexModeWithdrawn) && (
+        {(hasLogsDataStreams || isColumnarIndexModeWithdrawn) && (
           <>
             <ColumnarIndexModeSwitch
-              checked={isColumnarIndexModeEnabled && !isColumnarIndexModeWithdrawn}
-              disabled={isColumnarIndexModeWithdrawn}
+              checked={
+                isColumnarIndexModeEnabled &&
+                !isColumnarIndexModeWithdrawn &&
+                !isColumnarIndexModeNotReady
+              }
+              disabled={isColumnarIndexModeWithdrawn || isColumnarIndexModeNotReady}
+              notReady={isColumnarIndexModeNotReady}
               withdrawn={isColumnarIndexModeWithdrawn}
               onChange={toggleColumnarIndexMode}
               unsupportedDataStreams={columnarUnsupportedDataStreams}

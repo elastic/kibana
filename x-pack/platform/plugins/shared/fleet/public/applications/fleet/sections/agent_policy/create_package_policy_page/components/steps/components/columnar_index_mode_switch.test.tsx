@@ -42,11 +42,21 @@ describe('ColumnarIndexModeSwitch', () => {
   });
 
   it('lists the unsupported data streams when there are any', () => {
-    const result = render({ unsupportedDataStreams: ['nginx.error', 'nginx.audit'] });
+    const result = render({ unsupportedDataStreams: ['Nginx error logs', 'Nginx audit logs'] });
 
     expect(result.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
-      'nginx.error, nginx.audit'
+      'Nginx error logs, Nginx audit logs'
     );
+  });
+
+  it('explains why the switch is greyed out when the integration is not columnar-ready', () => {
+    const result = render({ notReady: true, disabled: true, unsupportedDataStreams: ['x'] });
+
+    expect(result.getByTestId(COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ)).toBeDisabled();
+    expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+      "This integration isn't columnar-ready yet."
+    );
+    expect(result.queryByTestId('columnarIndexModeUnsupportedDataStreams')).not.toBeInTheDocument();
   });
 
   it('omits the unsupported line when there are none', () => {
