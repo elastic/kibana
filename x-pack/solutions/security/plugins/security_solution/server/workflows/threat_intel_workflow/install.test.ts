@@ -134,20 +134,29 @@ describe('threat intel managed workflow install', () => {
         await runInstall(client);
       });
 
-      it.each(supplyWorkflowIds)('returns %s not installed in the default space', (workflowId) => {
-        expect(client.install).not.toHaveBeenCalledWith(workflowId, {
-          spaceId: DEFAULT_SPACE_ID,
-        });
-      });
-
       it.each(supplyWorkflowIds)(
-        'returns %s re-installed in the global space so it stays tracked',
+        'returns %s tracked in the global space so it is not orphan-cleaned',
         (workflowId) => {
           expect(client.install).toHaveBeenCalledWith(workflowId, {
             spaceId: GLOBAL_WORKFLOW_SPACE_ID,
           });
         }
       );
+
+      it.each(supplyWorkflowIds)(
+        'returns %s tracked in the default space so it is not orphan-cleaned',
+        (workflowId) => {
+          expect(client.install).toHaveBeenCalledWith(workflowId, {
+            spaceId: DEFAULT_SPACE_ID,
+          });
+        }
+      );
+
+      it('returns each supply workflow install attempted once per space', () => {
+        expect(
+          client.install.mock.calls.filter(([id]) => id === THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)
+        ).toHaveLength(2);
+      });
 
       it('returns the attribute workflows still installed', () => {
         expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {

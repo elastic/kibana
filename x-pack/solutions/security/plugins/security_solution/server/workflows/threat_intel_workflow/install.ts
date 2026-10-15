@@ -49,10 +49,12 @@ const uninstallTolerant = async (
 
 /**
  * Removes the legacy global copy of a supply workflow so the default-space install can create it.
- * Returns false when the removal fails: the global copy is then re-installed so `ready()` still
- * sees `id:*` as tracked this boot and does not delete or disable it as an orphan, and the
- * caller skips the default-space install (it would 409 on the shared `_id`). The move is retried
- * on the next boot.
+ * Returns false when the removal fails. A failed uninstall does not say where the document lives
+ * (it may already be in the default space and only the legacy lookup failed), so both locations are
+ * re-installed to keep `id:*` and `id:default` tracked this boot. The install tracks its key before
+ * it touches the document, so whichever copy exists is kept and the other attempt can only 409
+ * on the shared `_id`, which is expected and ignored. `ready()` then never treats either as an
+ * orphan. The caller skips its own default-space install, and the move is retried on the next boot.
  */
 const removeLegacyGlobalSupplyWorkflow = async (
   managedWorkflowsClient: SecurityManagedWorkflowsClient,
@@ -65,10 +67,19 @@ const removeLegacyGlobalSupplyWorkflow = async (
   } catch (error) {
     logger.warn(
       `Failed to remove the legacy global copy of the threat intel supply workflow ${workflowId}; ` +
-        `keeping it for this boot and retrying the move to the default space on the next boot`,
+        `keeping the existing copy for this boot and retrying the move to the default space on the next boot`,
       { error }
     );
-    await managedWorkflowsClient.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    for (const spaceId of [GLOBAL_WORKFLOW_SPACE_ID, DEFAULT_SPACE_ID]) {
+      try {
+        await managedWorkflowsClient.install(workflowId, { spaceId });
+      } catch (installError) {
+        logger.debug(
+          `Expected conflict while tracking the threat intel supply workflow ${workflowId} in space '${spaceId}'`,
+          { error: installError }
+        );
+      }
+    }
     return false;
   }
 };
