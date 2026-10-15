@@ -1,9 +1,37 @@
 {
-  "sha1": "eb0c1bdbeb490aa5608f7ff9e6bfb73a0ee38885",
+  "sha1": "1e2850ef224739f6e6e090ea0bbce96ef4dec9e3",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "ac5e7c002a7e247-2c548be6deb4cff",
+      "title": "Anonymization Settings - Enterprise license gate opens the page on an Enterprise license",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/ai_anonymization_settings/test/scout/ui/parallel_tests/license_gate.spec.ts",
+        "line": 21,
+        "column": 53
+      }
+    },
+    {
+      "id": "ac5e7c002a7e247-5c147c152e9a419",
+      "title": "Anonymization Settings - Enterprise license gate does not open the page on a license below Enterprise",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/ai_anonymization_settings/test/scout/ui/parallel_tests/license_gate.spec.ts",
+        "line": 25,
+        "column": 73
+      }
+    },
     {
       "id": "9ed640b7ee2f8fb-3887c05bde6fa6f",
       "title": "Anonymization Settings - Page Display should display correct UI elements",

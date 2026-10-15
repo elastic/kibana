@@ -30,6 +30,13 @@ export class AnonymizationSettingsPage {
   }
 
   /**
+   * Get the page's root container
+   */
+  getPageContainer() {
+    return this.page.testSubj.locator('aiAnonymizationSettingsPage');
+  }
+
+  /**
    * Get the Anonymization Settings page title element
    */
   getPageTitle() {
