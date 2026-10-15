@@ -112,7 +112,7 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
   );
 
   spaceTest(
-    'switches methods without rendering an unconfigured constant',
+    'keeps the configured line until the replacement method is configured',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
@@ -136,14 +136,16 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
         .toStrictEqual([]);
       await lens.closeDimensionEditor();
       await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveCount(0);
+      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
+        'Static value: 123'
+      );
+      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
 
       await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
       await lens.dimensions.switchToStaticValue();
-      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('0');
-      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '0');
+      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('123');
       await lens.closeDimensionEditor();
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 0');
+      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
 
       await lens.workspace.submitEsqlQuery(SINGLE_COLUMN_QUERY);
       await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);

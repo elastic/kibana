@@ -46,7 +46,7 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const [columnsQuery, setColumnsQuery] = useState<string>();
-  const [temporaryStaticValue, setTemporaryStaticValue] = useState(false);
+  const [temporaryMethod, setTemporaryMethod] = useState<'static_value' | 'esql'>();
   const query = props.state.layers[props.layerId]?.query;
   const { euiTheme } = useEuiTheme();
   const {
@@ -184,14 +184,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
 
   const isStatic = Boolean(
     supportStaticValue &&
-      (temporaryStaticValue || !selectedField || selectedField.valueSource?.type === 'static')
+      (temporaryMethod === 'static_value' ||
+        (temporaryMethod !== 'esql' &&
+          (!selectedField || selectedField.valueSource?.type === 'static')))
   );
 
   useEffect(() => {
     if (
       !supportStaticValue ||
+      temporaryMethod === 'static_value' ||
       columnsQuery !== queryEsql ||
-      selectedField?.valueSource?.type !== 'unconfigured'
+      (selectedField?.valueSource?.type !== 'unconfigured' && temporaryMethod !== 'esql')
     )
       return;
     const numericColumns = allColumns.filter(
@@ -201,26 +204,28 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     const [field] = numericColumns;
     setState((previousState) => {
       const layer = previousState.layers[layerId];
+      const previousColumn = layer.columns.find((column) => column.columnId === columnId);
+      const column = {
+        ...previousColumn,
+        columnId,
+        fieldName: field.name,
+        label: previousColumn?.customLabel ? previousColumn.label : field.name,
+        meta: field.meta,
+        variable: field.variable,
+        valueSource: { type: 'query' as const },
+      };
       return mergeLayer({
         state: previousState,
         layerId,
         newLayer: {
           ...layer,
-          columns: layer.columns.map((column) =>
-            column.columnId === columnId && column.valueSource?.type === 'unconfigured'
-              ? {
-                  ...column,
-                  fieldName: field.name,
-                  label: column.customLabel ? column.label : field.name,
-                  meta: field.meta,
-                  variable: field.variable,
-                  valueSource: { type: 'query' as const },
-                }
-              : column
-          ),
+          columns: previousColumn
+            ? layer.columns.map((existing) => (existing.columnId === columnId ? column : existing))
+            : [...layer.columns, column],
         },
       });
     });
+    setTemporaryMethod(undefined);
   }, [
     allColumns,
     columnId,
@@ -228,12 +233,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     layerId,
     queryEsql,
     selectedField?.valueSource?.type,
+    temporaryMethod,
     setState,
     supportStaticValue,
   ]);
   const setStaticValue = (value: number) => {
     if (!Number.isFinite(value)) return;
-    setTemporaryStaticValue(false);
+    setTemporaryMethod(undefined);
     setState((previousState) => {
       const layer = previousState.layers[layerId];
       const previousColumn = layer.columns.find((column) => column.columnId === columnId);
@@ -284,9 +290,11 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   defaultMessage: 'Static value',
                 }),
                 onClick: () => {
-                  if (selectedField && selectedField.valueSource?.type !== 'static') {
-                    setTemporaryStaticValue(true);
-                  }
+                  setTemporaryMethod(
+                    selectedField && selectedField.valueSource?.type !== 'static'
+                      ? 'static_value'
+                      : undefined
+                  );
                 },
               },
               {
@@ -297,34 +305,11 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   defaultMessage: 'ES|QL',
                 }),
                 onClick: () => {
-                  setTemporaryStaticValue(false);
-                  if (selectedField?.valueSource?.type !== 'static' && selectedField) return;
-                  setState((previousState) => {
-                    const layer = previousState.layers[layerId];
-                    const previousColumn = layer.columns.find(
-                      (column) => column.columnId === columnId
-                    );
-                    const column = {
-                      ...previousColumn,
-                      columnId,
-                      fieldName: '',
-                      label: previousColumn?.customLabel ? previousColumn.label : undefined,
-                      variable: undefined,
-                      valueSource: { type: 'unconfigured' as const },
-                    };
-                    return mergeLayer({
-                      state: previousState,
-                      layerId,
-                      newLayer: {
-                        ...layer,
-                        columns: previousColumn
-                          ? layer.columns.map((existing) =>
-                              existing.columnId === columnId ? column : existing
-                            )
-                          : [...layer.columns, column],
-                      },
-                    });
-                  });
+                  setTemporaryMethod(
+                    !selectedField || selectedField.valueSource?.type === 'static'
+                      ? 'esql'
+                      : undefined
+                  );
                 },
               },
             ]}
@@ -377,6 +362,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                     : selectedField
                 }
                 onChoose={(choice) => {
+                  setTemporaryMethod(undefined);
                   const column = allColumns?.find((f) => f.name === choice.field);
                   const newColumn = {
                     columnId: props.columnId,
