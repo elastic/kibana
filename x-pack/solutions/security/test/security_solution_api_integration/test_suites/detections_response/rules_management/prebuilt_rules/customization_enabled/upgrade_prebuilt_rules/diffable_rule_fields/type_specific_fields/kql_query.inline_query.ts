@@ -8,6 +8,7 @@
 import {
   KqlQueryType,
   ThreeWayDiffOutcome,
+  UpgradeConflictResolutionEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
@@ -911,6 +912,49 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'kql_query',
+            expectedFieldsAfterUpgrade: { query: STOCK_QUERY },
+          },
+          getService
+        );
+      });
+
+      describe('customized with an upgrade (-AB diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            query: STOCK_QUERY,
+            language: 'kuery',
+          },
+          patch: {
+            query: CUSTOM_QUERY,
+          },
+          upgrade: {
+            type: 'query',
+            query: WHITESPACE_QUERY,
+            language: 'kuery',
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'kql_query',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
+              target: NORMALIZED_KQL_QUERY,
+              merged: NORMALIZED_KQL_QUERY,
+            },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'kql_query',
+            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
             expectedFieldsAfterUpgrade: { query: STOCK_QUERY },
           },
           getService
