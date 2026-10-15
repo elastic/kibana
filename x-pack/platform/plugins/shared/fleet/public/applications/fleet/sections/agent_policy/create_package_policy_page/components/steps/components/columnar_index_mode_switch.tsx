@@ -77,73 +77,57 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
+    {/* One help line, like Fleet's other switches: a state that needs explaining replaces the
+        description rather than stacking under it. */}
     <EuiText color="subdued" size="xs">
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="info" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeDescription"
-            defaultMessage="Stores the integration's log data streams in the logsdb_columnar index mode: fields are stored once as doc values, with no inverted index except for text fields. Takes effect on the next rollover. Existing data is not rewritten."
+          <EuiIcon
+            type={withdrawn ? 'warning' : 'info'}
+            color={withdrawn ? 'warning' : 'subdued'}
+            aria-hidden={true}
           />
         </EuiFlexItem>
+        <EuiFlexItem>
+          {withdrawn ? (
+            <span data-test-subj="columnarIndexModeWithdrawn">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeWithdrawn"
+                defaultMessage="This version of the integration no longer supports columnar storage. Its log data streams move back to LogsDB at the next rollover."
+              />
+            </span>
+          ) : notReady ? (
+            <span data-test-subj="columnarIndexModeNotReady">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
+                defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
+              />
+            </span>
+          ) : (
+            <>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeDescription"
+                defaultMessage="Stores this integration's log data streams in the logsdb_columnar index mode: each field once, as doc values, with no inverted index except on text fields. Applies from the next rollover; existing data isn't rewritten."
+              />
+              {unsupportedDataStreams.length > 0 && (
+                <>
+                  {' '}
+                  <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
+                      defaultMessage="{dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage and {count, plural, one {stays} other {stay}} on LogsDB."
+                      values={{
+                        dataStreams: unsupportedDataStreams.join(', '),
+                        count: unsupportedDataStreams.length,
+                      }}
+                    />
+                  </span>
+                </>
+              )}
+            </>
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
-      {withdrawn && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span data-test-subj="columnarIndexModeWithdrawn">
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeWithdrawn"
-                  defaultMessage="This version of the integration no longer supports columnar storage. Its log data streams move back to LogsDB at the next rollover."
-                />
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-      {notReady && !withdrawn && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span data-test-subj="columnarIndexModeNotReady">
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
-                  defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
-                />
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-      {!withdrawn && !notReady && unsupportedDataStreams.length > 0 && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
-                  defaultMessage="These data streams don't support columnar storage and stay on LogsDB: {dataStreams}"
-                  values={{ dataStreams: unsupportedDataStreams.join(', ') }}
-                />
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </EuiText>
   </>
 );

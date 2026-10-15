@@ -28,7 +28,7 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(result.getByText('Columnar index mode')).toBeInTheDocument();
     expect(result.getByText('Technical preview')).toBeInTheDocument();
     expect(
-      result.getByText(/fields are stored once as doc values, with no inverted index/)
+      result.getByText(/each field once, as doc values, with no inverted index/)
     ).toBeInTheDocument();
   });
 
@@ -56,7 +56,24 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
       "This integration isn't columnar-ready yet."
     );
+    // The reason replaces the description rather than stacking under it.
+    expect(result.queryByText(/stored once|each field once/)).not.toBeInTheDocument();
     expect(result.queryByTestId('columnarIndexModeUnsupportedDataStreams')).not.toBeInTheDocument();
+  });
+
+  it('replaces the description with the withdrawn notice', () => {
+    const result = render({ withdrawn: true, disabled: true });
+
+    expect(result.getByTestId('columnarIndexModeWithdrawn')).toBeInTheDocument();
+    expect(result.queryByText(/each field once/)).not.toBeInTheDocument();
+  });
+
+  it('uses the singular for one unsupported data stream', () => {
+    const result = render({ unsupportedDataStreams: ['Nginx error logs'] });
+
+    expect(result.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
+      "Nginx error logs doesn't support columnar storage and stays on LogsDB."
+    );
   });
 
   it('omits the unsupported line when there are none', () => {
