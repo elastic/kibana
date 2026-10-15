@@ -119,6 +119,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);
     await globalRun(Tasks.AssertPathLength);
@@ -156,8 +157,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackageX64);
-      artifactTasks.push(Tasks.CreateRpmPackageARM64);
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'x64')));
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'arm64')));
     }
   }
 

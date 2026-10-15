@@ -7,7 +7,7 @@ date: 2022-05-17
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'plugin']
 ---
 
-An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Rules registered in `oxlint_plugin.js` run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. Rules that are only registered in `index.js` run in ESLint only.
+An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Rules registered in `oxlint_plugin.js` run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. Rules that alias an existing ESLint rule keep its `create` API and run through Oxlint's ESLint-compatible API. Rules that are only registered in `index.js` run in ESLint only.
 
 Oxlint loads the plugin from `.oxlint/index.mts` (via the repo-root `oxlint.config.mjs` entry) with the existing rule namespace preserved:
 
@@ -23,7 +23,7 @@ Rule configuration uses the existing `@kbn/eslint/<rule>` names in both linters.
 
 To move a rule to Oxlint:
 
-1. Implement it with `createOnce` and register it in `oxlint_plugin.js`.
+1. Implement it with `createOnce` and register it in `oxlint_plugin.js`. A rule that only aliases an existing ESLint rule may keep its `create` API instead; add it to `CREATE_API_RULES` in `rules/__fixtures__/run_oxlint_rule_tests.mjs`.
 2. Add its test file to `parityTests` in `rules/__fixtures__/run_oxlint_rule_tests.mjs`.
 3. Move its configuration from `.eslintrc.js` to the matching module in `.oxlint/` (`kibana.mts` for general `@kbn/eslint` rules), or add a new module and spread it into `.oxlint/index.mts`.
 
@@ -92,7 +92,7 @@ Disallows the usage of constructor arguments into class property initializers.
 
 ## no_export_all
 
-Disables the usage of `export *`.
+Disables the usage of `export *`. The autofix lists the names exported by the re-exported module, which the rule reads by parsing that module (and any modules it re-exports with `export *`) with TypeScript.
 
 ## no_this_in_property_initializers
 
@@ -127,3 +127,23 @@ module.exports = {
 ## no_unsafe_console
 
 Disables the usage of kbn-security-hardening/console/unsafeConsole.
+
+## scout_no_raw_eui_selectors
+
+Disallows hand-written EUI class selectors in Scout locators for components that have an `@elastic/eui-test-helpers` Component Object. The restricted classes are read from the installed `@elastic/eui-test-helpers` package.
+
+## security_imports_restriction
+
+typescript-eslint's `no-restricted-imports` under a separate name, so that local `no-restricted-imports` overrides cannot drop these restrictions. It accepts the same options and uses the ESLint `create` API in Oxlint. Kibana configures it in `.oxlint/security_imports.mts`.
+
+```javascript
+'@kbn/eslint/security_imports_restriction': [
+  'error',
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith', 'template'],
+    message: 'Please use @kbn/safer-lodash-set instead',
+  },
+  { name: 'lodash/set', message: 'Please use @kbn/safer-lodash-set/set instead' },
+],
+```

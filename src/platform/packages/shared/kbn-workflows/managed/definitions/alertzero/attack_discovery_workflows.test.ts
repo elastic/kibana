@@ -143,12 +143,11 @@ const asWith = (step: YamlStep | undefined): Record<string, string> =>
 // Every reference to the Investigation resolves through the derived id rather than
 // through the create's output: on a re-review the create 409s and emits nothing.
 const derivedInvestigationId = '{{ steps.resolve_investigation_id.output.investigation_id }}';
-const journalWorkflowIdTemplate = '{{ consts.journal_note }}';
+const journalWorkflowId = ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID;
 
 const journalExecutes = (steps: YamlStep[]) =>
   steps.filter(
-    (step) =>
-      step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowIdTemplate
+    (step) => step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowId
   );
 
 // Two persisted Attack Discovery ids. `kibana.alert.uuid` is the SHA-256 hex the
@@ -733,13 +732,9 @@ describe('Attack Discovery worker chain', () => {
       const analysisInputs = asInputs(runAnalysis);
 
       it('calls the analysis workflow', () => {
-        expect(review.consts?.fp_tp_analysis).toBe(
+        expect(runAnalysis?.with?.['workflow-id']).toBe(
           ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
         );
-      });
-
-      it('resolves the workflow id from that const', () => {
-        expect(runAnalysis?.with?.['workflow-id']).toBe('{{ consts.fp_tp_analysis }}');
       });
 
       // Synchronous: the review needs the verdict inline, and every write the
@@ -863,16 +858,34 @@ describe('Attack Discovery worker chain', () => {
       // recording it here would group nothing and quietly break the telemetry that
       // reads this field.
       it('records the Worker run that produced it, not its own execution', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
-        expect(metadata?.workflow_execution_id).toBe('{{ inputs.parent_run_id }}');
+        expect(metadata?.workflow_execution_ids).toEqual(['{{ inputs.parent_run_id }}']);
+      });
+
+      it('appends the runner ID when reusing an investigation without changing its metadata at creation', () => {
+        const append = stepIn(reviewSteps, 'append_workflow_execution');
+        expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+        expect(append?.['on-failure']).toEqual({ continue: true });
+        expect(append?.if).toBe('${{ inputs.parent_run_id != blank }}');
+        expect(append?.with).toEqual({
+          conversationId: '{{ steps.resolve_investigation_id.output.investigation_id }}',
+          workflowExecutionId: '{{ inputs.parent_run_id }}',
+        });
+        const names = reviewSteps.map(({ name }) => name);
+        expect(names.indexOf('verify_investigation')).toBeLessThan(
+          names.indexOf('append_workflow_execution')
+        );
+        expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+          names.indexOf('run_fp_tp_analysis')
+        );
       });
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
       // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
         expect(metadata?.summary).toBe(
           "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
@@ -1456,7 +1469,7 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact is the one other attachment, and it is bookkeeping, not evidence. Reads and
-      // the verdict refresh write no new attachment.
+      // the verdict refresh write no new attachment, nor do investigation metadata updates.
       it('writes no other attachment than the Impact', () => {
         const evidenceSteps = ['ai.attachment.add', 'ai.attachment.read', 'ai.attachment.update'];
 
@@ -1465,7 +1478,7 @@ describe('Attack Discovery worker chain', () => {
             .filter(
               (step) =>
                 (step.type.startsWith('ai.attachment.') ||
-                  step.type.startsWith('investigations.')) &&
+                  step.type.startsWith('investigations.attach')) &&
                 !evidenceSteps.includes(step.type)
             )
             .map((step) => step.type)
@@ -1733,7 +1746,7 @@ describe('Attack Discovery worker chain', () => {
       it.each(closes)("journals to the Investigation from %s's fallback", (name) => {
         expect(
           (fallbackOf(name)[0]?.with as { 'workflow-id'?: string } | undefined)?.['workflow-id']
-        ).toBe('{{ consts.journal_note }}');
+        ).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
       });
     });
 
@@ -2183,7 +2196,12 @@ describe('Attack Discovery worker chain', () => {
     const isFailureNote = (name: string) => LIFECYCLE_FAILURE_NOTES.includes(name);
 
     it('points journal executes at the helper id', () => {
-      expect(review.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+      expect(reviewJournal.length).toBeGreaterThan(0);
+      expect(
+        reviewJournal.every(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID
+        )
+      ).toBe(true);
     });
 
     it('calls the journal helper at each agreed inflection', () => {

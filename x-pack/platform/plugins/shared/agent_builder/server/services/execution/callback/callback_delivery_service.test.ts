@@ -5,29 +5,11 @@
  * 2.0.
  */
 
-import { AgentBuilderErrorCode, AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
-const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
-  ({
-    executionId: 'execution-1',
-    executionMode: AgentExecutionMode.conversation,
-    agentParams: {
-      nextInput: { message: 'hello' },
-      ...(url ? { callback: { url } } : {}),
-    },
-  } as unknown as AgentExecution);
-const createStandaloneExecution = (): AgentExecution =>
-  ({
-    executionId: 'execution-1',
-    executionMode: AgentExecutionMode.standalone,
-    agentParams: {
-      nextInput: { message: 'hello' },
-    },
-  } as unknown as AgentExecution);
 
 const failurePayload: ChatCallbackFailureResponse = {
   execution_id: 'execution-1',
@@ -58,26 +40,6 @@ const createCallbackDeliveryService = (
       }),
     },
   } as never);
-
-describe('getCallbackUrl', () => {
-  it('returns the callback URL for conversation executions with a callback', () => {
-    expect(createCallbackDeliveryService().getCallbackUrl(createConversationExecution())).toBe(
-      callbackUrl
-    );
-  });
-
-  it('returns undefined for conversation executions without a callback', () => {
-    expect(
-      createCallbackDeliveryService().getCallbackUrl(createConversationExecution(null))
-    ).toBeUndefined();
-  });
-
-  it('returns undefined for standalone executions', () => {
-    expect(
-      createCallbackDeliveryService().getCallbackUrl(createStandaloneExecution())
-    ).toBeUndefined();
-  });
-});
 
 describe('validateCallbackUrl', () => {
   it('delegates callback URL validation to the Actions allowed-host validator', () => {

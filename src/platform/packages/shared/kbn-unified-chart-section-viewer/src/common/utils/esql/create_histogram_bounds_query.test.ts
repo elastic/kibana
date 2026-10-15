@@ -31,7 +31,8 @@ describe('createHistogramBoundsQuery', () => {
     ).toEqual({
       metricKey: 'metrics-a::latency.exp',
       source: 'metrics-a',
-      esqlQuery: `TS metrics-a
+      esqlQuery: `SET unmapped_fields = "NULLIFY";
+TS metrics-a
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`,
     });
   });
@@ -59,17 +60,6 @@ describe('createHistogramBoundsQuery', () => {
     expect(boundsQuery?.esqlQuery).toContain(
       'STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)'
     );
-  });
-
-  it('returns undefined when histogram field types conflict across streams', () => {
-    expect(
-      createHistogramBoundsQuery({
-        metricItem: createMetric({
-          fieldTypes: [ES_FIELD_TYPES.HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
-        }),
-        originalSource: 'metrics-*',
-      })
-    ).toBeUndefined();
   });
 
   it('casts a legacy histogram with TO_TDIGEST', () => {

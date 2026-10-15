@@ -18,6 +18,15 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // HTTP caching (cache-control, etag, 304, uiSetting) is only testable end to end. The cache max age
+  // is configurable on classic but not on serverless (`data_views:cache_max_age` is not registered
+  // there, see `fieldListCachingEnabled`), so only `no-cache when data_views:cache_max_age set to zero`
+  // needs `tags.stateful.classic`. `are present`, `returns 304 on matching etag` and `handles empty
+  // field lists` also run on serverless (the route falls back to the default max age): tag them
+  // `tags.deploymentAgnostic`, i.e. split the file into two describes. Restore the ui setting with the
+  // Scout `uiSettings` fixture.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache.spec.ts
   describe('cache headers', () => {
     before(() =>
       esArchiver.load(

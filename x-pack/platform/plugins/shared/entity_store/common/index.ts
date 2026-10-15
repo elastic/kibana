@@ -14,7 +14,7 @@
  * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  *
  * @example
- * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
+ * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -79,6 +79,10 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
+    // Literal segments win over `{entityType}` in the router, so START and STOP are unambiguous.
+    START: `${INTERNAL_BASE_ROUTE}/start`,
+    STOP: `${INTERNAL_BASE_ROUTE}/stop`,
+    ENGINE_CONFIG: `${INTERNAL_BASE_ROUTE}/{entityType}`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
@@ -114,7 +118,13 @@ export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'g
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export { ExtractionMode } from './domain/definitions/entity_schema';
+export { ExtractionMode, extractionBlockSchema } from './domain/definitions/entity_schema';
+export type {
+  EntityDefinitionOfAnyType,
+  EntityDefinitionWithoutId,
+  ExtractionBlock,
+  ExtractedEntityDefinition,
+} from './domain/definitions/entity_schema';
 
 export type {
   Entity,
