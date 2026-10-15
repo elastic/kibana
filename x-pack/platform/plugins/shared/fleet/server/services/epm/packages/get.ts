@@ -529,46 +529,27 @@ export async function getPackageInfo({
     throw cachedError;
   }
 
-  try {
-    return await loadPackageInfo({
-      savedObjectsClient,
-      pkgName,
-      pkgVersion,
-      skipArchive,
-      ignoreUnverified,
-      prerelease,
-    });
-  } catch (error) {
-    // Only "not found" is remembered: transient registry/ES errors must stay retryable.
-    if (error instanceof PackageNotFoundError) {
-      setPackageInfoCacheError(pkgName, pkgVersion, error, prerelease);
-    }
-    throw error;
-  }
-}
-
-async function loadPackageInfo({
-  savedObjectsClient,
-  pkgName,
-  pkgVersion,
-  skipArchive = false,
-  ignoreUnverified = false,
-  prerelease,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
-  skipArchive?: boolean;
-  ignoreUnverified?: boolean;
-  prerelease?: boolean;
-}): Promise<PackageInfo> {
-  const [savedObject, latestPackage] = await Promise.all([
-    getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
+  const [installationResult, latestPackageResult] = await Promise.allSettled([
+    getInstallationObject({ savedObjectsClient, pkgName, failOnUnexpectedError: true }),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease, throwOnError: true }),
   ]);
+  const savedObject =
+    installationResult.status === 'fulfilled' ? installationResult.value : undefined;
+  const latestPackage =
+    latestPackageResult.status === 'fulfilled' ? latestPackageResult.value : undefined;
 
   if (!savedObject && !latestPackage) {
-    throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
+    if (installationResult.status === 'rejected') {
+      throw installationResult.reason;
+    }
+    if (latestPackageResult.status === 'rejected') {
+      throw latestPackageResult.reason;
+    }
+
+    // Only cache confirmed absence; archive and storage failures can also surface as not found.
+    const error = new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
+    setPackageInfoCacheError(pkgName, pkgVersion, error, prerelease);
+    throw error;
   }
 
   // If no package version is provided, use the installed version in the response, fallback to package from registry

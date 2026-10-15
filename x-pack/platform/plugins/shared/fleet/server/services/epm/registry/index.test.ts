@@ -192,6 +192,37 @@ describe('fetch package', () => {
     });
   });
 
+  describe('fetchFindLatestPackageOrUndefined with throwOnError', () => {
+    it('propagates registry failures instead of reporting absence', async () => {
+      const error = new RegistryResponseError('registry unavailable', 503);
+      mockFetchUrl.mockRejectedValue(error);
+      mockGetBundledPackageByName.mockResolvedValue(undefined);
+
+      await expect(
+        fetchFindLatestPackageOrUndefined('testpkg', { throwOnError: true })
+      ).rejects.toBe(error);
+    });
+
+    it('returns undefined for a successful empty search', async () => {
+      mockFetchUrl.mockResolvedValue('[]');
+      mockGetBundledPackageByName.mockResolvedValue(undefined);
+
+      await expect(
+        fetchFindLatestPackageOrUndefined('testpkg', { throwOnError: true })
+      ).resolves.toBeUndefined();
+    });
+
+    it('preserves the bundled fallback during a registry failure', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.0' };
+      mockFetchUrl.mockRejectedValue(new RegistryResponseError('registry unavailable', 503));
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+
+      await expect(
+        fetchFindLatestPackageOrUndefined('testpkg', { throwOnError: true })
+      ).resolves.toEqual(bundledPackage);
+    });
+  });
+
   describe('fetchFindLatestPackageOrThrow', () => {
     performGenericFetchTests(fetchFindLatestPackageOrThrow);
     it('Should return undefined if there is a registry error and no bundled package', async () => {
