@@ -211,6 +211,11 @@ export const checkLayoutInvariants = ({
   }
 
   // forkOrder / ownerCentred / joinAligned, for the outer graph and every container body.
+  const mergeStepIds = new Set(
+    [...transformed.nodes, ...transformed.foreachGroups.flatMap((g) => g.innerNodes)]
+      .filter((n) => n.data.stepType === 'merge')
+      .map((n) => n.id)
+  );
   const graphs: ReadonlyArray<readonly GraphEdge[]> = [
     transformed.edges,
     ...transformed.foreachGroups.map((group) => group.innerEdges),
@@ -291,14 +296,15 @@ export const checkLayoutInvariants = ({
     }
 
     // chainStraight: consecutive steps of one branch stay in one column. Forks and
-    // joins are excluded: their edges are the buses, not chain links.
+    // joins are excluded: their edges are the buses, not chain links. So is the edge from
+    // a `merge` step to its body, which hangs to the side of the step by design.
     const outCount = new Map<string, number>();
     const inCount = new Map<string, number>();
     for (const edge of spineEdges) {
       outCount.set(edge.source, (outCount.get(edge.source) ?? 0) + 1);
       inCount.set(edge.target, (inCount.get(edge.target) ?? 0) + 1);
     }
-    for (const edge of spineEdges.filter((e) => !isBranchEdge(e))) {
+    for (const edge of spineEdges.filter((e) => !isBranchEdge(e) && !mergeStepIds.has(e.source))) {
       const source = boxById.get(edge.source);
       const target = boxById.get(edge.target);
       if (

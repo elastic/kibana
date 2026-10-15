@@ -118,6 +118,20 @@ describe('packCrossAxis', () => {
     expect(get('a1').x).toBe(get('m').x + NODE_WIDTH + WORKFLOW_NODE_SEP);
   });
 
+  it('keeps the body of a merge step clear of the steps that follow it', () => {
+    // The body hangs off the merge step, but the fork after it shares its rows.
+    const { get } = pack(
+      [
+        step('m', { attached: [step('a1'), step('a2')] }),
+        fork('gate', [branch(step('t1')), branch(step('e1'))]),
+      ],
+      nodes('m', 'a1', 'a2', 'gate', 't1', 'e1')
+    );
+    const followingRight = Math.max(...['gate', 't1', 'e1'].map((id) => get(id).x + get(id).width));
+    expect(get('a1').x).toBeGreaterThanOrEqual(followingRight + WORKFLOW_NODE_SEP);
+    expect(get('a2').x).toBe(get('a1').x);
+  });
+
   describe('forks', () => {
     it('packs unequal branches side by side, centres the owner on the outer heads and the join under it', () => {
       const { get, centre } = pack(

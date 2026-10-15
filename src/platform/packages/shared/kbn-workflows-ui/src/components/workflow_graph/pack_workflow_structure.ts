@@ -102,9 +102,12 @@ export const packCrossAxis = ({
     };
   };
 
-  /** Adds sequences to the right of `base`, each one `nodeSep` past what is already there. */
-  const withSidesOnTheRight = (base: Packed, sides: readonly Packed[]): Packed => {
-    let reach = base.right;
+  /**
+   * Adds sequences to the right of `base`, each one `nodeSep` past what is already there
+   * and past `clearance`, how far the items sharing its rows reach to the right.
+   */
+  const withSidesOnTheRight = (base: Packed, sides: readonly Packed[], clearance = 0): Packed => {
+    let reach = Math.max(base.right, clearance);
     const spines = sides.map((side) => {
       const spine = reach + nodeSep + side.left;
       reach = spine + side.right;
@@ -127,7 +130,14 @@ export const packCrossAxis = ({
   };
 
   const packSequence = (items: StructureSequence): Packed => {
-    const packed = items.map((item) => packItem(item));
+    const unplaced = items.map((item) => packItem(item));
+    // The body of a `merge` step hangs off it, but the items after it start on the same
+    // rows (nothing pushes them down, unlike a fallback lane), so it must clear them.
+    const packed = items.map((item, index) =>
+      item.kind === 'step' && item.attached
+        ? packItem(item, Math.max(0, ...unplaced.slice(index + 1).map((piece) => piece.right)))
+        : unplaced[index]
+    );
     return {
       left: Math.max(0, ...packed.map((piece) => piece.left)),
       right: Math.max(0, ...packed.map((piece) => piece.right)),
@@ -169,14 +179,15 @@ export const packCrossAxis = ({
     };
   };
 
-  const packItem = (item: StructureItem): Packed => {
+  const packItem = (item: StructureItem, clearance = 0): Packed => {
     const lanes = item.lanes.map((lane) => packSequence(lane.items));
     switch (item.kind) {
       case 'step':
-        return withSidesOnTheRight(packNode(item.id), [
-          ...lanes,
-          ...(item.attached ? [packSequence(item.attached)] : []),
-        ]);
+        return withSidesOnTheRight(
+          packNode(item.id),
+          [...lanes, ...(item.attached ? [packSequence(item.attached)] : [])],
+          clearance
+        );
       case 'fork':
         return withSidesOnTheRight(packFork(item), lanes);
       case 'container':

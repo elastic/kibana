@@ -124,6 +124,14 @@ describe('checkLayoutInvariants', () => {
     expect(rulesOf(check(moved({ 'gate-else-bypass': { dwidth: -30 } })))).toContain('labelClear');
   });
 
+  it('does not read the body of a merge step as a broken chain', () => {
+    // The body hangs to the right of the merge step by design, even with nothing after it.
+    const { check } = start(
+      workflow([{ name: 'combine', type: 'merge', steps: [http('m1'), http('m2')] }])
+    );
+    expect(check()).toEqual([]);
+  });
+
   it('triggerOrder: triggers out of declaration order', () => {
     const { check, moved, node } = start(
       workflow([http('first')], [
