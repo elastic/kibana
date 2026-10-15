@@ -8,6 +8,7 @@
 import type { UnifiedAttachmentTypeSetup } from '@kbn/cases-plugin/server';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
+import { validateAttackWorkflowTargets } from './workflow_validation';
 
 /**
  * Server-side attack attachment type registration.
@@ -16,4 +17,5 @@ import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments
 export const getAttackAttachmentType = (): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
   schema: AttackAttachmentPayloadSchema,
+  workflow: { validateTargets: validateAttackWorkflowTargets },
 });
