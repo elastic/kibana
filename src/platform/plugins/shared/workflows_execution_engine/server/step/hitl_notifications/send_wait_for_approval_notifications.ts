@@ -19,8 +19,14 @@ import {
 } from './build_hitl_email_notification';
 import {
   assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  escapeServiceNowCommentText,
   executeHitlHttpChannel,
+  fitHitlTextPreservingSuffix,
+  renderServiceNowField,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -55,6 +61,29 @@ export function buildWaitForApprovalResumeLinks({
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildServiceNowApprovalComment({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeServiceNowCommentText(message),
+    `${serviceNowCommentLink(approveLabel, approveUrl)}\n${serviceNowCommentLink(
+      rejectLabel,
+      rejectUrl
+    )}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildSlackMessage({
@@ -239,6 +268,26 @@ export async function sendWaitForApprovalNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
+    const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(
+        table,
+        sysId,
+        buildServiceNowApprovalComment(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 
   const httpConfig = channels.http;
