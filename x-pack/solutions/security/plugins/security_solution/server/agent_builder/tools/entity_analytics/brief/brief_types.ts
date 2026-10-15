@@ -22,27 +22,26 @@ const { attention, priorityText, recommendation } = BRIEF_WORD_LIMITS;
 
 export type BriefEntityType = 'host' | 'user' | 'service' | 'generic';
 
-/** An entity from the page's tiles, with its Entity Store record. */
+/** A flagged entity, with its Entity Store record. */
 export interface BriefCandidate {
-  /** The resolved entity id (EUID), as the tile returned it. */
+  /** The EUID, the golden entity's for a resolution group. */
   id: string;
   name: string;
   type: BriefEntityType;
-  /** The tiles the entity appears in, the selected tile first. */
+  /** The tiles that flag the entity, in the page's order. */
   tileIds: SignalCardId[];
   record: Entity;
 }
 
-/** What the model knows about one candidate, as data. Every number the brief may state is here or in the view. */
+/** What the model knows about a candidate. Every number the brief may state is here or in the view. */
 export interface EntityFacts {
   /** The EUID, used in mention tokens. */
   entityId: string;
   name: string;
   type: BriefEntityType;
-  /** The page's counts that flag the entity, the selected one first. */
+  /** The tiles that flag the entity; the prompt says what each means. */
   flaggedFor: SignalCardId[];
   risk?: {
-    /** Resolution first: the group's risk when the entity is a scored resolution group. */
     of: 'entity' | 'resolution group';
     level: EntityRiskLevels;
     score: number;

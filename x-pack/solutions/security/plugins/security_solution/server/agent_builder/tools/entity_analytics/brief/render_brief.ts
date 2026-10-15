@@ -7,15 +7,13 @@
 
 import { compact, dropRightWhile } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type {
-  EntityAnalyticsScope,
-  EntityAnalyticsScopeTile,
-} from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
+import type { BriefPriority, EntityFacts } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
-  describeEntityFilter,
   describeDelta,
+  describeEntityFilter,
   describeSample,
   filterLabel,
   formatCount,
@@ -26,9 +24,6 @@ import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
 import { MENTION_PATTERN } from './verify_draft';
 
-const ENTITY_TABLE_INTRO =
-  '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
-
 export const QUIET_LINE =
   'Nothing in this view is flagged as needing attention. That does not mean the environment is safe.';
 export const UNAVAILABLE_TILES_LINE =
@@ -38,28 +33,28 @@ export const NO_MATCH_LINE =
 export const NO_PRIORITIES_LINE =
   'No entity in this view has enough evidence to prioritise. That does not mean the environment is safe.';
 
-/** A risk-history chart for a priority whose risk moved. */
+const ENTITY_TABLE_INTRO =
+  '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
+
+/** As the Risk movers tile: a smaller change explains nothing, so it gets no chart. */
+const RISK_CHART_MIN_CHANGE = 10;
+
 export interface RiskChart {
   tag: string;
-  /** The priority's entity. */
+  /** The priority the chart goes under. */
   entityId: string;
-  /** Resolution first: a group's chart is the group's risk. */
   of: 'entity' | 'resolution group';
 }
 
-interface RenderBriefParams {
-  scope: EntityAnalyticsScope;
-  spaceId: string;
-  entities: CandidateEntities;
-  /** Absent when no model call was made. */
-  verified?: VerifiedBrief;
-  /** The render tag of the priorities' entity table. */
-  entityTableTag?: string;
-  /** A risk-history chart, shown under the priority it explains. */
-  riskChart?: RiskChart;
-  /** True when the risk at the start of the period couldn't be read. */
-  riskChangeFailed?: boolean;
-}
+/** The first priority whose risk moved by at least the Risk movers threshold. Only it gets a chart. */
+export const getRiskChartEntityId = (
+  priorities: BriefPriority[],
+  facts: EntityFacts[]
+): string | undefined =>
+  priorities.find(({ entityId }) => {
+    const change = facts.find((entity) => entity.entityId === entityId)?.risk?.change;
+    return change !== undefined && Math.abs(change) >= RISK_CHART_MIN_CHANGE;
+  })?.entityId;
 
 /** Renders the brief as markdown, for the agent to present verbatim. */
 export const renderBrief = ({
@@ -70,23 +65,35 @@ export const renderBrief = ({
   entityTableTag,
   riskChart,
   riskChangeFailed = false,
-}: RenderBriefParams): string => {
+}: {
+  scope: EntityAnalyticsScope;
+  spaceId: string;
+  entities: CandidateEntities;
+  /** Absent when no model call was made. */
+  verified?: VerifiedBrief;
+  entityTableTag?: string;
+  riskChart?: RiskChart;
+  riskChangeFailed?: boolean;
+}): string => {
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   const boldName = (entityId: string) =>
     `**${escapeMarkdown(namesById.get(entityId) ?? entityId)}**`;
-  // Model text is plain prose: markdown is escaped, and mentions become bold names.
+  // Model text is prose: markdown is escaped, and mentions become bold names.
   const withNames = (text: string) =>
     text
       .split(MENTION_PATTERN)
       .map((part, index) => (index % 2 === 1 ? boldName(part) : escapeMarkdown(part)))
       .join('');
   const sample = describeSample(scope, entities);
+
   const sections = [
     [renderScope(scope, spaceId), ...renderDisclosures(scope, entities, riskChangeFailed)],
     renderAttention(scope, entities, verified, withNames),
-    renderChanges(scope),
+    renderCounts(scope),
     renderPriorities({ verified, entityTableTag, riskChart, boldName, withNames }),
-    renderRecommendation(verified, withNames),
+    verified?.recommendation
+      ? ['**Recommended next step**', withNames(verified.recommendation)]
+      : [],
     sample ? [`_${sample}_`] : [],
   ];
   return sections
@@ -94,17 +101,6 @@ export const renderBrief = ({
     .map((lines) => lines.join('\n'))
     .join('\n\n');
 };
-
-/**
- * Escapes markdown, emphasis included (`extreme_impact` would pair with `_Next:_`), and stops autolinks
- * with character references for `:` and `@`, so the text reads as written.
- */
-const escapeMarkdown = (text: string): string =>
-  text
-    .replace(/[\\`*_[\]<>|#!]/g, '\\$&')
-    .replace(/:(?=\/\/)/g, '&#58;')
-    .replace(/@(?=[\w-]+\.\w)/g, '&#64;')
-    .replace(/\b(www)\./gi, '$1\\.');
 
 /** The period and every filter the page applied, as the page labels them. */
 const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
@@ -119,43 +115,41 @@ const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
 };
 
-/** Tile entities have records, but the page's search query kept none of them. */
-const matchesNoTileEntity = ({
+const renderDisclosures = (
+  scope: EntityAnalyticsScope,
+  entities: CandidateEntities,
+  riskChangeFailed: boolean
+): string[] => {
+  const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
+    const tile = scope.tiles[tileId];
+    return tile?.unavailable ? [tile.title] : [];
+  });
+  const disclosures = [
+    // No count: with no records read, aliases can't be folded, so ids would overcount people.
+    matchesNoEntity(entities) ? 'None of the flagged entities match the search query.' : undefined,
+    entities.notFoundCount > 0
+      ? `${formatCountOf(
+          entities.notFoundCount,
+          'flagged entity was',
+          'flagged entities were'
+        )} not found in the Entity Store.`
+      : undefined,
+    unavailableTitles.length > 0
+      ? `Not checked, because the data couldn't be read: ${unavailableTitles.join(', ')}.`
+      : undefined,
+    riskChangeFailed ? "Risk change couldn't be read." : undefined,
+  ];
+  return compact(disclosures).map((text) => `_${text}_`);
+};
+
+/** Flagged entities have records, but the page's search kept none of them. */
+const matchesNoEntity = ({
   hasPageQuery,
   matchedCount,
   capturedCount,
   notFoundCount,
 }: CandidateEntities): boolean =>
   hasPageQuery && matchedCount === 0 && capturedCount > notFoundCount;
-
-const renderDisclosures = (
-  scope: EntityAnalyticsScope,
-  entities: CandidateEntities,
-  riskChangeFailed: boolean
-): string[] => {
-  const { notFoundCount } = entities;
-  const unavailable = SIGNAL_CARD_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
-  const disclosures = [
-    // No count: with no records read, aliases can't be folded, so ids would overcount people.
-    matchesNoTileEntity(entities)
-      ? 'None of the flagged entities match the search query.'
-      : undefined,
-    notFoundCount > 0
-      ? `${formatCountOf(
-          notFoundCount,
-          'flagged entity was',
-          'flagged entities were'
-        )} not found in the Entity Store.`
-      : undefined,
-    unavailable.length > 0
-      ? `Not checked, because the data couldn't be read: ${unavailable
-          .map((tileId) => scope.tiles[tileId]?.title)
-          .join(', ')}.`
-      : undefined,
-    riskChangeFailed ? "Risk change couldn't be read." : undefined,
-  ];
-  return compact(disclosures).map((text) => `_${text}_`);
-};
 
 const renderAttention = (
   scope: EntityAnalyticsScope,
@@ -169,50 +163,36 @@ const renderAttention = (
   return ['**What needs attention**', getNoBriefLine(scope, entities)];
 };
 
-/** The chart with a caption naming its priority. */
-const renderRiskChart = (
-  { tag, entityId, of }: RiskChart,
-  boldName: (entityId: string) => string
-): string[] => {
-  const group = of === 'resolution group' ? ' (resolution group)' : '';
-  return [`_Risk history over the period for_ ${boldName(entityId)}${group}`, '', tag];
-};
-
 /** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */
 const getNoBriefLine = ({ tiles }: EntityAnalyticsScope, entities: CandidateEntities): string => {
-  if (matchesNoTileEntity(entities)) {
+  if (matchesNoEntity(entities)) {
     return NO_MATCH_LINE;
   }
-  const scopeTiles = Object.values(tiles);
-  const flagged = scopeTiles.some(
+  const allTiles = Object.values(tiles);
+  const isFlagged = allTiles.some(
     ({ unavailable, value, entityIds }) => !unavailable && (value > 0 || entityIds.length > 0)
   );
-  if (flagged) {
+  if (isFlagged) {
     return NO_PRIORITIES_LINE;
   }
-  return scopeTiles.some(({ unavailable }) => unavailable) ? UNAVAILABLE_TILES_LINE : QUIET_LINE;
+  return allTiles.some(({ unavailable }) => unavailable) ? UNAVAILABLE_TILES_LINE : QUIET_LINE;
 };
 
-/** A row says something: a count above zero, or a change. A zero with no change is left out. */
-const isWorthShowing = ({ unavailable, value, delta = 0 }: EntityAnalyticsScopeTile): boolean =>
-  !unavailable && (value > 0 || delta !== 0);
-
-/** Every count with something to say, in the page's order. Never summed. */
-const pickChangeRows = ({ tiles }: EntityAnalyticsScope): EntityAnalyticsScopeTile[] =>
-  SIGNAL_CARD_IDS.flatMap((tileId) => {
+/**
+ * The page's counts in its order, never summed. A zero that didn't change says nothing, and neither does
+ * a column of "not enough history".
+ */
+const renderCounts = ({ tiles, period }: EntityAnalyticsScope): string[] => {
+  const rows = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = tiles[tileId];
-    return tile && isWorthShowing(tile) ? [tile] : [];
+    return tile && !tile.unavailable && (tile.value > 0 || (tile.delta ?? 0) !== 0) ? [tile] : [];
   });
-
-/** The counts, with their change when any can be compared. A column of "not enough history" says nothing. */
-const renderChanges = (scope: EntityAnalyticsScope): string[] => {
-  const rows = pickChangeRows(scope);
   if (rows.length === 0) {
     return [];
   }
   const hasComparison = rows.some(({ delta }) => delta !== undefined);
   const header = hasComparison
-    ? [`|  | Entities | vs previous ${BRIEF_PERIOD_LABELS[scope.period]} |`, '| --- | --- | --- |']
+    ? [`|  | Entities | vs previous ${BRIEF_PERIOD_LABELS[period]} |`, '| --- | --- | --- |']
     : ['|  | Entities |', '| --- | --- |'];
   return [
     '**This period at a glance**',
@@ -225,15 +205,7 @@ const renderChanges = (scope: EntityAnalyticsScope): string[] => {
   ];
 };
 
-const renderRecommendation = (
-  verified: VerifiedBrief | undefined,
-  withNames: (text: string) => string
-): string[] =>
-  verified?.recommendation ? ['**Recommended next step**', withNames(verified.recommendation)] : [];
-
-const asSentence = (text: string): string => (/[.!?…]$/.test(text) ? text : `${text}.`);
-
-/** The priorities' entity table, then the numbered priorities, with the risk chart under its priority. */
+/** The entity table, then the numbered priorities, with the risk chart under its priority. */
 const renderPriorities = ({
   verified,
   entityTableTag,
@@ -253,17 +225,35 @@ const renderPriorities = ({
   if (verified.priorities.length === 0) {
     return ['**Priorities**', NO_PRIORITIES_LINE];
   }
-  const table = entityTableTag ? [ENTITY_TABLE_INTRO, '', entityTableTag, ''] : [];
+  const sentence = (text: string) => {
+    const named = withNames(text);
+    return /[.!?…]$/.test(named) ? named : `${named}.`;
+  };
   // A render tag needs blank lines around it to stay its own block.
+  const table = entityTableTag ? [ENTITY_TABLE_INTRO, '', entityTableTag, ''] : [];
   const lines = verified.priorities.flatMap(
     ({ entityId, observed, whyItMatters, nextStep }, index) => {
-      const line = `${index + 1}. ${boldName(entityId)}: ${asSentence(
-        withNames(observed)
-      )} ${asSentence(withNames(whyItMatters))} _Next:_ ${asSentence(withNames(nextStep))}`;
-      return riskChart?.entityId === entityId
-        ? [line, '', ...renderRiskChart(riskChart, boldName), '']
-        : [line];
+      const line = `${index + 1}. ${boldName(entityId)}: ${sentence(observed)} ${sentence(
+        whyItMatters
+      )} _Next:_ ${sentence(nextStep)}`;
+      if (riskChart?.entityId !== entityId) {
+        return [line];
+      }
+      const group = riskChart.of === 'resolution group' ? ' (resolution group)' : '';
+      const caption = `_Risk history over the period for_ ${boldName(entityId)}${group}`;
+      return [line, '', caption, '', riskChart.tag, ''];
     }
   );
   return ['**Priorities**', '', ...table, ...dropRightWhile(lines, (line) => line === '')];
 };
+
+/**
+ * Escapes markdown, emphasis included (`extreme_impact` would pair with `_Next:_`), and stops autolinks
+ * with character references for `:` and `@`, so the text reads as written.
+ */
+const escapeMarkdown = (text: string): string =>
+  text
+    .replace(/[\\`*_[\]<>|#!]/g, '\\$&')
+    .replace(/:(?=\/\/)/g, '&#58;')
+    .replace(/@(?=[\w-]+\.\w)/g, '&#64;')
+    .replace(/\b(www)\./gi, '$1\\.');

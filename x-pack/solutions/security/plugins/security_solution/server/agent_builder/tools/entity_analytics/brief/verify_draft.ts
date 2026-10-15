@@ -11,58 +11,81 @@ import { BRIEF_WORD_LIMITS, MAX_PRIORITIES } from './brief_types';
 import { BRIEF_PERIOD_LABELS, BRIEF_TILE_DEFINITIONS } from './describe_scope';
 
 export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
-/** Numbers as written in prose, with thousands separators; signs are ignored. */
-const NUMBER_PATTERN = /\d[\d,]*(?:\.\d+)?/g;
-const SENTENCE_END = /(?<=[.!?])\s+/;
-/** A mention counts as one word, so a cap never cuts one in half. */
-const WORD_PATTERN = /\{\{[^}]*\}\}|\S+/g;
 
 export interface VerifiedBrief {
-  /** Absent when nothing is left or no priority survived, as is the recommendation. */
+  /** Absent when nothing is left, or when no priority survived. */
   attention?: string;
+  /** Absent when nothing is left, or when no priority survived. */
   recommendation?: string;
   priorities: BriefPriority[];
   droppedPriorityCount: number;
 }
 
-/** Replaces each `{{ entity.id <euid> }}` mention with the replacer's result. */
-const replaceMentions = (text: string, replacer: (entityId: string) => string): string =>
-  text.replace(MENTION_PATTERN, (_mention, entityId: string) => replacer(entityId));
+/**
+ * Checks the draft against the facts and the view, and trims it to the word limits. A priority must be
+ * about a flagged entity and quote only its own numbers. A sentence with an unknown number is dropped.
+ */
+export const verifyDraft = (
+  draft: BriefDraft,
+  facts: EntityFacts[],
+  scope: EntityAnalyticsScope
+): VerifiedBrief => {
+  const factsById = new Map(facts.map((entity) => [entity.entityId, entity]));
+  const hasKnownNumbers = createNumberCheck(scope, facts);
+  const clean = (text: string, max: number): string =>
+    capWords(
+      replaceMentions(text, (entityId) =>
+        factsById.has(entityId) ? `{{ entity.id ${entityId} }}` : ''
+      ),
+      max
+    );
 
-const cutWords = (text: string, max: number): string => {
-  const words = [...text.matchAll(WORD_PATTERN)];
-  const last = words[max - 1];
-  if (words.length <= max || last?.index === undefined) {
-    return text.trim();
-  }
-  const kept = text.slice(0, last.index + last[0].length);
-  return `${kept.trim().replace(/[\s,;:.-]+$/, '')}…`;
-};
-
-/** Keeps the whole sentences that fit, so a long answer loses its last sentence, not half of it. */
-const capWords = (text: string, max: number): string => {
-  const kept: string[] = [];
-  let count = 0;
-  for (const sentence of text.trim().split(SENTENCE_END)) {
-    count += sentence.match(WORD_PATTERN)?.length ?? 0;
-    if (count > max) {
-      break;
+  const priorities: BriefPriority[] = [];
+  for (const { entityId, observed, whyItMatters, nextStep } of draft.priorities) {
+    const entity = factsById.get(entityId);
+    const isKept =
+      entity !== undefined &&
+      [observed, whyItMatters, nextStep].every((text) => hasKnownNumbers(text, [entity])) &&
+      !priorities.some((kept) => kept.entityId === entityId) &&
+      priorities.length < MAX_PRIORITIES;
+    if (isKept) {
+      priorities.push({
+        entityId,
+        observed: clean(observed, BRIEF_WORD_LIMITS.priorityText),
+        whyItMatters: clean(whyItMatters, BRIEF_WORD_LIMITS.priorityText),
+        nextStep: clean(nextStep, BRIEF_WORD_LIMITS.priorityText),
+      });
     }
-    kept.push(sentence);
   }
-  return kept.length > 0 ? kept.join(' ') : cutWords(text, max);
+
+  // Without a priority the brief says there is nothing to prioritise, so there is nothing to introduce.
+  const cleanProse = (text: string, max: number): string | undefined => {
+    const kept = stripToolMarkup(text)
+      .split(SENTENCE_END)
+      .filter((sentence) => hasKnownNumbers(sentence, facts));
+    const cleaned = clean(kept.join(' '), max);
+    return cleaned && priorities.length > 0 ? cleaned : undefined;
+  };
+  return {
+    attention: cleanProse(draft.attention, BRIEF_WORD_LIMITS.attention),
+    recommendation: cleanProse(draft.recommendation, BRIEF_WORD_LIMITS.recommendation),
+    priorities,
+    droppedPriorityCount: draft.priorities.length - priorities.length,
+  };
 };
 
-/** Cuts tool-call markup the model sometimes leaks at the end of a string argument. */
-const stripToolMarkup = (text: string): string =>
-  text.replace(/<\/?(?:parameter|invoke|attention|recommendation)\b[\s\S]*$/, '');
+/** Numbers as written in prose, with thousands separators. Signs are ignored. */
+const NUMBER_PATTERN = /\d[\d,]*(?:\.\d+)?/g;
+const SENTENCE_END = /(?<=[.!?])\s+/;
+/** A mention counts as one word, so a cap never cuts one in half. */
+const WORD_PATTERN = /\{\{[^}]*\}\}|\S+/g;
 
 const numbersIn = (text: string): string[] =>
   (text.match(NUMBER_PATTERN) ?? []).map((number) => String(Number(number.replace(/,/g, ''))));
 
 /**
- * True when every number in the text is known: in the given entities' data or what their flags mean, or
- * the period, a count or a change in the view. Digits inside mentions, names and EUIDs are ignored.
+ * True when every number in the text is known: in the given entities' data or what their flags mean, the
+ * period, or a count or change in the view. Digits in mentions, names and EUIDs are not claims.
  */
 const createNumberCheck = (
   { tiles, period }: EntityAnalyticsScope,
@@ -92,62 +115,34 @@ const createNumberCheck = (
   };
 };
 
-/**
- * Checks the model's draft against the entities and the view, and trims it to the limits. A priority must
- * be about a flagged entity and quote only its own numbers.
- */
-export const verifyDraft = (
-  draft: BriefDraft,
-  facts: EntityFacts[],
-  scope: EntityAnalyticsScope
-): VerifiedBrief => {
-  const factsById = new Map(facts.map((entity) => [entity.entityId, entity]));
-  const hasKnownNumbers = createNumberCheck(scope, facts);
-  const clean = (text: string, max: number): string =>
-    capWords(
-      replaceMentions(text, (entityId) =>
-        factsById.has(entityId) ? `{{ entity.id ${entityId} }}` : ''
-      ),
-      max
-    );
+const replaceMentions = (text: string, replacer: (entityId: string) => string): string =>
+  text.replace(MENTION_PATTERN, (_mention, entityId: string) => replacer(entityId));
 
-  const seenEntityIds = new Set<string>();
-  const priorities: BriefPriority[] = [];
-  for (const { entityId, observed, whyItMatters, nextStep } of draft.priorities) {
-    const entity = factsById.get(entityId);
-    const isKept =
-      entity !== undefined &&
-      [observed, whyItMatters, nextStep].every((text) => hasKnownNumbers(text, [entity])) &&
-      !seenEntityIds.has(entityId) &&
-      priorities.length < MAX_PRIORITIES;
-    if (isKept) {
-      seenEntityIds.add(entityId);
-      priorities.push({
-        entityId,
-        observed: clean(observed, BRIEF_WORD_LIMITS.priorityText),
-        whyItMatters: clean(whyItMatters, BRIEF_WORD_LIMITS.priorityText),
-        nextStep: clean(nextStep, BRIEF_WORD_LIMITS.priorityText),
-      });
+/** Cuts tool-call markup the model sometimes leaks at the end of a string argument. */
+const stripToolMarkup = (text: string): string =>
+  text.replace(/<\/?(?:parameter|invoke|attention|recommendation)\b[\s\S]*$/, '');
+
+/** Keeps the whole sentences that fit, so a long answer loses its last sentence, not half of it. */
+const capWords = (text: string, max: number): string => {
+  const kept: string[] = [];
+  let count = 0;
+  for (const sentence of text.trim().split(SENTENCE_END)) {
+    count += sentence.match(WORD_PATTERN)?.length ?? 0;
+    if (count > max) {
+      break;
     }
+    kept.push(sentence);
   }
+  return kept.length > 0 ? kept.join(' ') : cutWords(text, max);
+};
 
-  // A sentence with a number that is in neither the entities nor the view is dropped, not repaired.
-  const cleanProse = (text: string, max: number): string =>
-    clean(
-      stripToolMarkup(text)
-        .split(SENTENCE_END)
-        .filter((sentence) => hasKnownNumbers(sentence, facts))
-        .join(' '),
-      max
-    );
-  const attention = cleanProse(draft.attention, BRIEF_WORD_LIMITS.attention);
-  const recommendation = cleanProse(draft.recommendation, BRIEF_WORD_LIMITS.recommendation);
-  // Without a priority, the brief says there is nothing to prioritise, so there is nothing to introduce.
-  const hasPriorities = priorities.length > 0;
-  return {
-    attention: attention !== '' && hasPriorities ? attention : undefined,
-    recommendation: recommendation !== '' && hasPriorities ? recommendation : undefined,
-    priorities,
-    droppedPriorityCount: draft.priorities.length - priorities.length,
-  };
+/** One sentence over the limit is cut with an ellipsis. */
+const cutWords = (text: string, max: number): string => {
+  const words = [...text.matchAll(WORD_PATTERN)];
+  const last = words[max - 1];
+  if (words.length <= max || last?.index === undefined) {
+    return text.trim();
+  }
+  const kept = text.slice(0, last.index + last[0].length);
+  return `${kept.trim().replace(/[\s,;:.-]+$/, '')}…`;
 };

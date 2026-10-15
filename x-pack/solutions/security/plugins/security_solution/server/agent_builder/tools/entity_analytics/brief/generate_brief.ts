@@ -16,12 +16,12 @@ import {
   ensureRiskScoreHistoryAttachment,
 } from '../risk_score_history/risk_score_history_attachment_utils';
 import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
-import { buildFacts, getCandidateRisk, getRiskChartEntityId } from './build_facts';
-import { draftBrief } from './draft_brief';
+import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
-import { fetchCandidateEntities, fetchRiskAtStart } from './read_entities';
+import { draftBrief } from './draft_brief';
+import { getCandidateRisk, readEntities, readRiskAtStart } from './read_entities';
 import type { RiskChart } from './render_brief';
-import { renderBrief } from './render_brief';
+import { getRiskChartEntityId, renderBrief } from './render_brief';
 import { verifyDraft } from './verify_draft';
 
 /** Turns the captured Entity Analytics view into the markdown brief. Elasticsearch and model errors propagate. */
@@ -36,23 +36,20 @@ export const generateBrief = async ({
   logger,
 }: GenerateBriefParams): Promise<GenerateBriefResult> => {
   const started = Date.now();
-  const entities = await fetchCandidateEntities({ scope, spaceId, esClient });
+  const entities = await readEntities({ scope, spaceId, esClient });
   const { candidates } = entities;
-  // Every candidate has facts, so with none there is nothing to brief on and no model call.
   if (candidates.length === 0) {
-    logger.debug(`AI brief: quiet, ${entities.capturedCount} captured`);
     return { brief: renderBrief({ scope, spaceId, entities }), priorityCount: 0 };
   }
-  // Risk change is supporting detail: a failure leaves its facts out, and the brief says so.
-  const riskAtStart = await fetchRiskAtStart({ candidates, scope, spaceId, esClient }).catch(
+  // Risk change is supporting detail: when it can't be read, the brief goes without it and says so.
+  const riskAtStart = await readRiskAtStart({ candidates, scope, spaceId, esClient }).catch(
     (error) => {
       logger.debug(`AI brief: risk change couldn't be read: ${error.message}`);
       return undefined;
     }
   );
-  const facts = buildFacts(candidates, scope, riskAtStart);
-  const fetched = Date.now();
 
+  const facts = buildFacts(candidates, scope, riskAtStart);
   const draft = await draftBrief({
     inferenceClient,
     scope,
@@ -60,25 +57,26 @@ export const generateBrief = async ({
     sample: describeSample(scope, entities),
     abortSignal,
   });
-  const composed = Date.now();
   const verified = verifyDraft(draft, facts, scope);
-  const priorityCandidates = verified.priorities.flatMap(
-    ({ entityId }) => candidates.find(({ id }) => id === entityId) ?? []
+
+  const findCandidate = (entityId: string | undefined) =>
+    candidates.find(({ id }) => id === entityId);
+  const entityTableTag = await createEntityTable(
+    verified.priorities.flatMap(({ entityId }) => findCandidate(entityId) ?? []),
+    attachments,
+    logger
   );
-  const entityTableTag = await createEntityTable(priorityCandidates, attachments, logger);
-  const chartEntityId = getRiskChartEntityId(verified.priorities, facts);
   const riskChart = await createRiskChart({
-    candidate: candidates.find(({ id }) => id === chartEntityId),
+    candidate: findCandidate(getRiskChartEntityId(verified.priorities, facts)),
     scope,
     riskScoreDataClient,
     attachments,
     logger,
   });
-  const took = Date.now() - started;
+
   logger.debug(
-    `AI brief: fetch ${fetched - started}ms, compose ${composed - fetched}ms, total ${took}ms; ` +
-      `${candidates.length} candidates, ${verified.priorities.length} priorities, ` +
-      `${verified.droppedPriorityCount} dropped`
+    `AI brief: ${candidates.length} candidates, ${verified.priorities.length} priorities, ` +
+      `${verified.droppedPriorityCount} dropped, ${Date.now() - started}ms`
   );
   return {
     brief: renderBrief({
@@ -118,7 +116,7 @@ const createEntityTable = async (
   return attachment ? buildRenderAttachmentTag(attachment) : undefined;
 };
 
-/** The period's risk-history chart for a priority whose risk moved. A failure means no chart, never a failed brief. */
+/** The period's risk-history chart for a candidate. A failure means no chart, never a failed brief. */
 const createRiskChart = async ({
   candidate,
   scope,
@@ -133,14 +131,14 @@ const createRiskChart = async ({
     return undefined;
   }
   const { name, type } = candidate;
-  const { scoredId: id, scoreType, of } = risk;
+  const { scoredId, scoreType } = risk;
   const from = getPeriodStart(scope).toISOString();
   const to = new Date(scope.capturedAt).toISOString();
   const interval = resolveSimpleRiskScoreHistoryInterval({ min: moment(from), max: moment(to) });
   try {
     const entries = await riskScoreDataClient.getRiskScoreHistory({
       entityType: type,
-      entityId: id,
+      entityId: scoredId,
       range: { gte: from, lte: to },
       scoreType,
       interval,
@@ -151,12 +149,12 @@ const createRiskChart = async ({
     const label = `${type}: ${name}`;
     const attachment = await ensureRiskScoreHistoryAttachment({
       attachments,
-      id: buildRiskScoreHistoryAttachmentId(type, id, scoreType),
+      id: buildRiskScoreHistoryAttachmentId(type, scoredId, scoreType),
       data: {
         attachmentLabel: label,
         identifierType: type,
         identifier: name,
-        entityStoreId: id,
+        entityStoreId: scoredId,
         from,
         to,
         bucketInterval: `${interval.value}${interval.unit}`,
@@ -166,12 +164,11 @@ const createRiskChart = async ({
       description: label,
       logger,
     });
-    if (!attachment) {
-      return undefined;
-    }
-    return { tag: buildRenderAttachmentTag(attachment), entityId: candidate.id, of };
+    return attachment
+      ? { tag: buildRenderAttachmentTag(attachment), entityId: candidate.id, of: risk.of }
+      : undefined;
   } catch (error) {
-    logger.debug(`AI brief: no risk-history chart for ${id}: ${error.message}`);
+    logger.debug(`AI brief: no risk-history chart for ${scoredId}: ${error.message}`);
     return undefined;
   }
 };

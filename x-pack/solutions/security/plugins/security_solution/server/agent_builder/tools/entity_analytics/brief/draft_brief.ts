@@ -9,18 +9,21 @@ import { once, uniq } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient, ToolSchema } from '@kbn/inference-common';
 import { createInferenceInternalError } from '@kbn/inference-common';
-import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import type {
+  EntityAnalyticsScope,
+  EntityAnalyticsScopeTile,
+} from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityFacts } from './brief_types';
 import { BriefDraft, MAX_PRIORITIES } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_DEFINITIONS,
-  describeTileChange,
+  describeDelta,
   formatCount,
 } from './describe_scope';
 
-/** The model drafts the brief in one structured-output call. The inference plugin retries an invalid answer once. */
+/** The model drafts the brief in one structured-output call, which the inference plugin retries once. */
 export const draftBrief = async ({
   inferenceClient,
   scope,
@@ -31,7 +34,7 @@ export const draftBrief = async ({
   inferenceClient: BoundInferenceClient;
   scope: EntityAnalyticsScope;
   facts: EntityFacts[];
-  /** From `describeSample`, absent when the entities are all the flagged ones. */
+  /** From `describeSample`, absent when the facts cover every flagged entity. */
   sample?: string;
   abortSignal?: AbortSignal;
 }): Promise<BriefDraft> => {
@@ -52,30 +55,10 @@ export const draftBrief = async ({
   return parsed.data;
 };
 
-const isToolSchema = (value: unknown): value is ToolSchema =>
-  typeof value === 'object' &&
-  value !== null &&
-  'type' in value &&
-  value.type === 'object' &&
-  'properties' in value;
-
-/** `BriefDraft` as JSON schema, without `$schema` and zod's safe-integer bounds. */
-const getBriefSchema = once((): ToolSchema => {
-  const schema: unknown = JSON.parse(
-    JSON.stringify(z.toJSONSchema(BriefDraft), (key, value) =>
-      key === '$schema' || Math.abs(value) === Number.MAX_SAFE_INTEGER ? undefined : value
-    )
-  );
-  if (!isToolSchema(schema)) {
-    throw new Error('The BriefDraft schema did not convert to an object JSON schema');
-  }
-  return schema;
-});
-
-const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from the facts about the entities in the page's needs-attention tiles. Answer with the complete brief in the required structure.
+const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from the facts about the entities the page flags. Answer with the complete brief in the required structure.
 
 ## The view and the entities
-- <view> lists the page's counts of flagged entities, with their change as the page shows it, and how many flagged entities <entities> covers.
+- <view> lists the page's counts of flagged entities, with their change as the page shows it, and how many of them <entities> covers.
 - <entities> has one JSON object per flagged entity. Mention an entity with its token, {{ entity.id <entityId> }}.
 - flaggedFor lists why the page flags it; <flags> says what each means.
 - risk is the resolution group's when \`of\` is "resolution group": the combined risk of the identity's linked records.
@@ -86,9 +69,8 @@ const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security a
 ## The brief
 - attention: one or two sentences on what needs attention in this view. Mention entities only with their token, copied exactly; the reader sees the name. Never write a display name or EUID on its own.
 - recommendation: the one next step you would take first across the whole view, considering every priority and the changes in the view together, not only the first priority. It must make sense on its own, so name entities with their token rather than "this account".
-- priorities: always include this field. At most ${MAX_PRIORITIES} entities, most important first. An entity in several tiles, with high criticality, privilege or high risk usually deserves a priority. Use fewer than ${MAX_PRIORITIES} when the facts don't support ${MAX_PRIORITIES}; never pad.
-- Never reveal or rely on field names; write plain prose.
-- Keep to the word limits in the tool schema. The whole brief is read in about a minute.
+- priorities: always include this field. At most ${MAX_PRIORITIES} entities, most important first. An entity flagged several ways, with high criticality, privilege or high risk usually deserves a priority. Use fewer than ${MAX_PRIORITIES} when the facts don't support ${MAX_PRIORITIES}; never pad.
+- Keep to the word limits in the schema. The whole brief is read in about a minute.
 
 ## Accuracy
 - Use only the view and the entities. A priority quotes only numbers from its own entity or the view. Never calculate, add up, estimate or round numbers.
@@ -98,9 +80,9 @@ const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security a
 
 ## Style
 British English. Plain words, short sentences. No markdown, no filler.
-Never mention tiles, cards, signals, the page's layout or flaggedFor names: readers don't know them. Say what the entity did, e.g. "risk rose by at least 10 points", not "riskMovers".`;
+Never mention tiles, cards, signals, the page's layout or field names: readers don't know them. Say what the entity did, e.g. "risk rose by at least 10 points", not "riskMovers".`;
 
-/** The user message: the period, the counts with what the entities cover, the flags, and one JSON object per entity. */
+/** The period, the page's counts, what each flag means, then one JSON object per entity. */
 const buildUserMessage = ({
   scope,
   facts,
@@ -116,11 +98,8 @@ const buildUserMessage = ({
     if (!tile) {
       return [];
     }
-    const title = `${tile.title}${tileId === scope.focusTileId ? ' (selected)' : ''}`;
-    if (tile.unavailable) {
-      return [`${title}: unavailable`];
-    }
-    return [`${title}: ${formatCount(tile.value)} (${describeTileChange(tile, scope.period)})`];
+    const selected = tileId === scope.focusTileId ? ' (selected)' : '';
+    return [`${tile.title}${selected}: ${describeCount(tile, period)}`];
   });
   const flags = uniq(facts.flatMap(({ flaggedFor }) => flaggedFor)).map(
     (tileId) => `${tileId}: ${BRIEF_TILE_DEFINITIONS[tileId](period)}`
@@ -140,3 +119,34 @@ ${flags.join('\n')}
 ${facts.map((entity) => JSON.stringify(entity)).join('\n')}
 </entities>`;
 };
+
+const describeCount = (tile: EntityAnalyticsScopeTile, period: string): string => {
+  if (tile.unavailable) {
+    return 'unavailable';
+  }
+  const change =
+    tile.delta === undefined
+      ? 'not enough history to compare'
+      : `${describeDelta(tile)} vs previous ${period}`;
+  return `${formatCount(tile.value)} (${change})`;
+};
+
+/** `BriefDraft` as JSON schema, without `$schema` and zod's safe-integer bounds. */
+const getBriefSchema = once((): ToolSchema => {
+  const schema: unknown = JSON.parse(
+    JSON.stringify(z.toJSONSchema(BriefDraft), (key, value) =>
+      key === '$schema' || Math.abs(value) === Number.MAX_SAFE_INTEGER ? undefined : value
+    )
+  );
+  if (!isToolSchema(schema)) {
+    throw new Error('The BriefDraft schema did not convert to an object JSON schema');
+  }
+  return schema;
+});
+
+const isToolSchema = (value: unknown): value is ToolSchema =>
+  typeof value === 'object' &&
+  value !== null &&
+  'type' in value &&
+  value.type === 'object' &&
+  'properties' in value;

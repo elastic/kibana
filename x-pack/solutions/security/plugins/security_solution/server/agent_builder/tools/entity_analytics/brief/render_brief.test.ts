@@ -6,12 +6,14 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { BriefPriority, EntityFacts } from './brief_types';
 import type { CandidateEntities } from './read_entities';
 import {
   NO_MATCH_LINE,
   NO_PRIORITIES_LINE,
   QUIET_LINE,
   UNAVAILABLE_TILES_LINE,
+  getRiskChartEntityId,
   renderBrief,
 } from './render_brief';
 
@@ -40,12 +42,11 @@ const hostA: CandidateEntities = {
   matchedCount: 1,
 };
 
-const priority = (entityId: string, observed: string) => ({
+const priority = (entityId: string, observed = 'Observed.'): BriefPriority => ({
   entityId,
   observed,
   whyItMatters: 'High impact asset.',
   nextStep: 'Review its alerts',
-  factIds: [1],
 });
 
 describe('renderBrief', () => {
@@ -323,5 +324,26 @@ Start with **jdoe**.`);
       entities: { ...noEntities, ...entities },
     });
     expect(brief).toContain(disclosure);
+  });
+});
+
+describe('getRiskChartEntityId', () => {
+  it('picks the first priority whose risk moved by at least 10 points', () => {
+    const facts = (entityId: string, change: number): EntityFacts => ({
+      entityId,
+      name: entityId,
+      type: 'host',
+      flaggedFor: ['riskMovers'],
+      risk: { of: 'entity', level: 'High', score: 80, atPeriodStart: 80 - change, change },
+    });
+    const all = [facts('host:wobble', 4), facts('host:moved', -12), facts('host:also', 30)];
+
+    expect(
+      getRiskChartEntityId(
+        [priority('host:wobble'), priority('host:moved'), priority('host:also')],
+        all
+      )
+    ).toBe('host:moved');
+    expect(getRiskChartEntityId([priority('host:wobble')], all)).toBeUndefined();
   });
 });
