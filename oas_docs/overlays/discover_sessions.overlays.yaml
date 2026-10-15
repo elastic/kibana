@@ -50,7 +50,7 @@ actions:
           }'
         ```
 
-        All examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). To use your own data, replace the index pattern and field references.
+        Most examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples require a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
 
         ### Discover session structure
 
@@ -72,6 +72,8 @@ actions:
         | `data_view_spec` | A data view defined inline, with an `index_pattern` and an optional `time_field`. |
 
         Tabs based on data views also support `query`, `filters`, and `view_mode` (`documents`, `patterns`, or `aggregated`).
+
+        Each tab also has a `type`. `default` tabs support data views and ES|QL. `metrics` tabs support only ES|QL and also store metrics grid settings, such as `dimensions` and aggregations. If omitted, `type` defaults to `default`.
 
         - **ES|QL tab**:
 
