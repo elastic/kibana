@@ -32,13 +32,15 @@ describe('AiAnonymizationSettingsPlugin', () => {
   const startWith = (
     plugin: AiAnonymizationSettingsPlugin,
     advancedSettings?: { save?: boolean; show?: boolean },
-    license$ = new BehaviorSubject(licenseOf('enterprise'))
+    license$ = new BehaviorSubject(licenseOf('enterprise')),
+    isSettingRegistered = true
   ) => {
     const coreStart = coreMock.createStart();
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: advancedSettings ?? {},
     };
+    coreStart.uiSettings.isDeclared.mockReturnValue(isSettingRegistered);
     plugin.start(coreStart, { licensing: { ...licensingMock.createStart(), license$ } });
     return license$;
   };
@@ -103,5 +105,19 @@ describe('AiAnonymizationSettingsPlugin', () => {
     license$.next(licenseOf('basic'));
 
     expect(app.disable).toHaveBeenCalledTimes(1); // only the initial registration
+  });
+
+  // The inference plugin registers `ai:anonymizationSettings`; without it the page cannot read its data.
+  it('keeps the page disabled when the setting is not registered, as when inference is disabled', () => {
+    const { plugin, app } = setupPlugin();
+
+    startWith(
+      plugin,
+      { show: true, save: true },
+      new BehaviorSubject(licenseOf('enterprise')),
+      false
+    );
+
+    expect(app.enable).not.toHaveBeenCalled();
   });
 });

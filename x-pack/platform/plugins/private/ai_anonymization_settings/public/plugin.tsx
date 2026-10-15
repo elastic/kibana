@@ -10,6 +10,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Subscription } from 'rxjs';
+import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
 import { isValidLicense } from '../common/license';
 
 interface AiAnonymizationSettingsPublicConfig {
@@ -80,10 +81,13 @@ export class AiAnonymizationSettingsPlugin
   ): AiAnonymizationSettingsPluginStart {
     const canSaveAdvancedSettings =
       coreStart.application.capabilities.advancedSettings?.save === true;
+    // The setting is registered by the inference plugin, which this plugin does not depend on. Without
+    // it (`xpack.inference.enabled: false`) reading the setting throws, so the page is not offered.
+    const isSettingRegistered = coreStart.uiSettings.isDeclared(aiAnonymizationSettings);
 
     // The license can change while Kibana runs, so follow it instead of reading it once.
     this.licenseSubscription = licensing.license$.subscribe((license) => {
-      if (canSaveAdvancedSettings && isValidLicense(license)) {
+      if (canSaveAdvancedSettings && isSettingRegistered && isValidLicense(license)) {
         this.registeredApp?.enable();
       } else {
         this.registeredApp?.disable();
