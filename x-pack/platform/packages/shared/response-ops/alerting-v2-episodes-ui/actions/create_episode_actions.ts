@@ -26,15 +26,16 @@ import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
 import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 
 /**
- * Ids of episode actions that are safe to expose to users without write
- * privilege because they do not mutate any episode (e.g. navigation only).
- * Anything not listed here is treated as a write action and hidden from
- * read-only users, so new mutating actions are gated by default.
+ * Episode action ids visible without alerting write privilege.
+ * Add to case is included because the Cases plugin checks its own privileges.
+ * Any other id is hidden from read-only users.
  */
 export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
   OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+  ADD_TO_CASE_EPISODE_ACTION_ID,
 ]);
 
 export interface EpisodeActionsDeps {
