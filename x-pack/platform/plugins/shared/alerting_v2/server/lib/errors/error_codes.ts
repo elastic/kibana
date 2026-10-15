@@ -325,6 +325,12 @@ export const ALERTING_LOG_CODES = {
   EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED:
     'EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED',
   /**
+   * The alert events client stored an alert event but failed to publish its
+   * status change. The write already succeeded; only the workflow fan-out for
+   * this change was lost.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED',
+  /**
    * The rule-changes-history subscriber failed to record a change entry for a
    * rule domain event. The rule operation itself already succeeded; only the
    * audit entry for this change was lost.

@@ -16,8 +16,18 @@ import {
   alertEpisodeStatus,
   alertEventType,
   ALERT_EVENTS_RESOURCE_KEY,
+  type AlertEpisodeStatus,
   type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import {
+  AlertStatusChangedEventPublisher,
+  type AlertStatusChangedEventPublisherContract,
+} from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -75,14 +85,27 @@ export function getGroupHash(event: CreateAlertEventData, spaceId: string): stri
   return sha256(`${spaceId}:${source}:${event.rule_id}`);
 }
 
+interface ResolvedEpisode {
+  readonly episodeId: string;
+  /** Last status of the series, or `null` when it has none yet. */
+  readonly previousStatus: AlertEpisodeStatus | null;
+}
+
 @injectable()
 export class AlertEventsClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract,
+    @inject(AlertStatusChangedEventPublisher)
+    private readonly alertStatusChangedPublisher: AlertStatusChangedEventPublisherContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public async createAlertEvent(
     event: CreateAlertEventData,
@@ -92,7 +115,11 @@ export class AlertEventsClient {
     const groupHash = getGroupHash(event, this.spaceId);
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
-    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
+    const { episodeId, previousStatus } = await this.resolveEpisode(
+      groupHash,
+      episodeStatus,
+      abortSignal
+    );
 
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
@@ -129,7 +156,7 @@ export class AlertEventsClient {
     await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
 
     // `refresh: 'wait_for'` ensures the written doc is visible to the next
-    // resolveEpisodeId query when events for the same series arrive back-to-back.
+    // resolveEpisode query when events for the same series arrive back-to-back.
     const { errors } = await this.storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],
@@ -144,20 +171,68 @@ export class AlertEventsClient {
       });
     }
 
+    // Same as the rule executor: only a genuine status change fires the trigger.
+    if (previousStatus !== episodeStatus) {
+      await this.publishAlertStatusChange({
+        source,
+        groupHash,
+        episodeId,
+        status: episodeStatus,
+        previousStatus,
+      });
+    }
+
     return {
       group_hash: groupHash,
       alert_id: episodeId,
     };
   }
 
-  private async resolveEpisodeId(
+  /**
+   * Publishes the status change of a stored alert event. The write already
+   * succeeded, so a failure here is logged rather than thrown.
+   */
+  private async publishAlertStatusChange({
+    source,
+    groupHash,
+    episodeId,
+    status,
+    previousStatus,
+  }: {
+    source: string;
+    groupHash: string;
+    episodeId: string;
+    status: AlertEpisodeStatus;
+    previousStatus: AlertEpisodeStatus | null;
+  }): Promise<void> {
+    try {
+      await this.alertStatusChangedPublisher.publishAlertStatusChanges([
+        {
+          spaceId: this.spaceId,
+          source,
+          alert: { id: episodeId, groupHash, status, previousStatus },
+          rule: null,
+          execution: null,
+        },
+      ]);
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to publish alert status change',
+        error,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+        labels: { space_id: this.spaceId, group_hash: groupHash, alert_id: episodeId },
+      });
+    }
+  }
+
+  private async resolveEpisode(
     groupHash: string,
-    nextStatus: string,
+    nextStatus: AlertEpisodeStatus,
     abortSignal?: AbortSignal
-  ): Promise<string> {
+  ): Promise<ResolvedEpisode> {
     const rows = await this.queryService.executeQueryRows<{
       last_episode_id: string;
-      last_episode_status: string;
+      last_episode_status: AlertEpisodeStatus;
     }>({
       query: `FROM ${ALERT_EVENTS_DATA_STREAM}
           | WHERE type == "alert" AND group_hash == "${groupHash}" AND alert.status IS NOT NULL
@@ -169,16 +244,16 @@ export class AlertEventsClient {
       abortSignal,
     });
 
-    if (rows.length === 0 || !rows[0].last_episode_id) {
-      return uuidv4();
+    const [row] = rows;
+    const previousStatus = row?.last_episode_status ?? null;
+
+    if (!row?.last_episode_id) {
+      return { episodeId: uuidv4(), previousStatus };
     }
 
-    const { last_episode_id: lastEpisodeId, last_episode_status: lastEpisodeStatus } = rows[0];
-
     const isNewLifecycle =
-      lastEpisodeStatus === alertEpisodeStatus.inactive &&
-      nextStatus !== alertEpisodeStatus.inactive;
+      previousStatus === alertEpisodeStatus.inactive && nextStatus !== alertEpisodeStatus.inactive;
 
-    return isNewLifecycle ? uuidv4() : lastEpisodeId;
+    return { episodeId: isNewLifecycle ? uuidv4() : row.last_episode_id, previousStatus };
   }
 }
