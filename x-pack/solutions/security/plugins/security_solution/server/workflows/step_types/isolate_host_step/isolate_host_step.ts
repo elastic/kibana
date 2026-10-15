@@ -105,6 +105,25 @@ export const isolateHostStepDefinition = createPollServerStepDefinition({
       });
       details = body.data;
     } catch (error) {
+      // The action was dispatched but this user cannot read its status (the details route needs
+      // the response actions history privilege): waiting out the deadline would only report a
+      // misleading `timed_out`.
+      if (error instanceof KibanaApiCallError && (error.status === 401 || error.status === 403)) {
+        const output: IsolateHostOutput = {
+          status: 'failed',
+          error_code: 'STATUS_UNREADABLE_FORBIDDEN',
+          action_ids: [state.action_id],
+          results: state.endpoint_ids.map((endpointId) => ({
+            endpoint_id: endpointId,
+            agent_type: 'endpoint',
+            status: 'pending' as const,
+          })),
+          dropped_endpoint_ids: [],
+          started_at: state.started_at,
+        };
+        return { output };
+      }
+
       // Never error after dispatch: keep polling until the deadline.
       context.logger.warn(
         `Isolate action ${state.action_id} poll failed: ${(error as Error).message}`

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { deriveRunQueryStatus } from './status';
 import { toRunQueryRow } from './rows';
+import { runQueryStepDefinition } from './run_query_step';
+
+type PollContext = Parameters<typeof runQueryStepDefinition.poll>[0];
 
 describe('osquery run query step', () => {
   describe('deriveRunQueryStatus', () => {
@@ -81,6 +85,53 @@ describe('osquery run query step', () => {
       const row = toRunQueryRow({ 'agent.id': 'a1', 'osquery.pid': 7 }, []);
       expect(row.agent.id).toBe('a1');
       expect(row.columns).toEqual({ pid: '7' });
+    });
+  });
+
+  describe('poll', () => {
+    const state = {
+      action_id: 'action-1',
+      query_action_id: 'query-1',
+      deadline: new Date(Date.now() + 60_000).toISOString(),
+      ecs_keys: [],
+      max_rows: 10,
+      agents_total: 2,
+    };
+
+    const buildContext = (callKibanaApi: jest.Mock) =>
+      ({
+        state,
+        contextManager: { callKibanaApi },
+        logger: { warn: jest.fn() },
+      } as unknown as PollContext);
+
+    const apiError = (status: number) =>
+      new KibanaApiCallError({ status, headers: {}, body: {}, message: `HTTP ${status}` });
+
+    it('should fail with STATUS_UNREADABLE_FORBIDDEN when the details read returns 403', async () => {
+      const result = await runQueryStepDefinition.poll(
+        buildContext(jest.fn().mockRejectedValue(apiError(403)))
+      );
+
+      expect(result).toEqual({
+        output: {
+          status: 'failed',
+          error_code: 'STATUS_UNREADABLE_FORBIDDEN',
+          action_id: 'action-1',
+          agents: { total: 2, responded: 0, pending: 2, failed: 0 },
+          rows: [],
+          row_count: 0,
+          truncated: false,
+        },
+      });
+    });
+
+    it('should keep polling when the details read returns 5xx before the deadline', async () => {
+      const result = await runQueryStepDefinition.poll(
+        buildContext(jest.fn().mockRejectedValue(apiError(503)))
+      );
+
+      expect(result).toEqual({ state });
     });
   });
 });

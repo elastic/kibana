@@ -159,6 +159,27 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
         body.data.queries.find((q) => q.action_id === state.query_action_id) ??
         body.data.queries[0];
     } catch (error) {
+      // The query was dispatched but this user cannot read it back (the details route needs
+      // `live_queries_read`): waiting out the deadline would only report a misleading `timed_out`.
+      if (error instanceof KibanaApiCallError && (error.status === 401 || error.status === 403)) {
+        const output: RunQueryOutput = {
+          status: 'failed',
+          error_code: 'STATUS_UNREADABLE_FORBIDDEN',
+          action_id: state.action_id,
+          agents: {
+            total: state.agents_total,
+            responded: 0,
+            pending: state.agents_total,
+            failed: 0,
+          },
+          rows: [],
+          row_count: 0,
+          truncated: false,
+        };
+
+        return { output };
+      }
+
       // Never error after dispatch: keep polling until the deadline.
       context.logger.warn(`Live query ${state.action_id} poll failed: ${(error as Error).message}`);
     }
