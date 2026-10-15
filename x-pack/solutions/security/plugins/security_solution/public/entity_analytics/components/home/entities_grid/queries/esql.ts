@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
+import { chunk } from 'lodash';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../../common/entity_analytics/risk_engine';
 import {
@@ -23,7 +24,6 @@ import {
   RESOLUTION_RISK_SCORE_FIELD,
   RISK_SCORE_NORM_FIELD,
   getEntityId,
-  toChunks,
 } from '../common';
 import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
 import type { EsqlRunner } from './types';
@@ -66,10 +66,10 @@ export const ID_LIST_CHUNK_SIZE = 2_000;
 export const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
-  buildQuery: (chunk: readonly string[]) => string[]
+  buildQuery: (ids: readonly string[]) => string[]
 ): Promise<Row[]> => {
-  const chunks = toChunks(ids, ID_LIST_CHUNK_SIZE);
-  return (await Promise.all(chunks.map((chunk) => runQuery(buildQuery(chunk))))).flat();
+  const chunks = chunk(ids, ID_LIST_CHUNK_SIZE);
+  return (await Promise.all(chunks.map((idsChunk) => runQuery(buildQuery(idsChunk))))).flat();
 };
 
 const IDENTITY_SOURCE_FIELDS = [

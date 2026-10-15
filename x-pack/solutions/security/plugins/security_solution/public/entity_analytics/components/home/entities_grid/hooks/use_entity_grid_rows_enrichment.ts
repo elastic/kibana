@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
+import { chunk as toChunks } from 'lodash';
 import { useQueries } from '@kbn/react-query';
 import type { QueryFunctionContext, UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
-import { getEntityId, getEntityIds, toChunks } from '../common';
+import { getEntityId, getEntityIds } from '../common';
 import { PAGE_ENRICHERS } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { ENTITY_ID_FIELD, getEntityId, getEntityIds, toChunks } from '../common';
+import { ENTITY_ID_FIELD, getEntityId, getEntityIds } from '../common';
 import type { QueryArgs, Row } from '../common';
 import {
   buildEntitiesInViewConditions,
@@ -85,7 +86,7 @@ const fetchValuesInChunks = async (
   ctx: SortPageContext
 ): Promise<EnrichedFields> => {
   const values = await Promise.all(
-    toChunks(rows, VALUES_CHUNK_SIZE).map((chunk) => column.fetchValues(chunk, args, ctx))
+    chunk(rows, VALUES_CHUNK_SIZE).map((rowsChunk) => column.fetchValues(rowsChunk, args, ctx))
   );
   return new Map(values.flatMap((chunkValues) => [...chunkValues]));
 };
@@ -169,7 +170,7 @@ const fetchSearchedPageByValues = async (
   }
 
   const [searched, empty] = await Promise.all([
-    fetchPerIdChunk(ctx.runQuery, valueIds, (chunk) => buildSearchedTargetsQuery(args, chunk)),
+    fetchPerIdChunk(ctx.runQuery, valueIds, (ids) => buildSearchedTargetsQuery(args, ids)),
     ctx.runQuery(emptyRowsQuery),
   ]);
 

@@ -141,10 +141,5 @@ export const getNumber = (row: Row, field: string): number | undefined => {
 
 export const getEntityId = (row: Row): string | undefined => getString(row, ENTITY_ID_FIELD);
 
-export const toChunks = <T>(items: readonly T[], size: number): T[][] =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, i) =>
-    items.slice(i * size, (i + 1) * size)
-  );
-
 export const getEntityIds = (rows: readonly Row[]): string[] =>
   rows.flatMap((row) => getEntityId(row) ?? []);

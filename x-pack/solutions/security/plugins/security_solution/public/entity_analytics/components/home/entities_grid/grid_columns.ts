@@ -70,15 +70,13 @@ const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
 /** On resolved rows, the page's rows also get their resolved entities' values. */
 export const findSortPageFetcher = (id: string): SortPageFetcher | undefined => {
   const fetchSortPage = getQuerySpec(id)?.fetchSortPage;
-  return (
-    fetchSortPage &&
-    (async (args, ctx) => {
-      const rows = await fetchSortPage(args, ctx);
-      return args.rowsMode === 'resolved'
-        ? withResolvedEntityValues(rows, args, ctx.runQuery)
-        : rows;
-    })
-  );
+
+  if (!fetchSortPage) return undefined;
+
+  return async (args, ctx) => {
+    const rows = await fetchSortPage(args, ctx);
+    return args.rowsMode === 'resolved' ? withResolvedEntityValues(rows, args, ctx.runQuery) : rows;
+  };
 };
 
 /** Fields the enrichers read; their cells stay blank until the page is enriched. */
