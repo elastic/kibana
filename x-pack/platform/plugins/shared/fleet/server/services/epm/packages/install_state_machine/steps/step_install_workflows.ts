@@ -60,7 +60,7 @@ export const stepInstallWorkflows = async (
       [KibanaSavedObjectType.workflow]
     );
 
-  const client = appContextService.getManagedWorkflowsClient();
+  const client = await appContextService.waitForManagedWorkflowsClient();
   if (appContextService.getExperimentalFeatures().enableWorkflowAssets !== true || !client) {
     logger.warn('Workflows are not available, skipping workflow assets installation');
     // The kibana assets step replaced the saved refs, put back the workflows that are still installed

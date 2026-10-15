@@ -71,7 +71,7 @@ describe('stepInstallWorkflows', () => {
     mockedAppContext.getExperimentalFeatures.mockReturnValue({
       enableWorkflowAssets: true,
     } as ReturnType<typeof appContextService.getExperimentalFeatures>);
-    mockedAppContext.getManagedWorkflowsClient.mockReturnValue(client);
+    mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(client);
   });
 
   it('is a no-op when the package has no workflows and none were installed before', async () => {
@@ -118,8 +118,27 @@ describe('stepInstallWorkflows', () => {
     );
   });
 
+  it('waits for the client to finish initializing instead of skipping workflows', async () => {
+    let resolveClient: (value: ManagedWorkflowsClient) => void = () => {};
+    mockedAppContext.waitForManagedWorkflowsClient.mockReturnValue(
+      new Promise((resolve) => {
+        resolveClient = resolve;
+      })
+    );
+    jest.mocked(installWorkflows).mockResolvedValue([WORKFLOW_REF]);
+
+    const pending = stepInstallWorkflows(createContext({ paths: [WORKFLOW_PATH] }));
+    await Promise.resolve();
+    expect(installWorkflows).not.toHaveBeenCalled();
+
+    resolveClient(client);
+    await pending;
+
+    expect(installWorkflows).toHaveBeenCalledWith(expect.objectContaining({ client }));
+  });
+
   it('keeps the previous workflow refs when the client is not available', async () => {
-    mockedAppContext.getManagedWorkflowsClient.mockReturnValue(undefined);
+    mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(undefined);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
     await stepInstallWorkflows(context);

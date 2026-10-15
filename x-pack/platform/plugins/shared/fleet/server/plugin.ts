@@ -875,15 +875,20 @@ export class FleetPlugin
       featureFlags: core.featureFlags,
     });
     if (appContextService.getExperimentalFeatures().enableWorkflowAssets) {
-      plugins.workflowsExtensions
-        ?.initManagedWorkflowsClient(FLEET_PACKAGE_WORKFLOW.pluginId)
+      const managedWorkflowsClientInit = Promise.resolve(
+        plugins.workflowsExtensions?.initManagedWorkflowsClient(FLEET_PACKAGE_WORKFLOW.pluginId)
+      )
         .then(async (managedWorkflowsClient) => {
+          if (!managedWorkflowsClient) return undefined;
           appContextService.setManagedWorkflowsClient(managedWorkflowsClient);
           await managedWorkflowsClient.ready();
+          return managedWorkflowsClient;
         })
         .catch((error) => {
           this.logger?.error(`Failed to initialize the managed workflows client: ${error.message}`);
+          return undefined;
         });
+      appContextService.setManagedWorkflowsClientInit(managedWorkflowsClientInit);
     }
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

@@ -94,6 +94,7 @@ class AppContextService {
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
   private managedWorkflowsClient: ManagedWorkflowsClient | undefined;
+  private managedWorkflowsClientInit: Promise<ManagedWorkflowsClient | undefined> | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     KibanaSavedObjectType.alertingRuleTemplate,
@@ -365,6 +366,15 @@ class AppContextService {
 
   public getManagedWorkflowsClient() {
     return this.managedWorkflowsClient;
+  }
+
+  public setManagedWorkflowsClientInit(init: Promise<ManagedWorkflowsClient | undefined>) {
+    this.managedWorkflowsClientInit = init;
+  }
+
+  /** Resolves once the client initialization settles; `undefined` if it failed or never started. */
+  public async waitForManagedWorkflowsClient(): Promise<ManagedWorkflowsClient | undefined> {
+    return (await this.managedWorkflowsClientInit) ?? this.managedWorkflowsClient;
   }
 
   public getReportingStart() {
