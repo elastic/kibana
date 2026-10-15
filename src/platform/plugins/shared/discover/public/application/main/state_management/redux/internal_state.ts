@@ -715,19 +715,24 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
-        withTab(listenerApi.getState(), action.payload, (tab) => {
-          tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState({
-              runtimeStateManager,
-              tabState: tab,
-              services,
-            }),
-            attributes: tab.attributes,
-            appState: tab.appState,
-            globalState: tab.globalState,
-            profileState: tab.profileState,
-            visorMode: tab.uiState.visor?.visorMode,
-          });
+        const state = listenerApi.getState();
+        withTab(state, action.payload, (tab) => {
+          tabsStorageManager.updateTabStateLocally(
+            action.payload.tabId,
+            {
+              internalState: selectTabRuntimeInternalState({
+                runtimeStateManager,
+                tabState: tab,
+                services,
+              }),
+              attributes: tab.attributes,
+              appState: tab.appState,
+              globalState: tab.globalState,
+              profileState: tab.profileState,
+              visorMode: tab.uiState.visor?.visorMode,
+            },
+            state.persistedDiscoverSession
+          );
         });
       },
       MIDDLEWARE_THROTTLE_MS,

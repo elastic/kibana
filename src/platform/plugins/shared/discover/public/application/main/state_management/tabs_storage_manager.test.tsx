@@ -734,13 +734,14 @@ describe('TabsStorageManager', () => {
     expect(storage.set).not.toHaveBeenCalled();
   });
 
-  it('should update tab state in local storage', () => {
+  it('should update tab state and keep the version it is based on in local storage', () => {
     const { tabsStorageManager, services } = create();
     const storage = services.storage;
 
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
+      discoverSessionVersion: 'saved-elsewhere-version',
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
@@ -763,11 +764,14 @@ describe('TabsStorageManager', () => {
       profileState: undefined,
     };
 
-    tabsStorageManager.updateTabStateLocally(mockTab1.id, updatedTabState);
+    tabsStorageManager.updateTabStateLocally(mockTab1.id, updatedTabState, {
+      version: 'current-version',
+    });
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
+      discoverSessionVersion: 'current-version',
       openTabs: [
         {
           ...toStoredTab(mockTab1),
@@ -804,19 +808,23 @@ describe('TabsStorageManager', () => {
 
     jest.spyOn(storage, 'set');
 
-    tabsStorageManager.updateTabStateLocally(mockTab1.id, {
-      internalState: mockTab1.initialInternalState,
-      attributes: mockTab1.attributes,
-      appState: mockTab1.appState,
-      globalState: mockTab1.globalState,
-      profileState: {
-        testProfileState: {
-          uiValue: 'ui',
-          urlValue: 'updatedUrl',
-          persistentValue: 'updatedPersistent',
+    tabsStorageManager.updateTabStateLocally(
+      mockTab1.id,
+      {
+        internalState: mockTab1.initialInternalState,
+        attributes: mockTab1.attributes,
+        appState: mockTab1.appState,
+        globalState: mockTab1.globalState,
+        profileState: {
+          testProfileState: {
+            uiValue: 'ui',
+            urlValue: 'updatedUrl',
+            persistentValue: 'updatedPersistent',
+          },
         },
       },
-    });
+      undefined
+    );
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -863,17 +871,21 @@ describe('TabsStorageManager', () => {
 
     jest.spyOn(storage, 'set');
 
-    tabsStorageManager.updateTabStateLocally(mockTab1.id, {
-      internalState: mockTab1.initialInternalState,
-      attributes: mockTab1.attributes,
-      appState: mockTab1.appState,
-      globalState: mockTab1.globalState,
-      profileState: {
-        testProfileState: {
-          uiValue: 'ui',
+    tabsStorageManager.updateTabStateLocally(
+      mockTab1.id,
+      {
+        internalState: mockTab1.initialInternalState,
+        attributes: mockTab1.attributes,
+        appState: mockTab1.appState,
+        globalState: mockTab1.globalState,
+        profileState: {
+          testProfileState: {
+            uiValue: 'ui',
+          },
         },
       },
-    });
+      undefined
+    );
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,

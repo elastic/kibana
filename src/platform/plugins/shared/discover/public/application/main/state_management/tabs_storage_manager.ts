@@ -95,7 +95,8 @@ export interface TabsStorageManager {
     tabState: Pick<
       TabStateInLocalStorage,
       'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState' | 'visorMode'
-    >
+    >,
+    discoverSession: Pick<DiscoverSession, 'version'> | undefined
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -419,7 +420,8 @@ export const createTabsStorageManager = ({
 
   const updateTabStateLocally: TabsStorageManager['updateTabStateLocally'] = (
     tabId,
-    tabStatePartial
+    tabStatePartial,
+    discoverSession
   ) => {
     if (!enabled) {
       return;
@@ -428,6 +430,8 @@ export const createTabsStorageManager = ({
     const storedTabsState = readFromLocalStorage();
     const updatedTabsState = {
       ...storedTabsState,
+      // Another browser tab may have stored a newer version that these changes are not based on
+      discoverSessionVersion: discoverSession?.version,
       openTabs: storedTabsState.openTabs.map((tab) => {
         if (tab.id === tabId) {
           hasModifications = true;
