@@ -9,12 +9,14 @@ import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
+const ES_ARCHIVE_MAPS_DATA = 'x-pack/platform/test/fixtures/es_archives/maps/data';
 
 // Data views the archive creates for these ids must not exist, so the layers
 // that reference them show their missing id as the display name.
 const MISSING_DATA_VIEW_IDS = [
   'idThatDoesNotExitForESSearchSource',
   'idThatDoesNotExitForESGeoGridSource',
+  'idThatDoesNotExitForESJoinSource',
 ];
 
 const LAYER_WITH_ERRORS_MAP_ID = '745c98b0-23e1-11e9-a048-6fef5a3e0d1e';
@@ -39,7 +41,8 @@ const LAYER_ERRORS = [
 ];
 
 test.describe('Maps - layer errors', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esArchiver }) => {
+    await esArchiver.loadIfNeeded(ES_ARCHIVE_MAPS_DATA);
     await kbnClient.importExport.load(KBN_ARCHIVE);
     for (const id of MISSING_DATA_VIEW_IDS) {
       await kbnClient.savedObjects.delete({ type: 'index-pattern', id });
