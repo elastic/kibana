@@ -90,16 +90,16 @@ describe('useFetchInvestigations', () => {
     );
   });
 
-  it('leaves running investigations out of the other sections and their totals', async () => {
+  it('keeps running investigations in the other sections, so none becomes unreachable', async () => {
     const { result } = renderHook(
       () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),
       { wrapper: createWrapper() }
     );
 
     await waitFor(() =>
-      expect(result.current.investigations.map(({ id }) => id)).toEqual(['done'])
+      expect(result.current.investigations.map(({ id }) => id)).toEqual(['running', 'done'])
     );
-    expect(result.current.total).toBe(11);
+    expect(result.current.total).toBe(12);
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations',
       expect.objectContaining({

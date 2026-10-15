@@ -134,17 +134,15 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  const loaded = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
-  const investigations = useMemo(
-    () => loaded.filter(({ in_progress: isRunning }) => isRunning === inProgress),
-    [loaded, inProgress]
-  );
+  // The other sections keep running investigations: dropping them from a page could empty the
+  // section and hide the finished ones on later pages.
+  const investigations = useMemo(() => {
+    const loaded = flattenInvestigationPages(data?.pages ?? []);
+    return inProgress ? loaded.filter(({ in_progress: isRunning }) => isRunning) : loaded;
+  }, [data?.pages, inProgress]);
 
-  // Running investigations past the loaded pages still count toward a severity section's total.
   const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
-  const total = inProgress
-    ? investigations.length
-    : listedTotal - (loaded.length - investigations.length);
+  const total = inProgress ? investigations.length : listedTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();
