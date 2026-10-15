@@ -31,6 +31,10 @@ export interface SignalCardData {
   isDeltaLoading?: boolean;
   /** True when the history is too short to compare with the previous period: the tile says so. */
   isDeltaUnavailable?: boolean;
+  /** The entities the tile counts, as its query returns them. */
+  entityIds?: readonly string[];
+  /** True when the tile's query failed or can't run, so the value shown isn't a real count. */
+  isUnavailable?: boolean;
   filterLabel: string;
   trend?: number[];
 }

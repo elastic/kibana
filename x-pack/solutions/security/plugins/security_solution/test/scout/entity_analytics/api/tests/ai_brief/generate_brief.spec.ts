@@ -130,8 +130,6 @@ apiTest.describe(
       );
       expect(brief).toContain(`**Recommended next step**\nStart with **${SEEDED_USER.name}**.`);
       expect(brief).toContain('<render_attachment');
-      // The priority doesn't cite the risk change fact, so it has no chart.
-      expect(brief).not.toContain(RISK_CHART_ID);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);

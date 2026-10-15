@@ -21,13 +21,6 @@ import { inputsSelectors } from '../../../../common/store/inputs';
 import type { SignalCardData, SignalCardId } from '../needs_attention_tiles/data';
 import type { EntityFilters } from '../use_entity_filters_param';
 
-/** A page tile as the brief captures it: the card, its entities, and whether its value is real. */
-export type AiBriefCard = SignalCardData & {
-  entityIds: readonly string[];
-  /** The tile's query failed or can't run, so the value shown isn't a real count. */
-  isUnavailable: boolean;
-};
-
 const BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.aiBrief.buttonLabel',
   { defaultMessage: 'Generate AI brief' }
@@ -47,7 +40,7 @@ export const useGenerateAiBriefAction = ({
   entityFilters,
   focusTileId,
 }: {
-  cards: AiBriefCard[];
+  cards: SignalCardData[];
   timeRange: TimeRange;
   entityFilters: EntityFilters;
   focusTileId?: SignalCardId;
@@ -98,7 +91,7 @@ const captureScope = ({
   query,
   filters,
 }: {
-  cards: AiBriefCard[];
+  cards: SignalCardData[];
   timeRange: TimeRange;
   entityFilters: EntityFilters;
   focusTileId?: SignalCardId;
@@ -126,7 +119,7 @@ const captureScope = ({
           // The page shows "Not enough history" rather than a delta, so the brief has no comparison.
           delta: card.isDeltaUnavailable ? undefined : card.delta,
           unavailable: card.isUnavailable || Boolean(card.noDataMessage) || undefined,
-          entityIds: card.entityIds.slice(0, MAX_ENTITY_IDS_PER_TILE),
+          entityIds: (card.entityIds ?? []).slice(0, MAX_ENTITY_IDS_PER_TILE),
         },
       ])
     ),

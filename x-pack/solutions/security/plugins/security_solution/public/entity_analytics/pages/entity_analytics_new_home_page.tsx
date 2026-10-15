@@ -47,7 +47,11 @@ import {
   useRiskTilesSeries,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import { EMPTY_ENTITY_IDS, type ActiveFilter } from '../components/home/needs_attention_tiles/data';
+import {
+  EMPTY_ENTITY_IDS,
+  type ActiveFilter,
+  type SignalCardData,
+} from '../components/home/needs_attention_tiles/data';
 import {
   DataViewContext,
   useEntityURLState,
@@ -59,7 +63,6 @@ import {
 } from '../components/home/entities_table';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
-import type { AiBriefCard } from '../components/home/ai_brief/use_generate_ai_brief_action';
 import { useGenerateAiBriefAction } from '../components/home/ai_brief/use_generate_ai_brief_action';
 
 const combineFilters = (
@@ -355,7 +358,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   }, [activeFilter, selectedEntityIds.length, addWarning]);
 
   const signalCards = useMemo(
-    (): AiBriefCard[] => [
+    (): SignalCardData[] => [
       {
         id: 'entitiesWithAlerts',
         title: i18n.translate(
