@@ -1006,7 +1006,41 @@ describe('updateAlertsStatus', () => {
       ).resolves.not.toThrow();
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
-        alerts: [{ id: 'attack-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000007',
+          },
+        ],
+      });
+    });
+
+    it('authorizes the document the search resolved, not the index the attachment named', async () => {
+      // `ensureAllAlertsAuthorizedRead` runs its own internal mget. The caller-supplied index need
+      // not hold the document the search found, so forwarding it would run the alerting
+      // permission check against a different document than the one whose rule type was read.
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+            _id: 'attack-1',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await alertService.ensureAttacksAuthorized({
+        attacks: [{ id: 'attack-1', index: ATTACK_INDEX }],
+        spaceId: 'default',
+      });
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+          },
+        ],
       });
     });
 
@@ -1086,6 +1120,29 @@ describe('updateAlertsStatus', () => {
       expect(esClient.search).not.toHaveBeenCalled();
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['.alerts-security.alerts-default'],
+      ['.internal.alerts-security.alerts-default-000001'],
+      ['.kibana'],
+      ['logs-*'],
+    ])(
+      'throws without reading when the index %s is not an attack discovery index',
+      async (index) => {
+        // Without this gate the read is pointed at any index the caller can read, and a document
+        // there whose `_source` claims an attack discovery rule type in the right space would pass
+        // every check that follows.
+        await expect(
+          alertService.ensureAttacksAuthorized({
+            attacks: [{ id: 'attack-1', index }],
+            spaceId: 'default',
+          })
+        ).rejects.toThrow(/not an attack discovery index/);
+
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+      }
+    );
 
     it('does not read when there are no non-empty attacks', async () => {
       await expect(
