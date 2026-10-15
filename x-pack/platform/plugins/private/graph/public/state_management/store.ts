@@ -33,6 +33,7 @@ import type {
 import { registerPersistenceListeners } from './persistence';
 import { metaDataReducer, registerMetaDataListeners } from './meta_data';
 import { registerWorkspaceListeners, workspaceReducer } from './workspace';
+import { createWorkspacePositionMiddleware } from './workspace_position_middleware';
 
 export type GraphState = ReturnType<ReturnType<typeof createRootReducer>>;
 
@@ -95,7 +96,10 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
       getDefaultMiddleware({
         // graph uses listeners instead of thunks
         thunk: false,
-      }).prepend(listenerMiddleware.middleware),
+      }).prepend(
+        createWorkspacePositionMiddleware(deps.getRuntimeGraph),
+        listenerMiddleware.middleware
+      ),
   });
 
   registerGraphListeners(listenerMiddleware.startListening, deps, store.getState());

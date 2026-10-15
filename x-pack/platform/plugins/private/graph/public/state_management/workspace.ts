@@ -102,6 +102,9 @@ const initialWorkspaceState: WorkspaceState = {
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
 export const workspaceLayoutChanged = actionCreator<boolean>('WORKSPACE_LAYOUT_CHANGED');
+export const workspacePositionsChanged = actionCreator<
+  Array<Pick<WorkspaceNodeState, 'id' | 'x' | 'y'>>
+>('WORKSPACE_POSITIONS_CHANGED');
 export const workspaceRuntimeChanged = actionCreator<WorkspaceSnapshot>(
   'WORKSPACE_RUNTIME_CHANGED'
 );
@@ -138,6 +141,15 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
   .case(datasourceLoaded, () => initialWorkspaceState)
   .case(workspaceLayoutChanged, (state, isLayoutRunning) => ({ ...state, isLayoutRunning }))
+  .case(workspacePositionsChanged, (state, positions) => {
+    const nodesById = { ...state.nodesById };
+    positions.forEach(({ id, x, y }) => {
+      if (nodesById[id]) {
+        nodesById[id] = { ...nodesById[id], x, y };
+      }
+    });
+    return { ...state, nodesById };
+  })
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
   .case(workspaceChanged, (state, workspace) => ({
     ...workspace,
