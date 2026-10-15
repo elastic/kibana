@@ -20,7 +20,7 @@ const SSH_CLIENT_FAILURE_CODE = 255;
 const SSH_PERMANENT_FAILURE_PATTERN =
   /permission denied|host key verification failed|remote host identification has changed|no matching host key|too many authentication failures|no supported authentication methods/i;
 
-/** Job directories older than this are removed when a new job is prepared. Terminal state is kept until then. */
+/** Job directories older than this are removed when a new job is prepared. Terminal state is kept until then, but env.sh and script.sh are removed as soon as the job ends. */
 const STALE_JOB_DIR_DAYS = 2;
 
 export class RemoteHostUnreachableError extends Error {
@@ -70,7 +70,7 @@ export const wrapUserScript = (code: string, hasEnv: boolean, cwd?: string): str
 #!/bin/bash
 export STEP_OUTPUT="$WORKDIR/output.txt"
 touch "$STEP_OUTPUT"
-${hasEnv ? '. "$WORKDIR/env.sh"' : ''}
+${hasEnv ? '. "$WORKDIR/env.sh"\nrm -f "$WORKDIR/env.sh"' : ''}
 ${cwd ? `cd ${shellQuote(cwd)} || exit 1` : ''}
 export FORCE_COLOR=1 TERM=xterm-256color
 ${code}
@@ -121,13 +121,42 @@ export const parseJobStatus = (stdout: string): RemoteHostJobStatus => {
   };
 };
 
+/** Raw bytes of each stream returned by one status call. The rest is picked up by the next poll. */
+const MAX_STREAM_CHUNK_BYTES = 1024 * 1024;
+
 const BASH_STATUS_HELPERS = `_b64_from() {
-  local off="$1" f="$2"
-  tail -c +$(( off + 1 )) "$f" 2>/dev/null | base64 -w 0 2>/dev/null \\
-    || tail -c +$(( off + 1 )) "$f" 2>/dev/null | openssl base64 -A 2>/dev/null \\
+  local off="$1" len="$2" f="$3"
+  tail -c +$(( off + 1 )) "$f" 2>/dev/null | head -c "$len" 2>/dev/null | base64 -w 0 2>/dev/null \\
+    || tail -c +$(( off + 1 )) "$f" 2>/dev/null | head -c "$len" 2>/dev/null | openssl base64 -A 2>/dev/null \\
     || echo ''
 }
-_fsize() { wc -c < "$1" 2>/dev/null | tr -d ' ' || echo '0'; }`;
+_fsize() { wc -c < "$1" 2>/dev/null | tr -d ' ' || echo '0'; }
+_take() {
+  local n=$(( $2 - $1 ))
+  [ "$n" -lt 0 ] && n=0
+  [ "$3" -gt 0 ] && [ "$n" -gt "$3" ] && n="$3"
+  echo "$n"
+}`;
+
+/**
+ * Reads from a size snapshot, so the returned offset matches the bytes read.
+ * A running job reads at most one chunk per stream and the next poll picks up the rest.
+ * Terminated and lost jobs are final and never polled again, so they read everything that is left.
+ */
+const readStreamsScript = (
+  stdoutFile: string,
+  stderrFile: string,
+  stdoutOffset: number,
+  stderrOffset: number,
+  chunkLimit: number = MAX_STREAM_CHUNK_BYTES
+): string => `STDOUT_SIZE=$(_fsize "${stdoutFile}")
+STDERR_SIZE=$(_fsize "${stderrFile}")
+STDOUT_N=$(_take ${stdoutOffset} "$STDOUT_SIZE" ${chunkLimit})
+STDERR_N=$(_take ${stderrOffset} "$STDERR_SIZE" ${chunkLimit})
+STDOUT=$(_b64_from ${stdoutOffset} "$STDOUT_N" "${stdoutFile}")
+STDERR=$(_b64_from ${stderrOffset} "$STDERR_N" "${stderrFile}")
+STDOUT_END=$(( ${stdoutOffset} + STDOUT_N ))
+STDERR_END=$(( ${stderrOffset} + STDERR_N ))`;
 
 const printTerminatedStatus = (
   workdir: string,
@@ -150,16 +179,13 @@ const printTerminatedStatus = (
       : '';
 
   return `EXIT_CODE=$(cat "${codeFile}" 2>/dev/null || echo '0')
-STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
-STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
-STDOUT_SIZE=$(_fsize "${stdoutFile}")
-STDERR_SIZE=$(_fsize "${stderrFile}")
+${readStreamsScript(stdoutFile, stderrFile, stdoutOffset, stderrOffset, 0)}
 OUTPUT=''
 if [ -f "${outputFile}" ]; then
-  ${sizeGuard}OUTPUT=$(_b64_from 0 "${outputFile}")
+  ${sizeGuard}OUTPUT=$(_b64_from 0 "$(_fsize "${outputFile}")" "${outputFile}")
 fi
 printf '{"status":"terminated","exitCode":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":"%s"}\\n' \\
-  "$EXIT_CODE" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE" "$OUTPUT"`;
+  "$EXIT_CODE" "$STDOUT" "$STDERR" "$STDOUT_END" "$STDERR_END" "$OUTPUT"`;
 };
 
 const printRunningStatus = (
@@ -170,22 +196,16 @@ const printRunningStatus = (
   const stdoutFile = `${workdir}/stdout.txt`;
   const stderrFile = `${workdir}/stderr.txt`;
 
-  return `STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
-STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
-STDOUT_SIZE=$(_fsize "${stdoutFile}")
-STDERR_SIZE=$(_fsize "${stderrFile}")
+  return `${readStreamsScript(stdoutFile, stderrFile, stdoutOffset, stderrOffset)}
 printf '{"status":"running","exitCode":0,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":""}\\n' \\
-  "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
+  "$STDOUT" "$STDERR" "$STDOUT_END" "$STDERR_END"`;
 };
 
 const printLostStatus = (workdir: string, stdoutOffset: number, stderrOffset: number): string => {
   const stdoutFile = `${workdir}/stdout.txt`;
   const stderrFile = `${workdir}/stderr.txt`;
 
-  return `STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
-STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
-STDOUT_SIZE=$(_fsize "${stdoutFile}")
-STDERR_SIZE=$(_fsize "${stderrFile}")
+  return `${readStreamsScript(stdoutFile, stderrFile, stdoutOffset, stderrOffset, 0)}
 case "$PID" in
   ''|*[!0-9]*) LOST_PID=null ;;
   *) LOST_PID=$PID ;;
@@ -193,8 +213,9 @@ esac
 if [ "$LOST_PID" != null ]; then
   kill -9 -"$LOST_PID" 2>/dev/null || true
 fi
+rm -f "${workdir}/env.sh" "${workdir}/script.sh"
 printf '{"status":"lost","exitCode":0,"pid":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":""}\\n' \\
-  "$LOST_PID" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
+  "$LOST_PID" "$STDOUT" "$STDERR" "$STDOUT_END" "$STDERR_END"`;
 };
 
 /** PID still alive reports running. A gone PID reads code.txt: present is a normal exit, missing is lost. */
@@ -223,7 +244,7 @@ const buildLauncherScript = (workdir: string, scriptFile: string, maxBytes: numb
   const codeFile = `${workdir}/code.txt`;
   const pidFile = `${workdir}/pid.txt`;
   // $$ is the wrapper that writes code.txt. $! is the setsid parent, which exits when setsid forks.
-  const jobCmd = `echo $$ > "${pidFile}"; WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"`;
+  const jobCmd = `echo $$ > "${pidFile}"; WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"; rm -f "${workdir}/env.sh" "${scriptFile}"`;
 
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}

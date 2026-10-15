@@ -36,6 +36,9 @@ import {
 } from '@kbn/connector-schemas/ssh_host';
 
 const MAX_BUFFER_BYTES = 100 * 1024 * 1024;
+const COMMAND_TIMEOUT_MS = 10 * 60 * 1000;
+const SERVER_ALIVE_INTERVAL_SECONDS = 15;
+const SERVER_ALIVE_COUNT_MAX = 3;
 const DEFAULT_SSH_PORT = 22;
 const DEFAULT_DOWNLOAD_MAX_BYTES = 10 * 1024 * 1024;
 const CONTROL_PERSIST = '10s';
@@ -126,10 +129,15 @@ const runExecFile = (
     const child = execFile(
       bin,
       args,
-      { env, maxBuffer: MAX_BUFFER_BYTES },
+      { env, maxBuffer: MAX_BUFFER_BYTES, timeout: COMMAND_TIMEOUT_MS, killSignal: 'SIGKILL' },
       (error, stdout, stderr) => {
         if (!error) {
           resolve({ stdout: stdout.trim(), stderr: stderr.trim(), code: 0 });
+          return;
+        }
+
+        if (error.killed) {
+          reject(new Error(`${bin} timed out after ${COMMAND_TIMEOUT_MS / 1000} seconds`));
           return;
         }
 
@@ -424,6 +432,10 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       ...this.getHostKeyArgs(),
       '-o',
       'ConnectTimeout=10',
+      '-o',
+      `ServerAliveInterval=${SERVER_ALIVE_INTERVAL_SECONDS}`,
+      '-o',
+      `ServerAliveCountMax=${SERVER_ALIVE_COUNT_MAX}`,
       '-o',
       'ControlMaster=auto',
       '-o',

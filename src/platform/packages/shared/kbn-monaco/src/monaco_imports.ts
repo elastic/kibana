@@ -74,7 +74,7 @@ export {
 export {
   conf as shellConf,
   language as shellLanguage,
-} from 'monaco-editor/esm/vs/languages/definitions/shell/shell.js';
+} from 'monaco-editor/esm/vs/basic-languages/shell/shell.js';
 
 import type { CustomLangModuleType } from './types';
 
