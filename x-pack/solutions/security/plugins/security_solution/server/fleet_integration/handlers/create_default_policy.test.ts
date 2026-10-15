@@ -50,6 +50,8 @@ describe('Create Default Policy tests ', () => {
   const experimentalFeatures = {
     trustedDevices: true,
     customYaraSignaturesEnabled: true,
+    linuxRansomwareProtection: true,
+    perOsPolicySettings: true,
   } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
@@ -362,7 +364,8 @@ describe('Create Default Policy tests ', () => {
         expect(policy[os].memory_protection.mode).toBe('off');
         expect(policy[os].behavior_protection.mode).toBe('off');
       });
-      // Ransomware is configurable on windows and macOS
+      // Linux ransomware is optional (behind `linuxRansomwareProtection`), so only the
+      // always-present branches are checked here.
       expect(policy.windows.ransomware.mode).toBe('off');
       expect(policy.mac.ransomware.mode).toBe('off');
     });
@@ -550,7 +553,10 @@ describe('Create Default Policy tests ', () => {
 
     // Without the per-OS form, macOS ransomware has no card, so it must stay opt-in.
     it('should keep macOS ransomware off when perOsPolicySettings is off', async () => {
-      const policy = await createDefaultPolicyCallback(createEndpointConfig('EDRComplete'));
+      const policy = await createDefaultPolicyCallback(createEndpointConfig('EDRComplete'), {
+        ...experimentalFeatures,
+        perOsPolicySettings: false,
+      });
 
       expect(policy.mac.ransomware).toEqual({ mode: ProtectionModes.off, supported: true });
       expect(policy.windows.ransomware.mode).toBe(ProtectionModes.prevent);
@@ -682,6 +688,8 @@ describe('Create Default Policy tests ', () => {
       const experimentalFeaturesWithCysDisabled = {
         trustedDevices: true,
         linuxDnsEvents: true,
+        linuxRansomwareProtection: true,
+        perOsPolicySettings: true,
         customYaraSignaturesEnabled: false,
       } as ExperimentalFeatures;
 
@@ -707,6 +715,8 @@ describe('Create Default Policy tests ', () => {
       const experimentalFeaturesWithCysDisabled = {
         trustedDevices: true,
         linuxDnsEvents: true,
+        linuxRansomwareProtection: true,
+        perOsPolicySettings: true,
         customYaraSignaturesEnabled: false,
       } as ExperimentalFeatures;
 
@@ -766,6 +776,8 @@ describe('Create Default Policy tests ', () => {
         const experimentalFeaturesWithCysDisabled = {
           trustedDevices: true,
           linuxDnsEvents: true,
+          linuxRansomwareProtection: true,
+          perOsPolicySettings: true,
           customYaraSignaturesEnabled: false,
         } as ExperimentalFeatures;
 
@@ -861,6 +873,8 @@ describe('Create Default Policy tests ', () => {
         const experimentalFeaturesWithDnsDisabled = {
           trustedDevices: true,
           linuxDnsEvents: false,
+          linuxRansomwareProtection: true,
+          perOsPolicySettings: true,
         } as ExperimentalFeatures;
 
         const esClientInfo = await elasticsearchServiceMock
@@ -963,6 +977,8 @@ describe('Create Default Policy tests ', () => {
         const experimentalFeaturesWithDnsEnabled = {
           trustedDevices: true,
           linuxDnsEvents: true,
+          linuxRansomwareProtection: true,
+          perOsPolicySettings: true,
         } as ExperimentalFeatures;
 
         const esClientInfo = await elasticsearchServiceMock
@@ -1056,6 +1072,140 @@ describe('Create Default Policy tests ', () => {
         const policy = await createDefaultPolicyWithFeature(config);
 
         expect(policy.linux.events.dns).toBe(true);
+      });
+    });
+  });
+
+  describe('Linux Ransomware Feature Flag', () => {
+    type LinuxRansomwareFlags = Pick<
+      ExperimentalFeatures,
+      'linuxRansomwareProtection' | 'perOsPolicySettings'
+    >;
+    const bothFlagsOn: LinuxRansomwareFlags = {
+      linuxRansomwareProtection: true,
+      perOsPolicySettings: true,
+    };
+
+    const createDefaultPolicyWithFeature = async (
+      flags: LinuxRansomwareFlags,
+      config?: AnyPolicyCreateConfig
+    ): Promise<PolicyConfig> => {
+      const experimentalFeaturesWithRansomwareFlag = {
+        trustedDevices: true,
+        linuxDnsEvents: true,
+        ...flags,
+      } as ExperimentalFeatures;
+
+      const esClientInfo = await elasticsearchServiceMock
+        .createClusterClient()
+        .asInternalUser.info();
+      esClientInfo.cluster_name = '';
+      esClientInfo.cluster_uuid = '';
+      return createDefaultPolicy(
+        licenseService,
+        config,
+        cloud,
+        esClientInfo,
+        productFeaturesService,
+        telemetryConfigProviderMock,
+        experimentalFeaturesWithRansomwareFlag
+      );
+    };
+
+    describe('with linuxRansomwareProtection and perOsPolicySettings feature flags enabled', () => {
+      it.each(['EDRComplete', 'EDREssential', 'NGAV'] as const)(
+        'should enable and support Linux ransomware on platinum with the %s preset',
+        async (preset) => {
+          const policy = await createDefaultPolicyWithFeature(bothFlagsOn, {
+            type: 'endpoint',
+            endpointConfig: { preset },
+          });
+
+          expect(policy.linux.ransomware).toEqual({ mode: 'prevent', supported: true });
+          expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: true });
+        }
+      );
+
+      it.each(['EDRComplete', 'EDREssential', 'NGAV'] as const)(
+        'should turn Linux ransomware off and unsupported below platinum with the %s preset',
+        async (preset) => {
+          licenseEmitter.next(Gold);
+
+          const policy = await createDefaultPolicyWithFeature(bothFlagsOn, {
+            type: 'endpoint',
+            endpointConfig: { preset },
+          });
+
+          expect(policy.linux.ransomware).toEqual({ mode: 'off', supported: false });
+          expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        }
+      );
+
+      it('should turn Linux ransomware mode off for the Data Collection preset', async () => {
+        const policy = await createDefaultPolicyWithFeature(bothFlagsOn, {
+          type: 'endpoint',
+          endpointConfig: { preset: 'DataCollection' },
+        });
+
+        expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
+      });
+
+      it('should turn Linux ransomware mode off for a cloud config', async () => {
+        const policy = await createDefaultPolicyWithFeature(bothFlagsOn, { type: 'cloud' });
+
+        expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
+      });
+
+      it('should turn Linux ransomware mode off when the endpointPolicyProtections product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+        );
+
+        const policy = await createDefaultPolicyWithFeature(bothFlagsOn, {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDRComplete' },
+        });
+
+        expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
+      });
+    });
+
+    describe.each<[string, LinuxRansomwareFlags]>([
+      [
+        'linuxRansomwareProtection',
+        { linuxRansomwareProtection: false, perOsPolicySettings: true },
+      ],
+      ['perOsPolicySettings', { linuxRansomwareProtection: true, perOsPolicySettings: false }],
+    ])('with the %s feature flag disabled', (_flag, flags) => {
+      const tiers: Array<[tier: string, license: ILicense]> = [
+        ['basic', Basic],
+        ['gold', Gold],
+        ['platinum', Platinum],
+        ['enterprise', Enterprise],
+      ];
+      it.each(tiers)('should omit linux.ransomware on %s', async (_tier, license) => {
+        licenseEmitter.next(license);
+
+        const policy = await createDefaultPolicyWithFeature(flags, {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDRComplete' },
+        });
+
+        expect(policy.linux).not.toHaveProperty('ransomware');
+        expect(policy.linux.popup).not.toHaveProperty('ransomware');
+      });
+
+      it('should omit linux.ransomware for a cloud config', async () => {
+        const policy = await createDefaultPolicyWithFeature(flags, { type: 'cloud' });
+
+        expect(policy.linux).not.toHaveProperty('ransomware');
+        expect(policy.linux.popup).not.toHaveProperty('ransomware');
       });
     });
   });

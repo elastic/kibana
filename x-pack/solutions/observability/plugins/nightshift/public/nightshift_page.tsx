@@ -23,8 +23,6 @@ import { KNOWLEDGE_PAGE_TITLE, NightshiftAppHeader, SETTINGS_PAGE_TITLE } from '
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
-import { useKnowledgeTabsAvailability } from './knowledge/hooks/use_knowledge_tabs_availability';
-import { isKnowledgeMenuItemVisible } from './knowledge/knowledge_tabs';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
@@ -103,8 +101,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const closeCustomContextFlyout = useCallback(() => setIsCustomContextFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const knowledgeTabsAvailability = useKnowledgeTabsAvailability({ enabled: isAvailable });
-  const isKnowledgeMenuVisible = isKnowledgeMenuItemVisible(knowledgeTabsAvailability);
 
   const onboarding = useOnboardingVisibility({
     isEnabled: canManage && nightshiftInvestigations?.investigationsClient != null,
@@ -191,8 +187,8 @@ export function NightshiftPage(): React.ReactElement | null {
               headerProps={{
                 onManagementClick: navigateToManagement,
                 managementHref,
-                onKnowledgeClick: isKnowledgeMenuVisible ? navigateToKnowledge : undefined,
-                knowledgeHref: isKnowledgeMenuVisible ? knowledgeHref : undefined,
+                onKnowledgeClick: navigateToKnowledge,
+                knowledgeHref,
                 onSandboxSecretsClick: canManageSandboxSecrets
                   ? openSandboxSecretsFlyout
                   : undefined,
@@ -235,8 +231,8 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onManagementClick={navigateToManagement}
             managementHref={managementHref}
-            onKnowledgeClick={isKnowledgeMenuVisible ? navigateToKnowledge : undefined}
-            knowledgeHref={isKnowledgeMenuVisible ? knowledgeHref : undefined}
+            onKnowledgeClick={navigateToKnowledge}
+            knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
             onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}

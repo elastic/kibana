@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
   QueriesGetResponse,
@@ -12,6 +13,7 @@ import type {
   StreamQuery,
 } from '@kbn/significant-events-schema';
 import type { QueryStatus } from '@kbn/significant-events-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { getQueryBucketParams } from './get_query_bucket_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -33,6 +35,15 @@ export interface QueriesTableFetchResult {
   total: number;
 }
 
+// Resolved on every fetch, so a relative window like `now-24h` stays current across refetches.
+const toTimeState = (
+  timefilter: { calculateBounds: (range: TimeRange) => TimeRangeBounds },
+  timeRange: TimeRange
+): { start: number; end: number } | undefined => {
+  const { min, max } = timefilter.calculateBounds(timeRange);
+  return min && max ? { start: min.valueOf(), end: max.valueOf() } : undefined;
+};
+
 export const useFetchDiscoveryQueries = (
   options: {
     name?: string;
@@ -40,11 +51,13 @@ export const useFetchDiscoveryQueries = (
     page: number;
     perPage: number;
     status?: QueryStatus[];
+    /** Fixed occurrence window; defaults to the global time filter. */
+    timeRange?: TimeRange;
     enabled?: boolean;
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, status, enabled = true } = options;
+  const { name, query, page, perPage, status, timeRange, enabled = true } = options;
   const {
     significantEvents: { significantEventsRepositoryClient },
     data,
@@ -56,7 +69,9 @@ export const useFetchDiscoveryQueries = (
   const fetchDiscoveryQueries = async ({
     signal,
   }: QueryFunctionContext): Promise<QueriesTableFetchResult | undefined> => {
-    const bucketParams = getQueryBucketParams(data.query.timefilter.timefilter, timeState);
+    const { timefilter } = data.query.timefilter;
+    const occurrenceWindow = timeRange ? toTimeState(timefilter, timeRange) : timeState;
+    const bucketParams = occurrenceWindow && getQueryBucketParams(timefilter, occurrenceWindow);
     if (!bucketParams) {
       return undefined;
     }
@@ -113,8 +128,7 @@ export const useFetchDiscoveryQueries = (
     queryKey: [
       ...DISCOVERY_QUERIES_QUERY_KEY,
       name,
-      timeState.start,
-      timeState.end,
+      ...(timeRange ? [timeRange.from, timeRange.to] : [timeState.start, timeState.end]),
       query,
       page,
       perPage,

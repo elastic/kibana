@@ -164,7 +164,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/description',
       validate: {
         body: schema.object({
-          description: schema.string({ maxLength: 4096 }),
+          description: schema.string({ maxLength: 10_000 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
@@ -303,7 +303,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         body: schema.object({
           configuration: schema.recordOf(
             schema.string({ maxLength: 1000 }),
-            schema.oneOf([schema.string({ maxLength: 4096 }), schema.number(), schema.boolean()])
+            schema.oneOf([schema.string({ maxLength: 100_000 }), schema.number(), schema.boolean()])
           ),
         }),
         params: schema.object({
