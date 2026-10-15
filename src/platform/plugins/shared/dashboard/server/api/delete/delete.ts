@@ -24,7 +24,7 @@ export async function deleteDashboard(
     await core.savedObjects.client.get<DashboardSavedObjectAttributes>('dashboard', id);
   const {
     dashboardState: { title, tags },
-  } = transformDashboardOut(soAttributes, soReferences, undefined, strictValidationSchema);
+  } = await transformDashboardOut(soAttributes, soReferences, undefined, strictValidationSchema);
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
   return { id, data: { title: title ?? '', tags: tags ?? [] } };
 }

@@ -349,3 +349,21 @@ embeddableServerSetup.registerEmbeddableServerDefinition(
   }
 });
 ```
+
+### Panel type migrations (server)
+
+Containers such as Dashboard can migrate stored panels from one embeddable type to other types **when
+they are read**. The stored saved object is not changed.
+
+- **Registration**: call `embeddableServerSetup.registerPanelTypeMigration({ from, migrateOut })`
+  during server plugin `setup`. Only one migration may be registered per `from` type; registering a
+  second one throws. The owner of the `from` type dispatches to other target types itself.
+- **Batch semantics**: `migrateOut(panels, { savedObjectsClient })` is async and receives **all panels
+  of the `from` type in a single dashboard**, so a migration can load referenced saved objects with
+  one `bulkGet`.
+- **Results**: return `{ panelId, type, config }` to replace a panel with the given target `type`, or
+  `{ panelId, error }` to drop it with a warning. Panels omitted from the results are left unchanged.
+  If `migrateOut` throws, all panels in the batch are dropped with a warning.
+- **Validation**: the container validates a migrated panel against its target type's schema. A migrated
+  panel whose target type has no registered schema is dropped.
+- **Lookup**: containers retrieve a migration with `embeddableStart.getPanelTypeMigration(from)`.

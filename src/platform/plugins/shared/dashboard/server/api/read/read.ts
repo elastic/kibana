@@ -48,12 +48,13 @@ export async function read(
   }
 
   return {
-    body: getDashboardCRUResponseBody(
+    body: await getDashboardCRUResponseBody(
       savedObject,
       'read',
       strictValidationSchema,
       isDashboardAppRequest,
-      serverTiming
+      serverTiming,
+      savedObjectsClient
     ),
     resolveHeaders,
   };

@@ -17,7 +17,7 @@ jest.mock('@kbn/as-code-utils', () => ({
 }));
 
 jest.mock('../transforms', () => ({
-  transformDashboardOut: jest.fn().mockReturnValue({
+  transformDashboardOut: jest.fn().mockResolvedValue({
     dashboardState: {
       title: 'Test',
       description: undefined,

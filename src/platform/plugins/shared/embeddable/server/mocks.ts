@@ -28,6 +28,7 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => {
       .mockImplementation((type: string, transforms: EmbeddableServerDefinition<any, any>) => {
         mockEmbeddableServerDefinitionRegistry[type] = transforms;
       }),
+    registerPanelTypeMigration: jest.fn(),
     getAllMigrations: jest.fn().mockReturnValue({}),
   };
 };
@@ -48,6 +49,7 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
     });
     return { ...transforms, schema: registration?.getSchema?.(mockGetDrilldownsSchema) };
   }),
+  getPanelTypeMigration: jest.fn().mockReturnValue(undefined),
 });
 
 export const mockGetDrilldownsSchema: GetDrilldownsSchemaFnType = (supportedTriggers) => {

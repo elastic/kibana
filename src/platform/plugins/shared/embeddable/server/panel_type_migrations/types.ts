@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+
+export interface PanelTypeMigrationContext {
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+export interface PanelTypeMigrationPanel {
+  id: string;
+  config: Record<string, unknown>;
+}
+
+export interface PanelTypeMigrationSuccessResult {
+  panelId: string;
+  type: string;
+  config: Record<string, unknown>;
+}
+
+export interface PanelTypeMigrationErrorResult {
+  panelId: string;
+  error: Error;
+}
+
+export type PanelTypeMigrationResult =
+  | PanelTypeMigrationSuccessResult
+  | PanelTypeMigrationErrorResult;
+
+export interface PanelTypeMigration {
+  from: string;
+  /**
+   * Receives all panels of the `from` type in a single dashboard. Panels omitted from the results
+   * are left unchanged.
+   */
+  migrateOut: (
+    panels: readonly PanelTypeMigrationPanel[],
+    context: PanelTypeMigrationContext
+  ) => Promise<readonly PanelTypeMigrationResult[]>;
+}
