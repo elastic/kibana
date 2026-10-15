@@ -16,8 +16,7 @@ import type { ActionHostStatusMessageProps } from './action_host_status_message'
 import { ActionHostStatusMessage } from './action_host_status_message';
 
 describe('ActionHostStatusMessage component', () => {
-  const testPrefix = 'test';
-  const statusMessageTestId = `${testPrefix}-hostStatus`;
+  const testId = 'test';
 
   let appTestContext: AppContextTestRender;
   let render: (
@@ -50,7 +49,7 @@ describe('ActionHostStatusMessage component', () => {
 
     render = (props = {}) =>
       (renderResult = appTestContext.render(
-        <ActionHostStatusMessage action={action} data-test-subj={testPrefix} {...props} />
+        <ActionHostStatusMessage action={action} data-test-subj={testId} {...props} />
       ));
   });
 
@@ -61,7 +60,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ isCompleted: false, wasSuccessful: false, completedAt: undefined });
       render();
 
-      const element = renderResult.getByTestId(statusMessageTestId);
+      const element = renderResult.getByTestId(testId);
 
       expect(element.textContent).toEqual(OUTPUT_MESSAGES.isPending(consoleCommandName));
       expect(element.className).toContain('warning');
@@ -71,7 +70,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasCanceled: true, wasSuccessful: false });
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
       );
     });
@@ -80,7 +79,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasSuccessful: true });
       render();
 
-      const element = renderResult.getByTestId(statusMessageTestId);
+      const element = renderResult.getByTestId(testId);
 
       expect(element.textContent).toEqual(OUTPUT_MESSAGES.wasSuccessful(consoleCommandName));
       expect(element.className).toContain('success');
@@ -91,7 +90,7 @@ describe('ActionHostStatusMessage component', () => {
       action = { ...action, isExpired: false };
       render();
 
-      const element = renderResult.getByTestId(statusMessageTestId);
+      const element = renderResult.getByTestId(testId);
 
       expect(element.textContent).toEqual(OUTPUT_MESSAGES.hasFailed(consoleCommandName));
       expect(element.className).toContain('danger');
@@ -102,7 +101,7 @@ describe('ActionHostStatusMessage component', () => {
       action = { ...action, isExpired: true };
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.hasExpired(consoleCommandName)
       );
     });
@@ -111,7 +110,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasSuccessful: true });
       render({ agentId: undefined });
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
       );
     });
@@ -130,7 +129,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasSuccessful: true });
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.submittedSuccessfully(
           RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.isolate
         )
@@ -141,7 +140,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasSuccessful: false });
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.submittedSuccessfully(
           RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.isolate
         )
@@ -152,7 +151,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ isCompleted: false, wasSuccessful: false, completedAt: undefined });
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.isPending(RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.isolate)
       );
     });
@@ -166,7 +165,7 @@ describe('ActionHostStatusMessage component', () => {
       setAgentState({ wasSuccessful: true });
       render();
 
-      expect(renderResult.getByTestId(statusMessageTestId).textContent).toEqual(
+      expect(renderResult.getByTestId(testId).textContent).toEqual(
         OUTPUT_MESSAGES.wasSuccessful(RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.runscript)
       );
     });
