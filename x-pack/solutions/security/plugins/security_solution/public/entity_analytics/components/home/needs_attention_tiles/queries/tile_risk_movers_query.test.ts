@@ -49,7 +49,7 @@ describe('buildRiskMoversCountQuery', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
     expect(query).toContain('  FROM .entities-v1');
     expect(query).toContain(
-      '  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL'
+      '  | WHERE entity.risk.calculated_score_norm >= 10 AND entity.name IS NOT NULL'
     );
     expect(query).toContain('current_score = entity.risk.calculated_score_norm');
   });
