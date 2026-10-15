@@ -133,12 +133,12 @@ export class TimeToVisualizePageObject extends FtrService {
     }
 
     if (saveToLibrary) {
-      // Only absent when the user cannot save by reference, which already means "by value".
       await this.testSubjects.existOrFail('add-to-library-checkbox', { timeout: 10000 });
       await this.setAddToLibrary(true);
     } else if (
       saveToLibrary === false &&
-      (await this.testSubjects.exists('add-to-library-checkbox'))
+      // Absent only for users who cannot save by reference, which already means "by value".
+      (await this.testSubjects.waitForExists('add-to-library-checkbox'))
     ) {
       await this.setAddToLibrary(false);
     }
