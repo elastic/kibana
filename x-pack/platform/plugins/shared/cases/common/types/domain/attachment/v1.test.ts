@@ -473,3 +473,36 @@ describe('Attachments', () => {
     });
   });
 });
+
+describe('Stored attachment schemas are shape-only', () => {
+  const basic = {
+    created_at: '2024-01-01T00:00:00.000Z',
+    created_by: { username: 'u', full_name: 'U', email: 'u@e.co' },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  };
+
+  it('accepts a legacy comment longer than the request limit', () => {
+    const result = UserCommentAttachmentSchema.safeParse({
+      ...basic,
+      id: 'id',
+      version: '1',
+      type: AttachmentType.user,
+      owner: 'securitySolution',
+      comment: 'a'.repeat(40000),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts persistable state with nested strings and keys over the request limits', () => {
+    const result = PersistableStateAttachmentPayloadSchema.safeParse({
+      type: AttachmentType.persistableState,
+      owner: 'securitySolution',
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: { ['k'.repeat(500)]: { nested: 'v'.repeat(40000) } },
+    });
+    expect(result.success).toBe(true);
+  });
+});

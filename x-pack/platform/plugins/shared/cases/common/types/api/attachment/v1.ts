@@ -13,9 +13,12 @@ import {
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_INDEX_NAME_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
+  limitedJsonObjectSchema,
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
@@ -29,6 +32,7 @@ import {
   ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
   PersistableStateAttachmentPayloadSchema,
   AttachmentType,
+  ExternalReferenceStorageType,
   AttachmentsSchema,
   EventAttachmentPayloadSchema,
 } from '../../domain/attachment/v1';
@@ -76,41 +80,102 @@ export const PostFileAttachmentRequestSchema = z.object({
  * Attachments
  */
 
+const stringOrArray = (max: number) => z.union([z.array(z.string().max(max)), z.string().max(max)]);
+
+const BoundedUserCommentRequestSchema = UserCommentAttachmentPayloadSchema.extend({
+  comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const BoundedEventRequestSchema = EventAttachmentPayloadSchema.extend({
+  eventId: stringOrArray(MAX_ATTACHMENT_ID_LENGTH),
+  index: stringOrArray(MAX_INDEX_NAME_LENGTH),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const BoundedAlertRequestSchema = AlertAttachmentPayloadSchema.extend({
+  alertId: stringOrArray(MAX_ATTACHMENT_ID_LENGTH),
+  index: stringOrArray(MAX_INDEX_NAME_LENGTH),
+  rule: z.object({
+    id: z.string().max(MAX_TITLE_LENGTH).nullable(),
+    name: z.string().max(MAX_COMMENT_LENGTH).nullable(),
+  }),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const BoundedActionsRequestSchema = ActionsAttachmentPayloadSchema.extend({
+  comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+  actions: z.object({
+    targets: z.array(
+      z.object({
+        hostname: z.string().max(255),
+        endpointId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+      })
+    ),
+    type: z.string().max(256),
+  }),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const boundedExternalReferenceShape = {
+  externalReferenceAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  externalReferenceMetadata: limitedJsonObjectSchema({
+    fieldName: 'externalReferenceMetadata',
+    max: MAX_COMMENT_LENGTH,
+  }).nullable(),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+};
+
+const BoundedExternalReferenceNoSORequestSchema =
+  ExternalReferenceNoSOAttachmentPayloadSchema.extend({
+    ...boundedExternalReferenceShape,
+    externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+  });
+
+const boundedStorageSO = z.object({
+  type: z.literal(ExternalReferenceStorageType.savedObject),
+  soType: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const BoundedExternalReferenceSORequestSchema = ExternalReferenceSOAttachmentPayloadSchema.extend({
+  ...boundedExternalReferenceShape,
+  externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+  externalReferenceStorage: boundedStorageSO,
+});
+
+const BoundedExternalReferenceSOWithoutRefsRequestSchema =
+  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema.extend({
+    ...boundedExternalReferenceShape,
+    externalReferenceStorage: boundedStorageSO,
+  });
+
+const BoundedPersistableStateRequestSchema = PersistableStateAttachmentPayloadSchema.extend({
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentState: limitedJsonObjectSchema({
+    fieldName: 'persistableStateAttachmentState',
+    max: MAX_COMMENT_LENGTH,
+  }),
+});
+
 export const AttachmentRequestSchema = z.union([
-  z.object({
-    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    type: z.literal(AttachmentType.user),
-    owner: z.string().max(MAX_TITLE_LENGTH),
-  }),
-  EventAttachmentPayloadSchema,
-  AlertAttachmentPayloadSchema,
-  z.object({
-    type: z.literal(AttachmentType.actions),
-    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    actions: z.object({
-      targets: z.array(
-        z.object({
-          hostname: z.string().max(255),
-          endpointId: z.string().max(512),
-        })
-      ),
-      type: z.string().max(256),
-    }),
-    owner: z.string().max(MAX_TITLE_LENGTH),
-  }),
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOAttachmentPayloadSchema,
-  PersistableStateAttachmentPayloadSchema,
+  BoundedUserCommentRequestSchema,
+  BoundedEventRequestSchema,
+  BoundedAlertRequestSchema,
+  BoundedActionsRequestSchema,
+  BoundedExternalReferenceNoSORequestSchema,
+  BoundedExternalReferenceSORequestSchema,
+  BoundedPersistableStateRequestSchema,
 ]);
 
 export const AttachmentRequestWithoutRefsSchema = z.union([
-  UserCommentAttachmentPayloadSchema,
-  AlertAttachmentPayloadSchema,
-  EventAttachmentPayloadSchema,
-  ActionsAttachmentPayloadSchema,
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
-  PersistableStateAttachmentPayloadSchema,
+  BoundedUserCommentRequestSchema,
+  BoundedAlertRequestSchema,
+  BoundedEventRequestSchema,
+  BoundedActionsRequestSchema,
+  BoundedExternalReferenceNoSORequestSchema,
+  BoundedExternalReferenceSOWithoutRefsRequestSchema,
+  BoundedPersistableStateRequestSchema,
 ]);
 
 /**

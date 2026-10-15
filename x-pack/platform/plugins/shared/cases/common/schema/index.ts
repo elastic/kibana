@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
-import { MAX_COMMENT_LENGTH, MAX_DOCS_PER_PAGE } from '../constants';
+import { MAX_DOCS_PER_PAGE } from '../constants';
 
 export interface LimitedSchemaType {
   fieldName: string;
@@ -188,12 +188,12 @@ export type JsonValue =
 
 export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   z.union([
-    z.string().max(MAX_COMMENT_LENGTH),
+    z.string(),
     z.number(),
     z.boolean(),
     z.null(),
     z.array(jsonValueSchema),
-    z.record(z.string().max(1000), jsonValueSchema),
+    z.record(z.string(), jsonValueSchema),
   ])
 );
 
