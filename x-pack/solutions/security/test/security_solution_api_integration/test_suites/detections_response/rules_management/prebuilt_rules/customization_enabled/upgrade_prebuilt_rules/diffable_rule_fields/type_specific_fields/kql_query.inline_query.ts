@@ -709,6 +709,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
   describe('"kql_query" with inline query differing only in surrounding whitespace', () => {
     const STOCK_QUERY = 'process.name:*.exe';
     const WHITESPACE_QUERY = `  ${STOCK_QUERY}\n`;
+    const CUSTOM_QUERY = 'process.name:*.sys';
     const NORMALIZED_KQL_QUERY = {
       query: STOCK_QUERY,
       language: 'kuery',
@@ -764,7 +765,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
         },
         upgrade: {
           type: 'query',
-          query: 'process.name:*.sys',
+          query: CUSTOM_QUERY,
           language: 'kuery',
         },
       };
@@ -777,8 +778,8 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           expectedFieldDiffValues: {
             base: NORMALIZED_KQL_QUERY,
             current: NORMALIZED_KQL_QUERY,
-            target: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
-            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            target: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
+            merged: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
           },
         },
         getService
@@ -788,7 +789,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
         {
           ruleUpgradeAssets,
           diffableRuleFieldName: 'kql_query',
-          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+          expectedFieldsAfterUpgrade: { query: CUSTOM_QUERY },
         },
         getService
       );
@@ -802,7 +803,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           language: 'kuery',
         },
         patch: {
-          query: 'process.name:*.sys',
+          query: CUSTOM_QUERY,
         },
         upgrade: {
           type: 'query',
@@ -818,9 +819,9 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
           expectedFieldDiffValues: {
             base: NORMALIZED_KQL_QUERY,
-            current: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            current: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
             target: NORMALIZED_KQL_QUERY,
-            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            merged: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
           },
         },
         getService
@@ -830,7 +831,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
         {
           ruleUpgradeAssets,
           diffableRuleFieldName: 'kql_query',
-          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+          expectedFieldsAfterUpgrade: { query: CUSTOM_QUERY },
         },
         getService
       );
@@ -844,11 +845,11 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           language: 'kuery',
         },
         patch: {
-          query: 'process.name:*.sys',
+          query: CUSTOM_QUERY,
         },
         upgrade: {
           type: 'query',
-          query: '  process.name:*.sys\n',
+          query: `  ${CUSTOM_QUERY}\n`,
           language: 'kuery',
         },
       };
@@ -860,9 +861,9 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
           expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
           expectedFieldDiffValues: {
             base: NORMALIZED_KQL_QUERY,
-            current: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
-            target: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
-            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            current: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
+            target: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
+            merged: { ...NORMALIZED_KQL_QUERY, query: CUSTOM_QUERY },
           },
         },
         getService
@@ -872,7 +873,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
         {
           ruleUpgradeAssets,
           diffableRuleFieldName: 'kql_query',
-          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+          expectedFieldsAfterUpgrade: { query: CUSTOM_QUERY },
         },
         getService
       );
