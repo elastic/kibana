@@ -34,9 +34,7 @@ import {
   createHistogramDistributionQuery,
   firstNonNullable,
   getAggregationLabel,
-  getLensMetricFormat,
   getMetricUniqueKey,
-  resolveMetricUnit,
 } from '../../../common/utils';
 import { isHistogramMetric } from '../../../common/utils/histogram_metric';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
@@ -377,7 +375,7 @@ const ChartItem = React.memo(
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
-    const { euiTheme, colorMode } = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
@@ -474,30 +472,13 @@ const ChartItem = React.memo(
       gridSettings,
     ]);
 
-    const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const heatmapConfig = useMemo(
       () =>
         distributionQuery
-          ? buildHistogramHeatmapConfig({
-              query: distributionQuery,
-              title: metricItem.metricName,
-              description,
-              valueFormat: getLensMetricFormat(resolvedUnit),
-              seriesColor: color,
-              colorMode,
-              backgroundColor: euiTheme.colors.emptyShade,
-            })
+          ? buildHistogramHeatmapConfig({ query: distributionQuery, title: metricItem.metricName })
           : undefined,
-      [
-        distributionQuery,
-        metricItem.metricName,
-        description,
-        resolvedUnit,
-        color,
-        colorMode,
-        euiTheme.colors.emptyShade,
-      ]
+      [distributionQuery, metricItem.metricName]
     );
 
     const yAxisTitle = useMemo(() => {

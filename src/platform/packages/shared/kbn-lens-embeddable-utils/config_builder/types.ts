@@ -242,43 +242,13 @@ export interface LensTableConfigBase {
 
 export type LensTableConfig = Identity<LensBaseConfig & LensBaseLayer & LensTableConfigBase>;
 
-export interface LensHeatmapAxisOptions {
-  /** Tick labels. Defaults to hidden. */
-  showLabels?: boolean;
-  /** Axis title. Defaults to hidden. */
-  showTitle?: boolean;
-  sort?: 'asc' | 'desc';
-  /** Column label used in tooltips. The axis title stays hidden unless `showTitle` is set. */
-  label?: string;
-}
-
-/** One band of a percentage color scale for the heatmap cell value. */
-export interface LensHeatmapColorStep {
-  color: string;
-  /** Inclusive lower bound, as a percentage of the value range. */
-  gte: number;
-  lt?: number;
-  lte?: number;
-}
-
 export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
-  xAxisOptions?: LensHeatmapAxisOptions;
-  yAxisOptions?: LensHeatmapAxisOptions;
-  /**
-   * Format for the breakdown column (the vertical axis).
-   * `format` on the layer still applies to the cell value.
-   */
-  breakdownFormat?: Pick<
-    LensBaseLayer,
-    'format' | 'decimals' | 'compactValues' | 'suffix' | 'fromUnit' | 'toUnit'
-  >;
-  /** Percentage color bands for the cell value. Omitted charts keep the default palette. */
-  colorSteps?: LensHeatmapColorStep[];
+  axisLabel?: { xAxis?: boolean; yAxis?: boolean };
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
