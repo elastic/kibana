@@ -24,6 +24,8 @@ export interface LayoutPanel {
   isNew?: true;
   /** Content edited in this call, so its size may no longer fit; omitted otherwise. */
   contentChanged?: true;
+  /** Moved to another section or the top level in this call, so its position is temporary; omitted otherwise. */
+  moved?: true;
 }
 
 export interface LayoutSection {

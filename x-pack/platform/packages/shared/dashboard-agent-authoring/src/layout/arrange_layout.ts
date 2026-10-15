@@ -12,7 +12,6 @@ import {
   type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
-import { indexPanelsById } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
@@ -83,7 +82,14 @@ export const arrangeDashboardLayout = async ({
     return dashboardData;
   }
 
-  const originalPanelIds = new Set(indexPanelsById(originalPanels).keys());
+  // The section id of each original panel, or null for a top-level panel.
+  const originalContainerByPanelId = new Map<string, string | null>(
+    originalPanels.flatMap((widget) =>
+      isSection(widget)
+        ? widget.panels.map(({ id }): [string, string | null] => [id, widget.id])
+        : [[widget.id, null]]
+    )
+  );
   const authoringNotesByPanelId = new Map(
     panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
   );
@@ -94,9 +100,10 @@ export const arrangeDashboardLayout = async ({
       ? describeMarkdownText(config.content)
       : undefined);
 
-  const toLayoutPanel = (panel: AttachmentPanel): LayoutPanel => {
+  const toLayoutPanel = (panel: AttachmentPanel, containerId: string | null): LayoutPanel => {
     const { id, type, config, grid } = panel;
     const authoringNote = getAuthoringNote(panel);
+    const originalContainerId = originalContainerByPanelId.get(id);
     return {
       id,
       type,
@@ -104,24 +111,28 @@ export const arrangeDashboardLayout = async ({
       ...(typeof config.title === 'string' ? { title: config.title } : {}),
       ...(authoringNote ? { authoringNote } : {}),
       grid,
-      ...(originalPanelIds.has(id) ? {} : { isNew: true }),
+      ...(originalContainerId === undefined ? { isNew: true } : {}),
+      ...(originalContainerId !== undefined && originalContainerId !== containerId
+        ? { moved: true }
+        : {}),
       ...(editedPanelIds.has(id) ? { contentChanged: true } : {}),
     };
   };
 
-  const toLayoutPanels = (panels: AttachmentPanel[]): LayoutPanel[] =>
-    [...panels].sort(byReadingOrder).map(toLayoutPanel);
+  const toLayoutPanels = (panels: AttachmentPanel[], containerId: string | null): LayoutPanel[] =>
+    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, containerId));
 
   const request: LayoutRequest = {
     ...(instructions !== undefined ? { instructions } : {}),
     panels: toLayoutPanels(
-      dashboardData.panels.filter((widget): widget is AttachmentPanel => !isSection(widget))
+      dashboardData.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)),
+      null
     ),
     sections: dashboardData.panels.filter(isSection).map((section) => ({
       id: section.id,
       title: section.title,
       y: section.grid.y,
-      panels: toLayoutPanels(section.panels),
+      panels: toLayoutPanels(section.panels, section.id),
     })),
   };
 
