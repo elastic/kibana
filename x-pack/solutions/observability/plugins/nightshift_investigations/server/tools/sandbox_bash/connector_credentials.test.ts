@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsMock,
@@ -264,7 +265,7 @@ describe('createConnectorCredentialResolver', () => {
 
     const resolveRequestScoped = (
       elasticsearchUrl: string | undefined = esUrl,
-      getSandboxServiceAccountId?: () => Promise<string | undefined>
+      getSandboxServiceAccountId?: (request: KibanaRequest) => Promise<string | undefined>
     ) => {
       const actions = actionsMock.createStart();
       const resolve = createConnectorCredentialResolver({
@@ -277,7 +278,7 @@ describe('createConnectorCredentialResolver', () => {
         }),
         allowedConnectorIds: [REQUEST_SCOPED_CONNECTOR_ID],
       };
-      return { result: resolve(REQUEST_SCOPED_CONNECTOR_ID, callContext), actions };
+      return { result: resolve(REQUEST_SCOPED_CONNECTOR_ID, callContext), actions, callContext };
     };
 
     it("injects the run's API key as ELASTICSEARCH_AUTHORIZATION next to ELASTICSEARCH_URL", async () => {
@@ -296,7 +297,8 @@ describe('createConnectorCredentialResolver', () => {
     });
 
     it('sends only the UIAM service account id and URL as metadata in UIAM mode', async () => {
-      const { result } = resolveRequestScoped(esUrl, async () => 'sa-id');
+      const getSandboxServiceAccountId = jest.fn().mockResolvedValue('sa-id');
+      const { result, callContext } = resolveRequestScoped(esUrl, getSandboxServiceAccountId);
 
       expect(await result).toEqual({
         env: {
@@ -306,9 +308,11 @@ describe('createConnectorCredentialResolver', () => {
         secretValues: [],
         metadata: { 'x-uiam-service-account-id': 'sa-id', 'x-elasticsearch-url': esUrl },
       });
+      // The account is looked up for the space the run's request belongs to.
+      expect(getSandboxServiceAccountId).toHaveBeenCalledWith(callContext.request);
     });
 
-    it('falls back to the API key while no UIAM service account is stored', async () => {
+    it('falls back to the API key while no UIAM service account is bound', async () => {
       const { result } = resolveRequestScoped(esUrl, async () => undefined);
 
       expect(await result).toMatchObject({

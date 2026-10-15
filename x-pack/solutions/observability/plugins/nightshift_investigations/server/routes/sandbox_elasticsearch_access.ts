@@ -17,17 +17,21 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 export interface SandboxElasticsearchAccessResponse {
   /** `sandbox.elasticsearch.uiam.enabled`: the sandbox reaches Elasticsearch as a UIAM service account. */
   uiam_enabled: boolean;
-  /** Absent until the service account has been created. */
+  /** The space of the request; each space binds its own service account. */
+  space_id: string;
+  /** Absent until a service account has been bound in the space. */
   service_account_id?: string;
-  created_at?: string;
+  bound_at?: string;
 }
 
 const toResponse = (
   uiamEnabled: boolean,
+  spaceId: string,
   access: SandboxElasticsearchAccess | undefined
 ): SandboxElasticsearchAccessResponse => ({
   uiam_enabled: uiamEnabled,
-  ...(access ? { service_account_id: access.serviceAccountId, created_at: access.createdAt } : {}),
+  space_id: spaceId,
+  ...(access ? { service_account_id: access.serviceAccountId, bound_at: access.boundAt } : {}),
 });
 
 const getSandboxElasticsearchAccessRoute = createNightshiftInvestigationsServerRoute({
@@ -36,17 +40,21 @@ const getSandboxElasticsearchAccessRoute = createNightshiftInvestigationsServerR
     access: 'internal',
     summary: 'Get sandbox Elasticsearch access',
     description:
-      'Returns the UIAM service account the Nightshift sandbox queries this project as, if one has been created.',
+      'Returns the UIAM service account the Nightshift sandbox queries this project as in the current space, if one is bound.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
   handler: async ({
+    request,
     sandboxElasticsearchAccessClient,
-  }): Promise<SandboxElasticsearchAccessResponse> =>
-    toResponse(
-      sandboxElasticsearchAccessClient.isEnabled(),
-      await sandboxElasticsearchAccessClient.get()
-    ),
+  }): Promise<SandboxElasticsearchAccessResponse> => {
+    const spaceId = sandboxElasticsearchAccessClient.getSpaceId(request);
+    // Bindings need saved object encryption, which a deployment without UIAM mode may not have.
+    if (!sandboxElasticsearchAccessClient.isEnabled()) {
+      return toResponse(false, spaceId, undefined);
+    }
+    return toResponse(true, spaceId, await sandboxElasticsearchAccessClient.get(request));
+  },
 });
 
 const ensureSandboxElasticsearchAccessRoute = createNightshiftInvestigationsServerRoute({
@@ -55,7 +63,7 @@ const ensureSandboxElasticsearchAccessRoute = createNightshiftInvestigationsServ
     access: 'internal',
     summary: 'Ensure sandbox Elasticsearch access',
     description:
-      'Creates the UIAM service account the Nightshift sandbox queries this project as, unless it exists. Creating it uses the caller credentials and requires the manage_security cluster privilege.',
+      'Creates the UIAM service account the Nightshift sandbox queries this project as in the current space and binds it to the space, unless one is bound. Creating and binding use the caller credentials and require the manage_security cluster privilege.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({}),
@@ -64,7 +72,8 @@ const ensureSandboxElasticsearchAccessRoute = createNightshiftInvestigationsServ
     sandboxElasticsearchAccessClient,
   }): Promise<SandboxElasticsearchAccessResponse> => {
     try {
-      return toResponse(true, await sandboxElasticsearchAccessClient.ensure(request));
+      const access = await sandboxElasticsearchAccessClient.ensure(request);
+      return toResponse(true, access.spaceId, access);
     } catch (error) {
       if (error instanceof SandboxElasticsearchAccessDisabledError) {
         throw badRequest(error.message);

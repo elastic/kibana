@@ -85,13 +85,15 @@ import {
   nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
-  nightshiftSandboxEsAccessSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
-import { createSandboxElasticsearchAccessClient } from './sandbox_elasticsearch_access';
+import {
+  createSandboxElasticsearchAccessClient,
+  sandboxElasticsearchWorkloadType,
+} from './sandbox_elasticsearch_access';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -173,7 +175,6 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
-    core.savedObjects.registerType(nightshiftSandboxEsAccessSavedObjectType);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
@@ -198,10 +199,12 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('sandbox_secrets'),
     });
 
+    core.security.serviceAccounts.registerWorkloadType(sandboxElasticsearchWorkloadType);
     const sandboxEsAccessLogger = this.logger.get('sandbox_elasticsearch_access');
     const uiamConfig = this.ctx.config.get().sandbox?.elasticsearch.uiam;
     const sandboxElasticsearchAccessClient = createSandboxElasticsearchAccessClient({
-      getDeps: () => ({ savedObjects: this.savedObjects, security: this.security }),
+      getDeps: () => ({ security: this.security }),
+      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       config: {
         enabled: uiamConfig?.enabled ?? false,
         serviceAccountName: uiamConfig?.service_account_name ?? 'nightshift-sandbox',
@@ -212,8 +215,8 @@ export class NightshiftInvestigationsPlugin
     });
     // A lookup failure leaves the connector on the API key path, which fails closed for UIAM keys.
     const getSandboxServiceAccountId = sandboxElasticsearchAccessClient.isEnabled()
-      ? () =>
-          sandboxElasticsearchAccessClient.getServiceAccountId().catch((error) => {
+      ? (request: KibanaRequest) =>
+          sandboxElasticsearchAccessClient.getServiceAccountId(request).catch((error) => {
             sandboxEsAccessLogger.warn(
               `Failed to read the sandbox Elasticsearch service account: ${error.message}`
             );

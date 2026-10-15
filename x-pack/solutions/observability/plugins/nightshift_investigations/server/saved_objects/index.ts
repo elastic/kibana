@@ -22,9 +22,3 @@ export {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './automation_saved_object';
-export {
-  nightshiftSandboxEsAccessSavedObjectType,
-  NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-  NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID,
-  type NightshiftSandboxEsAccessAttributes,
-} from './sandbox_elasticsearch_access_saved_object';

@@ -11,10 +11,15 @@ import { SandboxElasticsearchAccessDisabledError } from '../sandbox_elasticsearc
 import { sandboxElasticsearchAccessRoutes } from './sandbox_elasticsearch_access';
 import { onboardingRoutes } from './onboarding';
 
-const ACCESS = { serviceAccountId: 'sa-id', createdAt: '2026-10-15T00:00:00.000Z' };
+const ACCESS = {
+  serviceAccountId: 'sa-id',
+  spaceId: 'space-a',
+  boundAt: '2026-10-15T00:00:00.000Z',
+};
 
 const createAccessClient = ({ enabled = true } = {}) => ({
   isEnabled: jest.fn().mockReturnValue(enabled),
+  getSpaceId: jest.fn().mockReturnValue('space-a'),
   get: jest.fn().mockResolvedValue(ACCESS),
   getServiceAccountId: jest.fn(),
   ensure: jest.fn().mockResolvedValue(ACCESS),
@@ -26,25 +31,37 @@ describe('sandbox Elasticsearch access routes', () => {
   const { handler: ensureHandler } =
     sandboxElasticsearchAccessRoutes['POST /internal/nightshift/sandbox/elasticsearch_access'];
 
-  it('GET reports the stored service account', async () => {
+  it('GET reports the service account bound in the request space', async () => {
     const sandboxElasticsearchAccessClient = createAccessClient();
+    const request = {};
 
     await expect(
-      getHandler({ request: {}, params: {}, sandboxElasticsearchAccessClient } as never)
+      getHandler({ request, params: {}, sandboxElasticsearchAccessClient } as never)
     ).resolves.toEqual({
       uiam_enabled: true,
+      space_id: 'space-a',
       service_account_id: 'sa-id',
-      created_at: ACCESS.createdAt,
+      bound_at: ACCESS.boundAt,
     });
+    expect(sandboxElasticsearchAccessClient.get).toHaveBeenCalledWith(request);
   });
 
-  it('GET reports no service account before one is created', async () => {
-    const sandboxElasticsearchAccessClient = createAccessClient({ enabled: false });
+  it('GET reports no service account before one is bound', async () => {
+    const sandboxElasticsearchAccessClient = createAccessClient();
     sandboxElasticsearchAccessClient.get.mockResolvedValue(undefined);
 
     await expect(
       getHandler({ request: {}, params: {}, sandboxElasticsearchAccessClient } as never)
-    ).resolves.toEqual({ uiam_enabled: false });
+    ).resolves.toEqual({ uiam_enabled: true, space_id: 'space-a' });
+  });
+
+  it('GET does not read bindings when UIAM mode is disabled', async () => {
+    const sandboxElasticsearchAccessClient = createAccessClient({ enabled: false });
+
+    await expect(
+      getHandler({ request: {}, params: {}, sandboxElasticsearchAccessClient } as never)
+    ).resolves.toEqual({ uiam_enabled: false, space_id: 'space-a' });
+    expect(sandboxElasticsearchAccessClient.get).not.toHaveBeenCalled();
   });
 
   it('POST ensures the service account with the caller request', async () => {
@@ -55,8 +72,9 @@ describe('sandbox Elasticsearch access routes', () => {
       ensureHandler({ request, params: {}, sandboxElasticsearchAccessClient } as never)
     ).resolves.toEqual({
       uiam_enabled: true,
+      space_id: 'space-a',
       service_account_id: 'sa-id',
-      created_at: ACCESS.createdAt,
+      bound_at: ACCESS.boundAt,
     });
     expect(sandboxElasticsearchAccessClient.ensure).toHaveBeenCalledWith(request);
   });

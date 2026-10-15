@@ -39,6 +39,15 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     });
   });
 
+  it('registers the sandbox Elasticsearch service account workload type', () => {
+    const core = coreMock.createSetup();
+    createPlugin().setup(core, createSetupDeps());
+
+    expect(core.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'sandbox_elasticsearch' })
+    );
+  });
+
   it('accepts one investigation quota callback', () => {
     const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
     const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });

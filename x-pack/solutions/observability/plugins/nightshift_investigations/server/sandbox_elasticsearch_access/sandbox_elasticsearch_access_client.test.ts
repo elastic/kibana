@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
-import {
-  NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID,
-  NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-} from '../saved_objects';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createSandboxElasticsearchAccessClient,
+  getSandboxServiceAccountName,
+  SANDBOX_ELASTICSEARCH_WORKLOAD_ID,
+  SANDBOX_ELASTICSEARCH_WORKLOAD_TYPE,
   SandboxElasticsearchAccessDisabledError,
 } from './sandbox_elasticsearch_access_client';
 
@@ -29,130 +23,155 @@ const CONFIG = {
   assumerServiceAccountId: 'sandbox-api',
 };
 
-const STORED = { serviceAccountId: 'stored-sa', createdAt: '2026-10-15T00:00:00.000Z' };
-
-const notFound = () =>
-  SavedObjectsErrorHelpers.createGenericNotFoundError(
-    NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-    NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID
-  );
-
-const storedObject = (attributes = STORED) => ({
-  id: NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID,
-  type: NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-  references: [],
-  attributes,
+const binding = (
+  spaceId: string,
+  serviceAccountId = `sa-${spaceId}`
+): ServiceAccountWorkloadBinding => ({
+  pluginId: 'nightshiftInvestigations',
+  workloadType: SANDBOX_ELASTICSEARCH_WORKLOAD_TYPE,
+  workloadId: SANDBOX_ELASTICSEARCH_WORKLOAD_ID,
+  serviceAccountId,
+  spaceId,
+  boundBy: { type: 'user', username: 'admin' },
+  boundAt: '2026-10-15T00:00:00.000Z',
 });
+
+const requestInSpace = (spaceId: string): KibanaRequest =>
+  httpServerMock.createKibanaRequest({ headers: { 'x-space': spaceId } });
 
 const setup = ({ config = CONFIG, serviceAccountsEnabled = true } = {}) => {
   const core = coreMock.createStart();
-  jest.mocked(core.security.serviceAccounts.isEnabled).mockReturnValue(serviceAccountsEnabled);
-  jest.mocked(core.security.serviceAccounts.create).mockResolvedValue({
-    id: 'new-sa',
-    name: CONFIG.serviceAccountName,
-    roles: CONFIG.roles,
-  });
-  const savedObjects = savedObjectsServiceMock.createStartContract();
-  const repository = savedObjectsRepositoryMock.create();
-  savedObjects.createInternalRepository.mockReturnValue(repository);
+  const serviceAccounts = jest.mocked(core.security.serviceAccounts);
+  serviceAccounts.isEnabled.mockReturnValue(serviceAccountsEnabled);
+  serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
+  serviceAccounts.create.mockImplementation(async (_request, { name, roles }) => ({
+    id: `new-${name}`,
+    name,
+    roles,
+  }));
+  serviceAccounts.bindWorkload.mockImplementation(async (request, { serviceAccountId }) =>
+    binding(String(request.headers['x-space']), serviceAccountId)
+  );
   const logger = loggingSystemMock.createLogger();
   const client = createSandboxElasticsearchAccessClient({
-    getDeps: () => ({ savedObjects, security: core.security }),
+    getDeps: () => ({ security: core.security }),
+    getSpaceId: (request) => String(request.headers['x-space']),
     config,
     logger,
   });
-  return { client, repository, create: core.security.serviceAccounts.create, logger };
+  return { client, serviceAccounts };
 };
 
 describe('createSandboxElasticsearchAccessClient', () => {
-  const request = httpServerMock.createKibanaRequest();
-
-  it('returns the stored account without creating one', async () => {
-    const { client, repository, create } = setup();
-    repository.get.mockResolvedValue(storedObject());
-
-    await expect(client.ensure(request)).resolves.toEqual(STORED);
-    expect(create).not.toHaveBeenCalled();
-    expect(repository.get).toHaveBeenCalledWith(
-      NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-      NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID
-    );
+  beforeEach(() => {
+    jest.useRealTimers();
   });
 
-  it('creates an account assumable by sandbox-api and stores its id', async () => {
-    const { client, repository, create } = setup();
-    repository.get.mockRejectedValue(notFound());
+  it('returns the binding of the request space without creating an account', async () => {
+    const { client, serviceAccounts } = setup();
+    serviceAccounts.getWorkloadBinding.mockResolvedValue(binding('space-a', 'bound-sa'));
+
+    await expect(client.ensure(requestInSpace('space-a'))).resolves.toEqual({
+      serviceAccountId: 'bound-sa',
+      spaceId: 'space-a',
+      boundAt: '2026-10-15T00:00:00.000Z',
+    });
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith({
+      workloadType: 'sandbox_elasticsearch',
+      workloadId: 'default',
+      spaceId: 'space-a',
+    });
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
+    expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('creates an account assumable by sandbox-api and binds it in the request space', async () => {
+    const { client, serviceAccounts } = setup();
+    const request = requestInSpace('space-a');
 
     const access = await client.ensure(request);
 
-    expect(create).toHaveBeenCalledWith(request, {
-      name: 'nightshift-sandbox',
-      description: expect.any(String),
+    expect(serviceAccounts.create).toHaveBeenCalledWith(request, {
+      name: 'nightshift-sandbox-space-a',
+      description: expect.stringContaining('[space-a]'),
       roles: ['nightshift'],
       assumableByPlatformServiceAccounts: ['sandbox-api'],
     });
-    expect(access).toEqual({ serviceAccountId: 'new-sa', createdAt: expect.any(String) });
-    expect(repository.create).toHaveBeenCalledWith(NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE, access, {
-      id: NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID,
-      overwrite: false,
+    expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(request, {
+      workloadType: 'sandbox_elasticsearch',
+      workloadId: 'default',
+      serviceAccountId: 'new-nightshift-sandbox-space-a',
     });
-    await expect(client.getServiceAccountId()).resolves.toBe('new-sa');
-  });
-
-  it('shares one create between concurrent callers', async () => {
-    const { client, repository, create } = setup();
-    repository.get.mockRejectedValue(notFound());
-
-    await Promise.all([client.ensure(request), client.ensure(request)]);
-
-    expect(create).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns the concurrently stored account when the write conflicts', async () => {
-    const { client, repository, logger } = setup();
-    repository.get.mockRejectedValueOnce(notFound()).mockResolvedValueOnce(storedObject());
-    repository.create.mockRejectedValue(
-      SavedObjectsErrorHelpers.createConflictError(
-        NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_TYPE,
-        NIGHTSHIFT_SANDBOX_ES_ACCESS_SO_ID
-      )
+    expect(access).toEqual({
+      serviceAccountId: 'new-nightshift-sandbox-space-a',
+      spaceId: 'space-a',
+      boundAt: expect.any(String),
+    });
+    await expect(client.getServiceAccountId(request)).resolves.toBe(
+      'new-nightshift-sandbox-space-a'
     );
+    // Served from the cache filled by the bind.
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledTimes(1);
+  });
 
-    await expect(client.ensure(request)).resolves.toEqual(STORED);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[new-sa] is unused'));
+  it('shares one create between concurrent callers of a space, not across spaces', async () => {
+    const { client, serviceAccounts } = setup();
+
+    await Promise.all([
+      client.ensure(requestInSpace('space-a')),
+      client.ensure(requestInSpace('space-a')),
+      client.ensure(requestInSpace('space-b')),
+    ]);
+
+    expect(serviceAccounts.create).toHaveBeenCalledTimes(2);
+    expect(serviceAccounts.bindWorkload).toHaveBeenCalledTimes(2);
   });
 
   it('refuses to create an account when UIAM mode is disabled', async () => {
-    const { client, create } = setup({ config: { ...CONFIG, enabled: false } });
+    const { client, serviceAccounts } = setup({ config: { ...CONFIG, enabled: false } });
 
-    await expect(client.ensure(request)).rejects.toBeInstanceOf(
+    await expect(client.ensure(requestInSpace('space-a'))).rejects.toBeInstanceOf(
       SandboxElasticsearchAccessDisabledError
     );
-    expect(create).not.toHaveBeenCalled();
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
   it('refuses to create an account when service accounts are disabled', async () => {
-    const { client, repository, create } = setup({ serviceAccountsEnabled: false });
-    repository.get.mockRejectedValue(notFound());
+    const { client, serviceAccounts } = setup({ serviceAccountsEnabled: false });
 
-    await expect(client.ensure(request)).rejects.toThrow('xpack.security.serviceAccounts.enabled');
-    expect(create).not.toHaveBeenCalled();
+    await expect(client.ensure(requestInSpace('space-a'))).rejects.toThrow(
+      'xpack.security.serviceAccounts.enabled'
+    );
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
-  it('caches a found service account id', async () => {
-    const { client, repository } = setup();
-    repository.get.mockResolvedValue(storedObject());
+  it('caches a found service account id per space for a minute', async () => {
+    jest.useFakeTimers({ now: new Date('2026-10-15T00:00:00.000Z') });
+    const { client, serviceAccounts } = setup();
+    serviceAccounts.getWorkloadBinding.mockImplementation(async ({ spaceId }) => binding(spaceId));
 
-    await expect(client.getServiceAccountId()).resolves.toBe('stored-sa');
-    await expect(client.getServiceAccountId()).resolves.toBe('stored-sa');
-    expect(repository.get).toHaveBeenCalledTimes(1);
+    await expect(client.getServiceAccountId(requestInSpace('space-a'))).resolves.toBe('sa-space-a');
+    await expect(client.getServiceAccountId(requestInSpace('space-a'))).resolves.toBe('sa-space-a');
+    await expect(client.getServiceAccountId(requestInSpace('space-b'))).resolves.toBe('sa-space-b');
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledTimes(2);
+
+    jest.advanceTimersByTime(60_001);
+    await client.getServiceAccountId(requestInSpace('space-a'));
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledTimes(3);
   });
 
-  it('reports no service account before one is created', async () => {
-    const { client, repository } = setup();
-    repository.get.mockRejectedValue(notFound());
+  it('reports no service account before one is bound, without caching the miss', async () => {
+    const { client, serviceAccounts } = setup();
 
-    await expect(client.getServiceAccountId()).resolves.toBeUndefined();
-    await expect(client.get()).resolves.toBeUndefined();
+    await expect(client.getServiceAccountId(requestInSpace('space-a'))).resolves.toBeUndefined();
+    await expect(client.get(requestInSpace('space-a'))).resolves.toBeUndefined();
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the account name within the service account name limit', () => {
+    expect(getSandboxServiceAccountName('nightshift-sandbox', 'default')).toBe(
+      'nightshift-sandbox-default'
+    );
+    expect(getSandboxServiceAccountName('nightshift-sandbox', 'x'.repeat(200))).toHaveLength(128);
   });
 });

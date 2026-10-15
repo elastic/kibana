@@ -80,13 +80,13 @@ export type RequestScopedConnectorAccess =
 
 /**
  * Checks that the virtual connector can be used in this call and returns how. UIAM mode wins once
- * `getUiamServiceAccountId` (set only when UIAM mode is configured) resolves an account; otherwise
- * the run's own API key is used.
+ * `getSandboxServiceAccountId` (set only when UIAM mode is configured) resolves an account bound in
+ * the space of the call's request; otherwise the run's own API key is used.
  */
 export const checkRequestScopedConnector = async (
   callContext: SandboxCallContext,
   elasticsearchUrl: string | undefined,
-  getUiamServiceAccountId?: () => Promise<string | undefined>
+  getSandboxServiceAccountId?: (request: KibanaRequest) => Promise<string | undefined>
 ): Promise<Resolution<RequestScopedConnectorAccess>> => {
   if (!callContext.allowedConnectorIds.includes(REQUEST_SCOPED_CONNECTOR_ID)) {
     return {
@@ -102,7 +102,7 @@ export const checkRequestScopedConnector = async (
     };
   }
 
-  const serviceAccountId = await getUiamServiceAccountId?.();
+  const serviceAccountId = await getSandboxServiceAccountId?.(callContext.request);
   if (serviceAccountId) {
     return { mode: 'uiam', url: elasticsearchUrl, serviceAccountId };
   }

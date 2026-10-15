@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { RunCommandParams } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
@@ -42,8 +42,11 @@ export interface ConnectorCredentialDeps {
   actions?: ActionsPluginStart;
   /** Elasticsearch URL the sandbox reaches this cluster at; enables the request-scoped connector. */
   elasticsearchUrl?: string;
-  /** Set in UIAM mode: the service account sandbox-api assumes for the request-scoped connector. */
-  getSandboxServiceAccountId?: () => Promise<string | undefined>;
+  /**
+   * Set in UIAM mode: the service account sandbox-api assumes for the request-scoped connector,
+   * bound in the space of the request.
+   */
+  getSandboxServiceAccountId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export type ResolveConnectorCredentials = (

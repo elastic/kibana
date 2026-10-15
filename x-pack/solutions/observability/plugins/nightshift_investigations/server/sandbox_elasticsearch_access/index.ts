@@ -7,6 +7,7 @@
 
 export {
   createSandboxElasticsearchAccessClient,
+  sandboxElasticsearchWorkloadType,
   SandboxElasticsearchAccessDisabledError,
   type SandboxElasticsearchAccess,
   type SandboxElasticsearchAccessClient,

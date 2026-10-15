@@ -32,6 +32,7 @@ const sandboxElasticsearchUiamConfigSchema = schema.object({
     minSize: 1,
     maxSize: 50,
   }),
+  // Name prefix: each space binds its own account, named `<prefix>-<space id>` (cut to 128 chars).
   service_account_name: schema.string({
     defaultValue: 'nightshift-sandbox',
     minLength: 1,

@@ -87,17 +87,19 @@ describe('checkRequestScopedConnector', () => {
     });
   });
 
-  it('returns the UIAM service account when one is stored, even for a UIAM-key run', async () => {
-    expect(
-      await checkRequestScopedConnector(
-        callContext(fakeRequest('ApiKey essu_internal_key')),
-        ES_URL,
-        async () => 'sa-id'
-      )
-    ).toEqual({ mode: 'uiam', url: ES_URL, serviceAccountId: 'sa-id' });
+  it('returns the UIAM service account bound for the request, even for a UIAM-key run', async () => {
+    const context = callContext(fakeRequest('ApiKey essu_internal_key'));
+    const getSandboxServiceAccountId = jest.fn().mockResolvedValue('sa-id');
+
+    expect(await checkRequestScopedConnector(context, ES_URL, getSandboxServiceAccountId)).toEqual({
+      mode: 'uiam',
+      url: ES_URL,
+      serviceAccountId: 'sa-id',
+    });
+    expect(getSandboxServiceAccountId).toHaveBeenCalledWith(context.request);
   });
 
-  it('uses the API key while no UIAM service account is stored', async () => {
+  it('uses the API key while no UIAM service account is bound', async () => {
     expect(await checkRequestScopedConnector(callContext(), ES_URL, async () => undefined)).toEqual(
       expect.objectContaining({ mode: 'api_key' })
     );
