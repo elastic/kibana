@@ -215,8 +215,17 @@ export const AttackTabBulkActions = ({
       telemetrySource: TELEMETRY_SOURCE,
     });
 
+  const attacksWithTimelineAlerts = useMemo(
+    () =>
+      baseAttackProps.map((props, position) => ({
+        ...props,
+        timestamp: resolvedAttacks[position].timestamp,
+      })),
+    [baseAttackProps, resolvedAttacks]
+  );
+
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
-    attacksWithTimelineAlerts: baseAttackProps,
+    attacksWithTimelineAlerts,
     closePopover,
     telemetrySource: TELEMETRY_SOURCE,
   });

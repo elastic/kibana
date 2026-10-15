@@ -128,7 +128,10 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
-  const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
+  const attacksWithTimelineAlerts = useMemo(
+    () => [{ ...baseAttackProps, timestamp: attack.timestamp }],
+    [attack.timestamp, baseAttackProps]
+  );
 
   const { items: runWorkflowItems, panels: runWorkflowPanels } =
     useAttackRunWorkflowContextMenuItems({

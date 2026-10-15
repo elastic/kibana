@@ -39,7 +39,7 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
       attacksWithTimelineAlerts.map((attack) => ({
         _id: attack.attackId,
         data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds }],
-        ecs: { _id: attack.attackId },
+        ecs: { _id: attack.attackId, timestamp: attack.timestamp },
       })),
     [attacksWithTimelineAlerts]
   );
