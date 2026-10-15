@@ -50,7 +50,7 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
 >;
 
 export interface ChangeHistoryClientInitializeOptions {
-  /** When supplied, `getHistory` resolves `user.full_name` at read time; lookup failures are swallowed. */
+  /** When supplied, `getHistory` and `getEvent` resolve `user.full_name` and `user.email` at read time; lookup failures are swallowed. */
   userProfileService?: UserProfileServiceStart;
 }
 
