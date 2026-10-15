@@ -50092,7 +50092,6 @@
     "xpack.significantEventsApp.eventsDeepLinkTitle": "重大事件/事件",
     "xpack.significantEventsApp.findSignificantEventsLabel": "查找重大事件",
     "xpack.significantEventsApp.findSignificantEventsSecondaryAriaLabel": "发现选项",
-    "xpack.significantEventsApp.knowledgeIndicators.emptyStateImage": "知识指标视图的空状态示意图",
     "xpack.significantEventsApp.lifecycle.emptyBody": "无法为该事件重建生命周期链。",
     "xpack.significantEventsApp.lifecycle.emptyTitle": "没有生命周期数据",
     "xpack.significantEventsApp.nightshiftButtonLabel": "夜班",

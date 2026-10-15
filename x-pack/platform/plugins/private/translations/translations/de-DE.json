@@ -49923,7 +49923,6 @@
     "xpack.significantEventsApp.eventsDeepLinkTitle": "Signifikante Ereignisse/Ereignisse",
     "xpack.significantEventsApp.findSignificantEventsLabel": "Wichtige Ereignisse finden",
     "xpack.significantEventsApp.findSignificantEventsSecondaryAriaLabel": "Discovery-Optionen",
-    "xpack.significantEventsApp.knowledgeIndicators.emptyStateImage": "Leere Beispielansicht für die Ansicht „Wissensindikatoren“",
     "xpack.significantEventsApp.lifecycle.emptyBody": "Für dieses Ereignis konnte keine Lebenszykluskette rekonstruiert werden.",
     "xpack.significantEventsApp.lifecycle.emptyTitle": "Keine Lebenszyklusdaten",
     "xpack.significantEventsApp.nightshiftButtonLabel": "Nachtschicht",

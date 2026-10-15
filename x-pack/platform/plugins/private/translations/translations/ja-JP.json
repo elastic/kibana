@@ -50089,7 +50089,6 @@
     "xpack.significantEventsApp.eventsDeepLinkTitle": "重要なイベント / イベント",
     "xpack.significantEventsApp.findSignificantEventsLabel": "重要なイベントを検索",
     "xpack.significantEventsApp.findSignificantEventsSecondaryAriaLabel": "Discoveryオプション",
-    "xpack.significantEventsApp.knowledgeIndicators.emptyStateImage": "ナレッジインジケータービューの空の状態のイラスト",
     "xpack.significantEventsApp.lifecycle.emptyBody": "このイベントに対して再構築できるライフサイクルチェーンはありません。",
     "xpack.significantEventsApp.lifecycle.emptyTitle": "ライフサイクルデータはありません",
     "xpack.significantEventsApp.nightshiftButtonLabel": "Nightshift",
