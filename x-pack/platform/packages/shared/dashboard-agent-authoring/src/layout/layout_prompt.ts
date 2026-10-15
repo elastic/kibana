@@ -23,7 +23,7 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 - Start from the \`previous\` grids. The user may have arranged them by hand, so without \`instructions\` change only the rows that hold an added, removed, moved or edited panel, and the rows below them that must move up or down. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels are affected too. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
 - Every row you change follows the sizing and packing rules in full: leaving empty space is never a way to keep a panel unchanged.
 - Size added and edited panels by *Grid sizes by chart type*.
-- In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
+- In a new dashboard, or when \`instructions\` ask to rearrange the whole dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables, and size every panel by *Grid sizes by chart type*.
 
 ## Grid sizes by chart type
 
