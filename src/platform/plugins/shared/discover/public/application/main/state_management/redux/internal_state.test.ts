@@ -16,6 +16,7 @@ import {
   DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   internalStateActions,
+  getTabDataView,
   selectTabRuntimeState,
   selectTab,
 } from '.';
@@ -50,13 +51,9 @@ describe('InternalStateStore', () => {
   it('should set data view', async () => {
     const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    expect(
-      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
-    ).toBeUndefined();
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBeUndefined();
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
-      dataViewMock
-    );
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
   });
 
   it('should clear expandedDoc when setDataView is called with a different data view id', async () => {

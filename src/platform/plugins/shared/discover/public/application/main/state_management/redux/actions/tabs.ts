@@ -28,6 +28,7 @@ import {
 import {
   createTabRuntimeState,
   selectCurrentProfileUrlState,
+  getTabDataView,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -237,10 +238,14 @@ export const updateTabs: InternalStateThunkActionCreator<
           stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
           defaultsHandling: 'strip',
         });
+        tab.uiState = {
+          ...tab.uiState,
+          visor: recentlyClosedTabToRestore.uiState.visor,
+        };
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
-        const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+        const currentDataView = getTabDataView(currentTabRuntimeState);
 
         tab.skipInitialFetch = true;
         const currentRefreshInterval =

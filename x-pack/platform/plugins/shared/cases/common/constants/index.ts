@@ -107,6 +107,8 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_BULK_GET_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_get` as const;
+export const INTERNAL_BULK_DELETE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_delete` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
@@ -207,6 +209,7 @@ export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_ATTACHMENT_TYPES_PER_QUERY = 20 as const;
+export const MAX_BULK_DELETE_ATTACHMENTS = 100 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;

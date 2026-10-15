@@ -8,9 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
-  InvestigationStructuredOutput,
-  InvestigationStatus,
-} from '@kbn/nightshift-investigations-plugin/common';
+  Hypothesis,
+  InvestigationImpactResponse,
+  InvestigationProposalSummary,
+  InvestigationSeverity,
+} from '@kbn/agentic-investigations-plugin/common';
 
 export const investigationExampleSchema = z.object({
   input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
@@ -36,13 +38,31 @@ export interface TrajectoryStep {
   result: string;
 }
 
+/**
+ * What the investigation recorded, read from the shared investigations API
+ * (`GET /internal/investigations/investigations/{id}`): the agent's summary ("what happened") and
+ * verdict (the conclusion) from the conversation metadata, plus its hypotheses, impact, and
+ * proposed actions.
+ */
+export interface InvestigationReport {
+  summary?: string;
+  conclusion?: string;
+  severity?: InvestigationSeverity;
+  hypotheses?: Hypothesis[];
+  impact?: InvestigationImpactResponse;
+  proposals?: Array<Pick<InvestigationProposalSummary, 'title' | 'comment' | 'status'>>;
+}
+
+/** `running` while the investigation agent runs, `complete` after. */
+export type InvestigationRunState = 'running' | 'complete';
+
 export interface InvestigationTaskOutput {
   case_id: string;
   query: string;
   investigation_id?: string;
   conversation_id?: string;
-  workflow_status?: InvestigationStatus;
-  structured_report?: InvestigationStructuredOutput;
+  workflow_status?: InvestigationRunState;
+  structured_report?: InvestigationReport;
   report_truncated?: boolean;
   conversation_round_count?: number;
   traceId?: string;

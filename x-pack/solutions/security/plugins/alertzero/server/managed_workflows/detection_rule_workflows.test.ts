@@ -741,9 +741,43 @@ describe('detection rule workflows', () => {
       });
 
       describe('expiring stale tuning proposals', () => {
+        const expireStaleProposalsStep = tuningSteps.find(
+          ({ name }) => name === 'expire_stale_tuning_proposals'
+        ) as NestedStep & {
+          foreach?: string;
+        };
+        const fetchProposalRuleStep = tuningSteps.find(
+          ({ name }) => name === 'fetch_proposal_rule'
+        )!;
         const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
           (stepName) => tuningSteps.find(({ name }) => name === stepName)!
         );
+
+        it('checks only exception proposals for staleness, not Rule Coverage proposals', () => {
+          const exception = { actionWorkflowId: 'system-alertzero-action-add-rule-exception' };
+          const install = { actionWorkflowId: 'system-alertzero-action-install-prebuilt-rule' };
+          const context = {
+            consts: tuning.consts,
+            steps: {
+              list_pending_tuning_proposals: { output: { proposals: [exception, install] } },
+            },
+          };
+
+          expect(resolveExpression(expireStaleProposalsStep.foreach, context)).toEqual([exception]);
+        });
+
+        it("looks up an exception proposal's rule by rule_id, not id", async () => {
+          const path = await createWorkflowLiquidEngine().parseAndRender(
+            String(fetchProposalRuleStep.with?.path),
+            {
+              workflow: { spaceId: 'default' },
+              foreach: { item: { actionInput: { rule_id: 'rule-1' } } },
+            }
+          );
+
+          expect(path).toBe('/s/default/api/detection_engine/rules?id=rule-1');
+        });
+
         const proposal = (expectedRevision?: number) => ({
           id: 'proposal-1',
           actionInput: { id: 'rule-1', expected_revision: expectedRevision },
