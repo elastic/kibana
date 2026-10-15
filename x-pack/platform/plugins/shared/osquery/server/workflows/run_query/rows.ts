@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { get } from 'lodash';
+import type { RunQueryOutput } from '../../../common/workflows/step_types/run_query/run_query_common';
+
+export type RunQueryRow = RunQueryOutput['rows'][number];
+
+const readPath = (source: Record<string, unknown>, path: string): unknown =>
+  path in source ? source[path] : get(source, path);
+
+const toColumns = (source: Record<string, unknown>): Record<string, string> => {
+  const columns: Record<string, string> = {};
+  const nested = source.osquery;
+  if (nested && typeof nested === 'object') {
+    Object.entries(nested as Record<string, unknown>).forEach(([key, value]) => {
+      columns[key] = String(value);
+    });
+  }
+
+  Object.entries(source).forEach(([key, value]) => {
+    if (key.startsWith('osquery.')) {
+      columns[key.slice('osquery.'.length)] = String(value);
+    }
+  });
+
+  return columns;
+};
+
+export const toRunQueryRow = (source: Record<string, unknown>, ecsKeys: string[]): RunQueryRow => {
+  const agent = (readPath(source, 'agent') ?? {}) as { id?: string; name?: string };
+  const agentId = agent.id ?? (readPath(source, 'agent.id') as string | undefined) ?? '';
+  const agentName = agent.name ?? (readPath(source, 'agent.name') as string | undefined);
+  const timestamp = source['@timestamp'];
+
+  const ecs: Record<string, unknown> = {};
+  ecsKeys.forEach((key) => {
+    const value = readPath(source, key);
+    if (value !== undefined) {
+      ecs[key] = value;
+    }
+  });
+
+  return {
+    agent: { id: agentId, ...(agentName ? { name: agentName } : {}) },
+    ...(timestamp ? { '@timestamp': String(timestamp) } : {}),
+    columns: toColumns(source),
+    ecs,
+  };
+};

@@ -182,6 +182,8 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { isolateHostStepDefinition } from './workflows/step_types/isolate_host_step/isolate_host_step';
+import { getRunningProcessesStepDefinition } from './workflows/step_types/get_running_processes_step/get_running_processes_step';
 import {
   registerSecurityManagedWorkflowOwner,
   initSecurityManagedWorkflowsClient,
@@ -879,6 +881,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      if (this.config.experimentalFeatures.responseActionsWorkflowStepsEnabled) {
+        plugins.workflowsExtensions.registerStepDefinition(isolateHostStepDefinition);
+        plugins.workflowsExtensions.registerStepDefinition(getRunningProcessesStepDefinition);
+      }
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
