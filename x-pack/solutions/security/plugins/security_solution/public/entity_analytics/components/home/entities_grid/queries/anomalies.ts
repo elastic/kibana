@@ -17,6 +17,7 @@ import {
   buildIdentityPrefilter,
   buildLookback,
   buildStatsByEntityClause,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
 import type { EntityAggregation } from './esql';
@@ -25,9 +26,6 @@ import { withEntityAliases } from './resolved_entities';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
 import { fetchComputedColumnSortPage } from './computed_column';
 import type { ComputedColumn } from './computed_column';
-
-/** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
-const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 const ANOMALY_AGGREGATIONS: readonly EntityAggregation[] = [
   { field: ANOMALY_COUNT_FIELD, aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },

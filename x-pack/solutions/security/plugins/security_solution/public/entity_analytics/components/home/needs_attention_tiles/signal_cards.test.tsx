@@ -20,7 +20,7 @@ const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
 });
 
 const renderCards = (cards: SignalCardData[]) =>
-  render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
+  render(<SignalCards activeTile={null} cards={cards} onFilterForTile={jest.fn()} />);
 
 describe('SignalCards delta pill', () => {
   it('shows an increase with a plus sign and an up arrow, without a percentage', () => {

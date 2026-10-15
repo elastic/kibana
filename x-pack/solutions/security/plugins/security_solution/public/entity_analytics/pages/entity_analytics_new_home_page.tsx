@@ -264,7 +264,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         const entityType = row[ENTITY_TYPE_FIELD];
         const entityName = getString(row, 'entity.name');
         if (!entityName || !isStoreEntityType(entityType)) return;
-        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(entityType, row);
+        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+          euidApi.getBuiltInEntityDefinition(entityType),
+          row
+        );
         if (kqlFilter) {
           investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
           return;

@@ -170,7 +170,7 @@ const useResolvedEntityFilterOverrides = (
       },
     ],
     ({ signal }) => fetchFilterOverrides(context, options, signal),
-    { enabled: !!context.concreteEntityIndexName && needsResolvedEntityFilterOverrides(options) }
+    { enabled: getReadyContext(context) != null && needsResolvedEntityFilterOverrides(options) }
   );
 
 const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
@@ -223,11 +223,11 @@ const usePrefetch = (context: GridContext) =>
  * of another view, e.g. a group's records on hover.
  */
 export const useEntityGridData = (
-  viewOptions: UseEntityGridDataOptions,
+  requestedOptions: UseEntityGridDataOptions,
   /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */
   { enrichRowsInView = false }: { enrichRowsInView?: boolean } = {}
 ) => {
-  const options = useMemo(() => limitPageSize(viewOptions), [viewOptions]);
+  const options = useMemo(() => limitPageSize(requestedOptions), [requestedOptions]);
   const context = useGridContext();
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
   // Every query of the view waits for the overrides of its filters.

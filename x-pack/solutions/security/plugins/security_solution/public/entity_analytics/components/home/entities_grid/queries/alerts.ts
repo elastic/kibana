@@ -6,6 +6,7 @@
  */
 
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
@@ -29,6 +30,7 @@ import {
   buildStatsByEntityClause,
   getAlertsIndex,
   getEntityAlias,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
 import type { EntityAggregation } from './esql';
@@ -73,6 +75,7 @@ const getAlertColumn = (field: string, emptyValue: 0 | null): ComputedColumn => 
   emptyValue,
   emptyColumns: ALERT_EMPTY_COLUMNS,
   columns: [field, ...ALERT_FIELDS],
+  settings: [SET_UNMAPPED_NULLIFY],
   buildSourceRows: (args) => buildOpenAlertRowsSteps(args),
   aggregations: ALERT_AGGREGATIONS,
   rollsUpOverAliases: true,
@@ -113,6 +116,7 @@ const buildOpenAlertRowsSteps = ({ namespace, timeRange }: QueryArgs): string[] 
  * entities, can't run inside a FROM subquery, so the alerts and the entity docs share the FROM.
  */
 const buildMergedAlertSortQuery = (args: QueryArgs, sortField: string): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getAlertsIndex(args.namespace)}, ${getEntityAlias(args.namespace)} METADATA _index`,
   `| WHERE (NOT ${isEntityDoc(args)} AND \`@timestamp\` >= ${buildLookback(
     args.timeRange
@@ -185,6 +189,7 @@ const buildOpenAlertsOfSteps = (
 ): string[] => {
   const entityIds = getEntityIds(entities);
   return [
+    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
@@ -210,7 +215,7 @@ const buildUnstampedIdentityFilters = (rows: readonly Row[]) => {
   for (const row of rows) {
     const entityType = row[ENTITY_TYPE_FIELD];
     if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
+      const clause = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition(entityType), row);
       if (clause) {
         clauses.add(clause);
         matchedRows.push(row);
