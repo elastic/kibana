@@ -66,13 +66,13 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
-const mockUseKiList = jest.fn();
+const mockUseListKi = jest.fn();
 
-jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: (...args: unknown[]) => mockUseKiList(...args),
+jest.mock('../hooks/use_list_ki', () => ({
+  useListKi: (...args: unknown[]) => mockUseListKi(...args),
 }));
 
-const defaultKiListMock = {
+const defaultListKiMock = {
   kis: [],
   total: 25,
   summary: {
@@ -193,7 +193,7 @@ const renderWithProviders = (
                   },
                 ]}
               >
-                <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                <Route path={CONTEXT_ENGINE_PATHS.detail} exact component={AiIndexDetailPage} />
               </MemoryRouter>
             </QueryClientProvider>
           </KibanaContextProvider>
@@ -222,13 +222,13 @@ describe('AiIndexDetailPage', () => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
-    mockUseKiList.mockImplementation(() => defaultKiListMock);
+    mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    mockUseKiList.mockImplementation(() => defaultKiListMock);
+    mockUseListKi.mockImplementation(() => defaultListKiMock);
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
@@ -357,7 +357,7 @@ describe('AiIndexDetailPage', () => {
             >
               <QueryClientProvider client={queryClient}>
                 <Router history={history}>
-                  <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                  <Route path={CONTEXT_ENGINE_PATHS.detail} exact component={AiIndexDetailPage} />
                 </Router>
               </QueryClientProvider>
             </KibanaContextProvider>
@@ -909,16 +909,16 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanel')).not.toBeInTheDocument();
 
     fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
 
-    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       total: 0,
       summary: { total: 0, countsByType: [] },
     }));
@@ -938,8 +938,8 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('hides the Knowledge Indicators tab while the KI summary is loading', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       isLoading: true,
     }));
     const services = createServices();
@@ -958,8 +958,8 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       total: 0,
       summary: { total: 0, countsByType: [] },
       error: new Error('Request timed out'),
