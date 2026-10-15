@@ -559,9 +559,7 @@ describe('UiamService', () => {
           }
         );
       });
-    });
 
-    describe.each(schemePreservingRequestOperations)('$name', ({ run }) => {
       it.each([
         ['Bearer', 'upstream-shared-secret'],
         ['Bearer', ''],

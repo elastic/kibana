@@ -82,9 +82,7 @@ apiTest.describe(
 
     apiTest(
       'omits client authentication for an external API key on direct UIAM calls',
-      async ({ apiClient, samlAuth }) => {
-        await samlAuth.asInteractiveUser('admin');
-
+      async ({ apiClient }) => {
         const response = await apiClient.get('internal/security/oauth/clients', {
           headers: {
             ...COMMON_HEADERS,

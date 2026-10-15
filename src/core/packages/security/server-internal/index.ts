@@ -18,4 +18,3 @@ export type {
 export { WorkloadTypeRegistry } from './src/workload_type_registry';
 export { createCoreUiamService } from './src/uiam';
 export type { CoreUiamService } from './src/uiam';
-export type { UiamClientAuthenticationParams } from '@kbn/core-security-server';
