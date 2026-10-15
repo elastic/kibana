@@ -17,17 +17,17 @@ export interface LayoutPanel {
   /** Lens chart type, e.g. `metric` or `xy`, when known. */
   chartType?: string;
   title?: string;
-  /** What the panel shows when it was authored in this call, or the text size of a markdown panel. */
-  authoringNote?: string;
+  /** Approximate grid rows the content needs at half width, for markdown and custom content panels. */
+  preferredHeight?: number;
   grid: { x: number; y: number; w: number; h: number };
   /** Which parts of `grid` to set again; omitted when the panel keeps its grid. */
   relayout?: Relayout;
 }
 
 /**
- * `all` for a panel added in this call, or moved with a new chart type or markdown text size;
+ * `all` for a panel added in this call, or moved with a new chart type or preferred height;
  * `position` for a panel moved to another container, which keeps its size but not its temporary
- * position; `size` for a panel whose chart type or markdown text size changed, which keeps its
+ * position; `size` for a panel whose chart type or preferred height changed, which keeps its
  * position.
  */
 export type Relayout = 'all' | 'position' | 'size';

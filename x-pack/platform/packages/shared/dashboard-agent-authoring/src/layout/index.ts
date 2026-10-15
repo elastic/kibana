@@ -7,5 +7,6 @@
 
 export { arrangeDashboardLayout } from './arrange_layout';
 export { buildLayoutPrompt } from './layout_prompt';
+export { getGridRowsForPixelHeight } from './preferred_height';
 export { GRID_COLUMNS, layoutArrangementSchema } from './types';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';

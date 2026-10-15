@@ -176,6 +176,7 @@ export const editPanelsOperation = defineOperation({
       const { panelId } = panelInput;
       let panelContent: PanelContent;
       let authoringNote: string | undefined;
+      let preferredHeight: number | undefined;
 
       if (panelInput.source === 'config') {
         panelContent = buildConfigPanelContent(panelInput.type, panelInput.config);
@@ -190,7 +191,7 @@ export const editPanelsOperation = defineOperation({
           continue;
         }
 
-        ({ panelContent, authoringNote } = attempt);
+        ({ panelContent, authoringNote, preferredHeight } = attempt);
       }
 
       const updateResult = updatePanelInDashboard({
@@ -207,6 +208,9 @@ export const editPanelsOperation = defineOperation({
       nextDashboardData = updateResult.dashboardData;
       if (authoringNote) {
         context.panelAuthoringNotes.push({ panelId, authoringNote });
+      }
+      if (preferredHeight !== undefined) {
+        context.panelPreferredHeights.set(panelId, preferredHeight);
       }
     }
 

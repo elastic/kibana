@@ -63,6 +63,7 @@ describe('createCustomContentPanelResolver', () => {
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: { esql_query: undefined, template: '<div>resolved</div>' },
         },
+        preferredHeight: 12,
       });
     });
 

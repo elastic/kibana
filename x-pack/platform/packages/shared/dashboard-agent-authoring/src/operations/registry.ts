@@ -49,6 +49,7 @@ interface PrepareOperationExecutionParams {
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
   panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
+  panelPreferredHeights: OperationExecutionContext['panelPreferredHeights'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
   resolveControlFieldCapabilities?: OperationExecutionContext['resolveControlFieldCapabilities'];
@@ -59,6 +60,7 @@ export const prepareOperationExecution = async ({
   logger,
   failures,
   panelAuthoringNotes,
+  panelPreferredHeights,
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
@@ -72,6 +74,7 @@ export const prepareOperationExecution = async ({
     logger,
     failures,
     panelAuthoringNotes,
+    panelPreferredHeights,
     resolvedPanelCreationRequests,
     sectionIdsByKey: new Map(),
     resolvePanelContent,

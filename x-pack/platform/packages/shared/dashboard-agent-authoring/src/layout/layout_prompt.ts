@@ -15,9 +15,9 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 1. The user's request in \`instructions\`, when given. It may override the sizes below.
 2. Stability: a panel without \`relayout\` keeps its position and size unless something changed around it (a panel with \`relayout\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged it by hand. A panel with \`relayout\` changes only what it names:
-   - \`all\`: new, or moved with a new chart type or text size. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
+   - \`all\`: new, or moved with a new chart type or preferred height. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
    - \`position\`: moved to another section or the top level. Place it and keep its size.
-   - \`size\`: chart type or markdown text size changed. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
+   - \`size\`: chart type or \`preferredHeight\` changed. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
 3. No gaps and no overlaps.
 4. Sizes by chart type. These decide \`w\` and \`h\` for every panel with \`relayout: all\` or \`relayout: size\`.
 
@@ -31,8 +31,8 @@ Do not make metric or gauge panels full width.
 - **Heatmap, tag cloud, treemap, waffle, mosaic** → \`w: 24, h: 10\`.
 - **Pie / donut** → \`w: 12–24, h: 10\`.
 - **Data table** → \`w: 24–48, h: 12–16\`. Prefer full width so columns are readable.
-- **Markdown** → \`w: 24–48\`, \`h\` from the text size in \`authoringNote\`: about \`h: 3–4\` for a sentence or two, \`h: 5–9\` for longer text.
-- **Vega, custom content, ML panels** → \`w: 24–48\`. Size \`h\` for what the panel shows (use \`authoringNote\`): a single KPI card \`h: 6–8\`, a list or table of rows \`h: 10–16\`, a multi-part layout or drawn chart \`h: 16–20\`. Too short makes the panel scroll; too tall leaves an empty gap.
+- **Markdown and custom content** → \`w: 24–48\`, \`h\` from \`preferredHeight\`: the approximate rows the content needs at \`w: 24\`. At \`w: 48\`, markdown text needs about two thirds of it. Too short makes the panel scroll; too tall leaves an empty gap.
+- **Vega and ML panels** → \`w: 24–48, h: 12–16\`.
 - **Any other type** (legacy visualizations, maps, saved searches, and other panels not listed above) → \`w: 24\` by default, up to \`48\`. Keep the current \`h\` unless \`instructions\` ask for a change.
 
 Prefer widths that divide 48 evenly: 6, 8, 12, 24, 48.

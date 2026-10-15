@@ -22,6 +22,7 @@ type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 export interface MaterializedPanelInput {
   panelContent: PanelContent;
   authoringNote?: string;
+  preferredHeight?: number;
 }
 
 export interface PanelCreationRequest {
@@ -182,11 +183,11 @@ export const createPanelInputMaterializer = ({
       return undefined;
     }
 
+    const { panelContent, authoringNote, preferredHeight } = resolvedRequest.resolvedPanel;
     return {
-      panelContent: resolvedRequest.resolvedPanel.panelContent,
-      ...(resolvedRequest.resolvedPanel.authoringNote
-        ? { authoringNote: resolvedRequest.resolvedPanel.authoringNote }
-        : {}),
+      panelContent,
+      ...(authoringNote ? { authoringNote } : {}),
+      ...(preferredHeight !== undefined ? { preferredHeight } : {}),
     };
   };
 };

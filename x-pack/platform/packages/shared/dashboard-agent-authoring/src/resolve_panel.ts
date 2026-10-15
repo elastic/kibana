@@ -24,6 +24,8 @@ export type PanelContentAttempt =
       type: 'success';
       panelContent: PanelContent;
       authoringNote?: string;
+      /** Approximate grid rows the content needs, when the content declares its height. */
+      preferredHeight?: number;
     }
   | {
       type: 'failure';

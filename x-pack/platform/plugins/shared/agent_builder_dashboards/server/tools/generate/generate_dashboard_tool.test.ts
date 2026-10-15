@@ -84,6 +84,7 @@ describe('generateDashboardTool handler', () => {
       dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
+      panelPreferredHeights: new Map(),
     });
   });
 
@@ -144,6 +145,7 @@ describe('generateDashboardTool handler', () => {
         dashboardData,
         failures,
         panelAuthoringNotes: [],
+        panelPreferredHeights: new Map(),
       } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
 
     it('does not create a new dashboard without panels or controls', async () => {

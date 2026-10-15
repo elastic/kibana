@@ -55,6 +55,7 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  panelPreferredHeights: Map<string, number>;
 }> => {
   const originalDashboardData = structuredClone(
     dashboardData ?? {
@@ -66,6 +67,7 @@ export const executeDashboardOperations = async ({
   let nextDashboardData = structuredClone(originalDashboardData);
   const failures: OperationFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
+  const panelPreferredHeights = new Map<string, number>();
 
   const context = await prepareOperationExecution({
     operations,
@@ -75,6 +77,7 @@ export const executeDashboardOperations = async ({
     resolveControlFieldCapabilities,
     failures,
     panelAuthoringNotes,
+    panelPreferredHeights,
   });
 
   for (const [operationIndex, operation] of operations.entries()) {
@@ -87,7 +90,12 @@ export const executeDashboardOperations = async ({
   }
 
   if (!validator) {
-    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
+    return {
+      dashboardData: nextDashboardData,
+      failures,
+      panelAuthoringNotes,
+      panelPreferredHeights,
+    };
   }
 
   const validationResult = discardInvalidChanges({
@@ -102,5 +110,6 @@ export const executeDashboardOperations = async ({
     panelAuthoringNotes: panelAuthoringNotes.filter(
       ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
     ),
+    panelPreferredHeights,
   };
 };

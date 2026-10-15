@@ -73,7 +73,7 @@ describe('arrangeDashboardLayout', () => {
     arrangeDashboardLayout({
       originalPanels: originalDashboardData.panels,
       dashboardData,
-      panelAuthoringNotes: [{ panelId: 'new-panel', authoringNote: 'Shows total requests.' }],
+      panelPreferredHeights: new Map([['new-panel', 8]]),
       instructions,
       arrangeLayout,
       reportFailure,
@@ -134,7 +134,7 @@ describe('arrangeDashboardLayout', () => {
           id: 'new-panel',
           chartType: 'metric',
           title: 'Panel new-panel',
-          authoringNote: 'Shows total requests.',
+          preferredHeight: 8,
           relayout: 'all',
         }),
       ],

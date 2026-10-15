@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import {
   isSection,
   type AttachmentPanel,
@@ -14,7 +13,6 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
-import type { PanelAuthoringNote } from '../resolve_panel';
 import {
   GRID_COLUMNS,
   layoutArrangementSchema,
@@ -24,22 +22,17 @@ import {
   type LayoutRequest,
   type Relayout,
 } from './types';
-
-const countLines = (content: string): number =>
-  content.split('\n').filter((line) => line.trim() !== '').length;
-
-/** The text size of a markdown panel, which its height depends on. */
-const describeMarkdownText = (content: string): string =>
-  `Markdown text of ${content.length} characters in ${countLines(content)} lines.`;
+import { getMarkdownPreferredHeight } from './preferred_height';
 
 /**
- * What the size of a panel depends on: its chart type, or the rough text size of a markdown panel,
- * so that small text edits keep the height.
+ * What the size of a panel depends on: its chart type, or the height of a markdown panel's text,
+ * so that small text edits keep the size.
  */
-const getSizeSignature = ({ type, config }: AttachmentPanel): string =>
-  type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string'
-    ? `${type}:${countLines(config.content)}:${Math.round(config.content.length / 200)}`
-    : `${type}:${typeof config.type === 'string' ? config.type : ''}`;
+const getSizeSignature = (panel: AttachmentPanel): string => {
+  const { type, config } = panel;
+  const chartType = typeof config.type === 'string' ? config.type : '';
+  return `${type}:${chartType}:${getMarkdownPreferredHeight(panel) ?? ''}`;
+};
 
 interface PlacedPanel {
   panel: AttachmentPanel;
@@ -61,7 +54,8 @@ interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
   originalPanels: DashboardAttachmentData['panels'];
   dashboardData: DashboardAttachmentData;
-  panelAuthoringNotes: readonly PanelAuthoringNote[];
+  /** Grid rows that panels authored in this call declare for their content, by panel id. */
+  panelPreferredHeights: ReadonlyMap<string, number>;
   /** The user's own arrangement or size request. */
   instructions?: string;
   arrangeLayout: ArrangeDashboardLayout;
@@ -72,15 +66,15 @@ interface ArrangeLayoutParams {
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
  * user asked for a layout change or a change since `originalPanels` affects the layout: a panel or
- * section was added or removed, a panel moved to another container, or its chart type or markdown
- * text size changed. Other edits, such as colors or queries, keep the layout without a model call.
+ * section was added or removed, a panel moved to another container, or its chart type or preferred
+ * height changed. Other edits, such as colors or queries, keep the layout without a model call.
  * When the call fails, the dashboard keeps its current layout, and a failure is reported if the user
  * asked for a layout change.
  */
 export const arrangeDashboardLayout = async ({
   originalPanels,
   dashboardData,
-  panelAuthoringNotes,
+  panelPreferredHeights,
   instructions,
   arrangeLayout,
   reportFailure,
@@ -106,15 +100,9 @@ export const arrangeDashboardLayout = async ({
   const originalPanelsById = new Map(
     getPlacedPanels(originalPanels).map((placedPanel) => [placedPanel.panel.id, placedPanel])
   );
-  const authoringNotesByPanelId = new Map(
-    panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
-  );
 
-  const getAuthoringNote = ({ id, type, config }: AttachmentPanel): string | undefined =>
-    authoringNotesByPanelId.get(id) ??
-    (type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string'
-      ? describeMarkdownText(config.content)
-      : undefined);
+  const getPreferredHeight = (panel: AttachmentPanel): number | undefined =>
+    getMarkdownPreferredHeight(panel) ?? panelPreferredHeights.get(panel.id);
 
   const getRelayout = ({ panel, containerId }: PlacedPanel): Relayout | undefined => {
     const original = originalPanelsById.get(panel.id);
@@ -122,7 +110,10 @@ export const arrangeDashboardLayout = async ({
       return 'all';
     }
     const isMoved = original.containerId !== containerId;
-    const isResized = getSizeSignature(original.panel) !== getSizeSignature(panel);
+    const declaredHeight = panelPreferredHeights.get(panel.id);
+    const isResized =
+      getSizeSignature(original.panel) !== getSizeSignature(panel) ||
+      (declaredHeight !== undefined && declaredHeight !== original.panel.grid.h);
     if (isMoved) {
       return isResized ? 'all' : 'position';
     }
@@ -144,14 +135,14 @@ export const arrangeDashboardLayout = async ({
 
   const toLayoutPanel = (panel: AttachmentPanel, containerId: string | null): LayoutPanel => {
     const { id, type, config, grid } = panel;
-    const authoringNote = getAuthoringNote(panel);
+    const preferredHeight = getPreferredHeight(panel);
     const relayout = getRelayout({ panel, containerId });
     return {
       id,
       type,
       ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
       ...(typeof config.title === 'string' ? { title: config.title } : {}),
-      ...(authoringNote ? { authoringNote } : {}),
+      ...(preferredHeight !== undefined ? { preferredHeight } : {}),
       grid,
       ...(relayout ? { relayout } : {}),
     };

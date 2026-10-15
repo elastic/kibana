@@ -55,6 +55,9 @@ export const addPanelsOperation = defineOperation({
           authoringNote: panel.authoringNote,
         });
       }
+      if (panel.preferredHeight !== undefined) {
+        context.panelPreferredHeights.set(panelId, panel.preferredHeight);
+      }
     }
 
     return nextDashboardData;

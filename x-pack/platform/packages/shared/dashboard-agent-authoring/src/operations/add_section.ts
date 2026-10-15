@@ -81,6 +81,9 @@ export const addSectionOperation = defineOperation({
             authoringNote: panel.authoringNote,
           });
         }
+        if (panel.preferredHeight !== undefined) {
+          context.panelPreferredHeights.set(panelId, panel.preferredHeight);
+        }
       }
 
       nextSection = {
