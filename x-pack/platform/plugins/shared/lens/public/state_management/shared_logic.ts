@@ -19,11 +19,15 @@ import {
   type VisualizationMap,
   type Datasource,
   type LensDocument,
+  type TextBasedPersistedState,
   type Visualization,
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
 import { applyLegacySecondaryLabelIfMetric } from '../visualizations/metric/runtime_state/apply_legacy_secondary_label';
+import { withoutEsqlLayerDataViewSpecs } from '../data_views_service/esql_layer_data_view_specs';
+
+const TEXT_BASED_DATASOURCE_ID = 'textBased';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -104,8 +108,16 @@ export function mergeToNewDoc(
     });
   }
 
+  const textBasedLayers = (
+    syncedDatasourceStates[TEXT_BASED_DATASOURCE_ID]?.state as TextBasedPersistedState | undefined
+  )?.layers;
   const persistableAdHocDataViews = Object.fromEntries(
-    Object.entries(adHocDataViews).map(([id, dataView]) => {
+    Object.entries(
+      withoutEsqlLayerDataViewSpecs(adHocDataViews, textBasedLayers, [
+        ...references,
+        ...internalReferences,
+      ])
+    ).map(([id, dataView]) => {
       const { references: dataViewReferences, state } =
         DataViewPersistableStateService.extract(dataView);
       references.push(...dataViewReferences);

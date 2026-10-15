@@ -7,7 +7,10 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-common';
-import { withEsqlLayerDataViewSpecs } from './esql_layer_data_view_specs';
+import {
+  withEsqlLayerDataViewSpecs,
+  withoutEsqlLayerDataViewSpecs,
+} from './esql_layer_data_view_specs';
 
 type Layers = TextBasedPersistedState['layers'];
 
@@ -109,5 +112,67 @@ describe('withEsqlLayerDataViewSpecs', () => {
 
     expect(withEsqlLayerDataViewSpecs(persisted, undefined)).toBe(persisted);
     expect(withEsqlLayerDataViewSpecs(undefined, undefined)).toEqual({});
+  });
+});
+
+describe('withoutEsqlLayerDataViewSpecs', () => {
+  const layers = createLayers({
+    layer1: { index: 'esql-id', query: { esql: 'FROM logs-*' }, timeField: '@timestamp' },
+  });
+  const spec: DataViewSpec = {
+    id: 'esql-id',
+    title: 'logs-*',
+    type: 'esql',
+    timeFieldName: '@timestamp',
+  };
+  const layerReference = { type: 'index-pattern', id: 'esql-id', name: 'layer-reference' };
+
+  it('drops the spec of an ES|QL layer', () => {
+    expect(withoutEsqlLayerDataViewSpecs({ 'esql-id': spec }, layers, [layerReference])).toEqual(
+      {}
+    );
+  });
+
+  it('keeps the specs that are not the dataset of an ES|QL layer', () => {
+    const other: DataViewSpec = { id: 'other', title: 'other-*' };
+
+    expect(
+      withoutEsqlLayerDataViewSpecs({ 'esql-id': spec, other }, layers, [layerReference])
+    ).toEqual({ other });
+  });
+
+  it('keeps the spec when another layer or visualization points to the same id', () => {
+    const adHoc = { 'esql-id': spec };
+    const referenceLineReference = { ...layerReference, name: 'reference-line-reference' };
+
+    expect(
+      withoutEsqlLayerDataViewSpecs(adHoc, layers, [layerReference, referenceLineReference])
+    ).toEqual(adHoc);
+  });
+
+  it('drops the spec of every ES|QL layer sharing the dataset when nothing else uses it', () => {
+    const sharedLayers = createLayers({
+      layer1: { index: 'esql-id', query: { esql: 'FROM logs-*' } },
+      layer2: { index: 'esql-id', query: { esql: 'FROM logs-*' } },
+    });
+
+    expect(
+      withoutEsqlLayerDataViewSpecs({ 'esql-id': spec }, sharedLayers, [
+        layerReference,
+        { ...layerReference, name: 'layer2-reference' },
+      ])
+    ).toEqual({});
+  });
+
+  it('keeps a spec that is not of type ES|QL, like a saved data view reused by a layer', () => {
+    const adHoc = { 'esql-id': { ...spec, type: undefined } };
+
+    expect(withoutEsqlLayerDataViewSpecs(adHoc, layers, [layerReference])).toEqual(adHoc);
+  });
+
+  it('keeps every spec when there are no ES|QL layers', () => {
+    const adHoc = { 'esql-id': spec };
+
+    expect(withoutEsqlLayerDataViewSpecs(adHoc, undefined, [])).toBe(adHoc);
   });
 });
