@@ -15,15 +15,11 @@ export interface ModeSwitchChange {
   type: BoostProfileType;
   from: string;
   to: string;
-}
-
-/**
- * A rule behind some of a mode switch's changes: a custom rule that the switch suspends or
- * restores, or a default rule whose profile changes.
- */
-export interface ModeSwitchRuleChanges {
-  rule: BoostRule;
-  changes: ModeSwitchChange[];
+  /**
+   * What causes the change: a custom rule that the switch suspends or restores, or a default rule
+   * whose profile changes.
+   */
+  cause: 'custom_rule' | 'default_rule';
 }
 
 /**
@@ -44,43 +40,30 @@ const getModeRules = (
   return [...customRules, ...createDefaultRules(getEffectiveDefaults({ ...settings, mode }))];
 };
 
-/**
- * What switching to a mode changes: each index or data stream that would use a different boost
- * profile, grouped by the rule behind the change. Custom rules come first, by name.
- */
-export const getModeSwitchChanges = (
-  state: BoostState,
-  mode: BoostMode
-): ModeSwitchRuleChanges[] => {
+/** What switching to a mode changes: each index or data stream that would use a different profile. */
+export const getModeSwitchChanges = (state: BoostState, mode: BoostMode): ModeSwitchChange[] => {
   const profilesByName = new Map(state.profiles.map((profile) => [profile.name, profile]));
   const currentRules = getModeRules(state, state.settings.mode);
   const nextRules = getModeRules(state, mode);
-  const changesByRule = new Map<string, ModeSwitchRuleChanges>();
 
-  [...state.data_sources]
+  return [...state.data_sources]
     .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach((dataSource) => {
+    .flatMap((dataSource) => {
       const currentRule = resolveRule(dataSource, currentRules, profilesByName);
       const nextRule = resolveRule(dataSource, nextRules, profilesByName);
       if (!currentRule || !nextRule || currentRule.boost_profile === nextRule.boost_profile) {
-        return;
+        return [];
       }
-      // A custom rule on either side is the one suspended or restored; otherwise the default
-      // rule's profile changed.
-      const rule = currentRule.is_builtin ? nextRule : currentRule;
-      const ruleChanges = changesByRule.get(rule.name) ?? { rule, changes: [] };
-      ruleChanges.changes.push({
-        name: dataSource.name,
-        type: PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type],
-        from: currentRule.boost_profile,
-        to: nextRule.boost_profile,
-      });
-      changesByRule.set(rule.name, ruleChanges);
+      return [
+        {
+          name: dataSource.name,
+          type: PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type],
+          from: currentRule.boost_profile,
+          to: nextRule.boost_profile,
+          // A custom rule on either side is the one suspended or restored; otherwise the default
+          // rule's profile changed.
+          cause: currentRule.is_builtin && nextRule.is_builtin ? 'default_rule' : 'custom_rule',
+        },
+      ];
     });
-
-  return [...changesByRule.values()].sort(
-    (a, b) =>
-      Number(a.rule.is_builtin) - Number(b.rule.is_builtin) ||
-      a.rule.name.localeCompare(b.rule.name)
-  );
 };

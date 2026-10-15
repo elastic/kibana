@@ -11,14 +11,14 @@ import { EuiButton, EuiEmptyPrompt, EuiPageSection, EuiSpacer } from '@elastic/e
 import { AppHeader, AppHeaderLoading, type AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../common/constants';
-import type { ModeSwitchRuleChanges } from '../../common/mode_switch';
+import type { ModeSwitchChange } from '../../common/mode_switch';
 import { getModeSwitchChanges } from '../../common/mode_switch';
 import type { BoostMode } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
 import { BOOST_DOCS_URL } from '../doc_links';
 import { BOOST_APP_TITLE } from '../translations';
-import { formatDataSourceCount } from './format';
+import { formatDataSourceCounts } from './format';
 import { ModeSwitchModal } from './mode_switch/mode_switch_modal';
 import {
   isModeSwitchConfirmationSkipped,
@@ -33,25 +33,16 @@ type AdvancedTab = 'profiles' | 'rules';
 /** A mode switch waiting for confirmation, with what it changes when it was asked for. */
 interface PendingModeSwitch {
   mode: BoostMode;
-  changes: ModeSwitchRuleChanges[];
+  changes: ModeSwitchChange[];
 }
 
 /** Says how many indices and data streams a mode switch changed. */
-const getChangedTargetsMessage = (changes: readonly ModeSwitchRuleChanges[]): string => {
-  const targets = changes.flatMap(({ changes: ruleChanges }) => ruleChanges);
-  const indexCount = targets.filter(({ type }) => type === 'indices').length;
-  const dataStreamCount = targets.length - indexCount;
-  const indices = formatDataSourceCount('indices', indexCount);
-  const dataStreams = formatDataSourceCount('data_streams', dataStreamCount);
-  return indexCount > 0 && dataStreamCount > 0
-    ? i18n.translate('xpack.boost.page.modeSwitchedBothText', {
-        defaultMessage: '{indices} and {dataStreams} changed boost profile.',
-        values: { indices, dataStreams },
-      })
-    : i18n.translate('xpack.boost.page.modeSwitchedText', {
-        defaultMessage: '{targets} changed boost profile.',
-        values: { targets: indexCount > 0 ? indices : dataStreams },
-      });
+const getChangedTargetsMessage = (changes: readonly ModeSwitchChange[]): string => {
+  const indexCount = changes.filter(({ type }) => type === 'indices').length;
+  return i18n.translate('xpack.boost.page.modeSwitchedText', {
+    defaultMessage: '{targets} changed boost profile.',
+    values: { targets: formatDataSourceCounts(indexCount, changes.length - indexCount) },
+  });
 };
 
 const BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.boost.page.description', {

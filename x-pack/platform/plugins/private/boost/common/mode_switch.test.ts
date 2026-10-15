@@ -10,7 +10,6 @@ import {
   BUILTIN_DATA_STREAMS_PROFILE_NAMES,
   BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
-  DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_SIMPLE_MODE_DEFAULTS,
   NO_CUSTOM_DEFAULTS,
   createDefaultRules,
@@ -65,60 +64,45 @@ const createState = (
 
 const customDataStreamsDefault = { ...NO_CUSTOM_DEFAULTS, data_streams_profile: 'clickstream' };
 
-const summarize = (state: BoostState, mode: BoostSettings['mode']) =>
-  getModeSwitchChanges(state, mode).map(({ rule, changes }) => ({ rule: rule.name, changes }));
-
 describe('getModeSwitchChanges', () => {
   it('lists what suspending custom rules and custom default profiles changes', () => {
-    expect(summarize(createState('advanced', customDataStreamsDefault), 'simple')).toEqual([
+    expect(
+      getModeSwitchChanges(createState('advanced', customDataStreamsDefault), 'simple')
+    ).toEqual([
       {
-        rule: 'catalogs',
-        changes: [
-          {
-            name: 'catalog-fall',
-            type: 'indices',
-            from: 'catalog-search',
-            to: BUILTIN_INDICES_PROFILE_NAMES.performant,
-          },
-        ],
+        name: 'catalog-fall',
+        type: 'indices',
+        from: 'catalog-search',
+        to: BUILTIN_INDICES_PROFILE_NAMES.performant,
+        cause: 'custom_rule',
       },
       {
-        rule: DEFAULT_DATA_STREAMS_RULE_NAME,
-        changes: [
-          {
-            name: 'logs-app',
-            type: 'data_streams',
-            from: 'clickstream',
-            to: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
-          },
-        ],
+        name: 'logs-app',
+        type: 'data_streams',
+        from: 'clickstream',
+        to: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
+        cause: 'default_rule',
       },
     ]);
   });
 
   it('lists what restoring them changes', () => {
-    expect(summarize(createState('simple', customDataStreamsDefault), 'advanced')).toEqual([
+    expect(
+      getModeSwitchChanges(createState('simple', customDataStreamsDefault), 'advanced')
+    ).toEqual([
       {
-        rule: 'catalogs',
-        changes: [
-          {
-            name: 'catalog-fall',
-            type: 'indices',
-            from: BUILTIN_INDICES_PROFILE_NAMES.performant,
-            to: 'catalog-search',
-          },
-        ],
+        name: 'catalog-fall',
+        type: 'indices',
+        from: BUILTIN_INDICES_PROFILE_NAMES.performant,
+        to: 'catalog-search',
+        cause: 'custom_rule',
       },
       {
-        rule: DEFAULT_DATA_STREAMS_RULE_NAME,
-        changes: [
-          {
-            name: 'logs-app',
-            type: 'data_streams',
-            from: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
-            to: 'clickstream',
-          },
-        ],
+        name: 'logs-app',
+        type: 'data_streams',
+        from: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
+        to: 'clickstream',
+        cause: 'default_rule',
       },
     ]);
   });

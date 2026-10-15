@@ -10,9 +10,6 @@ import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
   EuiHorizontalRule,
   EuiNotificationBadge,
   EuiPanel,
@@ -120,59 +117,5 @@ export const RuleChangeList = ({ titleId, items }: RuleChangeListProps) => {
         )}
       </div>
     </EuiPanel>
-  );
-};
-
-interface RuleChangeTableProps {
-  'aria-label': string;
-  nameHeader: string;
-  valueHeader: string;
-  rows: ReadonlyArray<{ name: string; value: ReactNode }>;
-}
-
-/**
- * The data sources a rule's change affects, and what each changes to. Built from flex layout with
- * table roles, so the borders sit only between rows.
- */
-export const RuleChangeTable = ({
-  'aria-label': ariaLabel,
-  nameHeader,
-  valueHeader,
-  rows,
-}: RuleChangeTableProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <div role="table" aria-label={ariaLabel}>
-      <EuiFlexGroup
-        role="row"
-        gutterSize="s"
-        responsive={false}
-        css={{ paddingBlockEnd: euiTheme.size.xs }}
-      >
-        <EuiFlexItem role="columnheader">
-          <EuiFormLabel>{nameHeader}</EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem role="columnheader">
-          <EuiFormLabel>{valueHeader}</EuiFormLabel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {rows.map(({ name, value }) => (
-        <EuiFlexGroup
-          key={name}
-          role="row"
-          gutterSize="s"
-          responsive={false}
-          css={{ paddingBlock: euiTheme.size.xs }}
-        >
-          <EuiFlexItem role="cell">
-            <EuiText size="xs">{name}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem role="cell">
-            <EuiText size="xs">{value}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </div>
   );
 };

@@ -9,31 +9,31 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ModeSwitchRuleChanges } from '../../../common/mode_switch';
-import type { BoostMode, BoostRule } from '../../../common/types';
+import type { ModeSwitchChange } from '../../../common/mode_switch';
+import type { BoostMode } from '../../../common/types';
 import { ModeSwitchModal } from './mode_switch_modal';
 
-const rule = (name: string, isBuiltin = false): BoostRule => ({
-  name,
-  index_patterns: isBuiltin ? [] : [`${name}-*`],
-  boost_profile: isBuiltin ? 'elastic-last-7-days' : 'catalog-search',
-  priority: isBuiltin ? 0 : 1,
-  is_builtin: isBuiltin,
-});
-
-const changes: ModeSwitchRuleChanges[] = [
+const changes: ModeSwitchChange[] = [
   {
-    rule: rule('catalogs'),
-    changes: [
-      { name: 'catalog-fall', type: 'indices', from: 'catalog-search', to: 'elastic-performant' },
-      { name: 'catalog-spring', type: 'indices', from: 'catalog-search', to: 'elastic-performant' },
-    ],
+    name: 'catalog-fall',
+    type: 'indices',
+    from: 'catalog-search',
+    to: 'elastic-performant',
+    cause: 'custom_rule',
   },
   {
-    rule: rule('elastic-default-data-streams', true),
-    changes: [
-      { name: 'logs-app', type: 'data_streams', from: 'clickstream', to: 'elastic-last-7-days' },
-    ],
+    name: 'catalog-spring',
+    type: 'indices',
+    from: 'catalog-search',
+    to: 'elastic-performant',
+    cause: 'custom_rule',
+  },
+  {
+    name: 'logs-app',
+    type: 'data_streams',
+    from: 'clickstream',
+    to: 'elastic-last-7-days',
+    cause: 'default_rule',
   },
 ];
 
@@ -65,7 +65,9 @@ describe('ModeSwitchModal', () => {
     expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
       'Nothing is deleted, and turning advanced mode back on restores them.'
     );
-    expect(screen.getByText('2 rules with changes')).toBeInTheDocument();
+    expect(
+      screen.getByText('2 indices and 1 data stream change boost profile')
+    ).toBeInTheDocument();
   });
 
   it('explains what turning on advanced mode restores', () => {
@@ -77,18 +79,24 @@ describe('ModeSwitchModal', () => {
     );
   });
 
-  it('lists each change under the rule behind it', async () => {
+  it('lists each index and data stream with its current and new profile', () => {
     renderModal();
 
-    const catalogs = within(screen.getByTestId('modeSwitchRule-catalogs'));
-    expect(catalogs.getByText('2 indices')).toBeInTheDocument();
-    await userEvent.click(catalogs.getByRole('button', { name: /catalogs/ }));
-    expect(catalogs.getByRole('table')).toHaveTextContent('catalog-fall');
-    expect(catalogs.getByRole('table')).toHaveTextContent('catalog-search → elastic-performant');
-
-    expect(screen.getByTestId('modeSwitchRule-elastic-default-data-streams')).toHaveTextContent(
-      'Default'
-    );
+    const table = screen.getByRole('table', {
+      name: '2 indices and 1 data stream change boost profile',
+    });
+    const [, ...rows] = within(table).getAllByRole('row');
+    expect(
+      rows.map((row) =>
+        within(row)
+          .getAllByRole('cell')
+          .map((cell) => cell.textContent)
+      )
+    ).toEqual([
+      ['catalog-fall', 'catalog-search', 'elastic-performant'],
+      ['catalog-spring', 'catalog-search', 'elastic-performant'],
+      ['logs-app', 'clickstream', 'elastic-last-7-days'],
+    ]);
   });
 
   it('switches, and remembers whether to skip this next time', async () => {

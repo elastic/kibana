@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
@@ -19,29 +18,27 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ModeSwitchRuleChanges } from '../../../common/mode_switch';
+import type { ModeSwitchChange } from '../../../common/mode_switch';
 import type { BoostMode } from '../../../common/types';
-import { formatDataSourceCount } from '../format';
-import { RuleChangeList, RuleChangeTable } from '../rule_change_list';
+import { ChangeTable } from '../change_table';
+import { formatDataSourceCounts } from '../format';
 
 interface ModeSwitchModalProps {
   /** The mode being switched to. */
   mode: BoostMode;
-  changes: readonly ModeSwitchRuleChanges[];
+  changes: readonly ModeSwitchChange[];
   isSwitching: boolean;
   onCancel: () => void;
   /** Switches modes, and whether to skip this confirmation next time. */
   onConfirm: (shouldSkipNextTime: boolean) => void;
 }
-
-const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.modeSwitchModal.defaultBadge', {
-  defaultMessage: 'Default',
-});
 
 const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: boolean) => {
   if (mode === 'simple') {
@@ -88,10 +85,7 @@ const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: b
   ].join(' ');
 };
 
-/**
- * Confirms switching modes when it changes the boost profile of any index or data stream, listing
- * each change under the rule behind it.
- */
+/** Confirms switching modes when it changes the boost profile of any index or data stream. */
 export const ModeSwitchModal = ({
   mode,
   changes,
@@ -99,6 +93,7 @@ export const ModeSwitchModal = ({
   onCancel,
   onConfirm,
 }: ModeSwitchModalProps) => {
+  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId();
   const listTitleId = useGeneratedHtmlId({ prefix: 'modeSwitchRules' });
   const skipCheckboxId = useGeneratedHtmlId({ prefix: 'modeSwitchSkip' });
@@ -129,59 +124,43 @@ export const ModeSwitchModal = ({
           <p>
             {getSummary(
               mode,
-              changes.some(({ rule }) => !rule.is_builtin),
-              changes.some(({ rule }) => rule.is_builtin)
+              changes.some(({ cause }) => cause === 'custom_rule'),
+              changes.some(({ cause }) => cause === 'default_rule')
             )}
           </p>
         </EuiText>
         <EuiSpacer size="l" />
         <EuiFormLabel id={listTitleId}>
-          {i18n.translate('xpack.boost.modeSwitchModal.rulesListTitle', {
-            defaultMessage: '{count, plural, one {# rule} other {# rules}} with changes',
-            values: { count: changes.length },
+          {i18n.translate('xpack.boost.modeSwitchModal.changesListTitle', {
+            defaultMessage: '{targets} change boost profile',
+            values: {
+              targets: formatDataSourceCounts(
+                changes.filter(({ type }) => type === 'indices').length,
+                changes.filter(({ type }) => type === 'data_streams').length
+              ),
+            },
           })}
         </EuiFormLabel>
         <EuiSpacer size="xs" />
-        <RuleChangeList
-          titleId={listTitleId}
-          items={changes.map(({ rule, changes: ruleChanges }) => {
-            const [{ type }] = ruleChanges;
-            return {
-              name: rule.name,
-              nameAppend: rule.is_builtin && <EuiBadge>{DEFAULT_BADGE_LABEL}</EuiBadge>,
-              count: formatDataSourceCount(type, ruleChanges.length),
-              details: (
-                <RuleChangeTable
-                  aria-label={i18n.translate('xpack.boost.modeSwitchModal.changesTableLabel', {
-                    defaultMessage:
-                      'Data sources that {ruleName} changes, and the boost profile each changes to',
-                    values: { ruleName: rule.name },
-                  })}
-                  nameHeader={
-                    type === 'indices'
-                      ? i18n.translate('xpack.boost.modeSwitchModal.affectedIndexColumn', {
-                          defaultMessage: 'Affected index',
-                        })
-                      : i18n.translate('xpack.boost.modeSwitchModal.affectedDataStreamColumn', {
-                          defaultMessage: 'Affected data stream',
-                        })
-                  }
-                  valueHeader={i18n.translate('xpack.boost.modeSwitchModal.profileColumn', {
-                    defaultMessage: 'Boost profile',
-                  })}
-                  rows={ruleChanges.map(({ name, from, to }) => ({
-                    name,
-                    value: i18n.translate('xpack.boost.modeSwitchModal.profileChange', {
-                      defaultMessage: '{from} → {to}',
-                      values: { from, to },
-                    }),
-                  }))}
-                />
-              ),
-              'data-test-subj': `modeSwitchRule-${rule.name}`,
-            };
-          })}
-        />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+          <ChangeTable
+            aria-labelledby={listTitleId}
+            columns={[
+              i18n.translate('xpack.boost.modeSwitchModal.nameColumn', {
+                defaultMessage: 'Index or data stream',
+              }),
+              i18n.translate('xpack.boost.modeSwitchModal.currentProfileColumn', {
+                defaultMessage: 'Current profile',
+              }),
+              i18n.translate('xpack.boost.modeSwitchModal.newProfileColumn', {
+                defaultMessage: 'New profile',
+              }),
+            ]}
+            rows={changes.map(({ name, from, to }) => ({ id: name, cells: [name, from, to] }))}
+            // Long lists scroll, keeping the modal's buttons in view.
+            maxHeight={euiTheme.base * 15}
+          />
+        </EuiPanel>
       </EuiModalBody>
 
       <EuiModalFooter>

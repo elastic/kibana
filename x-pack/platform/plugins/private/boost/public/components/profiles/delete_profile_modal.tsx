@@ -19,7 +19,8 @@ import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/t
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
 import { formatDataSourceCount } from '../format';
-import { RuleChangeList, RuleChangeTable } from '../rule_change_list';
+import { ChangeTable } from '../change_table';
+import { RuleChangeList } from '../rule_change_list';
 
 interface DeleteProfileModalProps {
   profile: BoostProfile;
@@ -31,8 +32,8 @@ interface DeleteProfileModalProps {
 
 interface AffectedDataSource {
   name: string;
-  /** The rule that applies once the deleted rules are gone. */
-  nextRule?: string;
+  /** The rule that applies once the deleted rules are gone, and its profile. */
+  nextRule?: BoostRule;
 }
 
 interface DeletedRule {
@@ -73,7 +74,7 @@ export const DeleteProfileModal = ({
         .filter((dataSource) => resolveRule(dataSource, rules, profilesByName)?.name === rule.name)
         .map((dataSource) => ({
           name: dataSource.name,
-          nextRule: resolveRule(dataSource, remainingRules, profilesByName)?.name,
+          nextRule: resolveRule(dataSource, remainingRules, profilesByName),
         }))
         .sort((a, b) => a.name.localeCompare(b.name)),
     }));
@@ -141,7 +142,8 @@ export const DeleteProfileModal = ({
       }
       buttonColor="danger"
       isLoading={isDeleting}
-      maxWidth={576}
+      // Wide enough for three columns beside the rule list's indent, so default rule names fit.
+      maxWidth={640}
       data-test-subj="deleteBoostProfileModal"
     >
       {deletedRules.length === 0 ? (
@@ -169,27 +171,30 @@ export const DeleteProfileModal = ({
               name: ruleName,
               count: affected.length > 0 ? formatDataSourceCount(type, affected.length) : undefined,
               details: affected.length > 0 && (
-                <RuleChangeTable
+                <ChangeTable
                   aria-label={i18n.translate('xpack.boost.deleteProfileModal.affectedTableLabel', {
                     defaultMessage:
-                      'Data sources that {ruleName} applies to, and the rule each will now use',
+                      'Data sources that {ruleName} applies to, and the rule and profile each will now use',
                     values: { ruleName },
                   })}
-                  nameHeader={
+                  columns={[
                     type === 'indices'
                       ? i18n.translate('xpack.boost.deleteProfileModal.affectedIndexColumn', {
                           defaultMessage: 'Affected index',
                         })
                       : i18n.translate('xpack.boost.deleteProfileModal.affectedDataStreamColumn', {
                           defaultMessage: 'Affected data stream',
-                        })
-                  }
-                  valueHeader={i18n.translate('xpack.boost.deleteProfileModal.nextRuleColumn', {
-                    defaultMessage: 'Will now use rule',
-                  })}
+                        }),
+                    i18n.translate('xpack.boost.deleteProfileModal.nextRuleColumn', {
+                      defaultMessage: 'New rule',
+                    }),
+                    i18n.translate('xpack.boost.deleteProfileModal.nextProfileColumn', {
+                      defaultMessage: 'New profile',
+                    }),
+                  ]}
                   rows={affected.map(({ name: dataSourceName, nextRule }) => ({
-                    name: dataSourceName,
-                    value: nextRule,
+                    id: dataSourceName,
+                    cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
                   }))}
                 />
               ),

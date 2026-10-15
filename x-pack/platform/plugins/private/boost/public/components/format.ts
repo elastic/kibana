@@ -30,3 +30,16 @@ export const formatDataSourceCount = (type: BoostProfileType | undefined, count:
         defaultMessage: '{count, plural, one {# index} other {# indices}}',
         values: { count },
       });
+
+/** Counts indices and data streams together, leaving out a type there are none of. */
+export const formatDataSourceCounts = (indexCount: number, dataStreamCount: number): string => {
+  const indices = formatDataSourceCount('indices', indexCount);
+  const dataStreams = formatDataSourceCount('data_streams', dataStreamCount);
+  if (indexCount > 0 && dataStreamCount > 0) {
+    return i18n.translate('xpack.boost.format.indexAndDataStreamCounts', {
+      defaultMessage: '{indices} and {dataStreams}',
+      values: { indices, dataStreams },
+    });
+  }
+  return dataStreamCount > 0 ? dataStreams : indices;
+};
