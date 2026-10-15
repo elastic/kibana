@@ -134390,11 +134390,11 @@ paths:
               - updated_at
               - created_at
               - urls
-              - name.keyword
-              - tags.keyword
-              - project_id.keyword
-              - type.keyword
-              - schedule.keyword
+              - name
+              - tags
+              - project_id
+              - type
+              - schedule
               - journey_id
             type: string
         - description: The sort order.

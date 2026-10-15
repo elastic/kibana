@@ -258,6 +258,10 @@ actions:
   - target: "$.components.schemas.Kibana_HTTP_APIs_editMonitorRequest.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
     description: Hide system-managed fields from editMonitorRequest
     remove: true
+# Hide Elasticsearch field-name aliases from the Synthetics sortField values; the friendly names (name, tags, ...) are the documented ones
+  - target: "$.paths['/api/synthetics/monitors']['get'].parameters[?(@.name=='sortField')].schema.enum[?(@ =~ /[.]keyword$/)]"
+    description: Hide legacy .keyword sort values
+    remove: true
 # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces
