@@ -179,7 +179,7 @@ describe('SuppressRedundantNoDataEventsStep', () => {
     expect(result.state.alertEventsBatch).toEqual([marker]);
   });
 
-  it('passes the batch through unchanged when no prior state was threaded (signal rules)', async () => {
+  it('passes the batch through unchanged when no prior state was threaded', async () => {
     const events = [heldNoDataEvent()];
 
     const result = await run(events, undefined);

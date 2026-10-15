@@ -38,13 +38,6 @@ export interface RulePipelineState {
   readonly alertEventsBatch?: ReadonlyArray<AlertEventDocument>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
-  /**
-   * Latest persisted lifecycle state per `group_hash` for the groups in
-   * `alertEventsBatch`, as loaded by the director before it computed the
-   * batch's next episode state. Threaded so downstream steps can compare an
-   * enriched event against what is already persisted without a second
-   * `.rule-events` round trip.
-   */
   readonly previousAlertStateByGroupHash?: ReadonlyMap<string, LatestAlertEventState>;
 }
 

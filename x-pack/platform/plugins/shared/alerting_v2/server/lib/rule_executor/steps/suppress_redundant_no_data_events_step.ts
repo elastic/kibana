@@ -66,7 +66,7 @@ export const isRedundantNoDataEvent = (
  *
  * Runs after `DirectorStep`, which stays a pure 1:1 state function and threads
  * the prior state it loaded onto `state.previousAlertStateByGroupHash`. When no
- * prior state was threaded (signal rules) the batch passes through unchanged.
+ * prior state was threaded the batch passes through unchanged.
  */
 @injectable()
 export class SuppressRedundantNoDataEventsStep implements RuleExecutionStep {

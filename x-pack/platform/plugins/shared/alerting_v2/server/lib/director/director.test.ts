@@ -1122,10 +1122,9 @@ describe('DirectorService', () => {
       });
     });
   });
+
   describe('previous alert state', () => {
     it('returns the persisted state it loaded, keyed by group_hash, alongside a 1:1 batch', async () => {
-      // The director never drops events; write policy lives downstream in
-      // SuppressRedundantNoDataEventsStep, which needs this state.
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
