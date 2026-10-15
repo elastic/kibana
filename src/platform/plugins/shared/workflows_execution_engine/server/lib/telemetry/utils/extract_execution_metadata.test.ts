@@ -570,6 +570,91 @@ describe('extractCompositionContext', () => {
       )
     ).toEqual({ rootWorkflowExecutionId: 'own-exec-id' });
   });
+
+  describe('executionChain', () => {
+    const ROOT_HOP = { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' };
+    const PARENT_HOP = {
+      executionId: 'parent-exec-id',
+      invocation: 'async',
+      workflowId: 'parent-wf-id',
+    };
+    const grandchildContext = {
+      executionChain: [ROOT_HOP, PARENT_HOP],
+      parentDepth: 1,
+      parentWorkflowExecutionId: 'parent-exec-id',
+      parentWorkflowId: 'parent-wf-id',
+      parentWorkflowInvocation: 'async',
+      rootWorkflowExecutionId: 'root-exec-id',
+    };
+
+    it('returns the stored chain, root first and direct parent last, next to the other lineage fields', () => {
+      expect(
+        extractCompositionContext(compositionFixture('workflow-step', grandchildContext))
+      ).toEqual({
+        compositionDepth: 2,
+        executionChain: [ROOT_HOP, PARENT_HOP],
+        parentWorkflowExecutionId: 'parent-exec-id',
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'async',
+        rootWorkflowExecutionId: 'root-exec-id',
+      });
+    });
+
+    it('agrees with the root and parent fields at its two ends, and its length is the depth', () => {
+      const {
+        compositionDepth,
+        executionChain = [],
+        parentWorkflowExecutionId,
+        parentWorkflowId,
+        parentWorkflowInvocation,
+        rootWorkflowExecutionId,
+      } = extractCompositionContext(compositionFixture('workflow-step', grandchildContext));
+      const lastHop = executionChain[executionChain.length - 1];
+
+      expect({
+        depth: executionChain.length,
+        first: executionChain[0]?.executionId,
+        last: lastHop,
+      }).toEqual({
+        depth: compositionDepth,
+        first: rootWorkflowExecutionId,
+        last: {
+          executionId: parentWorkflowExecutionId,
+          invocation: parentWorkflowInvocation,
+          workflowId: parentWorkflowId,
+        },
+      });
+    });
+
+    it("copies only each hop's own fields", () => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', {
+            ...grandchildContext,
+            executionChain: [{ ...ROOT_HOP, extra: 'not reported' }, PARENT_HOP],
+          })
+        ).executionChain
+      ).toEqual([ROOT_HOP, PARENT_HOP]);
+    });
+
+    it.each([
+      ['no chain (a pre-upgrade chain)', undefined],
+      ['an empty chain', []],
+      ['a malformed hop', [ROOT_HOP, { executionId: 'parent-exec-id' }]],
+    ])('omits executionChain for a child with %s', (_label, executionChain) => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', { ...grandchildContext, executionChain })
+        )
+      ).not.toHaveProperty('executionChain');
+    });
+
+    it('never returns a chain for a top-level execution, even when its context carries one', () => {
+      expect(extractCompositionContext(compositionFixture('manual', grandchildContext))).toEqual({
+        rootWorkflowExecutionId: 'own-exec-id',
+      });
+    });
+  });
 });
 
 describe('extractEventChainDepthFromExecution', () => {

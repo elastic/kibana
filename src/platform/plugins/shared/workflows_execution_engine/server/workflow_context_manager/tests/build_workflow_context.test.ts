@@ -590,10 +590,14 @@ describe('buildWorkflowContext', () => {
     });
   });
 
-  describe('root lineage', () => {
+  describe('root lineage and execution chain', () => {
     const childExecution: EsWorkflowExecution = {
       ...baseExecution,
       context: {
+        executionChain: [
+          { executionId: 'root-exec-1', invocation: 'sync', workflowId: 'root-workflow-id' },
+          { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+        ],
         parentWorkflowExecutionId: 'parent-exec-1',
         parentWorkflowId: 'parent-workflow-id',
         parentDepth: 1,
@@ -613,10 +617,16 @@ describe('buildWorkflowContext', () => {
       expect(context).not.toHaveProperty('root');
     });
 
-    it('should keep the stored root execution id out of the Liquid render context', () => {
-      const context = buildWorkflowRenderContext(childExecution, undefined, dependencies);
+    it('should keep the stored root execution id and chain out of the Liquid render context', () => {
+      const rendered = JSON.stringify(
+        buildWorkflowRenderContext(childExecution, undefined, dependencies)
+      );
 
-      expect(JSON.stringify(context)).not.toContain('root-exec-1');
+      expect({
+        chain: rendered.includes('executionChain'),
+        root: rendered.includes('root-exec-1'),
+        rootWorkflow: rendered.includes('root-workflow-id'),
+      }).toEqual({ chain: false, root: false, rootWorkflow: false });
     });
 
     it('should still expose the parent for a child execution with stored root lineage', () => {

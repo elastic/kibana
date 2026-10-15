@@ -1207,12 +1207,24 @@ describe('WorkflowExecutionRuntimeManager', () => {
       [ExecutionStatus.FAILED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
       [ExecutionStatus.CANCELLED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled],
     ])(
-      'should report execution lineage ids for a %s child execution after the context is rebuilt',
+      'should report execution lineage ids and the execution chain for a %s child execution after the context is rebuilt',
       async (status, eventType) => {
         const analytics = analyticsServiceMock.createAnalyticsServiceStart();
         const childWorkflowExecution = {
           ...workflowExecution,
           context: {
+            executionChain: [
+              {
+                executionId: 'root-execution-id',
+                invocation: 'async',
+                workflowId: 'root-workflow-id',
+              },
+              {
+                executionId: 'parent-execution-id',
+                invocation: 'sync',
+                workflowId: 'parent-workflow-id',
+              },
+            ],
             parentDepth: 1,
             parentWorkflowExecutionId: 'parent-execution-id',
             parentWorkflowId: 'parent-workflow-id',
@@ -1226,7 +1238,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue(
           childWorkflowExecution
         );
-        // The rebuilt context has the render shape, without the raw parent* / root* keys.
+        // The rebuilt context has the render shape, without the raw parent* / root* / chain keys.
         buildWorkflowContextMock.mockReturnValue({
           execution: {} as WorkflowExecutionContext,
           parent: {
@@ -1253,6 +1265,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
         expect(analytics.reportEvent).toHaveBeenCalledWith(
           eventType,
           expect.objectContaining({
+            executionChain: [
+              {
+                executionId: 'root-execution-id',
+                invocation: 'async',
+                workflowId: 'root-workflow-id',
+              },
+              {
+                executionId: 'parent-execution-id',
+                invocation: 'sync',
+                workflowId: 'parent-workflow-id',
+              },
+            ],
             parentWorkflowExecutionId: 'parent-execution-id',
             rootWorkflowExecutionId: 'root-execution-id',
           })

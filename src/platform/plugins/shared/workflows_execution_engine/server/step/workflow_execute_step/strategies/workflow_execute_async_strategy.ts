@@ -50,7 +50,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
-          ...buildChildLineageContext(workflowExecution),
+          ...buildChildLineageContext({ invocation: 'async', parent: workflowExecution }),
           ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request

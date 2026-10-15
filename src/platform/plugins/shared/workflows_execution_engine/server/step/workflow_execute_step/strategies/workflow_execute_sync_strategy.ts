@@ -131,7 +131,7 @@ export class WorkflowExecuteSyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
-          ...buildChildLineageContext(workflowExecution),
+          ...buildChildLineageContext({ invocation: 'sync', parent: workflowExecution }),
           ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request

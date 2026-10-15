@@ -396,12 +396,17 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
       expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
-    it('should include parentWorkflowExecutionId and rootWorkflowExecutionId for sub-workflow executions', () => {
+    it('should include parentWorkflowExecutionId, rootWorkflowExecutionId and executionChain for sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'workflow-step',
         context: {
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
           parentDepth: 1,
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
@@ -417,6 +422,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
         parentWorkflowExecutionId: 'parent-exec-id',
         rootWorkflowExecutionId: 'root-exec-id',
       });
@@ -670,13 +679,18 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
       expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
-    it('should include execution lineage ids for failed sub-workflow executions', () => {
+    it('should include execution lineage ids and the execution chain for failed sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.FAILED,
         triggeredBy: 'workflow-step',
         context: {
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
           parentDepth: 1,
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
@@ -695,6 +709,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
         parentWorkflowExecutionId: 'parent-exec-id',
         rootWorkflowExecutionId: 'root-exec-id',
       });
@@ -815,6 +833,9 @@ describe('WorkflowExecutionTelemetryClient', () => {
         status: ExecutionStatus.SKIPPED,
         context: {
           event: { timestamp: '2025-01-01T00:00:00.000Z', spaceId: 'default' },
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' },
+          ],
           parentWorkflowExecutionId: 'parent-exec-id',
           rootWorkflowExecutionId: 'root-exec-id',
         },
@@ -827,7 +848,11 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(Object.keys(eventData)).toEqual(
-        expect.not.arrayContaining(['parentWorkflowExecutionId', 'rootWorkflowExecutionId'])
+        expect.not.arrayContaining([
+          'executionChain',
+          'parentWorkflowExecutionId',
+          'rootWorkflowExecutionId',
+        ])
       );
     });
 
@@ -945,13 +970,17 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
       expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
-    it('should include execution lineage ids for cancelled sub-workflow executions', () => {
+    it('should include execution lineage ids and the execution chain for cancelled sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.CANCELLED,
         triggeredBy: 'workflow-step',
         context: {
+          executionChain: [
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
           parentDepth: 0,
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
@@ -968,6 +997,9 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
         parentWorkflowExecutionId: 'parent-exec-id',
         rootWorkflowExecutionId: 'parent-exec-id',
       });

@@ -8,33 +8,53 @@
  */
 
 import { isTopLevelWorkflowExecution } from '@kbn/workflows';
-import { hasRootWorkflowExecutionId } from '../../utils';
+import type { ExecutionChainHop } from '../../utils';
+import { hasExecutionChain, hasRootWorkflowExecutionId, toExecutionChainHop } from '../../utils';
 
-/** Root of a composition chain, carried in a child execution's context bag for telemetry. */
-export interface RootWorkflowLineage {
-  readonly rootWorkflowExecutionId: string;
+/**
+ * Lineage carried in a child execution's context bag for telemetry: the root of its composition
+ * chain, and every ancestor from the root down to its direct parent.
+ */
+export interface ChildLineageContext {
+  readonly executionChain?: readonly ExecutionChainHop[];
+  readonly rootWorkflowExecutionId?: string;
 }
 
 export interface ChildLineageParent {
   readonly context?: Record<string, unknown>;
   readonly id: string;
   readonly triggeredBy?: string;
+  readonly workflowId: string;
+}
+
+export interface BuildChildLineageContextParams {
+  /** How the parent invokes this child: `workflow.execute` (sync) or `workflow.executeAsync`. */
+  readonly invocation: ExecutionChainHop['invocation'];
+  readonly parent: ChildLineageParent;
 }
 
 /**
- * Root lineage key to spread into a child execution's context: the parent itself when it is top
- * level, else the parent's stored root, else nothing (a pre-upgrade child has no known root).
+ * Lineage keys to spread into a child execution's context. A top-level parent is the root and the
+ * chain's only hop. A child parent passes on its stored root and chain, with itself appended to the
+ * chain; either is left out when the parent has none stored (it started before they were recorded),
+ * so a partial chain is never written.
  */
 export const buildChildLineageContext = ({
-  context,
-  id,
-  triggeredBy,
-}: ChildLineageParent): RootWorkflowLineage | Record<string, never> => {
+  invocation,
+  parent: { context, id, triggeredBy, workflowId },
+}: BuildChildLineageContextParams): ChildLineageContext => {
+  const hop: ExecutionChainHop = { executionId: id, invocation, workflowId };
+
   if (isTopLevelWorkflowExecution({ triggeredBy })) {
-    return { rootWorkflowExecutionId: id };
+    return { executionChain: [hop], rootWorkflowExecutionId: id };
   }
 
-  return hasRootWorkflowExecutionId(context)
-    ? { rootWorkflowExecutionId: context.rootWorkflowExecutionId }
-    : {};
+  return {
+    ...(hasExecutionChain(context)
+      ? { executionChain: [...context.executionChain.map(toExecutionChainHop), hop] }
+      : {}),
+    ...(hasRootWorkflowExecutionId(context)
+      ? { rootWorkflowExecutionId: context.rootWorkflowExecutionId }
+      : {}),
+  };
 };

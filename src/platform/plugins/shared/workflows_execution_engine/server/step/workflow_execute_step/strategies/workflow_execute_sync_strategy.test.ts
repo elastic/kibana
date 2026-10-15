@@ -225,7 +225,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
   });
 
-  describe('root lineage in the child context', () => {
+  describe('root lineage and execution chain in the child context', () => {
     const getChildContext = (): Record<string, unknown> =>
       mockEngine.executeWorkflow.mock.calls[0][1] as Record<string, unknown>;
 
@@ -244,14 +244,20 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(getChildContext()).toEqual(
         expect.objectContaining({
+          executionChain: [
+            { executionId: 'parent-exec-1', invocation: 'sync', workflowId: 'parent-workflow-id' },
+          ],
           rootWorkflowExecutionId: 'parent-exec-1',
         })
       );
       expect(getChildContext()).not.toHaveProperty('rootWorkflowId');
     });
 
-    it('gives a grandchild the top-level execution as its root', async () => {
+    it('gives a grandchild the top-level execution as its root, and its parent as the last hop', async () => {
       (mockStepRuntime.workflowExecution as any).context = {
+        executionChain: [
+          { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+        ],
         parentWorkflowExecutionId: 'top-exec-1',
         parentWorkflowId: 'top-workflow-id',
         rootWorkflowExecutionId: 'top-exec-1',
@@ -270,6 +276,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(getChildContext()).toEqual(
         expect.objectContaining({
+          executionChain: [
+            { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+            { executionId: 'parent-exec-1', invocation: 'sync', workflowId: 'parent-workflow-id' },
+          ],
           parentWorkflowExecutionId: 'parent-exec-1',
           parentWorkflowId: 'parent-workflow-id',
           rootWorkflowExecutionId: 'top-exec-1',
