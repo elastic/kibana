@@ -81,7 +81,6 @@ describe('Discover export JSON flyout', () => {
         objectType: 'Discover session',
         getExportJson: expect.any(Function),
         dataTestSubjPrefix: 'discover',
-        isTechnicalPreview: true,
       })
     );
 

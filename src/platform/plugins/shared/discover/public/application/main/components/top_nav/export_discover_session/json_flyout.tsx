@@ -100,7 +100,6 @@ export const ExportDiscoverSessionJsonFlyout = ({
             )}
           </EuiFlexGroup>
         }
-        isTechnicalPreview
         objectType={i18n.translate('discover.exportJson.objectTypeLabel', {
           defaultMessage: 'Discover session',
         })}
