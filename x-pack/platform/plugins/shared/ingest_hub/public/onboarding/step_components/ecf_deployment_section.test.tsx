@@ -18,9 +18,24 @@ jest.mock('../ecf_cloudformation', () => ({
   buildEcfUnifiedCloudFormationUrl: jest.fn(() => 'https://cf.aws/unified'),
   buildEcfOtelCloudFormationUrl: jest.fn(() => 'https://cf.aws/otel'),
   buildEcfCrowdstrikeCloudFormationUrl: jest.fn(() => 'https://cf.aws/crowdstrike'),
+  buildEcfStackUpdateUrl: jest.fn(
+    (arn: string) =>
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        arn
+      )}&templateURL=mock`
+  ),
+  buildEcfTemplateUrl: jest.fn(
+    (_file: string, version: string) => `https://s3.amazonaws.com/ecf/${version}/template.yaml`
+  ),
+  isEcfStackArnValid: jest.fn((arn: string) =>
+    /^arn:aws(?:-us-gov|-cn)?:cloudformation:[a-z0-9-]+:\d+:stack\//.test(arn.trim())
+  ),
   ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
   ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
   ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
+  ECF_UNIFIED_TEMPLATE_FILE: 'unified.yaml',
+  ECF_OTEL_TEMPLATE_FILE: 'otel.yaml',
+  ECF_CROWDSTRIKE_TEMPLATE_FILE: 'crowdstrike.yaml',
 }));
 
 jest.mock('../onboarding_session_storage', () => ({
@@ -72,6 +87,8 @@ function makeSessionStorageMock(
     launchedFamilies?: string[];
     stackNames?: Record<string, string>;
     stackVersions?: Record<string, string>;
+    launchedServiceIds?: Record<string, string[]>;
+    stackArns?: Record<string, string>;
   } = {}
 ) {
   const setter = jest.fn();
@@ -91,10 +108,28 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
     launchedFamilies: [] as React.ComponentProps<typeof EcfDeploymentSection>['launchedFamilies'],
     stackNames: {} as React.ComponentProps<typeof EcfDeploymentSection>['stackNames'],
     stackVersions: {} as React.ComponentProps<typeof EcfDeploymentSection>['stackVersions'],
+    stackArns: {} as React.ComponentProps<typeof EcfDeploymentSection>['stackArns'],
+    isStaleByFamily: {
+      unified: false,
+      otel: false,
+      crowdstrike: false,
+    } as React.ComponentProps<typeof EcfDeploymentSection>['isStaleByFamily'],
+    isUpdateOpenedByFamily: {} as React.ComponentProps<
+      typeof EcfDeploymentSection
+    >['isUpdateOpenedByFamily'],
     onLaunch: jest.fn() as React.ComponentProps<typeof EcfDeploymentSection>['onLaunch'],
+    onUpdateOpened: jest.fn() as React.ComponentProps<
+      typeof EcfDeploymentSection
+    >['onUpdateOpened'],
     onStackNameChange: jest.fn() as React.ComponentProps<
       typeof EcfDeploymentSection
     >['onStackNameChange'],
+    onStackArnChange: jest.fn() as React.ComponentProps<
+      typeof EcfDeploymentSection
+    >['onStackArnChange'],
+    unifiedUpdateUrl: undefined as string | undefined,
+    otelUpdateUrl: undefined as string | undefined,
+    crowdstrikeUpdateUrl: undefined as string | undefined,
     ...props,
   } satisfies React.ComponentProps<typeof EcfDeploymentSection>;
   return render(
@@ -185,9 +220,13 @@ describe('useEcfDeployment', () => {
       expect(result.current.isDone).toBe(false);
     });
 
-    it('is true once all required families are launched', () => {
+    it('is true once all required families are launched, none are stale, and all have valid ARNs', () => {
       mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
-      makeSessionStorageMock({ launchedFamilies: ['unified'] });
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+      });
       const { result } = renderHook(() =>
         useEcfDeployment({
           instances: [baseInstance('cloudtrail')],
@@ -197,6 +236,68 @@ describe('useEcfDeployment', () => {
           dataFormat: 'ecs' as const,
         })
       );
+      expect(result.current.isDone).toBe(true);
+    });
+
+    it('is false when all families are launched but no ARN has been provided', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      expect(result.current.isDone).toBe(false);
+    });
+
+    it('is false when a launched family is stale', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      // snapshot has vpcflow, current selection is cloudtrail → stale
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['vpcflow'] },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      expect(result.current.isDone).toBe(false);
+    });
+
+    it('is true when stale but the update wizard has been opened (unblocked)', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['vpcflow'] },
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      // Stale without update opened → still blocked
+      expect(result.current.isDone).toBe(false);
+      act(() => {
+        result.current.sectionProps.onUpdateOpened('unified');
+      });
+      // Stale but update opened → unblocked
       expect(result.current.isDone).toBe(true);
     });
   });
@@ -318,16 +419,35 @@ describe('EcfDeploymentSection', () => {
       );
     });
 
-    it('renders the Done badge when all families are launched', () => {
+    it('renders the Done badge when all families are launched and have valid ARNs', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
       });
       expect(screen.getByText('Done')).toBeInTheDocument();
     });
 
+    it('does not render the Done badge when launched but no ARN provided', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: {},
+      });
+      expect(screen.queryByText('Done')).not.toBeInTheDocument();
+    });
+
     it('does not render Done badge when not all families are launched', () => {
       renderSection({ ecfUnifiedConfigs: [unifiedConfig('cloudtrail')], launchedFamilies: [] });
+      expect(screen.queryByText('Done')).not.toBeInTheDocument();
+    });
+
+    it('does not render Done badge when a launched family is stale', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
       expect(screen.queryByText('Done')).not.toBeInTheDocument();
     });
 
@@ -346,12 +466,20 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={{}}
             stackVersions={{}}
+            stackArns={{}}
+            isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={jest.fn()}
+            onStackArnChange={jest.fn()}
           />
         </I18nProvider>
       );
@@ -371,15 +499,58 @@ describe('EcfDeploymentSection', () => {
       expect(btn).toHaveTextContent('Launch CloudFormation');
     });
 
-    it('is replaced by the confirmation text after launch', () => {
+    it('remains visible after launch until a valid ARN is provided', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
+        stackArns: {},
+      });
+      // Launch button is still shown — user may not have completed CFN setup yet
+      expect(screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton')).toBeInTheDocument();
+      // ARN field is also shown post-launch
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).toBeInTheDocument();
+    });
+
+    it('is hidden once a valid ARN has been provided', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
       });
       expect(
         screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton')
       ).not.toBeInTheDocument();
-      expect(screen.getByText(/Elastic Cloud Forwarder has been created/i)).toBeInTheDocument();
+    });
+
+    it('is visible when stale with no valid ARN (user may not have deployed yet)', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: {},
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      // Launch button stays visible — without an ARN the stack may not exist so re-launch is valid
+      expect(screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('is hidden when stale with a valid ARN (Update stack is shown instead)', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
     });
   });
 
@@ -439,14 +610,22 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
             stackVersions={{}}
+            stackArns={{}}
+            isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
+            onStackArnChange={jest.fn()}
           />
         );
       };
@@ -474,14 +653,22 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
             stackVersions={{}}
+            stackArns={{}}
+            isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
+            onStackArnChange={jest.fn()}
           />
         );
       };
@@ -523,10 +710,7 @@ describe('EcfDeploymentSection', () => {
   });
 
   describe('Reopen AWS Console link', () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
-
-    it('is hidden immediately after launch', () => {
+    it('is never shown — the button has been removed in favour of the Launch button staying visible until an ARN is pasted', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
@@ -535,18 +719,394 @@ describe('EcfDeploymentSection', () => {
         screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-reopen')
       ).not.toBeInTheDocument();
     });
+  });
 
-    it('appears after the 5s delay', () => {
+  describe('stack ARN field', () => {
+    it('is hidden before launch', () => {
+      renderSection({ ecfUnifiedConfigs: [unifiedConfig('cloudtrail')], launchedFamilies: [] });
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).not.toBeInTheDocument();
+    });
+
+    it('is shown after launch with an empty value when no ARN is stored', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
+        stackArns: {},
       });
-      act(() => {
-        jest.advanceTimersByTime(5000);
+      const field = screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField');
+      expect(field).toBeInTheDocument();
+      expect(field).toHaveValue('');
+    });
+
+    it('shows the stored ARN when one has been pasted', () => {
+      const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: arn },
       });
       expect(
-        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-reopen')
-      ).toBeInTheDocument();
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).toHaveValue(arn);
     });
+
+    it('calls onStackArnChange when the user edits the ARN field', () => {
+      const onStackArnChange = jest.fn();
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        onStackArnChange,
+      });
+      const field = screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField');
+      fireEvent.change(field, {
+        target: { value: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/uuid' },
+      });
+      expect(onStackArnChange).toHaveBeenCalledWith(
+        'unified',
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/s/uuid'
+      );
+    });
+
+    it('shows a check icon when a valid ARN is stored', () => {
+      const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: arn },
+        isStaleByFamily: { unified: false, otel: false, crowdstrike: false },
+      });
+      // The View stack button was removed; the ARN field shows a check icon instead.
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-viewStack')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).toHaveValue(arn);
+    });
+  });
+
+  describe('stale callout', () => {
+    it('is not shown when the family is not stale', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: false, otel: false, crowdstrike: false },
+      });
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('is shown when the family is stale', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Services changed/i)).toBeInTheDocument();
+    });
+
+    it('shows a disabled Update stack button when no ARN is stored', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: {},
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      const btn = screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateStackButton');
+      expect(btn).toBeDisabled();
+    });
+
+    it('shows an enabled Update stack button when a valid updateUrl is provided', () => {
+      const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: arn },
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+        unifiedUpdateUrl: 'https://console.aws.amazon.com/cloudformation/home#/stacks/update',
+      });
+      const btn = screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateStackButton');
+      expect(btn).not.toBeDisabled();
+    });
+
+    it('shows "update opened" callout after the Update stack button is clicked', () => {
+      const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+      const UpdateOpenedWrapper = () => {
+        const [isUpdateOpenedByFamily, setIsUpdateOpenedByFamily] = React.useState<
+          Partial<Record<string, boolean>>
+        >({});
+        return (
+          <EcfDeploymentSection
+            ecfUnifiedConfigs={[unifiedConfig('cloudtrail')]}
+            ecfOtelConfigs={[]}
+            ecfCrowdstrikeServices={[]}
+            unifiedLaunchUrl="https://cf.aws/unified"
+            otelLaunchUrl={undefined}
+            crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl="https://console.aws.amazon.com/cloudformation/home#/stacks/update"
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
+            globalRegion="us-east-1"
+            launchedFamilies={['unified'] as any}
+            stackNames={{}}
+            stackVersions={{}}
+            stackArns={{ unified: arn }}
+            isStaleByFamily={{ unified: true, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={isUpdateOpenedByFamily}
+            onUpdateOpened={(family) =>
+              setIsUpdateOpenedByFamily((prev) => ({ ...prev, [family]: true }))
+            }
+            onLaunch={jest.fn()}
+            onStackNameChange={jest.fn()}
+            onStackArnChange={jest.fn()}
+          />
+        );
+      };
+
+      render(
+        <I18nProvider>
+          <UpdateOpenedWrapper />
+        </I18nProvider>
+      );
+      // Initially shows the stale callout
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
+      fireEvent.click(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateStackButton')
+      );
+      // After clicking, transitions to the "update opened" callout
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateOpenedCallout')
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Update opened in AWS Console/i)).toBeInTheDocument();
+    });
+  });
+});
+
+// ─── useEcfDeployment — staleness detection ───────────────────────────────────
+
+describe('useEcfDeployment staleness', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+  });
+
+  it('isStaleByFamily is false for all families when none have been launched', () => {
+    makeSessionStorageMock({ launchedFamilies: [] });
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+  });
+
+  it('isStaleByFamily is false when no launchedServiceIds snapshot exists (old session)', () => {
+    makeSessionStorageMock({ launchedFamilies: ['unified'] });
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+  });
+
+  it('isStaleByFamily is false when service IDs match the snapshot', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail'] },
+    });
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+  });
+
+  it('isStaleByFamily is true when a service was added after launch', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail'] },
+    });
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail'), baseInstance('waf')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+  });
+
+  it('isStaleByFamily is true when a service was removed after launch', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail', 'waf'] },
+    });
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+  });
+
+  it('onLaunch stores the current service IDs as launchedServiceIds snapshot', () => {
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const setter = makeSessionStorageMock({ launchedFamilies: [] });
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    act(() => {
+      result.current.sectionProps.onLaunch('unified');
+    });
+    const persisted = setter.mock.calls[0][0];
+    expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail']);
+  });
+
+  it('advanceStaleSnapshots updates launchedServiceIds snapshot for stale+updateOpened families', () => {
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
+    const setter = makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail'] },
+    });
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail'), baseInstance('waf')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    // Must open the update wizard before advanceStaleSnapshots will advance the snapshot.
+    act(() => {
+      result.current.sectionProps.onUpdateOpened('unified');
+    });
+    act(() => {
+      result.current.advanceStaleSnapshots();
+    });
+    const persisted = setter.mock.calls[setter.mock.calls.length - 1][0];
+    expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail', 'waf']);
+  });
+
+  it('onStackArnChange stores the ARN for the given family', () => {
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+    const setter = makeSessionStorageMock({ launchedFamilies: ['unified'] });
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [baseInstance('cloudtrail')],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+    act(() => {
+      result.current.sectionProps.onStackArnChange('unified', arn);
+    });
+    const persisted = setter.mock.calls[0][0];
+    expect(persisted.stackArns?.unified).toBe(arn);
+  });
+
+  it('isStaleByFamily is false when all services of a launched family are removed', () => {
+    // Family was launched with cloudtrail; all services were subsequently deselected.
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      launchedServiceIds: { unified: ['cloudtrail'] },
+    });
+    // No unified configs — the family has no active services
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    // Family is no longer active — should not be considered stale (no panel to interact with)
+    expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    // isDone should also not be blocked by this case
+    expect(result.current.isDone).toBe(true);
+  });
+
+  it('hasRemovedFamiliesWithArn is true when a launched family has a valid ARN but no active services', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+    });
+    // No unified configs — the family has no active services
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.hasRemovedFamiliesWithArn).toBe(true);
+  });
+
+  it('hasRemovedFamiliesWithArn is false when a launched family has no ARN', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+    });
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.hasRemovedFamiliesWithArn).toBe(false);
   });
 });

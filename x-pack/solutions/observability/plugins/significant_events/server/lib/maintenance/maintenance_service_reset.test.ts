@@ -30,7 +30,7 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('reset', () => {
-    it('deletes the snapshot, owned rules, investigations, and populated streams while healing registered streams', async () => {
+    it('deletes the snapshot, owned rules, and populated streams while healing registered streams', async () => {
       const { api, cancelAllActiveWorkflowExecutions } = makeManagementApi();
       const {
         service,
@@ -39,7 +39,6 @@ describe('SignificantEventsMaintenanceService', () => {
         esClient,
         internalEsClient,
         streamDocuments,
-        deleteAllInvestigations,
         asScoped,
         countKnowledgeIndicators,
       } = makeService({
@@ -59,7 +58,6 @@ describe('SignificantEventsMaintenanceService', () => {
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 4,
           [DISCOVERIES_DATA_STREAM]: 4,
         },
-        investigations: { deleted: 2, failures: [] },
       });
 
       const summary = await service.reset({ request: REQUEST, updatedBy: 'marco' });
@@ -74,7 +72,6 @@ describe('SignificantEventsMaintenanceService', () => {
             knowledgeIndicators: 2,
             storedQueries: 2,
             rules: 3,
-            investigations: 2,
             dataStreams: 3,
           },
           partialFailures: [],
@@ -115,7 +112,7 @@ describe('SignificantEventsMaintenanceService', () => {
       );
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
-        deleteAllInvestigations!.mock.invocationCallOrder[0]
+        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
       );
       expect(soClient.create.mock.calls[0][1]).toEqual(
         expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
@@ -250,17 +247,26 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('records a partial failure when the investigations plugin is unavailable', async () => {
+    it('keeps investigations out of the reset scope', async () => {
       const { api } = makeManagementApi();
-      const { service } = makeService({ management: api, investigations: null });
+      const { service, soClient } = makeService({ management: api });
+      // A paused space keeps its document through reset, so the stored summary can be read back.
+      await service.pause({ request: REQUEST });
 
       const summary = await service.reset({ request: REQUEST });
 
-      expect(summary.deleted?.investigations).toBe(0);
-      expect(summary.partialFailures).toContainEqual({
-        target: 'investigations',
-        error: 'Investigations plugin is not available',
-      });
+      expect(summary.deleted).not.toHaveProperty('investigations');
+      expect(summary.partialFailures).not.toContainEqual(
+        expect.objectContaining({ target: expect.stringContaining('investigation') })
+      );
+      // Released model versions require the count, so the stored summary still carries a 0.
+      const stored = soClient.readDocument('default') as {
+        lastSummary?: { deleted?: { investigations?: number } };
+      };
+      expect(stored.lastSummary?.deleted?.investigations).toBe(0);
+      expect(
+        (await service.getStatus({ request: REQUEST })).lastSummary?.deleted
+      ).not.toHaveProperty('investigations');
     });
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
@@ -511,7 +517,6 @@ describe('SignificantEventsMaintenanceService', () => {
         knowledgeIndicators: 0,
         storedQueries: 0,
         rules: 0,
-        investigations: 0,
         dataStreams: 0,
       });
       expect(second.partialFailures).toEqual([]);

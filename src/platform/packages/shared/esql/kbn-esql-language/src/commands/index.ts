@@ -21,6 +21,8 @@ export { inlineCastsMapping } from './definitions/generated/inline_casts_mapping
 // Utilities from definitions
 export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
 export { METADATA_FIELDS } from './registry/options/metadata';
+export { getRecommendedQueriesTemplates } from './registry/options/recommended_queries';
+export type { QueryTemplate } from './registry/options/recommended_queries';
 export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';
