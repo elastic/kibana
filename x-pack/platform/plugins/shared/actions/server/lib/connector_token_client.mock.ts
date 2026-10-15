@@ -16,6 +16,7 @@ const createConnectorTokenClientMock = (): jest.Mocked<ConnectorTokenClientContr
     updateOrReplace: jest.fn(),
     createWithRefreshToken: jest.fn(),
     updateWithRefreshToken: jest.fn(),
+    getUsableOAuthConnectorIds: jest.fn(),
   } satisfies jest.Mocked<ConnectorTokenClientContract>;
 
   return mocked;

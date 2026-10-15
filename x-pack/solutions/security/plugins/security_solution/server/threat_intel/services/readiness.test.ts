@@ -268,8 +268,8 @@ describe('getThreatIntelReadiness', () => {
   });
 
   it.each([
-    ['alertzero_fast', 'no_enrich_connector'],
-    ['alertzero_reasoning', 'diamond_unavailable'],
+    ['alertzero_efficient', 'no_enrich_connector'],
+    ['alertzero_frontier', 'diamond_unavailable'],
   ])('reports %s as unavailable when the tier is unregistered', async (missingTier, reason) => {
     const getForFeature = jest.fn().mockResolvedValue({
       endpoints: [{ connectorId: 'genai-default' }],

@@ -1,5 +1,5 @@
 {
-  "sha1": "e9bfc6d7b2f51c0b3184c706d89834cbe9ef4f23",
+  "sha1": "9091f51b8e14f3a8bbe4f984992c51d0c04dc81d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -22,8 +22,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 68,
-        "column": 20
+        "line": 66,
+        "column": 26
       }
     }
   ]

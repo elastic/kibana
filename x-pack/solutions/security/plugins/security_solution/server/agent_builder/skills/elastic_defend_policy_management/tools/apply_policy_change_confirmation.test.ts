@@ -31,6 +31,7 @@ const capabilities = (): PolicyChangeCapabilities => ({
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  linuxRansomwareProtection: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,

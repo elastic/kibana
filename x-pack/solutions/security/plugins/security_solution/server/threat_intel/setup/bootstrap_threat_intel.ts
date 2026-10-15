@@ -112,7 +112,7 @@ const checkReportSemanticTextEndpoints = async (
  * only surfaces when `extract_diamond` first writes a `summary`.
  *
  * This is not the chat model that performs Diamond extraction — that one is
- * resolved per request through the AlertZero Reasoning tier.
+ * resolved per request through the AlertZero Frontier tier.
  */
 const checkDiamondSummaryEmbeddingEndpoint = async (
   esClient: ElasticsearchClient,

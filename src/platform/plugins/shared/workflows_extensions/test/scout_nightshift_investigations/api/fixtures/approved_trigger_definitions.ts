@@ -68,7 +68,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.actions.alertAssigned',
-    schemaHash: '0516506647c941f5cd0b255fee04fa9eb0254e85291a9e51c4f78cc07c9ae65c',
+    schemaHash: 'bdbe4b8494809fa5e3a5311440aa4ff485bae7a2acd6d8989489aec8c36a279d',
   },
   {
     id: 'alerting.actions.alertDeactivated',
@@ -123,6 +123,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
+    id: 'alerting.v1.alertStatusChanged',
+    schemaHash: '393ba21ad63d5b65d3b019c299b5f7d9e172d9eea52df67c069413b007c22a7a',
+  },
+  {
     id: 'cases.attachmentsAdded',
     schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
   },
@@ -164,15 +168,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '7221629d3ea4194a6d04fd878b545871bad555684ef0efea7928c74ed34fd6a8',
+    schemaHash: '9c4a56800d90d397279b9e40a872a64d5cee0a3675556850dc16afa5840d3b9a',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: '364cbd9e4f78aafbf4636dabe22d6d2a1f971d9ece23abafc1fc6804fb225de2',
+    schemaHash: 'd5e9e788b13edf73d0f57d07f127e63153eb52a0b2dcb6dfdcaf80b751a428ec',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: 'c181a1cc5edb929c6426ad17250d8285736620dc4770a6056737442843b7f716',
+    schemaHash: '80cdd17e8634561e45af961d8df628f767dd02e2ed4e44c7ec2d3170bd39839b',
   },
   {
     id: 'security.alertAssigneesChanged',
@@ -208,11 +212,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: 'ca3750421d18c0c3078498757145582562f8b1c2efa543279c240d259622b474',
+    schemaHash: 'c6724b9ea991bf0541f2444d9d966e6ed6f8dcaf73c008f6869c4808832d11aa',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: '3e544a3fb46812fba31c41ac77d21e18a70c3161522958e563fe005a248cd2b2',
+    schemaHash: '5d5e07122f98c29f16a1128c42b72e6412c2c048312e019c32a15e4dc81f521a',
   },
   {
     id: 'workflows.failed',

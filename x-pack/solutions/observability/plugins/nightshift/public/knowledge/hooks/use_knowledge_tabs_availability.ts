@@ -77,6 +77,8 @@ interface UseKnowledgeTabsAvailabilityOptions {
 export const useKnowledgeTabsAvailability = ({
   enabled = true,
 }: UseKnowledgeTabsAvailabilityOptions = {}): KnowledgeTabsAvailability => ({
+  // KIs are always available; only the optional tabs below have gates.
+  knowledge_indicators: { isEnabled: true, isLoading: false },
   cortex: useCortexEnabled(enabled),
   memory: useMemoryEnabled(enabled),
   decision_trees: useDecisionTreesEnabled(enabled),

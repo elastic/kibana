@@ -15,6 +15,7 @@ import {
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
+  INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
 } from '../../common';
@@ -22,14 +23,19 @@ import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
   subject_type: z
-    .enum(['significant_event', 'alert'])
-    .describe('The type of entity being investigated'),
+    .enum(INVESTIGATION_SUBJECT_TYPES)
+    .describe(
+      'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+    ),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
   title: z
     .string()
     .min(1)
     .max(MAX_TITLE_LENGTH)
-    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
+    .optional()
+    .describe(
+      'Accepted for compatibility; not used as the investigation title, which Agent Builder generates from the first round'
+    ),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()
@@ -50,12 +56,6 @@ const inputSchema = z.object({
     .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Nightshift source ids to scope the investigation'),
-  concurrency_key: z
-    .string()
-    .optional()
-    .describe(
-      'Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'
-    ),
   context: z
     .record(z.string(), z.unknown())
     .optional()
@@ -77,12 +77,12 @@ export const triggerInvestigationStepDefinition = (
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). Returns investigation_id for tracking.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking.',
     inputSchema,
     outputSchema: z.object({
       investigation_id: z
         .string()
-        .describe('The workflow execution ID for the started investigation'),
+        .describe('The investigation (Agent Builder conversation) the start created or continued'),
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
@@ -101,7 +101,6 @@ export const triggerInvestigationStepDefinition = (
         trigger_type: input.trigger_type ?? 'automatic',
         message: input.message,
         source_ids: input.source_ids,
-        concurrency_key: input.concurrency_key,
         context: input.context,
         notificationDestinations: input.notificationDestinations,
       });
