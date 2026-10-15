@@ -7,13 +7,18 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type {
-  EntityDefinitionOfAnyType,
   EntityDefinitionWithoutId,
   EuidAttribute,
   FieldEvaluation,
   FieldEvaluationWhenClauseFieldMappingThen,
+  SetFieldsByCondition,
 } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import {
+  getPostAggFilter,
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import type { EuidGateOptions } from './commons';
 import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './commons';
 
@@ -146,9 +151,7 @@ function wrapEvaluationScriptForKeywordRuntimeField(
  * Used for pre-agg and `whenConditionTrueSetFieldsAfterStats` (see getEuidFromObject).
  */
 function buildPreAggEvaluatedVarOverridesPreamble(
-  whenRules:
-    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsPreAgg']
-    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsAfterStats'],
+  whenRules: SetFieldsByCondition[] | undefined,
   evaluatedVars: Map<string, string>,
   expressions: PainlessFieldExpressions
 ): string {
@@ -188,7 +191,7 @@ function buildPreAggEvaluatedVarOverridesPreamble(
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
 export function getEuidPainlessRuntimeMapping(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   options?: EuidPainlessOptions
 ): {
   type: 'keyword';
@@ -221,7 +224,7 @@ export function getEuidPainlessRuntimeMapping(
  * multi-valued field yields the first value written rather than the lowest.
  */
 export function getEuidPainlessSourceUpdateScript(
-  entityDefinitions: EntityDefinitionOfAnyType[],
+  entityDefinitions: EntityDefinitionWithoutId[],
   onEuids: string
 ): string {
   const { preamble, rootBinding } = sourceExpressions;
@@ -267,7 +270,7 @@ export function getEuidPainlessSourceUpdateScript(
  * @returns A Painless evaluation string that computes the entity id.
  */
 export function getEuidPainlessEvaluation(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   options?: EuidPainlessOptions
 ): string {
   const { applyPostAggFilter = true, expressions = docValuesExpressions } = options ?? {};
@@ -299,12 +302,12 @@ export function getEuidPainlessEvaluation(
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
-    entityDefinition.whenConditionTrueSetFieldsPreAgg,
+    getPreAggFieldOverrides(entityDefinition),
     evaluatedVars,
     expressions
   );
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
-    entityDefinition.whenConditionTrueSetFieldsAfterStats,
+    getPostStatsFieldOverrides(entityDefinition),
     evaluatedVars,
     expressions
   );
@@ -313,7 +316,7 @@ export function getEuidPainlessEvaluation(
   const filterOpts: ConditionToPainlessOptions = { evaluatedVars, expressions };
   const filterChecks: string[] = [];
   const gateConditions = applyPostAggFilter
-    ? [identityField.documentsFilter, waiveForAlerts(entityDefinition.postAggFilter)]
+    ? [identityField.documentsFilter, waiveForAlerts(getPostAggFilter(entityDefinition))]
     : [identityField.documentsFilter];
   for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
     filterChecks.push(`if (!(${conditionToPainless(filterCond, filterOpts)})) { return null; }`);
@@ -386,7 +389,7 @@ export function getEuidPainlessEvaluation(
  * @returns A Painless evaluation string that computes the entity id.
  */
 export function getEuidPainlessEvaluationForSearch(
-  entityDefinition: EntityDefinitionOfAnyType
+  entityDefinition: EntityDefinitionWithoutId
 ): string {
   return getEuidPainlessEvaluation(entityDefinition, { applyPostAggFilter: false });
 }

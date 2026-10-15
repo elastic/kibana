@@ -128,7 +128,7 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth authorization code method.
+Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth authorization code method. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### Bearer token (delegated auth)
 
