@@ -70,8 +70,9 @@ const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'ty
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
 /**
- * The key Agent Builder identifies a Slack thread's conversation by (its conversation origin),
- * which is also the thread's subject id. Channel ids are only unique within a workspace.
+ * The key the Relay and Agent Builder identify a Slack thread's conversation by (its conversation
+ * origin), which is also the thread's subject id. Matches the Relay's `slackConversationKey`.
+ * Channel ids are only unique within a workspace.
  */
 export const toSlackThreadKey = ({
   workspace,
@@ -81,7 +82,7 @@ export const toSlackThreadKey = ({
   workspace: string;
   channel: string;
   threadTs: string;
-}): string => `team:${workspace}/channel:${channel}/thread:${threadTs}`;
+}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
 
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject

@@ -1501,7 +1501,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
-  const THREAD_KEY = 'team:T1/channel:C1/thread:1712345678.000100';
+  const THREAD_KEY = 'slack:T1:C1:1712345678.000100';
   const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
     makeStoredSubject({
       subjectType: 'slack_thread',
@@ -1800,7 +1800,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     await makeClient().findOrCreateSlackThread({ ...THREAD, workspace: 'T2', create: false });
 
     expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
-      { type: 'slack_thread', id: 'team:T2/channel:C1/thread:1712345678.000100' },
+      { type: 'slack_thread', id: 'slack:T2:C1:1712345678.000100' },
     ]);
   });
 
@@ -1836,11 +1836,11 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
 
   it('reports a Slack thread as a manual subject, after any other subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
-      makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'team:T/channel:C/thread:1' }),
+      makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'slack:T:C:1' }),
     ]);
 
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
-      subject: { type: 'manual', id: 'team:T/channel:C/thread:1' },
+      subject: { type: 'manual', id: 'slack:T:C:1' },
       triggerType: 'manual',
     });
   });

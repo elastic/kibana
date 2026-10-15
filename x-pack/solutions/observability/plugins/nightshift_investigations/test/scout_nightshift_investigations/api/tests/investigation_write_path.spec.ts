@@ -219,7 +219,7 @@ apiTest.describe(
           channel: 'CSCOUT',
           thread_ts: `${Date.now()}.000100`,
         };
-        const threadKey = `team:${thread.workspace}/channel:${thread.channel}/thread:${thread.thread_ts}`;
+        const threadKey = `slack:${thread.workspace}:${thread.channel}:${thread.thread_ts}`;
 
         const created = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,

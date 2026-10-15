@@ -834,9 +834,9 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * The investigation for a Slack thread, found by the thread's conversation origin (the
-   * `team:<T>/channel:<C>/thread:<ts>` key Agent Builder uses for Slack) and, when the origin
-   * names some other conversation, by the thread's `slack_thread` subject. Without `create`, a
+   * The investigation for a Slack thread, found by the thread's `slack_thread` subject (keyed by
+   * the `slack:<T>:<C>:<ts>` origin key the Relay and Agent Builder use for Slack). Without
+   * `create`, a
    * thread that has no investigation yet returns undefined. With `create`, the investigation is
    * created with that origin and the thread as its subject, as the identity that runs the Slack
    * workflow, which also runs the investigation workflow on it. `statusMessageTs` records the

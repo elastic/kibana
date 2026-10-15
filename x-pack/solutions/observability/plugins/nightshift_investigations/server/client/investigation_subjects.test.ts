@@ -92,14 +92,14 @@ describe('toStartSubjects', () => {
       { type: 'manual', id: 'slack:C1:1.1', triggerType: 'automatic' },
       {
         type: 'slack_thread',
-        id: 'team:T1/channel:C1/thread:1.1',
+        id: 'slack:T1:C1:1.1',
         triggerType: 'automatic',
         slack: { channel: 'C1', thread_ts: '1.1' },
       },
     ]);
     expect(toSubjectKeys(subjects, 'inv-1')).toEqual([
       { type: 'manual', id: 'slack:C1:1.1' },
-      { type: 'slack_thread', id: 'team:T1/channel:C1/thread:1.1' },
+      { type: 'slack_thread', id: 'slack:T1:C1:1.1' },
     ]);
   });
 });
