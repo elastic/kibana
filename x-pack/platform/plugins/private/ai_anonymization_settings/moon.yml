@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
