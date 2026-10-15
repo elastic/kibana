@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+
 import type { Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 import { isMap, parseDocument } from 'yaml';
