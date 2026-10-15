@@ -85,14 +85,9 @@ describe('verifyDraft', () => {
       },
     ],
     [
-      'drops attention without priorities unless it names a candidate',
+      'drops attention without priorities',
       draft('Things happened.', [priority('host:zzz')]),
       { attention: undefined, priorities: [] },
-    ],
-    [
-      'keeps attention without priorities when it names a candidate',
-      draft('{{ entity.id host:a }} rose.', []),
-      { attention: '{{ entity.id host:a }} rose.', priorities: [], recommendation: undefined },
     ],
     [
       'checks the recommendation like attention: unknown mentions and unsupported numbers go',

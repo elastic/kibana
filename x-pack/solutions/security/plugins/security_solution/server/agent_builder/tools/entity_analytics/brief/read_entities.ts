@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy, truncate, uniq } from 'lodash';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { EsQueryConfig } from '@kbn/es-query';
@@ -42,15 +42,10 @@ export interface CandidateEntities {
   matchedCount: number;
   /** True when the page had a search query or filter pills. */
   hasPageQuery: boolean;
-  /** True when the page's query couldn't be built or run, so it didn't narrow the candidates. */
-  pageQueryFailed: boolean;
-  /** The earliest first seen on the entities index: when the Entity Store started extracting. */
-  storeStartTimestamp?: string;
 }
 
 interface CandidateAggregations {
   found: { value: number };
-  all_entities: { first_seen: { value_as_string?: string } };
 }
 
 /** Reads the Entity Store records of the scope's tile entities in one search as the user, and ranks them. */
@@ -58,12 +53,10 @@ export const fetchCandidateEntities = async ({
   scope,
   spaceId,
   esClient,
-  logger,
 }: {
   scope: EntityAnalyticsScope;
   spaceId: string;
   esClient: ElasticsearchClient;
-  logger: Logger;
 }): Promise<CandidateEntities> => {
   const { focusTileId } = scope;
   const tileIdsByEntityId = selectCandidateTiles(scope);
@@ -71,34 +64,16 @@ export const fetchCandidateEntities = async ({
   const hasPageQuery = Boolean(scope.query?.query) || (scope.filters ?? []).length > 0;
 
   // Every record is read (at most 200 ids per tile, about 1 KB each) and ranked here. The page query is a
-  // post filter: it narrows the hits, while `found` still counts every tile entity with a record.
-  const search = (pageQuery: QueryDslQueryContainer | undefined) =>
-    esClient.search<Entity, CandidateAggregations>({
-      index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-      size: entityIds.length,
-      ignore_unavailable: true,
-      query: { bool: { filter: [{ terms: { 'entity.id': entityIds } }] } },
-      post_filter: pageQuery,
-      sort: [{ 'entity.id': 'asc' }],
-      aggs: {
-        found: { value_count: { field: 'entity.id' } },
-        // `global` ignores the query, so this is when the whole entities index started.
-        all_entities: {
-          global: {},
-          aggs: { first_seen: { min: { field: 'entity.lifecycle.first_seen' } } },
-        },
-      },
-    });
-
-  const pageQuery = hasPageQuery ? buildPageQuery(scope, logger) : undefined;
-  let pageQueryFailed = hasPageQuery && !pageQuery;
-  const response = await search(pageQuery).catch(async (error) => {
-    if (!pageQuery) {
-      throw error;
-    }
-    logger.debug(`AI brief: the page query failed, reading without it: ${error.message}`);
-    pageQueryFailed = true;
-    return search(undefined);
+  // post filter: it narrows the hits, while `found` still counts every tile entity with a record. The page
+  // has already run the same query, so a failure here is a real error.
+  const response = await esClient.search<Entity, CandidateAggregations>({
+    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
+    size: entityIds.length,
+    ignore_unavailable: true,
+    query: { bool: { filter: [{ terms: { 'entity.id': entityIds } }] } },
+    post_filter: hasPageQuery ? buildPageQuery(scope) : undefined,
+    sort: [{ 'entity.id': 'asc' }],
+    aggs: { found: { value_count: { field: 'entity.id' } } },
   });
 
   const candidates = response.hits.hits.flatMap(({ _source: record }): BriefCandidate[] => {
@@ -122,8 +97,6 @@ export const fetchCandidateEntities = async ({
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
     matchedCount,
     hasPageQuery,
-    pageQueryFailed,
-    storeStartTimestamp: response.aggregations?.all_entities.first_seen.value_as_string,
   };
 };
 
@@ -138,22 +111,14 @@ const PAGE_QUERY_CONFIG: EsQueryConfig = {
 const getTotal = (total: number | SearchTotalHits | undefined): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
 
-const buildPageQuery = (
-  scope: EntityAnalyticsScope,
-  logger: Logger
-): QueryDslQueryContainer | undefined => {
+const buildPageQuery = (scope: EntityAnalyticsScope): QueryDslQueryContainer => {
   const { query } = scope;
-  try {
-    return buildEsQuery(
-      undefined,
-      query?.query ? [query] : [],
-      getScopeFilters(scope),
-      PAGE_QUERY_CONFIG
-    );
-  } catch (error) {
-    logger.debug(`AI brief: the page query could not be built: ${error.message}`);
-    return undefined;
-  }
+  return buildEsQuery(
+    undefined,
+    query?.query ? [query] : [],
+    getScopeFilters(scope),
+    PAGE_QUERY_CONFIG
+  );
 };
 
 /** The record's entity type, falling back to the EUID prefix when the record has none. */

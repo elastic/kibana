@@ -18,7 +18,7 @@ import {
 import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
 import { buildFacts, getCandidateRisk, getRiskChartEntityId } from './build_facts';
 import { draftBrief } from './draft_brief';
-import { describeCoverage, getPeriodStart } from './describe_scope';
+import { describeSample, getPeriodStart } from './describe_scope';
 import { fetchCandidateEntities, fetchRiskAtStart } from './read_entities';
 import type { RiskChart } from './render_brief';
 import { renderBrief } from './render_brief';
@@ -36,7 +36,7 @@ export const generateBrief = async ({
   logger,
 }: GenerateBriefParams): Promise<GenerateBriefResult> => {
   const started = Date.now();
-  const entities = await fetchCandidateEntities({ scope, spaceId, esClient, logger });
+  const entities = await fetchCandidateEntities({ scope, spaceId, esClient });
   const { candidates } = entities;
   // Every candidate has facts, so with none there is nothing to brief on and no model call.
   if (candidates.length === 0) {
@@ -50,17 +50,14 @@ export const generateBrief = async ({
       return undefined;
     }
   );
-  const facts = buildFacts(candidates, scope, {
-    riskAtStart,
-    storeStartTimestamp: entities.storeStartTimestamp,
-  });
+  const facts = buildFacts(candidates, scope, riskAtStart);
   const fetched = Date.now();
 
   const draft = await draftBrief({
     inferenceClient,
     scope,
     facts,
-    coverage: describeCoverage(scope, entities),
+    sample: describeSample(scope, entities),
     abortSignal,
   });
   const composed = Date.now();

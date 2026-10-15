@@ -30,7 +30,6 @@ const noEntities: CandidateEntities = {
   notFoundCount: 0,
   matchedCount: 0,
   hasPageQuery: false,
-  pageQueryFailed: false,
 };
 
 const hostA: CandidateEntities = {
@@ -184,7 +183,7 @@ describe('renderBrief', () => {
       [
         '| Entities with alerts | 48,213 | +4,800 |',
         '| Risk movers | 6 | -2 |',
-        '| Newly high/critical | 3 | none before |',
+        '| Newly high/critical | 3 | +3 |',
       ],
     ],
     [
@@ -312,16 +311,6 @@ Start with **jdoe**.`);
   });
 
   it.each<[string, Partial<CandidateEntities>, string]>([
-    [
-      'the query narrowing',
-      { hasPageQuery: true },
-      '_Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities._',
-    ],
-    [
-      'a query that could not be applied',
-      { hasPageQuery: true, pageQueryFailed: true },
-      "_The search query or filters couldn't be applied, so they don't narrow the priorities._",
-    ],
     [
       'a query that matches no flagged entity',
       { hasPageQuery: true, capturedCount: 1200, notFoundCount: 2 },

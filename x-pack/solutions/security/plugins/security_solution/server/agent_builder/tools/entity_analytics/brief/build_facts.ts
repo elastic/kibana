@@ -21,7 +21,6 @@ import { formatStoredValue } from './describe_scope';
 
 /** As the Risk movers count: a change of at least this many points is worth a chart. */
 const RISK_CHART_MIN_CHANGE = 10;
-const DAY_MS = 24 * 3_600_000;
 
 /** The risk the brief states for a candidate, and where its scores are stored. */
 export interface CandidateRisk {
@@ -69,10 +68,7 @@ export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk 
 export const buildFacts = (
   candidates: BriefCandidate[],
   scope: EntityAnalyticsScope,
-  {
-    riskAtStart,
-    storeStartTimestamp,
-  }: { riskAtStart?: Map<string, number>; storeStartTimestamp?: string } = {}
+  riskAtStart?: Map<string, number>
 ): EntityFacts[] =>
   candidates.map((candidate) => {
     const { id, name, type, tileIds } = candidate;
@@ -92,7 +88,6 @@ export const buildFacts = (
       otherWatchlists: otherWatchlists || undefined,
       // Relative to the capture, so no date or time zone is stated.
       firstSeen: firstSeen ? moment(firstSeen).from(scope.capturedAt) : undefined,
-      firstSeenOnStoreFirstDay: isStoreFirstDay(firstSeen, storeStartTimestamp) || undefined,
     };
   });
 
@@ -115,12 +110,6 @@ const describeRisk = (
     change: atPeriodStart === null ? undefined : score - atPeriodStart,
   };
 };
-
-/** On the Entity Store's first day, first seen covers every existing entity. */
-const isStoreFirstDay = (firstSeen?: string, storeStartTimestamp?: string): boolean =>
-  firstSeen !== undefined &&
-  storeStartTimestamp !== undefined &&
-  new Date(firstSeen).getTime() - new Date(storeStartTimestamp).getTime() < DAY_MS;
 
 /** The first priority whose risk moved by at least the Risk movers threshold. Only it gets a chart. */
 export const getRiskChartEntityId = (

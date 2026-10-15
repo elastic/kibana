@@ -72,28 +72,16 @@ describe('buildFacts', () => {
     ],
     ['no risk', {}, new Map(), undefined],
   ])('states risk: %s', (_name, entity, riskAtStart, expected) => {
-    const [facts] = buildFacts([candidate(entity)], scope, { riskAtStart });
+    const [facts] = buildFacts([candidate(entity)], scope, riskAtStart);
     expect(facts.risk).toEqual(expected);
   });
 
-  it.each<[string, string, string | undefined, Partial<EntityFacts>]>([
-    [
-      'relative to the capture',
-      '2026-10-10T00:00:00.000Z',
-      '2026-01-01T00:00:00.000Z',
-      { firstSeen: '5 days ago', firstSeenOnStoreFirstDay: undefined },
-    ],
-    [
-      "on the Entity Store's first day",
-      '2026-10-10T20:00:00.000Z',
-      '2026-10-10T00:00:00.000Z',
-      { firstSeen: '4 days ago', firstSeenOnStoreFirstDay: true },
-    ],
-  ])('states first seen %s', (_name, firstSeen, storeStartTimestamp, expected) => {
-    const [facts] = buildFacts([candidate({ lifecycle: { first_seen: firstSeen } })], scope, {
-      storeStartTimestamp,
-    });
-    expect(facts).toMatchObject(expected);
+  it('states first seen relative to the capture', () => {
+    const [facts] = buildFacts(
+      [candidate({ lifecycle: { first_seen: '2026-10-10T00:00:00.000Z' } })],
+      scope
+    );
+    expect(facts.firstSeen).toBe('5 days ago');
   });
 });
 

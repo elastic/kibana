@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { upperFirst } from 'lodash';
+import { mapValues, omit, upperFirst } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { CandidateEntities } from './read_entities';
 import type {
   TimeRange,
@@ -81,18 +80,10 @@ export const formatCount = (count: number): string => count.toLocaleString('en-U
 export const formatCountOf = (count: number, one: string, many: string): string =>
   `${formatCount(count)} ${count === 1 ? one : many}`;
 
-/** True when the tile compares against a previous value of 0, which may be missing history. */
-export const hasNoPreviousValue = ({ value, delta }: EntityAnalyticsScopeTile): boolean =>
-  value > 0 && delta === value;
-
-/** A tile's change, for a place that already names the period: `+3`, `no change`, `none before`. */
-export const describeDelta = (tile: EntityAnalyticsScopeTile): string => {
-  const { delta } = tile;
+/** A tile's change as the page shows it, for a place that already names the period: `+3` or `no change`. */
+export const describeDelta = ({ delta }: EntityAnalyticsScopeTile): string => {
   if (delta === undefined) {
     return 'not enough history';
-  }
-  if (hasNoPreviousValue(tile)) {
-    return 'none before';
   }
   if (delta === 0) {
     return 'no change';
@@ -108,10 +99,7 @@ export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: TimeR
   if (tile.delta === undefined) {
     return 'not enough history to compare';
   }
-  const previous = `previous ${BRIEF_PERIOD_LABELS[period]}`;
-  return hasNoPreviousValue(tile)
-    ? `none in the ${previous}`
-    : `${describeDelta(tile)} vs ${previous}`;
+  return `${describeDelta(tile)} vs previous ${BRIEF_PERIOD_LABELS[period]}`;
 };
 
 interface Coverage {
@@ -135,36 +123,19 @@ const getCoverage = (
   return { isPartial: isSampled || isTruncated, isSampled, total };
 };
 
-const formatTotal = ({ isSampled, total }: Coverage): string =>
-  `${isSampled ? 'at least ' : ''}${formatCountOf(total, 'flagged entity', 'flagged entities')}`;
-
-/** How many flagged entities the facts cover, for the model. */
-export const describeCoverage = (
-  scope: EntityAnalyticsScope,
-  entities: CoverageEntities
-): string => {
-  const checkedCount = entities.candidates.length;
-  const coverage = getCoverage(scope, entities);
-  if (!coverage.isPartial) {
-    return `all ${formatCountOf(checkedCount, 'flagged entity', 'flagged entities')}`;
-  }
-  return `${formatCount(checkedCount)} of ${formatTotal(
-    coverage
-  )}, ranked by how they are flagged, then risk`;
-};
-
-/** For the reader, only when a cap left out flagged entities: the brief looked at a sample. */
+/** Only when a cap left out flagged entities: the brief looked at a sample. The reader and the model see it. */
 export const describeSample = (
   scope: EntityAnalyticsScope,
   entities: CoverageEntities
 ): string | undefined => {
-  const coverage = getCoverage(scope, entities);
-  if (!coverage.isPartial) {
+  const { isPartial, isSampled, total } = getCoverage(scope, entities);
+  if (!isPartial) {
     return undefined;
   }
-  return `Based on the ${formatCount(entities.candidates.length)} highest-ranked of ${formatTotal(
-    coverage
-  )}.`;
+  const atLeast = isSampled ? 'at least ' : '';
+  return `Based on the ${formatCount(
+    entities.candidates.length
+  )} highest-ranked of ${atLeast}${formatCountOf(total, 'flagged entity', 'flagged entities')}.`;
 };
 
 /** The page's entity filters by their scope key, as the filter bar labels them. */
@@ -187,29 +158,10 @@ export const describeEntityFilter = (key: string, values: readonly string[]): st
   return `${label}: ${values.map(formatStoredValue).join(', ')}`;
 };
 
-/** The captured view as text for the agent, for follow-up questions. */
-export const describeScopeForAgent = (
-  attachmentId: string,
-  scope: EntityAnalyticsScope
-): string => {
-  const { period, capturedAt, query, entityFilters = {}, tiles } = scope;
-  const entityFilterLabels = Object.entries(entityFilters).map(([key, values]) =>
-    describeEntityFilter(key, values)
-  );
-  const tileLabels = SIGNAL_CARD_IDS.flatMap((tileId) => {
-    const tile = tiles[tileId];
-    if (!tile) {
-      return [];
-    }
-    const value = tile.unavailable ? '' : ` ${tile.value}`;
-    return [`${tile.title}${value} (${describeTileChange(tile, period)})`];
+/** The captured view for the agent's follow-up questions: the scope, without the entity ids. */
+export const describeScopeForAgent = (attachmentId: string, scope: EntityAnalyticsScope): string =>
+  JSON.stringify({
+    attachmentId,
+    ...scope,
+    tiles: mapValues(scope.tiles, (tile) => tile && omit(tile, 'entityIds')),
   });
-  return [
-    `Entity Analytics view (attachment id "${attachmentId}"), captured ${capturedAt}`,
-    `Period: last ${BRIEF_PERIOD_LABELS[period]}`,
-    `Search: ${query?.query || 'none'}`,
-    `Filters: ${getScopeFilters(scope).map(filterLabel).join('; ') || 'none'}`,
-    `Entity filters: ${entityFilterLabels.join('; ') || 'none'}`,
-    `Counts of flagged entities: ${tileLabels.join('; ') || 'none'}`,
-  ].join('\n');
-};

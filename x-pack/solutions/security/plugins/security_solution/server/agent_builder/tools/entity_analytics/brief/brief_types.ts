@@ -55,8 +55,6 @@ export interface EntityFacts {
   otherWatchlists?: number;
   /** Relative to the capture, such as "5 days ago". */
   firstSeen?: string;
-  /** First seen on the Entity Store's first day of data, so it doesn't mean the entity is new. */
-  firstSeenOnStoreFirstDay?: true;
 }
 
 /**

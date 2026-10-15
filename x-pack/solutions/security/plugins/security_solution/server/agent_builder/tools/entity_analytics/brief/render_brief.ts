@@ -122,30 +122,23 @@ const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
 /** Tile entities have records, but the page's search query kept none of them. */
 const matchesNoTileEntity = ({
   hasPageQuery,
-  pageQueryFailed,
   matchedCount,
   capturedCount,
   notFoundCount,
 }: CandidateEntities): boolean =>
-  hasPageQuery && !pageQueryFailed && matchedCount === 0 && capturedCount > notFoundCount;
+  hasPageQuery && matchedCount === 0 && capturedCount > notFoundCount;
 
 const renderDisclosures = (
   scope: EntityAnalyticsScope,
   entities: CandidateEntities,
   riskChangeFailed: boolean
 ): string[] => {
-  const { hasPageQuery, pageQueryFailed, notFoundCount } = entities;
+  const { notFoundCount } = entities;
   const unavailable = SIGNAL_CARD_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
   const disclosures = [
-    hasPageQuery && !pageQueryFailed
-      ? 'Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities.'
-      : undefined,
     // No count: with no records read, aliases can't be folded, so ids would overcount people.
     matchesNoTileEntity(entities)
       ? 'None of the flagged entities match the search query.'
-      : undefined,
-    pageQueryFailed
-      ? "The search query or filters couldn't be applied, so they don't narrow the priorities."
       : undefined,
     notFoundCount > 0
       ? `${formatCountOf(

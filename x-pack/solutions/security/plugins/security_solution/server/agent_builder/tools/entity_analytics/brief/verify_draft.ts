@@ -18,9 +18,8 @@ const SENTENCE_END = /(?<=[.!?])\s+/;
 const WORD_PATTERN = /\{\{[^}]*\}\}|\S+/g;
 
 export interface VerifiedBrief {
-  /** Absent when nothing is left, or when no priority survived and it names no candidate. */
+  /** Absent when nothing is left or no priority survived, as is the recommendation. */
   attention?: string;
-  /** Absent when nothing is left or no priority survived. */
   recommendation?: string;
   priorities: BriefPriority[];
   droppedPriorityCount: number;
@@ -143,11 +142,11 @@ export const verifyDraft = (
     );
   const attention = cleanProse(draft.attention, BRIEF_WORD_LIMITS.attention);
   const recommendation = cleanProse(draft.recommendation, BRIEF_WORD_LIMITS.recommendation);
-  const namesCandidate = replaceMentions(attention, () => '') !== attention;
-  const keepAttention = attention !== '' && (priorities.length > 0 || namesCandidate);
+  // Without a priority, the brief says there is nothing to prioritise, so there is nothing to introduce.
+  const hasPriorities = priorities.length > 0;
   return {
-    attention: keepAttention ? attention : undefined,
-    recommendation: recommendation !== '' && priorities.length > 0 ? recommendation : undefined,
+    attention: attention !== '' && hasPriorities ? attention : undefined,
+    recommendation: recommendation !== '' && hasPriorities ? recommendation : undefined,
     priorities,
     droppedPriorityCount: draft.priorities.length - priorities.length,
   };
