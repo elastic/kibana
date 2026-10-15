@@ -9,6 +9,7 @@
 
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useMemo } from 'react';
 
 import {
@@ -24,9 +25,11 @@ import type { ResolvedLink } from '../../types';
 export const ExternalLinkComponent = ({
   link,
   layout,
+  viewMode,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  viewMode: ViewMode;
 }) => {
   const linkOptions = useMemo(() => {
     return {
@@ -48,7 +51,7 @@ export const ExternalLinkComponent = ({
     <EuiListGroupItem
       external
       color="text"
-      isDisabled={Boolean(link.error)}
+      isDisabled={viewMode === 'non-interactive' || Boolean(link.error)}
       className={'linksPanelLink'}
       showToolTip={Boolean(link.error)}
       toolTipProps={{
