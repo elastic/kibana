@@ -127,6 +127,7 @@ export const esqlFormValidationSchema = z
           }
         });
       }),
+    includeFrozen: z.boolean(),
     type: z.literal(ToolType.esql),
   })
   .superRefine(({ esql, params }, ctx) => {

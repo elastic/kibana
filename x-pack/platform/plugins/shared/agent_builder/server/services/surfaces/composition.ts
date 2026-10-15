@@ -6,6 +6,7 @@
  */
 
 import { formatValidationError } from '@elastic/isomer-sdk';
+import { splitAuthoredMarkdown } from '@elastic/isomer-sdk/markdown';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getLatestVersion,
@@ -13,9 +14,7 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
-  getCustomElementAttribute,
   renderAttachmentElement,
-  splitCustomElements,
   type RenderAttachmentElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
@@ -41,23 +40,10 @@ interface AttachmentNode extends RenderAttachmentElementAttributes {
 /** The response message split into its markdown and its attachment tags, in order. */
 type MessageNode = SurfaceNode | AttachmentNode;
 
-const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
-  const attachmentId = getCustomElementAttribute(tag, attributes.attachmentId);
-  if (!attachmentId) {
-    return;
-  }
-
-  return {
-    type: 'attachment',
-    attachmentId,
-    version: getCustomElementAttribute(tag, attributes.version),
-  };
-};
-
 /**
- * Splits a message into nodes: its markdown becomes `markdown` nodes, and each
- * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
- * id are dropped.
+ * Splits a message into nodes with {@link splitAuthoredMarkdown}: its markdown becomes `markdown`
+ * nodes, and each `<render_attachment>` tag becomes an `attachment` node. Tags without an id are
+ * dropped.
  *
  * For example, `Here is the note: <render_attachment id="a1" /> Anything else?` splits into:
  *
@@ -70,17 +56,15 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * ```
  */
 const toMessageNodes = (message: string): MessageNode[] =>
-  splitCustomElements(message, tagName).flatMap((segment, index): MessageNode[] => {
-    if (segment.type === 'text') {
-      // Text after a tag on the same line drops the space that separates it from the tag. The
-      // first line otherwise keeps its indentation, which an indented code block needs.
-      const text = index > 0 ? segment.text.replace(/^[ \t]+/, '') : segment.text;
-
-      return [{ type: 'markdown', text: text.replace(/^\s*\n/, '').trimEnd() }];
+  splitAuthoredMarkdown(message, { elements: [tagName] }).flatMap((segment): MessageNode[] => {
+    if (segment.type === 'markdown') {
+      return [{ type: 'markdown', text: segment.source }];
     }
 
-    const node = toAttachmentNode(segment.tag);
-    return node ? [node] : [];
+    const { [attributes.attachmentId]: attachmentId, [attributes.version]: version } =
+      segment.attributes;
+
+    return attachmentId ? [{ type: 'attachment', attachmentId, version }] : [];
   });
 
 /**

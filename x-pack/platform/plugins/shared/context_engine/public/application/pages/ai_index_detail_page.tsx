@@ -23,10 +23,10 @@ import {
   SourcesPanel,
   TracesPanel,
 } from '../components/ai_index_detail';
-import { KiListPanel } from '../components/ki';
+import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
-import { useKiList } from '../hooks/use_ki_list';
+import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
 import {
@@ -98,7 +98,7 @@ export const AiIndexDetailPage = () => {
     history.replace({ ...location, state: undefined });
   }, [location, history]);
 
-  const { summary, isLoading: isKiSummaryLoading } = useKiList({
+  const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
@@ -269,7 +269,7 @@ export const AiIndexDetailPage = () => {
       )}
 
       {selectedTab === 'knowledge_indicators' && showKnowledgeIndicatorsTab && aiIndex && (
-        <KiListPanel aiIndex={aiIndex} />
+        <ListKiPanel aiIndex={aiIndex} />
       )}
     </>
   );

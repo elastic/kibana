@@ -22,6 +22,7 @@ import type {
 import {
   ExecutionStatus,
   isTerminalStatus,
+  isWorkflowStepTriggered,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -278,7 +279,8 @@ export class WorkflowsExecutionEnginePlugin
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'system_index',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);
@@ -329,6 +331,7 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
               const { default: apm } = await import('elastic-apm-node');
+
               const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
@@ -1435,7 +1438,7 @@ export class WorkflowsExecutionEnginePlugin
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
       // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
-      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
+      const isChildExecution = isWorkflowStepTriggered(context.triggeredBy as string | undefined);
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');

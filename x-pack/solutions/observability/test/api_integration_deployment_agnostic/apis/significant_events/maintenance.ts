@@ -247,7 +247,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(deleted).to.eql({
           storedQueries: 1,
           rules: 2,
-          investigations: 0,
           dataStreams: 3,
         });
         expect(
@@ -283,7 +282,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           knowledgeIndicators: 0,
           storedQueries: 0,
           rules: 0,
-          investigations: 0,
           dataStreams: 0,
         });
         for (const dataStream of REGISTERED_DATA_STREAMS) {
