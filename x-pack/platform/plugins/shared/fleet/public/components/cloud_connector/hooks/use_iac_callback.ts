@@ -25,6 +25,13 @@ export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
 
 export type IacCallbackClientStatus = 'idle' | 'pending' | 'received' | 'expired' | 'error';
 
+/**
+ * What `cancel` found. `cancelled`: nothing will arrive, the caller may create by hand.
+ * `created`: the stack reported first; its identity is (or will be) in `created`. `failed`: the
+ * record could not be retired and is still live; the caller must not create by hand yet.
+ */
+export type IacCallbackCancelOutcome = 'cancelled' | 'created' | 'failed';
+
 /** The cloud connector created when the stack reported back. */
 export interface IacCallbackCreated {
   id: string;
@@ -54,11 +61,10 @@ export interface UseIacCallbackResult {
   start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
   /**
    * Stops waiting on the current record and retires it on the server, so a late report cannot
-   * create an identity the form no longer watches. Resolves true when the stack had already
-   * reported: the identity it made is surfaced through `created` (now, or by the next poll while
-   * it is still being made), so the caller must not create one by hand.
+   * create an identity the form no longer watches. See `IacCallbackCancelOutcome` for what the
+   * caller may do next.
    */
-  cancel: () => Promise<boolean>;
+  cancel: () => Promise<IacCallbackCancelOutcome>;
 }
 
 /**
@@ -106,6 +112,8 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
   const [created, setCreated] = useState<IacCallbackCreated | undefined>(undefined);
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
+  // The record whose report was last seen, so a cancel racing with that poll knows the outcome.
+  const receivedIdRef = useRef<string | undefined>(undefined);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   // `start` awaits the create request; don't poll a record created after the form unmounted.
   const mountedRef = useRef(true);
@@ -117,32 +125,38 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     }
   }, []);
 
-  const cancel = useCallback(async () => {
+  const cancel = useCallback(async (): Promise<IacCallbackCancelOutcome> => {
     const id = activeIdRef.current;
     if (!id) {
-      return false;
+      return 'cancelled';
     }
-    const { data } = await sendDeleteIacCallback(id);
+    const { data, error } = await sendDeleteIacCallback(id);
     if (activeIdRef.current !== id) {
-      // Superseded by a new Launch, or unmounted, while the request was in flight.
-      return false;
+      // A poll saw the report land while the request was in flight; otherwise a new Launch or
+      // an unmount took the record away, and there is nothing left to wait on.
+      return receivedIdRef.current === id ? 'created' : 'cancelled';
+    }
+    if (error && error.statusCode !== 404) {
+      // The record is still live. Keep waiting rather than let a late report create a second
+      // identity next to a manual one.
+      return 'failed';
     }
     const item = data?.item;
     if (item?.status === 'receiving') {
       // The stack reported first and its identity is being made; the poll picks it up.
-      return true;
+      return 'created';
     }
     stopPolling();
     activeIdRef.current = undefined;
     if (item?.status === 'received') {
+      receivedIdRef.current = id;
       setCreated(toCreated(item));
       setStatus('received');
-      return true;
+      return 'created';
     }
-    // Cancelled, or gone: either way nothing will arrive. A failed request is treated the same;
-    // the key then expires on its own.
+    // Cancelled, or already gone: nothing will arrive.
     setStatus('idle');
-    return false;
+    return 'cancelled';
   }, [stopPolling]);
 
   const startPolling = useCallback(
@@ -177,6 +191,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         if (data.item.status === 'received') {
           stopPolling();
           activeIdRef.current = undefined;
+          receivedIdRef.current = id;
           setCreated(toCreated(data.item));
           setStatus('received');
         }

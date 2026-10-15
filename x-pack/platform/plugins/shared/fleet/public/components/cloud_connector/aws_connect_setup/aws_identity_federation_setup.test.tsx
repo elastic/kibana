@@ -21,6 +21,7 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { useIacCallback } from '../hooks/use_iac_callback';
+import type { IacCallbackCancelOutcome } from '../hooks/use_iac_callback';
 import { IacKeyCheck } from '../components/iac_key_check';
 import { INVALID_STACK_ARN_MESSAGE } from '../utils';
 
@@ -150,8 +151,9 @@ describe('AwsIdentityFederationSetup', () => {
   const mockMutate = jest.fn();
   const mockLaunchOnClick = jest.fn();
   const mockCallbackStart = jest.fn();
-  const mockCallbackCancel = jest.fn<Promise<boolean>, []>();
+  const mockCallbackCancel = jest.fn<Promise<IacCallbackCancelOutcome>, []>();
   const mockAddSuccess = jest.fn();
+  const mockAddDanger = jest.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
     mockUseGetCloudConnectors.mockReturnValue({
@@ -195,7 +197,7 @@ describe('AwsIdentityFederationSetup', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToApp: jest.fn() },
-        notifications: { toasts: { addSuccess: mockAddSuccess } },
+        notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -206,7 +208,7 @@ describe('AwsIdentityFederationSetup', () => {
 
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     mockUseDisabledIdentityFederationProviders.mockReturnValue([]);
-    mockCallbackCancel.mockResolvedValue(false);
+    mockCallbackCancel.mockResolvedValue('cancelled');
     mockUseIacCallback.mockReturnValue({
       available: false,
       status: 'idle',
@@ -697,7 +699,7 @@ describe('AwsIdentityFederationSetup', () => {
 
     it('does not create by hand when the stack reported first', async () => {
       mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
-      mockCallbackCancel.mockResolvedValue(true);
+      mockCallbackCancel.mockResolvedValue('created');
       const user = userEvent.setup();
       renderSetup({ cloud, integrations });
 
@@ -706,6 +708,22 @@ describe('AwsIdentityFederationSetup', () => {
 
       expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
       expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it('does not create by hand when the record could not be retired', async () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockCallbackCancel.mockResolvedValue('failed');
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).not.toHaveBeenCalled();
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title:
+          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+      });
     });
 
     it('keeps waiting after a static-template fallback', () => {

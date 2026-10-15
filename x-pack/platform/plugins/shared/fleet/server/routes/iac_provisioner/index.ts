@@ -211,7 +211,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
             },
             410: {
-              description: 'The callback has expired.',
+              description: 'The callback has expired or was cancelled.',
               body: genericErrorResponse,
             },
           },

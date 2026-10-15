@@ -232,31 +232,63 @@ class IacCallbackService {
       return { outcome: 'received', item: toItem(so.id, attributes) };
     }
 
-    const connector = await this.ensureCloudConnector(so.id, attributes, payload);
+    let connector: CreatedCloudConnector;
+    try {
+      connector = await this.ensureCloudConnector(so.id, attributes, payload);
+    } catch (error) {
+      // No identity was made. Hand the record back so a retry of the report, or a cancel from
+      // the browser, is not stuck behind a claim nobody is applying.
+      await this.releaseClaim(soClient, so.id);
+      throw error;
+    }
 
+    const item = await this.finish(soClient, so.id, attributes, connector);
+    this.logger.debug(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
+    return { outcome: 'received', item };
+  }
+
+  /** Marks the record received for the connector made from it and kills the key. */
+  private async finish(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    attributes: IacCallbackSOAttributes,
+    connector: CreatedCloudConnector
+  ): Promise<IacCallback> {
     const update: Partial<IacCallbackSOAttributes> = {
       status: 'received',
       received_at: new Date().toISOString(),
       connector_name: connector.name,
       cloud_connector_id: connector.id,
     };
-    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
+    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, id, update);
 
     // The key is single use.
     await invalidateAPIKeys([attributes.api_key_id]);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `IaC callback received [id=${so.id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${payload.role_arn}]`,
+      message: `IaC callback received [id=${id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
     });
-    this.logger.debug(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
 
-    return { outcome: 'received', item: toItem(so.id, { ...attributes, ...update }) };
+    return toItem(id, { ...attributes, ...update });
+  }
+
+  private async releaseClaim(soClient: SavedObjectsClientContract, id: string): Promise<void> {
+    try {
+      await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, id, {
+        status: 'pending',
+      });
+    } catch (error) {
+      this.logger.warn(
+        `IaC callback [id=${id}] could not be released after a failed report: ${error.message}`
+      );
+    }
   }
 
   /**
    * Retires a record the browser no longer waits on and kills its key. A record the stack has
    * already reported to is returned as it is, so the caller can pick up the identity instead of
-   * creating one by hand.
+   * creating one by hand. A report that made its connector but never got marked received is
+   * finished here.
    */
   public async cancel(
     soClient: SavedObjectsClientContract,
@@ -267,6 +299,13 @@ class IacCallbackService {
       return undefined;
     }
     const { attributes, version } = so;
+    if (attributes.status === 'receiving') {
+      const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
+      const connector = await this.findCloudConnector(spaceClient, so.id);
+      return connector
+        ? this.finish(soClient, so.id, attributes, connector)
+        : toItem(so.id, attributes);
+    }
     if (attributes.status !== 'pending') {
       return toItem(so.id, attributes);
     }

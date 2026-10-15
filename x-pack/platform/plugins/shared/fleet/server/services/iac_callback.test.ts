@@ -517,8 +517,8 @@ describe('iacCallbackService', () => {
       });
     });
 
-    it('rethrows a create failure when no connector exists for the record', async () => {
-      mockRecord(CLAIMED);
+    it('releases the claim and rethrows when no connector could be made', async () => {
+      mockRecord(pendingAttrs());
       jest
         .mocked(cloudConnectorService.create)
         .mockRejectedValue(new CloudConnectorCreateError('boom'));
@@ -526,9 +526,23 @@ describe('iacCallbackService', () => {
       await expect(
         iacCallbackService.receive(soClient, 'cb-1', { apiKeyId: 'key-1', payload: PAYLOAD })
       ).rejects.toThrow('boom');
-      // The record stays claimed with the reported values, so a retry can finish it.
-      expect(soClient.update).not.toHaveBeenCalled();
+      // Back to pending, so a retry of the report or a cancel from the browser can proceed.
+      expect(soClient.update).toHaveBeenLastCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
+        status: 'pending',
+      });
       expect(mockedInvalidate).not.toHaveBeenCalled();
+    });
+
+    it('still rethrows when the claim cannot be released', async () => {
+      mockRecord(pendingAttrs());
+      soClient.update.mockResolvedValueOnce({} as any).mockRejectedValueOnce(new Error('down'));
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValue(new CloudConnectorCreateError('boom'));
+
+      await expect(
+        iacCallbackService.receive(soClient, 'cb-1', { apiKeyId: 'key-1', payload: PAYLOAD })
+      ).rejects.toThrow('boom');
     });
 
     it('is a conflict when a different payload arrives while the first is being applied', async () => {
@@ -597,20 +611,57 @@ describe('iacCallbackService', () => {
       expect(item).not.toHaveProperty('api_key_id');
     });
 
-    it.each(['receiving', 'received', 'cancelled'] as const)(
-      'leaves a %s record as it is',
-      async (status) => {
-        soClient.get.mockResolvedValue(
-          soWith(pendingAttrs({ status, ...PAYLOAD, cloud_connector_id: 'cb-1' }))
-        );
+    it.each(['received', 'cancelled'] as const)('leaves a %s record as it is', async (status) => {
+      soClient.get.mockResolvedValue(
+        soWith(pendingAttrs({ status, ...PAYLOAD, cloud_connector_id: 'cb-1' }))
+      );
 
-        const item = await iacCallbackService.cancel(soClient, 'cb-1');
+      const item = await iacCallbackService.cancel(soClient, 'cb-1');
 
-        expect(soClient.update).not.toHaveBeenCalled();
-        expect(mockedInvalidate).not.toHaveBeenCalled();
-        expect(item).toMatchObject({ status, cloud_connector_id: 'cb-1' });
-      }
-    );
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedInvalidate).not.toHaveBeenCalled();
+      expect(item).toMatchObject({ status, cloud_connector_id: 'cb-1' });
+    });
+
+    it('leaves a report that is still being applied alone', async () => {
+      soClient.get.mockImplementation(async (type) => {
+        if (type === IAC_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(CLAIMED);
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+
+      const item = await iacCallbackService.cancel(soClient, 'cb-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedInvalidate).not.toHaveBeenCalled();
+      expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
+    });
+
+    it('finishes a report whose connector exists but was never marked received', async () => {
+      soClient.get.mockImplementation(async (type, id) => {
+        if (type === IAC_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(CLAIMED);
+        }
+        return { id, type, references: [], attributes: { name: 'my-identity' } } as any;
+      });
+      soClient.update.mockResolvedValue({} as any);
+
+      const item = await iacCallbackService.cancel(soClient, 'cb-1');
+
+      expect(soClient.update).toHaveBeenCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
+        status: 'received',
+        received_at: NOW.toISOString(),
+        connector_name: 'my-identity',
+        cloud_connector_id: 'cb-1',
+      });
+      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
+      expect(item).toMatchObject({
+        status: 'received',
+        cloud_connector_id: 'cb-1',
+        connector_name: 'my-identity',
+      });
+    });
 
     it('hands back what a report stored when it claimed the record first', async () => {
       soClient.get

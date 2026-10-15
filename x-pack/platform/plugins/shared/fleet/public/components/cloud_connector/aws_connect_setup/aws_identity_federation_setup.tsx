@@ -268,9 +268,18 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     // Retire the pending record first, so a late report cannot create a second identity. When
     // the stack got there first, its identity is picked up instead of creating one by hand.
     setIsHandingOff(true);
-    const createdByCallback = await cancelCallback();
+    const outcome = await cancelCallback();
     setIsHandingOff(false);
-    if (createdByCallback) {
+    if (outcome === 'created') {
+      return;
+    }
+    if (outcome === 'failed') {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('xpack.fleet.cloudConnector.iacCallback.cancelFailed', {
+          defaultMessage:
+            'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+        }),
+      });
       return;
     }
     createConnector({
@@ -285,6 +294,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     });
   }, [
     cancelCallback,
+    notifications,
     createConnector,
     connectorName,
     accountType,
