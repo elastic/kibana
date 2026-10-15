@@ -190,10 +190,7 @@ export const registerGetPipelineDataRoute = (
             });
           }
 
-          const spaceId = getSpaceId({
-            request,
-            spaces: pluginsStart.spaces?.spacesService,
-          });
+          const spaceId = getSpaceId({ request });
 
           // Step 1: Reconstruct WorkflowExecutionsTracking from event log
           const tracking = await getWorkflowExecutionsTracking({

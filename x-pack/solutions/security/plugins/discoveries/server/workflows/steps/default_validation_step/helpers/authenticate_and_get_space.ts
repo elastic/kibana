@@ -41,10 +41,7 @@ export const authenticateAndGetSpace = async ({
 
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-  const spaceId = getSpaceId({
-    request,
-    spaces: pluginsStart.spaces?.spacesService,
-  });
+  const spaceId = getSpaceId({ request });
 
   return {
     authenticationInfo,

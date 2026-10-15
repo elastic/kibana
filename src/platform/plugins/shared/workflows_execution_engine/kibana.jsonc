@@ -18,8 +18,7 @@
     ],
     "optionalPlugins": [
       "usageApi",
-      "cloud",
-      "spaces",
+      "cloud"
     ],
   }
 }

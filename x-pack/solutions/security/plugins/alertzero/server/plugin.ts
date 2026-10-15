@@ -90,7 +90,6 @@ export class AlertZeroPlugin
   private readonly setServerlessTierAvailable = (available: boolean): void => {
     this.serverlessTierAvailable = available;
   };
-  private spaces?: AlertZeroStartDependencies['spaces'];
   private taskManager?: AlertZeroStartDependencies['taskManager'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
@@ -287,7 +286,6 @@ export class AlertZeroPlugin
   }
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
-    this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
     this.fleetAgentService = plugins.fleet?.agentService;
@@ -475,7 +473,7 @@ export class AlertZeroPlugin
   }
 
   private getSpaceId(request: KibanaRequest): string {
-    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    return request.spaceId;
   }
 
   stop() {}

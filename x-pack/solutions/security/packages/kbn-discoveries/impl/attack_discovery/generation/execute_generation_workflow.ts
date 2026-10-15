@@ -544,12 +544,7 @@ export async function executeGenerationWorkflow({
       throw new Error('Attack Discovery workflows are not enabled');
     }
 
-    const { spaces: spacesPlugin } = pluginsStart as { spaces?: SpacesPluginStart };
-
-    spaceId = getSpaceId({
-      request,
-      spaces: spacesPlugin?.spacesService,
-    });
+    spaceId = getSpaceId({ request });
 
     // Authoritative authorization guard (sole choke point for ALL four AD 2.0
     // surfaces: ad hoc, scheduled, agent-builder tool, and workflow run-step).

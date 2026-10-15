@@ -23,7 +23,7 @@ import {
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerExportWorkflowsRoute(deps: RouteDependencies) {
-  const { router, api, logger, spaces, audit } = deps;
+  const { router, api, logger, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/export',
@@ -62,7 +62,7 @@ export function registerExportWorkflowsRoute(deps: RouteDependencies) {
           if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { ids } = request.body;
 
           const workflows = await api.getWorkflowsByIds(ids, spaceId, request);

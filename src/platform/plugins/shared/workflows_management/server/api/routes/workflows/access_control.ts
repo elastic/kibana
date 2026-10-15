@@ -32,7 +32,7 @@ export const registerWorkflowAccessControlRoutes = ({
       try {
         const result = await api.updateAccessControl(
           request.params.id,
-          spaces.getSpaceId(request),
+          request.spaceId,
           request.body,
           request
         );
@@ -60,20 +60,16 @@ export const registerWorkflowAccessControlRoutes = ({
     },
     withAvailabilityCheck(async (context, request, response) => {
       try {
-        await api.assertWorkflowAccess(
-          request.params.id,
-          spaces.getSpaceId(request),
-          'manage',
-          request,
-          { auditOverride: false }
-        );
+        await api.assertWorkflowAccess(request.params.id, request.spaceId, 'manage', request, {
+          auditOverride: false,
+        });
         const { userProfile } = await workflowsService.getCoreStart();
         const { security } = await workflowsService.getPluginsStart();
         if (!security) return response.ok({ body: [] });
         const profiles = await userProfile.suggest({
           ...request.body,
           requiredPrivileges: {
-            spaceId: spaces.getSpaceId(request),
+            spaceId: request.spaceId,
             privileges: {
               kibana: [security.authz.actions.api.get(WorkflowsManagementApiActions.read)],
             },

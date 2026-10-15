@@ -30,12 +30,10 @@ export const registerAgentBuilderHandlerContext = ({
 }) => {
   coreSetup.http.registerRouteHandlerContext<AgentBuilderHandlerContext, 'agentBuilder'>(
     'agentBuilder',
-    async (context, request) => {
-      const [, { spaces }] = await coreSetup.getStartServices();
-
+    async (_context, request) => {
       return {
         spaces: {
-          getSpaceId: () => getCurrentSpaceId({ request, spaces }),
+          getSpaceId: () => getCurrentSpaceId({ request }),
         },
       };
     }

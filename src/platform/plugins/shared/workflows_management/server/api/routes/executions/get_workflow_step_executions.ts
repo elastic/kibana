@@ -20,7 +20,7 @@ import {
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowStepExecutionsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions/steps',
@@ -84,7 +84,7 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { workflowId } = request.params;
           const query = request.query;
           const workflow = await api.getWorkflow(workflowId, spaceId, request);

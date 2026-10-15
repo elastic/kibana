@@ -12,8 +12,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-
 import type { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/list_client';
@@ -39,7 +37,6 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
   private readonly logger: Logger;
   private readonly config: ConfigType;
   private readonly extensionPoints: ExtensionPointStorageInterface;
-  private spaces: SpacesServiceStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -87,9 +84,8 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): ListsPluginStart {
+  public start(_core: CoreStart, _plugins: PluginsStart): ListsPluginStart {
     this.logger.debug('Starting plugin');
-    this.spaces = plugins.spaces?.spacesService;
   }
 
   public stop(): void {
@@ -99,7 +95,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, extensionPoints } = this;
+      const { config, extensionPoints } = this;
       const {
         security,
         savedObjects: { client: savedObjectsClient },
@@ -110,7 +106,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
       if (config == null) {
         throw new TypeError('Configuration is required for this plugin to operate');
       } else {
-        const spaceId = getSpaceId({ request, spaces });
+        const spaceId = getSpaceId({ request });
         const user = getUser({ security });
         return {
           getExceptionListClient: (): ExceptionListClient =>

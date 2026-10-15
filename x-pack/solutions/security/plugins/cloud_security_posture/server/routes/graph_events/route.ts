@@ -44,7 +44,7 @@ export const defineGraphEventsRoute = (router: CspRouter) =>
         const { page } = request.body;
         const { eventIds, start, end, indexPatterns } = request.body
           .query as EventsRequest['query'];
-        const spaceId = await cspContext.spacesService?.getSpaceId(request);
+        const spaceId = await request.spaceId;
 
         try {
           const resp = await getEvents({

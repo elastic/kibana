@@ -131,7 +131,7 @@ const querySchema = schema.object({
   ),
 });
 
-export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerSearchExecutionsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/executions',
@@ -158,7 +158,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
       },
       withAvailabilityCheck(async (_context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const {
             kql,
             statuses,

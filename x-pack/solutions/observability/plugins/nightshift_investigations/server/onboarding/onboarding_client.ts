@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -76,8 +75,7 @@ export const createOnboardingClient = ({
   listSandboxSecretKeys: (request: KibanaRequest) => Promise<string[]>;
   logger: Logger;
 }): OnboardingClient => {
-  const getSpaceId = (request: KibanaRequest): string =>
-    getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  const getSpaceId = (request: KibanaRequest): string => request.spaceId;
 
   const getWorkflowsManagement = (): WorkflowsServerPluginSetup => {
     const { workflowsManagement } = getDeps();

@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -707,7 +707,7 @@ export class AlertingPlugin {
         return plugins.spaces?.spacesService.createSpacesClient(request).get(spaceId);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        return request.spaceId;
       },
       features: plugins.features,
     });
@@ -732,7 +732,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        return request.spaceId;
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,

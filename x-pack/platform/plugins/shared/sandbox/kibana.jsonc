@@ -10,6 +10,6 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "sandbox"],
-    "optionalPlugins": ["spaces"]
+    "optionalPlugins": []
   }
 }

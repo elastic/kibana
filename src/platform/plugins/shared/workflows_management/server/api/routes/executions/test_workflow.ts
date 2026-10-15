@@ -17,7 +17,7 @@ import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerTestWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, logger, spaces, audit } = deps;
+  const { router, api, logger, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/test',
@@ -65,7 +65,7 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
             });
           }
 
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
 
           let inputs = rawInputs;
           const event = rawInputs.event as
@@ -102,7 +102,7 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
             logContext: {
               route: 'POST /api/workflows/test',
               workflowId: request.body.workflowId,
-              spaceId: spaces.getSpaceId(request),
+              spaceId: request.spaceId,
             },
           });
         }

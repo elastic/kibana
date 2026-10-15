@@ -16,7 +16,7 @@ import { getHasSetupPrivileges } from '../universal_profiling/setup/lib/get_has_
 import { PROFILING_API_PRIVILEGE } from '../../feature';
 
 export function registerStatusRoute({ router, logger, dependencies }: RouteRegisterParameters) {
-  const { buildFlavor, setup, start } = dependencies;
+  const { buildFlavor, start } = dependencies;
 
   /*
   Whether the user can run the Universal Profiling setup is computed here rather than in the
@@ -51,7 +51,7 @@ export function registerStatusRoute({ router, logger, dependencies }: RouteRegis
         const status = await start.profilingDataAccess.services.getStatus({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
-          spaceId: setup.spaces?.spacesService?.getSpaceId(request),
+          spaceId: request.spaceId,
           abortSignal: getRequestAbortedSignal(request.events.aborted$),
         });
 

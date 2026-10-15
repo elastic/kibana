@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   EcsDataQualityDashboardPluginSetup,
   EcsDataQualityDashboardPluginStart,
@@ -62,7 +61,7 @@ export class EcsDataQualityDashboardPlugin
       DataQualityDashboardRequestHandlerContext,
       'dataQualityDashboard'
     >('dataQualityDashboard', (_context, request) => {
-      const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const spaceId = request.spaceId;
       return {
         spaceId,
         getResultsIndexName: async () => this.resultsDataStream.installSpace(spaceId),

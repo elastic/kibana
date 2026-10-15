@@ -52,7 +52,7 @@ export async function createRequestHandlerContext({
   const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
 
-  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+  const namespace = request.spaceId;
   const emitEvent = createWorkflowTriggerEmitter({
     getWorkflowsClient: () => startPlugins.workflowsExtensions.getClient(request),
     logger,

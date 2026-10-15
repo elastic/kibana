@@ -63,7 +63,7 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
           name: request.body.name,
           dataPath: request.body.dataPath,
           requiredPrivileges: {
-            spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
+            spaceId: request.spaceId,
             privileges: {
               kibana: [pluginDeps.security.authz.actions.login],
             },

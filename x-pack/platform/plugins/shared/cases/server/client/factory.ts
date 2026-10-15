@@ -33,7 +33,6 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
@@ -208,8 +207,7 @@ export class CasesClientFactory {
 
     const userInfo = await this.getUserInfo(request);
 
-    const spaceId =
-      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const spaceId = request.spaceId;
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
     const { closeReasonValidator } = this.options;
     const boundCloseReasonValidator = closeReasonValidator
@@ -321,8 +319,7 @@ export class CasesClientFactory {
 
     const attachmentService = this.createAttachmentService(unsecuredSavedObjectsClient);
 
-    const spaceId =
-      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const spaceId = request.spaceId;
     const namespace = spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
 
     // Bound, parameterless callback handed to the templates service. The v2
@@ -370,8 +367,7 @@ export class CasesClientFactory {
       notifications: this.options.notifications,
       security: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId: request.spaceId,
     });
 
     return {
