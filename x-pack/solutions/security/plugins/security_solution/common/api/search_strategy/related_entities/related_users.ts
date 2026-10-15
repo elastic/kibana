@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { RelatedEntitiesQueries } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
-export const relatedUsersRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  hostName: z.string(),
-  skip: z.boolean().optional(),
-  from: z.string(),
-  inspect,
-  factoryQueryType: z.literal(RelatedEntitiesQueries.relatedUsers),
-});
+export const relatedUsersRequestOptionsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    hostName: z.string(),
+    skip: z.boolean().optional(),
+    from: z.string(),
+    inspect,
+    factoryQueryType: z.literal(RelatedEntitiesQueries.relatedUsers),
+  })
+);
 
 export type RelatedUsersRequestOptionsInput = z.input<typeof relatedUsersRequestOptionsSchema>;
 

@@ -18379,7 +18379,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -18393,7 +18393,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -18450,6 +18450,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -18485,6 +18490,32 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -18497,6 +18528,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -27771,6 +27803,13 @@ paths:
           required: false
           schema:
             type: string
+        - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
+          in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
         - description: use withAgentCount instead
           in: query
           name: noAgentCount
@@ -50838,6 +50877,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id` exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -50930,6 +50985,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id`, or no query with this `actionId`, exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -139981,6 +140052,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -150763,6 +150835,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155395,6 +155468,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155628,6 +155702,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -159839,6 +159914,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -161336,6 +161412,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165158,6 +165235,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165248,6 +165326,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165308,6 +165387,34 @@ components:
         - desc
       title: termsRankByCustomDirection
       type: string
+    Kibana_HTTP_APIs_termsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_termsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -165326,7 +165433,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -166011,6 +166117,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -168575,6 +168682,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -170971,6 +171079,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -172959,6 +173068,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -176702,6 +176812,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -176739,6 +176850,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:

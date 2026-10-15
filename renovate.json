@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**", ".github/workflows/*.lock.yml"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.4", "9.3", "8.19"],
@@ -728,8 +732,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -1103,8 +1107,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mochawesome",
-        "mochawesome-merge",
-        "regenerate"
+        "mochawesome-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1521,7 +1524,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1967,13 +1970,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
@@ -1982,7 +1986,9 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2585,7 +2591,7 @@
     {
       "description": "Update Wolfi FIPS base image",
       "customType": "regex",
-      "fileMatch": ["^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"],
+      "fileMatch": ["^src/dev/build/lib/fips_config\\.ts$"],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],

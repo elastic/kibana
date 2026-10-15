@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -24,32 +24,34 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
-const schema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to update. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
-    ),
-  name: z
-    .string()
-    .min(1)
-    .max(MAX_WATCHLIST_NAME_LENGTH)
-    .optional()
-    .describe(
-      `Optional new name for the watchlist. Pass only when the user asked to rename it. Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
-    ),
-  description: z
-    .string()
-    .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
-    .optional()
-    .describe(
-      `Optional new description. Pass only when the user asked to change the description. Pass an empty string to clear an existing description. Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
-    ),
-  riskModifier: riskModifierSchema
-    .optional()
-    .describe('Optional new risk modifier. Pass only when the user asked to change it.'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to update. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
+      ),
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_WATCHLIST_NAME_LENGTH)
+      .optional()
+      .describe(
+        `Optional new name for the watchlist. Pass only when the user asked to rename it. Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
+      ),
+    description: z
+      .string()
+      .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
+      .optional()
+      .describe(
+        `Optional new description. Pass only when the user asked to change the description. Pass an empty string to clear an existing description. Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
+      ),
+    riskModifier: riskModifierSchema
+      .optional()
+      .describe('Optional new risk modifier. Pass only when the user asked to change it.'),
+  })
+);
 
 export const SECURITY_UPDATE_WATCHLIST_TOOL_ID = securityTool('update_watchlist');
 

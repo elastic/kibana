@@ -17,7 +17,7 @@
  * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
@@ -33,13 +33,9 @@ export {
 } from './privileges';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+export const EntityStoreStatus = lazySchema(() =>
+  z.enum(['not_installed', 'installing', 'running', 'stopped', 'error'])
+);
 
 export const API_VERSIONS = {
   public: {
@@ -107,7 +103,7 @@ export const getErrorMessage = (error: unknown): string => {
 
 // Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
@@ -151,6 +147,7 @@ export interface IdentitySourceFields {
 
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
 export type { AssetCriticalityLevel, EntityRiskLevels } from './domain/definitions/entity.gen';
+export type { RiskScoreDistribution } from './domain/risk_score_distribution';
 
 export {
   ENTITY_LATEST,

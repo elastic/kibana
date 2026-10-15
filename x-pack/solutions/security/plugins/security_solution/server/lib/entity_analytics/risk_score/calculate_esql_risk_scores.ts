@@ -498,6 +498,10 @@ export const getEuidCompositeQuery = (
   return {
     index: params.index,
     size: 0,
+    // The target is a single space's alerts index, which doesn't exist until a detection rule has
+    // run in that space at least once. Without this, that case throws `index_not_found_exception`
+    // instead of yielding the empty result an index with genuinely no alerts would produce.
+    ignore_unavailable: true,
     runtime_mappings: { ...params.runtimeMappings, entity_id: runtimeMapping },
     query: filter.length > 0 ? { bool: { filter } } : { match_all: {} },
     aggs: {
@@ -595,6 +599,7 @@ export const getBaseScoreESQL = (
 };
 
 export const getResolutionCompositeQuery = (
+  entityType: EntityType,
   index: string,
   pageSize: number,
   afterKey?: Record<string, string>,
@@ -604,7 +609,16 @@ export const getResolutionCompositeQuery = (
   size: 0,
   query: targetEntityIds
     ? { terms: { resolution_target_id: targetEntityIds } }
-    : { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+    : {
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            // The lookup index holds every entity type's targets. Without this, each type also
+            // pages through the others' targets, scoring alerts that can never match them.
+            { prefix: { resolution_target_id: `${entityType}:` } },
+          ],
+        },
+      },
   aggs: {
     by_resolution_target: {
       composite: {

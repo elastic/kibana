@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsAuthorization } from './actions_authorization';
 
@@ -13,6 +14,9 @@ export type ActionsAuthorizationMock = jest.Mocked<PublicMethodsOf<ActionsAuthor
 const createActionsAuthorizationMock = () => {
   const mocked: ActionsAuthorizationMock = {
     ensureAuthorized: jest.fn(),
+    getFindAuthorizationFilter: jest.fn().mockResolvedValue({
+      filter: fromKueryExpression('*'),
+    }),
   };
   return mocked;
 };

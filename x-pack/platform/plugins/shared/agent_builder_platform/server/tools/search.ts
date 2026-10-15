@@ -13,6 +13,7 @@ import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const searchSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
@@ -33,6 +34,7 @@ const searchSchema = z.object({
     .describe(
       '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const searchTool = ({
@@ -75,7 +77,12 @@ Note:
     `,
     schema: searchSchema,
     handler: async (
-      { query: nlQuery, index, time_range: explicitTimeRange },
+      {
+        query: nlQuery,
+        index,
+        time_range: explicitTimeRange,
+        include_frozen: includeFrozen = false,
+      },
       {
         esClient,
         modelProvider,
@@ -114,11 +121,13 @@ Note:
         allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         modelProvider,
         events,
         logger,
         topSnippetsConfig,
         includeDatasets: experimentalFeatures.datasets,
+        includeFrozen,
         rowLimit: 100,
       });
       return { results };

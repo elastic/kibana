@@ -30,8 +30,13 @@ const mockUseGetAgentsQuery = useGetAgentsQuery as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/201738
-describe.skip('AgentlessEnrollmentFlyout', () => {
+// Stub out AgentDetailsIntegration — its internal hooks are not relevant here
+jest.mock(
+  '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration',
+  () => ({ AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" /> })
+);
+
+describe('AgentlessEnrollmentFlyout', () => {
   const onClose = jest.fn();
   const baseProps = {
     onClose,
@@ -132,6 +137,99 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
         expect(getByText('Confirm incoming data')).toBeInTheDocument();
         expect(getByText('Step 2 is loading')).toBeInTheDocument();
       });
+    });
+
+    it('shows the failure state with component details when the agent is online but a component is failed', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: {
+          data: {
+            items: [
+              {
+                status: 'online',
+                components: [
+                  {
+                    id: 'c1',
+                    type: 'logfile',
+                    status: 'FAILED',
+                    units: [{ id: 'input-1', type: 'input', status: 'FAILED', message: '' }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, queryByText, getByTestId } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          agentPolicy={{ id: 'ap1', name: 'AP', package_policies: [] } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
+        expect(getByText('Step 1 has errors')).toBeInTheDocument();
+        expect(
+          queryByText('Managed integration deployment was successful')
+        ).not.toBeInTheDocument();
+        expect(getByText('Confirm incoming data')).toBeInTheDocument();
+        expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
+      });
+    });
+
+    it('shows per-integration details when the agent is in error and a package policy is provided', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: { data: { items: [{ status: 'error', last_checkin_message: 'boom' }] } },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, getByTestId } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          // minimal agent policy, as synthesized by the managed integrations table
+          agentPolicy={{ id: 'ap1', name: 'AP' } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
+        expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
+      });
+    });
+
+    it('stops polling once online without a package policy, keeps polling to refresh component health with one', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: { data: { items: [{ status: 'online' }] } },
+      });
+      const renderer = createIntegrationsTestRendererMock();
+      const withoutPolicy = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
+      await waitFor(() => {
+        expect(withoutPolicy.getByText('Step 1 is complete')).toBeInTheDocument();
+      });
+      expect(mockUseGetAgentsQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchInterval: false })
+      );
+      withoutPolicy.unmount();
+
+      mockUseGetAgentsQuery.mockClear();
+      const withPolicy = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [] } as any}
+        />
+      );
+      await waitFor(() => {
+        expect(withPolicy.getByText('Step 1 is complete')).toBeInTheDocument();
+      });
+      expect(mockUseGetAgentsQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchInterval: expect.any(Number) })
+      );
     });
 
     it('does not reset completed steps when a subsequent poll returns no data', async () => {

@@ -359,8 +359,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
@@ -463,8 +467,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       // open edit flyout when icon is clicked
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
+      await testSubjects.existOrFail('ruleForm');
 
-      await testSubjects.click('rulePageFooterCancelButton');
+      // Cancel can be swallowed while the edit form is still re-rendering, so navigate back instead.
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
     });
 
     it('should delete all selection', async () => {
@@ -481,8 +491,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
