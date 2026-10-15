@@ -431,7 +431,7 @@ export const ServiceAccountEditorWidgets = ({
           return;
         }
         hoverSuppressed = true;
-        editor.updateOptions({ hover: { enabled: false } });
+        editor.updateOptions({ hover: { enabled: monaco.editor.ShowLightbulbIconMode.Off } });
         const current = ++hoverGeneration;
         const version = model.getVersionId();
         hoverTimer = setTimeout(async () => {

@@ -44,7 +44,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
       ).toBeHidden();
-      await page.click('[aria-label="Select agent policy"]');
+      await page.testSubj.click('syntheticsAgentPolicySelect');
       await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
@@ -71,9 +71,9 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       });
     });
 
-    await test.step('edit location label and verify disabled fields', async () => {
+    await test.step('edit location label and verify editable and disabled fields', async () => {
       await page.testSubj.click('action-edit');
-      await expect(page.locator('[aria-label="Select agent policy"]')).toBeDisabled();
+      await expect(page.testSubj.locator('syntheticsAgentPolicySelect')).toBeEnabled();
       await expect(page.locator('[aria-label="Tags"]')).toBeEnabled();
       await expect(page.locator('[aria-label="Spaces "]')).toBeDisabled();
       await page.testSubj.fill('syntheticsLocationFormFieldText', NEW_LOCATION_LABEL);

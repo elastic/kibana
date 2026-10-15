@@ -23,6 +23,7 @@ import type {
   MatchRulesBody,
   RuleResponse,
   UpdateRuleData,
+  RuleRoutingTagsParams,
   RuleTagsParams,
   TagsResponse,
 } from '@kbn/alerting-v2-schemas';
@@ -62,6 +63,12 @@ export class RulesApi {
         search: params.search || undefined,
         kind: params.kind || undefined,
       },
+    });
+  }
+
+  public async listRoutingTags(params: RuleRoutingTagsParams = {}): Promise<TagsResponse> {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/routing_tags`, {
+      query: { search: params.search || undefined },
     });
   }
 

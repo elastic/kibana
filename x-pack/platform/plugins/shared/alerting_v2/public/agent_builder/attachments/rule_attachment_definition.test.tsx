@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
@@ -92,6 +92,18 @@ describe('createRuleAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
+    });
+  });
+
   describe('getActionButtons', () => {
     it('returns Preview button when not in canvas and openCanvas is provided', () => {
       const services = createMockServices();
@@ -135,7 +147,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('draft')).toBeDefined();
+      expect(getByText('Draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -147,7 +159,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('enabled')).toBeDefined();
+      expect(getByText('Enabled')).toBeDefined();
     });
 
     it('shows disabled status when origin set and enabled is false', () => {
@@ -159,7 +171,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('disabled')).toBeDefined();
+      expect(getByText('Disabled')).toBeDefined();
     });
 
     it('shows schedule interval', () => {
@@ -171,7 +183,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('Every 5m')).toBeDefined();
+      expect(getByText('Every 5 min')).toBeDefined();
     });
   });
 

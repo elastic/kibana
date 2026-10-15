@@ -14,7 +14,6 @@ import {
 } from '../../../common/impact/constants';
 import type { AttachImpactRequest, Impact, ImpactEntity } from '../../../common/impact/impact';
 import {
-  hashInvestigationAttachmentId,
   InvestigationAttachmentConflictError,
   type InvestigationAttachmentDocService,
   type WrittenInvestigationAttachment,
@@ -213,13 +212,9 @@ export class ImpactService {
   }
 }
 
-/**
- * One impact document per space and conversation. Joining the two keys can
- * exceed Elasticsearch's 512-byte `_id` limit, so the id is a hash of a
- * length-prefixed pair.
- */
+/** One impact document per space and conversation. */
 export const impactDocumentId = (spaceId: string, conversationId: string): string =>
-  hashInvestigationAttachmentId(spaceId, conversationId);
+  impactAttachment.documentId(spaceId, conversationId);
 
 const assertBoundedId = (value: string, field: string): void => {
   if (value.length < 1 || value.length > MAX_IMPACT_ID_LENGTH) {

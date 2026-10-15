@@ -1,5 +1,5 @@
 {
-  "sha1": "926c8777a27e6931bc0b9609b8cd59827e197892",
+  "sha1": "bba4afa046870a3bd9fc004a4b22f8d55cbfd97d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 5,
+        "line": 6,
         "column": 1
+      }
+    },
+    {
+      "id": "c649c775b388af1-8f5df355442d174",
+      "title": "Add data page switches between the OpenTelemetry and Universal Profiling instructions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/add_data/add_data.spec.ts",
+        "line": 17,
+        "column": 20
       }
     },
     {
@@ -226,6 +240,34 @@
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
         "line": 19,
         "column": 5
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-a4f4995d739e7c8",
+      "title": "Profiling schema selector keeps the selected schema while moving across the profiling sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 22,
+        "column": 8
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-bd5e314c3c11812",
+      "title": "Profiling schema selector recovers from a selected schema without data by selecting another schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 74,
+        "column": 14
       }
     },
     {

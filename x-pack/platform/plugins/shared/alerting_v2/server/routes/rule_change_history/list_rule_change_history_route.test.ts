@@ -92,7 +92,7 @@ describe('ListRuleChangeHistoryRoute', () => {
 });
 
 describe('GetRuleChangeHistoryEventRoute', () => {
-  it('forwards rule id and event id to the client', async () => {
+  it('forwards the event id to the client', async () => {
     const mocks = createMocks();
     mocks.ruleChangesHistoryClient.getRuleChange.mockResolvedValue({
       id: 'event-1',
@@ -103,14 +103,12 @@ describe('GetRuleChangeHistoryEventRoute', () => {
     });
     const request = httpServerMock.createKibanaRequest({
       params: { change_id: 'event-1' },
-      query: { rule_id: 'rule-1' },
     });
     const route = buildGetRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.ruleChangesHistoryClient.getRuleChange).toHaveBeenCalledWith({
-      ruleId: 'rule-1',
       eventId: 'event-1',
     });
   });

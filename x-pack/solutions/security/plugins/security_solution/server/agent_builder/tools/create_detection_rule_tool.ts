@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -133,19 +133,21 @@ export const resolveAttachmentTarget = (
   };
 };
 
-const createDetectionRuleSchema = z.object({
-  user_query: z
-    .string()
-    .describe(
-      'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
-    ),
-  attachment_id: z
-    .string()
-    .optional()
-    .describe(
-      'ID of the existing rule attachment to update. Pass when rewriting the query of an existing rule so the tool reads the current rule state and updates in place. Omit for a fresh create.'
-    ),
-});
+const createDetectionRuleSchema = lazySchema(() =>
+  z.object({
+    user_query: z
+      .string()
+      .describe(
+        'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
+      ),
+    attachment_id: z
+      .string()
+      .optional()
+      .describe(
+        'ID of the existing rule attachment to update. Pass when rewriting the query of an existing rule so the tool reads the current rule state and updates in place. Omit for a fresh create.'
+      ),
+  })
+);
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
