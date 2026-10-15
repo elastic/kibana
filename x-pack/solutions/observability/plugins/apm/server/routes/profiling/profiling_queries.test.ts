@@ -7,6 +7,7 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getHostsProfilingEventsQuery, getTransactionsProfilingQuery } from './profiling_queries';
 
 const range = { start: 1000, end: 1900 };
@@ -31,7 +32,7 @@ describe('getTransactionsProfilingQuery', () => {
           ...kqlQuery(filters.kuery),
           { term: { 'service.name': 'my-service' } },
           { term: { 'transaction.name': 'GET /orders' } },
-          { term: { 'service.environment': 'production' } },
+          ...environmentQuery('production'),
           { term: { 'transaction.type': 'request' } },
           timeRangeFilter,
         ],
