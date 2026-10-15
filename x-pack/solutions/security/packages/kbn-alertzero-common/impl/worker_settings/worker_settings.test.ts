@@ -21,14 +21,18 @@ import {
   buildCompleteWorkerSettingsSchema,
   buildDefaultWorkerSettings,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
 } from './contract';
 import {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
   createDefaultWorkerSettings,
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
+  getMinBudgetPerHour,
+  getWorkerSettingsDeclaration,
 } from '.';
 import type { WorkerSettingsDeclaration } from './types';
 
@@ -332,5 +336,46 @@ describe('formatWorkerSettingsIssues', () => {
     expect(formatted).toContain('extras.analysisWindowDays:');
     expect(formatted).toContain('other');
     expect(formatted).toContain('stray');
+  });
+});
+
+describe('Alert Triage budget against the schedule', () => {
+  const withBudget = (scheduleInterval: string, budgetPerHour: number) => ({
+    ...createDefaultWorkerSettings(TRIAGE),
+    scheduleInterval,
+    extras: { ...ALERT_TRIAGE_DEFAULT_EXTRAS, budgetPerHour },
+  });
+  const issuesFor = (settings: ReturnType<typeof withBudget>) =>
+    formatCrossFieldIssues(getWorkerSettingsDeclaration(TRIAGE).crossFieldIssues?.(settings) ?? []);
+
+  // A run gets floor(budget * interval / 60) units and the cheapest batch costs 6, so a budget
+  // below ceil(360 / interval) would plan nothing on every run.
+  it.each([
+    ['15m', 24],
+    ['5m', 72],
+    ['30m', 12],
+    ['1h', 10],
+    ['1d', 10],
+  ])('needs a budget of at least %s -> %i for one run to fund a batch', (interval, min) => {
+    expect(getMinBudgetPerHour(interval)).toBe(min);
+  });
+
+  it('falls back to the default schedule when none is set', () => {
+    expect(getMinBudgetPerHour(undefined)).toBe(getMinBudgetPerHour('15m'));
+  });
+
+  it('accepts the least budget that funds a batch and rejects one unit less, naming the field', () => {
+    expect(issuesFor(withBudget('15m', 24))).toBe('');
+    expect(issuesFor(withBudget('15m', 23))).toMatch(
+      /^extras\.budgetPerHour: must be at least 24 for a 15m schedule/
+    );
+  });
+
+  // The settings contract check cannot compare a schema refinement, and a rule applied on read could
+  // make a stored document unreadable, so the schema itself must keep accepting such a document.
+  it('leaves the complete schema, which reads stored settings, free of the rule', () => {
+    expect(getCompleteWorkerSettingsSchema(TRIAGE).safeParse(withBudget('15m', 10)).success).toBe(
+      true
+    );
   });
 });
