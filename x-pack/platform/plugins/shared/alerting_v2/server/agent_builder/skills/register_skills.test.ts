@@ -28,9 +28,7 @@ const createRuleAuthoringSkillMock = createRuleAuthoringSkill as jest.MockedFunc
   typeof createRuleAuthoringSkill
 >;
 const createActionPolicyAuthoringSkillMock =
-  createActionPolicyAuthoringSkill as jest.MockedFunction<
-    typeof createActionPolicyAuthoringSkill
-  >;
+  createActionPolicyAuthoringSkill as jest.MockedFunction<typeof createActionPolicyAuthoringSkill>;
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
