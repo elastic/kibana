@@ -362,6 +362,81 @@ describe('SearchBar', () => {
     });
   });
 
+  describe('while a cancellable query is loading', () => {
+    const filter = {
+      meta: {
+        key: 'query',
+        value: '{"wildcard":{"kibana.alert.rule.name":"example*"}}',
+        type: 'custom',
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: { wildcard: { 'kibana.alert.rule.name': 'example*' } },
+    };
+
+    const getProps = (overrides: Partial<SearchBarProps> = {}) => ({
+      indexPatterns: [stubIndexPattern],
+      screenTitle: 'test screen',
+      onQuerySubmit: noop,
+      query: kqlQuery,
+      filters: [filter],
+      onFiltersUpdated: noop,
+      dataViewPickerComponentProps: {
+        trigger: { label: 'Data View', 'data-test-subj': 'dataViewPickerTrigger' },
+      },
+      ...overrides,
+    });
+
+    it('locks everything that can start a new search, but not the query input or cancel', async () => {
+      render(wrapSearchBarInContext(getProps({ isLoading: true, onCancel: jest.fn() })));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryCancelButton')).toBeEnabled();
+      });
+      expect(screen.getByTestId('addFilter')).toBeDisabled();
+      expect(screen.getByTestId('showQueryBarMenu')).toBeDisabled();
+      expect(screen.getByTestId('dataViewPickerTrigger')).toBeDisabled();
+      // Filter pills render read-only, without the actions and delete buttons
+      expect(screen.queryByRole('button', { name: 'Filter actions' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Delete / })).not.toBeInTheDocument();
+      // Editing the query doesn't emit new state, so it stays available
+      expect(screen.getByTestId('unifiedQueryInput').querySelector('textarea')).toBeEnabled();
+    });
+
+    it('unlocks again once the query has settled', async () => {
+      const { rerender } = render(
+        wrapSearchBarInContext(getProps({ isLoading: true, onCancel: jest.fn() }))
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('addFilter')).toBeDisabled();
+      });
+
+      rerender(wrapSearchBarInContext(getProps({ isLoading: false, onCancel: jest.fn() })));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('addFilter')).toBeEnabled();
+      });
+      expect(screen.getByTestId('showQueryBarMenu')).toBeEnabled();
+      expect(screen.getByTestId('dataViewPickerTrigger')).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Filter actions' })).toBeInTheDocument();
+    });
+
+    it.each([
+      { description: 'loading without a cancel handler', isLoading: true, onCancel: undefined },
+      { description: 'a cancel handler without loading', isLoading: false, onCancel: jest.fn() },
+    ])('does not lock with $description', async ({ isLoading, onCancel }) => {
+      render(wrapSearchBarInContext(getProps({ isLoading, onCancel })));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('addFilter')).toBeEnabled();
+      });
+      expect(screen.getByTestId('showQueryBarMenu')).toBeEnabled();
+      expect(screen.getByTestId('dataViewPickerTrigger')).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Filter actions' })).toBeInTheDocument();
+    });
+  });
+
   it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', async () => {
     const user = userEvent.setup();
     const mockedOnQuerySubmit = jest.fn();

@@ -66,6 +66,7 @@ import {
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { AddFilterPopover } from './add_filter_popover';
+import { isSearchLocked } from './is_search_locked';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
@@ -526,6 +527,7 @@ export const QueryBarTopRow = React.memo(
 
     const propsOnSubmit = props.onSubmit;
     const propsOnCancel = props.onCancel;
+    const isLocked = isSearchLocked({ isLoading: props.isLoading, onCancel: propsOnCancel });
 
     const toRecentlyUsedRanges = (ranges: TimeRange[]) =>
       ranges.map(({ from, to }: { from: string; to: string }) => {
@@ -892,7 +894,9 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderDatePicker()) {
         return null;
       }
-      let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
+      let isDisabled: boolean | { display: React.ReactNode } = Boolean(
+        props.isDisabled || isLocked
+      );
 
       // Consumers (e.g. Discover, Dashboard) opt into a disabled picker via `showDatePicker={{ disabled: true }}`.
       const consumerDatePicker =
@@ -985,7 +989,7 @@ export const QueryBarTopRow = React.memo(
         // readOnly — like the legacy picker's read-only date display, no time
         // filtering is possible but the auto-refresh play/pause button (which
         // ignores `readOnly`, unlike `disabled`) stays operable.
-        const pickerDisabled = Boolean(props.isDisabled) || isDatePickerDisabled;
+        const pickerDisabled = Boolean(props.isDisabled || isLocked) || isDatePickerDisabled;
         datePicker = (
           <>
             {(isDatePickerDisabled || isAutoRefreshOnly) && (
@@ -1202,8 +1206,8 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
-          {props.isLoading && propsOnCancel && renderCancelButton()}
-          {(!props.isLoading || !propsOnCancel) && updateButton}
+          {isLocked && renderCancelButton()}
+          {!isLocked && updateButton}
         </EuiFlexItem>
       );
 
@@ -1251,7 +1255,7 @@ export const QueryBarTopRow = React.memo(
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
               trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-              isDisabled={props.isDisabled}
+              isDisabled={props.isDisabled || isLocked}
             />
           </EuiFlexItem>
         );
@@ -1273,7 +1277,7 @@ export const QueryBarTopRow = React.memo(
                 size: 's',
                 display: 'empty',
               }}
-              isDisabled={props.isDisabled}
+              isDisabled={props.isDisabled || isLocked}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />
           </EuiFlexItem>
