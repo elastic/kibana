@@ -15,11 +15,11 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 1. The user's request in \`instructions\`, when given. It may override the sizes below.
 2. Stability: a panel without \`relayout\` keeps its position and size unless something changed around it (a panel with \`relayout\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged it by hand. A panel with \`relayout\` changes only what it names:
-   - \`all\`: new, or moved and edited. Place and size it.
+   - \`all\`: new, or moved and edited. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
    - \`position\`: moved to another section or the top level. Place it and keep its size.
-   - \`size\`: content edited. Keep its position and size it for the new content.
+   - \`size\`: content edited. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
 3. No gaps and no overlaps.
-4. Sizes by chart type.
+4. Sizes by chart type. These decide \`w\` and \`h\` for every panel with \`relayout: all\` or \`relayout: size\`.
 
 ## Sizes by chart type
 
@@ -49,7 +49,7 @@ Panels are listed in reading order (by \`y\`, then \`x\`). When a panel moves, g
 
 - Every panel below the change moves by the same number of rows, so rows further down stay intact. If you push a row down by 7, push every row under it down by 7 too.
 - Panels displaced from a row go to a row of their own or fill a gap; they never land on top of another panel.
-- Before answering, check every row from top to bottom: no two panels overlap (same rows and overlapping columns), and no row has an empty gap that a panel below could fill.
+- Before answering, check every row from top to bottom: no two panels overlap (same rows and overlapping columns), no row has an empty gap that a panel below could fill, and the widths of every row add up to exactly 48. If a row is short, widen its panels or pull a panel up.
 - Place panels with \`relayout: all\` or \`relayout: position\` by purpose, next to related panels; their current position is temporary, at the bottom of their container. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
 
 ## Sections
