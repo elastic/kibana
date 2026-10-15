@@ -3,7 +3,7 @@
 exports[`Marker renders agent marker correctly 1`] = `
 <div>
   <div
-    class="css-1oyht0a-MarkerContainer e1ttoyky0"
+    class="css-1oyht0a-MarkerContainer ewe3p2k0"
     style="left: 4.5px;"
   >
     <span
@@ -11,10 +11,10 @@ exports[`Marker renders agent marker correctly 1`] = `
       id="agent-wrapper"
     >
       <div
-        class="css-1ejn3a9-Container ex8slh61"
+        class="css-1ejn3a9-Container e7ziuc10"
       >
         <span
-          class="css-xbgcmn-Indicator ex8slh60"
+          class="css-xbgcmn-Indicator e7ziuc11"
           color="#8E9FBC"
           shape="circle"
         />
@@ -27,7 +27,7 @@ exports[`Marker renders agent marker correctly 1`] = `
 exports[`Marker renders error marker correctly 1`] = `
 <div>
   <div
-    class="css-1oyht0a-MarkerContainer e1ttoyky0"
+    class="css-1oyht0a-MarkerContainer ewe3p2k0"
     style="left: 4.5px;"
   >
     <div
@@ -35,11 +35,11 @@ exports[`Marker renders error marker correctly 1`] = `
       id="popover"
     >
       <div
-        class="e1vxv0ng0 css-lzkl4t-Container-Button ex8slh61"
+        class="ed78xii2 css-lzkl4t-Container-Button e7ziuc10"
         data-test-subj="popover"
       >
         <span
-          class="css-1p2bud6-Indicator ex8slh60"
+          class="css-1p2bud6-Indicator e7ziuc11"
           color="#C61E25"
           shape="square"
         />

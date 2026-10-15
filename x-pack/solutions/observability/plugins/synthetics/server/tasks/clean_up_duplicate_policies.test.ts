@@ -11,7 +11,10 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 describe('deleteDuplicatePackagePolicies', () => {
-  const makeServerSetup = (deleteMock: jest.Mock) => {
+  const makeServerSetup = (
+    deleteMock: jest.Mock,
+    bumpRevisionMock: jest.Mock = jest.fn().mockResolvedValue(undefined)
+  ) => {
     const logger = {
       info: jest.fn(),
       debug: jest.fn(),
@@ -25,10 +28,30 @@ describe('deleteDuplicatePackagePolicies', () => {
           },
         },
       },
+      fleet: {
+        runWithCache: (fn: () => Promise<unknown>) => fn(),
+        agentPolicyService: {
+          getByIds: jest.fn().mockResolvedValue([]),
+          bumpRevision: bumpRevisionMock,
+        },
+      },
+      coreStart: {
+        savedObjects: {
+          createInternalRepository: jest.fn(),
+          getUnsafeInternalClient: () => ({ asScopedToNamespace: jest.fn() }),
+        },
+        elasticsearch: { client: { asInternalUser: {} } },
+      },
       logger,
     } as unknown as SyntheticsServerSetup;
-    return { serverSetup, logger };
+    return { serverSetup, logger, bumpRevisionMock };
   };
+
+  const deleted = (id: string, policyIds: string[]) => ({
+    id,
+    success: true,
+    policy_ids: policyIds,
+  });
 
   test('does nothing and logs when packagePoliciesToDelete is empty', async () => {
     const deleteMock = jest.fn();
@@ -67,6 +90,7 @@ describe('deleteDuplicatePackagePolicies', () => {
       force: true,
       ignoreMissing: true,
       spaceIds: ['*'],
+      bumpRevision: false,
     });
   });
 
@@ -101,16 +125,82 @@ describe('deleteDuplicatePackagePolicies', () => {
       force: true,
       ignoreMissing: true,
       spaceIds: ['*'],
+      bumpRevision: false,
     });
     expect(deleteMock).toHaveBeenNthCalledWith(2, soClient, esClient, secondBatch, {
       force: true,
       ignoreMissing: true,
       spaceIds: ['*'],
+      bumpRevision: false,
     });
     expect(deleteMock).toHaveBeenNthCalledWith(3, soClient, esClient, thirdBatch, {
       force: true,
       ignoreMissing: true,
       spaceIds: ['*'],
+      bumpRevision: false,
     });
+  });
+
+  test('bumps each agent policy once, after every batch is deleted', async () => {
+    const order: string[] = [];
+    const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
+      order.push(`delete:${batch.length}`);
+      return Promise.resolve(batch.map((id) => deleted(id, ['agent-a', 'agent-b'])));
+    });
+    const bumpRevisionMock = jest.fn().mockImplementation(async (_so, _es, policyId: string) => {
+      order.push(`bump:${policyId}`);
+    });
+    const { serverSetup } = makeServerSetup(deleteMock, bumpRevisionMock);
+    const packages = Array.from({ length: 150 }, (_, i) => `p-${i + 1}`);
+
+    await deleteDuplicatePackagePolicies(
+      packages,
+      {} as SavedObjectsClientContract,
+      {} as ElasticsearchClient,
+      serverSetup
+    );
+
+    expect(order).toEqual(['delete:100', 'delete:50', 'bump:agent-a', 'bump:agent-b']);
+  });
+
+  test('still bumps agent policies of earlier batches when a later batch fails', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockImplementationOnce((_so, _es, batch: string[]) =>
+        Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])))
+      )
+      .mockRejectedValueOnce(new Error('fleet unavailable'));
+    const { serverSetup, bumpRevisionMock } = makeServerSetup(deleteMock);
+    const packages = Array.from({ length: 150 }, (_, i) => `p-${i + 1}`);
+
+    await expect(
+      deleteDuplicatePackagePolicies(
+        packages,
+        {} as SavedObjectsClientContract,
+        {} as ElasticsearchClient,
+        serverSetup
+      )
+    ).rejects.toThrow('fleet unavailable');
+
+    expect(bumpRevisionMock.mock.calls.map((call) => call[2])).toEqual(['agent-a']);
+  });
+
+  test('bumps only agent policies whose package policies were actually deleted', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockResolvedValue([
+        deleted('p-1', ['agent-a']),
+        { id: 'p-2', success: false, policy_ids: ['agent-b'] },
+      ]);
+    const { serverSetup, bumpRevisionMock } = makeServerSetup(deleteMock);
+
+    await deleteDuplicatePackagePolicies(
+      ['p-1', 'p-2'],
+      {} as SavedObjectsClientContract,
+      {} as ElasticsearchClient,
+      serverSetup
+    );
+
+    expect(bumpRevisionMock.mock.calls.map((call) => call[2])).toEqual(['agent-a']);
   });
 });

@@ -91,9 +91,9 @@ const getSha256Hash = async (filePath) => {
       'pr',
       'list',
       '--search',
-      String(`is:open is:pr head:${branchName} base:main`),
-      '--author',
-      process.env.KIBANA_MACHINE_USERNAME,
+      String(
+        `is:open is:pr head:${branchName} base:main (author:${process.env.KIBANA_MACHINE_USERNAME} OR author:app/elastic-vault-github-plugin-prod)`
+      ),
       '--limit',
       '1',
       '--json',
@@ -110,7 +110,7 @@ const getSha256Hash = async (filePath) => {
     );
 
     await $(
-      'ts-node',
+      'node',
       [
         resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts'),
         '--message',
@@ -189,7 +189,7 @@ const getSha256Hash = async (filePath) => {
   );
 
   /**
-   * @type {import('./transform_path_file').ChromiumUpdateConfigMap}
+   * @type {import('./transform_path_file.cjs').ChromiumUpdateConfigMap}
    */
   const config = {};
 
@@ -297,7 +297,7 @@ const getSha256Hash = async (filePath) => {
       `--transform`,
       resolve(
         buildRoot,
-        '.buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/transform_path_file.js'
+        '.buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/transform_path_file.cjs'
       ),
       '../paths.ts',
       `--updateConfig=${JSON.stringify(config)}`,
@@ -355,7 +355,7 @@ const getSha256Hash = async (filePath) => {
   console.log('---Providing feedback to issue \n');
 
   await $(
-    'ts-node',
+    'node',
     [
       resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts'),
       '--message',

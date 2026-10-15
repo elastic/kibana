@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../affected-packages', () => ({
+jest.mock('../../affected-packages/index.ts', () => ({
   ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: ['always/jest.integration.config.js'],
   CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
   CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT'],
@@ -19,13 +19,13 @@ jest.mock('../../affected-packages', () => ({
     files.some((f) => critical.includes(f)),
 }));
 
-jest.mock('./jest_configs', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
+jest.mock('./jest_configs.ts', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
 
-import type { SelectiveTestingContext } from './selective_testing';
+import type { SelectiveTestingContext } from './selective_testing.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
-} from './selective_testing';
+} from './selective_testing.ts';
 
 const context = (
   affected: string[],
