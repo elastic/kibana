@@ -18,7 +18,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ViewKiContentLayout } from '../components/ki/view/view_ki_content_layout';
 import { ViewKiRawJsonPanel } from '../components/ki/view/content/view_ki_raw_json_panel';
 import { getViewKiHeaderBadges } from '../components/ki/view/metadata/view_ki_header_badges';
-import { useViewKi } from '../hooks/use_view_ki';
+import { useKi } from '../hooks/use_ki';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
@@ -51,7 +51,7 @@ export const ViewKiPage = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const index = searchParams.get('index') ?? '';
 
-  const { ki, isLoading, error } = useViewKi({
+  const { ki, isLoading, error } = useKi({
     aiIndexId,
     kiId,
     index,
