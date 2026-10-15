@@ -189,6 +189,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
               parsed: invocationResult.parsed,
               schema: context.input.schema,
               responseMetadata: invocationResult.raw?.response_metadata,
+              logger: context.logger,
             }),
             metadata: buildMetadata(invocationResult.raw, resolvedConnectorId),
           },

@@ -86,10 +86,137 @@ describe('extractStructuredContent', () => {
     });
   });
 
-  it('throws when the wrapped value does not validate and the arguments are not valid either', () => {
-    expect(() =>
-      extractStructuredContent({ parsed: { response: { name: 5 } }, schema: objectSchema })
-    ).toThrow(ExecutionError);
+  describe('wrapped value that breaks the schema (lenient)', () => {
+    const boundedSchema = {
+      type: 'object',
+      properties: {
+        rationale: { type: 'string', maxLength: 5 },
+        factors: { type: 'array', items: { type: 'string' }, maxItems: 1 },
+      },
+      required: ['rationale'],
+    };
+    const outOfBounds = { rationale: 'far too long', factors: ['a', 'b'] };
+
+    it('returns the wrapped value and logs a warning naming the failing paths', () => {
+      const logger = { warn: jest.fn() };
+      expect(
+        extractStructuredContent({
+          parsed: { response: outOfBounds },
+          schema: boundedSchema,
+          logger,
+        })
+      ).toBe(outOfBounds);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      const message = logger.warn.mock.calls[0][0] as string;
+      expect(message).toContain('rationale');
+      expect(message).toContain('factors');
+    });
+
+    it('does not log when the wrapped value is valid', () => {
+      const logger = { warn: jest.fn() };
+      extractStructuredContent({
+        parsed: { response: { rationale: 'ok' } },
+        schema: boundedSchema,
+        logger,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns a wrapped value of the wrong type (primitive for an object schema)', () => {
+      const logger = { warn: jest.fn() };
+      expect(
+        extractStructuredContent({ parsed: { response: 5 }, schema: objectSchema, logger })
+      ).toBe(5);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw when no logger is given', () => {
+      expect(
+        extractStructuredContent({ parsed: { response: outOfBounds }, schema: boundedSchema })
+      ).toBe(outOfBounds);
+    });
+
+    it('still throws for non-matching unwrapped arguments without a wrapped value', () => {
+      expect(() =>
+        extractStructuredContent({ parsed: { rationale: 'far too long' }, schema: boundedSchema })
+      ).toThrow(ExecutionError);
+    });
+  });
+
+  describe('unwrapped arguments carrying a `response` key the schema does not declare', () => {
+    const permissive = { type: 'object' };
+
+    it('treats a non-null `response` as the wrapped answer, not as unwrapped content', () => {
+      expect(
+        extractStructuredContent({ parsed: { response: 'hi', other: 1 }, schema: permissive })
+      ).toBe('hi');
+    });
+
+    it('does so even when the wrapped value fails validation, with a warning', () => {
+      const logger = { warn: jest.fn() };
+      expect(
+        extractStructuredContent({
+          parsed: { response: 'hi', other: 1 },
+          schema: { type: 'object', properties: { other: { type: 'number' } } },
+          logger,
+        })
+      ).toBe('hi');
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects a null `response` next to other keys when the schema does not declare it', () => {
+      expect(() =>
+        extractStructuredContent({ parsed: { response: null, other: 1 }, schema: permissive })
+      ).toThrow(ExecutionError);
+    });
+
+    it('accepts permissive unwrapped arguments when `response` is absent', () => {
+      expect(extractStructuredContent({ parsed: { other: 1 }, schema: permissive })).toEqual({
+        other: 1,
+      });
+    });
+
+    it('accepts unwrapped arguments that carry `response` when the schema declares it', () => {
+      expect(
+        extractStructuredContent({
+          parsed: { response: 'hi', other: 1 },
+          schema: { type: 'object', properties: { response: { type: 'string' } } },
+        })
+      ).toEqual({ response: 'hi', other: 1 });
+    });
+  });
+
+  describe('converter coverage', () => {
+    it('accepts date-time values with a UTC offset on the wrapped path', () => {
+      const schema = {
+        type: 'object',
+        properties: { at: { type: 'string', format: 'date-time' } },
+        required: ['at'],
+      };
+      const logger = { warn: jest.fn() };
+      const value = { at: '2026-10-15T10:00:00+02:00' };
+      expect(extractStructuredContent({ parsed: { response: value }, schema, logger })).toBe(value);
+    });
+
+    it('pins the converter behaviour for date-time with an offset on the unwrapped path', () => {
+      const schema = {
+        type: 'object',
+        properties: { at: { type: 'string', format: 'date-time' } },
+        required: ['at'],
+      };
+      const run = () =>
+        extractStructuredContent({ parsed: { at: '2026-10-15T10:00:00+02:00' }, schema });
+      // Known convertJsonSchemaToZod limitation (shared code, not changed here): offset date-times are
+      // rejected, so a model that drops the wrapper with such a value fails the step.
+      expect(run).toThrow(ExecutionError);
+    });
+
+    it.each([
+      ['an empty schema', {}],
+      ['a root $ref', { $ref: '#/$defs/thing', $defs: { thing: { type: 'object' } } }],
+    ])('accepts unwrapped junk for %s because the converter validates nothing', (_, schema) => {
+      expect(extractStructuredContent({ parsed: { junk: true }, schema })).toEqual({ junk: true });
+    });
   });
 
   it.each([

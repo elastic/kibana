@@ -30,39 +30,58 @@ export const wrapStructuredOutputSchema = (schema: unknown) => ({
 /**
  * Reads the step content out of the tool-call arguments returned by the model.
  *
- * Models do not always honor the `{ response: ... }` wrapper; some return the inner object at the
- * top level. Accepted, in order:
- *  1. wrapped: `{ response: <value> }` where the value validates against the user's schema;
- *  2. unwrapped: the arguments themselves validate against the user's schema;
- * Anything else throws, so a step can never complete with empty content.
+ * Models do not always honor the `{ response: ... }` wrapper or the bounds of the user's schema.
+ * Resolution order:
+ *  1. wrapped and valid: `{ response: <value> }` where the value validates against the schema;
+ *  2. unwrapped and valid: the arguments themselves validate against the schema. Arguments that
+ *     carry a non-null `response` key the schema does not declare are never taken as unwrapped
+ *     content;
+ *  3. wrapped but out of schema: a non-null `response` is returned as is and a warning naming the
+ *     failing paths is logged, so one out-of-bounds field does not discard the whole answer;
+ *  4. anything else (not an object, `{}`, missing or null `response` with non-matching arguments)
+ *     throws, so a step can never complete with empty content.
  */
 export const extractStructuredContent = ({
   parsed,
   schema,
   responseMetadata,
+  logger,
 }: {
   parsed: unknown;
   schema: unknown;
   responseMetadata?: Record<string, unknown>;
+  logger?: { warn: (message: string) => void };
 }): unknown => {
   if (isPlainObject(parsed)) {
-    const innerValidator = convertJsonSchemaToZod(schema as JSONSchema7);
-    const conforms = (value: unknown) => innerValidator.safeParse(value).success;
+    const jsonSchema = schema as JSONSchema7;
+    const validator = convertJsonSchemaToZod(jsonSchema);
 
     const wrapped = parsed[STRUCTURED_OUTPUT_WRAPPER_PROPERTY];
-    if (wrapped !== undefined && conforms(wrapped)) {
+    const hasWrapped = wrapped !== undefined && wrapped !== null;
+    const wrappedResult = hasWrapped ? validator.safeParse(wrapped) : undefined;
+    if (wrappedResult?.success) {
       return wrapped;
     }
 
-    // `{ response: <invalid> }` is a wrapped answer that failed validation, not an unwrapped object
-    // that happens to be shaped like the wrapper, unless the user's schema declares `response` itself.
-    const declaresResponseProperty = isPlainObject((schema as JSONSchema7)?.properties)
-      ? STRUCTURED_OUTPUT_WRAPPER_PROPERTY in (schema as JSONSchema7).properties!
+    const declaresResponseProperty = isPlainObject(jsonSchema?.properties)
+      ? STRUCTURED_OUTPUT_WRAPPER_PROPERTY in jsonSchema.properties
       : false;
-    const keys = Object.keys(parsed).filter((key) => parsed[key] !== undefined);
-    const onlyWrapperKey = keys.length === 1 && keys[0] === STRUCTURED_OUTPUT_WRAPPER_PROPERTY;
-    if (keys.length > 0 && !(onlyWrapperKey && !declaresResponseProperty) && conforms(parsed)) {
+    const hasContent = Object.keys(parsed).some((key) => parsed[key] !== undefined);
+    const mayBeUnwrapped =
+      parsed[STRUCTURED_OUTPUT_WRAPPER_PROPERTY] === undefined || declaresResponseProperty;
+    if (hasContent && mayBeUnwrapped && validator.safeParse(parsed).success) {
       return parsed;
+    }
+
+    if (hasWrapped) {
+      const failingPaths = (
+        wrappedResult && !wrappedResult.success ? wrappedResult.error.issues : []
+      ).map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`);
+      logger?.warn(
+        `The model response does not match the step "schema"; returning it as is. ` +
+          `Failing paths: ${failingPaths.join('; ')}`
+      );
+      return wrapped;
     }
   }
 
@@ -70,8 +89,8 @@ export const extractStructuredContent = ({
     type: 'InvalidModelResponse',
     message:
       `The model response does not match the expected structured output. Expected an object ` +
-      `with a "${STRUCTURED_OUTPUT_WRAPPER_PROPERTY}" property holding a value that matches the ` +
-      `step "schema", or a value that directly matches the "schema".`,
+      `with a non-null "${STRUCTURED_OUTPUT_WRAPPER_PROPERTY}" property, or a value that directly ` +
+      `matches the step "schema".`,
     details: {
       receivedType: parsed === null ? 'null' : Array.isArray(parsed) ? 'array' : typeof parsed,
       receivedKeys: isPlainObject(parsed) ? Object.keys(parsed) : [],

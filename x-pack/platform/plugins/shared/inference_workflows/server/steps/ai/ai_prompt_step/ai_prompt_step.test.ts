@@ -461,6 +461,12 @@ describe('aiPromptStepDefinition', () => {
           );
         });
 
+        it('returns a wrapped value that breaks the schema and logs a warning through the step logger', async () => {
+          const result = await run({ response: { summary: 5, sentiment: 'good' } });
+          expect(result.output.content).toEqual({ summary: 5, sentiment: 'good' });
+          expect(mockContext.logger.warn).toHaveBeenCalledWith(expect.stringContaining('summary'));
+        });
+
         it.each([[undefined], [null], [{}], [{ response: null }], [{ response: undefined }]])(
           'a completed step with no content is impossible: parsed=%j fails the step',
           async (parsed) => {
