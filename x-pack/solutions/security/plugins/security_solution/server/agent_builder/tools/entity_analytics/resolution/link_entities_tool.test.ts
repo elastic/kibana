@@ -549,6 +549,46 @@ describe('linkEntitiesTool', () => {
         ]);
       });
 
+      it('does not offer a flip when the named target heads a group of its own', async () => {
+        mockResolveEntityIds.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:jsmith123' }],
+          unresolved: [],
+        });
+        mockRequireResolvedEntity.mockResolvedValueOnce({
+          ok: true,
+          identity: {
+            identifierType: 'user',
+            identifier: 'jsmith.contractor',
+            entityStoreId: 'user:jsmith.contractor',
+          },
+        });
+        mockFindEntitiesWithAliases.mockResolvedValueOnce(
+          new Map([
+            ['user:jsmith123', ['user:jsmith.old']],
+            ['user:jsmith.contractor', ['user:jsmith.temp']],
+          ])
+        );
+        const ctx = unpromptedCtx();
+
+        const result = (await tool.handler(
+          { targetId: 'jsmith.contractor', entityIds: ['jsmith123'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        // Both sides have aliases, so reversing the roles would hit the same guard.
+        expect(mockFindEntitiesWithAliases).toHaveBeenCalledWith([
+          'user:jsmith123',
+          'user:jsmith.contractor',
+        ]);
+        expect(mockLinkEntities).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.data.message).toContain('cannot merge existing resolution groups');
+        expect(other.data.message).not.toContain('call this tool again with');
+        expect(other.data.groupTargets).toEqual([
+          { euid: 'user:jsmith123', aliases: ['user:jsmith.old'] },
+        ]);
+      });
+
       it('still confirms when the only group head in the batch is the named target', async () => {
         mockResolveEntityIds.mockResolvedValueOnce({
           resolved: [{ euid: 'user:jsmith.contractor' }],

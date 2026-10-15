@@ -249,6 +249,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
         // constrains both a proposed target and an explicitly named one.
         const aliasesByGroupTarget = await findExistingGroupTargets(
           resolved,
+          explicitTargetEuid,
           entityStore.createResolutionClient(client, spaceId)
         );
 
@@ -262,10 +263,17 @@ Entity references that don't resolve to a canonical id are excluded from the bat
 
           if (blockedGroupTargets.length > 0) {
             const blocked = blockedGroupTargets.map((euid) => `\`${euid}\``).join(', ');
-            const message =
-              blockedGroupTargets.length === 1
-                ? `Cannot link to \`${explicitTargetEuid}\`: ${blocked} already heads a resolution group of its own, and an entity that has aliases cannot itself become an alias. Tell the user and offer both ways out: link \`${explicitTargetEuid}\` into that group instead (call this tool again with ${blocked} as \`targetId\`, which makes it the canonical entity rather than \`${explicitTargetEuid}\`), or unlink that group's aliases first if \`${explicitTargetEuid}\` has to stay canonical.`
-                : `Cannot link to \`${explicitTargetEuid}\`: ${blocked} each already head a resolution group of their own, and an entity that has aliases cannot itself become an alias. This tool cannot merge existing resolution groups. Tell the user that the aliases of all but one of those groups have to be unlinked first.`;
+            // Reversing the roles only helps when the named target can still become an alias;
+            // if it heads a group too, the retry would hit this same guard.
+            const canReverse =
+              blockedGroupTargets.length === 1 && !aliasesByGroupTarget.has(explicitTargetEuid);
+            const message = canReverse
+              ? `Cannot link to \`${explicitTargetEuid}\`: ${blocked} already heads a resolution group of its own, and an entity that has aliases cannot itself become an alias. Tell the user and offer both ways out: link \`${explicitTargetEuid}\` into that group instead (call this tool again with ${blocked} as \`targetId\`, which makes it the canonical entity rather than \`${explicitTargetEuid}\`), or unlink that group's aliases first if \`${explicitTargetEuid}\` has to stay canonical.`
+              : `Cannot link to \`${explicitTargetEuid}\`: ${blocked} ${
+                  blockedGroupTargets.length === 1
+                    ? 'already heads a resolution group of its own'
+                    : 'each already head a resolution group of their own'
+                }, and an entity that has aliases cannot itself become an alias. This tool cannot merge existing resolution groups. Tell the user that the aliases of all but one of the groups involved have to be unlinked first.`;
             return {
               results: [
                 {
@@ -379,15 +387,19 @@ const NO_TARGET_PROPOSAL_MESSAGE: Record<NoTargetProposalReason, string> = {
 };
 
 /**
- * Looks up which of the resolved entities already head a resolution group, mapped to their
- * current aliases. Entities that are themselves aliases are excluded: they can never be a
- * group target. These are existing groups, not the target of this link operation.
+ * Looks up which of the given entities already head a resolution group, mapped to their
+ * current aliases. Resolved entities that are themselves aliases are excluded: they can
+ * never be a group target. These are existing groups, not the target of this link operation.
  */
 const findExistingGroupTargets = async (
   resolved: readonly ResolvedEntityResult[],
+  explicitTargetEuid: string | undefined,
   resolutionClient: ResolutionClient
 ): Promise<Map<string, string[]>> => {
   const euids = resolved.filter(({ resolvedTo }) => !resolvedTo).map(({ euid }) => euid);
+  if (explicitTargetEuid && !euids.includes(explicitTargetEuid)) {
+    euids.push(explicitTargetEuid);
+  }
   if (euids.length === 0) {
     return new Map();
   }
