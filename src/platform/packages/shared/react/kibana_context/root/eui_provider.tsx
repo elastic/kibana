@@ -18,7 +18,7 @@ import createCache from '@emotion/cache';
 // import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import type { EuiProviderProps } from '@elastic/eui';
-import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
+import { EUI_BREAKPOINT_CONTAINER_ATTRIBUTE, EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -75,8 +75,9 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
-const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
-const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+// Flyouts are scoped to the app area wrapper, which is also the breakpoint container. Push padding
+// then shrinks the container's content box, so breakpoints follow the area left next to a push flyout.
+const FLYOUT_CONTAINER_SELECTOR = `[${EUI_BREAKPOINT_CONTAINER_ATTRIBUTE}]`;
 
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
@@ -154,6 +155,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         highContrastMode,
         theme: _theme,
         componentDefaults,
+        // EUI CSS breakpoints follow the nearest breakpoint container (the app area or `body`). JS breakpoints keep the window.
+        breakpointContainer: true,
       }}
     >
       {children}
