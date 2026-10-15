@@ -101,6 +101,7 @@ export async function processScoutReports(
     pipeline,
     prependTitle,
     updateGithub,
+    createIssues,
     indexInEs,
     reportUpdate,
   } = params;
@@ -163,6 +164,15 @@ export async function processScoutReports(
         }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         recordGithubIssue(failure);
+        continue;
+      }
+
+      if (!createIssues) {
+        log.info(
+          `No issue opened for new Scout failure, the daily flaky suite reporter files them: ${failure.classname} - ${failure.name}`
+        );
+        failure.failureCount = 0;
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
 
