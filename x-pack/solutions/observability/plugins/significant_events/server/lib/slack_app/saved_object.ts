@@ -26,10 +26,9 @@ const relayAppConnectionAttributesV1 = schema.object({
     schema.literal('connected'),
     schema.literal('error'),
   ]),
-  // Id of the managed ES API key minted for the Relay; kept so we can invalidate it on disconnect.
+  // Id of the managed ES API key minted for the Relay; kept so we can invalidate it
+  // on disconnect. The secret itself is never stored (it is handed to the Relay).
   apiKeyId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  // UIAM service-account id. Not a secret.
-  serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
   claimId: schema.maybe(schema.string()),
@@ -49,7 +48,12 @@ const relayAppConnectionAttributesV2 = relayAppConnectionAttributesV1.extends({
   tenantUrl: schema.maybe(schema.string()),
 });
 
-export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV2>;
+const relayAppConnectionAttributesV3 = relayAppConnectionAttributesV2.extends({
+  // UIAM service-account id. Not a secret.
+  serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+});
+
+export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV3>;
 
 export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
   name: RELAY_APP_CONNECTION_SO_TYPE,
@@ -80,6 +84,13 @@ export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
       schemas: {
         forwardCompatibility: relayAppConnectionAttributesV2.extends({}, { unknowns: 'ignore' }),
         create: relayAppConnectionAttributesV2,
+      },
+    },
+    '3': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: relayAppConnectionAttributesV3.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV3,
       },
     },
   },
