@@ -2522,6 +2522,9 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-charts-elastic':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-charts-elastic
       '@kbn/isomer-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-components
@@ -9046,6 +9049,8 @@ importers:
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
   x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-charts-elastic: {}
 
   x-pack/platform/packages/shared/isomer/isomer-components: {}
 

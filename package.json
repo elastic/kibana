@@ -864,6 +864,7 @@
     "@kbn/io-ts-utils": "workspace:*",
     "@kbn/ipynb": "workspace:*",
     "@kbn/isomer": "workspace:*",
+    "@kbn/isomer-charts-elastic": "workspace:*",
     "@kbn/isomer-components": "workspace:*",
     "@kbn/isomer-plugin": "workspace:*",
     "@kbn/isomer-primitives-charts": "workspace:*",

@@ -1285,6 +1285,7 @@ packages:
   - 'x-pack/platform/packages/shared/index-management/index_management_shared_types'
   - 'x-pack/platform/packages/shared/ingest-pipelines'
   - 'x-pack/platform/packages/shared/isomer/isomer'
+  - 'x-pack/platform/packages/shared/isomer/isomer-charts-elastic'
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
   - 'x-pack/platform/packages/shared/isomer/isomer-primitives-charts'
   - 'x-pack/platform/packages/shared/isomer/isomer-primitives-vega'

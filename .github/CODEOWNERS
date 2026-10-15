@@ -1082,6 +1082,7 @@ x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_manag
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-charts-elastic @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-primitives-charts @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-primitives-vega @elastic/appex-sharedux
