@@ -54,6 +54,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import { isScreenshotExportType } from './lib/screenshotting_availability';
 import { isServerlessExportEnabled } from './lib/serverless_export_gate';
 import type { IReport, ReportingStore } from './lib/store';
 import type { ReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from './lib/tasks';
@@ -161,9 +162,16 @@ export class ReportingCore {
     return this.packageInfo;
   }
 
-  /** Whether serverless feature flags allow running or creating reports of this export type. */
+  /**
+   * Whether reports of this export type can be created and run. PDF and PNG need a screenshotting
+   * implementation and, on serverless, an enabled feature flag.
+   */
   public async isExportTypeEnabled(exportTypeId: string, scheduleType: ScheduleType) {
-    const { featureFlags } = await this.getPluginStartDeps();
+    const { featureFlags, screenshotting } = await this.getPluginStartDeps();
+    if (!screenshotting && isScreenshotExportType(exportTypeId)) {
+      return false;
+    }
+
     return isServerlessExportEnabled({
       isServerless: this.packageInfo.buildFlavor === 'serverless',
       featureFlags,

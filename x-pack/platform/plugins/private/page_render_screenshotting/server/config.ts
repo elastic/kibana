@@ -6,11 +6,17 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const pluginConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  // Serverless only. Elsewhere Reporting renders with the local `screenshotting` plugin, and there is
+  // no UIAM to authenticate to the service with.
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.literal(false),
+    options: { defaultValue: false },
+  }),
 
   /** Base URL of the page-render-service. */
   url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),

@@ -18,6 +18,10 @@ import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
+import {
+  getScreenshotting,
+  registerScreenshottingCapabilitiesSwitcher,
+} from './lib/screenshotting_availability';
 import { registerRoutes } from './routes';
 import type {
   ReportingSetup,
@@ -88,6 +92,7 @@ export class ReportingPlugin
 
     registerUiSettings(core);
     registerDeprecations({ core });
+    registerScreenshottingCapabilitiesSwitcher(core);
 
     if (plugins.usageCollection) {
       registerReportingUsageCollector(
@@ -145,7 +150,7 @@ export class ReportingPlugin
         store,
         securityService: core.security,
         ...plugins,
-        screenshotting: plugins.pageRenderScreenshotting ?? plugins.screenshotting,
+        screenshotting: getScreenshotting(plugins),
       });
 
       // Note: this must be called after ReportingCore.pluginStart

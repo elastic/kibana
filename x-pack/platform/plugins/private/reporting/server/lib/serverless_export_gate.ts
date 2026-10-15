@@ -7,19 +7,12 @@
 
 import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import { ScheduleType } from '@kbn/reporting-server';
 import {
   REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED,
   REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED,
 } from '../../common/feature_flags';
-
-const SCREENSHOT_EXPORT_TYPE_IDS = new Set([
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-]);
+import { isScreenshotExportType } from './screenshotting_availability';
 
 export async function isServerlessExportEnabled({
   isServerless,
@@ -32,7 +25,7 @@ export async function isServerlessExportEnabled({
   exportTypeId: string;
   scheduleType: ScheduleType;
 }): Promise<boolean> {
-  if (!isServerless || !SCREENSHOT_EXPORT_TYPE_IDS.has(exportTypeId)) {
+  if (!isServerless || !isScreenshotExportType(exportTypeId)) {
     return true;
   }
 

@@ -9,10 +9,26 @@ import { config } from './config';
 
 describe('config schema', () => {
   it('is disabled by default', () => {
-    expect(config.schema.validate({})).toEqual({
+    expect(config.schema.validate({}, { serverless: true })).toEqual({
       enabled: false,
       ssl: { verificationMode: 'full' },
     });
+    expect(config.schema.validate({}, { serverless: false })).toEqual({
+      enabled: false,
+      ssl: { verificationMode: 'full' },
+    });
+  });
+
+  it('can be enabled on serverless', () => {
+    expect(config.schema.validate({ enabled: true }, { serverless: true })).toMatchObject({
+      enabled: true,
+    });
+  });
+
+  it('cannot be enabled outside serverless', () => {
+    expect(() => config.schema.validate({ enabled: true }, { serverless: false })).toThrow(
+      /enabled/
+    );
   });
 
   it('accepts an https kibanaBaseUrl', () => {

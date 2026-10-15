@@ -19,7 +19,9 @@ xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /path/to/ca.crt
 xpack.pageRenderScreenshotting.kibanaBaseUrl: https://kibana.example.com
 ```
 
-The plugin is disabled by default.
+The plugin is disabled by default, and can only be enabled on serverless. Setting `enabled: true` on any other offering fails config validation at startup.
+
+If no screenshotting implementation is enabled, Reporting hides PDF and PNG reports and rejects requests to create or run them.
 
 On serverless, PDF and PNG reports are also gated by feature flags: `reporting.serverlessOnDemandExportEnabled` for on-demand reports and `reporting.serverlessScheduledExportEnabled` for scheduled reports. See `x-pack/platform/plugins/private/reporting/common/feature_flags.ts`.
 
