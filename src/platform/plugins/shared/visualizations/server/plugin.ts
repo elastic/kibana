@@ -26,11 +26,14 @@ import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embe
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
+import { getLegacyPanelMigrationRegistry } from './legacy_panel_migrations/registry';
+import { getLegacyVisPanelTypeMigration } from './legacy_panel_migrations/migrate_out';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
 {
   private readonly logger: Logger;
+  private readonly legacyPanelMigrationRegistry = getLegacyPanelMigrationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -61,6 +64,10 @@ export class VisualizationsPlugin
       getTransforms,
     });
 
+    plugins.embeddable.registerPanelTypeMigration(
+      getLegacyVisPanelTypeMigration(this.legacyPanelMigrationRegistry.getLegacyPanelMigration)
+    );
+
     plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new VisualizationsStorage({
@@ -72,7 +79,10 @@ export class VisualizationsPlugin
       },
     });
 
-    return { registerReadOnlyVisType };
+    return {
+      registerReadOnlyVisType,
+      registerLegacyPanelMigration: this.legacyPanelMigrationRegistry.registerLegacyPanelMigration,
+    };
   }
 
   public start(core: CoreStart) {
