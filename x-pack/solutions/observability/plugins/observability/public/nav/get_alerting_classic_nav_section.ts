@@ -23,8 +23,8 @@ import { observabilityAppId } from '../../common';
 import { ALERTS_PATH } from '../../common/locators/paths';
 import { canReadV1Alerts, getObservabilityAlertsLinkTitle } from './get_alerts_nav_panel';
 
-// After the unlabeled top section (100) and Streams (101), before the Logs/Infra sections (200+).
-const ALERTING_SECTION_SORT_KEY = 102;
+// Directly below the Overview section (100), before the remaining top entries (102) and Streams (103).
+const ALERTING_SECTION_SORT_KEY = 101;
 
 const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
   const entries: NavigationEntry[] = [];

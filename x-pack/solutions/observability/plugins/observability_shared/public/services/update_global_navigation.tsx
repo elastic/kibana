@@ -76,10 +76,9 @@ export function updateGlobalNavigation({
         case 'alerts':
           // Observability feature access only — cases-only users do not get alerts/rules nav.
           if (hasObsCapabilities) {
-            // The project side nav keeps the link so chrome can resolve the solution nav node.
             const alertsVisibleIn: AppDeepLinkLocations[] = showV1Alerts
               ? ['classicSideNav', 'projectSideNav', 'globalSearch']
-              : ['projectSideNav'];
+              : [];
             return { ...link, visibleIn: alertsVisibleIn };
           }
           return null;

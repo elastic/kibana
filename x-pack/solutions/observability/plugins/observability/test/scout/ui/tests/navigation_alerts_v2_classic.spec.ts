@@ -32,6 +32,7 @@ import {
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const NAV_ITEMS = {
+  overview: 'observability-nav-observability-overview-overview',
   alerts: 'observability-nav-observabilityAlerting-alerts',
   alertsClassicTable: 'observability-nav-observability-overview-alerts_(classic)',
   flatAlerts: 'observability-nav-observability-overview-alerts',
@@ -43,6 +44,12 @@ const ALERTING_SECTION_ITEMS = [
   NAV_ITEMS.alerts,
   NAV_ITEMS.actionPolicies,
   NAV_ITEMS.executionHistory,
+] as const;
+
+const ALL_ALERTING_ITEMS = [
+  ...ALERTING_SECTION_ITEMS,
+  NAV_ITEMS.alertsClassicTable,
+  NAV_ITEMS.flatAlerts,
 ] as const;
 
 const NAV_TARGETS = [
@@ -83,6 +90,44 @@ const expectNavItems = async (
   }
 };
 
+/**
+ * Logs in with `role` and asserts exactly `visible` of the Alerting entries render. Every role
+ * lands on the Alerting app, whose page template renders the sub-nav regardless of route access;
+ * Overview is always listed, so it anchors the wait for the sub-nav.
+ */
+const expectAlertingItemsForRole = async (
+  {
+    browserAuth,
+    page,
+    kbnClient,
+    scoutSpace,
+  }: {
+    browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> };
+    page: ScoutPage;
+    kbnClient: Parameters<typeof setAlertingV2NavSettings>[0];
+    scoutSpace: Parameters<typeof setAlertingV2NavSettings>[1];
+  },
+  role: KibanaRole,
+  visible: readonly string[],
+  { showV1AlertsTable = false }: { showV1AlertsTable?: boolean } = {}
+) => {
+  await setAlertingV2NavSettings(kbnClient, scoutSpace, { v2Enabled: true, showV1AlertsTable });
+  await browserAuth.loginWithCustomRole(role);
+  await gotoAlerting(page, '/alerts');
+
+  await expectNavItems(page, {
+    visible: [NAV_ITEMS.overview, ...visible],
+    hidden: ALL_ALERTING_ITEMS.filter((testSubj) => !visible.includes(testSubj)),
+  });
+
+  const heading = alertingHeading(page, NAV_ITEMS.overview);
+  if (visible.length === 0) {
+    await expect(heading).toBeHidden();
+    return;
+  }
+  await expect(heading).toBeVisible();
+};
+
 test.describe(
   'Classic Observability nav — Alerting section',
   { tag: tags.stateful.classic },
@@ -114,6 +159,22 @@ test.describe(
         visible: ALERTING_SECTION_ITEMS,
         hidden: [NAV_ITEMS.alertsClassicTable, NAV_ITEMS.flatAlerts],
       });
+    });
+
+    test('lists the Alerting section directly below Overview', async ({ browserAuth, page }) => {
+      await browserAuth.loginAsAdmin();
+      await gotoAlerting(page, '/alerts');
+
+      await expectNavItems(page, { visible: [NAV_ITEMS.overview, NAV_ITEMS.alerts], hidden: [] });
+
+      const navEntries = page.locator('[data-test-subj^="observability-nav-"]');
+      await expect
+        .poll(() =>
+          navEntries.evaluateAll((elements) =>
+            elements.slice(0, 2).map((element) => element.getAttribute('data-test-subj'))
+          )
+        )
+        .toStrictEqual([NAV_ITEMS.overview, NAV_ITEMS.alerts]);
     });
 
     for (const { name, navItem: target, urlRe } of NAV_TARGETS) {
@@ -169,23 +230,97 @@ test.describe(
       await expect(navItem(page, NAV_ITEMS.alertsClassicTable)).toBeHidden();
     });
 
-    test('lists only the destinations a restricted role can open', async ({
+    test('hides the Alerting section when the user has no alerting privileges', async ({
       browserAuth,
       page,
+      kbnClient,
+      scoutSpace,
     }) => {
-      const role: KibanaRole = observabilityAlertingNavRole({
-        alerting_v2_action_policies: ['read'],
-      });
-      await browserAuth.loginWithCustomRole(role);
-      await gotoAlerting(page, '/action-policies');
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole(),
+        []
+      );
+    });
 
-      await expect(alertingHeading(page, NAV_ITEMS.actionPolicies)).toBeVisible({
-        timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-      });
-      await expectNavItems(page, {
-        visible: [NAV_ITEMS.actionPolicies],
-        hidden: [NAV_ITEMS.alerts, NAV_ITEMS.executionHistory],
-      });
+    test('shows Alerts when the user has only v2 alerts read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
+        [NAV_ITEMS.alerts]
+      );
+    });
+
+    test('shows Alerts when the user has only v1 observability alerts read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
+        [NAV_ITEMS.alerts]
+      );
+    });
+
+    test('shows Alerts and Alerts (Classic) to a v1-only user when the V1 table is on', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
+        [NAV_ITEMS.alerts, NAV_ITEMS.alertsClassicTable],
+        { showV1AlertsTable: true }
+      );
+    });
+
+    test('hides Alerts (Classic) from a v2-only user when the V1 table is on', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
+        [NAV_ITEMS.alerts],
+        { showV1AlertsTable: true }
+      );
+    });
+
+    test('shows only Action Policies when the user has only v2 action policies read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_action_policies: ['read'] }),
+        [NAV_ITEMS.actionPolicies]
+      );
+    });
+
+    test('shows only Execution History when the user has only v2 execution history read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_execution_history: ['read'] }),
+        [NAV_ITEMS.executionHistory]
+      );
     });
 
     test('shows the flat Alerts entry and no Alerting section when v2 is off', async ({

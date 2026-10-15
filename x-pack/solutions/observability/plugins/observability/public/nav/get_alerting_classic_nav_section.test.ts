@@ -56,11 +56,11 @@ describe('getAlertingClassicNavSection', () => {
     expect(getAlertingClassicNavSection(core)).toEqual([]);
   });
 
-  it('returns the labeled section sorted after the top and Streams sections', () => {
+  it('returns the labeled section sorted directly after the Overview section', () => {
     setCapabilities(core, V2_CAPABILITIES);
 
     expect(getAlertingClassicNavSection(core)).toEqual([
-      expect.objectContaining({ label: 'Alerting', sortKey: 102 }),
+      expect.objectContaining({ label: 'Alerting', sortKey: 101 }),
     ]);
   });
 

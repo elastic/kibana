@@ -96,7 +96,7 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { getObservabilityAlertsLinkTitle } from './nav/get_alerts_nav_panel';
-import { getAlertingClassicNavSection } from './nav/get_alerting_classic_nav_section';
+import { getClassicNavTopSections } from './nav/get_classic_nav_top_sections';
 import { setInvestigationsClient } from './services/investigations_client';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -457,10 +457,8 @@ export class Plugin
                   //
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const isV2Enabled = isAlertingV2Enabled(coreStart);
-                  // With v2 on, the labeled Alerting section below owns the Alerts entries.
                   const alertsLinks: NavigationEntry[] = otherLinks
-                    .filter((link) => link.id === 'alerts' && !isV2Enabled)
+                    .filter((link) => link.id === 'alerts')
                     .map((link) => ({
                       app: observabilityAppId,
                       label: link.title,
@@ -475,20 +473,11 @@ export class Plugin
                       path: link.path ?? '',
                     }));
 
-                  return [
-                    {
-                      label: '',
-                      sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...alertsLinks,
-                        ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
-                    },
-                    ...getAlertingClassicNavSection(coreStart),
-                  ];
+                  return getClassicNavTopSections(coreStart, {
+                    overviewLinks: overviewLink,
+                    alertsLinks,
+                    trailingLinks: [...sloLink, ...casesLink, ...aiAssistantLink],
+                  });
                 })
               );
             })
@@ -509,7 +498,7 @@ export class Plugin
               return [
                 {
                   label: '',
-                  sortKey: 101,
+                  sortKey: 103,
                   entries: [
                     {
                       label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
