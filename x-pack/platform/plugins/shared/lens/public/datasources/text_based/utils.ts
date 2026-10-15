@@ -15,6 +15,8 @@ import type {
   TextBasedLayerColumn,
   TextBasedLayer,
 } from '@kbn/lens-common';
+import { staticValueOperationName } from '../form_based/dimension_panel/dimensions_editor_helpers';
+import { isValidNumber } from '../form_based/operations/definitions/helpers';
 
 export const MAX_NUM_OF_COLUMNS = 10;
 
@@ -90,8 +92,8 @@ export const reconcileQueryColumns = (
   columnsFromQuery: DatatableColumn[],
   preferredColumnIds: Set<string> = new Set()
 ): TextBasedLayerColumn[] => {
-  const staticColumns = existingColumns.filter((column) => column.valueSource?.type === 'static');
-  existingColumns = existingColumns.filter((column) => column.valueSource?.type !== 'static');
+  const staticColumns = existingColumns.filter(isStaticValueColumn);
+  existingColumns = existingColumns.filter((column) => !isStaticValueColumn(column));
   const usedColumnIds = new Set<string>();
   const findPreferredFirst = (
     predicate: (column: TextBasedLayerColumn) => boolean
@@ -312,3 +314,15 @@ export function updateColumnDropPartials({
     ],
   };
 }
+
+export const isStaticValueColumn = (column: TextBasedLayerColumn): boolean =>
+  column.operationType === staticValueOperationName;
+
+/** Same validation as the form-based static value operation. */
+export const isValidStaticValue = (value: string | undefined): value is string =>
+  isValidNumber(value, false, undefined, undefined, 15);
+
+export const removeStaticValue = (column: TextBasedLayerColumn): TextBasedLayerColumn => {
+  const { value, ...params } = column.params ?? {};
+  return { ...column, operationType: undefined, params: column.params ? params : undefined };
+};

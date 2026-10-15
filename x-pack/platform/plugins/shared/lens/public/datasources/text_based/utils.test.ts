@@ -32,7 +32,8 @@ describe('Text based languages utils', () => {
         columnId: 'threshold',
         fieldName: '42',
         meta: { type: 'number' },
-        valueSource: { type: 'static', value: 42 },
+        operationType: 'static_value',
+        params: { value: '42' },
       };
       expect(
         reconcileQueryColumns(

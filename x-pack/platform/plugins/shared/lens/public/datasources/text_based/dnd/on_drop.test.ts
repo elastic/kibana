@@ -30,23 +30,29 @@ describe('onDrop', () => {
       } as DatatableColumn;
     })
   );
-  describe.each<TextBasedLayerColumn>([
+  describe.each<{ description: string; referenceColumn: TextBasedLayerColumn }>([
     {
-      ...column1,
-      fieldName: '1000',
-      label: 'Threshold',
-      customLabel: true,
-      meta: { type: 'number' },
-      valueSource: { type: 'static', value: 1000 },
+      description: 'static',
+      referenceColumn: {
+        ...column1,
+        fieldName: '1000',
+        label: 'Threshold',
+        customLabel: true,
+        meta: { type: 'number' },
+        operationType: 'static_value',
+        params: { value: '1000' },
+      },
     },
     {
-      ...column1,
-      fieldName: 'threshold',
-      label: 'Threshold',
-      meta: { type: 'number' },
-      valueSource: { type: 'query' },
+      description: 'query',
+      referenceColumn: {
+        ...column1,
+        fieldName: 'threshold',
+        label: 'Threshold',
+        meta: { type: 'number' },
+      },
     },
-  ])('reference column $valueSource.type', (referenceColumn) => {
+  ])('reference column $description', ({ referenceColumn }) => {
     it.each([
       {
         dropType: 'duplicate_compatible' as const,

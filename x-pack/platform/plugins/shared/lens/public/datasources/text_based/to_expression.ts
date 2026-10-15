@@ -11,6 +11,8 @@ import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import type { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from '@kbn/lens-common';
 import type { OriginalColumn } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
+import { isStaticValueColumn, isValidStaticValue } from './utils';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,
@@ -21,18 +23,23 @@ function getExpressionForLayer(
     return null;
   }
 
-  const staticColumns = layer.columns.filter((column) => column.valueSource?.type === 'static');
-  const queryColumns = layer.columns.filter((column) => column.valueSource?.type !== 'static');
+  const staticColumns = layer.columns.filter(isStaticValueColumn);
+  const queryColumns = layer.columns.filter((column) => !isStaticValueColumn(column));
   if (!staticColumns.length && !queryColumns.length) return null;
-  const staticExpressions: ExpressionAstFunction[] = staticColumns.map((column) => ({
-    type: 'function',
-    function: 'mathColumn',
-    arguments: {
-      id: [column.columnId],
-      name: [column.customLabel ? column.label ?? column.fieldName : column.fieldName],
-      expression: [String(column.valueSource?.type === 'static' ? column.valueSource.value : 0)],
-    },
-  }));
+  // Mirrors the form-based static_value operation, including its invalid-value fallback.
+  const staticExpressions: ExpressionAstFunction[] = staticColumns.map((column) => {
+    const value = column.params?.value;
+    const isValid = isValidStaticValue(value);
+    return {
+      type: 'function',
+      function: isValid ? 'mathColumn' : 'mapColumn',
+      arguments: {
+        id: [column.columnId],
+        name: [column.customLabel ? column.label ?? column.fieldName : column.fieldName],
+        expression: [isValid ? value : String(DEFAULT_STATIC_VALUE)],
+      },
+    };
+  });
   if (!queryColumns.length) {
     return {
       type: 'expression',

@@ -206,28 +206,36 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'static',
                 fieldName: '1000',
-                valueSource: { type: 'static', value: 1000 },
+                operationType: 'static_value',
+                params: { value: '1000' },
               },
               {
                 columnId: 'duplicate',
                 fieldName: '1000',
-                valueSource: { type: 'static', value: 1000 },
+                operationType: 'static_value',
+                params: { value: '1000' },
               },
               {
                 columnId: 'negative',
                 fieldName: '-1.5',
-                valueSource: { type: 'static', value: -1.5 },
+                operationType: 'static_value',
+                params: { value: '-1.5' },
               },
-              { columnId: 'zero', fieldName: '0', valueSource: { type: 'static', value: 0 } },
+              {
+                columnId: 'zero',
+                fieldName: '0',
+                operationType: 'static_value',
+                params: { value: '0' },
+              },
               {
                 columnId: 'custom',
                 fieldName: '1000',
-                valueSource: { type: 'static', value: 1000 },
+                operationType: 'static_value',
+                params: { value: '1000' },
                 customLabel: true,
                 label: 'Target',
               },
-              { columnId: 'query', fieldName: 'threshold', valueSource: { type: 'query' } },
-              { columnId: 'legacy', fieldName: 'bytes' },
+              { columnId: 'query', fieldName: 'threshold' },
             ],
           },
         },
@@ -239,7 +247,6 @@ describe('Textbased Data Source', () => {
         zero: 'Static value: 0',
         custom: 'Target',
         query: 'threshold',
-        legacy: 'bytes',
       });
     });
 
@@ -635,7 +642,8 @@ describe('Textbased Data Source', () => {
           columnId: 'threshold',
           fieldName: '42',
           meta: { type: 'number' },
-          valueSource: { type: 'static', value: 42 },
+          operationType: 'static_value',
+          params: { value: '42' },
         },
       ]);
       expect(nextState.layers.reference.query).toEqual(state.layers.reference.query);

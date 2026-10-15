@@ -55,6 +55,7 @@ import {
   hasNumericColumn,
   isNotNumeric,
   isNumeric,
+  isStaticValueColumn,
   MAX_NUM_OF_COLUMNS,
   operationFromDataType,
   resolveTextBasedColumnType,
@@ -64,6 +65,7 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
+import { staticValueOperationName } from '../form_based/dimension_panel/dimensions_editor_helpers';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
@@ -630,7 +632,8 @@ export function getTextBasedDatasource({
                 {
                   columnId,
                   fieldName: String(staticValue),
-                  valueSource: { type: 'static' as const, value: staticValue },
+                  operationType: staticValueOperationName,
+                  params: { value: String(staticValue) },
                   meta: { type: 'number' as const },
                 },
               ],
@@ -800,10 +803,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          const defaultLabel =
-            column.valueSource?.type === 'static'
-              ? ofNameStaticValue(column.valueSource.value)
-              : column.fieldName;
+          const defaultLabel = isStaticValueColumn(column)
+            ? ofNameStaticValue(column.params?.value)
+            : column.fieldName;
           columnLabelMap[column.columnId] = uniqueLabelGenerator(
             column.customLabel ? column.label ?? defaultLabel : defaultLabel
           );
@@ -853,7 +855,7 @@ export function getTextBasedDatasource({
             inMetricDimension: column.inMetricDimension,
             hasTimeShift: false,
             hasReducedTimeRange: false,
-            ...(column.valueSource?.type === 'static' ? { isStaticValue: true } : {}),
+            ...(isStaticValueColumn(column) ? { isStaticValue: true } : {}),
             ...(column.customLabel ? { customLabel: true } : {}),
             scale,
           };

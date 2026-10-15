@@ -326,10 +326,10 @@ function convertReferenceLineLayerToAPI(
         };
       }
       const column = layer.columns.find(({ columnId }) => columnId === accessor);
-      if (column?.valueSource?.type === 'static') {
+      if (column?.operationType === 'static_value') {
         return {
           operation: 'static_value',
-          value: column.valueSource.value,
+          value: Number(column.params?.value),
           ...(column.customLabel ? { label: column.label } : {}),
           ...decorationConfig,
         };

@@ -58,7 +58,12 @@ describe('toExpression', () => {
         a: {
           ...baseState.layers.a,
           columns: [
-            { columnId: 'threshold', fieldName: '42', valueSource: { type: 'static', value: 42 } },
+            {
+              columnId: 'threshold',
+              fieldName: '42',
+              operationType: 'static_value',
+              params: { value: '42' },
+            },
           ],
         },
       },
@@ -82,7 +87,8 @@ describe('toExpression', () => {
             {
               columnId: 'threshold',
               fieldName: '42',
-              valueSource: { type: 'static', value: 42 },
+              operationType: 'static_value',
+              params: { value: '42' },
             },
           ],
         },

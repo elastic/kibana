@@ -39,7 +39,8 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
     : allColumns.find((column) => column.columnId === source.id || column.variable === source.id);
   const targetField = layer.columns.find((column) => column.columnId === target.columnId);
   const newColumn = {
-    ...sourceField,
+    // Moving or duplicating a dimension keeps its configuration (e.g. static values, labels).
+    ...(isOperation(source) ? sourceField : {}),
     columnId: target.columnId,
     fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,

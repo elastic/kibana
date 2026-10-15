@@ -17,13 +17,16 @@ import {
 } from '@elastic/eui';
 import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
 import type {
   TextBasedPrivateState,
   TextBasedLayer,
+  TextBasedLayerColumn,
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
 import {
   mergeLayer,
   updateColumnFormat,
@@ -31,6 +34,9 @@ import {
   isNotNumeric,
   isNumeric,
   updateColumnDropPartials,
+  isStaticValueColumn,
+  isValidStaticValue,
+  removeStaticValue,
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
@@ -192,7 +198,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     supportStaticValue &&
       (temporaryMethod === staticValueOperationName ||
         (temporaryMethod !== esqlColumnName &&
-          (!selectedField || selectedField.valueSource?.type === 'static')))
+          (!selectedField || isStaticValueColumn(selectedField))))
   );
 
   useEffect(() => {
@@ -212,13 +218,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       const layer = previousState.layers[layerId];
       const previousColumn = layer.columns.find((column) => column.columnId === columnId);
       const column = {
-        ...previousColumn,
+        ...(previousColumn ? removeStaticValue(previousColumn) : {}),
         columnId,
         fieldName: field.name,
         label: previousColumn?.customLabel ? previousColumn.label : field.name,
         meta: field.meta,
         variable: field.variable,
-        valueSource: { type: 'query' as const },
       };
       return mergeLayer({
         state: previousState,
@@ -238,39 +243,66 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     columnsQuery,
     layerId,
     queryEsql,
-    selectedField?.valueSource?.type,
     temporaryMethod,
     setState,
     supportStaticValue,
   ]);
-  const setStaticValue = (value: number) => {
-    if (!Number.isFinite(value)) return;
-    setTemporaryMethod(undefined);
-    setState((previousState) => {
-      const layer = previousState.layers[layerId];
-      const previousColumn = layer.columns.find((column) => column.columnId === columnId);
-      const column = {
-        ...previousColumn,
-        columnId,
-        fieldName: String(value),
-        label: previousColumn?.customLabel ? previousColumn.label : String(value),
-        variable: undefined,
-        valueSource: { type: 'static' as const, value },
-        meta: { type: 'number' as const },
-      };
-      return mergeLayer({
-        state: previousState,
-        layerId,
-        newLayer: {
-          ...layer,
-          columns: previousColumn
-            ? layer.columns.map((existing) => (existing.columnId === columnId ? column : existing))
-            : [...layer.columns, column],
-        },
+  const setStaticValue = useCallback(
+    (value: string | undefined) => {
+      // Same validation as the form-based static value editor.
+      if (!isValidStaticValue(value)) return;
+      if (
+        selectedField &&
+        isStaticValueColumn(selectedField) &&
+        selectedField.params?.value === value
+      )
+        return;
+      setTemporaryMethod(undefined);
+      setState((previousState) => {
+        const layer = previousState.layers[layerId];
+        const previousColumn = layer.columns.find((column) => column.columnId === columnId);
+        const column: TextBasedLayerColumn = {
+          ...previousColumn,
+          columnId,
+          fieldName: value,
+          label: previousColumn?.customLabel ? previousColumn.label : value,
+          variable: undefined,
+          operationType: staticValueOperationName,
+          params: { ...previousColumn?.params, value },
+          meta: { type: 'number' as const },
+        };
+        return mergeLayer({
+          state: previousState,
+          layerId,
+          newLayer: {
+            ...layer,
+            columns: previousColumn
+              ? layer.columns.map((existing) =>
+                  existing.columnId === columnId ? column : existing
+                )
+              : [...layer.columns, column],
+          },
+        });
       });
-    });
-  };
+    },
+    [columnId, layerId, selectedField, setState]
+  );
   const activeTable = props.activeData?.[layerId];
+  const activeValue = activeTable?.rows[0]?.[columnId];
+  const { inputValue: staticInputValue, handleInputChange: handleStaticInputChange } =
+    useDebouncedValue<string | undefined>(
+      {
+        value:
+          selectedField && isStaticValueColumn(selectedField)
+            ? selectedField.params?.value
+            : typeof activeValue === 'number'
+            ? String(activeValue)
+            : String(DEFAULT_STATIC_VALUE),
+        onChange: setStaticValue,
+      },
+      { allowFalsyValue: true }
+    );
+  const isStaticInputValid = isValidStaticValue(staticInputValue);
   const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
   const isNumericColumn =
     activeColumnMeta != null
@@ -297,7 +329,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 }),
                 onClick: () => {
                   setTemporaryMethod(
-                    selectedField && selectedField.valueSource?.type !== 'static'
+                    selectedField && !isStaticValueColumn(selectedField)
                       ? staticValueOperationName
                       : undefined
                   );
@@ -312,7 +344,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 }),
                 onClick: () => {
                   setTemporaryMethod(
-                    !selectedField || selectedField.valueSource?.type === 'static'
+                    !selectedField || isStaticValueColumn(selectedField)
                       ? esqlColumnName
                       : undefined
                   );
@@ -330,18 +362,19 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
               })
             }
             fullWidth
+            isInvalid={!isStaticInputValid}
+            error={
+              !isStaticInputValid &&
+              i18n.translate('xpack.lens.textBasedLanguages.staticValueError', {
+                defaultMessage: 'The static value of {value} is not a valid number',
+                values: { value: staticInputValue ?? "''" },
+              })
+            }
           >
             <EuiFieldNumber
-              value={
-                selectedField?.valueSource?.type === 'static'
-                  ? selectedField.valueSource.value
-                  : typeof activeTable?.rows[0]?.[columnId] === 'number'
-                  ? activeTable.rows[0][columnId]
-                  : 0
-              }
-              onChange={(event) => {
-                if (event.target.value !== '') setStaticValue(Number(event.target.value));
-              }}
+              isInvalid={!isStaticInputValid}
+              value={staticInputValue ?? ''}
+              onChange={(event) => handleStaticInputChange(event.currentTarget.value)}
               data-test-subj="lns-indexPattern-static_value-input"
               compressed
               fullWidth
@@ -362,7 +395,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 data-test-subj="text-based-dimension-field"
                 existingFields={allColumns ?? []}
                 selectedField={
-                  selectedField?.valueSource?.type === 'static' ? undefined : selectedField
+                  selectedField && isStaticValueColumn(selectedField) ? undefined : selectedField
                 }
                 onChoose={(choice) => {
                   setTemporaryMethod(undefined);
@@ -402,9 +435,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                                 const shouldKeepCustomLabel = Boolean(col.customLabel);
 
                                 return {
-                                  ...col,
+                                  ...removeStaticValue(col),
                                   fieldName: choice.field,
-                                  valueSource: { type: 'query' },
                                   meta: column?.meta,
                                   variable: column?.variable,
                                   // If the new column is not numeric, remove the format selector params

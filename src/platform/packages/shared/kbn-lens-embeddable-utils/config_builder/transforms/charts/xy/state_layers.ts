@@ -66,7 +66,8 @@ export function getValueColumns(
           return {
             columnId,
             fieldName: String(threshold.value),
-            valueSource: { type: 'static' as const, value: threshold.value },
+            operationType: 'static_value' as const,
+            params: { value: String(threshold.value) },
             meta: { type: 'number' as const },
             ...(threshold.label ? { label: threshold.label, customLabel: true } : {}),
           };

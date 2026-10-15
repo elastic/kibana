@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
@@ -141,7 +142,11 @@ describe('TextBasedDimensionEditor', () => {
     render(
       <TextBasedDimensionEditor
         {...defaultProps}
-        state={stateWithColumn({ fieldName: '42', valueSource: { type: 'static', value: 42 } })}
+        state={stateWithColumn({
+          fieldName: '42',
+          operationType: 'static_value',
+          params: { value: '42' },
+        })}
         setState={setState}
         supportStaticValue
         enableFormatSelector={false}
@@ -156,18 +161,21 @@ describe('TextBasedDimensionEditor', () => {
     expect(setState).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
     act(() => capturedOnChoose?.({ field: 'a', type: 'field', dataType: 'number' }));
-    expect(setState.mock.calls[0][0].layers.layer1.columns[0]).toMatchObject({
-      columnId: 'dim1',
-      fieldName: 'a',
-      valueSource: { type: 'query' },
-    });
+    const [selectedColumn] = setState.mock.calls[0][0].layers.layer1.columns;
+    expect(selectedColumn).toMatchObject({ columnId: 'dim1', fieldName: 'a' });
+    expect(selectedColumn.operationType).toBeUndefined();
+    expect(selectedColumn.params?.value).toBeUndefined();
   });
 
   it('auto-selects the only numeric field and defaults static controls without a result', async () => {
     render(
       <StatefulEditor
         {...defaultProps}
-        state={stateWithColumn({ fieldName: '42', valueSource: { type: 'static', value: 42 } })}
+        state={stateWithColumn({
+          fieldName: '42',
+          operationType: 'static_value',
+          params: { value: '42' },
+        })}
         supportStaticValue
         enableFormatSelector={false}
       />
@@ -176,7 +184,9 @@ describe('TextBasedDimensionEditor', () => {
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
     await waitFor(() => expect(capturedSelectedField?.fieldName).toBe('Field Two'));
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(0);
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(
+      DEFAULT_STATIC_VALUE
+    );
   });
 
   it('keeps the query active until the temporary static value is edited', async () => {
@@ -201,10 +211,12 @@ describe('TextBasedDimensionEditor', () => {
     fireEvent.change(screen.getByTestId('lns-indexPattern-static_value-input'), {
       target: { value: '43' },
     });
+    await waitFor(() => expect(setState).toHaveBeenCalled());
     const nextState = setState.mock.calls[0][0](stateWithColumn());
     expect(nextState.layers.layer1.columns[0]).toMatchObject({
       columnId: 'dim1',
-      valueSource: { type: 'static', value: 43 },
+      operationType: 'static_value',
+      params: { value: '43' },
     });
   });
 
