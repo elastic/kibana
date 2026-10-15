@@ -13,6 +13,10 @@ import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  EncryptionError,
+  EncryptionErrorOperation,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
@@ -548,6 +552,41 @@ describe('StreamsUnitService', () => {
     await expect(
       service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets })
     ).rejects.toMatchObject({ statusCode: 400 });
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(soClient.delete).not.toHaveBeenCalled();
+    expect(publishUnit).not.toHaveBeenCalled();
+  });
+
+  it('seals, validates, writes and publishes nothing when the stored document fails to decrypt', async () => {
+    const soClient = createSoClient();
+    const encryptedSavedObjectsClient = {
+      getDecryptedAsInternalUser: jest
+        .fn()
+        .mockRejectedValue(
+          new EncryptionError(
+            'Unable to decrypt attribute "secrets"',
+            'secrets',
+            EncryptionErrorOperation.Decryption
+          )
+        ),
+    } as unknown as EncryptedSavedObjectsClient;
+    const prepareCredentials = fakePrepareCredentials();
+    const validateUnit = jest.fn();
+    const publishUnit = jest.fn();
+
+    const service = createService({
+      soClient,
+      publishUnit,
+      validateUnit,
+      prepareCredentials,
+      encryptedSavedObjectsClient,
+    });
+
+    await expect(
+      service.upsertUnit({ unitId: 'default', unit, ui_metadata: {} })
+    ).rejects.toBeInstanceOf(EncryptionError);
+    expect(prepareCredentials).not.toHaveBeenCalled();
+    expect(validateUnit).not.toHaveBeenCalled();
     expect(soClient.create).not.toHaveBeenCalled();
     expect(soClient.delete).not.toHaveBeenCalled();
     expect(publishUnit).not.toHaveBeenCalled();

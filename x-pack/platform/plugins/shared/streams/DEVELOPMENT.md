@@ -60,7 +60,7 @@ Important consequences:
 - Types are `hidden: true`. They do **not** appear in Stack Management → Saved Objects.
 - Both types are `namespaceType: 'multiple'` and are written with `initialNamespaces: ['*']`, so every space sees the same unit. That matches config-distributor `PUT /v1/units/default` (one unit per cluster). `multiple-isolated` would hide the object from other spaces while still using a globally unique id, so a second space would 404 then collide.
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
-- `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest; `unit_id` is in AAD. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document — do not `soClient.update` encrypted or AAD attributes.
+- `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - Without `xpack.streams.distributor.url`, validate and publish are no-ops.
@@ -94,7 +94,7 @@ A JSON envelope that stores a secret references it from the node and sends the v
 | --- | --- |
 | Unit YAML / `unit` attribute | `{ credential: <name> }` reference only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
-| SO `sealed_credentials` (plain) | `{ name, target, ciphertext }` from the last save, reused while nothing changed |
+| SO `sealed_credentials` (plain, in ESO AAD) | `{ name, target, ciphertext }` from the last save, reused while nothing changed |
 | Distributor `PUT /v1/units/{id}` and `POST /v1/validate` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` |
 
 `GET /internal/streams/unit/{id}` omits `secrets` and `sealed_credentials`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values.

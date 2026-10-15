@@ -218,8 +218,8 @@ export class StreamsUnitService {
     // Validate before any write, with the same credentials the publish sends.
     const validation = await this.validateUnit({ unit, credentials });
 
-    // Always overwrite the full document. Partial `soClient.update` must not
-    // touch `secrets` or `unit_id` (ESO encrypted / AAD attributes).
+    // Always overwrite the full document. Partial `soClient.update` must not touch
+    // `secrets`, `unit_id` or `sealed_credentials` (ESO encrypted / AAD attributes).
     await this.writeConfiguration({
       savedObjectId: unitId,
       unitId,
