@@ -86,9 +86,24 @@ export const buildJudgeQuestion = ({ spaceId, reportIds }: HuntWatchExample['inp
   `space "${spaceId}". For each report, state whether the environment shows the reported threat, ` +
   `what the Tier 1 IOC search and Tier 2 behavior hunt found, and what action, if any, is proposed.`;
 
+/**
+ * A row that pins `partial` alone expects an incomplete run, and the judge has to know that:
+ * without it, a narrative that calls the result incomplete reads as contradicting "no confirmed
+ * hit" and is marked inaccurate for saying exactly what the row asks it to say.
+ */
+const describeOutcome = (expected: HuntWatchExample['output']['expected']): string[] => {
+  if (expected.outcome?.length !== 1 || expected.outcome[0] !== 'partial') return [];
+  const stage = expected.incompleteStage ? ` at the ${expected.incompleteStage} stage` : '';
+  return [
+    `The run ends partial${stage}: part of the work did not complete, so the results are ` +
+      'incomplete rather than a clean or complete verdict, and the narrative is expected to say so.',
+  ];
+};
+
 export const buildGroundTruth = ({ expected, criteria }: HuntWatchExample['output']): string =>
   [
     'The hunt runs Tier 1 (IOC search) first, then Tier 2 (behavior hunt), then records a verdict.',
+    ...describeOutcome(expected),
     ...expected.reports.map(describeReport),
     ...(criteria.length > 0 ? ['The narrative must also satisfy:', ...criteria] : []),
   ].join('\n');
@@ -246,8 +261,14 @@ export const runJudgeAnalyses = async ({
   };
 };
 
-const expectsNoInvestigation = (expected: HuntExpected): boolean =>
-  expected.reports.every((r) => r.investigationStatus === 'none');
+/**
+ * Rows where the Worker is expected to post nothing: no Investigation at all, or a run pinned to
+ * `failed` alone (the conclusion step has no Investigation it can write to). A judge reading
+ * those as MISSING would report the expected behavior as a gap.
+ */
+export const expectsNoNarrative = (expected: HuntExpected): boolean =>
+  expected.reports.every((r) => r.investigationStatus === 'none') ||
+  (expected.outcome?.length === 1 && expected.outcome[0] === 'failed');
 
 /**
  * Wraps a built-in quantitative judge so it reads the analyses stored on the hunt artifacts and
@@ -261,11 +282,11 @@ const adaptJudgeEvaluator = (
   kind: 'LLM',
   direction: 'maximize',
   evaluate: async ({ input, output, expected }) => {
-    if (expectsNoInvestigation(expected.expected)) {
+    if (expectsNoNarrative(expected.expected)) {
       return {
         score: null,
         label: 'N/A',
-        explanation: 'row expects no Investigation, so there is no narrative to judge',
+        explanation: 'row expects no Investigation narrative, so there is nothing to judge',
       };
     }
     const result = await evaluator.evaluate({

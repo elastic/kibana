@@ -19,6 +19,8 @@ import {
   HOLDOUT_REPORT_IDS,
   HUNT_BLOCKED_SPACE_ID,
   HUNT_REPORT_IDS,
+  HUNT_REPORT_IOC_BOUND,
+  IOC_DUMP_IOC_COUNT,
   SPACE_COPY_SOURCES,
   SPACE_REPORT_IDS,
   TI_REPORT_MISSING_ID,
@@ -26,6 +28,7 @@ import {
 import {
   ALL_SEEDED_REPORT_IDS,
   buildCanaryReportDoc,
+  buildIocDumpReportDoc,
   HUNT_INVESTIGATION_ID_NAMESPACE,
   HUNT_INVESTIGATION_UUID_NAMESPACE,
 } from './seed_hunt_data';
@@ -178,6 +181,53 @@ describe('canary report', () => {
   });
 });
 
+describe('IOC dump report', () => {
+  const doc = buildIocDumpReportDoc('2026-01-01T00:00:00.000Z');
+
+  it('returns the per-hunt IOC bound the coordinator enforces', () => {
+    const source = readRepoFile(
+      alertzeroRoot,
+      'server/services/watches/hunt/common/load_report_context.ts'
+    );
+    expect(source).toContain(`export const MAX_HUNT_REPORT_IOCS = ${HUNT_REPORT_IOC_BOUND};`);
+  });
+
+  it('returns one IOC more than a hunt accepts', () => {
+    expect(doc.extracted.iocs).toHaveLength(HUNT_REPORT_IOC_BOUND + 1);
+  });
+
+  it('returns only distinct TEST-NET-3 addresses, which no seeded telemetry uses', () => {
+    const values = doc.extracted.iocs.map((ioc) => ioc.value);
+    expect(new Set(values).size).toBe(IOC_DUMP_IOC_COUNT);
+    expect(values.every((value) => /^203\.0\.113\.\d{1,3}$/.test(value))).toBe(true);
+  });
+
+  it('returns ip IOCs only, so every one counts toward the Tier 1 bound', () => {
+    expect(doc.extracted.iocs.every((ioc) => ioc.type === 'ip')).toBe(true);
+  });
+
+  it('returns no ATT&CK technique ids for Tier 2 to anchor on', () => {
+    expect(JSON.stringify(doc)).not.toMatch(/\bT\d{4}(\.\d{3})?\b/);
+  });
+
+  it('returns no seeded evidence', () => {
+    expect(doc).not.toHaveProperty('evidence');
+  });
+});
+
+describe('locked Investigation report', () => {
+  it('returns a default-space copy id derived from the clean report', () => {
+    expect(HUNT_REPORT_IDS.lockedInvestigation).toBe(`${HUNT_REPORT_IDS.clean}-locked`);
+  });
+
+  it('returns an id distinct from every generator and space-copy id', () => {
+    expect([
+      ...GENERATED_AWS_IAM_REPORT_IDS,
+      ...SPACE_COPY_SOURCES.map((c) => c.copyReportId),
+    ]).not.toContain(HUNT_REPORT_IDS.lockedInvestigation);
+  });
+});
+
 describe('space isolation fixtures', () => {
   it.each(SPACE_COPY_SOURCES)(
     'returns a copy id of <source>-<space> for $spaceId',
@@ -234,12 +284,20 @@ describe('dataset bindings', () => {
     ]);
   });
 
-  it('returns the four hard rows the README documents', () => {
+  it('returns the six hard rows the README documents', () => {
     expect(hardCases.map((row) => row.id)).toEqual([
       'hard-multi-candidate',
       'hard-clean-repeat',
       'hard-no-candidates-missing-report',
       'hard-difficult-hit-ioc-only',
+      'hard-partial-ioc-dump',
+      'hard-failed-locked-investigation',
+    ]);
+  });
+
+  it('returns the locked row as the only one staging a fault', () => {
+    expect(allDatasetRows.filter((row) => row.input.fault).map((row) => row.id)).toEqual([
+      'hard-failed-locked-investigation',
     ]);
   });
 

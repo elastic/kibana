@@ -87,6 +87,16 @@ export const HUNT_BLOCKED_INDEX_PATTERN = 'logs-hunt-eval-nonexistent-*';
 export const TI_REPORT_AWS_IAM_PREFIX = 'ti-report-aws-iam';
 export const TI_REPORT_CANARY_ID = 'ti-report-hunt-eval-canary-01';
 export const TI_REPORT_MISSING_ID = 'ti-report-hunt-eval-missing-01';
+/** Suite-authored report carrying more IOCs than one hunt accepts; induces `partial`. */
+export const TI_REPORT_IOC_DUMP_ID = 'ti-report-hunt-eval-ioc-dump-01';
+
+/**
+ * `MAX_HUNT_REPORT_IOCS` in `alertzero/server/services/watches/hunt/common/load_report_context.ts`.
+ * Not importable from a package; `seed_contract.test.ts` reads that file as text to catch drift.
+ * One more than the bound is enough: the coordinator counts what it dropped, not how much.
+ */
+export const HUNT_REPORT_IOC_BOUND = 100;
+export const IOC_DUMP_IOC_COUNT = HUNT_REPORT_IOC_BOUND + 1;
 
 /** `reportIdSlug` of each aws-iam scenario the generator seeds. */
 export const AWS_IAM_REPORT_SLUGS = [
@@ -134,6 +144,13 @@ export const HUNT_REPORT_IDS = {
   ],
   /** Hard `no-candidates`: an id that does not exist. Must complete with `not_found`. */
   missing: TI_REPORT_MISSING_ID,
+  /** Hard `partial`: suite-authored IOC dump over the per-hunt bound (`input_truncated`). */
+  iocDump: TI_REPORT_IOC_DUMP_ID,
+  /**
+   * Hard `failed`: a default-space copy of the clean report whose Investigation the suite locks
+   * (a private conversation owned by another user) before the run, so `find_or_create` fails.
+   */
+  lockedInvestigation: `${buildHistoricReportId('aws-iam-clean', 1)}-locked`,
   /** Canary: suite-authored prose-only report with no IOCs or technique ids. */
   canary: TI_REPORT_CANARY_ID,
 } as const;

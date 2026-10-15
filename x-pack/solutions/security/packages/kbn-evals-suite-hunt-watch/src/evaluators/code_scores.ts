@@ -409,7 +409,10 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
 
 /**
  * Actioned Proposals only: recommendations are keyed per Investigation and are expected to
- * duplicate across reports. Target paths match packaging's `holdsSubject` contract.
+ * duplicate across reports. Target paths match packaging's `holdsSubject` contract, and the
+ * criticality level is part of the subject for the same reason packaging's `coversCriticality`
+ * makes it one: a finding that wants a higher level than the live Proposal asks for is minted on
+ * its own rather than absorbed, so two levels on one target is the product working, not a miss.
  */
 export const actionedSubjectFingerprint = (proposal: ProposalWithMetadata): string | undefined => {
   if (!proposal.actionWorkflowId) return undefined;
@@ -425,6 +428,7 @@ export const actionedSubjectFingerprint = (proposal: ProposalWithMetadata): stri
     typeof input.id_value === 'string' ? input.id_value : '',
     Array.isArray(endpointIds) ? endpointIds.join(',') : '',
     typeof parameters?.entity_id === 'string' ? parameters.entity_id : '',
+    typeof input.criticality_level === 'string' ? input.criticality_level : '',
   ].join('|');
 };
 

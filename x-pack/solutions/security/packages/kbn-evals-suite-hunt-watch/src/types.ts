@@ -57,7 +57,8 @@ export interface HuntExpected {
   skipped?: string[];
   /**
    * When true, the CODE `Proposal Convergence` evaluator requires that actioned
-   * Proposals for the same subject are minted once across this run's Investigations,
+   * Proposals for the same subject (target plus criticality level, as packaging keys it)
+   * are minted once across this run's Investigations,
    * and that at least one converging Investigation (or the live Proposal's comment)
    * records the "Also raised by" / "no second Proposal" convergence text. Used by
    * multi-candidate rows that share principals across report ids.
@@ -66,6 +67,15 @@ export interface HuntExpected {
   reports: HuntReportExpectation[];
 }
 
+/**
+ * Faults the task injects after `resetHuntReport` and before the run. Each one is a condition the
+ * product can meet in the field, staged deterministically:
+ *  - `investigation_locked`: the report's Investigation conversation already exists as a private
+ *    conversation owned by another user, so the Worker's `find_or_create` cannot read it, the hunt
+ *    child skips the coordinator, and the run ends `failed` with nothing written.
+ */
+export type HuntFault = 'investigation_locked';
+
 export interface HuntWatchExample {
   id: string;
   cohort: HuntCohort;
@@ -73,6 +83,8 @@ export interface HuntWatchExample {
     spaceId: string;
     /** Named report ids for the manual trigger. */
     reportIds: string[];
+    /** Fault to stage before the run; see `HuntFault`. */
+    fault?: HuntFault;
   };
   output: {
     expected: HuntExpected;

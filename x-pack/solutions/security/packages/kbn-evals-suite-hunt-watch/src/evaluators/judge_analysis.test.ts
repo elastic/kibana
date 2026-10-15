@@ -85,6 +85,19 @@ describe('judge_analysis', () => {
     ).toContain('any number of behaviors is acceptable');
   });
 
+  it('states that a partial-only row expects an incomplete run', () => {
+    const output = buildOutput({});
+    output.expected.outcome = ['partial'];
+    output.expected.incompleteStage = 'hunt';
+    expect(buildGroundTruth(output)).toContain('The run ends partial at the hunt stage');
+  });
+
+  it('says nothing about the outcome when a row accepts completed or partial', () => {
+    const output = buildOutput({});
+    output.expected.outcome = ['completed', 'partial'];
+    expect(buildGroundTruth(output)).not.toContain('The run ends partial');
+  });
+
   it('appends the rubric criteria to the ground truth', () => {
     expect(buildGroundTruth(buildOutput({}, ['Must not claim compromise.']))).toContain(
       'Must not claim compromise.'

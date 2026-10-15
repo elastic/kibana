@@ -419,6 +419,24 @@ describe('actionedSubjectFingerprint', () => {
       actionedSubjectFingerprint(actionedProposal({ id: 'p2', conversationId: 'c2' }))
     );
   });
+
+  it('returns different fingerprints when the same target is asked for at two criticality levels', () => {
+    expect(
+      actionedSubjectFingerprint(actionedProposal({ id: 'p1', conversationId: 'c1' }))
+    ).not.toBe(
+      actionedSubjectFingerprint(
+        actionedProposal({
+          id: 'p2',
+          conversationId: 'c2',
+          actionInput: {
+            id_field: 'user.name',
+            id_value: 'dev-user',
+            criticality_level: 'high_impact',
+          },
+        })
+      )
+    );
+  });
 });
 
 describe('scoreStageProgression', () => {

@@ -26,7 +26,7 @@ never part of that gate.
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
 | Evidence Honesty | CODE | report `evidence[]` written iff the hunt completed (`hunt.output.status === 'success'`) |
 | Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum |
-| Proposal Convergence | CODE | multi-candidate only: each actioned subject is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
+| Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff a prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
@@ -74,7 +74,8 @@ pre-run reset. Scored tasks never decide a Proposal.
 
 - `datasets/golden.ts`: one row per core path (confirmed hit, clean no-hit, blocked index scope).
 - `datasets/hard_cases.ts`: multi-candidate fan-out, clean repeat, unknown report id,
-  IOC-only difficult hit.
+  IOC-only difficult hit, plus the two fault rows: a report over the per-hunt IOC bound
+  (`partial`) and an Investigation the Worker is locked out of (`failed`). See "Fault rows".
 - `datasets/canary.ts`: a suite-authored prose-only report scored only by the inverted evaluator.
 - `datasets/holdout.ts`: one hit, one IOC-only hit and one clean row on report ids the iteration
   cohorts never touch. Skipped unless `HUNT_WATCH_HOLDOUT=1`, so day-to-day runs cannot tune
@@ -105,6 +106,34 @@ Before each row, `resetHuntReport` dismisses pending Proposals on the report's I
 waits for them to settle (dismiss only resumes the gate workflow; the status flips a few
 seconds later, and the Worker skips a report whose Investigation still has an open Proposal),
 deletes the Investigation, and clears `evidence` on the report doc.
+
+## Fault rows
+
+Nothing on `main` ends `partial` or `failed` on its own, and a suite that only ever sees
+`success` cannot tell whether the Worker's incomplete and failed paths still report honestly.
+Two hard rows force those paths without touching the product:
+
+- `hard-partial-ioc-dump` (`partial`, `incomplete_stage: hunt`). The seed writes a suite-authored
+  report (`ti-report-hunt-eval-ioc-dump-01`) carrying one more IOC than
+  `MAX_HUNT_REPORT_IOCS` in the Worker's `load_report_context`, all TEST-NET-3 addresses the
+  generator never emits. The loader drops the overflow, the coordinator records an
+  `input_truncated` gap, and because that gap is deterministic (no retry can make the report
+  smaller) the hunt ends `incomplete_final`: evidence is written, no verdict is recorded, the
+  Investigation stays `open`, and the narrative has to say part of the report was not searched.
+  `seed_contract.test.ts` reads the bound from the Worker source so a change to it fails in Jest
+  first.
+- `hard-failed-locked-investigation` (`failed`, `incomplete_stage: hunt`). The seed copies the
+  clean report to `ti-report-aws-iam-clean-historic-01-locked` and, after `resetHuntReport`,
+  `applyHuntFault` creates a private conversation at the report's Investigation id through the
+  public conversations API. The Worker's `find_or_create_investigation` sees the id taken and
+  cannot read what is there, the hunt child skips the coordinator rather than hunt into an
+  Investigation it cannot see, and the run ends `failed` with no evidence, SSE or Proposal. The
+  row pins exactly that and leaves `investigationStatus` unpinned: the conversation at the id is
+  the staged one, not something the Worker made. The judges are N/A on this row because there is
+  no narrative to read.
+
+Faults are declared on the row (`input.fault`) and staged by the task after the reset, so a
+fresh stack and a reused one see the same condition.
 
 ## Running
 
@@ -221,3 +250,13 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   that is the first place to look.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.
+- On the `aws-iam-assume-role` scenario, Tier 2 fails to ground an ES|QL query for at least one
+  derived technique (`generation_failed`), which makes the hunt `incomplete_retryable` and the
+  run `partial` with no evidence written. Four of four observed runs: `historic-01` inside
+  `hard-multi-candidate` lost T1548.005 (a technique the report does not name), and every
+  holdout run of `historic-03` lost T1059.001, the process chain the report leads with, while
+  T1078.004 executed and hit. Rows on that scenario accept `completed` or `partial`, check
+  evidence with `iff_hunt_success`, and do not pin Tier 2 execution (zero when every generated
+  query fails, as one holdout run showed). The golden hit (`aws-iam-historic-01`) does not show
+  this and keeps its exact pins. This is a Worker signal the suite reports rather than hides:
+  the scenario never reaches `completed` today.

@@ -16,11 +16,12 @@ import type {
 import type { ToolingLog } from '@kbn/tooling-log';
 import { collectHuntArtifacts, type HuntArtifacts } from '../collect';
 import type { HuntWatchClient } from '../hunt_watch_client';
-import { resetHuntReport } from '../seed_hunt_data';
+import { applyHuntFault, resetHuntReport } from '../seed_hunt_data';
 import type { HuntExpected, HuntWatchExample } from '../types';
 import { CODE_SCORERS, scoreCanaryTripped, type CodeScore } from './code_scores';
 import {
   createJudgeEvaluators,
+  expectsNoNarrative,
   narrativeOf,
   runJudgeAnalyses,
   type JudgeProvenance,
@@ -67,11 +68,11 @@ export const createNarrativeRubricEvaluator = (
     if (criteria.length === 0) {
       return { score: null, label: 'N/A', explanation: 'row has no rubric criteria' };
     }
-    if (expected.expected.reports.every((r) => r.investigationStatus === 'none')) {
+    if (expectsNoNarrative(expected.expected)) {
       return {
         score: null,
         label: 'N/A',
-        explanation: 'row expects no Investigation, so there is no narrative to judge',
+        explanation: 'row expects no Investigation narrative, so there is nothing to judge',
       };
     }
     const narrative = narrativeOf(output);
@@ -136,10 +137,14 @@ export const createEvaluateDataset =
         datasets: [dataset],
         concurrency: 1,
         task: async ({ input, output }) => {
-          const { spaceId, reportIds } = input;
-          // Reset first so every row starts from an unhunted report and no Investigation.
+          const { spaceId, reportIds, fault } = input;
+          // Reset first so every row starts from an unhunted report and no Investigation, then
+          // stage the row's fault on that clean slate.
           for (const reportId of reportIds) {
             await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
+            if (fault) {
+              await applyHuntFault({ fault, fetch, log, reportId, spaceId });
+            }
           }
           const run = await huntWatchClient.run({ spaceId, reportIds });
           const artifacts = await collectHuntArtifacts({ run, reportIds, fetch, esClient, log });

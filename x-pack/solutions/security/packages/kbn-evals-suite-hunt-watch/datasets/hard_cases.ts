@@ -13,8 +13,9 @@ import type { HuntWatchExample } from '../src/types';
  *
  * aws-iam hits can resolve Tier 2 `incomplete_retryable` (seen in smoke runs), so hit rows accept
  * `completed` or `partial` and the evaluators check the outcome is consistent with evidence and
- * Proposal presence instead of pinning one label. There is no `failed` row: no deterministic
- * failure inducer exists on main, so one needs fault injection first.
+ * Proposal presence instead of pinning one label. The `partial` and `failed` rows at the end pin
+ * one label each, because their faults are deterministic: a report over the per-hunt IOC bound,
+ * and an Investigation the Worker is locked out of.
  */
 export const hardCases: HuntWatchExample[] = [
   {
@@ -69,8 +70,7 @@ export const hardCases: HuntWatchExample[] = [
   },
   {
     // A second clean report on a different id: the no-hit path must be stable across reports,
-    // not just on the golden one. Started life as a `partial` probe when the benign close failed
-    // on main; a deterministic `partial`/`failed` row now needs fault injection.
+    // not just on the golden one.
     id: 'hard-clean-repeat',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.cleanRepeat] },
@@ -135,6 +135,71 @@ export const hardCases: HuntWatchExample[] = [
         'The hit narrative is grounded in the environment IOCs (IP addresses, user) the report names.',
         'The narrative does not claim a technique-level finding, since the report names no technique to hunt.',
       ],
+    },
+  },
+  {
+    // One IOC over `MAX_HUNT_REPORT_IOCS`: the coordinator hunts the prefix and records the rest as
+    // `input_truncated`, a gap no later run can close, so the run is `partial` at `hunt`, the
+    // report retires with evidence marked incomplete, and no Proposal is minted on a clean prefix.
+    id: 'hard-partial-ioc-dump',
+    cohort: 'hard',
+    input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.iocDump] },
+    output: {
+      expected: {
+        outcome: ['partial'],
+        incompleteStage: 'hunt',
+        indexScopeBlocked: false,
+        reports: [
+          {
+            reportId: HUNT_REPORT_IDS.iocDump,
+            hasConfirmedHit: false,
+            tier1Status: 'no_environment_hits',
+            pendingProposals: 0,
+            evidenceWritten: true,
+            sseAttachment: false,
+            // Opened before the hunt and left open: an `incomplete_final` hunt writes evidence
+            // but records no verdict, so nothing closes it.
+            investigationStatus: 'open',
+          },
+        ],
+      },
+      criteria: [
+        'The narrative says part of the report was not searched (indicators beyond what one hunt accepts) rather than calling the environment clean.',
+        'The narrative does not claim compromise.',
+      ],
+    },
+  },
+  {
+    // The Investigation already exists as a private conversation owned by someone else, so the
+    // Worker's find_or_create cannot read it. The hunt child skips the coordinator rather than hunt
+    // into an Investigation it cannot see, and the run ends `failed` with no evidence, no SSE and
+    // no Proposal, leaving the report eligible for the next sweep.
+    id: 'hard-failed-locked-investigation',
+    cohort: 'hard',
+    input: {
+      spaceId: DEFAULT_EVAL_SPACE_ID,
+      reportIds: [HUNT_REPORT_IDS.lockedInvestigation],
+      fault: 'investigation_locked',
+    },
+    output: {
+      expected: {
+        outcome: ['failed'],
+        incompleteStage: 'hunt',
+        indexScopeBlocked: false,
+        reports: [
+          {
+            reportId: HUNT_REPORT_IDS.lockedInvestigation,
+            hasConfirmedHit: false,
+            pendingProposals: 0,
+            evidenceWritten: false,
+            sseAttachment: false,
+            // Not pinned: the conversation at the Investigation id is the staged private one
+            // (no `metadata.status`), so neither `none` nor `open` describes what the Worker did.
+          },
+        ],
+      },
+      // No Investigation the Worker could write to, so there is no narrative to judge.
+      criteria: [],
     },
   },
 ];

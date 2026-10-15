@@ -18,13 +18,16 @@ import {
   PROPOSAL_DISMISS_URL,
 } from '@kbn/proposals-common';
 import {
+  DEFAULT_EVAL_SPACE_ID,
   GENERATED_AWS_IAM_REPORT_IDS,
   HISTORIC_REPORTS_PER_SCENARIO,
   HUNT_REPORT_IDS,
+  IOC_DUMP_IOC_COUNT,
   PUBLIC_API_VERSION,
   SPACE_COPY_SOURCES,
   THREAT_REPORTS_INDEX,
 } from './constants';
+import type { HuntFault } from './types';
 import { apiVersion, errorMessage, httpStatus, isEsNotFound, sleep, spacePath } from './kibana_api';
 
 const GENERATOR_CLI = Path.join(
@@ -150,6 +153,91 @@ export const buildCanaryReportDoc = (timestamp: string) => ({
   },
 });
 
+/**
+ * TEST-NET-3 (RFC 5737) addresses, one per IOC. The generator's telemetry and its own decoys use
+ * TEST-NET-1 (`192.0.2.0/24`), so none of these can match an environment event, and Tier 1 ends
+ * `no_environment_hits` over the prefix it does search.
+ */
+const iocDumpAddresses = (): string[] =>
+  Array.from({ length: IOC_DUMP_IOC_COUNT }, (_, i) => `203.0.113.${i + 1}`);
+
+/**
+ * A blocklist-style report with one more searchable IOC than a hunt accepts. The coordinator hunts
+ * the first `MAX_HUNT_REPORT_IOCS` and records the rest as an `input_truncated` gap, which is
+ * deterministic (`incomplete_final`): the run ends `partial` at the `hunt` stage, evidence is
+ * written as incomplete rather than clean, and the report retires. The body names no technique
+ * and no principal, so Tier 2 has nothing to derive and the row stays about the IOC bound.
+ */
+export const buildIocDumpReportDoc = (timestamp: string) => ({
+  '@timestamp': timestamp,
+  content_fingerprint: `hunt-eval-ioc-dump-${HUNT_REPORT_IDS.iocDump}`,
+  space_id: DEFAULT_EVAL_SPACE_ID,
+  source: {
+    type: 'rss',
+    name: 'Hunt eval blocklist feed',
+    url: 'https://example.invalid/hunt-eval-blocklist',
+    adapter_id: 'rss:hunt-eval-blocklist',
+  },
+  content: {
+    title: `Bulk indicator feed: ${IOC_DUMP_IOC_COUNT} scanning addresses`,
+    body_text:
+      `This feed lists ${IOC_DUMP_IOC_COUNT} IPv4 addresses observed scanning exposed services ` +
+      'over the past week. Defenders should block or monitor traffic from the listed addresses. ' +
+      'No specific intrusion activity, tooling, or affected organization is described.',
+    language: 'en',
+  },
+  severity: { level: 'medium', score: 40 },
+  extracted: {
+    categories: ['scanning'],
+    ttps: { techniques: [] },
+    iocs: iocDumpAddresses().map((value) => ({
+      type: 'ip',
+      value,
+      defanged: value.replace(/\./g, '[.]'),
+    })),
+    relevance: 0.4,
+  },
+  geography: { regions: ['global'] },
+  lineage: {
+    ingested_at: timestamp,
+    extracted_at: timestamp,
+    extraction_method: 'seeded',
+    source_doc_ref: { index: 'rss:feed', id: HUNT_REPORT_IDS.iocDump },
+  },
+});
+
+/**
+ * Stages a fault for one row, after `resetHuntReport` has cleared the previous run and before the
+ * Worker runs. See `HuntFault` for what each one models.
+ */
+export const applyHuntFault = async ({
+  fault,
+  fetch,
+  log,
+  reportId,
+  spaceId,
+}: {
+  fault: HuntFault;
+  fetch: HttpHandler;
+  log: ToolingLog;
+  reportId: string;
+  spaceId: string;
+}): Promise<void> => {
+  const conversationId = buildHuntInvestigationConversationId(reportId);
+  // The evals fixture authenticates as the stack's superuser, who is not the Worker's service
+  // account, so a private conversation it owns is one the Worker can neither read nor reopen.
+  await fetch(spacePath(spaceId, '/api/agent_builder/conversations'), {
+    method: 'POST',
+    headers: apiVersion(PUBLIC_API_VERSION),
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      title: `Locked Investigation for ${reportId} (hunt-watch eval fault)`,
+      access_control: { access_mode: 'private' },
+    }),
+  });
+  log.info(`Staged fault "${fault}" on ${reportId}: private conversation ${conversationId}`);
+};
+
 /** The suite never creates the index: Kibana creates it when threat intel bootstraps. */
 export const assertThreatReportsIndexExists = async ({ esClient }: { esClient: Client }) => {
   const exists = await esClient.indices.exists({ index: THREAT_REPORTS_INDEX });
@@ -187,7 +275,8 @@ const runGenerator = async ({ target, log }: { target: GeneratorTarget; log: Too
 };
 
 /**
- * Copies a default-space report into another space under a suffixed `_id`. The generator writes
+ * Copies a default-space report under a new `_id`, into another space or back into `default`
+ * (the locked-Investigation row needs its own Investigation, not the clean row's). The generator writes
  * telemetry to shared streams, so re-running it per space would duplicate telemetry and change
  * Tier 1 hit counts; copying only the report doc avoids that. Seeded `evidence` is dropped so each
  * copy starts un-hunted.
@@ -230,6 +319,8 @@ export const ALL_SEEDED_REPORT_IDS: readonly string[] = [
   ...GENERATED_AWS_IAM_REPORT_IDS,
   ...SPACE_COPY_SOURCES.map((c) => c.copyReportId),
   HUNT_REPORT_IDS.canary,
+  HUNT_REPORT_IDS.iocDump,
+  HUNT_REPORT_IDS.lockedInvestigation,
 ];
 
 /** Expected `space_id` for each seeded report id. */
@@ -237,6 +328,8 @@ export const EXPECTED_REPORT_SPACES: ReadonlyMap<string, string> = new Map([
   ...GENERATED_AWS_IAM_REPORT_IDS.map((id): [string, string] => [id, 'default']),
   ...SPACE_COPY_SOURCES.map((c): [string, string] => [c.copyReportId, c.spaceId]),
   [HUNT_REPORT_IDS.canary, 'default'] as [string, string],
+  [HUNT_REPORT_IDS.iocDump, 'default'] as [string, string],
+  [HUNT_REPORT_IDS.lockedInvestigation, 'default'] as [string, string],
 ]);
 
 /**
@@ -309,11 +402,26 @@ export const seedHuntData = async ({
     await copyReportToSpace({ esClient, sourceReportId, copyReportId, spaceId });
   }
 
+  const now = new Date().toISOString();
   await esClient.index({
     index: THREAT_REPORTS_INDEX,
     id: HUNT_REPORT_IDS.canary,
     refresh: true,
-    document: buildCanaryReportDoc(new Date().toISOString()),
+    document: buildCanaryReportDoc(now),
+  });
+  await esClient.index({
+    index: THREAT_REPORTS_INDEX,
+    id: HUNT_REPORT_IDS.iocDump,
+    refresh: true,
+    document: buildIocDumpReportDoc(now),
+  });
+  // Same content as the golden clean report; only its Investigation differs, and the fault stages
+  // that per run. A copy keeps the clean row's own Investigation out of the locked row's reach.
+  await copyReportToSpace({
+    esClient,
+    sourceReportId: HUNT_REPORT_IDS.clean,
+    copyReportId: HUNT_REPORT_IDS.lockedInvestigation,
+    spaceId: DEFAULT_EVAL_SPACE_ID,
   });
 
   await verifySeededReports({ esClient });
