@@ -120,6 +120,7 @@ const fetchEmptyRowsInBatches = async (
   return emptyRows.slice(0, limit);
 };
 
+// We do this when sorting alerts or records descending, or last alert, anomalies or risk score change either way.
 const fetchPageEmptyLast = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -135,6 +136,7 @@ const fetchPageEmptyLast = async (
   return [...withValue, ...empty].slice(0, limit);
 };
 
+// We do this when sorting alerts or records ascending.
 const fetchPageEmptyFirst = async (
   column: ComputedColumn,
   args: QueryArgs,

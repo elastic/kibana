@@ -34,14 +34,7 @@ const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 const LAST_SEEN_FIELD = '`@timestamp`';
 
-/** The resolved entity values a grid column sorts by, under their column ids. */
-export const SORTABLE_RESOLVED_ENTITY_FIELDS: readonly string[] = [
-  CRITICALITY_FIELD,
-  FIRST_SEEN_FIELD,
-  '@timestamp',
-];
-
-const RESOLVED_ENTITY_VALUE_FIELDS = [
+const GROUP_VALUE_FIELDS = [
   CRITICALITY_FIELD,
   SOURCE_FIELD,
   WATCHLISTS_FIELD,
@@ -124,7 +117,7 @@ const buildResolvedEntityValuesQuery = (
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
   ...buildResolvedEntityRowSteps(args),
-  `| KEEP \`entity.id\`, ${RESOLVED_ENTITY_VALUE_FIELDS.join(', ')}`,
+  `| KEEP \`entity.id\`, ${GROUP_VALUE_FIELDS.join(', ')}`,
 ];
 
 /** Rows whose main entity has aliases show the whole group's values. */
@@ -172,7 +165,7 @@ export interface ResolvedEntityFilterOverrides {
 const MAX_RESOLVED_ENTITY_FILTER_OVERRIDES = 4_000;
 
 /** Only filters on group-valued columns can pass a resolved entity differently from its main entity. */
-export const needsResolvedEntityFilterOverrides = ({
+export const isFilteringByGroupValue = ({
   rowsMode,
   entityExpression,
 }: Pick<QueryArgs, 'rowsMode' | 'entityExpression'>): boolean =>
@@ -204,7 +197,7 @@ export const fetchResolvedEntityFilterOverrides = async (
   runQuery: EsqlRunner
 ): Promise<ResolvedEntityFilterOverrides> => {
   const { entityExpression } = args;
-  if (!entityExpression || !needsResolvedEntityFilterOverrides(args)) return EMPTY_OVERRIDES;
+  if (!entityExpression || !isFilteringByGroupValue(args)) return EMPTY_OVERRIDES;
   const rows = await runQuery(
     buildResolvedEntityFilterOverridesQuery({ ...args, entityExpression })
   );

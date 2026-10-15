@@ -10,7 +10,7 @@ import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
   getPartsByResolvedEntity,
-  needsResolvedEntityFilterOverrides,
+  isFilteringByGroupValue,
   withEntityAliases,
   withResolvedEntityValues,
 } from './resolved_entities';
@@ -101,7 +101,7 @@ describe('withResolvedEntityValues', () => {
 
 const CRITICALITY_FILTER = 'asset.criticality IN ("high_impact")';
 
-describe('needsResolvedEntityFilterOverrides', () => {
+describe('isFilteringByGroupValue', () => {
   it.each([
     ['criticality', CRITICALITY_FILTER],
     ['sources', 'MV_CONTAINS(entity.source, "okta")'],
@@ -110,9 +110,7 @@ describe('needsResolvedEntityFilterOverrides', () => {
       'entity.EngineMetadata.Type IN ("host") AND MV_CONTAINS(entity.attributes.watchlists, "w1")',
     ],
   ])('is true for a filter on %s of resolved rows', (_name, entityExpression) => {
-    expect(needsResolvedEntityFilterOverrides({ rowsMode: 'resolved', entityExpression })).toBe(
-      true
-    );
+    expect(isFilteringByGroupValue({ rowsMode: 'resolved', entityExpression })).toBe(true);
   });
 
   it.each([
@@ -123,7 +121,7 @@ describe('needsResolvedEntityFilterOverrides', () => {
     ],
     ['individual rows', { rowsMode: 'individual', entityExpression: CRITICALITY_FILTER }],
   ] as const)('is false for %s', (_name, args) => {
-    expect(needsResolvedEntityFilterOverrides(args)).toBe(false);
+    expect(isFilteringByGroupValue(args)).toBe(false);
   });
 });
 

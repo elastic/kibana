@@ -17,7 +17,7 @@ import { createEsqlRunner } from '../queries/esql';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
-  needsResolvedEntityFilterOverrides,
+  isFilteringByGroupValue,
 } from '../queries/resolved_entities';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
 import {
@@ -166,7 +166,7 @@ const useResolvedEntityFilterOverrides = (
       },
     ],
     ({ signal }) => fetchFilterOverrides(context, options, signal),
-    { enabled: getReadyContext(context) != null && needsResolvedEntityFilterOverrides(options) }
+    { enabled: getReadyContext(context) != null && isFilteringByGroupValue(options) }
   );
 
 const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
@@ -219,8 +219,7 @@ export const useEntityGridData = (
   const context = useGridContext();
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
   // Every query of the view waits for the overrides of its filters.
-  const isReady =
-    !needsResolvedEntityFilterOverrides(options) || resolvedEntityFilterOverrides.data != null;
+  const isReady = !isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null;
   // The filters judge resolved entities by their group's values, so the overrides join the filter.
   const viewOptions = {
     ...options,

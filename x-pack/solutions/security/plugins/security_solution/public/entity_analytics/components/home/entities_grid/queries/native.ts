@@ -34,7 +34,6 @@ import {
 } from './esql';
 import {
   CRITICALITY_LEVELS,
-  SORTABLE_RESOLVED_ENTITY_FIELDS,
   buildResolvedEntityRowSteps,
   getCriticalitySortRank,
 } from './resolved_entities';
@@ -47,6 +46,12 @@ const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
   }
   return runQuery(buildSortedByFieldQuery(args));
 };
+
+const SORTED_WITH_ALIASES_FIELDS: readonly string[] = [
+  CRITICALITY_FIELD,
+  'entity.lifecycle.first_seen',
+  '@timestamp',
+];
 
 /** Resolved entities with aliases take values over them, so they're read apart and merged with the rest. */
 const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => {
@@ -178,7 +183,7 @@ const getMergedPage = (
 
 export const nativeSortQuerySpec = {
   fetchSortPage: (args, ctx) =>
-    args.rowsMode === 'resolved' && SORTABLE_RESOLVED_ENTITY_FIELDS.includes(args.sort.field)
+    args.rowsMode === 'resolved' && SORTED_WITH_ALIASES_FIELDS.includes(args.sort.field)
       ? fetchSortedWithAliases(args, ctx)
       : fetchSortedByField(args, ctx),
 } satisfies ColumnQuerySpec;
