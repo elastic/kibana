@@ -2408,6 +2408,22 @@ describe('RulesClient', () => {
     });
   });
 
+  describe('getRuleCountsByTemplateId', () => {
+    it('returns the per-template rule counts from the saved object service', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.countByTemplateIds.mockResolvedValueOnce({ 'template-1': 4 });
+
+      const counts = await client.getRuleCountsByTemplateId(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 4 });
+      expect(rulesSavedObjectService.countByTemplateIds).toHaveBeenCalledWith([
+        'template-1',
+        'template-2',
+      ]);
+    });
+  });
+
   describe('getTags', () => {
     it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();

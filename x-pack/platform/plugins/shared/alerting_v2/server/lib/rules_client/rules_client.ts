@@ -1041,6 +1041,12 @@ export class RulesClient {
     });
   }
 
+  /** Returns how many rules were created from each of the given rule templates. */
+  @withApm
+  public async getRuleCountsByTemplateId(templateIds: string[]): Promise<Record<string, number>> {
+    return this.rulesSavedObjectService.countByTemplateIds(templateIds);
+  }
+
   @withApm
   public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
