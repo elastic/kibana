@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
-  ALERTING_TOOL_IDS,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_MANAGEMENT_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
+import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 
 const createDeps = (): ManageActionPolicyToolDeps & {
@@ -45,10 +41,10 @@ describe('createActionPolicyManagementSkill', () => {
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
-  it('marks the skill as experimental so it is gated behind agent builder experimental features', () => {
+  it('is not gated behind agent builder experimental features', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 
-    expect(skill.experimental).toBe(true);
+    expect(skill.experimental).not.toBe(true);
   });
 
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
@@ -57,14 +53,16 @@ describe('createActionPolicyManagementSkill', () => {
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
-  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
+  it('stays available when Alerting V2 experimental features are disabled', async () => {
     const skill = createActionPolicyManagementSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };
 
-    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
-      status: 'unavailable',
+    await expect(
+      skill.availability?.handler({ request: {}, uiSettings } as never)
+    ).resolves.toEqual({
+      status: 'available',
     });
-    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+    expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
   it('exposes only the manage action policy inline tool', async () => {

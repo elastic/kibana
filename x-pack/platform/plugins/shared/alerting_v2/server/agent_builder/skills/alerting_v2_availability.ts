@@ -8,7 +8,6 @@
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Space } from '@kbn/spaces-plugin/common';
 
 interface AlertingV2AvailabilityDeps {
@@ -28,11 +27,7 @@ export const createAlertingV2Availability = ({
   projectType,
 }: AlertingV2AvailabilityDeps): AvailabilityConfig => ({
   cacheMode: 'none',
-  handler: async ({ request, uiSettings }) => {
-    if (!(await uiSettings.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID))) {
-      return { status: 'unavailable' };
-    }
-
+  handler: async ({ request }) => {
     if (!isObservabilityProject(projectType)) {
       return {
         status: 'unavailable',

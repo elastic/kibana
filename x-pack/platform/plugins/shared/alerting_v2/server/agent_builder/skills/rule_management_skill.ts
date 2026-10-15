@@ -34,7 +34,6 @@ export const createRuleManagementSkill = (deps: RuleManagementSkillDeps) =>
     basePath: 'skills/platform/alerting',
     description:
       'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-management skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
-    experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [

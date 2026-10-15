@@ -8,11 +8,10 @@
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
+import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = () => ({
@@ -41,10 +40,10 @@ describe('createRuleManagementSkill', () => {
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
-  it('marks the skill as experimental so it is gated behind agent builder experimental features', () => {
+  it('is not gated behind agent builder experimental features', () => {
     const skill = createRuleManagementSkill(createDeps());
 
-    expect(skill.experimental).toBe(true);
+    expect(skill.experimental).not.toBe(true);
   });
 
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
@@ -53,14 +52,16 @@ describe('createRuleManagementSkill', () => {
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
-  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
+  it('stays available when Alerting V2 experimental features are disabled', async () => {
     const skill = createRuleManagementSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };
 
-    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
-      status: 'unavailable',
+    await expect(
+      skill.availability?.handler({ request: {}, uiSettings } as never)
+    ).resolves.toEqual({
+      status: 'available',
     });
-    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+    expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
   it('exposes only the manage rule inline tool', async () => {

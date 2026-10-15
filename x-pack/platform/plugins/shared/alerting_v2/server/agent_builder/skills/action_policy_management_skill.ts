@@ -38,7 +38,6 @@ export const createActionPolicyManagementSkill = (deps: ActionPolicyManagementSk
     basePath: 'skills/platform/alerting',
     description:
       'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
-    experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
