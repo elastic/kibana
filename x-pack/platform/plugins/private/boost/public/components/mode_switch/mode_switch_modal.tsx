@@ -12,7 +12,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -27,8 +27,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ModeSwitchChange } from '../../../common/mode_switch';
 import type { BoostMode, BoostProfileType } from '../../../common/types';
-import type { ChangeTableSection } from '../change_table';
 import { ChangeTable } from '../change_table';
+import { formatDataSourceCounts } from '../format';
 import { MODAL_WIDTH } from '../modal_width';
 
 interface ModeSwitchModalProps {
@@ -41,72 +41,74 @@ interface ModeSwitchModalProps {
   onConfirm: (shouldSkipNextTime: boolean) => void;
 }
 
-const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: boolean) => {
+const getCause = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: boolean) => {
   if (mode === 'simple') {
-    const cause =
-      hasCustomRules && hasDefaultRules
-        ? i18n.translate('xpack.boost.modeSwitchModal.suspendBoth', {
-            defaultMessage:
-              'Turning off advanced mode suspends custom boost rules and profiles, and default rules go back to the profiles chosen in simple mode.',
-          })
-        : hasCustomRules
-        ? i18n.translate('xpack.boost.modeSwitchModal.suspendRules', {
-            defaultMessage: 'Turning off advanced mode suspends custom boost rules and profiles.',
-          })
-        : i18n.translate('xpack.boost.modeSwitchModal.suspendDefaults', {
-            defaultMessage: 'Default rules go back to the profiles chosen in simple mode.',
-          });
-    return [
-      cause,
-      i18n.translate('xpack.boost.modeSwitchModal.suspendEffect', {
-        defaultMessage:
-          'The indices and data streams below change boost profile. No boost rules or profiles will be deleted. Returning to advanced mode will restore them.',
-      }),
-    ].join(' ');
-  }
-
-  const cause =
-    hasCustomRules && hasDefaultRules
-      ? i18n.translate('xpack.boost.modeSwitchModal.restoreBoth', {
+    return hasCustomRules && hasDefaultRules
+      ? i18n.translate('xpack.boost.modeSwitchModal.suspendBoth', {
           defaultMessage:
-            'Advanced mode restores your custom boost rules, and the custom profiles chosen for default rules.',
+            'Turning off advanced mode suspends custom boost rules and profiles, and default rules go back to the profiles chosen in simple mode.',
         })
       : hasCustomRules
-      ? i18n.translate('xpack.boost.modeSwitchModal.restoreRules', {
-          defaultMessage: 'Advanced mode restores your custom boost rules.',
+      ? i18n.translate('xpack.boost.modeSwitchModal.suspendRules', {
+          defaultMessage: 'Turning off advanced mode suspends custom boost rules and profiles.',
         })
-      : i18n.translate('xpack.boost.modeSwitchModal.restoreDefaults', {
-          defaultMessage: 'Advanced mode restores the custom profiles chosen for default rules.',
+      : i18n.translate('xpack.boost.modeSwitchModal.suspendDefaults', {
+          defaultMessage: 'Default rules go back to the profiles chosen in simple mode.',
         });
-  return [
-    cause,
-    i18n.translate('xpack.boost.modeSwitchModal.restoreEffect', {
-      defaultMessage: 'The indices and data streams below change boost profile.',
-    }),
-  ].join(' ');
+  }
+  return hasCustomRules && hasDefaultRules
+    ? i18n.translate('xpack.boost.modeSwitchModal.restoreBoth', {
+        defaultMessage:
+          'Advanced mode restores your custom boost rules, and the custom profiles chosen for default rules.',
+      })
+    : hasCustomRules
+    ? i18n.translate('xpack.boost.modeSwitchModal.restoreRules', {
+        defaultMessage: 'Advanced mode restores your custom boost rules.',
+      })
+    : i18n.translate('xpack.boost.modeSwitchModal.restoreDefaults', {
+        defaultMessage: 'Advanced mode restores the custom profiles chosen for default rules.',
+      });
 };
 
-const SECTION_TITLES: Readonly<Record<BoostProfileType, (count: number) => string>> = {
-  indices: (count) =>
-    i18n.translate('xpack.boost.modeSwitchModal.indicesSection', {
-      defaultMessage: 'Indices ({count})',
-      values: { count },
-    }),
-  data_streams: (count) =>
-    i18n.translate('xpack.boost.modeSwitchModal.dataStreamsSection', {
-      defaultMessage: 'Data streams ({count})',
-      values: { count },
-    }),
-};
-
-/** The changes split into indices, then data streams, leaving out a type with none. */
-const getSections = (changes: readonly ModeSwitchChange[]): ChangeTableSection[] =>
-  (['indices', 'data_streams'] as const).flatMap((type) => {
-    const rows = changes
-      .filter((change) => change.type === type)
-      .map(({ name, from, to }) => ({ id: name, cells: [name, from, to] }));
-    return rows.length > 0 ? [{ title: SECTION_TITLES[type](rows.length), rows }] : [];
+/** How many indices and how many data streams change, leaving out a type with none. */
+const getEffect = (changes: readonly ModeSwitchChange[]) => {
+  const indexCount = changes.filter(({ type }) => type === 'indices').length;
+  return i18n.translate('xpack.boost.modeSwitchModal.effect', {
+    defaultMessage: 'This will cause the {targets} below to change boost profile.',
+    values: { targets: formatDataSourceCounts(indexCount, changes.length - indexCount) },
   });
+};
+
+const getSummary = (mode: BoostMode, changes: readonly ModeSwitchChange[]) =>
+  [
+    getCause(
+      mode,
+      changes.some(({ cause }) => cause === 'custom_rule'),
+      changes.some(({ cause }) => cause === 'default_rule')
+    ),
+    getEffect(changes),
+    ...(mode === 'simple'
+      ? [
+          i18n.translate('xpack.boost.modeSwitchModal.suspendReassurance', {
+            defaultMessage:
+              'No boost rules or profiles will be deleted. Returning to advanced mode will restore them.',
+          }),
+        ]
+      : []),
+  ].join(' ');
+
+const TYPE_ICONS: Readonly<Record<BoostProfileType, { iconType: string; label: string }>> = {
+  indices: {
+    iconType: 'table',
+    label: i18n.translate('xpack.boost.modeSwitchModal.indexIcon', { defaultMessage: 'Index' }),
+  },
+  data_streams: {
+    iconType: 'productStreamsClassic',
+    label: i18n.translate('xpack.boost.modeSwitchModal.dataStreamIcon', {
+      defaultMessage: 'Data stream',
+    }),
+  },
+};
 
 /** Confirms switching modes when it changes the boost profile of any index or data stream. */
 export const ModeSwitchModal = ({
@@ -118,7 +120,6 @@ export const ModeSwitchModal = ({
 }: ModeSwitchModalProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId();
-  const listTitleId = useGeneratedHtmlId({ prefix: 'modeSwitchRules' });
   const skipCheckboxId = useGeneratedHtmlId({ prefix: 'modeSwitchSkip' });
   const [shouldSkipNextTime, setShouldSkipNextTime] = useState(false);
   const isTurningOff = mode === 'simple';
@@ -144,29 +145,17 @@ export const ModeSwitchModal = ({
 
       <EuiModalBody>
         <EuiText size="s">
-          <p>
-            {getSummary(
-              mode,
-              changes.some(({ cause }) => cause === 'custom_rule'),
-              changes.some(({ cause }) => cause === 'default_rule')
-            )}
-          </p>
+          <p>{getSummary(mode, changes)}</p>
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiFormLabel id={listTitleId}>
-          {i18n.translate('xpack.boost.modeSwitchModal.changesListTitle', {
-            defaultMessage:
-              '{count, plural, one {# boost profile will change} other {# boost profiles will change}}',
-            values: { count: changes.length },
-          })}
-        </EuiFormLabel>
-        <EuiSpacer size="xs" />
         <EuiPanel hasBorder hasShadow={false} paddingSize="none">
           <ChangeTable
-            aria-labelledby={listTitleId}
+            aria-label={i18n.translate('xpack.boost.modeSwitchModal.changesTableLabel', {
+              defaultMessage: 'Indices and data streams that change boost profile',
+            })}
             columns={[
               i18n.translate('xpack.boost.modeSwitchModal.nameColumn', {
-                defaultMessage: 'Index or data stream',
+                defaultMessage: 'Data source',
               }),
               i18n.translate('xpack.boost.modeSwitchModal.currentProfileColumn', {
                 defaultMessage: 'Current profile',
@@ -175,7 +164,18 @@ export const ModeSwitchModal = ({
                 defaultMessage: 'New profile',
               }),
             ]}
-            sections={getSections(changes)}
+            // Each name starts with an icon for its type, which screen readers read out.
+            rows={changes.map(({ name, type, from, to }) => ({
+              id: name,
+              cells: [
+                <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
+                  <EuiIcon type={TYPE_ICONS[type].iconType} title={TYPE_ICONS[type].label} />
+                  {name}
+                </span>,
+                from,
+                to,
+              ],
+            }))}
             // Long lists scroll, keeping the modal's buttons in view.
             maxHeight={euiTheme.base * 15}
           />

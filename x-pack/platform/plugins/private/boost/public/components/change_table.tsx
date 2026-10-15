@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -22,18 +22,12 @@ export interface ChangeTableRow {
   cells: readonly ReactNode[];
 }
 
-/** Rows listed together, under a heading when there's more than one kind of row. */
-export interface ChangeTableSection {
-  title?: string;
-  rows: readonly ChangeTableRow[];
-}
-
 type ChangeTableProps = (
   | { 'aria-label': string; 'aria-labelledby'?: never }
   | { 'aria-labelledby': string; 'aria-label'?: never }
 ) & {
   columns: readonly string[];
-  sections: readonly ChangeTableSection[];
+  rows: readonly ChangeTableRow[];
   /**
    * The rows' tallest height, past which they scroll under the column headers. Set when the table
    * is a list of its own rather than part of one.
@@ -45,14 +39,14 @@ type ChangeTableProps = (
  * Indices or data streams and what changes for each. Built from flex layout with table roles, so it
  * can scroll its rows under fixed column headers.
  */
-export const ChangeTable = ({ columns, sections, maxHeight, ...labelProps }: ChangeTableProps) => {
+export const ChangeTable = ({ columns, rows, maxHeight, ...labelProps }: ChangeTableProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const isScrollable = maxHeight !== undefined;
   // Names can be long, so a cell wraps anywhere rather than widening its column.
   const cellStyles = { minInlineSize: 0, overflowWrap: 'anywhere' } as const;
 
-  const renderRow = ({ id, cells }: ChangeTableRow) => (
+  const body = rows.map(({ id, cells }) => (
     <EuiFlexGroup
       key={id}
       role="row"
@@ -66,32 +60,6 @@ export const ChangeTable = ({ columns, sections, maxHeight, ...labelProps }: Cha
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
-  );
-
-  // A section's heading is a row of its own, spanning every column, so it reads in order.
-  const body = sections.map(({ title, rows }, sectionIndex) => (
-    <Fragment key={title ?? sectionIndex}>
-      {title && (
-        <div
-          role="row"
-          css={{
-            paddingBlock: euiTheme.size.xs,
-            paddingBlockStart: sectionIndex > 0 ? euiTheme.size.m : euiTheme.size.xs,
-          }}
-        >
-          <EuiText
-            role="cell"
-            aria-colspan={columns.length}
-            size="xs"
-            color="subdued"
-            css={{ fontWeight: euiTheme.font.weight.semiBold }}
-          >
-            {title}
-          </EuiText>
-        </div>
-      )}
-      {rows.map(renderRow)}
-    </Fragment>
   ));
 
   return (
@@ -105,7 +73,7 @@ export const ChangeTable = ({ columns, sections, maxHeight, ...labelProps }: Cha
           // headers' bottom padding.
           css={
             isScrollable
-              ? { padding: `${euiTheme.size.s} ${euiTheme.size.s} 0` }
+              ? { padding: `${euiTheme.size.base} ${euiTheme.size.base} 0` }
               : { paddingBlockEnd: euiTheme.size.xs }
           }
         >
@@ -117,14 +85,15 @@ export const ChangeTable = ({ columns, sections, maxHeight, ...labelProps }: Cha
         </EuiFlexGroup>
       </div>
       {isScrollable ? (
-        // The scroll mask fades the area's first and last 8px, which its padding keeps clear.
+        // The scroll mask fades the area's first and last 8px, which its padding keeps clear. With
+        // the rows' own padding, they sit 16px from the panel's edges.
         <div
           role="rowgroup"
           tabIndex={0}
           css={css`
             ${scrollStyles}
             max-block-size: ${maxHeight}px;
-            padding: ${euiTheme.size.s};
+            padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.m};
           `}
         >
           {body}

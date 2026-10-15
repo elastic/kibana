@@ -181,14 +181,10 @@ export const DeleteProfileModal = ({
                       defaultMessage: 'New profile',
                     }),
                   ]}
-                  sections={[
-                    {
-                      rows: affected.map(({ name: dataSourceName, nextRule }) => ({
-                        id: dataSourceName,
-                        cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
-                      })),
-                    },
-                  ]}
+                  rows={affected.map(({ name: dataSourceName, nextRule }) => ({
+                    id: dataSourceName,
+                    cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
+                  }))}
                 />
               ),
               'data-test-subj': `deletedRule-${ruleName}`,

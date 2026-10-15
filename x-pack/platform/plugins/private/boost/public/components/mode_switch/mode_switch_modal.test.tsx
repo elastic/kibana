@@ -37,14 +37,14 @@ const changes: ModeSwitchChange[] = [
   },
 ];
 
-const renderModal = (mode: BoostMode = 'simple') => {
+const renderModal = (mode: BoostMode = 'simple', modalChanges = changes) => {
   const onConfirm = jest.fn();
   const onCancel = jest.fn();
   render(
     <IntlProvider locale="en">
       <ModeSwitchModal
         mode={mode}
-        changes={changes}
+        changes={modalChanges}
         isSwitching={false}
         onCancel={onCancel}
         onConfirm={onConfirm}
@@ -65,7 +65,17 @@ describe('ModeSwitchModal', () => {
     expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
       'No boost rules or profiles will be deleted. Returning to advanced mode will restore them.'
     );
-    expect(screen.getByText('3 boost profiles will change')).toBeInTheDocument();
+    expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
+      'This will cause the 2 indices and 1 data stream below to change boost profile.'
+    );
+  });
+
+  it('leaves out a type of data source with no changes', () => {
+    renderModal('simple', changes.slice(0, 2));
+
+    expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
+      'This will cause the 2 indices below to change boost profile.'
+    );
   });
 
   it('explains what turning on advanced mode restores', () => {
@@ -77,23 +87,27 @@ describe('ModeSwitchModal', () => {
     );
   });
 
-  it('lists indices, then data streams, with their current and new profiles', () => {
+  it('lists each data source, with an icon for its type, and its current and new profiles', () => {
     renderModal();
 
-    const table = screen.getByRole('table', { name: '3 boost profiles will change' });
-    const [, ...rows] = within(table).getAllByRole('row');
+    const table = screen.getByRole('table', {
+      name: 'Indices and data streams that change boost profile',
+    });
+    const [header, ...rows] = within(table).getAllByRole('row');
+    expect(header).toHaveTextContent('Data sourceCurrent profileNew profile');
     expect(
-      rows.map((row) =>
-        within(row)
-          .getAllByRole('cell')
-          .map((cell) => cell.textContent)
-      )
+      rows.map((row) => {
+        const [nameCell, ...profileCells] = within(row).getAllByRole('cell');
+        return [
+          nameCell.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type'),
+          nameCell.textContent,
+          ...profileCells.map((cell) => cell.textContent),
+        ];
+      })
     ).toEqual([
-      ['Indices (2)'],
-      ['catalog-fall', 'catalog-search', 'elastic-performant'],
-      ['catalog-spring', 'catalog-search', 'elastic-performant'],
-      ['Data streams (1)'],
-      ['logs-app', 'clickstream', 'elastic-last-7-days'],
+      ['table', 'catalog-fall', 'catalog-search', 'elastic-performant'],
+      ['table', 'catalog-spring', 'catalog-search', 'elastic-performant'],
+      ['productStreamsClassic', 'logs-app', 'clickstream', 'elastic-last-7-days'],
     ]);
   });
 
