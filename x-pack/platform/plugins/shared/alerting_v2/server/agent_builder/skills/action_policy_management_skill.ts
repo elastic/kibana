@@ -202,11 +202,9 @@ An action policy only requires its destination **workflows** to be saved first. 
 
 After rendering the attachments, remind the user to save the workflow before the action policy.
 
-If a rule attachment in the conversation is still unsaved, also remind the user that the rule has not been saved yet. Do not search for or fetch other rules to check this.
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
 
-Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. Explain that unless another saved rule already carries the policy's routing tag(s), the policy will not match any alerts until the rule is saved.
-
-Do not add this reminder for catch-all policies.
+Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
 
 ## Customization Hints
 
