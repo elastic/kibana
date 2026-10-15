@@ -391,11 +391,6 @@ export const QueryBarTopRow = React.memo(
 
     const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
-    // Temporary, the empty page will change and we wont need to control it
-    useEffect(() => {
-      esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState]);
-
     const {
       showQueryInput = true,
       showDatePicker = true,
@@ -1416,6 +1411,7 @@ export const QueryBarTopRow = React.memo(
             enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            hasExternalVisor
           />
         )
       );

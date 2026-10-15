@@ -339,6 +339,15 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack2:
         connector-id: my-slack2-connector
         channels: ['C0123456789']`,
+        `- name: ask_in_servicenow
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456`,
         `- name: ask_over_http
   type: waitForInput
   with:
@@ -384,6 +393,10 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack2:
         connector-id: my-slack2-connector
         channels: ['C0123456789']
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456
       http:
         url: https://hooks.example/hitl
         method: POST

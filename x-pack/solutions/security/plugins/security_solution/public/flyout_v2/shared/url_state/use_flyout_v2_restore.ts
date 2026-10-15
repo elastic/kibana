@@ -386,18 +386,18 @@ export const openDescriptorAsStart = (
 
     // --- Entity main flyouts ---
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyout({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyout({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyout({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -639,18 +639,18 @@ export const openDescriptorAsChild = (
       break;
     }
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {
