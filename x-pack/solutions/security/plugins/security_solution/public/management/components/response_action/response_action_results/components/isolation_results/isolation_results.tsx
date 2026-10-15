@@ -6,8 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../../common/endpoint/service/response_actions/constants';
-import { OUTPUT_MESSAGES } from '../../../../endpoint_response_actions_list/translations';
 import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { EndpointActionFailureMessage } from '../action_failure_message';
@@ -34,12 +32,6 @@ export const IsolationResults = memo<IsolationResultsProps>(
 
     return (
       <div data-test-subj={getTestId()}>
-        {agentActionState.wasSuccessful &&
-          action.agentType === 'crowdstrike' &&
-          OUTPUT_MESSAGES.submittedSuccessfully(
-            RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.command]
-          )}
-
         {!agentActionState.wasSuccessful && (
           <EndpointActionFailureMessage
             action={action}
