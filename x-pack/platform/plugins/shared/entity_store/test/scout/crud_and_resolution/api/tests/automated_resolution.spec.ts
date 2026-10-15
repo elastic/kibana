@@ -1044,4 +1044,43 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       expect(enable.statusCode).toBe(200);
     }
   });
+
+  apiTest(
+    'Security all can enable and disable built-in rules; Security read cannot',
+    async ({ apiClient, samlAuth }) => {
+      const securityRole = (privilege: 'all' | 'read') => ({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: ['.entities.v2.*'], privileges: ['read', 'view_index_metadata'] }],
+        },
+        kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
+      });
+      // Scout has one custom role per worker: each asInteractiveUser call
+      // redefines it, so the same session takes on whichever role was set last.
+      const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
+      const customRoleHeaders = { ...cookieHeader, ...PUBLIC_HEADERS };
+      const toggleEmailRule = (action: 'ENABLE' | 'DISABLE') =>
+        apiClient.put(
+          ENTITY_STORE_ROUTES.public[`RESOLUTION_RULES_${action}`](
+            RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH
+          ),
+          { headers: customRoleHeaders, responseType: 'json' }
+        );
+
+      await apiTest.step('Security all disables and re-enables a built-in rule', async () => {
+        expect((await toggleEmailRule('DISABLE')).statusCode).toBe(200);
+        expect((await toggleEmailRule('ENABLE')).statusCode).toBe(200);
+      });
+
+      await apiTest.step('Security read can do neither', async () => {
+        await samlAuth.asInteractiveUser(securityRole('read'));
+        for (const action of ['DISABLE', 'ENABLE'] as const) {
+          const response = await toggleEmailRule(action);
+          expect(response.statusCode).toBe(403);
+          // Refused by route authorization, not only by the saved-objects layer.
+          expect(response.body.message).toContain('securitySolution-entity-analytics-manage');
+        }
+      });
+    }
+  );
 });
