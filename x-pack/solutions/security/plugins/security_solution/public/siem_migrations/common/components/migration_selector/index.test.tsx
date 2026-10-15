@@ -7,25 +7,15 @@
 
 import React from 'react';
 import { render, fireEvent, within } from '@testing-library/react';
-import { HeaderButtons } from '.';
+import { MigrationSelector } from '.';
 import { getMigrationsStatsMock } from '../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
-describe('HeaderButtons', () => {
+describe('MigrationSelector', () => {
   const onMigrationIdChange = jest.fn();
 
-  it('renders the component', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <HeaderButtons
-          migrationType="dashboard"
-          migrationsStats={getMigrationsStatsMock()}
-          selectedMigrationId="1"
-          onMigrationIdChange={onMigrationIdChange}
-        />
-      </TestProviders>
-    );
-    expect(getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('marks only the option with the selected migration id as selected when names are duplicated', () => {
@@ -37,8 +27,7 @@ describe('HeaderButtons', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderButtons
-          migrationType="dashboard"
+        <MigrationSelector
           migrationsStats={migrationsWithDuplicateNames}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
@@ -62,8 +51,7 @@ describe('HeaderButtons', () => {
   it('calls onMigrationIdChange when a migration is selected', () => {
     const { getByTestId, getByText } = render(
       <TestProviders>
-        <HeaderButtons
-          migrationType="dashboard"
+        <MigrationSelector
           migrationsStats={getMigrationsStatsMock()}
           selectedMigrationId="1"
           onMigrationIdChange={onMigrationIdChange}
@@ -79,35 +67,5 @@ describe('HeaderButtons', () => {
     fireEvent.click(getByText('Migration 2'));
 
     expect(onMigrationIdChange).toHaveBeenCalledWith('2');
-  });
-
-  it('renders the add another migration button', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <HeaderButtons
-          migrationType="dashboard"
-          migrationsStats={getMigrationsStatsMock()}
-          selectedMigrationId="1"
-          onMigrationIdChange={onMigrationIdChange}
-        />
-      </TestProviders>
-    );
-    expect(getByTestId('addAnotherMigrationButton')).toBeInTheDocument();
-  });
-
-  it('should render the migration vendor badge', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <HeaderButtons
-          migrationType="dashboard"
-          migrationsStats={getMigrationsStatsMock()}
-          selectedMigrationId="2"
-          onMigrationIdChange={onMigrationIdChange}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
-    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRadar');
   });
 });

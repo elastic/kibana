@@ -48325,7 +48325,6 @@
     "xpack.securitySolution.siemMigrations.common.searchAriaLabel": "Migrationselemente suchen",
     "xpack.securitySolution.siemMigrations.common.searchBarPlaceholder": "Nach Migrationselementnamen suchen",
     "xpack.securitySolution.siemMigrations.common.selectionOption.arealLabel": "Wählen Sie eine Migration aus",
-    "xpack.securitySolution.siemMigrations.common.selectionOption.title": "Migrationen",
     "xpack.securitySolution.siemMigrations.common.sentinel.copyrightNotice": "Microsoft, Microsoft Azure und Microsoft Sentinel sind Marken oder eingetragene Marken der Microsoft Corporation in den Vereinigten Staaten und anderen Ländern.",
     "xpack.securitySolution.siemMigrations.common.splunk.copyrightNotice": "Splunk und zugehörige Marken sind Markennamen oder eingetrengte Marken von Splunk LLC in den Vereinigten Staaten und anderen Ländern.",
     "xpack.securitySolution.siemMigrations.common.startMigrationModal.aiConnectorLabel": "KI-Connector",
