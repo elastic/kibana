@@ -10,14 +10,13 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  TooManyCustomResolutionRulesError,
   MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
 } from '../../../errors';
 import { CustomResolutionRulesClient } from './client';
-import { CustomResolutionRuleTypeName, MAX_CUSTOM_RULES_PER_SPACE } from './constants';
+import { CustomResolutionRuleTypeName } from './constants';
 import type { CustomResolutionRuleAttributes } from './saved_object';
 
 jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
@@ -150,23 +149,6 @@ describe('CustomResolutionRulesClient', () => {
       const error = await client.create(LOCAL_USERS_TO_AD).catch((e) => e);
       expect(error).toBeInstanceOf(esErrors.ResponseError);
       expect(error).not.toBeInstanceOf(InvalidCustomResolutionRuleError);
-    });
-
-    it(`refuses more than ${MAX_CUSTOM_RULES_PER_SPACE} rules per space`, async () => {
-      const { client, soClient } = setup();
-      soClient.find.mockResolvedValue({
-        saved_objects: Array.from({ length: MAX_CUSTOM_RULES_PER_SPACE }, (_, i) =>
-          savedObject(`r${i}`)
-        ),
-        total: MAX_CUSTOM_RULES_PER_SPACE,
-        per_page: 100,
-        page: 1,
-      } as never);
-
-      await expect(client.create(LOCAL_USERS_TO_AD)).rejects.toBeInstanceOf(
-        TooManyCustomResolutionRulesError
-      );
-      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     it('rejects a key that Elasticsearch types as boolean', async () => {
@@ -455,6 +437,23 @@ describe('CustomResolutionRulesClient', () => {
       } as never);
 
       expect((await client.list()).map(({ id }) => id)).toEqual(['older', 'newer']);
+    });
+
+    it('returns every rule, not only the first page', async () => {
+      const { client, soClient } = setup();
+      const page = (ids: string[]) =>
+        ({
+          saved_objects: ids.map((id) => savedObject(id)),
+          total: 101,
+          per_page: 100,
+          page: 1,
+        } as never);
+      soClient.find
+        .mockResolvedValueOnce(page(Array.from({ length: 100 }, (_, i) => `r${i}`)))
+        .mockResolvedValueOnce(page(['r100']));
+
+      expect(await client.list()).toHaveLength(101);
+      expect(soClient.createPointInTimeFinder.mock.results[0].value.close).toHaveBeenCalled();
     });
   });
 });

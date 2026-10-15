@@ -13,7 +13,6 @@ export const CUSTOM_RULE_STATE_KEY_PREFIX = 'custom:';
 export const customRuleStateKey = (ruleId: string): string =>
   `${CUSTOM_RULE_STATE_KEY_PREFIX}${ruleId}`;
 
-export const MAX_CUSTOM_RULES_PER_SPACE = 20;
 export const MAX_CUSTOM_RULE_NAME_LENGTH = 256;
 export const MAX_CUSTOM_RULE_EXPRESSION_LENGTH = 2048;
 export const MAX_CUSTOM_RULE_NAMESPACES = 20;

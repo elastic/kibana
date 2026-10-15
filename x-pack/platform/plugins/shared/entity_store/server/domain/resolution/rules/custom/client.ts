@@ -18,7 +18,6 @@ import {
 } from '../../../../infra/elasticsearch/es_errors';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import {
-  TooManyCustomResolutionRulesError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -29,7 +28,6 @@ import { RAW_MATCH_VALUE_COLUMN, buildMatcherValidationQuery } from '../matcher'
 import {
   CustomResolutionRuleTypeName,
   DEFAULT_DECLINE_SAME_NAMESPACE_DUPLICATES,
-  MAX_CUSTOM_RULES_PER_SPACE,
 } from './constants';
 import {
   canonicalDefinitionKey,
@@ -44,7 +42,6 @@ import type {
   CustomResolutionRuleUpdate,
 } from './schemas';
 
-// Above the per-space cap, so a rule created in a race is still found.
 const FIND_PAGE_SIZE = 100;
 
 export interface CustomResolutionRule {
@@ -104,11 +101,19 @@ export const compareByCreation = (a: CustomResolutionRule, b: CustomResolutionRu
 export const findCustomResolutionRules = async (
   soClient: SavedObjectsClientContract
 ): Promise<CustomResolutionRule[]> => {
-  const { saved_objects: savedObjects } = await soClient.find<CustomResolutionRuleAttributes>({
+  const finder = soClient.createPointInTimeFinder<CustomResolutionRuleAttributes>({
     type: CustomResolutionRuleTypeName,
     perPage: FIND_PAGE_SIZE,
   });
-  return savedObjects.map(toRule).sort(compareByCreation);
+  const rules: CustomResolutionRule[] = [];
+  try {
+    for await (const { saved_objects: savedObjects } of finder.find()) {
+      rules.push(...savedObjects.map(toRule));
+    }
+  } finally {
+    await finder.close();
+  }
+  return rules.sort(compareByCreation);
 };
 
 const findSavedObject = async (
@@ -165,11 +170,6 @@ export class CustomResolutionRulesClient {
     const { index } = await this.validate(rule);
     if (rule.enabled) {
       await this.assertCanWriteLinks(index);
-    }
-
-    const existing = await this.list();
-    if (existing.length >= MAX_CUSTOM_RULES_PER_SPACE) {
-      throw new TooManyCustomResolutionRulesError(MAX_CUSTOM_RULES_PER_SPACE);
     }
 
     const created = await this.deps.soClient.create<CustomResolutionRuleAttributes>(

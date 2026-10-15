@@ -23,7 +23,6 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  TooManyCustomResolutionRulesError,
   MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
@@ -69,9 +68,6 @@ const toErrorResponseOrThrow = (
         message: 'Not authorized to access custom resolution rules in this space',
       },
     });
-  }
-  if (error instanceof TooManyCustomResolutionRulesError) {
-    return res.conflict({ body: { message: error.message } });
   }
   if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
     return res.conflict({

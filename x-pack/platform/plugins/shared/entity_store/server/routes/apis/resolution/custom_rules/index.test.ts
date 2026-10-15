@@ -18,7 +18,6 @@ import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  TooManyCustomResolutionRulesError,
   MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
@@ -146,7 +145,6 @@ describe('custom resolution rules routes', () => {
         403,
         new MissingEntityIndexPrivilegeError('i', 'write'),
       ],
-      ['the per-space rule limit', 409, new TooManyCustomResolutionRulesError(20)],
       [
         'a saved-objects authorization error',
         403,

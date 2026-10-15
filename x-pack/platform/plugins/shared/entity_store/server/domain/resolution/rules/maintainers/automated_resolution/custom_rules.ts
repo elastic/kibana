@@ -113,10 +113,8 @@ const priorStateIfDefinitionUnchanged = (
   return { lastProcessedTimestamp: previous.lastProcessedTimestamp, lastRun: previous.lastRun };
 };
 
-// An unauthorized saved-objects `find` returns an empty page rather than
-// throwing, so a rule missing from the list is only pruned once a read by id
-// confirms it's gone. Otherwise one run without access would wipe every rule's
-// progress and the next run would rescan from scratch.
+// A rule missing from the list is only pruned once a read by id confirms it's
+// gone, so a run that can't see the rules never wipes their saved progress.
 const pruneDeletedRules = async (
   { ruleStates, resolutionRulesClient, logger }: RunCustomRulesDeps,
   customRules: CustomResolutionRule[]
