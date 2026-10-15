@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../../common/constants';
 import {
   auditAlertUpdateAuthorizationFailureIfNeeded,
   isAlertUpdateAuthorizationFailure,
+  registerAlertUpdateAuthorizationAudit,
 } from './audit_alert_update_authz';
 
 describe('isAlertUpdateAuthorizationFailure', () => {
@@ -57,5 +59,40 @@ describe('isAlertUpdateAuthorizationFailure', () => {
     expect(
       isAlertUpdateAuthorizationFailure({ route: { method: 'post', path: '/unrelated' } }, 403)
     ).toBe(false);
+  });
+});
+
+describe('registerAlertUpdateAuthorizationAudit', () => {
+  const request = httpServerMock.createKibanaRequest({
+    method: 'post',
+    path: DETECTION_ENGINE_ALERT_TAGS_URL,
+  });
+
+  const setup = () => {
+    const auditLogger = auditLoggerMock.create();
+    const http = { registerOnPreResponse: jest.fn() };
+    registerAlertUpdateAuthorizationAudit({ http, getAuditLogger: () => auditLogger });
+    const [handler] = http.registerOnPreResponse.mock.calls[0];
+    return { auditLogger, handler };
+  };
+
+  it('audits a 403 and continues the response', () => {
+    const { auditLogger, handler } = setup();
+    const toolkit = { next: jest.fn() };
+
+    handler(request, { statusCode: 403 }, toolkit);
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not audit a 200 but continues the response', () => {
+    const { auditLogger, handler } = setup();
+    const toolkit = { next: jest.fn() };
+
+    handler(request, { statusCode: 200 }, toolkit);
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
   });
 });

@@ -40,7 +40,7 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
-import { auditAlertUpdateAuthorizationFailureIfNeeded } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
+import { registerAlertUpdateAuthorizationAudit } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -356,11 +356,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    core.http.registerOnPreResponse((request, preResponse, toolkit) => {
-      auditAlertUpdateAuthorizationFailureIfNeeded(request, preResponse.statusCode, () =>
-        plugins.security?.audit.asScoped(request)
-      );
-      return toolkit.next();
+    registerAlertUpdateAuthorizationAudit({
+      http: core.http,
+      getAuditLogger: (request) => plugins.security?.audit.asScoped(request),
     });
 
     if (plugins.share) {

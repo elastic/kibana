@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpServiceSetup, KibanaRequest } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import {
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
@@ -50,6 +51,22 @@ export const auditAlertUpdateAuthorizationFailureIfNeeded = (
   if (isAlertUpdateAuthorizationFailure(request, statusCode)) {
     auditAlertUpdateAuthorizationFailure(getAuditLogger());
   }
+};
+
+/** Registers an on-pre-response hook that audits alert update authorization rejections. */
+export const registerAlertUpdateAuthorizationAudit = ({
+  http,
+  getAuditLogger,
+}: {
+  http: Pick<HttpServiceSetup, 'registerOnPreResponse'>;
+  getAuditLogger: (request: KibanaRequest) => AuditLogger | undefined;
+}): void => {
+  http.registerOnPreResponse((request, preResponse, toolkit) => {
+    auditAlertUpdateAuthorizationFailureIfNeeded(request, preResponse.statusCode, () =>
+      getAuditLogger(request)
+    );
+    return toolkit.next();
+  });
 };
 
 interface AlertUpdateAuthorizationRequest {
