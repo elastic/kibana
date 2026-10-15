@@ -6,16 +6,12 @@
  */
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
-import {
-  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-  API_VERSIONS,
-  HuntBehaviorRequestBody,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
+import { API_VERSIONS, HuntBehaviorRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
-import { resolveScopedModel } from './lib/scoped_model';
+import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
+import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -56,29 +52,36 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
-          // Resolved by tier, not the deployment default — see resolveScopedModel's
-          // doc for why that distinction matters.
-          const modelOutcome = await resolveScopedModel({
+          // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
+          // why that distinction matters. Tier 2 needs both of its tiers (Frontier for
+          // extraction, Balanced for ES|QL generation) and the route cannot run half of it, so
+          // either one missing fails the request.
+          const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
-            featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
+            tiers: TIER2_MODEL_TIERS,
           });
 
-          if (!modelOutcome.ok) {
+          if (!models.frontier || !models.balanced) {
+            const failure = mostSevereFailure(failures);
             return response.customError({
-              statusCode: modelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
+              // A resolution that threw is ours to fix, not a missing connector the caller can add.
+              statusCode:
+                failure.reason === 'no_inference_plugin'
+                  ? 503
+                  : failure.reason === 'resolution_error'
+                  ? 500
+                  : 400,
               body: {
-                message: modelOutcome.message,
+                message: failure.message,
                 attributes: {
-                  tier2_skipped_reason:
-                    modelOutcome.reason === 'no_inference_plugin'
-                      ? 'no_inference_plugin'
-                      : 'no_connector',
+                  tier2_skipped_reason: failure.reason,
+                  unavailable_model_tiers: failures.map(({ tier }) => tier),
                 },
               },
             });
@@ -90,7 +93,7 @@ export const registerHuntBehaviorRoute = ({
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
-            modelOutcome.model,
+            { extraction: models.frontier, esql: models.balanced },
             logger,
             {
               text,
@@ -100,7 +103,8 @@ export const registerHuntBehaviorRoute = ({
               article_context,
               allowed_indices: indexPatterns,
             },
-            esClient
+            esClient,
+            mitreDataClient
           );
 
           return response.ok({ body });

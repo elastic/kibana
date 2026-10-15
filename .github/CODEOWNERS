@@ -784,7 +784,7 @@ src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
 src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
-src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/observability-ui
+src/platform/packages/shared/serverless/settings/observability_project @elastic/observability-ui @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-ml-ux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/vectordb_project @elastic/search-ml-ux
@@ -1473,6 +1473,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-
 x-pack/solutions/security/packages/navigation @elastic/security-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/security-mitre-attack-mocks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
@@ -1819,6 +1820,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift
 
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
@@ -3485,6 +3487,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/ @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engineering

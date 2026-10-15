@@ -83,7 +83,9 @@ export interface CoreServiceAccountsService {
    * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
    * Rejects when the workload has no binding (a 404), its account differs from
-   * expectedServiceAccountId (a 403), or bindings are unavailable.
+   * expectedServiceAccountId (a 403), `executionId` is empty or longer than a workload ID, or
+   * bindings are unavailable. On the Elasticsearch backend it also rejects when Kibana refuses the
+   * account's stored credential (a 403), or when that credential is missing (a 404).
    */
   withScopedRequestForWorkload<T>(
     params: ServiceAccountWorkloadRequestParams,

@@ -410,14 +410,8 @@ interface InternalUnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * @deprecated Use only `rowAdditionalLeadingControls` instead
-   * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
-   */
-  externalControlColumns?: EuiDataGridControlColumn[];
-  /**
-   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
-   * We recommend to rather position all controls in the beginning of rows and use `rowAdditionalLeadingControls` for that
-   * as number of columns can be dynamically changed and we don't want the controls to become hidden due to horizontal scroll.
+   * Trailing EuiDataGrid control columns for non-per-row uses, such as header-only actions
+   * and custom row-renderer columns that `rowAdditionalLeadingControls` cannot express.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
   /**
@@ -657,8 +651,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCustomGridBody,
       renderCustomToolbar,
       showSummaryColumnToggle = false,
-      externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
-      trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+      trailingControlColumns,
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
@@ -1352,7 +1345,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         ? getActionsColumn({
             baseColumns: leadColumnsExtraContent,
             rowAdditionalLeadingControls,
-            externalControlColumns,
             visibleRowLeadingControls,
           })
         : undefined;
@@ -1365,7 +1357,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       canSetExpandedDoc,
       controlColumnIds,
       displayedRows,
-      externalControlColumns,
       getRowIndicator,
       isInteractive,
       rowAdditionalLeadingControls,
