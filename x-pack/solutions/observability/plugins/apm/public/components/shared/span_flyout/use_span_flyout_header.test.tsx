@@ -170,6 +170,9 @@ describe('useSpanFlyoutHeader', () => {
       'spanFlyoutInfo-timestamp',
       'spanFlyoutInfo-duration',
     ]);
+    expect(parts.infoBlocks.find((block) => block.props.id === 'timestamp')?.props.title).toBe(
+      'Date'
+    );
 
     renderParts(parts);
     expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();

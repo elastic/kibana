@@ -31,11 +31,11 @@ import { ServiceLink } from '../links/apm/service_link';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
 import {
+  DATE_LABEL,
   DURATION_LABEL,
   NAME_LABEL,
   REQUEST_LABEL,
   SERVICE_LABEL,
-  TIMESTAMP_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
 
@@ -212,7 +212,7 @@ export function useSpanFlyoutHeader({
     <InfoBlock
       key="timestamp"
       id="timestamp"
-      title={TIMESTAMP_LABEL}
+      title={DATE_LABEL}
       data-test-subj="spanFlyoutInfo-timestamp"
     >
       <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />

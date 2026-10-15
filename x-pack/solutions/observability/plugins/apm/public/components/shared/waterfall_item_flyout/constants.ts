@@ -14,8 +14,8 @@ import { i18n } from '@kbn/i18n';
  */
 export const WATERFALL_FLYOUT_MAX_WIDTH = 'calc(50vw + 300px)';
 
-export const TIMESTAMP_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.timestampLabel', {
-  defaultMessage: 'Timestamp',
+export const DATE_LABEL = i18n.translate('xpack.apm.transactionDetails.transFlyout.dateLabel', {
+  defaultMessage: 'Date',
 });
 
 export const DURATION_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.durationLabel', {

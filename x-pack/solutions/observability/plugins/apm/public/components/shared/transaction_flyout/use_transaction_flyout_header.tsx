@@ -29,11 +29,11 @@ import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
 import { getTransactionResultBadgeDescriptor } from '../summary/transaction_result_summary_item';
 import { getTransactionUrl } from '../summary/transaction_summary';
 import {
+  DATE_LABEL,
   DURATION_LABEL,
-  NAME_LABEL,
   REQUEST_LABEL,
   SERVICE_LABEL,
-  TIMESTAMP_LABEL,
+  TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
 
 const { Badge, InfoBlock } = FlyoutTemplate.Header;
@@ -130,9 +130,6 @@ export function useTransactionFlyoutHeader({
   const duration = transaction.transaction?.duration?.us;
 
   const infoBlocks = [
-    <InfoBlock key="name" id="name" title={NAME_LABEL} data-test-subj="transactionFlyoutInfo-name">
-      {name}
-    </InfoBlock>,
     <InfoBlock
       key="service"
       id="service"
@@ -160,9 +157,17 @@ export function useTransactionFlyoutHeader({
       )}
     </InfoBlock>,
     <InfoBlock
+      key="name"
+      id="name"
+      title={TRANSACTION_LABEL}
+      data-test-subj="transactionFlyoutInfo-name"
+    >
+      {name}
+    </InfoBlock>,
+    <InfoBlock
       key="timestamp"
       id="timestamp"
-      title={TIMESTAMP_LABEL}
+      title={DATE_LABEL}
       data-test-subj="transactionFlyoutInfo-timestamp"
     >
       <Timestamp timestamp={getTimestampUs(transaction) / 1000} renderMode="tooltip" />

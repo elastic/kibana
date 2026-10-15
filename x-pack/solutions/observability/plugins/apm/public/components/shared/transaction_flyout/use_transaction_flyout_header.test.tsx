@@ -92,10 +92,16 @@ describe('useTransactionFlyoutHeader', () => {
     expect(parts.title).toBe('Transaction details');
     expect(parts.titleText).toBe('Transaction details');
     expect(getTestSubjects(parts.infoBlocks)).toEqual([
-      'transactionFlyoutInfo-name',
       'transactionFlyoutInfo-service',
+      'transactionFlyoutInfo-name',
       'transactionFlyoutInfo-timestamp',
       'transactionFlyoutInfo-duration',
+    ]);
+    expect(parts.infoBlocks.map((block) => block.props.title)).toEqual([
+      'Service',
+      'Transaction',
+      'Date',
+      'Duration',
     ]);
 
     renderParts(parts);
