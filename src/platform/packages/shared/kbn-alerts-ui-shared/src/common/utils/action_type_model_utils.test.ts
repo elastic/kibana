@@ -9,7 +9,7 @@
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
-import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
+import type { GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
 import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
@@ -38,16 +38,38 @@ describe('action_type_model_utils', () => {
   describe('fetchConnectorSpec', () => {
     const http = httpServiceMock.createStartContract();
 
-    const mockWireResponse = (): ConnectorSpecWireResponse => ({
+    const mockWireResponse = (): GetConnectorSpecResponse => ({
       metadata: {
         id: 'test-connector',
         display_name: 'Test Connector',
         description: 'A test connector',
         minimum_license: 'basic',
         supported_feature_ids: ['alerting'],
+        icon: 'testIcon',
+        docs_url: 'https://example.com/docs',
+        is_technical_preview: true,
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
+      auth_type_ids: ['basic'],
+      availability: {
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        is_deprecated: false,
+      },
+      has_inbound_events: false,
+      is_inbound_only: false,
+      is_ears_experimental: false,
+      actions: [
+        {
+          name: 'listIncidents',
+          description: 'List incidents',
+          is_tool: true,
+          scope: 'read',
+          input_schema: { type: 'object', properties: { id: { type: 'string' } } },
+        },
+      ],
     });
 
     const expectedClientSpec = (): ConnectorSpecResponse => ({
@@ -57,9 +79,20 @@ describe('action_type_model_utils', () => {
         description: 'A test connector',
         minimumLicense: 'basic',
         supportedFeatureIds: ['alerting'],
+        icon: 'testIcon',
+        docsUrl: 'https://example.com/docs',
+        isTechnicalPreview: true,
       },
       schema: { type: 'object', properties: {} },
       isTestable: true,
+      actions: [
+        {
+          name: 'listIncidents',
+          description: 'List incidents',
+          isTool: true,
+          scope: 'read',
+        },
+      ],
     });
 
     beforeEach(() => {
@@ -75,6 +108,7 @@ describe('action_type_model_utils', () => {
         '/internal/actions/connector_types/test-connector/spec'
       );
       expect(result).toEqual(expectedClientSpec());
+      expect(result.actions?.[0]).not.toHaveProperty('inputSchema');
     });
   });
 
