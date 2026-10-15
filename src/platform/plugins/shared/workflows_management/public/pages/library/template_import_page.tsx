@@ -58,16 +58,12 @@ export const LibraryTemplateImportPage = React.memo(() => {
     () => ({
       label: libraryBreadcrumbLabel,
       href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
-      onClick: (event) => {
-        event.preventDefault();
-        application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
-      },
     }),
     [application]
   );
 
   const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
-    () => ({ text: libraryBack.label, href: libraryBack.href, onClick: libraryBack.onClick }),
+    () => ({ text: libraryBack.label, href: libraryBack.href }),
     [libraryBack]
   );
 
