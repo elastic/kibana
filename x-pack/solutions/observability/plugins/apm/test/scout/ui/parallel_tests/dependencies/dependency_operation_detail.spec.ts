@@ -80,7 +80,11 @@ test.describe(
       await test.step('verify span link flyout is visible', async () => {
         const flyoutLocator = page.getByRole('dialog');
         await expect(flyoutLocator).toBeVisible();
-        await expect(flyoutLocator.getByRole('heading', { name: 'Span details' })).toBeVisible();
+        // The span name is the title; "Span details" is the description under it.
+        const headerLocator = page.testSubj.locator('spanFlyoutHeader');
+        await expect(headerLocator).toBeVisible();
+        await expect(headerLocator.getByRole('heading')).toBeVisible();
+        await expect(headerLocator).toContainText('Span details');
       });
     });
 

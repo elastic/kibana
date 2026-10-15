@@ -128,6 +128,7 @@ export function useTransactionFlyoutHeader({
 
   const url = getTransactionUrl(transaction);
   const userAgent = transaction.user_agent;
+  const duration = transaction.transaction?.duration?.us;
 
   const metaBlocks = [
     <MetaBlock
@@ -164,18 +165,20 @@ export function useTransactionFlyoutHeader({
     >
       <Timestamp timestamp={getTimestampUs(transaction) / 1000} renderMode="tooltip" />
     </MetaBlock>,
-    <MetaBlock
-      key="duration"
-      id="duration"
-      title={DURATION_LABEL}
-      data-test-subj="transactionFlyoutMeta-duration"
-    >
-      <Duration
-        duration={transaction.transaction.duration.us}
-        parent={{ duration: rootTransactionDuration, type: 'trace' }}
-      />
-    </MetaBlock>,
   ];
+
+  if (duration !== undefined) {
+    metaBlocks.push(
+      <MetaBlock
+        key="duration"
+        id="duration"
+        title={DURATION_LABEL}
+        data-test-subj="transactionFlyoutMeta-duration"
+      >
+        <Duration duration={duration} parent={{ duration: rootTransactionDuration, type: 'trace' }} />
+      </MetaBlock>
+    );
+  }
 
   if (url) {
     metaBlocks.push(
@@ -208,7 +211,7 @@ export function useTransactionFlyoutHeader({
   }
 
   const badges: ReactElement[] = [];
-  const result = transaction.transaction.result;
+  const result = transaction.transaction?.result;
 
   if (!url && result) {
     const descriptor = getTransactionResultBadgeDescriptor(result);

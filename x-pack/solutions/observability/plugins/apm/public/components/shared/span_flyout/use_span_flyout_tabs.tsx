@@ -45,7 +45,7 @@ export function useSpanFlyoutTabs({
     return [];
   }
 
-  const stackframes = span.span.stacktrace;
+  const stackframes = span.span?.stacktrace;
   const plaintextStacktrace = span.code?.stacktrace;
   const codeLanguage = parentTransaction?.service?.language?.name;
 
@@ -77,7 +77,7 @@ export function useSpanFlyoutTabs({
       content: (
         <>
           <EuiSpacer size="m" />
-          <SpanDatabase spanDb={span.span.db} />
+          <SpanDatabase spanDb={span.span?.db} />
           <SpanMetadata span={span} prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }} />
         </>
       ),

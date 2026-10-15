@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getSyncLabel, SyncBadge } from './sync_badge';
+import { getSyncBadgeDescriptor, getSyncLabel, SyncBadge } from './sync_badge';
 
 describe('Sync badge', () => {
   describe('Nodejs', () => {
@@ -204,5 +204,19 @@ describe('SyncBadge Component', () => {
       expect(screen.queryByText('blocking')).not.toBeInTheDocument();
       expect(screen.queryByText('async')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('getSyncBadgeDescriptor', () => {
+  it('describes the badge with its label and tooltip', () => {
+    expect(getSyncBadgeDescriptor({ agentName: 'nodejs', sync: true })).toEqual({
+      label: 'blocking',
+      toolTipContent: 'Indicates whether the span was executed synchronously or asynchronously.',
+    });
+  });
+
+  it('returns undefined when there is no label', () => {
+    expect(getSyncBadgeDescriptor({ agentName: 'nodejs', sync: false })).toBeUndefined();
+    expect(getSyncBadgeDescriptor({ sync: true })).toBeUndefined();
   });
 });

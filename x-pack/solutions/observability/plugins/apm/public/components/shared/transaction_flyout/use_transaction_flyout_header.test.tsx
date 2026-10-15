@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
+import type { TransactionFlyoutHeaderParts } from './use_transaction_flyout_header';
+import { useTransactionFlyoutHeader } from './use_transaction_flyout_header';
 
 jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
@@ -45,20 +46,63 @@ const baseTransaction = {
   },
 } as unknown as Transaction;
 
-const renderWithTheme = (ui: React.ReactElement) =>
-  render(<EuiThemeProvider>{ui}</EuiThemeProvider>);
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiThemeProvider>{children}</EuiThemeProvider>
+);
 
-describe('FlyoutTopLevelProperties', () => {
+const renderHeader = (
+  transaction: Transaction | undefined,
+  { errorCount = 0 }: { errorCount?: number } = {}
+) =>
+  renderHook(
+    () => useTransactionFlyoutHeader({ transaction, errorCount, rootTransactionDuration: 10000 }),
+    { wrapper }
+  ).result.current;
+
+/** Renders the title and the meta block and badge contents, which the template would place. */
+const renderParts = ({ title, metaBlocks, badges }: TransactionFlyoutHeaderParts) =>
+  render(
+    <>
+      <h3>{title}</h3>
+      {[...metaBlocks, ...badges].map((part) => (
+        <div key={part.key} data-test-subj={part.props['data-test-subj']}>
+          {part.props.children}
+        </div>
+      ))}
+    </>,
+    { wrapper }
+  );
+
+const getTestSubjects = (parts: React.ReactElement[]) =>
+  parts.map((part) => part.props['data-test-subj']);
+
+describe('useTransactionFlyoutHeader', () => {
   it('renders null when transaction is undefined', () => {
-    const { container } = renderWithTheme(<FlyoutTopLevelProperties transaction={undefined} />);
-    expect(container.firstChild).toBeNull();
+    const parts = renderHeader(undefined);
+
+    expect(parts.title).toBe('Transaction details');
+    expect(parts.titleText).toBe('Transaction details');
+    expect(parts.description).toBeUndefined();
+    expect(parts.metaBlocks).toEqual([]);
+    expect(parts.badges).toEqual([]);
   });
 
   it('renders service and transaction links with complete data', () => {
-    renderWithTheme(<FlyoutTopLevelProperties transaction={baseTransaction} />);
+    const parts = renderHeader(baseTransaction);
 
-    expect(screen.getByText('my-service')).toBeInTheDocument();
-    expect(screen.getByText('GET /api')).toBeInTheDocument();
+    expect(parts.titleText).toBe('GET /api');
+    expect(parts.description).toBe('Transaction details');
+    expect(getTestSubjects(parts.metaBlocks)).toEqual([
+      'transactionFlyoutMeta-service',
+      'transactionFlyoutMeta-timestamp',
+      'transactionFlyoutMeta-duration',
+    ]);
+
+    renderParts(parts);
+
+    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'GET /api' })).toHaveAttribute('href', '/mock-link');
+    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
   });
 
   it('does not crash when agent is missing', () => {
@@ -67,10 +111,10 @@ describe('FlyoutTopLevelProperties', () => {
       agent: undefined,
     } as unknown as Transaction;
 
-    renderWithTheme(<FlyoutTopLevelProperties transaction={txWithoutAgent} />);
+    renderParts(renderHeader(txWithoutAgent));
 
-    expect(screen.getByText('my-service')).toBeInTheDocument();
-    expect(screen.getByText('GET /api')).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
+    expect(screen.getByRole('link', { name: 'GET /api' })).toBeInTheDocument();
   });
 
   it('renders N/A for service when service is missing, and transaction name as plain text', () => {
@@ -79,10 +123,11 @@ describe('FlyoutTopLevelProperties', () => {
       service: undefined,
     } as unknown as Transaction;
 
-    renderWithTheme(<FlyoutTopLevelProperties transaction={txWithoutService} />);
+    renderParts(renderHeader(txWithoutService));
 
-    expect(screen.getByText('N/A')).toBeInTheDocument();
-    expect(screen.getByText('GET /api')).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('N/A');
+    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'GET /api' })).not.toBeInTheDocument();
   });
 
   it('renders N/A for transaction when transaction sub-object is missing', () => {
@@ -91,9 +136,38 @@ describe('FlyoutTopLevelProperties', () => {
       transaction: undefined,
     } as unknown as Transaction;
 
-    renderWithTheme(<FlyoutTopLevelProperties transaction={txWithoutInner} />);
+    const parts = renderHeader(txWithoutInner);
+    renderParts(parts);
 
-    expect(screen.getByText('my-service')).toBeInTheDocument();
-    expect(screen.getByText('N/A')).toBeInTheDocument();
+    expect(parts.titleText).toBe('N/A');
+    expect(screen.getByRole('heading', { name: 'N/A' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
+    expect(screen.queryByTestId('transactionFlyoutMeta-duration')).not.toBeInTheDocument();
+  });
+
+  it('shows the result badge without a URL, and the request block and error count otherwise', () => {
+    const withResult = {
+      ...baseTransaction,
+      transaction: { ...baseTransaction.transaction, result: 'HTTP 2xx' },
+    } as unknown as Transaction;
+
+    const resultParts = renderHeader(withResult);
+    expect(getTestSubjects(resultParts.badges)).toEqual(['transactionFlyoutBadge-result']);
+    expect(resultParts.badges[0].props.toolTipContent).toBe('Result');
+    expect(resultParts.badges[0].props.children).toBe('HTTP 2xx');
+
+    const withUrlAndErrors = {
+      ...withResult,
+      url: { full: 'https://example.com/api' },
+      faas: { coldstart: true },
+    } as unknown as Transaction;
+
+    const urlParts = renderHeader(withUrlAndErrors, { errorCount: 2 });
+    expect(getTestSubjects(urlParts.metaBlocks)).toContain('transactionFlyoutMeta-request');
+    expect(getTestSubjects(urlParts.badges)).toEqual([
+      'transactionFlyoutBadge-errorCount',
+      'transactionFlyoutBadge-coldStart',
+    ]);
+    expect(urlParts.badges[0].props.children).toBe('2 Errors');
   });
 });

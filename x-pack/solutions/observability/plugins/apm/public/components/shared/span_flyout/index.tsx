@@ -7,21 +7,15 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { FlyoutTemplate } from '@kbn/flyout-template';
-import type { FlyoutTemplateProps } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
-import { useOpenInDiscoverLink } from '../links/discover_links/open_in_discover';
 import type { SpanLinksCount } from '../span_links';
 import { WATERFALL_FLYOUT_MAX_WIDTH } from '../waterfall_item_flyout/constants';
-import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { useSpanFlyoutHeader } from './use_span_flyout_header';
+import { useSpanFlyoutMenuProps } from './use_span_flyout_menu_props';
 import { useSpanFlyoutTabs } from './use_span_flyout_tabs';
-
-const OPEN_IN_DISCOVER_LABEL = i18n.translate('xpack.apm.spanFlyout.openInDiscover', {
-  defaultMessage: 'Open in Discover',
-});
 
 const COMPOSITE_WARNING = i18n.translate(
   'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
@@ -82,30 +76,13 @@ export function SpanFlyout({
   });
   const tabs = useSpanFlyoutTabs({ span, parentTransaction, spanLinksCount });
 
-  const discoverLink = useOpenInDiscoverLink({
-    indexType: 'traces',
+  const flyoutMenuProps = useSpanFlyoutMenuProps({
+    isSpanLoaded: !!span,
+    spanId,
     rangeFrom,
     rangeTo,
-    queryParams: { kuery, spanId, sortDirection: 'DESC' },
-    ebt: { element: SPAN_FLYOUT_EBT_ELEMENTS.HEADER },
+    kuery,
   });
-
-  const flyoutMenuProps: FlyoutTemplateProps['flyoutMenuProps'] = span
-    ? {
-        trailingActions: [
-          {
-            iconType: 'productDiscover',
-            href: discoverLink.href,
-            'aria-label': OPEN_IN_DISCOVER_LABEL,
-            toolTipContent: OPEN_IN_DISCOVER_LABEL,
-            isDisabled: discoverLink.isLoading || discoverLink.isDisabled,
-            hasAriaDisabled: true,
-            'data-test-subj': 'spanFlyoutViewSpanInDiscoverLink',
-            ...discoverLink.ebtProps,
-          },
-        ],
-      }
-    : undefined;
 
   return (
     <FlyoutTemplate
@@ -129,7 +106,7 @@ export function SpanFlyout({
         {badges}
       </FlyoutTemplate.Header>
       <FlyoutTemplate.Body>
-        {span?.span.composite ? (
+        {span?.span?.composite ? (
           <FlyoutTemplate.Body.Callout
             level="warning"
             title={COMPOSITE_WARNING}

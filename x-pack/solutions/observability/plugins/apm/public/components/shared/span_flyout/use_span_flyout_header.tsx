@@ -127,6 +127,8 @@ export function useSpanFlyoutHeader({
   const transactionServiceName = parentTransaction?.service?.name;
   const transactionName = parentTransaction?.transaction?.name;
   const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
+  const duration = span.span?.duration?.us;
+  const composite = span.span?.composite;
 
   const metaBlocks: ReactElement[] = [];
 
@@ -211,31 +213,36 @@ export function useSpanFlyoutHeader({
       data-test-subj="spanFlyoutMeta-timestamp"
     >
       <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />
-    </MetaBlock>,
-    <MetaBlock
-      key="duration"
-      id="duration"
-      title={DURATION_LABEL}
-      data-test-subj="spanFlyoutMeta-duration"
-    >
-      <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <Duration
-            duration={span.span.duration.us}
-            parent={{ duration: totalDuration, type: 'transaction', loading: false }}
-          />
-        </EuiFlexItem>
-        {span.span.composite && (
-          <EuiFlexItem grow={false}>
-            <CompositeSpanDurationSummaryItem
-              count={span.span.composite.count}
-              durationSum={span.span.composite.sum.us}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
     </MetaBlock>
   );
+
+  if (duration !== undefined) {
+    metaBlocks.push(
+      <MetaBlock
+        key="duration"
+        id="duration"
+        title={DURATION_LABEL}
+        data-test-subj="spanFlyoutMeta-duration"
+      >
+        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <Duration
+              duration={duration}
+              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+            />
+          </EuiFlexItem>
+          {composite && (
+            <EuiFlexItem grow={false}>
+              <CompositeSpanDurationSummaryItem
+                count={composite.count}
+                durationSum={composite.sum.us}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </MetaBlock>
+    );
+  }
 
   if (spanHttpUrl) {
     metaBlocks.push(
@@ -254,22 +261,27 @@ export function useSpanFlyoutHeader({
     );
   }
 
-  const { type, subtype, action } = span.span;
-  const spanSubtype = formatSubtype(subtype);
+  const type = span.span?.type;
+  const action = span.span?.action;
+  const spanSubtype = formatSubtype(span.span?.subtype);
 
-  const badges: ReactElement[] = [
-    <Badge
-      key="type"
-      id="type"
-      color="hollow"
-      toolTipContent={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
-        defaultMessage: 'Type',
-      })}
-      data-test-subj="spanFlyoutBadge-type"
-    >
-      {formatType(type)}
-    </Badge>,
-  ];
+  const badges: ReactElement[] = [];
+
+  if (type) {
+    badges.push(
+      <Badge
+        key="type"
+        id="type"
+        color="hollow"
+        toolTipContent={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
+          defaultMessage: 'Type',
+        })}
+        data-test-subj="spanFlyoutBadge-type"
+      >
+        {formatType(type)}
+      </Badge>
+    );
+  }
 
   if (spanSubtype) {
     badges.push(
@@ -318,7 +330,7 @@ export function useSpanFlyoutHeader({
     );
   }
 
-  const sync = getSyncBadgeDescriptor({ sync: span.span.sync, agentName: span.agent?.name });
+  const sync = getSyncBadgeDescriptor({ sync: span.span?.sync, agentName: span.agent?.name });
   if (sync) {
     badges.push(
       <Badge
