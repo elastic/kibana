@@ -62,8 +62,8 @@ export const updatePanelLayoutsOperation = defineOperation({
         continue;
       }
 
-      // Keep the size, but place the panel below the content of its new container, since its
-      // coordinates belong to the container it left.
+      // Keep the size, but place the panel below the content of its new container until the
+      // layout call places it, since its coordinates belong to the container it left.
       const targetBottomY = getWidgetsBottomY(
         getContainerWidgets(dashboardAfterRemoval, targetSectionId)
       );

@@ -26,7 +26,8 @@ export interface LayoutPanel {
 
 /**
  * `all` for a panel added in this call, or moved and edited; `position` for a panel moved to
- * another container, whose position is temporary; `size` for a panel whose content was edited.
+ * another container, which keeps its size but not its temporary position; `size` for a panel
+ * whose content was edited, which keeps its position.
  */
 export type Relayout = 'all' | 'position' | 'size';
 
