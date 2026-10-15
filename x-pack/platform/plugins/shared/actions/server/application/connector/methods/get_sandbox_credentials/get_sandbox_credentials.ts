@@ -31,6 +31,10 @@ export async function getSandboxCredentials(
     );
   }
 
+  if (!context.actionTypeRegistry.isActionExecutable(connectorId, actionTypeId)) {
+    context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  }
+
   if (
     !isSandboxCapableConnector({
       actionTypeId,

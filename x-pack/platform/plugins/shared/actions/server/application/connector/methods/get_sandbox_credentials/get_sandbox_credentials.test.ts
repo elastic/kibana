@@ -131,6 +131,7 @@ describe('getSandboxCredentials()', () => {
   let actionsClient: ActionsClient;
   let actionTypeRegistry: ActionTypeRegistry;
   let authTypeRegistry: AuthTypeRegistry;
+  let actionsConfigUtils: ReturnType<typeof actionsConfigMock.create>;
 
   const createClient = (overrides: Partial<ConstructorParameters<typeof ActionsClient>[0]> = {}) =>
     new ActionsClient({
@@ -158,6 +159,8 @@ describe('getSandboxCredentials()', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    licenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionsConfigUtils = actionsConfigMock.create();
     actionTypeRegistry = new ActionTypeRegistry({
       licensing,
       taskManager,
@@ -170,7 +173,7 @@ describe('getSandboxCredentials()', () => {
         }),
         inMemoryMetrics
       ),
-      actionsConfigUtils: actionsConfigMock.create(),
+      actionsConfigUtils,
       licenseState,
       inMemoryConnectors,
     });
@@ -249,6 +252,64 @@ describe('getSandboxCredentials()', () => {
     });
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  it('allows a preconfigured connector when its action type is disabled', async () => {
+    actionsConfigUtils.isActionTypeEnabled.mockReturnValue(false);
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: inMemoryConnectorTypeId,
+        sandboxSupportedAuthTypes: ['basic'],
+        validate: {
+          config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
+          secrets: secretsSchema,
+        },
+        executor: undefined,
+      })
+    );
+
+    await expect(
+      actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
+    ).resolves.toMatchObject({ connectorId: inMemoryConnectorId });
+    expect(actionsConfigUtils.ensureActionTypeEnabled).not.toHaveBeenCalled();
+  });
+
+  it('rejects a preconfigured connector when its action type license is invalid', async () => {
+    licenseState.isLicenseValidForActionType.mockReturnValue({
+      isValid: false,
+      reason: 'invalid',
+    });
+    licenseState.ensureLicenseForActionType.mockImplementation(() => {
+      throw new Error('Action type license is invalid');
+    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: inMemoryConnectorTypeId,
+        sandboxSupportedAuthTypes: ['basic'],
+        validate: {
+          config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
+          secrets: secretsSchema,
+        },
+        executor: undefined,
+      })
+    );
+
+    await expect(actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })).rejects.toThrow(
+      'Action type license is invalid'
+    );
+  });
+
+  it('rejects a persisted connector when its action type is disabled', async () => {
+    actionsConfigUtils.isActionTypeEnabled.mockReturnValue(false);
+    actionsConfigUtils.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Action type is disabled');
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
+    await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects.toThrow(
+      'Action type is disabled'
+    );
+    expect(actionsConfigUtils.ensureActionTypeEnabled).toHaveBeenCalledWith(defaultConnectorTypeId);
   });
 
   describe('authorization', () => {
