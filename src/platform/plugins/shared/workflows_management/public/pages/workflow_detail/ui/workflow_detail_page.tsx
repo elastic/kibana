@@ -270,15 +270,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     clearSelectedExecution({ replace: true });
   }, [clearSelectedExecution]);
 
-  // When creating a new workflow, start on the agentic-first landing; drop into the
-  // YAML editor when the user opts into "Start manually" or picks an example.
-  // `?startBlank=true` in the URL skips the landing (used by "Start manually" on
-  // the empty workflow list — otherwise the user would land on the same screen).
+  // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
+  // on the empty list) skips it.
   const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
-  // The prompt handed off from the landing (either this page's own landing on
-  // submit, or the empty workflows list via `location.state.initialAgentMessage`).
-  // Forwarded to the editor's Agent Builder integration so the auto-open chat
-  // fires with `initialMessage` + `autoSendInitialMessage: true`.
+  // Prompt from this page's landing or from the empty list (`location.state`).
   const [pendingInitialAgentMessage, setPendingInitialAgentMessage] = useState<string | undefined>(
     () => (!id ? location.state?.initialAgentMessage : undefined)
   );
@@ -389,7 +384,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           showAddIntegrations
           spacing="compact"
         />
-        {/* Center the landing vertically, like the Agent Builder new-chat screen. */}
         <EuiPageTemplate.Section restrictWidth={false} grow alignment="center">
           <AgenticFirstEmptyStateLive
             onSubmitPrompt={handleLandingSubmit}

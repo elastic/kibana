@@ -12,11 +12,7 @@ import { PLUGIN_ID } from '../../../common';
 
 export interface WorkflowDetailRouteState {
   workflowsListSearch?: string;
-  /**
-   * Prompt captured on the agentic-first landing (e.g. the empty workflows
-   * list). Consumed once by `WorkflowDetailPage` on `/workflows/create` to
-   * hand off to the workflow editor's Agent Builder chat integration.
-   */
+  /** Prompt from the empty-list landing, handed to the chat on `/create`. */
   initialAgentMessage?: string;
 }
 

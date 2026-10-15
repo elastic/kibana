@@ -57,8 +57,6 @@ export interface AgenticFirstEmptyStateProps {
   onSelectTemplate?: (template: Template) => void;
   llmLabel?: string;
   agentLabel?: string;
-  /** Renders a subtle dot-grid background — used on the "New automation flow" landing */
-  withDotBackground?: boolean;
 }
 
 const submitLabel = i18n.translate('workflows.agenticFirst.submit', {
@@ -109,7 +107,6 @@ export function AgenticFirstEmptyState({
   onSelectTemplate,
   llmLabel = 'LLM',
   agentLabel = 'Elastic Agent',
-  withDotBackground = false,
 }: AgenticFirstEmptyStateProps) {
   const visibleTemplates = liveTemplates?.slice(0, 3) ?? [];
   const showLiveTemplates = visibleTemplates.length > 0;
@@ -121,21 +118,10 @@ export function AgenticFirstEmptyState({
     onSubmitPrompt?.(prompt.trim());
   };
 
-  const containerCss = withDotBackground
-    ? css`
-        position: relative;
-        min-height: 100%;
-        background-image: radial-gradient(
-          ${euiTheme.colors.borderBaseSubdued} 1px,
-          transparent 1px
-        );
-        background-size: 16px 16px;
-        padding: ${euiTheme.size.xl} ${euiTheme.size.l};
-      `
-    : css`
-        width: 100%;
-        padding: ${euiTheme.size.xl} ${euiTheme.size.l};
-      `;
+  const containerCss = css`
+    width: 100%;
+    padding: ${euiTheme.size.xl} ${euiTheme.size.l};
+  `;
 
   return (
     <div css={containerCss} data-test-subj="agenticFirstEmptyState">

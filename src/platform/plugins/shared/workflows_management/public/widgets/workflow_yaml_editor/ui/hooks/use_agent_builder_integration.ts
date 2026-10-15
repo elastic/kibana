@@ -54,12 +54,7 @@ interface UseAgentBuilderIntegrationParams {
    * until the editor shows it.
    */
   workflowTabYaml?: string;
-  /**
-   * When set, the auto-open path opens the sidebar with this message and
-   * `autoSendInitialMessage: true` — used by the "agentic first" landing on
-   * `/workflows/create` to hand the user's typed prompt off to the workflow
-   * editor's chat integration.
-   */
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
   initialAgentMessage?: string;
   /**
    * Opens the sidebar on mount for an unsaved workflow. Set when the user

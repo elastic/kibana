@@ -84,11 +84,7 @@ const WorkflowVisualEditor = React.lazy(() =>
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
   onAgentProposalHeld?: () => void;
-  /**
-   * Prompt handed off from the agentic-first landing on `/workflows/create`.
-   * Forwarded to the YAML editor's Agent Builder integration so the auto-open
-   * fires with this message and `autoSendInitialMessage: true`.
-   */
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
   initialAgentMessage?: string;
   /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
   autoOpenAgentChat?: boolean;

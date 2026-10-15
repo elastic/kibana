@@ -189,11 +189,7 @@ export interface WorkflowYAMLEditorProps {
    * execution. The proposal shows once the parent opens the Workflow tab.
    */
   onAgentProposalHeld?: () => void;
-  /**
-   * Optional prompt to hand off to the Agent Builder chat when the editor
-   * auto-opens on `/workflows/create`. Used by the agentic-first landing to
-   * carry the user's typed message into the workflow-scoped chat session.
-   */
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
   initialAgentMessage?: string;
   /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
   autoOpenAgentChat?: boolean;

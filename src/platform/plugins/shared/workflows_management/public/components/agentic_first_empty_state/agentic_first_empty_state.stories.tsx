@@ -34,14 +34,3 @@ type Story = StoryObj<typeof AgenticFirstEmptyState>;
  * "Start manually" is available but demoted.
  */
 export const WorkflowsListEmpty: Story = {};
-
-/**
- * Shown on `/create` when the user clicks "Create New Workflow".
- * The dot-grid background hints that this is the editor surface —
- * the agentic prompt is the primary entry point, not the raw YAML editor.
- */
-export const NewAutomationFlow: Story = {
-  args: {
-    withDotBackground: true,
-  },
-};

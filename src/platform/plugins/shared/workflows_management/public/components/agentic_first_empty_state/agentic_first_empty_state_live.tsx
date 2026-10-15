@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import type { Template } from '@kbn/workflows-library';
 import { useCatalog, useLibraryEnabled } from '@kbn/workflows-ui';
 import {
   AgenticFirstEmptyState,
@@ -23,14 +22,9 @@ export type AgenticFirstEmptyStateLiveProps = Omit<
 >;
 
 /**
- * Wraps {@link AgenticFirstEmptyState} with real Kibana data:
- *  - Template library catalog behind the `useLibraryEnabled` feature flag.
- *  - Renders Agent Builder's `EmbeddableConversationInput` so the prompt input
- *    matches the chat input surface elsewhere. Submissions are bubbled up via
- *    `onSubmitPrompt`; the parent is responsible for handing the message off
- *    to the workflow editor's Agent Builder integration (which owns the
- *    session tag + attachment scope). This component does NOT call `openChat`
- *    on its own, to avoid spawning a competing sidebar conversation.
+ * {@link AgenticFirstEmptyState} with the library catalog and Agent Builder's chat input.
+ * It reports prompts through `onSubmitPrompt` and never calls `openChat`: the editor's
+ * Agent Builder integration owns the chat session.
  */
 export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProps) {
   const libraryEnabled = useLibraryEnabled();
@@ -71,13 +65,7 @@ function LiveInner({
   ...props
 }: AgenticFirstEmptyStateLiveProps & { agentInput?: React.ReactNode }) {
   const { templates } = useCatalog();
-  return (
-    <AgenticFirstEmptyState
-      {...props}
-      liveTemplates={templates as Template[]}
-      agentInput={agentInput}
-    />
-  );
+  return <AgenticFirstEmptyState {...props} liveTemplates={templates} agentInput={agentInput} />;
 }
 
 /**

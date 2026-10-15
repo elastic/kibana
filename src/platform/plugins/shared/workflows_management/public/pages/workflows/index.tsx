@@ -196,7 +196,7 @@ export function WorkflowsPage() {
         docLink={WORKFLOWS_DOCUMENTATION_URL}
         spacing="compact"
       />
-      {/* With no workflows, the section fills the page so the landing can center vertically below any filters, like `/create`. */}
+      {/* With no workflows, fill the page so the landing centers below the filters. */}
       <EuiPageTemplate.Section
         restrictWidth={false}
         {...(shouldShowEmptyState
