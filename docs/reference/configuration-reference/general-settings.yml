@@ -365,7 +365,7 @@ groups:
       - setting: permissionsPolicy.fullscreen
         id: permissionspolicy-fullscreen
         description: |
-          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. By default, the feature is allowed for `self`.
         datatype: array of strings
         applies_to:
           - "stack: preview"
