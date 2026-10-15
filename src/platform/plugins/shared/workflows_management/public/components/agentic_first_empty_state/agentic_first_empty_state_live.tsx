@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { Template } from '@kbn/workflows-library';
 import { useCatalog, useLibraryEnabled } from '@kbn/workflows-ui';
 import {
   AgenticFirstEmptyState,
@@ -71,8 +72,35 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
 
 function LiveInner({ agentInput, ...props }: AgenticFirstEmptyStateProps) {
   const { templates } = useCatalog();
-  return <AgenticFirstEmptyState {...props} templates={templates} agentInput={agentInput} />;
+  const randomTemplates = useRandomTemplates(templates, VISIBLE_TEMPLATE_COUNT);
+  return <AgenticFirstEmptyState {...props} templates={randomTemplates} agentInput={agentInput} />;
 }
+
+const VISIBLE_TEMPLATE_COUNT = 3;
+
+/**
+ * Picks `count` random templates once per mount. Until there is a recommendation, a random
+ * pick shows more of the library across visits. Catalog refetches keep the same pick, so
+ * the cards do not change while the user reads them.
+ */
+const useRandomTemplates = (templates: Template[], count: number): Template[] => {
+  const pickRef = useRef<Template[]>();
+  if (!pickRef.current && templates.length > 0) {
+    pickRef.current = pickRandom(templates, count);
+  }
+  return pickRef.current ?? [];
+};
+
+/** Returns `count` distinct random items (partial Fisher–Yates shuffle). */
+export const pickRandom = <T,>(items: readonly T[], count: number): T[] => {
+  const pool = [...items];
+  const size = Math.min(count, pool.length);
+  for (let i = 0; i < size; i++) {
+    const j = i + Math.floor(Math.random() * (pool.length - i));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, size);
+};
 
 type AgentChatAccess = 'loading' | 'ready' | 'noLlm' | 'unavailable';
 

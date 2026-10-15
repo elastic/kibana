@@ -10,7 +10,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AgenticFirstEmptyStateLive } from './agentic_first_empty_state_live';
+import { AgenticFirstEmptyStateLive, pickRandom } from './agentic_first_empty_state_live';
 
 const mockNavigateToApp = jest.fn();
 const mockGetAgentBuilderAccess = jest.fn();
@@ -37,11 +37,23 @@ jest.mock('../../hooks/use_kibana', () => ({
   }),
 }));
 
+let mockLibraryEnabled = false;
+let mockTemplates: Array<Record<string, unknown>> = [];
+
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useLibraryEnabled: () => false,
-  useCatalog: () => ({ templates: [] }),
+  useLibraryEnabled: () => mockLibraryEnabled,
+  useCatalog: () => ({ templates: mockTemplates }),
 }));
+
+const makeTemplate = (slug: string) => ({
+  slug,
+  name: `Template ${slug}`,
+  description: '',
+  stepTypes: [],
+  triggerTypes: [],
+  categories: [],
+});
 
 const renderLive = () =>
   render(
@@ -55,6 +67,8 @@ describe('AgenticFirstEmptyStateLive', () => {
     jest.clearAllMocks();
     mockHasShowPrivilege = true;
     mockHasAgentBuilder = true;
+    mockLibraryEnabled = false;
+    mockTemplates = [];
   });
 
   const expectNoPrompt = () => {
@@ -143,5 +157,52 @@ describe('AgenticFirstEmptyStateLive', () => {
     renderLive();
 
     expectNoPrompt();
+  });
+
+  it('shows 3 random library templates and keeps them across catalog refetches', async () => {
+    mockGetAgentBuilderAccess.mockResolvedValue({
+      hasRequiredLicense: true,
+      hasLlmConnector: true,
+    });
+    mockLibraryEnabled = true;
+    mockTemplates = ['a', 'b', 'c', 'd', 'e'].map(makeTemplate);
+    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    const { rerender } = renderLive();
+    await waitFor(() => expect(mockGetAgentBuilderAccess).toHaveBeenCalled());
+
+    const shownSlugs = () =>
+      screen
+        .getAllByTestId(/^workflow-library-template-card-/)
+        .map((card) => card.getAttribute('data-test-subj'));
+    const firstPick = shownSlugs();
+    expect(firstPick).toEqual([
+      'workflow-library-template-card-e',
+      'workflow-library-template-card-a',
+      'workflow-library-template-card-b',
+    ]);
+
+    // A refetch returns a new array; the pick must not change.
+    randomSpy.mockReturnValue(0);
+    mockTemplates = [...mockTemplates];
+    rerender(
+      <I18nProvider>
+        <AgenticFirstEmptyStateLive />
+      </I18nProvider>
+    );
+    expect(shownSlugs()).toEqual(firstPick);
+    randomSpy.mockRestore();
+  });
+});
+
+describe('pickRandom', () => {
+  it('returns the requested number of distinct items', () => {
+    const picked = pickRandom([1, 2, 3, 4, 5], 3);
+    expect(picked).toHaveLength(3);
+    expect(new Set(picked).size).toBe(3);
+  });
+
+  it('returns every item when there are fewer than requested', () => {
+    expect(pickRandom([1, 2], 3).sort()).toEqual([1, 2]);
   });
 });
