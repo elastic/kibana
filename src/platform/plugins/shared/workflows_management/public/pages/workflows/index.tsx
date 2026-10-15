@@ -14,6 +14,7 @@ import {
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
@@ -195,13 +196,16 @@ export function WorkflowsPage() {
         docLink={WORKFLOWS_DOCUMENTATION_URL}
         spacing="compact"
       />
-      {/* With no workflows (and no filters above it), center the landing vertically like `/create`. */}
+      {/* With no workflows, the section fills the page so the landing can center vertically below any filters, like `/create`. */}
       <EuiPageTemplate.Section
         restrictWidth={false}
-        {...(shouldShowFilters ? {} : { grow: true, alignment: 'center' as const })}
+        {...(shouldShowEmptyState
+          ? { grow: true, css: styles.fillColumn, contentProps: { css: styles.fillColumn } }
+          : {})}
       >
         {shouldShowFilters ? (
-          <>
+          // A plain wrapper keeps the filters at their height in the empty-state flex column.
+          <div>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <WorkflowSearchField
@@ -280,14 +284,16 @@ export function WorkflowsPage() {
             {!shouldShowEmptyState && isExecutionStatsBarEnabled ? (
               <WorkflowExecutionStatsBar height={140} />
             ) : null}
-          </>
+          </div>
         ) : null}
 
-        <WorkflowList
-          search={search}
-          setSearch={setSearch}
-          onCreateWorkflow={navigateToCreateWorkflow}
-        />
+        <div css={shouldShowEmptyState ? styles.centeredEmptyState : undefined}>
+          <WorkflowList
+            search={search}
+            setSearch={setSearch}
+            onCreateWorkflow={navigateToCreateWorkflow}
+          />
+        </div>
       </EuiPageTemplate.Section>
       {showImportFlyout ? (
         <ImportWorkflowsFlyout onClose={() => setShowImportFlyout(false)} />
@@ -295,3 +301,13 @@ export function WorkflowsPage() {
     </EuiPageTemplate>
   );
 }
+
+const styles = {
+  fillColumn: css({ display: 'flex', flexDirection: 'column', flexGrow: 1 }),
+  centeredEmptyState: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flexGrow: 1,
+  }),
+};
