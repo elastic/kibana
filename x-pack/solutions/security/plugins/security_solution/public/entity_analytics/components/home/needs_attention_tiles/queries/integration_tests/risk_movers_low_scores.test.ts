@@ -130,6 +130,19 @@ describe('Risk movers count and entities with a low current score, on Elasticsea
     expect(await run(readingEveryScoredEntity)).toEqual(await run(shipped));
   });
 
+  it('still returns one row with a count of 0 when no entity can qualify', async () => {
+    // Every entity left in view has a current score below 10, so the filtered entity branch reads
+    // nothing. The tile must get a real 0 (one row), not an empty result.
+    const belowTen = ['host:reset-to-zero', 'host:zero-zero', 'host:small-rise', 'host:nine'];
+    const { columns, values } = await client.esql.query({
+      query: buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '30d', [
+        `| WHERE entity.id IN (${belowTen.map((id) => `"${id}"`).join(', ')})`,
+      ]),
+    });
+    expect(values).toHaveLength(1);
+    expect(values[0][columns.findIndex(({ name }) => name === 'value')]).toBe(0);
+  });
+
   it('reads only the entities that can qualify', async () => {
     const countRows = async (where: string) => {
       const { values } = await client.esql.query({
