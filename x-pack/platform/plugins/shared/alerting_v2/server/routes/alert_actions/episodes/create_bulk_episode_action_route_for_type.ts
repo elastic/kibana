@@ -74,6 +74,9 @@ export const createBulkEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      ...(access === 'public' && {
+        availability: { stability: 'stable' as const, since: '9.6.0' },
+      }),
       summary,
       description: 'Create the same action for multiple alerts in a single request.',
       oasOperationObject,

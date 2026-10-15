@@ -74,6 +74,9 @@ export const createEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      ...(access === 'public' && {
+        availability: { stability: 'stable' as const, since: '9.6.0' },
+      }),
       summary,
       description: 'Create an action for a specific alert.',
       oasOperationObject,
