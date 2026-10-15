@@ -56,8 +56,6 @@ const ROWS_STALE_TIME_MS: Readonly<Record<EntityGridKeyScope, number>> = {
 const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
   sortField === ANOMALY_COUNT_FIELD;
 
-// ── query keys ────────────────────────────────────────────────────────────────
-
 const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
   [
     'entity-grid',
@@ -89,13 +87,27 @@ const getCountKey = (
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
   ] as const;
 
-// ── requests ──────────────────────────────────────────────────────────────────
+const getFilterOverridesKey = (context: GridContext, options: UseEntityGridDataOptions) =>
+  [
+    'entity-grid',
+    getKeyScope(options),
+    'resolved-entity-filter-overrides',
+    {
+      spaceId: context.spaceId,
+      concreteEntityIndexName: context.concreteEntityIndexName,
+      entityExpression: options.entityExpression,
+    },
+  ] as const;
+
+const getQueryArgs = (context: GridContext, options: UseEntityGridDataOptions): QueryArgs => {
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  return buildQueryArgs(ready, options);
+};
 
 /** The count query of the view, or `null` until the space and the index resolve. */
-const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
-  const ready = getReadyContext(context);
-  return ready && buildEntitiesInViewCountQuery(buildQueryArgs(ready, options));
-};
+const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) =>
+  getReadyContext(context) ? buildEntitiesInViewCountQuery(getQueryArgs(context, options)) : null;
 
 const fetchCount = async (
   { searchService }: GridContext,
@@ -106,48 +118,36 @@ const fetchCount = async (
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
-const fetchSortRows = async (
-  context: GridContext,
-  options: UseEntityGridDataOptions,
-  args: QueryArgs,
-  signal?: AbortSignal
-): Promise<Row[]> => {
-  const fetchSortPage = findSortPageFetcher(options.sortField);
-  if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
-  return fetchSortPage(args, { runQuery: createEsqlRunner(context.searchService, signal) });
-};
-
 /** The sort query reads one extra row, only to tell whether the view has more. */
 const fetchRows = async (
   context: GridContext,
   options: UseEntityGridDataOptions,
   signal?: AbortSignal
-): Promise<{ rows: Row[]; hasMore: boolean }> => {
-  const ready = getReadyContext(context);
-  if (!ready) throw new Error('entities index not resolved');
-  const args = buildQueryArgs(ready, options);
-  const rowsWithLookahead = await fetchSortRows(context, options, args, signal);
+): Promise<{ rows: Row[]; isAtLoadLimit: boolean }> => {
+  const fetchSortPage = findSortPageFetcher(options.sortField);
+  if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
+  const args = getQueryArgs(context, options);
+  const rowsWithLookahead = await fetchSortPage(args, {
+    runQuery: createEsqlRunner(context.searchService, signal),
+  });
   return {
     rows: rowsWithLookahead.slice(0, args.pageSize),
-    hasMore: rowsWithLookahead.length > args.pageSize,
+    isAtLoadLimit: rowsWithLookahead.length > args.pageSize,
   };
 };
-
-const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
-  options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
-
-// ── hooks ─────────────────────────────────────────────────────────────────────
 
 const fetchFilterOverrides = (
   context: GridContext,
   options: UseEntityGridDataOptions,
   signal?: AbortSignal
-) => {
-  const ready = getReadyContext(context);
-  if (!ready) throw new Error('entities index not resolved');
-  const args = buildQueryArgs(ready, options);
-  return fetchResolvedEntityFilterOverrides(args, createEsqlRunner(context.searchService, signal));
-};
+) =>
+  fetchResolvedEntityFilterOverrides(
+    getQueryArgs(context, options),
+    createEsqlRunner(context.searchService, signal)
+  );
+
+const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
+  options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
 /** The resolved entities the entity filters add or remove, read before any query uses them. */
 const useResolvedEntityFilterOverrides = (
@@ -155,16 +155,7 @@ const useResolvedEntityFilterOverrides = (
   options: UseEntityGridDataOptions
 ) =>
   useQuery(
-    [
-      'entity-grid',
-      getKeyScope(options),
-      'resolved-entity-filter-overrides',
-      {
-        spaceId: context.spaceId,
-        concreteEntityIndexName: context.concreteEntityIndexName,
-        entityExpression: options.entityExpression,
-      },
-    ],
+    getFilterOverridesKey(context, options),
     ({ signal }) => fetchFilterOverrides(context, options, signal),
     { enabled: getReadyContext(context) != null && isFilteringByGroupValue(options) }
   );
@@ -188,7 +179,7 @@ const useCountQuery = (
   const countQuery = buildCountQuery(context, options);
   return useQuery(
     getCountKey(context, options, countQuery ?? []),
-    ({ signal }) => (countQuery ? fetchCount(context, countQuery, signal) : Promise.resolve(0)),
+    ({ signal }) => fetchCount(context, countQuery ?? [], signal),
     // No keepPreviousData: a stale unfiltered total would show next to filtered rows.
     { enabled: isReady && countQuery != null }
   );
@@ -221,15 +212,18 @@ export const useEntityGridData = (
   // Every query of the view waits for the overrides of its filters.
   const isReady = !isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null;
   // The filters judge resolved entities by their group's values, so the overrides join the filter.
-  const viewOptions = {
-    ...options,
-    entityExpression:
-      options.entityExpression &&
-      applyResolvedEntityFilterOverrides(
-        options.entityExpression,
-        resolvedEntityFilterOverrides.data
-      ),
-  };
+  const viewOptions = useMemo(
+    () => ({
+      ...options,
+      entityExpression:
+        options.entityExpression &&
+        applyResolvedEntityFilterOverrides(
+          options.entityExpression,
+          resolvedEntityFilterOverrides.data
+        ),
+    }),
+    [options, resolvedEntityFilterOverrides.data]
+  );
   const rowsQuery = useRowsQuery(context, viewOptions, isReady);
   const countQuery = useCountQuery(context, viewOptions, isReady);
   const enrichment = useEntityGridRowsEnrichment(
@@ -262,7 +256,7 @@ export const useEntityGridData = (
       enrichment.isFetching ||
       context.isEntitiesIndexLoading,
     /** The view has more rows than the grid shows. */
-    isAtLoadLimit: !!rowsQuery.data?.hasMore,
+    isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
     prefetch,
     onRowsInViewChange,
   };
