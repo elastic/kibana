@@ -81,6 +81,7 @@ const originContext = {
   request: httpServerMock.createKibanaRequest(),
   conversationId: 'conversation-1',
   agentId: 'my-agent',
+  canManageAgents: true,
 };
 
 describe('connector_setup attachment type', () => {
@@ -202,6 +203,20 @@ describe('connector_setup attachment type', () => {
 
       await createType(agentsStart).onOriginUpdated!(completedAttachment, originContext);
 
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a readable message and assigns nothing without the manage agents privilege', async () => {
+      const { agentsStart, update } = makeAgentsStart([]);
+      const { actionsStart, get } = makeActionsStart();
+
+      await expect(
+        createType(agentsStart, actionsStart).onOriginUpdated!(completedAttachment, {
+          ...originContext,
+          canManageAgents: false,
+        })
+      ).rejects.toThrow('Create and edit agents');
+      expect(get).not.toHaveBeenCalled();
       expect(update).not.toHaveBeenCalled();
     });
 

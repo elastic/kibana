@@ -7,7 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   getToolResultId,
   createErrorResult,
@@ -44,7 +44,7 @@ export const createListConnectorsTool = ({
 **When NOT to use:**
 - To find connectors for a workflow step (use platform.workflows.get_connectors — it lists every connector in the space, not just the ones this agent can call).
 - To set up a new connector (use the connector-authoring skill).
-- Again on a follow-up turn, when a previous result is still in the conversation. The list only changes when a connector is added to or removed from this agent.
+- Again on a follow-up turn, when you still have a previous result. The list only changes when a connector is added to or removed from this agent.
 
 A connector that exists in the space but is not in this list is not assigned to this agent and cannot be called. If the user asks about a connector that is not in the list, call this again with \`include_unassigned: true\` to check whether it exists. Connectors marked \`assigned: false\` cannot be called until the user adds them to this agent's connectors.`,
   schema: listConnectorsSchema,
@@ -97,18 +97,5 @@ A connector that exists in the space but is not in this list is not assigned to 
         ],
       };
     }
-  },
-  summarizeToolReturn: (toolReturn) => {
-    if (toolReturn.results.length === 0) return undefined;
-    const result = toolReturn.results[0];
-    if (!isOtherResult(result)) return undefined;
-    const data = result.data as { total?: number; assigned_total?: number };
-    const summary =
-      data.assigned_total === undefined
-        ? `Listed ${data.total ?? 0} available connectors.`
-        : `Listed ${data.total ?? 0} connectors in the space, ${
-            data.assigned_total
-          } assigned to this agent.`;
-    return [{ ...result, data: { summary, total: data.total } }];
   },
 });

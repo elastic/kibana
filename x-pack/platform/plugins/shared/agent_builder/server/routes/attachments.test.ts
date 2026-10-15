@@ -17,7 +17,17 @@ import { hashContent } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
+import { getAgentApiAccessFromRequest } from '../services/utils';
 import type { RouteDependencies } from './types';
+
+jest.mock('../services/utils', () => ({
+  ...jest.requireActual('../services/utils'),
+  getAgentApiAccessFromRequest: jest.fn(),
+}));
+
+const mockGetAgentApiAccess = getAgentApiAccessFromRequest as jest.MockedFunction<
+  typeof getAgentApiAccessFromRequest
+>;
 
 describe('Attachment Routes', () => {
   let mockRouter: jest.Mocked<IRouter>;
@@ -88,6 +98,7 @@ describe('Attachment Routes', () => {
   });
 
   beforeEach(() => {
+    mockGetAgentApiAccess.mockResolvedValue({ canReadAgents: true, canManageAgents: true });
     jest.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
@@ -206,6 +217,7 @@ describe('Attachment Routes', () => {
 
   const createMockContext = () => ({
     core: Promise.resolve({
+      elasticsearch: { client: { asCurrentUser: {} } },
       uiSettings: {
         client: {
           get: jest.fn().mockResolvedValue(true),
@@ -1034,9 +1046,30 @@ describe('Attachment Routes', () => {
 
       expect(onOriginUpdated).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'att-1', origin: 'so-1' }),
-        expect.objectContaining({ conversationId: 'conv-1', agentId: 'agent-1' })
+        expect.objectContaining({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          canManageAgents: true,
+        })
       );
       expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.ok.mock.calls[0][0].body).not.toHaveProperty('warnings');
+    });
+
+    it('tells the hook when the caller cannot manage agents', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      mockGetAgentApiAccess.mockResolvedValue({ canReadAgents: true, canManageAgents: false });
+      const onOriginUpdated = jest.fn().mockResolvedValue(undefined);
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(onOriginUpdated).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ canManageAgents: false })
+      );
     });
 
     it('succeeds without calling anything when the type has no onOriginUpdated hook', async () => {
@@ -1075,7 +1108,7 @@ describe('Attachment Routes', () => {
       expect(onOriginUpdated).not.toHaveBeenCalled();
     });
 
-    it('still succeeds and logs a warning when the hook fails', async () => {
+    it('still succeeds, logs a warning and returns it when the hook fails', async () => {
       mockConversationsClient.get.mockResolvedValue(
         createMockConversation([createMockAttachment({ id: 'att-1' })])
       );
@@ -1084,6 +1117,10 @@ describe('Attachment Routes', () => {
       await getHandler('PUT', path)(createMockContext(), request, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.ok.mock.calls[0][0].body).toMatchObject({
+        success: true,
+        warnings: ['boom'],
+      });
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
     });
   });

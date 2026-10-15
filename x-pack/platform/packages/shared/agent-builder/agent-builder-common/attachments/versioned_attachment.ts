@@ -352,6 +352,8 @@ export const estimateTokens = (data: unknown): number => {
 export interface UpdateOriginResponse {
   success: boolean;
   attachment: VersionedAttachment;
+  /** Set when the origin was saved but a follow-up action for the attachment type failed. */
+  warnings?: string[];
 }
 
 /**

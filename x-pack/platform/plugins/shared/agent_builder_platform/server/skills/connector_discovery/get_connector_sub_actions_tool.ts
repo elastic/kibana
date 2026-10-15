@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   getToolResultId,
   createErrorResult,
@@ -43,7 +43,7 @@ export const createGetConnectorSubActionsTool = ({
   description: `Get the full spec for a connector this agent can call: its available sub-actions, their descriptions, and parameter schemas.
 
 **When to use:** Before the first execute_connector_sub_action call on a connector, with a connector_id from list_connectors.
-**When NOT to use:** Again for the same connector when the sub-actions are already in the conversation.`,
+**When NOT to use:** Again for the same connector when you still have its sub-actions.`,
   schema: getConnectorSubActionsSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -86,23 +86,5 @@ export const createGetConnectorSubActionsTool = ({
         ],
       };
     }
-  },
-  summarizeToolReturn: (toolReturn) => {
-    if (toolReturn.results.length === 0) return undefined;
-    const result = toolReturn.results[0];
-    if (!isOtherResult(result)) return undefined;
-    const data = result.data as { name?: string; subActions?: unknown[] };
-    return [
-      {
-        ...result,
-        data: {
-          summary: `Loaded ${data.subActions?.length ?? 0} sub-actions for connector '${
-            data.name
-          }'.`,
-          name: data.name,
-          subActionCount: data.subActions?.length ?? 0,
-        },
-      },
-    ];
   },
 });

@@ -29,7 +29,10 @@ export interface AttachmentValidateContext {
 export interface AttachmentOriginUpdatedContext {
   request: KibanaRequest;
   conversationId: string;
+  /** The agent the conversation belongs to. */
   agentId: string;
+  /** Whether the caller has the privilege to create and edit agents. */
+  canManageAgents: boolean;
 }
 
 /**
@@ -76,8 +79,9 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     context: AttachmentResolveContext
   ) => MaybePromise<boolean>;
   /**
-   * Optional hook called after a user links the attachment to an origin (e.g. a card that created
-   * a saved object). Failures are logged and do not fail the request.
+   * Optional hook called by the update-origin route after a user links the attachment to an origin
+   * (e.g. a card that created a saved object). A thrown error does not fail the request: it is
+   * logged and returned to the client as a warning, so keep the message user-readable.
    */
   onOriginUpdated?: (
     attachment: VersionedAttachmentWithOrigin<TType, TContent>,

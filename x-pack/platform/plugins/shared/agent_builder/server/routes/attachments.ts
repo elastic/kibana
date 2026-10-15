@@ -28,6 +28,7 @@ import type {
   GetAttachmentResponse,
 } from '../../common/http_api/attachments';
 import { createAttachmentPublicClient } from '../services/attachments';
+import { getAgentApiAccessFromRequest } from '../services/utils';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';
@@ -827,17 +828,25 @@ export function registerAttachmentRoutes({
         );
 
         const { onOriginUpdated } = attachmentsService.getTypeDefinition(updated.type) ?? {};
+        const warnings: string[] = [];
         if (onOriginUpdated && isVersionedAttachmentWithOrigin(updated)) {
           try {
+            const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+            const { canManageAgents } = await getAgentApiAccessFromRequest({
+              esClient,
+              space: (await ctx.agentBuilder).spaces.getSpaceId(),
+            });
             await onOriginUpdated(updated, {
               request,
               conversationId,
               agentId: conversation.agent_id,
+              canManageAgents,
             });
           } catch (e) {
             logger.warn(
               `onOriginUpdated hook failed for attachment '${attachmentId}' (${updated.type}): ${e.message}`
             );
+            warnings.push(e.message);
           }
         }
 
@@ -845,6 +854,7 @@ export function registerAttachmentRoutes({
           body: {
             success: true,
             attachment: updated,
+            ...(warnings.length > 0 ? { warnings } : {}),
           },
         });
       })

@@ -39,7 +39,12 @@ export const createConnectorSetupAttachmentType = ({
 > => ({
   id: CONNECTOR_SETUP_ATTACHMENT_TYPE,
   isReadonly: true,
-  onOriginUpdated: async (attachment, { request, agentId }) => {
+  onOriginUpdated: async (attachment, { request, agentId, canManageAgents }) => {
+    if (!canManageAgents) {
+      throw new Error(
+        'The connector was created, but adding it to this agent requires the "Create and edit agents" privilege.'
+      );
+    }
     const connectorId = attachment.origin;
     // The origin is client-supplied: confirm the connector exists, is visible to the user, and
     // use its real type. The agent can't call types without a spec (they only work in Workflows).
@@ -82,7 +87,7 @@ export const createConnectorSetupAttachmentType = ({
         const value = [
           `Connector setup card shown to the user for: ${displayName} (${connectorType}).`,
           'The user enters configuration and secrets in the connector form; those never appear in chat.',
-          'Once the user creates the connector it is added to this agent automatically — you do not need to ask for the connector id.',
+          'Once the user creates the connector it is added to this agent automatically, if they have permission to edit agents — you do not need to ask for the connector id.',
           'After the user confirms it is set up, proceed using the connector tools on a later turn.',
         ].join('\n');
         return { type: 'text', value };

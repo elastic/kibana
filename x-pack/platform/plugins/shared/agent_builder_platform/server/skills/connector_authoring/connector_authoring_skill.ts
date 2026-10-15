@@ -61,7 +61,7 @@ Never ask the user to paste API keys, tokens, passwords, or webhook URLs into th
 
 4. **Render the setup card.** Call \`propose_connector\` with the chosen \`connector_type\` (and an optional \`suggested_name\` / one-line \`reason\`). On success, emit \`<render_attachment id="ATTACHMENT_ID" />\` **on its own line** (a blank line before it — a tag on the same line as prose renders as raw text). Keep your prose short — prompt the user to click "Set up connector" and complete the form.
 
-5. **Continue after setup.** Once the user completes the form, the connector is added to this agent automatically — you do not need to ask for its id or add it yourself. On a later turn, confirm it's connected and proceed with the task. Use the \`connector-discovery\` skill (\`list_connectors\`, \`get_connector_sub_actions\`) if you need its sub-actions; the connector tools handle any authorization prompts. If it was not \`available_in_chat\`, confirm it's connected and remind the user it's ready to use in a Workflow, since you cannot call it yourself.
+5. **Continue after setup.** Once the user completes the form, the connector is added to this agent automatically if they have permission to edit agents — you do not need to ask for its id or add it yourself. If you cannot call it afterwards, it was not added; tell the user it must be added to the agent's connectors. On a later turn, confirm it's connected and proceed with the task. Use the \`connector-discovery\` skill (\`list_connectors\`, \`get_connector_sub_actions\`) if you need its sub-actions; the connector tools handle any authorization prompts. If it was not \`available_in_chat\`, confirm it's connected and remind the user it's ready to use in a Workflow, since you cannot call it yourself.
 
 ## Example
 
