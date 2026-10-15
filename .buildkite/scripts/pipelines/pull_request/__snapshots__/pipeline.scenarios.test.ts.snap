@@ -204,6 +204,7 @@ exports[`pull_request pipeline scenarios all ui test suites 1`] = `
   "response-ops",
   "response-ops-cases",
   "fleet-cypress",
+  "scout-fleet-real-agent",
   "group:AppEx AI-Infra genAI tests",
   "> ai-infra-gen-ai-inference-api",
   "group:Agent Builder Smoke Tests",
