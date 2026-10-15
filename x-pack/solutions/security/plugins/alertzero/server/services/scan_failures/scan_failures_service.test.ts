@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -64,11 +65,15 @@ const page = (ids: Array<string | null>, total: number): FailedExecutionPage => 
 
 const createService = (
   search: FailedExecutionSearch['searchFailedManagedExecutions'],
-  lookup: Map<string, FailedExecutionPage['results'][number]> = new Map()
+  lookup: Map<string, FailedExecutionPage['results'][number]> = new Map(),
+  latest: FailedExecutionSearch['getLatestWorkflowExecution'] = async () => undefined
 ) => {
   const logger = loggerMock.create();
   const executions: FailedExecutionSearch = {
     searchFailedManagedExecutions: search,
+    getLatestWorkflowExecution: jest.fn(
+      latest
+    ) as FailedExecutionSearch['getLatestWorkflowExecution'],
     getWorkflowExecution: jest.fn(
       async (id: string) => lookup.get(id) ?? null
     ) as FailedExecutionSearch['getWorkflowExecution'],
@@ -184,6 +189,77 @@ describe('ScanFailuresService', () => {
         workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-analyst`,
       }),
     ]);
+  });
+
+  describe('recovery', () => {
+    const failedTriage = {
+      results: [execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID)],
+      total: 1,
+    } satisfies FailedExecutionPage;
+    const latestWith = (status: ExecutionStatus) => async () =>
+      ({ status } as FailedExecutionPage['results'][number]);
+
+    it('drops a Worker whose failed workflow has since completed', async () => {
+      const latest = jest.fn(latestWith(ExecutionStatus.COMPLETED));
+      const { service } = createService(async () => failedTriage, new Map(), latest);
+
+      const body = await service.list(request, 'default');
+
+      expect(body.workers).toEqual([]);
+      expect(latest).toHaveBeenCalledWith(
+        ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+        'default',
+        request
+      );
+    });
+
+    it.each([ExecutionStatus.FAILED, ExecutionStatus.RUNNING])(
+      'keeps a Worker whose newest run is %s',
+      async (status) => {
+        const { service } = createService(async () => failedTriage, new Map(), latestWith(status));
+
+        const body = await service.list(request, 'default');
+
+        expect(body.workers).toHaveLength(1);
+      }
+    );
+
+    it('keeps a Worker when the latest execution lookup throws', async () => {
+      const { service, logger } = createService(
+        async () => failedTriage,
+        new Map(),
+        async () => {
+          throw new Error('boom');
+        }
+      );
+
+      const body = await service.list(request, 'default');
+
+      expect(body.workers).toHaveLength(1);
+      expect(body.unknown).toBe(false);
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('only drops the Workers that recovered', async () => {
+      const search = async () => ({
+        results: [
+          execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID),
+          execution(ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID),
+        ],
+        total: 2,
+      });
+      const { service } = createService(search, new Map(), async (workflowId) =>
+        workflowId === ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+          ? ({ status: ExecutionStatus.COMPLETED } as FailedExecutionPage['results'][number])
+          : ({ status: ExecutionStatus.FAILED } as FailedExecutionPage['results'][number])
+      );
+
+      const body = await service.list(request, 'default');
+
+      expect(body.workers.map(({ workerId }) => workerId)).toEqual([
+        SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      ]);
+    });
   });
 
   it('reports a catalog Worker that failed on its own', async () => {
@@ -402,6 +478,7 @@ describe('ScanFailuresService', () => {
     const logger = loggerMock.create();
     const executions: FailedExecutionSearch = {
       searchFailedManagedExecutions: search,
+      getLatestWorkflowExecution: jest.fn(async () => undefined),
       getWorkflowExecution: jest.fn(async () => {
         throw new Error('workflows down');
       }),

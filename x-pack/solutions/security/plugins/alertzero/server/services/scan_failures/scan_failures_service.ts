@@ -11,6 +11,7 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   type ScanFailuresResponse,
 } from '@kbn/alertzero-common';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import pMap from 'p-map';
@@ -46,6 +47,12 @@ export interface FailedExecutionSearch {
     spaceId: string,
     request: KibanaRequest
   ): Promise<FailedExecutionPage>;
+
+  getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<FailedExecutionPage['results'][number] | undefined>;
 
   getWorkflowExecution(
     workflowExecutionId: string,
@@ -247,12 +254,44 @@ export class ScanFailuresService {
         loadExecution,
         spaceId
       );
-      return lookupFailed ? { ...failures, unknown: true } : failures;
+      const stillFailing = await this.dropRecovered(failures, executions, request, spaceId);
+      return lookupFailed ? { ...stillFailing, unknown: true } : stillFailing;
     } catch (error) {
       this.logger.warn(
         `Scan failure query failed: ${error instanceof Error ? error.message : String(error)}`
       );
       return EMPTY_SCAN_FAILURES;
     }
+  }
+
+  /**
+   * A Worker recovered when the newest run of the workflow that failed completed. A failed or
+   * running newest run, or a lookup that throws, keeps the Worker listed.
+   */
+  private async dropRecovered(
+    failures: ScanFailuresResponse,
+    executions: FailedExecutionSearch,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<ScanFailuresResponse> {
+    const recovered = await pMap(
+      failures.workers,
+      async ({ workflowId }) => {
+        try {
+          const latest = await executions.getLatestWorkflowExecution(workflowId, spaceId, request);
+          return latest?.status === ExecutionStatus.COMPLETED;
+        } catch (error) {
+          this.logger.warn(
+            `Latest execution lookup failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return false;
+        }
+      },
+      { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
+    );
+
+    return { ...failures, workers: failures.workers.filter((_, index) => !recovered[index]) };
   }
 }
