@@ -41,20 +41,21 @@ const unit: StreamsUnit.Configuration = {
 
 const expectedYaml = YAML.stringify(unit);
 
-const hashPublishPayload = (unitYaml: string, credentials: UnitCredential[] = []): string => {
+const hashPublishPayload = (unitYaml: string, fingerprint?: string): string => {
   const hash = createHash('sha256').update(unitYaml, 'utf8');
-  if (credentials.length > 0) {
+  if (fingerprint) {
     hash.update('\n');
-    hash.update(
-      JSON.stringify(
-        [...credentials]
-          .sort((left, right) => left.name.localeCompare(right.name))
-          .map(({ name, ciphertext }) => [name, ciphertext])
-      )
-    );
+    hash.update(fingerprint);
   }
   return hash.digest('hex');
 };
+
+const okFetch = () =>
+  jest.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    text: async () => '',
+  });
 
 describe('createConfigDistributorClient', () => {
   it('logs an error and does not call the distributor when the URL is not configured', async () => {
@@ -103,18 +104,14 @@ describe('createConfigDistributorClient', () => {
     );
   });
 
-  it('sends credentials as a sidecar after encrypting secrets under the project key', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      text: async () => '',
-    });
+  it('sends sealed credentials as a sidecar and hashes the fingerprint', async () => {
+    const fetchImpl = okFetch();
     const secrets = { es_api_key: 's3cret', s3_secret: 'bucket' };
     const credentials: UnitCredential[] = [
       { name: 'es_api_key', ciphertext: 'cipher-es' },
       { name: 's3_secret', ciphertext: 'cipher-s3' },
     ];
-    const encryptCredentials = jest.fn().mockResolvedValue(credentials);
+    const encryptCredentials = jest.fn().mockResolvedValue({ credentials, fingerprint: 'fp-1' });
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
       logger: loggerMock.create(),
@@ -128,29 +125,48 @@ describe('createConfigDistributorClient', () => {
     const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
     expect(body.unit_yaml).toEqual(expectedYaml);
     expect(body.credentials).toEqual(credentials);
-    expect(body.config_hash).toEqual(hashPublishPayload(expectedYaml, credentials));
+    expect(body.config_hash).toEqual(hashPublishPayload(expectedYaml, 'fp-1'));
   });
 
-  it('publishes without a credentials sidecar when project-key encryption is not configured', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      text: async () => '',
-    });
-    const logger = loggerMock.create();
+  it('keeps config_hash stable when unchanged secrets are sealed to new ciphertext', async () => {
+    const fetchImpl = okFetch();
+    const encryptCredentials = jest
+      .fn()
+      .mockResolvedValueOnce({
+        credentials: [{ name: 'es_api_key', ciphertext: 'first-seal' }],
+        fingerprint: 'fp-same',
+      })
+      .mockResolvedValueOnce({
+        credentials: [{ name: 'es_api_key', ciphertext: 'second-seal' }],
+        fingerprint: 'fp-same',
+      });
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
-      logger,
+      logger: loggerMock.create(),
+      hooks: { encryptCredentials },
       fetchImpl,
     });
 
     await publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } });
+    await publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } });
 
-    expect(logger.warn).toHaveBeenCalled();
-    const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
-    expect(body.credentials).toBeUndefined();
-    expect(body.unit_yaml).toEqual(expectedYaml);
-    expect(body.unit_yaml).not.toContain('s3cret');
+    const [first, second] = fetchImpl.mock.calls.map(([, init]) => JSON.parse(init.body));
+    expect(first.credentials).not.toEqual(second.credentials);
+    expect(first.config_hash).toEqual(second.config_hash);
+  });
+
+  it('rejects with 503 and does not call the distributor when secrets exist but no encryption key is configured', async () => {
+    const fetchImpl = okFetch();
+    const { publish } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await expect(
+      publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } })
+    ).rejects.toMatchObject({ statusCode: 503 });
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it('POSTs unit YAML to /v1/validate without credentials', async () => {

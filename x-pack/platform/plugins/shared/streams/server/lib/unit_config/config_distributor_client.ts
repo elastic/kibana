@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
-import type { UnitConfigHooks, UnitCredential, UnitValidationResult } from './types';
+import type { SealedCredentials, UnitConfigHooks, UnitValidationResult } from './types';
 
 export interface ConfigDistributorClientConfig {
   url?: string;
@@ -40,18 +40,14 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 const serializeUnitYaml = (unit: StreamsUnit.Configuration): string => YAML.stringify(unit);
 
-const hashUnitPublishPayload = (unitYaml: string, credentials: UnitCredential[]): string => {
+const hashUnitPublishPayload = (unitYaml: string, fingerprint: string | undefined): string => {
   const hash = createHash('sha256').update(unitYaml, 'utf8');
 
-  if (credentials.length > 0) {
-    // Distributor stores `config_hash` without recomputing it. Hashing
-    // credential ciphertext as well means a secret-only change still rolls
-    // out instead of matching the previous YAML-only hash and no-op'ing.
-    const fingerprint = [...credentials]
-      .sort((left, right) => left.name.localeCompare(right.name))
-      .map(({ name, ciphertext }) => [name, ciphertext]);
+  if (fingerprint) {
+    // Distributor stores `config_hash` without recomputing it. The plaintext fingerprint makes a
+    // secret-only change roll out, while re-sealing unchanged secrets (random GCM nonce) does not.
     hash.update('\n');
-    hash.update(JSON.stringify(fingerprint));
+    hash.update(fingerprint);
   }
 
   return hash.digest('hex');
@@ -217,13 +213,11 @@ export const createConfigDistributorClient = ({
   return {
     publish: async ({ unitId, unit, secrets }) => {
       const unitYaml = serializeUnitYaml(unit);
-      const credentials = await credentialsForPublish({
-        unitId,
+      const sealed = await credentialsForPublish({
         secrets,
         encryptCredentials: hooks.encryptCredentials,
-        logger,
       });
-      const configHash = hashUnitPublishPayload(unitYaml, credentials);
+      const configHash = hashUnitPublishPayload(unitYaml, sealed?.fingerprint);
 
       logger.debug(`Publishing Streams unit [${unitId}] to config distributor`);
 
@@ -233,7 +227,7 @@ export const createConfigDistributorClient = ({
         body: JSON.stringify({
           unit_yaml: unitYaml,
           config_hash: configHash,
-          ...(credentials.length > 0 ? { credentials } : {}),
+          ...(sealed ? { credentials: sealed.credentials } : {}),
         }),
       });
 
@@ -271,47 +265,27 @@ export const createConfigDistributorClient = ({
 };
 
 const credentialsForPublish = async ({
-  unitId,
   secrets,
   encryptCredentials,
-  logger,
 }: {
-  unitId: string;
   secrets: StreamsUnit.Secrets;
   encryptCredentials: UnitConfigHooks['encryptCredentials'];
-  logger: Logger;
-}): Promise<UnitCredential[]> => {
+}): Promise<SealedCredentials | undefined> => {
   if (Object.keys(secrets).length === 0) {
-    return [];
+    return undefined;
   }
 
-  // Project-key encryption is not wired yet. Keep the unit publish working and
-  // leave plaintext in Encrypted Saved Objects instead of sending it or failing
-  // the write.
-  if (!encryptCredentials) {
-    logger.warn(
-      `Project-key encryption is not configured; publishing Streams unit [${unitId}] without a credentials sidecar.`
-    );
-    return [];
-  }
-
-  return encryptSecretsForDistributor(encryptCredentials, secrets);
-};
-
-const encryptSecretsForDistributor = async (
-  encryptCredentials: UnitConfigHooks['encryptCredentials'],
-  secrets: StreamsUnit.Secrets
-): Promise<UnitCredential[]> => {
+  // Publishing without the sidecar would ship a unit that names credentials the collector never gets.
   if (!encryptCredentials) {
     throw new StatusError(
-      'Cannot publish Streams unit credentials: project-key encryption is not configured.',
+      'Cannot publish Streams unit credentials: xpack.streams.encryptionKey.path is not configured.',
       503
     );
   }
 
-  const credentials = await encryptCredentials(secrets);
+  const sealed = await encryptCredentials(secrets);
   const secretNames = Object.keys(secrets).sort();
-  const credentialNames = credentials.map((credential) => credential.name).sort();
+  const credentialNames = sealed.credentials.map(({ name }) => name).sort();
 
   if (
     secretNames.length !== credentialNames.length ||
@@ -323,7 +297,7 @@ const encryptSecretsForDistributor = async (
     );
   }
 
-  return credentials;
+  return sealed;
 };
 
 const statusErrorFromDistributorResponse = (

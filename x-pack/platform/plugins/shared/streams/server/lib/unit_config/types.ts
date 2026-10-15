@@ -9,12 +9,21 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 
 /**
  * One credential as the config-distributor `PUT /v1/units/{id}` sidecar expects:
- * a name referenced from authored unit YAML, and ciphertext under the project
- * public key. Plaintext never appears in `unit_yaml`.
+ * a name referenced from authored unit YAML, and `base64(nonce || ciphertext || tag)`
+ * under the project AES-256-GCM wrap key. Plaintext never appears in `unit_yaml`.
  */
 export interface UnitCredential {
   name: string;
   ciphertext: string;
+}
+
+/**
+ * Sealed sidecar plus a keyed fingerprint of the plaintext. The fingerprint feeds
+ * `config_hash`, because GCM ciphertext changes on every seal.
+ */
+export interface SealedCredentials {
+  credentials: UnitCredential[];
+  fingerprint: string;
 }
 
 export interface PublishUnitConfigParams {
@@ -25,7 +34,7 @@ export interface PublishUnitConfigParams {
 
 export type PublishUnitConfig = (params: PublishUnitConfigParams) => Promise<void>;
 
-export type EncryptUnitCredentials = (secrets: StreamsUnit.Secrets) => Promise<UnitCredential[]>;
+export type EncryptUnitCredentials = (secrets: StreamsUnit.Secrets) => Promise<SealedCredentials>;
 
 /**
  * Result of config-distributor `POST /v1/validate` when the unit compiles.
@@ -54,10 +63,9 @@ export interface UnitConfigHooks {
    */
   publish?: PublishUnitConfig;
   /**
-   * Outbound transform: encrypt each named secret under the project public
-   * key for the distributor `credentials[]` sidecar. Does not rewrite `unit`.
+   * Outbound transform: seal each named secret under the project wrap key for the
+   * distributor `credentials[]` sidecar. Does not rewrite `unit`.
    * Kibana at-rest protection is Encrypted Saved Objects on `secrets`.
-   * TODO: Needs implementation once we can hook up the encryption with the project key.
    */
   encryptCredentials?: EncryptUnitCredentials;
 }

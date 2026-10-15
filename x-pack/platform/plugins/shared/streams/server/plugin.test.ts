@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { createDecipheriv, randomBytes } from 'crypto';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -28,7 +32,15 @@ jest.mock('./register_suggestions_inference_features', () => ({
 }));
 jest.mock('./feature_flags', () => ({ registerFeatureFlags: jest.fn() }));
 
+jest.mock('./lib/unit_config/config_distributor_client', () => {
+  const actual = jest.requireActual('./lib/unit_config/config_distributor_client');
+  return { createConfigDistributorClient: jest.fn(actual.createConfigDistributorClient) };
+});
+
 const { registerStreamsAgentBuilder } = jest.requireMock('./agent_builder/register');
+const { createConfigDistributorClient } = jest.requireMock(
+  './lib/unit_config/config_distributor_client'
+);
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -36,6 +48,7 @@ function getConfig(overrides: Partial<StreamsConfig> = {}): StreamsConfig {
   return {
     canvas: { enabled: false },
     distributor: { ssl: {} },
+    encryptionKey: {},
     preconfigured: { enabled: false, stream_definitions: [] },
     workers: {
       patternExtraction: {
@@ -154,5 +167,51 @@ describe('StreamsPlugin agent builder registration gating', () => {
     await flushPromises();
 
     expect(registerStreamsAgentBuilder).not.toHaveBeenCalled();
+  });
+});
+
+describe('StreamsPlugin credential sealing wiring', () => {
+  const KID = '20261014_101500_a3f19b2c';
+  let dir: string;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    dir = await mkdtemp(join(tmpdir(), 'streams-plugin-key-'));
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const registeredEncryptCredentials = (config: StreamsConfig) => {
+    const plugin = new StreamsPlugin(coreMock.createPluginInitializerContext(config));
+    plugin.setup(coreMock.createSetup(), createPluginsSetup());
+    return createConfigDistributorClient.mock.calls[0][0].hooks?.encryptCredentials;
+  };
+
+  it('seals with the mounted key when encryptionKey.path is set', async () => {
+    const key = randomBytes(32);
+    await writeFile(join(dir, 'current-kid'), KID);
+    await writeFile(join(dir, `streams-encryption-key.${KID}`), key);
+
+    const encryptCredentials = registeredEncryptCredentials(
+      getConfig({ encryptionKey: { path: dir } })
+    );
+    const {
+      credentials: [{ name, ciphertext }],
+    } = await encryptCredentials({ es_api_key: 's3cret' });
+
+    const blob = Buffer.from(ciphertext, 'base64');
+    const decipher = createDecipheriv('aes-256-gcm', key, blob.subarray(0, 12));
+    decipher.setAuthTag(blob.subarray(blob.length - 16));
+    const plaintext = Buffer.concat([
+      decipher.update(blob.subarray(12, blob.length - 16)),
+      decipher.final(),
+    ]).toString('utf8');
+    expect({ name, plaintext }).toEqual({ name: 'es_api_key', plaintext: 's3cret' });
+  });
+
+  it('registers no sealer when encryptionKey.path is unset', () => {
+    expect(registeredEncryptCredentials(getConfig())).toBeUndefined();
   });
 });

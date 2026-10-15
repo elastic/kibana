@@ -21,6 +21,8 @@ xpack.streams.distributor.url: "https://localhost:18443"
 xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
 xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
 xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
+# Needed only to publish units with secrets. See "Credentials".
+xpack.streams.encryptionKey.path: /tmp/streams-encryption-key
 
 uiSettings.overrides:
   observability:streamsEnableCanvas: true
@@ -66,19 +68,32 @@ Important consequences:
 
 ### Credentials
 
-Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. Authored YAML keeps a **name** that keys into that map (for example a destination config value of `es_api_key`).
+Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. Authored YAML keeps a **name** that keys into that map.
+
+Secret names follow `secret:<nodeId>:<field>`, for example `secret:es-remote-1:api_key`. That string is the value of the secret-typed config entry in the unit YAML, the key of the plaintext in `secrets`, and the `credentials[].name` sent to the distributor. Sealing treats it as an opaque string.
 
 | Layer | What is stored |
 | --- | --- |
 | Unit YAML / `unit` attribute | Credential **name** only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
-| Distributor `PUT /v1/units/{id}` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` under the **project public key** |
+| Distributor `PUT /v1/units/{id}` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]`, sealed with the project AES-256-GCM wrap key |
 
 `GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored — it does not replace the secrets — because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
 
-Project-key encryption (`encryptCredentials`) is not wired yet. Publishing a **non-empty** secrets bag without it logs a warning and omits the `credentials` sidecar rather than sending plaintext or failing the unit write. Secrets stay in the configuration saved object. Empty secrets still publish `unit_yaml` + `config_hash` only.
+Kibana seals each secret with the key named by `current-kid` in `xpack.streams.encryptionKey.path`, the mount of the project-controller `streams-encryption-key` Secret. Each `ciphertext` is `base64(nonce[12] || ciphertext || tag[16])` from AES-256-GCM with no AAD. The key is read from disk on every publish, so rotations apply without a restart. Publishing a **non-empty** secrets bag without the path, or with a missing or invalid key, fails with 503 and the saved object write is rolled back. Empty secrets publish `unit_yaml` + `config_hash` only and need no key.
 
-`config_hash` is SHA-256 of the authored YAML bytes, plus a credential ciphertext fingerprint when `credentials[]` is present. The distributor stores that hash without recomputing it; including ciphertext means a secret-only change still rolls out instead of matching the previous YAML-only hash and no-op'ing. Validate (`POST /v1/validate`) does not send credentials.
+To get a local key directory:
+
+```bash
+KID="$(date -u +%Y%m%d_%H%M%S)_$(openssl rand -hex 4)"
+mkdir -p /tmp/streams-encryption-key
+printf '%s' "$KID" > /tmp/streams-encryption-key/current-kid
+openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
+```
+
+`config_hash` is SHA-256 of the authored YAML bytes, plus a keyed HMAC fingerprint of the plaintext secrets when there are any. Hashing the fingerprint, not the ciphertext, means re-sealing unchanged secrets does not roll the collector, while a changed secret or a new key does. The distributor stores the hash without recomputing it, so this differs harmlessly from the `[name, ciphertext]` description in the distributor API docs. Validate (`POST /v1/validate`) does not send credentials.
+
+Not handled yet: re-sealing units that are not saved again before the previous key expires, and agreeing AAD and kid selection with the collector unwrap (ingest-dev#9550).
 
 ### Reset canvas saved objects
 
