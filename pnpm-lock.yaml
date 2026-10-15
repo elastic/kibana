@@ -425,8 +425,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.30.0
-        version: 4.30.0(monaco-editor@0.56.0)
+        specifier: 4.31.0
+        version: 4.31.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -11164,8 +11164,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.30.0':
-    resolution: {integrity: sha512-57RPlAJlw28OhsOZz/gIW1leGq1bwvb1/0vzaNSc8anKUusyxR/CWOdNCRkMhRocjdISzh9uPcPCXxwM+mj4pg==}
+  '@elastic/monaco-esql@4.31.0':
+    resolution: {integrity: sha512-xMwtMuvHhRPHqzmPmY/BPZy5MAR0dAWA72QYI6/rAYAFqWev5fj58f0Y1ML2YVQrt7lWP84HkvqW43V18jVxuQ==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27970,7 +27970,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.30.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.31.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.31.0
       monaco-editor: 0.56.0

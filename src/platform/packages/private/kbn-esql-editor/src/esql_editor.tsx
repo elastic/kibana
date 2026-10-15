@@ -991,6 +991,7 @@ const ESQLEditorInternal = function ESQLEditor({
           isDisabled={Boolean(isDisabled)}
           disableSubmitAction={Boolean(disableSubmitAction)}
           onKqlSubmitted={focusEditor}
+          hasOutline={Boolean(hasOutline)}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
