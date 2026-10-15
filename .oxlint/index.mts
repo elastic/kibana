@@ -31,6 +31,7 @@ import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { unusedVarsOverrides } from './unused_vars.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -81,6 +82,7 @@ export default defineConfig<OxlintConfig>({
     ...securityImportsOverrides,
     ...kbnUiOverrides,
     ...alertingV2Overrides,
+    ...unusedVarsOverrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

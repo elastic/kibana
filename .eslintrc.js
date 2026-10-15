@@ -1115,17 +1115,6 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check all function arguments to catch unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'all',
-            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
-            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
-            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
-          },
-        ],
       },
     },
     {
@@ -1230,7 +1219,6 @@ module.exports = {
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
@@ -1329,7 +1317,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
@@ -1510,10 +1497,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
         'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-        ],
       },
     },
     {
