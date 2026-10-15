@@ -1854,26 +1854,30 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    // Write the saved object first: if this throws (e.g. a version conflict),
-    // the task is left untouched, so a disabled rule never loses a task that
-    // the stored (unchanged) attrs still expect to be running.
-    await this.writeRuleAttrs({
-      id,
-      attrs: nextAttrs,
-      version: existingVersion,
-      references,
-    });
-
-    // Self-heal, like `enableRule`/`disableRule`: always reapply the task
-    // state for `nextEnabled`, not just on a transition, so a leftover task
-    // from a prior bug or failed write also gets cleaned up.
+    // Enable schedules before writing; disable writes before removing — each
+    // order keeps a failure from leaving the rule in a worse state than
+    // before. Also self-heals like `enableRule`/`disableRule`: the task state
+    // is always reapplied for `nextEnabled`, not just on a transition, so a
+    // leftover task from a prior bug or failed write also gets cleaned up.
     if (nextEnabled) {
       await this.scheduleRuleExecutorTask({
         ruleId: id,
         spaceId,
         scheduleEvery: nextAttrs.schedule.every,
       });
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
     } else {
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
       const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
       await this.taskManager.removeIfExists(taskId);
     }

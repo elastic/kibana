@@ -1840,6 +1840,28 @@ describe('RulesClient', () => {
         expect(taskManager.removeIfExists).not.toHaveBeenCalled();
       });
 
+      it('does not write the saved object when scheduling fails on an enable transition', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          // enabled: false, so this PUT attempts a disabled -> enabled transition.
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: true } })
+        ).rejects.toThrow('schedule failed');
+
+        // Scheduling failed before the write, so the stored rule is still
+        // disabled — writing here would have left it enabled with no task.
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
       it('throws 409 when the request body changes the rule kind', async () => {
         const client = createClient();
         const existingDoc = {
