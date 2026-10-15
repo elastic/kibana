@@ -7,6 +7,7 @@
 
 import { internalAvailabilityRoutes } from './internal/availability/route';
 import { internalSlackAppRoutes } from './internal/apps/slack/route';
+import { internalDetectionEngineRoutes } from './internal/detection_engine/route';
 import { internalDetectionsRoutes } from './internal/detections/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
@@ -30,6 +31,7 @@ export const significantEventsRouteRepository = {
   // internal APIs
   ...internalAvailabilityRoutes,
   ...internalSlackAppRoutes,
+  ...internalDetectionEngineRoutes,
   ...internalDetectionsRoutes,
   ...internalDetectionsWorkflowRoutes,
   ...internalDiscoveryRoutes,

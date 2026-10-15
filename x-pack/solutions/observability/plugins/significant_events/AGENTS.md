@@ -37,6 +37,10 @@ into that package.
 - Managed workflow ids keep their `system-streams-ki-*` names.
 - Legacy handling that stays: the `sigevents:stream:<name>` rule ownership tag (`LEGACY_RULE_STREAM_TAG_PREFIX`) and the maintenance reset sweep.
 
+## Detection engine prototype
+
+`server/lib/detection_engine/` is a prototype of the new detection engine architecture (strategies, common detection format, baseline check, join proposals, bounded agent, state machine, verifier, learning). It runs next to the current pipeline and does not change it; its UI is the Detection engine tab in `significant_events_app`. See its `README.md` before changing it.
+
 ## Keeping this file current
 
 Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, pipeline restructuring, addition or removal of concepts relevant to the pipeline, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.

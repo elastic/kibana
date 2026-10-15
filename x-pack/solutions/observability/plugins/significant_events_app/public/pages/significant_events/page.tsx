@@ -40,6 +40,7 @@ import { ONBOARDING_FAILURE_TITLE } from './components/sources_view/translations
 import { QueriesTable } from './components/queries_table/queries_table';
 import { SourcesView } from './components/sources_view/sources_view';
 import { DetectionsTab } from './components/detections_tab';
+import { DetectionEngineTab } from './components/detection_engine_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -174,6 +175,15 @@ export function SignificantEventsPage() {
         href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
         isSelected: tab === SIGNIFICANT_EVENTS_TAB,
       },
+      {
+        id: 'detection_engine',
+        label: i18n.translate('xpack.significantEventsApp.detectionEngineTab', {
+          defaultMessage: 'Detection engine',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'detection_engine' } }),
+        isSelected: tab === 'detection_engine',
+        badge: { iconType: 'beaker' },
+      },
     ],
     [tab, router]
   );
@@ -287,6 +297,7 @@ export function SignificantEventsPage() {
           )}
           {tab === 'detections' && <DetectionsTab />}
           {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
+          {tab === 'detection_engine' && <DetectionEngineTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

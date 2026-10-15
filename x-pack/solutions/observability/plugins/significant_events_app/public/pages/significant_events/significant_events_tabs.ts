@@ -13,6 +13,7 @@ const SIGNIFICANT_EVENTS_TABS = [
   'queries',
   'detections',
   SIGNIFICANT_EVENTS_TAB,
+  'detection_engine',
 ] as const;
 
 export type SignificantEventsTabId = (typeof SIGNIFICANT_EVENTS_TABS)[number];
