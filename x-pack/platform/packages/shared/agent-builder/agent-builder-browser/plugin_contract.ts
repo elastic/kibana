@@ -146,11 +146,12 @@ export interface PublicEmbeddableConversationInputProps {
   agentId?: string;
   /**
    * Optional override for the submit action. When provided, submitting the
-   * input calls this handler with the message instead of navigating to the
-   * Agent Builder app. Use this when embedding the input in a host UI that
-   * wants to handle the message locally (e.g. via `openChat`).
+   * input calls this handler with the message and its attachments (e.g. pasted
+   * images) instead of navigating to the Agent Builder app. Use this when
+   * embedding the input in a host UI that handles the message locally (e.g.
+   * via `openChat`).
    */
-  onSubmit?: (message: string) => void;
+  onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
 }
 
 /**

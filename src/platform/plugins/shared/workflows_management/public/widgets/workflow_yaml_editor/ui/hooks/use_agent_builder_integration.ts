@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import {
@@ -56,6 +57,8 @@ interface UseAgentBuilderIntegrationParams {
   workflowTabYaml?: string;
   /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
   initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images), added when the chat auto-opens. */
+  initialAgentAttachments?: ConversationAttachment[];
   /**
    * Opens the sidebar on mount for an unsaved workflow. Set when the user
    * chose AI on the landing or remixed a library template.
@@ -75,6 +78,8 @@ export interface OpenAgentChatOptions {
   // session-completed events with `autoOpened: true` so analysts can filter
   // out non-deliberate opens when measuring engagement.
   isAutoOpen?: boolean;
+  /** Added to the chat next to the workflow attachment. */
+  attachments?: ConversationAttachment[];
 }
 
 interface UseAgentBuilderIntegrationReturn {
@@ -101,6 +106,7 @@ export const useAgentBuilderIntegration = ({
   onProposalDeferred,
   workflowTabYaml,
   initialAgentMessage,
+  initialAgentAttachments,
   autoOpenAgentChat = false,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
@@ -506,21 +512,24 @@ export const useAgentBuilderIntegration = ({
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         newConversation: options?.newConversation,
-        attachments: shouldAttachNow
-          ? [
-              buildWorkflowAttachment({
-                yaml: currentYaml,
-                attachmentId: syncAttachmentIdRef.current ?? attachmentId,
-                workflowId,
-                workflowName,
-                diagnostics:
-                  executionsTabYaml === undefined
-                    ? serializeClientDiagnostics(validationErrors)
-                    : undefined,
-                readOnlyReason,
-              }),
-            ]
-          : [],
+        attachments: [
+          ...(options?.attachments ?? []),
+          ...(shouldAttachNow
+            ? [
+                buildWorkflowAttachment({
+                  yaml: currentYaml,
+                  attachmentId: syncAttachmentIdRef.current ?? attachmentId,
+                  workflowId,
+                  workflowName,
+                  diagnostics:
+                    executionsTabYaml === undefined
+                      ? serializeClientDiagnostics(validationErrors)
+                      : undefined,
+                  readOnlyReason,
+                }),
+              ]
+            : []),
+        ],
         onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;
@@ -584,6 +593,7 @@ export const useAgentBuilderIntegration = ({
       isAutoOpen: true,
       initialMessage: initialAgentMessage,
       autoSendInitialMessage: Boolean(initialAgentMessage),
+      attachments: initialAgentAttachments,
     });
   }, [
     isEditorMounted,
@@ -592,6 +602,7 @@ export const useAgentBuilderIntegration = ({
     workflowId,
     openAgentChat,
     initialAgentMessage,
+    initialAgentAttachments,
     autoOpenAgentChat,
   ]);
 

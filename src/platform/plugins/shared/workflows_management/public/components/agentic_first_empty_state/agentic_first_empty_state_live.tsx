@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Template } from '@kbn/workflows-library';
 import { useCatalog, useLibraryEnabled } from '@kbn/workflows-ui';
 import {
@@ -21,7 +22,7 @@ export type AgenticFirstEmptyStateLiveProps = Omit<
   AgenticFirstEmptyStateProps,
   'templates' | 'agentInput'
 > & {
-  onSubmitPrompt?: (prompt: string) => void;
+  onSubmitPrompt?: (prompt: string, attachments: ConversationAttachment[]) => void;
 };
 
 /**
@@ -37,8 +38,8 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
 
   const { onSubmitPrompt, ...stateProps } = props;
   const handlePromptSubmit = useCallback(
-    (message: string) => {
-      onSubmitPrompt?.(message);
+    (message: string, attachments: ConversationAttachment[]) => {
+      onSubmitPrompt?.(message, attachments);
     },
     [onSubmitPrompt]
   );

@@ -34,7 +34,9 @@ export interface EmbeddableConversationInputInternalProps
  * message and attachments preserved in location state, where the message
  * auto-sends.
  */
-const SubmitInterceptor: React.FC<{ onSubmit?: (message: string) => void }> = ({ onSubmit }) => {
+const SubmitInterceptor: React.FC<Pick<PublicEmbeddableConversationInputProps, 'onSubmit'>> = ({
+  onSubmit,
+}) => {
   const { attachments, agentId } = useConversationContext();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const targetAgentId = agentId ?? agentBuilderDefaultAgentId;
@@ -42,7 +44,7 @@ const SubmitInterceptor: React.FC<{ onSubmit?: (message: string) => void }> = ({
   const handleSubmit = useCallback(
     (message: string) => {
       if (onSubmit) {
-        onSubmit(message);
+        onSubmit(message, attachments ?? []);
         return;
       }
       navigateToAgentBuilderUrl(

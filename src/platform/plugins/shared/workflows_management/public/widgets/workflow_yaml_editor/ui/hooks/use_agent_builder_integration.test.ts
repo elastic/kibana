@@ -10,7 +10,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  ConversationAttachment,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
@@ -537,6 +540,36 @@ describe('useAgentBuilderIntegration', () => {
         autoOpenAgentChat: true,
       });
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the landing prompt with its attachments next to the workflow YAML', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+      const imageAttachment = {
+        id: 'image-1',
+        type: 'image',
+        data: { fileId: 'file-1' },
+      } as unknown as ConversationAttachment;
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          autoOpenAgentChat: true,
+          initialAgentMessage: 'Build a workflow from this screenshot',
+          initialAgentAttachments: [imageAttachment],
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      const { initialMessage, autoSendInitialMessage, attachments } =
+        agentBuilder.openChat.mock.calls[0][0];
+      expect(initialMessage).toBe('Build a workflow from this screenshot');
+      expect(autoSendInitialMessage).toBe(true);
+      expect(attachments).toEqual([imageAttachment, expectedAttachment(INITIAL_YAML)]);
     });
 
     it('does NOT auto-open on the create route without autoOpenAgentChat ("Start manually")', async () => {

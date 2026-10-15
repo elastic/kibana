@@ -328,10 +328,10 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     }
     return (
       <AgenticFirstEmptyStateLive
-        onSubmitPrompt={(message) =>
+        onSubmitPrompt={(message, attachments) =>
           application.navigateToApp(PLUGIN_ID, {
             path: '/create',
-            state: { initialAgentMessage: message },
+            state: { initialAgentMessage: message, initialAgentAttachments: attachments },
           })
         }
         onStartManually={() =>

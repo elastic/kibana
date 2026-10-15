@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { AppHeader } from '@kbn/app-header';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
@@ -78,6 +79,11 @@ import {
  * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
  */
 type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
+
+interface PendingAgentPrompt {
+  message: string;
+  attachments: ConversationAttachment[];
+}
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -274,13 +280,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // on the empty list) skips it.
   const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
   // Prompt from this page's landing or from the empty list (`location.state`).
-  const [pendingInitialAgentMessage, setPendingInitialAgentMessage] = useState<string | undefined>(
-    () => (!id ? location.state?.initialAgentMessage : undefined)
-  );
+  const [pendingPrompt, setPendingPrompt] = useState<PendingAgentPrompt | undefined>(() => {
+    const message = !id ? location.state?.initialAgentMessage : undefined;
+    return message
+      ? { message, attachments: location.state?.initialAgentAttachments ?? [] }
+      : undefined;
+  });
   // "Remix with AI" arrives with the template YAML, so it skips the landing too.
   const shouldShowAgenticLandingRef = useRef(false);
-  shouldShowAgenticLandingRef.current =
-    !id && !startBlank && !pendingInitialAgentMessage && !initialYaml;
+  shouldShowAgenticLandingRef.current = !id && !startBlank && !pendingPrompt && !initialYaml;
   const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
   // Re-check only when the route switches between `/create` and `/:id`. URL
   // churn on `/create` (view toggle, run selection) drops the query and the
@@ -290,12 +298,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [id]);
   // The sidebar opens only when the user picked AI: a landing prompt or a remix.
   // "Start manually" goes straight to the editor.
-  const autoOpenAgentChat = !id && Boolean(pendingInitialAgentMessage || initialYaml);
+  const autoOpenAgentChat = !id && Boolean(pendingPrompt || initialYaml);
 
-  const handleLandingSubmit = useCallback((message: string) => {
-    setPendingInitialAgentMessage(message);
-    setShowAgenticLanding(false);
-  }, []);
+  const handleLandingSubmit = useCallback(
+    (message: string, attachments: ConversationAttachment[]) => {
+      setPendingPrompt({ message, attachments });
+      setShowAgenticLanding(false);
+    },
+    []
+  );
 
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
@@ -429,7 +440,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                 <WorkflowDetailEditor
                   highlightDiff={highlightDiff}
                   onAgentProposalHeld={onAgentProposalHeld}
-                  initialAgentMessage={pendingInitialAgentMessage}
+                  initialAgentMessage={pendingPrompt?.message}
+                  initialAgentAttachments={pendingPrompt?.attachments}
                   autoOpenAgentChat={autoOpenAgentChat}
                 />
               }
