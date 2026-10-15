@@ -6,39 +6,43 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { buildSourceNode } from './build_source';
+import { buildDataStreamsNode } from './build_data_streams';
 import { buildDestinationNode } from './build_destination';
 import { layoutGraph } from './layout';
 import { ANIMATED_EDGE_TYPE, type ClassicCanvasGraph, type ClassicCanvasNode } from './types';
 
+export interface BuildClassicStreamsGraphOptions {
+  /** When true, fan the hub out to one destination node per classic stream. */
+  expanded?: boolean;
+}
+
 /**
- * Orchestrates the whole classic-streams graph: it delegates node construction to
- * the per-area builders (`build_source`, `build_destination`), wires the edges,
- * and runs the shared auto-layout. Each new node kind (pipeline, routing, ...)
- * gets its own `build_*` module and is composed in here.
+ * Classic streams that are not already owned by a unit destination collapse into
+ * one Data streams hub. Expanding the hub fans destination cards out from it.
  */
 export const buildClassicStreamsGraph = (
-  streams: Streams.ClassicStream.Definition[]
+  streams: Streams.ClassicStream.Definition[],
+  { expanded = false }: BuildClassicStreamsGraphOptions = {}
 ): ClassicCanvasGraph => {
-  const nodes: ClassicCanvasNode[] = [];
-  const edges: ClassicCanvasGraph['edges'] = [];
+  if (streams.length === 0) {
+    return { nodes: [], edges: [] };
+  }
 
-  streams.forEach((definition) => {
-    const source = buildSourceNode(definition);
-    const destination = buildDestinationNode(definition);
+  const hub = buildDataStreamsNode(streams.length, expanded);
+  if (!expanded) {
+    return { nodes: [hub], edges: [] };
+  }
 
-    nodes.push(source, destination);
-    edges.push({
-      id: `${source.id}->${destination.id}`,
-      source: source.id,
-      target: destination.id,
-      type: ANIMATED_EDGE_TYPE,
-      reconnectable: false,
-    });
-  });
+  const destinations = streams.map(buildDestinationNode);
+  const nodes: ClassicCanvasNode[] = [hub, ...destinations];
+  const edges: ClassicCanvasGraph['edges'] = destinations.map((destination) => ({
+    id: `${hub.id}->${destination.id}`,
+    source: hub.id,
+    target: destination.id,
+    type: ANIMATED_EDGE_TYPE,
+    reconnectable: false,
+  }));
 
-  // Positions come from the shared auto-layout so the placement logic stays in
-  // one place and extends to richer topologies (pipelines, routing) later.
   const positions = layoutGraph(nodes, edges);
   const positionedNodes = nodes.map((node) => ({
     ...node,

@@ -41,5 +41,13 @@ export {
   getStreamsLocation,
 } from './get_streams_location/get_streams_location';
 
+export {
+  AUTO_WRITE_PATTERNS,
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+} from './resolve_index_patterns';
+export type { ResolvedIndexPatternMatches } from './resolve_index_patterns';
+
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';

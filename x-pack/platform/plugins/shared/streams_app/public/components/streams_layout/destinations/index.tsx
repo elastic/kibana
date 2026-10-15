@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
+import { StreamFlyout } from '../../stream_flyout';
 import { CreateDestinationModal } from './create_destination_modal';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { UnitDestinationFlyout } from './unit_destination_flyout';
@@ -31,13 +32,11 @@ export const DestinationsTab = () => {
     selectedTypes,
     sortingColumns,
     pagination,
-    visibleColumnIds,
     refreshUnit,
     setQuery,
     setSelectedTypes,
     setSortingColumns,
     setPagination,
-    setVisibleColumnIds,
     openCreateModal,
     closeCreateModal,
     openDestinationFlyout,
@@ -46,6 +45,14 @@ export const DestinationsTab = () => {
     isUnitSaving,
   } = destinationsController;
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
+  const [indexFlyoutName, setIndexFlyoutName] = useState<string | undefined>();
+  const openIndexDetail = useCallback(
+    (indexName: string) => {
+      closeDestinationFlyout();
+      setIndexFlyoutName(indexName);
+    },
+    [closeDestinationFlyout]
+  );
   const showOnCanvas = useCallback(
     (destination: DestinationViewModel) => navigateToCanvasSearch(destination.name),
     [navigateToCanvasSearch]
@@ -67,7 +74,14 @@ export const DestinationsTab = () => {
     return destinations.filter(
       (destination) =>
         (!normalizedQuery ||
-          [destination.name, destination.id, destination.index, LOCAL_ELASTICSEARCH_LABEL]
+          [
+            destination.name,
+            destination.id,
+            destination.index,
+            destination.signal,
+            destination.mode,
+            LOCAL_ELASTICSEARCH_LABEL,
+          ]
             .join(' ')
             .toLowerCase()
             .includes(normalizedQuery)) &&
@@ -124,15 +138,17 @@ export const DestinationsTab = () => {
             status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
             destinations={sortedDestinations}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
-            visibleColumns={visibleColumnIds}
             pagination={pagination}
             sortingColumns={sortingColumns}
-            onVisibleColumnsChange={setVisibleColumnIds}
             onPaginationChange={setPagination}
             onSortingChange={setSortingColumns}
-            onOpenDestination={openDestinationFlyout}
+            onOpenDestination={(destinationId) => {
+              setIndexFlyoutName(undefined);
+              openDestinationFlyout(destinationId);
+            }}
             onShowOnCanvas={showOnCanvas}
             onRequestDelete={setDestinationPendingDeletion}
+            onIndexClick={openIndexDetail}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -146,17 +162,21 @@ export const DestinationsTab = () => {
           onConfirm={confirmDeletion}
         />
       )}
-      {selectedDestination && (
+      {selectedDestination && !indexFlyoutName && (
         <UnitDestinationFlyout
           key={selectedDestination.id}
-          destinationName={selectedDestination.name}
+          destination={selectedDestination}
           onClose={closeDestinationFlyout}
           isDeleteDisabled={isUnitSaving}
+          onIndexClick={openIndexDetail}
           onDelete={() => {
             destinationsController.deleteDestination(selectedDestination.id);
             closeDestinationFlyout();
           }}
         />
+      )}
+      {indexFlyoutName && (
+        <StreamFlyout name={indexFlyoutName} onClose={() => setIndexFlyoutName(undefined)} />
       )}
     </>
   );

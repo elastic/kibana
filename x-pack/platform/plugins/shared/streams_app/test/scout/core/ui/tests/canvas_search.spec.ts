@@ -66,7 +66,7 @@ const mockUnitDefinition = async (page: ScoutPage) => {
 };
 
 test.describe(
-  'Stream canvas - search',
+  'Stream map - search',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient, logsSynthtraceEsClient }) => {
@@ -100,7 +100,7 @@ test.describe(
       });
     });
 
-    test('pivots from a destination row into a pre-filled canvas search', async ({
+    test('pivots from a destination row into a pre-filled map search', async ({
       page,
       pageObjects: { streams },
     }) => {
@@ -109,11 +109,10 @@ test.describe(
 
       await streams.getDestinationShowOnCanvasButton(DESTINATION_NAME).click();
 
-      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
       await expect(streams.canvasSearch).toHaveValue(DESTINATION_NAME);
       await expect(page).toHaveURL(
-        (url) =>
-          url.searchParams.get('canvasState')?.includes(`query:'${DESTINATION_NAME}'`) ?? false
+        (url) => url.searchParams.get('mapState')?.includes(`query:'${DESTINATION_NAME}'`) ?? false
       );
 
       // Only the matching flow is rendered; the unrelated classic stream is hidden.
@@ -124,18 +123,22 @@ test.describe(
       await streams.canvasSearch.fill('');
 
       await expect(page).toHaveURL(/query:!n/);
+      await expect(streams.canvasDataStreamsNode).toBeVisible();
+      await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toHaveCount(0);
+
+      await streams.expandCanvasDataStreams();
       await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toBeVisible();
-      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toBeVisible();
+      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toHaveCount(0);
     });
 
-    test('filters the canvas while typing', async ({ page, pageObjects: { streams } }) => {
-      await streams.gotoStreamsLayoutTab('canvas');
+    test('filters the map while typing', async ({ page, pageObjects: { streams } }) => {
+      await streams.gotoStreamsLayoutTab('map');
       await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toBeVisible();
 
       await streams.canvasSearch.fill(CLASSIC_STREAM);
 
       await expect(page).toHaveURL(new RegExp(`query:'?${CLASSIC_STREAM}`));
-      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toBeVisible();
+      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toHaveCount(0);
       await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toBeVisible();
       await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toHaveCount(0);
     });

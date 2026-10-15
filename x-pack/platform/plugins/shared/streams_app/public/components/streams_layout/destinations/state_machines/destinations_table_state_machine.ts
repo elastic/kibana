@@ -7,6 +7,7 @@
 
 import { assign, fromPromise, sendTo, setup } from 'xstate';
 import type { CoreStart } from '@kbn/core/public';
+import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { DestinationType } from '../types';
 import {
   createDestinationsMachineImplementations,
@@ -33,6 +34,7 @@ export interface DestinationsTablePagination {
 export interface DestinationsTableStateInput {
   unitDefinition?: Unit;
   toasts: CoreStart['notifications']['toasts'];
+  apiKeyGenerationDeps: DestinationApiKeyGenerationDeps;
   loadUnitDefinition: UnitRepository['load'];
   persistUnitDefinition: UnitRepository['persist'];
 }
@@ -231,12 +233,14 @@ export const destinationsTableStateMachine = setup({
       error: undefined,
       destinationsRef: spawn(
         destinationsStateMachine.provide(
-          createDestinationsMachineImplementations({ toasts: input.toasts })
+          createDestinationsMachineImplementations({
+            toasts: input.toasts,
+            apiKeyGenerationDeps: input.apiKeyGenerationDeps,
+          })
         ),
         {
           input: {
             unitDefinition,
-            includeUnconfiguredNodeOnCreate: false,
             parentRef: self,
           },
         }

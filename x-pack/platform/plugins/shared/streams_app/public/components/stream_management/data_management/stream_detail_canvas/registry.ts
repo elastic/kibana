@@ -7,9 +7,15 @@
 
 import type { EdgeTypes, NodeTypes } from '@xyflow/react';
 import { AnimatedEdge } from './edges/animated_edge';
-import { SourceNode } from './nodes/source_node';
+import { DataStreamsNode } from './nodes/data_streams_node';
 import { DestinationNode } from './nodes/destination_node';
-import { ANIMATED_EDGE_TYPE, DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { SourceNode } from './nodes/source_node';
+import {
+  ANIMATED_EDGE_TYPE,
+  DATA_STREAMS_NODE_TYPE,
+  DESTINATION_NODE_TYPE,
+  SOURCE_NODE_TYPE,
+} from './types';
 
 /**
  * Central registry mapping React Flow node/edge type identifiers to their
@@ -18,6 +24,7 @@ import { ANIMATED_EDGE_TYPE, DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './t
 export const canvasNodeTypes: NodeTypes = {
   [SOURCE_NODE_TYPE]: SourceNode,
   [DESTINATION_NODE_TYPE]: DestinationNode,
+  [DATA_STREAMS_NODE_TYPE]: DataStreamsNode,
   // future: [PIPELINE_NODE_TYPE]: PipelineNode, [ROUTING_NODE_TYPE]: RoutingNode,
 };
 

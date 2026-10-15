@@ -19,8 +19,6 @@ export type SourceType = Extract<
 
 export type ConfiguredSource = Extract<StreamsV2.Source, { type: SourceType }>;
 
-export type SourceStatus = 'live' | 'provisioning' | 'failed';
-
 export interface SourceApiKey {
   id: string;
   name: string;
@@ -35,15 +33,12 @@ export interface SourceEndpoint {
 export interface SourceRuntimeMetadata {
   endpoint?: string;
   endpoints: SourceEndpoint[];
-  throughput?: string;
-  lastEvent?: string;
   destinations: string[];
 }
 
 export type SourceViewModel = ConfiguredSource &
   SourceRuntimeMetadata & {
     apiKeys: SourceApiKey[];
-    status: SourceStatus;
   };
 
 export interface RevealedApiKey extends SourceApiKey {

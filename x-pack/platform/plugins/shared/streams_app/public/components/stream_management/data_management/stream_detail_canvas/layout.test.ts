@@ -50,7 +50,7 @@ describe('layoutGraph', () => {
         { id: 'classic-source' },
         { id: 'classic-destination' },
         { id: 'configured-source' },
-        { id: 'unconfigured-source' },
+        { id: 'standalone-source' },
       ],
       [{ source: 'classic-source', target: 'classic-destination' }]
     );
@@ -60,9 +60,24 @@ describe('layoutGraph', () => {
       new Set([
         positions.get('classic-source')!.y,
         positions.get('configured-source')!.y,
-        positions.get('unconfigured-source')!.y,
+        positions.get('standalone-source')!.y,
       ]).size
     ).toBe(3);
+  });
+
+  it('fans destination cards out from a Data streams hub', () => {
+    const positions = layoutGraph(
+      [{ id: 'data-streams' }, { id: 'd1' }, { id: 'd2' }],
+      [
+        { source: 'data-streams', target: 'd1' },
+        { source: 'data-streams', target: 'd2' },
+      ]
+    );
+
+    expect(positions.get('data-streams')!.x).toBe(0);
+    expect(positions.get('d1')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d2')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d1')!.y).not.toEqual(positions.get('d2')!.y);
   });
 
   it('lays a multi-node chain into one column per depth (extensible topology)', () => {

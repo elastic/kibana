@@ -1,6 +1,6 @@
 # Local Streams full dev flow (UI engineers)
 
-End-to-end path from a clean machine to a working local Streams backend: Canvas,
+End-to-end path from a clean machine to a working local Streams backend: Map,
 a published unit, logs in the project ES, and collector metrics. You start four
 long-lived processes. One script does everything else.
 
@@ -89,7 +89,7 @@ Tilt writes certs and a Kibana snippet to `.tilt/kibana/`. Keep those paths.
 
 ## 3. Point Kibana at the distributor
 
-In the Kibana checkout, add the Tilt snippet plus the canvas flags (without them
+In the Kibana checkout, add the Tilt snippet plus the Map flags (without them
 the unit API returns 404):
 
 ```sh
@@ -159,7 +159,7 @@ That one command:
 
 ## 7. Use it
 
-- Canvas: http://localhost:5601/app/streams/new-experience/
+- Map: http://localhost:5601/app/streams/new-experience/map
 - Discover / ES|QL as `elastic_serverless`:
 
 ```esql
@@ -176,7 +176,7 @@ include `streams.step.*` and `streams.destination.*` with `target_id=dev` and
 
 Edit `unit.yaml` in this directory, then re-run the script. `seed` / the default
 command `PUT`s that file through Kibana (after substituting `__API_KEY__`), so
-Canvas and the collector pick up the new graph.
+Map and the collector pick up the new graph.
 
 Keep `__API_KEY__` on any `elasticsearch` destination that needs a key. The
 document still needs `sources`, `destinations`, and `pipelines`. The
@@ -186,7 +186,7 @@ transpiler currently wants a static `index` (no templates, no
 The motel demo traffic is OTLP logs with `resource.attributes.env` of `dev` or
 `prod`. `wait`, Discover examples, and `reset` data-stream deletes still assume
 the stock `logs-application.otel-*` names. If you change routing or indexes,
-reload Canvas and query the indexes you authored; the wait step may warn.
+reload Map and query the indexes you authored; the wait step may warn.
 
 ## Day to day
 
@@ -200,16 +200,16 @@ Leave the four processes running. When you want a fresh unit and traffic:
 `./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh --help`.
 
 ```sh
-./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh reset    # drop Canvas unit, demo data, StreamUnit CR, controller patches
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh reset    # drop Map unit, demo data, StreamUnit CR, controller patches
 ./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh          # publish and send traffic again
 ```
 
-`reset` also `POST`s `/internal/streams/unit/default/_reset` so Canvas drops
+`reset` also `POST`s `/internal/streams/unit/default/_reset` so Map drops
 the graph (those nodes live in Kibana saved objects, not the kind StreamUnit).
 Then it deletes the demo data streams, the `project-dev/default` CR, the minted
 API key, and restores `streams-controller` `dev/values.yaml` and
 `internal/workload/telemetry.tpl.yml` to HEAD. That last step also discards any
-other uncommitted edits in those two files. Reload Canvas after reset.
+other uncommitted edits in those two files. Reload Map after reset.
 
 ## Teardown
 
@@ -231,7 +231,7 @@ make kind-delete    # from either repo
 | Symptom | Fix |
 | --- | --- |
 | `http://localhost:9200` returns nothing | ES is HTTPS. Use `https://` and `--cacert` / `-k`. |
-| Unit PUT 404 "Streams unit API is not enabled" | Add the canvas flags in step 3 and restart Kibana. |
+| Unit PUT 404 "Streams unit API is not enabled" | Add the Map flags in step 3 and restart Kibana. |
 | Unit PUT 503 | Distributor Tilt is down, or `kibana.dev.yml` snippet is missing. |
 | Script sits on `PUT .../unit/default` | The PUT itself is usually done in a few seconds. The script then waits for `spec.artifact` (not Ready). Ctrl-C and re-run if it exceeds ~90s. |
 | `es serverless` bind error on 8443 | Distributor must use `-- --port 18443`. |

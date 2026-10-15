@@ -43,9 +43,9 @@ const getNodeHeight = ({ type, measured }: LayoutNode): number =>
  * stacked vertically. Positions are normalized so the graph's top-left sits at
  * the origin, and returned as React Flow top-left coordinates.
  *
- * For the current classic topology (one source -> destination pair per stream)
- * this still yields source in column 0, destination in column 1, one pair per
- * row.
+ * For the current classic topology (one Data streams hub, optionally fanned out
+ * to destination cards) this still yields the hub in column 0 and destinations
+ * in column 1.
  */
 export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<string, XYPosition> => {
   const positions = new Map<string, XYPosition>();

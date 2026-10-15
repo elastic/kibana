@@ -23,9 +23,11 @@ import {
 } from './state_machines/destinations_table_state_machine';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  type DestinationCreationFormErrors,
   type DestinationStorageKind,
   type DestinationType,
   type DestinationViewModel,
+  type ElasticsearchDestinationFormData,
 } from './types';
 
 export interface DestinationsController {
@@ -37,26 +39,34 @@ export interface DestinationsController {
   storageKind: DestinationStorageKind;
   destinationName: string;
   destinationNameError?: DestinationNameValidationError;
-  elasticsearchIndex: string;
-  elasticsearchIndexPatterns: string;
-  indexError?: 'required';
-  indexPatternsError?: 'required' | 'invalid';
+  elasticsearchAuto: boolean;
+  elasticsearchLogsIndex: string;
+  elasticsearchMetricsIndex: string;
+  elasticsearchTracesIndex: string;
+  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
+  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
+  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
+  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
   canCreateDestination: boolean;
   isUnitSaving: boolean;
-  unconfiguredNodeIds: string[];
   persistenceError?: string;
+  apiKeyError?: string;
   isCreatingDestination: boolean;
   isCreateFailed: boolean;
   refreshUnit: () => void;
   createDestination: () => void;
   setStorageKind: (storageKind: DestinationStorageKind) => void;
   setCreateDestinationName: (destinationName: string) => void;
-  setElasticsearchIndex: (index: string) => void;
-  setElasticsearchIndexPatterns: (indexPatterns: string) => void;
+  setElasticsearchAuto: (auto: boolean) => void;
+  setElasticsearchIndexes: (
+    indexes: Partial<
+      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
+    >
+  ) => void;
   validateCreationForm: () => void;
   deleteDestination: (destinationId: string) => void;
   setQuery: (query: string) => void;
-  openCreateModal: (associatedUnconfiguredNodeId?: string) => void;
+  openCreateModal: () => void;
   closeCreateModal: () => void;
   openDestinationFlyout: (destinationId: string) => void;
   closeDestinationFlyout: () => void;
@@ -101,6 +111,7 @@ export const useDestinationsTable = (): DestinationsTableController => {
   const tableActorRef = useActorRef(destinationsTableStateMachine, {
     input: {
       toasts,
+      apiKeyGenerationDeps: { streamsRepositoryClient: streams.streamsRepositoryClient },
       loadUnitDefinition: unitDefinitionRepository.load,
       persistUnitDefinition: unitDefinitionRepository.persist,
     },
@@ -186,22 +197,30 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => state.context.creationContext
   );
-  const unconfiguredNodeIds = useSelector(
-    destinationsActorRef,
-    (state) => state.context.unconfiguredNodeIds
-  );
   const storageKind = creationContext?.formData.storageKind ?? 'local_elasticsearch';
   const destinationName = creationContext?.formData.destinationName ?? '';
   const destinationNameError = creationContext?.formErrors.destinationName;
-  const elasticsearchIndex =
-    creationContext?.formData.elasticsearch.index ?? EMPTY_ELASTICSEARCH_DESTINATION_FORM.index;
-  const elasticsearchIndexPatterns =
-    creationContext?.formData.elasticsearch.indexPatterns ??
-    EMPTY_ELASTICSEARCH_DESTINATION_FORM.indexPatterns;
-  const indexError = creationContext?.formErrors.index;
-  const indexPatternsError = creationContext?.formErrors.indexPatterns;
-  const isCreatingDestination = useSelector(destinationsActorRef, (state) =>
-    state.matches({ configuring: 'persisting' })
+  const elasticsearchAuto =
+    creationContext?.formData.elasticsearch.auto ?? EMPTY_ELASTICSEARCH_DESTINATION_FORM.auto;
+  const elasticsearchLogsIndex =
+    creationContext?.formData.elasticsearch.logsIndex ??
+    EMPTY_ELASTICSEARCH_DESTINATION_FORM.logsIndex;
+  const elasticsearchMetricsIndex =
+    creationContext?.formData.elasticsearch.metricsIndex ??
+    EMPTY_ELASTICSEARCH_DESTINATION_FORM.metricsIndex;
+  const elasticsearchTracesIndex =
+    creationContext?.formData.elasticsearch.tracesIndex ??
+    EMPTY_ELASTICSEARCH_DESTINATION_FORM.tracesIndex;
+  const staticIndexesError = creationContext?.formErrors.staticIndexes;
+  const logsIndexError = creationContext?.formErrors.logsIndex;
+  const metricsIndexError = creationContext?.formErrors.metricsIndex;
+  const tracesIndexError = creationContext?.formErrors.tracesIndex;
+  const apiKeyError = useSelector(destinationsActorRef, (state) => state.context.apiKeyError);
+  const isCreatingDestination = useSelector(
+    destinationsActorRef,
+    (state) =>
+      state.matches({ configuring: 'persisting' }) ||
+      state.matches({ configuring: 'mintingApiKey' })
   );
   const isCreateFailed = useSelector(destinationsActorRef, (state) =>
     state.matches({ configuring: 'failed' })
@@ -246,13 +265,16 @@ export const useDestinations = ({
       }),
     [destinationsActorRef]
   );
-  const setElasticsearchIndex = useCallback(
-    (index: string) => destinationsActorRef.send({ type: 'elasticsearch.change', index }),
+  const setElasticsearchAuto = useCallback(
+    (auto: boolean) => destinationsActorRef.send({ type: 'elasticsearch.change', auto }),
     [destinationsActorRef]
   );
-  const setElasticsearchIndexPatterns = useCallback(
-    (indexPatterns: string) =>
-      destinationsActorRef.send({ type: 'elasticsearch.change', indexPatterns }),
+  const setElasticsearchIndexes = useCallback(
+    (
+      indexes: Partial<
+        Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
+      >
+    ) => destinationsActorRef.send({ type: 'elasticsearch.change', ...indexes }),
     [destinationsActorRef]
   );
   const validateCreationForm = useCallback(
@@ -260,8 +282,7 @@ export const useDestinations = ({
     [destinationsActorRef]
   );
   const openCreateModal = useCallback(
-    (associatedUnconfiguredNodeId?: string) =>
-      destinationsActorRef.send({ type: 'modal.openCreate', associatedUnconfiguredNodeId }),
+    () => destinationsActorRef.send({ type: 'modal.openCreate' }),
     [destinationsActorRef]
   );
   const deleteDestination = useCallback(
@@ -280,14 +301,18 @@ export const useDestinations = ({
       storageKind,
       destinationName,
       destinationNameError,
-      elasticsearchIndex,
-      elasticsearchIndexPatterns,
-      indexError,
-      indexPatternsError,
+      elasticsearchAuto,
+      elasticsearchLogsIndex,
+      elasticsearchMetricsIndex,
+      elasticsearchTracesIndex,
+      staticIndexesError,
+      logsIndexError,
+      metricsIndexError,
+      tracesIndexError,
       canCreateDestination: canCreateDestination && !isUnitSaving,
       isUnitSaving,
-      unconfiguredNodeIds,
       persistenceError,
+      apiKeyError,
       isCreatingDestination,
       isCreateFailed,
       refreshUnit: () => {
@@ -296,8 +321,8 @@ export const useDestinations = ({
       createDestination,
       setStorageKind,
       setCreateDestinationName,
-      setElasticsearchIndex,
-      setElasticsearchIndexPatterns,
+      setElasticsearchAuto,
+      setElasticsearchIndexes,
       validateCreationForm,
       deleteDestination,
       setQuery: (nextQuery: string) => {
@@ -317,10 +342,14 @@ export const useDestinations = ({
       destinationName,
       destinationNameError,
       destinationViews,
-      elasticsearchIndex,
-      elasticsearchIndexPatterns,
-      indexError,
-      indexPatternsError,
+      elasticsearchAuto,
+      elasticsearchLogsIndex,
+      elasticsearchMetricsIndex,
+      elasticsearchTracesIndex,
+      staticIndexesError,
+      logsIndexError,
+      metricsIndexError,
+      tracesIndexError,
       destinationsActorRef,
       isCreateFailed,
       isCreateModalOpen,
@@ -330,13 +359,13 @@ export const useDestinations = ({
       persistenceError,
       query,
       selectedDestinationId,
+      apiKeyError,
       setCreateDestinationName,
-      setElasticsearchIndex,
-      setElasticsearchIndexPatterns,
+      setElasticsearchAuto,
+      setElasticsearchIndexes,
       setStorageKind,
       storageKind,
       tableState,
-      unconfiguredNodeIds,
       validateCreationForm,
     ]
   );
