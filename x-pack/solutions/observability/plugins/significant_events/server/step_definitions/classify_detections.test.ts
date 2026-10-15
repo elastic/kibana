@@ -13,6 +13,7 @@ import {
   classifyDetectionsStepDefinition,
   type ClassifyBatchParams,
 } from './classify_detections';
+import type { BaselineObservation } from './baseline';
 import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
 import type { ProbeResult } from './run_probe';
 
@@ -144,6 +145,40 @@ describe('classifyBatch', () => {
     expect(output.decisions[0]).toMatchObject({
       decision: 'needs_agent',
       reason: 'unjudged_member',
+    });
+  });
+
+  describe('shadow baseline observation', () => {
+    const observation: BaselineObservation = {
+      decision: 'above_normal',
+      value: 9,
+      samples: 60,
+      median: 5,
+      threshold: 8,
+    };
+    const confirmsA = () => jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
+
+    it('records the observation on the decision without changing the decision', async () => {
+      const observe = jest.fn(async () => observation);
+
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: confirmsA(), observe })
+      );
+
+      expect(observe).toHaveBeenCalledWith(STORED_QUERY);
+      expect(output.decisions[0]).toMatchObject({ decision: 'skip', baseline: observation });
+    });
+
+    it('does not observe a rule it does not probe, or when there is no observer', async () => {
+      const observe = jest.fn(async () => observation);
+
+      await classifyBatch(batchParams({ rows: [detectionRow('rule-A')], observe }));
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: confirmsA() })
+      );
+
+      expect(observe).not.toHaveBeenCalled();
+      expect(output.decisions[0]).not.toHaveProperty('baseline');
     });
   });
 
@@ -338,6 +373,32 @@ describe('classifyDetectionsStepDefinition', () => {
     expect(probeRequest?.query).toBe(`${STORED_QUERY}\n| LIMIT 1`);
     expect(logger.info).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('classifyDetections'));
+  });
+
+  it.each([
+    ['shadow mode', true, 1],
+    ['enforce mode', false, 0],
+  ])('runs the bucketed baseline query only in %s', async (_name, shadowMode, expected) => {
+    const { definition } = createDefinition();
+    const query = jest.fn(async (request: { query: string }) =>
+      request.query.includes('.rule-events')
+        ? membersResponse
+        : { columns: [{ name: 'x', type: 'keyword' }], values: [] }
+    );
+
+    const output = await runHandler(
+      definition,
+      { ...settings, shadow_mode: shadowMode, rows: [detectionRow('rule-A')] },
+      { esql: { query } }
+    );
+
+    const bucketed = query.mock.calls.filter(([request]) => request.query.includes('BUCKET'));
+    expect(bucketed).toHaveLength(expected);
+    if (shadowMode) {
+      expect(output.decisions[0].baseline).toMatchObject({ samples: 60 });
+    } else {
+      expect(output.decisions[0].baseline).toBeUndefined();
+    }
   });
 
   it('treats a missing rows input as an empty batch', async () => {
