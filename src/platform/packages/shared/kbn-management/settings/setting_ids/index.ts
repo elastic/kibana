@@ -8,9 +8,7 @@
  */
 
 // General settings
-export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
 export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
-export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
 export const DATE_FORMAT_ID = 'dateFormat';
@@ -279,6 +277,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
   'securitySolution:alertAnalysisWorkflowAgentId' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT =
+  'securitySolution:alertAnalysisWorkflowUsePrompt' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
   'securitySolution:alertAnalysisWorkflowEnabled' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =
