@@ -1,8 +1,6 @@
 {
   "sha1": "ae448d961fb08b95f9956aa693f56b1918b77b73",
-  "testChannels": [
-    "ci-on-commit"
-  ],
+  "testChannels": ["ci-on-commit"],
   "tests": [
     {
       "id": "2b399116595eb54-2e53726a69c4e83",
@@ -19,10 +17,7 @@
       "id": "eb023ae1d3c943e-e095692b83aa564",
       "title": "Coverage Overview — managed MITRE source renders the tactic matrix from the managed source",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
         "line": 27,
@@ -33,10 +28,7 @@
       "id": "eb023ae1d3c943e-c8a7726bd3be711",
       "title": "Coverage Overview — managed MITRE source renders tactics in ascending position order",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
         "line": 41,
@@ -47,10 +39,7 @@
       "id": "eb023ae1d3c943e-5e311561db93fdd",
       "title": "Coverage Overview — managed MITRE source does not break the matrix when the rule activity filter is changed",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
         "line": 50,
@@ -61,10 +50,7 @@
       "id": "eb023ae1d3c943e-a15c48607ac25b1",
       "title": "Coverage Overview — managed MITRE source shows the ATLAS matrix on the MITRE ATLAS tab with seeded tactics in position order",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
         "line": 59,
@@ -75,10 +61,7 @@
       "id": "eb023ae1d3c943e-47a8756ef36fc26",
       "title": "Coverage Overview — managed MITRE source places a rule mapped only to ATLAS in its ATLAS technique cell",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
         "line": 89,
@@ -121,10 +104,7 @@
       "id": "176ca0ecf589cb0-c6a4e67e2d9dda8",
       "title": "Rule creation MITRE picker — managed MITRE source loads tactics from the managed MITRE API and persists a tactic/technique/subtechnique selection after rule save",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
         "line": 46,
@@ -135,10 +115,7 @@
       "id": "176ca0ecf589cb0-dcff54fdb354b6d",
       "title": "Rule creation MITRE picker — managed MITRE source offers a multi-tactic technique under each of its tactics",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
         "line": 105,
@@ -149,10 +126,7 @@
       "id": "176ca0ecf589cb0-be7513ae30c06d7",
       "title": "Rule creation MITRE picker — managed MITRE source persists MITRE ATT&CK and MITRE ATLAS mappings together after rule save",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
         "line": 151,
@@ -163,10 +137,7 @@
       "id": "176ca0ecf589cb0-5fbbc8347c42420",
       "title": "Rule creation MITRE picker — managed MITRE source preserves the MITRE ATLAS framework when a rule is edited without touching its threat mappings",
       "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
         "line": 260,
