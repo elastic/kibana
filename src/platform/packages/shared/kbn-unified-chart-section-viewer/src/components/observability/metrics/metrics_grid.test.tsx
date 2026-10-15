@@ -203,7 +203,9 @@ describe('MetricsGrid', () => {
     metricItems.forEach((_, index) => {
       expect(Chart).toHaveBeenNthCalledWith(
         index + 1,
-        expect.objectContaining({ yAxisTitle: 'sum' }),
+        expect.objectContaining({
+          lensConfig: expect.objectContaining({ yTitle: 'sum' }),
+        }),
         expect.anything()
       );
     });
@@ -301,12 +303,16 @@ describe('MetricsGrid', () => {
 
     expect(Chart).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ description: descriptionForFirst }),
+      expect.objectContaining({
+        lensConfig: expect.objectContaining({ description: descriptionForFirst }),
+      }),
       expect.anything()
     );
     expect(Chart).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ description: undefined }),
+      expect.objectContaining({
+        lensConfig: expect.objectContaining({ description: undefined }),
+      }),
       expect.anything()
     );
   });
@@ -331,11 +337,13 @@ describe('MetricsGrid', () => {
 
     expect(Chart).toHaveBeenCalledWith(
       expect.objectContaining({
-        chartLayers: expect.arrayContaining([
-          expect.objectContaining({
-            breakdown: ['host.name'],
-          }),
-        ]),
+        lensConfig: expect.objectContaining({
+          layers: expect.arrayContaining([
+            expect.objectContaining({
+              breakdown: ['host.name'],
+            }),
+          ]),
+        }),
       }),
       expect.anything()
     );
@@ -1308,9 +1316,14 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
-          heatmapConfig: undefined,
-          yAxisTitle: 'p95',
-          esqlQuery: expect.not.stringContaining('BUCKET(latency.exp'),
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            yTitle: 'p95',
+            dataset: expect.objectContaining({
+              esql: expect.not.stringContaining('BUCKET(latency.exp'),
+            }),
+          }),
         }),
         expect.anything()
       );
@@ -1321,7 +1334,11 @@ describe('MetricsGrid', () => {
 
       expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
-        expect.objectContaining({ heatmapConfig: undefined, isLoading: false }),
+        expect.objectContaining({
+          isLoading: false,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy' }),
+        }),
         expect.anything()
       );
     });
@@ -1336,12 +1353,15 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).not.toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
-          esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 1, 9)'),
-          chartLayers: [],
-          heatmapConfig: expect.objectContaining({
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({
             chartType: 'heatmap',
             title: histogramItem.metricName,
-            dataset: { esql: expect.stringContaining('SORT bucket DESC') },
+            dataset: {
+              esql: expect.stringMatching(
+                /BUCKET\(latency\.exp, 10, 1, 9\)[\s\S]*SORT bucket DESC/
+              ),
+            },
           }),
         }),
         expect.anything()
@@ -1360,9 +1380,13 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).not.toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
-          esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
-          chartLayers: [],
-          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            dataset: {
+              esql: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
+            },
+          }),
         }),
         expect.anything()
       );
@@ -1381,8 +1405,13 @@ describe('MetricsGrid', () => {
       );
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
-          heatmapConfig: undefined,
-          esqlQuery: expect.stringContaining('`host.name`'),
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            dataset: expect.objectContaining({
+              esql: expect.stringContaining('`host.name`'),
+            }),
+          }),
         }),
         expect.anything()
       );
@@ -1399,7 +1428,8 @@ describe('MetricsGrid', () => {
       expect(Chart).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({ chartType: 'heatmap' }),
         }),
         expect.anything()
       );
@@ -1416,8 +1446,12 @@ describe('MetricsGrid', () => {
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
           isLoading: true,
-          esqlQuery: '',
-          heatmapConfig: undefined,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            layers: [],
+            dataset: { esql: '' },
+          }),
         }),
         expect.anything()
       );
@@ -1434,9 +1468,10 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
-          heatmapConfig: undefined,
           isLoading: false,
           error: undefined,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy' }),
         }),
         expect.anything()
       );
@@ -1451,7 +1486,11 @@ describe('MetricsGrid', () => {
       });
 
       expect(Chart).toHaveBeenCalledWith(
-        expect.objectContaining({ error, heatmapConfig: undefined }),
+        expect.objectContaining({
+          error,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy', layers: [] }),
+        }),
         expect.anything()
       );
     });
