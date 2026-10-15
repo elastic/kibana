@@ -9,10 +9,10 @@
 
 /**
  * Runs state-action machines: `next` picks the action for a state, and a pure
- * `model` turns the state and the action's result into the next state and an
- * event describing the step (Lamport's augmented state). Models never read a
- * clock; time arrives as the result's `completedAt`. The driver decides when
- * each action runs.
+ * `model` turns the state and the action's result into a step: the next state,
+ * an event describing it (Lamport's augmented state), and how long to wait
+ * before the next action. Models never read a clock; time arrives as the
+ * result's `completedAt`.
  */
 
 import { setTimeout as wait } from 'node:timers/promises';
@@ -42,19 +42,19 @@ export interface AugmentedState<S, E> {
   readonly event: E;
 }
 
-/** What `run` yields: an augmented state and when the next action is due, if `next` returns one. */
-export type Step<S, E> = AugmentedState<S, E> & { readonly dueAt: number };
+export interface Step<S, E> extends AugmentedState<S, E> {
+  /** How long to wait before the next action; zero acts at once. */
+  readonly wait: number;
+}
 
 export interface StateActionMachine<S, R, E> {
   readonly initialState: S;
   /** The action to run in `state`, or null once the machine is done. */
   readonly next: (state: S) => Action<R> | null;
-  readonly model: (state: S, result: ActionResult<R>) => AugmentedState<S, E>;
-  /** How long after an action completes the next is due, for the state it reached. Zero is due at once. */
-  readonly delay: (state: S) => number;
+  readonly model: (state: S, result: ActionResult<R>) => Step<S, E>;
 }
 
-/** Monotonic, so wall-clock adjustments don't move schedules; unref'd, so it never holds the process open. */
+/** Monotonic, so wall-clock adjustments don't move waits; unref'd, so it never holds the process open. */
 export const realClock: Clock = {
   now: () => performance.now(),
   // `wait` rejects only when `signal` aborts.
@@ -62,14 +62,14 @@ export const realClock: Clock = {
     wait(duration, undefined, { ref: false, signal }).catch(() => undefined),
 };
 
-/** Runs the action and stamps its completion; a failure becomes a result too. */
-const perform = async <R>(
-  action: Action<R>,
+/** Performs the action and stamps its completion; a failure becomes a result too. */
+const attempt = async <R>(
+  perform: Action<R>,
   now: Clock['now'],
   signal?: AbortSignal
 ): Promise<ActionResult<R>> => {
   try {
-    const value = await action(signal);
+    const value = await perform(signal);
     return { ok: true, value, completedAt: now() };
   } catch (error) {
     return {
@@ -81,39 +81,40 @@ const perform = async <R>(
 };
 
 /**
- * Yields the initial step, due at once, and then each step, until `next` returns null or
- * `signal` aborts. Returns the last domain state; its deadline is on the last yielded step.
+ * Yields the initial step, which acts at once, and then each step, until `next` returns
+ * null or `signal` aborts. Returns the last state.
  */
 export async function* run<S, R, E>(
-  { initialState, next, model, delay }: StateActionMachine<S, R, E>,
+  { initialState, next, model }: StateActionMachine<S, R, E>,
   clock: Clock = realClock,
   signal?: AbortSignal
 ): AsyncGenerator<Step<S, E | InitialEvent>, S> {
-  let state = initialState;
-  let dueAt = clock.now();
+  let step: Step<S, E | InitialEvent> = {
+    state: initialState,
+    event: { type: 'initial' },
+    wait: 0,
+  };
 
-  yield { state, event: { type: 'initial' }, dueAt };
+  yield step;
   while (!signal?.aborted) {
+    const { state } = step;
     const action = next(state);
     if (action === null) {
       return state;
     }
-    const waitMs = dueAt - clock.now();
-    if (waitMs > 0) {
-      await clock.sleep(waitMs, signal);
+    if (step.wait > 0) {
+      await clock.sleep(step.wait, signal);
     }
     if (signal?.aborted) {
       return state;
     }
-    const result = await perform(action, clock.now, signal);
+    const result = await attempt(action, clock.now, signal);
     if (signal?.aborted) {
       // Drop a result that arrived after the abort.
       return state;
     }
-    const reached = model(state, result);
-    dueAt = result.completedAt + delay(reached.state);
-    state = reached.state;
-    yield { ...reached, dueAt };
+    step = model(state, result);
+    yield step;
   }
-  return state;
+  return step.state;
 }

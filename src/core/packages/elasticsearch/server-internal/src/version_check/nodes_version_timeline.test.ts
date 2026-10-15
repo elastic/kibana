@@ -79,9 +79,10 @@ const runTimeline = async (
   };
 
   const timeline: Tick[] = [];
-  for await (const { state, event, dueAt } of run(nodesVersionMachine(request, config), clock)) {
+  for await (const { state, event, wait } of run(nodesVersionMachine(request, config), clock)) {
+    const at = clock.now();
     timeline.push(
-      tick(clock.now(), dueAt, state.controlState, state.compatibility?.isCompatible, event.type)
+      tick(at, at + wait, state.controlState, state.compatibility?.isCompatible, event.type)
     );
     if (timeline.length === count) {
       break;

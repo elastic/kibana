@@ -191,13 +191,14 @@ describe('pollEsNodesClockSkew', () => {
     expect(log.info).not.toHaveBeenCalled();
   });
 
-  it('swallows request failures', async () => {
-    await runRequests([
+  it('swallows request failures and checks again ten minutes later', async () => {
+    const stoppedAt = await runRequests([
       async () => {
         throw new Error('mock stats request error');
       },
     ]);
 
+    expect(stoppedAt).toBe(CHECK_INTERVAL);
     expect(log.error).not.toHaveBeenCalled();
     expect(log.info).not.toHaveBeenCalled();
   });
