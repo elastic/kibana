@@ -227,16 +227,18 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props, mockGetInternalState, {
-      id: 'testDiscoverSessionId',
-      version: 'saved-version',
-    });
+    await tabsStorageManager.persistLocally(
+      { ...props, unsavedTabIds: [mockTab2.id] },
+      mockGetInternalState,
+      { id: 'testDiscoverSessionId', version: 'saved-version' }
+    );
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      unsavedTabIds: [mockTab2.id],
       discoverSessionId: 'testDiscoverSessionId',
       discoverSessionVersion: 'saved-version',
     });
@@ -990,6 +992,7 @@ describe('TabsStorageManager', () => {
       discoverSessionVersion: version,
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      unsavedTabIds: [mockTab1.id],
     });
 
     urlStateStorage.set(TAB_STATE_URL_KEY, {
@@ -1050,6 +1053,42 @@ describe('TabsStorageManager', () => {
 
     expect(loadedProps.allTabs.map(({ id }) => id)).toEqual([savedTab.id]);
     expect(loadedProps.outdatedSelectedTab?.id).toBe(mockTab1.id);
+  });
+
+  it('keeps unsaved changes of tabs replaced by a newer saved version as recently closed tabs', () => {
+    const { tabsStorageManager, services } = create();
+    const toSavedTab = ({ id, label }: TabState) =>
+      fromSavedSearchToSavedObjectTab({
+        tab: { id, label },
+        savedSearch: savedSearchMock,
+        services,
+      });
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'session',
+      version: 'v2',
+      tabs: [toSavedTab(mockTab1), toSavedTab(mockTab2)],
+    });
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: persistedDiscoverSession.id,
+      discoverSessionVersion: 'v1',
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [],
+      unsavedTabIds: [mockTab1.id],
+    });
+
+    const { recentlyClosedTabs } = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(recentlyClosedTabs).toEqual([
+      { ...toRestoredTab(mockTab1), id: expect.any(String), closedAt: expect.any(Number) },
+    ]);
+    expect(recentlyClosedTabs[0].id).not.toBe(mockTab1.id);
   });
 
   it('should load persisted tabs when persisted discover session id differs from stored session id', () => {

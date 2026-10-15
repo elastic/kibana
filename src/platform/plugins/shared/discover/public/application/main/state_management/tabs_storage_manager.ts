@@ -8,6 +8,7 @@
  */
 
 import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
+import { v4 as uuid } from 'uuid';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -59,6 +60,7 @@ interface TabsStateInLocalStorage {
   draftSessionTitle: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
+  unsavedTabIds?: string[];
 }
 
 const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
@@ -83,7 +85,7 @@ export interface TabsStorageManager {
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
   pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
-    props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
+    props: Omit<TabsInternalStatePayload, 'selectedTabId'> & { unsavedTabIds?: string[] },
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSession: Pick<DiscoverSession, 'id' | 'version'> | undefined,
     draftSessionTitle?: string
@@ -338,6 +340,7 @@ export const createTabsStorageManager = ({
       draftSessionTitle: storedTabsState?.draftSessionTitle || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
+      unsavedTabIds: storedTabsState?.unsavedTabIds,
     };
   };
 
@@ -384,7 +387,7 @@ export const createTabsStorageManager = ({
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
-    { allTabs, recentlyClosedTabs },
+    { allTabs, recentlyClosedTabs, unsavedTabIds },
     getInternalState,
     discoverSession,
     draftSessionTitle
@@ -408,6 +411,7 @@ export const createTabsStorageManager = ({
       draftSessionTitle,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
+      unsavedTabIds,
     };
 
     storage.set(TABS_LOCAL_STORAGE_KEY, nextTabsInStorage);
@@ -513,6 +517,28 @@ export const createTabsStorageManager = ({
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+    // Unsaved changes of draft tabs replaced by a newer saved version stay restorable as recently
+    // closed tabs. They get new IDs because the saved tabs that replace them keep the original ones.
+    const replacedUnsavedTabs = hasNewSavedVersion
+      ? previousOpenTabs
+          .filter(
+            ({ id }) =>
+              storedTabsState.unsavedTabIds?.includes(id) &&
+              persistedTabs?.some((persistedTab) => persistedTab.id === id)
+          )
+          .map((tab) => ({ ...tab, id: uuid() }))
+      : [];
+
+    const getRecentlyClosedTabs = (nextOpenTabs: TabState[]) =>
+      getNRecentlyClosedTabs({
+        previousOpenTabs,
+        previousRecentlyClosedTabs: closedTabs,
+        nextOpenTabs,
+        justRemovedTabs: [
+          ...differenceBy(previousOpenTabs, nextOpenTabs, 'id'),
+          ...replacedUnsavedTabs,
+        ],
+      });
     // The draft title belongs to the unsaved session, so only keep it when restoring its open tabs
     const restoredDraftSessionTitle =
       !updatedDiscoverSession && !storedTabsState.discoverSessionId
@@ -533,11 +559,7 @@ export const createTabsStorageManager = ({
           selectedTabId,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
-          recentlyClosedTabs: getNRecentlyClosedTabs({
-            previousOpenTabs,
-            previousRecentlyClosedTabs: closedTabs,
-            nextOpenTabs: openTabs,
-          }),
+          recentlyClosedTabs: getRecentlyClosedTabs(openTabs),
         };
       }
 
@@ -562,11 +584,7 @@ export const createTabsStorageManager = ({
           selectedTabId: newTab.id,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
-          recentlyClosedTabs: getNRecentlyClosedTabs({
-            previousOpenTabs,
-            previousRecentlyClosedTabs: closedTabs,
-            nextOpenTabs: allTabsWithNewTab,
-          }),
+          recentlyClosedTabs: getRecentlyClosedTabs(allTabsWithNewTab),
         };
       }
 
@@ -584,11 +602,7 @@ export const createTabsStorageManager = ({
             selectedTabId,
             updatedDiscoverSession,
             draftSessionTitle: undefined,
-            recentlyClosedTabs: getNRecentlyClosedTabs({
-              previousOpenTabs,
-              previousRecentlyClosedTabs: closedTabs,
-              nextOpenTabs: restoredTabs,
-            }),
+            recentlyClosedTabs: getRecentlyClosedTabs(restoredTabs),
           };
         }
       }
@@ -618,11 +632,7 @@ export const createTabsStorageManager = ({
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
       draftSessionTitle: undefined,
-      recentlyClosedTabs: getNRecentlyClosedTabs({
-        previousOpenTabs,
-        previousRecentlyClosedTabs: closedTabs,
-        nextOpenTabs: allTabs,
-      }),
+      recentlyClosedTabs: getRecentlyClosedTabs(allTabs),
     };
   };
 

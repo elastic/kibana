@@ -665,12 +665,18 @@ const createMiddleware = (options: InternalStateDependencies) => {
     InternalStateDependencies
   >;
 
+  const shouldPersistTabsLocally = isAnyOf(
+    internalStateSlice.actions.setTabs,
+    internalStateSlice.actions.setPersistedDiscoverSession,
+    internalStateSlice.actions.setDraftSessionTitle
+  );
+
   startListening({
-    matcher: isAnyOf(
-      internalStateSlice.actions.setTabs,
-      internalStateSlice.actions.setPersistedDiscoverSession,
-      internalStateSlice.actions.setDraftSessionTitle
-    ),
+    // Unsaved changes are recomputed on every tab change, so persist only when the unsaved tabs differ
+    predicate: (action, currentState, previousState) =>
+      shouldPersistTabsLocally(action) ||
+      (internalStateSlice.actions.setUnsavedChanges.match(action) &&
+        !isEqual(currentState.tabs.unsavedIds, previousState.tabs.unsavedIds)),
     effect: throttle<
       ListenerEffect<
         UnknownAction,
@@ -689,7 +695,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
             services,
           });
         void tabsStorageManager.persistLocally(
-          { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
+          {
+            allTabs: selectAllTabs(state),
+            recentlyClosedTabs: selectRecentlyClosedTabs(state),
+            unsavedTabIds: state.tabs.unsavedIds,
+          },
           getTabInternalState,
           state.persistedDiscoverSession,
           state.draftSessionTitle
