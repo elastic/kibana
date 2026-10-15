@@ -204,7 +204,7 @@ class IacCallbackService {
       };
     }
 
-    let { attributes } = so;
+    let { attributes, version } = so;
     if (attributes.status === 'pending') {
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
         // The key expires at the same time; invalidate it anyway in case the clocks differ.
@@ -215,7 +215,8 @@ class IacCallbackService {
       if (!claimed) {
         return { outcome: 'not_found' };
       }
-      attributes = claimed;
+      attributes = claimed.attributes;
+      version = claimed.version;
     }
 
     if (attributes.status === 'cancelled') {
@@ -238,7 +239,7 @@ class IacCallbackService {
     } catch (error) {
       // No identity was made. Hand the record back so a retry of the report, or a cancel from
       // the browser, is not stuck behind a claim nobody is applying.
-      await this.releaseClaim(soClient, so.id);
+      await this.releaseClaim(soClient, so.id, version);
       throw error;
     }
 
@@ -272,12 +273,27 @@ class IacCallbackService {
     return toItem(id, { ...attributes, ...update });
   }
 
-  private async releaseClaim(soClient: SavedObjectsClientContract, id: string): Promise<void> {
+  /**
+   * Puts the record back to pending, but only if it is still as this attempt last saw it: a
+   * concurrent attempt with the same report may have finished it in the meantime, and its
+   * progress must not be rolled back.
+   */
+  private async releaseClaim(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    version: string | undefined
+  ): Promise<void> {
     try {
-      await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, id, {
-        status: 'pending',
-      });
+      await soClient.update<IacCallbackSOAttributes>(
+        IAC_CALLBACK_SAVED_OBJECT_TYPE,
+        id,
+        { status: 'pending' },
+        { version }
+      );
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        return;
+      }
       this.logger.warn(
         `IaC callback [id=${id}] could not be released after a failed report: ${error.message}`
       );
@@ -337,32 +353,33 @@ class IacCallbackService {
 
   /**
    * Moves a pending record to `receiving` with the reported values, guarded by the record's
-   * version. When another request got there first, returns what it stored instead.
+   * version. When another request got there first, returns what it stored instead. The version
+   * returned is the one this attempt last saw, for a guarded release later.
    */
   private async claim(
     soClient: SavedObjectsClientContract,
     so: SavedObject<IacCallbackSOAttributes>,
     payload: IacCallbackReceivedValues
-  ): Promise<IacCallbackSOAttributes | undefined> {
+  ): Promise<{ attributes: IacCallbackSOAttributes; version: string | undefined } | undefined> {
     const update: Partial<IacCallbackSOAttributes> = {
       status: 'receiving',
       role_arn: payload.role_arn,
       stack_arn: payload.stack_arn,
     };
     try {
-      await soClient.update<IacCallbackSOAttributes>(
+      const updated = await soClient.update<IacCallbackSOAttributes>(
         IAC_CALLBACK_SAVED_OBJECT_TYPE,
         so.id,
         update,
         { version: so.version }
       );
-      return { ...so.attributes, ...update };
+      return { attributes: { ...so.attributes, ...update }, version: updated.version };
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         throw error;
       }
       const current = await this.getSavedObject(soClient, so.id);
-      return current?.attributes;
+      return current ? { attributes: current.attributes, version: current.version } : undefined;
     }
   }
 

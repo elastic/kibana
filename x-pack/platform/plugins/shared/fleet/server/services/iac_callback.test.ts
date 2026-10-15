@@ -248,6 +248,7 @@ describe('iacCallbackService', () => {
         id: 'cb-1',
         type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
         references: [],
+        version: 'v2',
         attributes: {},
       });
     };
@@ -526,11 +527,32 @@ describe('iacCallbackService', () => {
       await expect(
         iacCallbackService.receive(soClient, 'cb-1', { apiKeyId: 'key-1', payload: PAYLOAD })
       ).rejects.toThrow('boom');
-      // Back to pending, so a retry of the report or a cancel from the browser can proceed.
-      expect(soClient.update).toHaveBeenLastCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
-        status: 'pending',
-      });
+      // Back to pending, so a retry of the report or a cancel from the browser can proceed. The
+      // release is guarded by the claim's version so it cannot undo a concurrent attempt.
+      expect(soClient.update).toHaveBeenLastCalledWith(
+        IAC_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        { status: 'pending' },
+        { version: 'v2' }
+      );
       expect(mockedInvalidate).not.toHaveBeenCalled();
+    });
+
+    it('leaves the record alone when a concurrent attempt finished it before the release', async () => {
+      mockRecord(pendingAttrs());
+      soClient.update
+        .mockResolvedValueOnce({ version: 'v2' } as any)
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1')
+        );
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValue(new CloudConnectorCreateError('boom'));
+
+      await expect(
+        iacCallbackService.receive(soClient, 'cb-1', { apiKeyId: 'key-1', payload: PAYLOAD })
+      ).rejects.toThrow('boom');
+      expect(jest.mocked(appContextService.getLogger)().warn).not.toHaveBeenCalled();
     });
 
     it('still rethrows when the claim cannot be released', async () => {
