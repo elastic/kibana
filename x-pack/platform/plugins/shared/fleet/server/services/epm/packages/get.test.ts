@@ -24,13 +24,16 @@ import type { PackagePolicySOAttributes } from '../../../types';
 import { dataStreamService } from '../../data_streams';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 import { auditLoggingService } from '../../audit_logging';
 import * as Registry from '../registry';
+import * as RegistryRequests from '../registry/requests';
 import { getEsPackage } from '../archive/storage';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+import { runWithCache } from './cache';
+import * as BundledPackages from './bundled_packages';
 
 import * as knowledgeBaseIndex from './knowledge_base_index';
 
@@ -1139,6 +1142,184 @@ owner: elastic`,
       });
 
       expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+    });
+
+    it('should reuse a successful package info lookup within a cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await runWithCache(async () => {
+        const first = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+        const second = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+        expect(second).toBe(first);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reuse a failed package info lookup within a cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'missing-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        const firstError = await lookup().catch((error) => error);
+        expect(firstError).toBeInstanceOf(PackageNotFoundError);
+        await expect(lookup()).rejects.toBe(firstError);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not reuse a not-found result for a lookup with a different prerelease option', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('second lookup ran'));
+
+      const lookup = (prerelease: boolean) =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'pre-package',
+          pkgVersion: '1.0.0',
+          prerelease,
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup(false)).rejects.toBeInstanceOf(PackageNotFoundError);
+        await expect(lookup(true)).rejects.toThrow('second lookup ran');
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(2);
+    });
+
+    it('should retry a registry HTTP failure after recovery in the same session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      const registryError = new RegistryResponseError('registry unavailable', 503);
+      const fetchUrl = jest
+        .spyOn(RegistryRequests, 'fetchUrl')
+        .mockRejectedValueOnce(registryError)
+        .mockResolvedValue(JSON.stringify([{ name: 'my-package', version: '1.0.0' }]));
+      const getBundledPackage = jest
+        .spyOn(BundledPackages, 'getBundledPackageByName')
+        .mockResolvedValue(undefined);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockImplementation(
+        jest.requireActual<typeof Registry>('../registry').fetchFindLatestPackageOrUndefined
+      );
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+
+      try {
+        await runWithCache(async () => {
+          await expect(lookup()).rejects.toBe(registryError);
+          await expect(lookup()).resolves.toMatchObject({ name: 'my-package', version: '1.0.0' });
+        });
+        expect(fetchUrl).toHaveBeenCalledTimes(2);
+      } finally {
+        fetchUrl.mockRestore();
+        getBundledPackage.mockRestore();
+      }
+    });
+
+    it('should retry a failed installation lookup within the same session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const storageError = new Error('storage unavailable');
+      soClient.get
+        .mockRejectedValueOnce(storageError)
+        .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBe(storageError);
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+      });
+      expect(soClient.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not cache a not-found error from archive retrieval', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.getPackage.mockRejectedValueOnce(
+        new PackageNotFoundError('archive unavailable after a connection failure')
+      );
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+        await expect(lookup()).resolves.toMatchObject({ name: 'my-package', version: '1.0.0' });
+      });
+      expect(MockRegistry.getPackage).toHaveBeenCalledTimes(2);
+    });
+
+    it('should use the installed package when the registry lookup fails', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockResolvedValue({
+        id: 'my-package',
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { install_status: 'installed', version: '1.0.0', install_source: 'registry' },
+      });
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockRejectedValue(
+        new RegistryResponseError('registry unavailable', 503)
+      );
+
+      await expect(
+        getPackageInfo({ savedObjectsClient: soClient, pkgName: 'my-package', pkgVersion: '1.0.0' })
+      ).resolves.toMatchObject({ name: 'my-package', status: 'installed', latestVersion: '1.0.0' });
+    });
+
+    it('should retry a failed package info lookup in the next cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'missing-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+      });
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(2);
     });
 
     it('should remove excluded data stream types and policy templates', async () => {

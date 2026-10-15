@@ -92,7 +92,9 @@ import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
   getPackageInfoCache,
+  getPackageInfoCacheError,
   setPackageInfoCache,
+  setPackageInfoCacheError,
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
@@ -522,13 +524,34 @@ export async function getPackageInfo({
   if (cacheResult) {
     return cacheResult;
   }
-  const [savedObject, latestPackage] = await Promise.all([
-    getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
+  const cachedError = getPackageInfoCacheError(pkgName, pkgVersion, prerelease);
+  if (cachedError !== undefined) {
+    throw cachedError;
+  }
+
+  const [installationResult, latestPackageResult] = await Promise.allSettled([
+    getInstallationObject({ savedObjectsClient, pkgName, failOnUnexpectedError: true }),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease, throwOnError: true }),
   ]);
+  const savedObject =
+    installationResult.status === 'fulfilled' ? installationResult.value : undefined;
+  const latestPackage =
+    latestPackageResult.status === 'fulfilled' ? latestPackageResult.value : undefined;
 
   if (!savedObject && !latestPackage) {
-    throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
+    if (installationResult.status === 'rejected') {
+      throw installationResult.reason;
+    }
+    if (latestPackageResult.status === 'rejected') {
+      throw latestPackageResult.reason;
+    }
+
+    // Only cache confirmed absence; archive and storage failures can also surface as not found.
+    const error = new PackageNotFoundError(
+      `[${pkgName}] package not installed or found in registry`
+    );
+    setPackageInfoCacheError(pkgName, pkgVersion, error, prerelease);
+    throw error;
   }
 
   // If no package version is provided, use the installed version in the response, fallback to package from registry
