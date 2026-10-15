@@ -23,6 +23,7 @@ import { getStatusForIndexName } from '../../../common/utils/helpers';
 import { Vulnerabilities } from '../vulnerabilities';
 import { CspAppHeader } from '../../components/csp_app_header';
 import { FindingsSearchBarPortalContext } from '../../common/contexts/findings_search_bar_portal_context';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';
 
@@ -65,6 +66,7 @@ export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
+  const { docLinks } = useKibana().services;
   const searchBarPortalNode = useMemo(() => createHtmlPortalNode(), []);
 
   // restore the users most recent tab selection
@@ -92,6 +94,11 @@ export const Findings = () => {
     <FindingsSearchBarPortalContext.Provider value={searchBarPortalNode}>
       <CspAppHeader
         title={i18n.translate('xpack.csp.findings.title', { defaultMessage: 'Findings' })}
+        docLink={
+          isVulnerabilitiesTabSelected(location.pathname)
+            ? docLinks.links.securitySolution.cloudNativeVulnerabilityManagement
+            : docLinks.links.securitySolution.cloudSecurityPosture
+        }
       />
       {/* The search bar spans the full width of the page, like the app header */}
       <div
