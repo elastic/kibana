@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -23,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../../common/types';
 import { SupersedingRule, TargetName } from './target_name';
+import { TargetStatus } from './target_status';
 
 /** A data source an index pattern matches. */
 export interface TargetPreview {
@@ -90,16 +90,9 @@ interface PatternMatchStatusProps {
   partialCount: number;
 }
 
-interface MatchStatus {
-  label: string;
-  color: 'success' | 'subdued';
-  iconType?: string;
-}
-
 /** How well a pattern matches, for beside its label: exactly, partly, or not at all. */
 export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchStatusProps) => {
-  const { euiTheme } = useEuiTheme();
-  const status: MatchStatus =
+  const status: ComponentProps<typeof TargetStatus> =
     exactCount > 0
       ? {
           label: i18n.translate('xpack.boost.patternMatches.exactCount', {
@@ -125,17 +118,7 @@ export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchSta
           color: 'subdued',
         };
 
-  return (
-    <EuiText
-      size="xs"
-      color={status.color}
-      css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}
-      data-test-subj="boostRulePatternMatchCount"
-    >
-      {status.iconType && <EuiIcon type={status.iconType} size="s" aria-hidden={true} />}
-      {status.label}
-    </EuiText>
-  );
+  return <TargetStatus {...status} data-test-subj="boostRulePatternMatchCount" />;
 };
 
 /**
@@ -174,7 +157,7 @@ export const PatternMatches = ({
       color={euiTheme.colors.textDisabled}
       textAlign="center"
       // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
-      css={{ paddingBlockStart: euiTheme.size.base, paddingBlockEnd: euiTheme.size.l }}
+      css={{ paddingBlock: euiTheme.size.base }}
       data-test-subj="boostRulePatternMatchesEmpty"
     >
       <p>{message}</p>
@@ -194,7 +177,7 @@ export const PatternMatches = ({
         display: flex;
         flex-direction: column;
         flex: 1 1 auto;
-        gap: ${euiTheme.size.s};
+        gap: ${euiTheme.size.m};
         min-block-size: 0;
         padding-block: ${euiTheme.size.s};
       `}
@@ -291,7 +274,7 @@ export const PatternMatches = ({
       data-test-subj="boostRulePatternMatches"
     >
       {/* A margin rather than padding, so the tabs' border stops at the panel's padding. */}
-      <EuiTabs size="s" css={{ margin: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}>
+      <EuiTabs size="s" css={{ margin: `${euiTheme.size.s} ${euiTheme.size.base} 0` }}>
         {TABS.map((id) => (
           <EuiTab
             key={id}
@@ -315,9 +298,9 @@ export const PatternMatches = ({
           flexDirection: 'column',
           flex: '1 1 auto',
           minBlockSize: 0,
-          // With the 8px inside the list, the content sits 16px below the tabs and 8px from the
-          // panel's edges.
-          padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+          // With the 8px inside the list, the content sits 16px below the tabs and 16px from the
+          // panel's other edges.
+          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
         }}
       >
         {selectedTab === 'matching' ? renderMatching() : renderAll()}

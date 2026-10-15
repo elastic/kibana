@@ -6,15 +6,11 @@
  */
 
 import type { BoostRule, BoostRuleInput } from '../../../common/types';
-import type {
-  IndexPatternError,
-  ProfileNameError,
-  RulePriorityError,
-} from '../../../common/validation';
+import type { IndexPatternError, ProfileNameError } from '../../../common/validation';
 import {
+  MAX_RULE_PRIORITY,
   getIndexPatternError,
   getRuleNameError,
-  getRulePriorityError,
 } from '../../../common/validation';
 
 /** How the rule chooses its targets: one name or `*` pattern, or a list of picked names. */
@@ -37,7 +33,6 @@ export interface RuleDraftErrors {
   /** Set by the form when a valid pattern matches nothing, which needs the data sources to check. */
   patternMatches?: 'none';
   picked?: 'required';
-  priority?: RulePriorityError;
 }
 
 /** A new rule starts in pattern mode at priority 0, which Elasticsearch also defaults to. */
@@ -76,6 +71,18 @@ const parseNumber = (value: string): number | undefined => {
   return value.trim() === '' || Number.isNaN(parsed) ? undefined : parsed;
 };
 
+/**
+ * A priority the rule can use, so the field never needs an error: anything that isn't a number of
+ * 0 or more becomes 0, a fraction is dropped, and the largest Elasticsearch accepts is the limit.
+ */
+export const normalizePriority = (value: string): string => {
+  const parsed = parseNumber(value);
+  if (parsed === undefined || parsed < 0) {
+    return '0';
+  }
+  return String(Math.min(Math.floor(parsed), MAX_RULE_PRIORITY));
+};
+
 /** The draft's targets in the shape a rule stores them. */
 export const getDraftPatterns = ({ mode, pattern, picked }: RuleDraft): string[] =>
   mode === 'pattern' ? [pattern.trim()] : picked;
@@ -89,7 +96,6 @@ export const getRuleDraftErrors = (
   profile: draft.profileName ? undefined : 'required',
   pattern: draft.mode === 'pattern' ? getIndexPatternError(draft.pattern.trim()) : undefined,
   picked: draft.mode === 'pick' && draft.picked.length === 0 ? 'required' : undefined,
-  priority: getRulePriorityError(parseNumber(draft.priority)),
 });
 
 export const hasRuleDraftErrors = (errors: RuleDraftErrors): boolean =>
@@ -100,5 +106,5 @@ export const ruleDraftToInput = (draft: RuleDraft): BoostRuleInput => ({
   name: draft.name,
   index_patterns: getDraftPatterns(draft),
   boost_profile: draft.profileName,
-  priority: Number(draft.priority),
+  priority: Number(normalizePriority(draft.priority)),
 });

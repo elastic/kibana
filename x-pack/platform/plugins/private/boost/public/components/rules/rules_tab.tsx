@@ -192,7 +192,10 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       }),
       // Fits "All unmatched data streams" on one line.
       width: '17em',
-      sortable: true,
+      // A default rule applies to everything no other rule matches, so it sorts as matching the
+      // most, whatever is left over for it today.
+      sortable: ({ matches, is_builtin: isBuiltin }: RuleRow) =>
+        isBuiltin ? Number.POSITIVE_INFINITY : matches,
       render: (
         matches: number,
         {

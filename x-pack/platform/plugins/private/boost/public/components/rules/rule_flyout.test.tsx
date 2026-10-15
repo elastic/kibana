@@ -312,6 +312,53 @@ describe('RuleFlyout estimate', () => {
   });
 });
 
+describe('RuleFlyout priority', () => {
+  const getPriority = () => screen.getByTestId('boostRulePriority');
+
+  it('only takes digits as they are typed', async () => {
+    renderFlyout();
+
+    await userEvent.clear(getPriority());
+    await userEvent.type(getPriority(), '-1.5e+');
+
+    expect(getPriority()).toHaveValue(15);
+    expect(getPriority()).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it.each([
+    ['nothing', '', 0],
+    ['a negative number', '-3', 0],
+    ['a fraction', '2.7', 2],
+  ])(
+    'corrects %s, such as a pasted value, when the field is left',
+    async (_case, value, expected) => {
+      renderFlyout();
+
+      await userEvent.clear(getPriority());
+      if (value) {
+        await userEvent.paste(value);
+      }
+      await userEvent.tab();
+
+      expect(getPriority()).toHaveValue(expected);
+    }
+  );
+
+  it('saves a priority of 0 instead of nothing, without an error', async () => {
+    mutation.mutate.mockClear();
+    renderFlyout();
+
+    await userEvent.clear(getPriority());
+    await userEvent.click(screen.getByTestId('boostRuleSave'));
+
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 0 }),
+      expect.anything()
+    );
+    expect(getPriority()).toHaveValue(0);
+  });
+});
+
 describe('RuleFlyout duplicate', () => {
   it('copies a rule under a new name', async () => {
     render(
@@ -557,5 +604,31 @@ describe('RuleFlyout superseded targets', () => {
     expect(picker.getByRole('option', { name: /products/ })).not.toHaveTextContent(
       'Higher-ranked rule'
     );
+  });
+
+  it('explains a higher-ranked rule when its data source in the list is hovered', async () => {
+    renderNewRule();
+
+    await userEvent.click(screen.getByText('Select indices'));
+    const option = within(screen.getByTestId('boostRulePicker')).getByRole('option', {
+      name: /catalog-fall/,
+    });
+    await userEvent.hover(within(option).getByText('catalog-fall'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      '"catalogs" ranks higher, so it applies instead.'
+    );
+  });
+
+  it('counts what is selected', async () => {
+    renderNewRule();
+
+    await userEvent.click(screen.getByText('Select indices'));
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('0 selected');
+
+    await userEvent.click(
+      within(screen.getByTestId('boostRulePicker')).getByRole('option', { name: /products/ })
+    );
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
   });
 });

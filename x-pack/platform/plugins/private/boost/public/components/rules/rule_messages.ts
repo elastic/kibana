@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../../common/types';
-import type {
-  IndexPatternError,
-  ProfileNameError,
-  RulePriorityError,
-} from '../../../common/validation';
+import type { IndexPatternError, ProfileNameError } from '../../../common/validation';
 import { INDEX_PATTERN_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH } from '../../../common/validation';
 
 export const RULE_NAME_ERROR_MESSAGES: Readonly<Record<ProfileNameError, string>> = {
@@ -63,14 +59,5 @@ export const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>
   }),
   data_streams: i18n.translate('xpack.boost.ruleForm.pickedDataStreamsRequired', {
     defaultMessage: 'Select at least one data stream.',
-  }),
-};
-
-export const RULE_PRIORITY_ERROR_MESSAGES: Readonly<Record<RulePriorityError, string>> = {
-  required: i18n.translate('xpack.boost.ruleForm.priorityRequired', {
-    defaultMessage: 'Enter a priority.',
-  }),
-  out_of_range: i18n.translate('xpack.boost.ruleForm.priorityOutOfRange', {
-    defaultMessage: 'Enter a whole number of 0 or more.',
   }),
 };

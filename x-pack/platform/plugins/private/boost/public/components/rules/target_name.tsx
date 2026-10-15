@@ -52,11 +52,20 @@ export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => 
   </span>
 );
 
+/** Why a higher-ranked rule applies to a target instead, and how to outrank it. */
+export const getSupersedingDescription = (rule: string): string =>
+  i18n.translate('xpack.boost.targetName.supersedingDescription', {
+    defaultMessage:
+      '"{rule}" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.',
+    values: { rule },
+  });
+
 interface SupersedingRuleProps {
   rule: string;
   /**
    * Explains the icon in a tooltip. Without one, such as inside a list option, which can't hold
-   * focusable content, screen readers get the explanation as text instead.
+   * focusable content and shows the explanation in its own tooltip, screen readers get the icon's
+   * meaning as text instead.
    */
   hasTooltip?: boolean;
 }
@@ -95,14 +104,7 @@ export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProp
 
   // The tooltip covers the icon and the rule's name, so hovering either explains it.
   return hasTooltip ? (
-    <EuiToolTip
-      id={tooltipId}
-      content={i18n.translate('xpack.boost.targetName.supersedingDescription', {
-        defaultMessage:
-          '"{rule}" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.',
-        values: { rule },
-      })}
-    >
+    <EuiToolTip id={tooltipId} content={getSupersedingDescription(rule)}>
       {label}
     </EuiToolTip>
   ) : (

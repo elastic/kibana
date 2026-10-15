@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { MAX_RULE_PRIORITY } from '../../../common/validation';
 import {
   createEmptyRuleDraft,
   getRuleDraftErrors,
   hasRuleDraftErrors,
+  normalizePriority,
   ruleDraftToInput,
   ruleToDraft,
 } from './rule_draft';
@@ -44,11 +46,16 @@ describe('rule drafts', () => {
     );
   });
 
-  it('rejects negative and fractional priorities', () => {
-    expect(getRuleDraftErrors({ ...validDraft, priority: '-1' }, []).priority).toBe('out_of_range');
-    expect(getRuleDraftErrors({ ...validDraft, priority: '1.5' }, []).priority).toBe(
-      'out_of_range'
+  it("corrects a priority it can't use rather than rejecting it", () => {
+    expect(hasRuleDraftErrors(getRuleDraftErrors({ ...validDraft, priority: '-1' }, []))).toBe(
+      false
     );
+    expect(normalizePriority('')).toBe('0');
+    expect(normalizePriority('-1')).toBe('0');
+    expect(normalizePriority('1.5')).toBe('1');
+    expect(normalizePriority('7')).toBe('7');
+    expect(normalizePriority('1e12')).toBe(String(MAX_RULE_PRIORITY));
+    expect(ruleDraftToInput({ ...validDraft, priority: '' }).priority).toBe(0);
   });
 
   it('converts either target mode into index patterns', () => {

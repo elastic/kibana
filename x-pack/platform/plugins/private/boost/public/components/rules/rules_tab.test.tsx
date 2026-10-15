@@ -179,6 +179,23 @@ describe('RulesTab matches', () => {
     return within(row);
   };
 
+  it('sorts default rules as matching the most', async () => {
+    renderTab('/rules');
+    const isDefaultRow = (row: HTMLElement) => within(row).queryByText('Default') !== null;
+    const getDefaultRowPositions = () =>
+      screen
+        .getAllByRole('row')
+        .slice(1)
+        .flatMap((row, index) => (isDefaultRow(row) ? [index] : []));
+    const rowCount = screen.getAllByRole('row').length - 1;
+
+    await userEvent.click(screen.getByRole('button', { name: /Matches/ }));
+    expect(getDefaultRowPositions()).toEqual([rowCount - 2, rowCount - 1]);
+
+    await userEvent.click(screen.getByRole('button', { name: /Matches/ }));
+    expect(getDefaultRowPositions()).toEqual([0, 1]);
+  });
+
   it('counts everything a rule matches, and lists it with what a higher-ranked rule takes', async () => {
     renderTab('/rules');
 
