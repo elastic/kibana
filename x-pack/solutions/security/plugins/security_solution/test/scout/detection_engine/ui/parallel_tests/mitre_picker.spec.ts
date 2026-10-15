@@ -188,7 +188,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'adds the MITRE ATLAS framework and persists an ATLAS tactic/technique/subtechnique after rule save',
+      'persists MITRE ATT&CK and MITRE ATLAS mappings together after rule save',
       async ({ page, apiServices, pageObjects: { ruleCreateWizard } }) => {
         await ruleCreateWizard.completeUntilActionsStep({
           name: ATLAS_RULE_NAME,
@@ -203,15 +203,29 @@ spaceTest.describe(
               }
             );
 
+            await spaceTest.step('Select an enterprise tactic and technique', async () => {
+              await ruleCreateWizard.selectMitreTacticByIdInSection(
+                'enterprise',
+                SEEDED_TACTIC_ALPHA.id
+              );
+              await ruleCreateWizard.addAndSelectMitreTechniqueByIdInSection(
+                'enterprise',
+                SEEDED_TECHNIQUE_ONE.id
+              );
+            });
+
             await spaceTest.step('Add the ATLAS framework', async () => {
               await ruleCreateWizard.addMitreFramework('atlas');
               await expect(ruleCreateWizard.mitreFrameworkSection('atlas')).toBeVisible();
               await expect(ruleCreateWizard.mitreFrameworkSection('enterprise')).toBeVisible();
             });
 
-            await spaceTest.step('a11y check: ATLAS section', async () => {
+            await spaceTest.step('a11y check: MITRE picker with both frameworks', async () => {
               const { violations } = await page.checkA11y({
-                include: ['[data-test-subj="mitreFrameworkSection-atlas"]'],
+                include: [
+                  '[data-test-subj="mitreFrameworkSection-enterprise"]',
+                  '[data-test-subj="mitreFrameworkSection-atlas"]',
+                ],
               });
               expect(violations).toHaveLength(0);
             });
@@ -245,6 +259,11 @@ spaceTest.describe(
 
         await spaceTest.step('Assert the saved rule contains both frameworks', async () => {
           await expect(ruleCreateWizard.ruleDetailsTitle).toContainText(ATLAS_RULE_NAME);
+          const enterpriseGroup = ruleCreateWizard.savedThreatFrameworkGroup('enterprise');
+          await expect(enterpriseGroup).toBeVisible();
+          await expect(
+            enterpriseGroup.locator('[data-test-subj="threatTacticLink"]')
+          ).toContainText(SEEDED_TACTIC_ALPHA.name);
           const atlasGroup = ruleCreateWizard.savedThreatFrameworkGroup('atlas');
           await expect(atlasGroup).toBeVisible();
           await expect(atlasGroup.locator('[data-test-subj="threatTacticLink"]')).toContainText(
@@ -257,14 +276,16 @@ spaceTest.describe(
             atlasGroup.locator('[data-test-subj="threatSubtechniqueLink"]')
           ).toContainText(SEEDED_ATLAS_SUBTECHNIQUE.name);
 
-          // The details URL is `/rules/id/<ruleId>/<tab>`. The untouched enterprise
-          // row is empty and filtered out on save, so only ATLAS persists.
+          // The details URL is `/rules/id/<ruleId>/<tab>`. Both the enterprise and
+          // ATLAS mappings persist as separate threat entries.
           const ruleId = new URL(page.url()).pathname.match(/\/rules\/id\/([^/]+)/)?.[1] ?? '';
           const rule = await apiServices.detectionRule.getById(ruleId);
-          const [atlasThreat] = (rule.threat ?? []).filter(
-            ({ framework }) => framework === 'MITRE ATLAS'
-          );
-          expect(rule.threat).toHaveLength(1);
+          const threats = rule.threat ?? [];
+          const enterpriseThreat = threats.find(({ framework }) => framework === 'MITRE ATT&CK');
+          const atlasThreat = threats.find(({ framework }) => framework === 'MITRE ATLAS');
+          expect(threats).toHaveLength(2);
+          expect(enterpriseThreat?.tactic.id).toBe(SEEDED_TACTIC_ALPHA.id);
+          if (!atlasThreat) throw new Error('Expected a MITRE ATLAS threat entry');
           expect(atlasThreat.tactic.id).toBe(SEEDED_ATLAS_TACTIC.id);
           expect(atlasThreat.technique?.[0].id).toBe(SEEDED_ATLAS_TECHNIQUE.id);
           expect(atlasThreat.technique?.[0].subtechnique?.[0].id).toBe(

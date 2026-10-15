@@ -78,11 +78,28 @@ describe('groupThreatsByFramework', () => {
     expect(groups[0].threats[1]).toBe(later);
   });
 
-  it('treats a missing framework as an unknown group with an empty label', () => {
+  it('treats a missing framework as the enterprise group', () => {
     const threat = buildThreat(undefined);
 
     expect(groupThreatsByFramework([threat])).toEqual([
-      { framework: undefined, label: '', threats: [threat] },
+      { framework: 'enterprise', label: MITRE_ATTACK_FRAMEWORK, threats: [threat] },
+    ]);
+  });
+
+  it('treats an empty or blank framework string as the enterprise group', () => {
+    const empty = buildThreat('');
+    const blank = buildThreat('  ');
+
+    expect(groupThreatsByFramework([empty, blank])).toEqual([
+      { framework: 'enterprise', label: MITRE_ATTACK_FRAMEWORK, threats: [empty, blank] },
+    ]);
+  });
+
+  it('keeps a non-empty unrecognized framework as an unknown group', () => {
+    const threat = buildThreat('MITRE Mobile');
+
+    expect(groupThreatsByFramework([threat])).toEqual([
+      { framework: undefined, label: 'MITRE Mobile', threats: [threat] },
     ]);
   });
 });

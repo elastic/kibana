@@ -191,7 +191,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       return (
         <>
           <EuiSuperSelect
-            id="mitreAttackTechnique"
+            id={`mitreAttackTechnique-${threatIndex}-${index}`}
             options={[
               ...(technique.name === 'none'
                 ? [
@@ -241,6 +241,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       isUnsupportedTechnique,
       techniques,
       updateTechnique,
+      threatIndex,
     ]
   );
 

@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -245,13 +244,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           <EuiSpacer size="s" />
           <SectionHeading>{THREAT_FIELD_LABEL}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
-            {rule.threat.map((entry, threatIndex) => (
-              <EuiFlexItem key={threatIndex}>
-                <MitreAttackDisplay threat={[entry]} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
+          <MitreAttackDisplay threat={rule.threat} />
         </>
       )}
 

@@ -126,14 +126,14 @@ export const MitreFrameworkThreatSection: React.FC<MitreFrameworkThreatSectionPr
     [findCurrentTacticOption, isMitreAttackUpdatesUIEnabled]
   );
 
-  const getSelectTactic = (threat: Threat, disabled: boolean) => {
+  const getSelectTactic = (threat: Threat, index: number, disabled: boolean) => {
     const tacticName = threat.tactic.name;
     const isUnsupported = isUnsupportedTactic(threat);
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow>
           <EuiSuperSelect
-            id="mitreAttackTactic"
+            id={`mitreAttackTactic-${framework}-${index}`}
             options={[
               ...(tacticName === 'none'
                 ? [
@@ -237,7 +237,7 @@ export const MitreFrameworkThreatSection: React.FC<MitreFrameworkThreatSectionPr
                   error={tacticError}
                   helpText={tacticHelpText}
                 >
-                  {getSelectTactic(threat, isDisabled)}
+                  {getSelectTactic(threat, index, isDisabled)}
                 </EuiFormRow>
                 <MitreAttackTechniqueFields
                   field={field}

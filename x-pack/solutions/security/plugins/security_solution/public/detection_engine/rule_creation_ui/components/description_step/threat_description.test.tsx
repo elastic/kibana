@@ -479,13 +479,13 @@ describe('ThreatEuiFlexGroup', () => {
       expect(group.querySelector('[data-test-subj^="threatUnsupportedMitreIdWarning"]')).toBeNull();
     });
 
-    it('renders entries with an empty framework under "Unknown framework"', async () => {
+    it('renders entries with an empty framework under "MITRE ATT&CK"', async () => {
       renderThreat([{ ...attackEntry, framework: '' }] as Threats);
 
       expect(await screen.findByTestId('threatFrameworkGroupTitle')).toHaveTextContent(
-        'Unknown framework'
+        'MITRE ATT&CK'
       );
-      expect(screen.getByTestId('threatFrameworkGroup-unknown')).toBeInTheDocument();
+      expect(screen.getByTestId('threatFrameworkGroup-enterprise')).toBeInTheDocument();
     });
   });
 });

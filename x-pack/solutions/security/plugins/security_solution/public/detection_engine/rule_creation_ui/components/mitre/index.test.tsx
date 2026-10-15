@@ -263,6 +263,20 @@ describe('AddMitreThreat', () => {
       ]);
     });
 
+    it('renders a row with an empty framework in the enterprise section and stamps MITRE ATT&CK on change', async () => {
+      const field = renderWithValue([{ framework: '', tactic: NONE_TACTIC, technique: [] }]);
+
+      const section = screen.getByTestId('mitreFrameworkSection-enterprise');
+      expect(within(section).getByTestId('mitreAttackTactic')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('mitreAttackTactic'));
+      await userEvent.click(screen.getByRole('option', { name: /Charlie/ }));
+
+      expect(field.setValue).toHaveBeenCalledWith([
+        expect.objectContaining({ framework: 'MITRE ATT&CK' }),
+      ]);
+    });
+
     it('pushes a MITRE ATT&CK row when adding a tactic in the enterprise section', async () => {
       const field = renderWithValue([ENTERPRISE_ROW]);
 

@@ -148,11 +148,11 @@ describe('MitreAttackDisplay', () => {
       expect(screen.getByTestId('mitreFrameworkGroupTitle')).toHaveTextContent('Custom Framework');
     });
 
-    it('renders "Unknown framework" when framework is missing', () => {
+    it('renders under MITRE ATT&CK when framework is missing', () => {
       const missing = { ...fullThreat, framework: undefined } as unknown as Threat;
       render(<MitreAttackDisplay threat={[missing]} />);
 
-      expect(screen.getByTestId('mitreFrameworkGroupTitle')).toHaveTextContent('Unknown framework');
+      expect(screen.getByTestId('mitreFrameworkGroupTitle')).toHaveTextContent('MITRE ATT&CK');
     });
   });
 });
