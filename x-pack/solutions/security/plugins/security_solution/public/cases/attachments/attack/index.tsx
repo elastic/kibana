@@ -18,7 +18,10 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_BULK_CREATE_ATTACHMENTS,
+} from '@kbn/cases-plugin/common/constants';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -264,23 +267,40 @@ export interface AlertAttachmentWithoutOwner {
   metadata: { index: string };
 }
 
+/**
+ * How many attacks one add-to-case may carry. A bulk create takes at most
+ * `MAX_BULK_CREATE_ATTACHMENTS` attachments, and each attack contributes two of them — itself
+ * and the alert attachment holding its constituent alerts.
+ */
+export const MAX_ATTACKS_PER_ATTACH = Math.floor(MAX_BULK_CREATE_ATTACHMENTS / 2);
+
 /** The attachments to post to a case, plus what had to be dropped to build them. */
 export interface AttackAttachmentsResult {
   /**
-   * The `security.attack` attachment, followed by the single `security.alert` attachment holding
-   * every constituent alert id. The alert attachment is absent when the attack has no alerts.
+   * Per attack, its `security.attack` attachment followed by the `security.alert` attachment
+   * holding its constituent alert ids. The alert attachment is absent for an attack with no
+   * alerts, or one the case had no room left for.
    *
    * Typed narrower than the framework's `CaseAttachmentsWithoutOwner` union so callers and tests
    * can reach `metadata` without re-narrowing; assignability to the framework type is checked by
    * {@link generateAttackAttachmentsWithoutOwner}.
    */
   attachments: Array<AttackAttachmentWithoutOwner | AlertAttachmentWithoutOwner>;
-  /** The attack's full de-anonymised, deduplicated constituent alert count. */
+  /**
+   * The attacks' full de-anonymised count of constituent alerts, counting an alert once per
+   * attack that comprises it, as the case's own limit does.
+   */
   alertCount: number;
-  /** How many alert ids the alert attachment carries — at most `MAX_ALERTS_PER_CASE`. */
+  /** How many alert ids the alert attachments carry — at most `MAX_ALERTS_PER_CASE`. */
   attachedAlertCount: number;
-  /** True when some of the attack's constituent alerts had to be left off. */
+  /** True when some of the constituent alerts had to be left off. */
   truncated: boolean;
+  /** How many attacks were asked for, counting any left off. */
+  attackCount: number;
+  /** How many `security.attack` attachments were built — at most `MAX_ATTACKS_PER_ATTACH`. */
+  attachedAttackCount: number;
+  /** True when some of the attacks themselves had to be left off. */
+  attacksTruncated: boolean;
 }
 
 /** Options narrowing what {@link buildAttackAttachments} may put in the alert attachment. */
@@ -294,27 +314,23 @@ export interface BuildAttackAttachmentsOptions {
 }
 
 /**
- * Builds the attachments for attaching one attack to a case: the `security.attack` attachment
- * carrying the metadata snapshot the activity card renders from, followed by one `security.alert`
- * attachment holding every de-anonymised constituent alert id.
- *
- * The constituent alerts are always included — attaching an attack means attaching the alerts it
- * comprises, so there is no at-attach-time choice about them. They go in a single attachment so
- * the case activity log records them as one "added N alerts" entry, matching a bulk add from the
- * alerts table, rather than burying the attack's own entry under one entry per alert.
+ * The de-anonymised, deduplicated ids of the alerts one attack comprises, in the order the attack
+ * lists them. Distinct anonymised ids can resolve to the same original alert, so de-anonymise
+ * before deduping or duplicates survive.
+ */
+const getDistinctOriginalAlertIds = ({ alertIds, replacements }: AttackToAttach): string[] => [
+  ...new Set(getOriginalAlertIds({ alertIds: alertIds ?? [], replacements })),
+];
+
+/**
+ * Builds the `security.attack` attachment for one attack: the metadata snapshot the activity card
+ * and the preview card render from.
  *
  * The narrative fields are de-anonymised here, once, so nothing downstream of the attachment
  * needs the attack's `replacements` map.
- *
- * Returns the truncation counts alongside the attachments so the caller can warn the user when
- * not every constituent alert fits. Use {@link generateAttackAttachmentsWithoutOwner} where that
- * reporting isn't needed.
- *
- * @param attack the attack we're attaching to a case
- * @param options how many alert ids the target case still has room for
  */
-export const buildAttackAttachments = (
-  {
+const buildAttackAttachment = (attack: AttackToAttach): AttackAttachmentWithoutOwner => {
+  const {
     id,
     index,
     title,
@@ -325,26 +341,8 @@ export const buildAttackAttachments = (
     timestamp,
     riskScore,
     entityCount,
-    alertIds,
     replacements,
-    alertsIndex,
-  }: AttackToAttach,
-  { maxAlerts = MAX_ALERTS_PER_CASE }: BuildAttackAttachmentsOptions = {}
-): AttackAttachmentsResult => {
-  if (!id) {
-    return { attachments: [], alertCount: 0, attachedAlertCount: 0, truncated: false };
-  }
-
-  // De-anonymise before deduping: distinct anonymised ids can resolve to the same original alert,
-  // so deduping the raw ids first would leave duplicates behind.
-  const originalAlertIds = [
-    ...new Set(getOriginalAlertIds({ alertIds: alertIds ?? [], replacements })),
-  ];
-  // A case holds at most MAX_ALERTS_PER_CASE alerts in total, counting the ones it already has, so
-  // cap the batch at what the target case still has room for and let the caller surface what was
-  // left off rather than having the server reject the whole attach.
-  const alertSlots = Math.min(MAX_ALERTS_PER_CASE, Math.max(0, maxAlerts));
-  const attachedAlertIds = originalAlertIds.slice(0, alertSlots);
+  } = attack;
 
   // Snapshot the narrative de-anonymised: the activity card renders straight from metadata and
   // is never handed a replacements map, so anything left anonymised here stays that way on screen.
@@ -366,7 +364,7 @@ export const buildAttackAttachments = (
     ),
   };
 
-  const attackAttachment: AttackAttachmentWithoutOwner = {
+  return {
     type: SECURITY_ATTACK_ATTACHMENT_TYPE,
     attachmentId: id,
     metadata: {
@@ -375,8 +373,8 @@ export const buildAttackAttachments = (
         MAX_ATTACK_TITLE_LENGTH
       ),
       // The attack's own alert count, which is what the preview card means by "alerts" — it can
-      // exceed the number of ids actually attached when the batch above was capped.
-      alertCount: originalAlertIds.length,
+      // exceed the number of ids actually attached when the batch below was capped.
+      alertCount: getDistinctOriginalAlertIds(attack).length,
       // Tells status sync which index to write the attack's status to, lets the flyout reopen
       // the attack document, and is what authorization checks resolve the attack against.
       // Note the "already attached" duplicate check matches on the attack id alone.
@@ -398,26 +396,93 @@ export const buildAttackAttachments = (
       ...(entityCount != null ? { entityCount } : {}),
     } satisfies AttackAttachmentMetadata,
   };
+};
 
-  const alertAttachments: AlertAttachmentWithoutOwner[] =
-    attachedAlertIds.length > 0
-      ? [
-          {
-            type: SECURITY_ALERT_ATTACHMENT_TYPE,
-            attachmentId: attachedAlertIds,
-            // The index is what makes the duplicate check and status sync work for these alerts too.
-            metadata: { index: alertsIndex },
-          },
-        ]
-      : [];
+/**
+ * Builds the attachments for attaching one or more attacks to a case: for each attack, a
+ * `security.attack` attachment carrying the metadata snapshot the activity card renders from,
+ * followed by its own `security.alert` attachment holding its de-anonymised constituent alert
+ * ids.
+ *
+ * The constituent alerts are always included — attaching an attack means attaching the alerts it
+ * comprises, so there is no at-attach-time choice about them. They go in one attachment per
+ * attack, rather than one merged attachment for the whole selection, because an alert attachment
+ * can only be deleted whole: a merged one belongs to no single attack, so removing an attack
+ * could not take its alerts with it. The cost is one "added N alerts" activity entry per attack
+ * instead of one for the batch, and an alert shared by two selected attacks being attached — and
+ * counted against the case's limit — once for each.
+ *
+ * Attacks with no id are skipped. Both the attacks and their alerts are capped — at
+ * `MAX_ATTACKS_PER_ATTACH` and at the case's remaining alert budget — by taking them in the order
+ * given, so an earlier attack keeps its alerts whole rather than every attack losing some. The
+ * counts come back alongside the attachments so the caller can warn about whatever was left off.
+ * Use {@link generateAttackAttachmentsWithoutOwner} where that reporting isn't needed.
+ *
+ * @param attacks the attacks we're attaching to a case, in the order they should be attached
+ * @param options how many alert ids the target case still has room for
+ */
+export const buildAttacksAttachments = (
+  attacks: ReadonlyArray<AttackToAttach | undefined>,
+  { maxAlerts = MAX_ALERTS_PER_CASE }: BuildAttackAttachmentsOptions = {}
+): AttackAttachmentsResult => {
+  const attachableAttacks = attacks.filter((attack): attack is AttackToAttach => !!attack?.id);
+  // One bulk create carries a bounded number of attachments, so take the attacks in selection
+  // order and leave the rest for the caller to report.
+  const attachedAttacks = attachableAttacks.slice(0, MAX_ATTACKS_PER_ATTACH);
+
+  // A case holds at most MAX_ALERTS_PER_CASE alerts in total, counting the ones it already has
+  // and counting an alert once per attachment that references it, so draw every attack's alerts
+  // from one shared budget and let the caller surface what was left off rather than having the
+  // server reject the whole attach.
+  let alertSlots = Math.min(MAX_ALERTS_PER_CASE, Math.max(0, maxAlerts));
+  let alertCount = 0;
+  let attachedAlertCount = 0;
+  const attachments: Array<AttackAttachmentWithoutOwner | AlertAttachmentWithoutOwner> = [];
+
+  for (const attack of attachedAttacks) {
+    const originalAlertIds = getDistinctOriginalAlertIds(attack);
+    // Spent in selection order, so an earlier attack keeps its alerts whole and a later one goes
+    // without, rather than every attack in the selection losing some of its evidence.
+    const attachedAlertIds = originalAlertIds.slice(0, alertSlots);
+
+    alertCount += originalAlertIds.length;
+    attachedAlertCount += attachedAlertIds.length;
+    alertSlots -= attachedAlertIds.length;
+
+    attachments.push(buildAttackAttachment(attack));
+
+    if (attachedAlertIds.length > 0) {
+      attachments.push({
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: attachedAlertIds,
+        // The index is what makes the duplicate check and status sync work for these alerts too.
+        metadata: { index: attack.alertsIndex },
+      });
+    }
+  }
 
   return {
-    attachments: [attackAttachment, ...alertAttachments],
-    alertCount: originalAlertIds.length,
-    attachedAlertCount: attachedAlertIds.length,
-    truncated: originalAlertIds.length > attachedAlertIds.length,
+    attachments,
+    alertCount,
+    attachedAlertCount,
+    truncated: alertCount > attachedAlertCount,
+    attackCount: attachableAttacks.length,
+    attachedAttackCount: attachedAttacks.length,
+    attacksTruncated: attachableAttacks.length > attachedAttacks.length,
   };
 };
+
+/**
+ * {@link buildAttacksAttachments} for the single-attack case. Returns no attachments when the
+ * attack has no id.
+ *
+ * @param attack the attack we're attaching to a case
+ * @param options how many alert ids the target case still has room for
+ */
+export const buildAttackAttachments = (
+  attack: AttackToAttach,
+  options?: BuildAttackAttachmentsOptions
+): AttackAttachmentsResult => buildAttacksAttachments([attack], options);
 
 /**
  * {@link buildAttackAttachments} narrowed to the cases-framework "without owner" payload — the

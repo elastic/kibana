@@ -57,7 +57,7 @@ const { useIsExperimentalFeatureEnabled } = jest.requireMock(
 const ALERTS_INDEX = '.alerts-security.alerts-default';
 const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
-const attackToAttach = {
+const attack = {
   id: 'attack-1',
   index: ATTACK_INDEX,
   title: 'A multi-stage attack',
@@ -65,6 +65,8 @@ const attackToAttach = {
   riskScore: 73,
   alertIds: ['alert-1', 'alert-2'],
 };
+
+const attacksToAttach = [attack];
 
 const alertItems: TimelineItem[] = [
   {
@@ -197,7 +199,7 @@ describe('useBulkAttackCaseItems', () => {
 
     const clickAddToCase = async (props = {}) => {
       const { result } = renderHook(() =>
-        useBulkAttackCaseItems({ title, attackToAttach, ...props })
+        useBulkAttackCaseItems({ title, attacksToAttach, ...props })
       );
 
       await act(async () => {
@@ -298,7 +300,7 @@ describe('useBulkAttackCaseItems', () => {
         (_, i) => `alert-${i}`
       );
 
-      await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
+      await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
 
       const attachments = resolveAttachments({ totalAlerts: 0 });
       expect(attachments).toHaveLength(2);
@@ -313,7 +315,7 @@ describe('useBulkAttackCaseItems', () => {
         (_, i) => `alert-${i}`
       );
 
-      await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
+      await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
 
       const attachments = resolveAttachments({ totalAlerts: 10 });
       // Otherwise the case would end up over the limit and the server would reject the attach.
@@ -349,7 +351,7 @@ describe('useBulkAttackCaseItems', () => {
         (_, i) => `alert-${i}`
       );
 
-      await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
+      await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
 
       // The selector is only open at this point; nothing is attached and the user can still cancel.
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();

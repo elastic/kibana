@@ -9,6 +9,7 @@ import { SECURITY_ATTACK_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
+import type { AttackToAttach } from '.';
 
 export type CaseAttachment = CaseUI['comments'][number];
 
@@ -159,3 +160,40 @@ export const getAttackAlertIds = (attack: AttackDiscoveryAlert | undefined): str
           })
         ),
       ];
+
+/**
+ * Maps attacks onto the payload {@link buildAttacksAttachments} takes, dropping any the UI cannot
+ * attach as a `security.attack`.
+ *
+ * An attack is attachable only when we know which index its document came from — the attachment
+ * metadata requires it for status sync and for reopening the flyout — so one without an index is
+ * left out rather than costing the rest of the selection the action. Call sites treat an empty
+ * result as "nothing attachable" and fall back to their markdown-comment payload.
+ *
+ * The narrative fields and alert ids stay anonymised here; the payload builder de-anonymises,
+ * truncates and dedupes them.
+ *
+ * @param attacks the attacks the user selected, in the order they should be attached
+ */
+export const toAttacksToAttach = (
+  attacks: ReadonlyArray<AttackDiscoveryAlert | undefined>
+): Array<Omit<AttackToAttach, 'alertsIndex'>> =>
+  attacks.flatMap((attack) =>
+    attack?.index != null
+      ? [
+          {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+            riskScore: attack.riskScore,
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          },
+        ]
+      : []
+  );

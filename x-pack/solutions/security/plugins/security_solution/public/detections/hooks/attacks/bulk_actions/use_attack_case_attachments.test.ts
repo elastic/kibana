@@ -13,6 +13,8 @@ import {
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import type { CaseUI } from '@kbn/cases-plugin/common';
 
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
+import { MAX_ATTACKS_PER_ATTACH } from '../../../../cases/attachments/attack';
 import { useAttackCaseAttachments } from './use_attack_case_attachments';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -45,14 +47,19 @@ const { useIsExperimentalFeatureEnabled } = jest.requireMock(
 const ALERTS_INDEX = '.alerts-security.alerts-default';
 const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
-const attackToAttach = {
+const attack = (
+  overrides: Partial<Omit<AttackToAttach, 'alertsIndex'>> = {}
+): Omit<AttackToAttach, 'alertsIndex'> => ({
   id: 'attack-1',
   index: ATTACK_INDEX,
   title: 'A multi-stage attack',
   summaryMarkdown: 'A summary of the attack',
   riskScore: 73,
   alertIds: ['alert-1', 'alert-2'],
-};
+  ...overrides,
+});
+
+const attacksToAttach = [attack()];
 
 describe('useAttackCaseAttachments', () => {
   let appToasts: ReturnType<typeof useAppToastsMock.create>;
@@ -75,10 +82,16 @@ describe('useAttackCaseAttachments', () => {
     expect(result.current).toBeUndefined();
   });
 
+  it('returns undefined when the attacks to attach are empty', () => {
+    const { result } = renderHook(() => useAttackCaseAttachments([]));
+
+    expect(result.current).toBeUndefined();
+  });
+
   it('returns undefined when the attack attachments feature flag is disabled', () => {
     useIsExperimentalFeatureEnabled.mockReturnValue(false);
 
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     expect(result.current).toBeUndefined();
   });
@@ -88,13 +101,13 @@ describe('useAttackCaseAttachments', () => {
       services: { cases: { config: { attachmentsEnabled: false } } },
     });
 
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     expect(result.current).toBeUndefined();
   });
 
   it('builds an attack attachment followed by its alerts', () => {
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     expect(result.current?.()).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
@@ -107,7 +120,7 @@ describe('useAttackCaseAttachments', () => {
   });
 
   it('does not warn when every alert fits in the case', () => {
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     result.current?.({ totalAlerts: 0 } as CaseUI);
 
@@ -115,7 +128,7 @@ describe('useAttackCaseAttachments', () => {
   });
 
   it('warns when the case does not have room for every alert', () => {
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI);
 
@@ -125,7 +138,7 @@ describe('useAttackCaseAttachments', () => {
   });
 
   it('attaches only the alerts that fit in the case', () => {
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI)).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
@@ -137,10 +150,111 @@ describe('useAttackCaseAttachments', () => {
   });
 
   it('attaches the attack alone when the case is already full', () => {
-    const { result } = renderHook(() => useAttackCaseAttachments(attackToAttach));
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
     expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI)).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
     ]);
+  });
+
+  describe('multiple attacks', () => {
+    const twoAttacks = [
+      attack({ id: 'attack-1', alertIds: ['alert-1', 'alert-2'] }),
+      attack({ id: 'attack-2', alertIds: ['alert-3'] }),
+    ];
+
+    it('pairs each attack with its own alert attachment', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
+
+      expect(result.current?.()).toEqual([
+        expect.objectContaining({
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          attachmentId: 'attack-1',
+        }),
+        expect.objectContaining({
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: { index: ALERTS_INDEX },
+        }),
+        expect.objectContaining({
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          attachmentId: 'attack-2',
+        }),
+        expect.objectContaining({
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: ['alert-3'],
+          metadata: { index: ALERTS_INDEX },
+        }),
+      ]);
+    });
+
+    it('gives each attack its own copy of an alert they share', () => {
+      const sharingAttacks = [
+        attack({ id: 'attack-1', alertIds: ['alert-1', 'alert-2'] }),
+        attack({ id: 'attack-2', alertIds: ['alert-2', 'alert-3'] }),
+      ];
+
+      const { result } = renderHook(() => useAttackCaseAttachments(sharingAttacks));
+
+      expect(result.current?.()).toEqual([
+        expect.objectContaining({ attachmentId: 'attack-1' }),
+        expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
+        expect.objectContaining({ attachmentId: 'attack-2' }),
+        expect.objectContaining({ attachmentId: ['alert-2', 'alert-3'] }),
+      ]);
+    });
+
+    it('keeps the earlier attacks whole when the alerts do not all fit', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
+
+      expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI)).toEqual([
+        expect.objectContaining({ attachmentId: 'attack-1' }),
+        expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
+        expect.objectContaining({ attachmentId: 'attack-2' }),
+      ]);
+    });
+
+    it('warns about the alerts left off across the whole selection', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
+
+      result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI);
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: expect.stringContaining('Only 2 of the 3 alerts in these 2 attacks will be added'),
+      });
+    });
+
+    it('attaches at most MAX_ATTACKS_PER_ATTACH attacks', () => {
+      const tooManyAttacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH + 1 }, (_, index) =>
+        attack({ id: `attack-${index}`, alertIds: [`alert-${index}`] })
+      );
+
+      const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
+      const attachments = result.current?.() ?? [];
+
+      expect(
+        attachments.filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+      ).toHaveLength(MAX_ATTACKS_PER_ATTACH);
+      expect(
+        attachments.filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+      ).toHaveLength(MAX_ATTACKS_PER_ATTACH);
+    });
+
+    it('warns about the attacks left off when there are too many of them', () => {
+      const tooManyAttacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH + 1 }, (_, index) =>
+        attack({ id: `attack-${index}`, alertIds: [`alert-${index}`] })
+      );
+
+      const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
+      result.current?.();
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: expect.stringContaining(
+          `Only ${MAX_ATTACKS_PER_ATTACH} of the ${
+            MAX_ATTACKS_PER_ATTACH + 1
+          } selected attacks will be added`
+        ),
+      });
+    });
   });
 });

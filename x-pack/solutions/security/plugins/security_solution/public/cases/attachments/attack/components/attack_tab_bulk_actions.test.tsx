@@ -496,21 +496,29 @@ describe('AttackTabBulkActions', () => {
       expect(useAttackCaseContextMenuItemsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Credential dumping on host-1',
-          attackToAttach: expect.objectContaining({
-            id: 'attack-1',
-            index: '.alerts-security.attack.discovery.alerts-default',
-            title: 'Credential dumping on host-1',
-            alertIds: ['alert-1', 'alert-2'],
-          }),
+          attacksToAttach: [
+            expect.objectContaining({
+              id: 'attack-1',
+              index: '.alerts-security.attack.discovery.alerts-default',
+              title: 'Credential dumping on host-1',
+              alertIds: ['alert-1', 'alert-2'],
+            }),
+          ],
         })
       );
     });
 
-    it('names the selection by count, and attaches no single attack, for several rows', () => {
+    it('names the selection by count, and attaches every attack in it, for several rows', () => {
       renderBar(resolvedSelection);
 
       expect(useAttackCaseContextMenuItemsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ title: '2 attacks', attackToAttach: undefined })
+        expect.objectContaining({
+          title: '2 attacks',
+          attacksToAttach: [
+            expect.objectContaining({ id: 'attack-1' }),
+            expect.objectContaining({ id: 'attack-2' }),
+          ],
+        })
       );
     });
 
@@ -527,6 +535,7 @@ describe('AttackTabBulkActions', () => {
       expect(useAttackCaseContextMenuItemsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           attacksWithCase: [expect.objectContaining({ attackId: 'attack-1' })],
+          attacksToAttach: [expect.objectContaining({ id: 'attack-1' })],
         })
       );
     });

@@ -104,21 +104,46 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
 export const ATTACK_ALERTS_TRUNCATED = ({
   alertCount,
   attachedAlertCount,
+  attackCount,
   maxAlertsPerCase,
 }: {
   alertCount: number;
   attachedAlertCount: number;
+  attackCount: number;
   maxAlertsPerCase: number;
 }) =>
   i18n.translate(
     'xpack.securitySolution.detections.hooks.attacks.bulkActions.attackAlertsTruncatedWarningTitle',
     {
       defaultMessage:
-        'Only {attachedAlertCount} of the {alertCount} alerts in this attack will be added. A case holds at most {maxAlertsPerCase} alerts.',
+        'Only {attachedAlertCount} of the {alertCount} alerts in {attackCount, plural, one {this attack} other {these # attacks}} will be added. A case holds at most {maxAlertsPerCase} alerts.',
       values: {
         alertCount,
         attachedAlertCount,
+        attackCount,
         maxAlertsPerCase,
+      },
+    }
+  );
+
+export const ATTACKS_TRUNCATED = ({
+  attackCount,
+  attachedAttackCount,
+  maxAttacks,
+}: {
+  attackCount: number;
+  attachedAttackCount: number;
+  maxAttacks: number;
+}) =>
+  i18n.translate(
+    'xpack.securitySolution.detections.hooks.attacks.bulkActions.attacksTruncatedWarningTitle',
+    {
+      defaultMessage:
+        'Only {attachedAttackCount} of the {attackCount} selected attacks will be added. At most {maxAttacks} attacks can be added at a time.',
+      values: {
+        attackCount,
+        attachedAttackCount,
+        maxAttacks,
       },
     }
   );
