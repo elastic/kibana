@@ -64,29 +64,39 @@ function getHumanizedNodeName(node: NodeInfo) {
   return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
 }
 
-export function mapNodesVersionCompatibility(
-  nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error },
+const UNABLE_TO_RETRIEVE = 'Unable to retrieve version information from Elasticsearch nodes.';
+
+/** The compatibility of a nodes info request that failed; the message ends with the error's. */
+export const compatibilityFromRequestError = (
+  nodesInfoRequestError: Error,
+  kibanaVersion: string
+): NodesVersionCompatibility => ({
+  isCompatible: false,
+  message: `${UNABLE_TO_RETRIEVE} ${nodesInfoRequestError.message}`,
+  incompatibleNodes: [],
+  warningNodes: [],
+  kibanaVersion,
+  nodesInfoRequestError,
+});
+
+/** The compatibility of the nodes a nodes info request returned. */
+export function compatibilityFromNodesInfo(
+  nodesInfo: NodesInfo,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfoResponse.nodes ?? {}).length === 0) {
-    // Note: If the a nodesInfoRequestError is present, the message contains the nodesInfoRequestError.message as a suffix
-    let message = `Unable to retrieve version information from Elasticsearch nodes.`;
-    if (nodesInfoResponse.nodesInfoRequestError) {
-      message = message + ` ${nodesInfoResponse.nodesInfoRequestError.message}`;
-    }
+  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
     return {
       isCompatible: false,
-      message,
+      message: UNABLE_TO_RETRIEVE,
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion,
-      nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
 
-  const nodes = Object.keys(nodesInfoResponse.nodes)
-    .map((key) => nodesInfoResponse.nodes[key])
+  const nodes = Object.keys(nodesInfo.nodes)
+    .map((key) => nodesInfo.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
     .sort(compareNodes); // stable order, so `sameCompatibility` can compare positionally
 
