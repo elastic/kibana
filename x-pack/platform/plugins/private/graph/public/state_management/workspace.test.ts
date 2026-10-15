@@ -12,8 +12,11 @@ import { loadFields } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
+  createWorkspaceState,
+  initializeWorkspace,
   registerWorkspaceListeners,
   submitSearch,
+  workspaceChanged,
   workspaceInitializedSelector,
 } from './workspace';
 
@@ -60,6 +63,146 @@ const createWorkspaceListenerEnvironment = () => {
 
   return { ...environment, workspace };
 };
+
+describe('workspace state', () => {
+  it('normalizes the mutable workspace into serializable graph state', () => {
+    const parent = {
+      id: 'parent',
+      x: 1,
+      y: 2,
+      label: 'Parent',
+      color: 'red',
+      data: { field: 'field', term: 'parent' },
+    };
+    const child = {
+      id: 'child',
+      x: 3,
+      y: 4,
+      label: 'Child',
+      color: 'blue',
+      data: { field: 'field', term: 'child' },
+      parent,
+    };
+    const edge = {
+      id: 'edge',
+      source: parent,
+      target: child,
+      topSrc: parent,
+      topTarget: parent,
+      label: 'connection',
+      weight: 5,
+    };
+    const workspace = {
+      nodes: [parent, child],
+      edges: [edge],
+      selectedNodes: [parent],
+      getEdgeSelection: () => [edge],
+    } as unknown as Workspace;
+
+    const snapshot = createWorkspaceState(workspace);
+
+    expect(snapshot).toEqual({
+      nodesById: {
+        parent: {
+          id: 'parent',
+          parentId: undefined,
+          x: 1,
+          y: 2,
+          label: 'Parent',
+          color: 'red',
+          scaledSize: undefined,
+          data: { field: 'field', term: 'parent' },
+        },
+        child: {
+          id: 'child',
+          parentId: 'parent',
+          x: 3,
+          y: 4,
+          label: 'Child',
+          color: 'blue',
+          scaledSize: undefined,
+          data: { field: 'field', term: 'child' },
+        },
+      },
+      nodeIds: ['parent', 'child'],
+      edgesById: {
+        edge: {
+          id: 'edge',
+          sourceId: 'parent',
+          targetId: 'child',
+          topSourceId: 'parent',
+          topTargetId: 'parent',
+          label: 'connection',
+          weight: 5,
+          width: undefined,
+        },
+      },
+      edgeIds: ['edge'],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+    });
+
+    parent.data.term = 'mutated';
+    expect(snapshot.nodesById.parent.data.term).toBe('parent');
+  });
+
+  it('keeps node IDs consistent with their maps when workspace IDs repeat', () => {
+    const node = {
+      id: 'field..term',
+      data: { field: 'field', term: 'term' },
+      label: 'First',
+    };
+    const duplicate = { ...node, label: 'Last' };
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [node, duplicate],
+      edges: [],
+      blocklistedNodes: [node, duplicate],
+    });
+
+    const snapshot = createWorkspaceState(workspace);
+
+    expect(snapshot.nodeIds).toEqual([node.id]);
+    expect(snapshot.nodeIds).toEqual(Object.keys(snapshot.nodesById));
+    expect(snapshot.nodesById[node.id].label).toBe('Last');
+    expect(snapshot.blocklistedNodeIds).toEqual([node.id]);
+    expect(snapshot.blocklistedNodeIds).toEqual(Object.keys(snapshot.blocklistedNodesById));
+    expect(snapshot.blocklistedNodesById[node.id].label).toBe('Last');
+  });
+
+  it('stores normalized workspace snapshots', () => {
+    const environment = createMockGraphStore({});
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [],
+      edges: [],
+      selectedNodes: [],
+      getEdgeSelection: () => [],
+    });
+    const snapshot = createWorkspaceState(workspace);
+
+    environment.store.dispatch(workspaceChanged(snapshot));
+
+    expect(environment.store.getState().workspace).toEqual({
+      ...snapshot,
+      isInitialized: false,
+    });
+  });
+
+  it('preserves explicit initialization when storing workspace snapshots', () => {
+    const environment = createMockGraphStore({});
+    const snapshot = createWorkspaceState({
+      nodes: [],
+      edges: [],
+      blocklistedNodes: [],
+    } as unknown as Workspace);
+
+    environment.store.dispatch(initializeWorkspace());
+    environment.store.dispatch(workspaceChanged(snapshot));
+
+    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+  });
+});
 
 describe('workspace listeners', () => {
   beforeEach(() => {

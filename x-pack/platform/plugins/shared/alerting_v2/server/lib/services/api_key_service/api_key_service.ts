@@ -89,8 +89,8 @@ export class ApiKeyService implements ApiKeyServiceContract {
     } catch (e) {
       const message = (e as Error).message;
       this.logger.error(
-        `Failed to bulk mark list of API keys [${apiKeys
-          .map((key) => `"${key}"`)
+        `Failed to bulk mark list of API keys [${decodedApiKeys
+          .map(({ apiKeyId }) => `"${apiKeyId}"`)
           .join(', ')}] for invalidation: ${message}`,
         {
           error: { stack_trace: (e as Error).stack },

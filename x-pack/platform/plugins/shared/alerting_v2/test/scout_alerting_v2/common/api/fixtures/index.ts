@@ -96,6 +96,7 @@ export {
   getFindRuleTemplatesUrl,
   getRuleTemplateTagsUrl,
   getRuleTemplateUrl,
+  getInstallRuleTemplateUrl,
 } from '../../urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,

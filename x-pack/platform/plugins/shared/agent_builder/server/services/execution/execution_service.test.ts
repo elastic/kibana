@@ -386,6 +386,29 @@ describe('AgentExecutionService', () => {
       );
     });
 
+    it("stores the workflow execution id with the execution's params, for round telemetry", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          workflowExecutionId: 'workflow-run-1',
+        },
+        useTaskManager: false,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentParams: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
+        })
+      );
+    });
+
     it('validates attachments and throws on invalid attachment', async () => {
       (attachmentsService.validateAttachmentInputs as jest.Mock).mockRejectedValue(
         new Error('Attachment validation failed: boom')
@@ -1441,6 +1464,45 @@ describe('AgentExecutionService', () => {
         { source: 'execution' }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('attributes a conversation created for a sub-agent to the parent execution', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        agentId: 'parent-agent',
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      // The record id only names the parent for `peek`: it is not a conversation `execution_id`.
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('parent-1');
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+        activity: { actor: { type: EventActorType.agent, id: 'parent-agent' } },
+      });
+    });
+
+    it('creates with no attribution when the parent execution is no longer recorded', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce(undefined);
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
     });
 
     it('leaves a conversation paused on a prompt to the resume path', async () => {
