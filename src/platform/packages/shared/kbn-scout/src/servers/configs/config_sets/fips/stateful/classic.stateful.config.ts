@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
@@ -17,10 +16,13 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.security.fipsMode.enabled=true',
+    ],
     env: {
       ...defaultConfig.kbnTestServer.env,
-      KBN_PATH_CONF: join(__dirname, 'config'),
-      NODE_OPTIONS: undefined,
+      NODE_OPTIONS: '--enable-fips',
       OPENSSL_CONF: undefined,
       OPENSSL_CONF_INCLUDE: undefined,
       OPENSSL_MODULES: undefined,
