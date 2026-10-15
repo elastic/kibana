@@ -167,6 +167,55 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
+    it('appends the named platform assumers to `assumable_by` after the project', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        platformAssumers: ['relay', 'sandbox', 'relay'],
+      });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          assumable_by: [
+            {
+              type: 'project-service-account',
+              organization_id: 'organization-id',
+              project_type: 'security',
+              project_id: 'project-id',
+            },
+            { type: 'platform-service-account', service_account_id: 'relay-service' },
+            { type: 'platform-service-account', service_account_id: 'sandbox-api' },
+          ],
+        }),
+        undefined
+      );
+    });
+
+    it('refuses an assumer that is not in the catalog, without calling UIAM', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['unknown-service'],
+        } as never)
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('ignores an `assumable_by` passed in the params', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 'other-service' }],
+      } as never);
+
+      const [, body] = mockUiam.createServiceAccount.mock.calls[0];
+      expect(JSON.stringify(body)).not.toContain('other-service');
+    });
+
     // UIAM counts duplicates against its 50-role cap before dropping them, so the request is
     // normalized before it leaves.
     it('drops duplicate roles, keeping first occurrences in order', async () => {
@@ -553,6 +602,23 @@ describe('UiamServiceAccounts', () => {
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             user: { target: { id: 'service-account-id', name: 'nightshift-relay' } },
+          })
+        );
+      });
+
+      it('names the platform assumers in the `success` event, without returning them', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+        const created = await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['relay', 'relay'],
+        });
+
+        expect(created).not.toHaveProperty('platformAssumers');
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'User has created service account [id=service-account-id, name=nightshift-relay] [platformAssumers=relay]',
           })
         );
       });
@@ -1153,7 +1219,12 @@ describe('UiamServiceAccounts', () => {
           mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
           await expect(
             serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-          ).rejects.toMatchObject({ cause, retryable: false });
+          ).rejects.toMatchObject({
+            cause,
+            retryable: false,
+            statusCode,
+            message: `Error occurred during service account token exchange (status ${statusCode}).`,
+          });
         }
       );
 
@@ -1189,7 +1260,12 @@ describe('UiamServiceAccounts', () => {
         mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ cause, retryable: true });
+        ).rejects.toMatchObject({
+          cause,
+          retryable: true,
+          statusCode: undefined,
+          message: 'Error occurred during service account token exchange.',
+        });
       });
 
       it.each(['ENOTFOUND', 'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNCLASSIFIED'])(

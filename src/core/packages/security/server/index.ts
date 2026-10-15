@@ -14,7 +14,11 @@ export type {
   FakeRequestUserFields,
 } from './src/authc';
 export type { CoreAuditService } from './src/audit';
-export type { CoreServiceAccountsService } from './src/service_accounts';
+export type {
+  CoreServiceAccountsService,
+  CreateServiceAccountServerParams,
+  ServiceAccountPlatformAssumer,
+} from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
   ServiceAccountWorkloadDetails,
