@@ -124,6 +124,16 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   .react-flow__edge.streamsUnitConnection.updating {
     cursor: grabbing;
   }
+
+  .react-flow__edges {
+    z-index: 1;
+  }
+  .react-flow__nodes {
+    z-index: 3;
+  }
+  .react-flow__edgelabel-renderer {
+    z-index: 2;
+  }
 `;
 
 /**
