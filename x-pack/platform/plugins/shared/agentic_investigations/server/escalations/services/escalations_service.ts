@@ -18,6 +18,7 @@ import type {
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
@@ -611,6 +612,8 @@ export class EscalationsService {
       { [ESCALATION_STATUS_FIELD]: body.status },
       { access: 'converse' }
     );
+
+    await waitForMetadataChangeEvents(request);
 
     return {
       escalation_id: updated.id,

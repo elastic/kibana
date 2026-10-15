@@ -12,8 +12,13 @@ import {
   assertNoUnexpectedProposals,
   ProposalDismissFailedError,
 } from './investigation_status_service';
+import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
+
+jest.mock('../../conversation_events/metadata_change_events', () => ({
+  waitForMetadataChangeEvents: jest.fn().mockResolvedValue(undefined),
+}));
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -249,6 +254,41 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     });
     return { service, releaseGate, get, patchMetadata: client.patchMetadata };
   };
+
+  it('waits for the request timeline writes after patching, before returning', async () => {
+    const { service, patchMetadata } = makeDismissService({ releaseGateSideEffect: 'success' });
+    const calls: string[] = [];
+    patchMetadata.mockImplementation(async () => {
+      calls.push('patch');
+      return { conversation: MOCK_CONVERSATION };
+    });
+    (waitForMetadataChangeEvents as jest.Mock).mockImplementationOnce(async () => {
+      calls.push('wait');
+    });
+
+    await service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' });
+
+    expect(waitForMetadataChangeEvents).toHaveBeenCalledWith(request);
+    expect(calls).toEqual(['patch', 'wait']);
+  });
+
+  it('passes the automation context to patchMetadata', async () => {
+    const { service, patchMetadata } = makeDismissService({ releaseGateSideEffect: 'success' });
+    const context = { type: 'agent' as const, agent_id: 'agent-1' };
+
+    await service.setStatus(
+      request,
+      'conv-1',
+      { status: 'closed', dismiss_reason: 'no_reason' },
+      context
+    );
+
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'closed' },
+      { access: 'converse', context }
+    );
+  });
 
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
     const conflictErr = Object.assign(new Error('already decided'), {

@@ -111,6 +111,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     runId = uuidv4(),
     agentId,
+    agentName,
     abortSignal,
     browserApiTools,
     structuredOutput = false,
@@ -336,7 +337,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     const updateConversationMetadata =
       storesConversation && conversationId && conversation?.template_id
         ? (updates: Record<string, MetadataFieldValue>) =>
-            conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
+            conversationClient.patchMetadata(conversationId, updates, {
+              source: 'execution',
+              context: {
+                type: 'agent',
+                agent_id: agentId ?? conversation?.agent_id ?? 'unknown',
+                ...(agentName ? { agent_name: agentName } : {}),
+                ...(executionId ? { execution_id: executionId } : {}),
+              },
+            })
         : undefined;
 
     const conversationTemplate = conversation?.template_id

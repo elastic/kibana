@@ -2505,7 +2505,44 @@ describe('ConversationClient', () => {
           templateId: template.id,
           parentId: undefined,
           changedFields: ['severity'],
+          changes: { severity: { from: undefined, to: 'high' } },
+          source: 'http_api',
         });
+      });
+
+      it('emits the serialized before/after values and the automation context', async () => {
+        const eventEmitter = buildEventEmitter();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter,
+        });
+
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            metadata: { severity: 'low' },
+          })
+        );
+
+        const context = { type: 'agent' as const, agent_id: 'agent-1', execution_id: 'exec-1' };
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { severity: 'high' },
+          { source: 'execution', context }
+        );
+
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith(
+          expect.objectContaining({
+            changes: { severity: { from: 'low', to: 'high' } },
+            source: 'execution',
+            context,
+          })
+        );
       });
 
       it('includes parentId when the conversation has a parent_conversation', async () => {
@@ -2543,7 +2580,7 @@ describe('ConversationClient', () => {
         );
       });
 
-      it('emits exactly the pinned metadata updated trigger payload keys', async () => {
+      it('emits the pinned keys plus the in-process change details', async () => {
         const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
@@ -2573,14 +2610,17 @@ describe('ConversationClient', () => {
           { source: 'http_api' }
         );
 
-        // The bridge forwards this payload as is to the ai.conversation.metadataUpdated
-        // workflow trigger, so any new key here would reach customer workflows.
+        // The bridge forwards only conversationId, templateId, parentId and changedFields to the
+        // ai.conversation.metadataUpdated workflow trigger (pinned in event_bridge.test.ts), so
+        // the in-process-only keys below never reach customer workflows.
         expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledTimes(1);
         const [[payload]] = eventEmitter.emitMetadataPatched.mock.calls;
         expect(Object.keys(payload).sort()).toEqual([
           'changedFields',
+          'changes',
           'conversationId',
           'parentId',
+          'source',
           'templateId',
         ]);
       });

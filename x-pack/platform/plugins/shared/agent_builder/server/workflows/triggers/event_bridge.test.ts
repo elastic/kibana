@@ -89,6 +89,9 @@ describe('registerConversationWorkflowEventBridge', () => {
       conversationId: 'conv-1',
       templateId: 'investigation',
       changedFields: ['status', 'severity'],
+      changes: { status: { from: 'open', to: 'closed' } },
+      context: { type: 'agent', agent_id: 'a1' },
+      source: 'http_api',
     });
 
     await flushMicrotasks();
@@ -107,6 +110,8 @@ describe('registerConversationWorkflowEventBridge', () => {
       templateId: 'proposal',
       parentId: 'parent-conv',
       changedFields: ['decision'],
+      changes: {},
+      source: 'http_api',
     });
 
     await flushMicrotasks();
@@ -126,6 +131,8 @@ describe('registerConversationWorkflowEventBridge', () => {
     isolatedBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
       changedFields: ['status'],
+      changes: {},
+      source: 'http_api',
     });
 
     await flushMicrotasks();
@@ -145,6 +152,8 @@ describe('registerConversationWorkflowEventBridge', () => {
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
       changedFields: ['status'],
+      changes: {},
+      source: 'http_api',
     });
 
     await flushMicrotasks();

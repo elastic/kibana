@@ -38,6 +38,8 @@ import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
+import { registerAssignmentConversationEvents } from './assignments/conversation_events';
+import { registerMetadataChangeEvents } from './conversation_events/metadata_change_events';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
@@ -98,6 +100,13 @@ export class AgenticInvestigationsPlugin
   ): AgenticInvestigationsPluginSetup {
     this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
+
+    registerAssignmentConversationEvents(agentBuilder);
+    registerMetadataChangeEvents({
+      agentBuilder,
+      getConversationClient: (request) => this.getConversationClient(request),
+      logger: this.logger,
+    });
 
     if (this.escalationsEnabled) {
       registerEscalationConversationEvents(agentBuilder);

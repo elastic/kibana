@@ -77,6 +77,10 @@ export interface RunAgentParams {
    * The execution ID for this run. Used for sub-agent parent tracking.
    */
   executionId?: string;
+  /**
+   * Display name of the agent. Recorded on metadata writes the agent makes, for attribution.
+   */
+  agentName?: string;
 }
 
 export interface RunAgentResponse {

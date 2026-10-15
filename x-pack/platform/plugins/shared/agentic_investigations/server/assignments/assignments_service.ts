@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { isPublicConversation, ConversationAccessControlRole } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import { waitForMetadataChangeEvents } from '../conversation_events/metadata_change_events';
 import { WrongTemplateError } from './errors';
 
 export { WrongTemplateError };
@@ -56,6 +57,9 @@ export class AssignmentsService {
    * - A caller can remove themselves; the request succeeds but they lose access afterwards.
    * - The diff is computed from a read outside OCC, so concurrent reassigns can race (same
    *   as other multi-step writes in this plugin, e.g. linked_investigations).
+   * - The timeline event is not written here: the `metadata.assignees` write below emits Agent
+   *   Builder's metadata-changed event, which `registerMetadataChangeEvents` records, so changes
+   *   made by automation are covered too.
    * - An assignee who was never an ACL member (escalation created before add-sync) makes
    *   removeAccessControlEntries a no-op, which is safe.
    */
@@ -109,6 +113,14 @@ export class AssignmentsService {
       { access: 'converse' }
     );
 
-    return conversation;
+    // The timeline event is written by a listener that doesn't block the patch. Wait for it so the
+    // returned conversation, and the refetch that follows, include the event.
+    await waitForMetadataChangeEvents(request);
+    try {
+      return await client.get(conversationId);
+    } catch (error) {
+      // A caller who removed themselves can no longer read it; the change itself succeeded.
+      return conversation;
+    }
   }
 }

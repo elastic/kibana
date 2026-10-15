@@ -48,6 +48,7 @@ export const createAgentHandler = ({
         runId,
         abortSignal,
         agentId: agent.id,
+        agentName: agent.name,
         agentConfiguration: effectiveConfiguration,
         browserApiTools,
         structuredOutput,
