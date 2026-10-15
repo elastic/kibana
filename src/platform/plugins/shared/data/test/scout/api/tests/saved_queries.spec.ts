@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { ApiClientFixture } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -28,9 +29,14 @@ const titlesOf = (savedQueries: Array<{ attributes: { title: string } }>) =>
   savedQueries.map(({ attributes }) => attributes.title);
 
 apiTest.describe('Saved queries API', { tag: tags.deploymentAgnostic }, () => {
+  // The tests assert exact totals, so they run in their own space instead of the default one.
+  const spaceId = `saved-queries-${randomUUID()}`;
+  const baseUrl = `/s/${spaceId}${SAVED_QUERY_BASE_URL}`;
   let headers: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, config }) => {
+  apiTest.beforeAll(async ({ apiServices, samlAuth, config }) => {
+    await apiServices.spaces.create({ id: spaceId });
+
     // Same role selection as saved_query_shared_delete.spec.ts: savedQuery:read/manage is not granted to every role.
     const role = config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
     const { cookieHeader } = await samlAuth.asInteractiveUser(role);
@@ -38,33 +44,33 @@ apiTest.describe('Saved queries API', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest.beforeEach(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['query'] });
+    await kbnClient.savedObjects.clean({ types: ['query'], space: spaceId });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['query'] });
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.spaces.delete(spaceId);
   });
 
   const createQuery = (apiClient: ApiClientFixture, body: object = mockSavedQuery) =>
-    apiClient.post(`${SAVED_QUERY_BASE_URL}/_create`, { headers, body });
+    apiClient.post(`${baseUrl}/_create`, { headers, body });
 
   const updateQuery = (apiClient: ApiClientFixture, id: string, body: object = mockSavedQuery) =>
-    apiClient.put(`${SAVED_QUERY_BASE_URL}/${id}`, { headers, body });
+    apiClient.put(`${baseUrl}/${id}`, { headers, body });
 
   const getQuery = (apiClient: ApiClientFixture, id: string) =>
-    apiClient.get(`${SAVED_QUERY_BASE_URL}/${id}`, { headers });
+    apiClient.get(`${baseUrl}/${id}`, { headers });
 
   const deleteQuery = (apiClient: ApiClientFixture, id: string) =>
-    apiClient.delete(`${SAVED_QUERY_BASE_URL}/${id}`, { headers });
+    apiClient.delete(`${baseUrl}/${id}`, { headers });
 
   const findQueries = (apiClient: ApiClientFixture, body: object = {}) =>
-    apiClient.post(`${SAVED_QUERY_BASE_URL}/_find`, { headers, body });
+    apiClient.post(`${baseUrl}/_find`, { headers, body });
 
   const countQueries = (apiClient: ApiClientFixture) =>
-    apiClient.get(`${SAVED_QUERY_BASE_URL}/_count`, { headers, responseType: 'text' });
+    apiClient.get(`${baseUrl}/_count`, { headers, responseType: 'text' });
 
   const isDuplicateTitle = (apiClient: ApiClientFixture, title: string, id?: string) =>
-    apiClient.post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, {
+    apiClient.post(`${baseUrl}/_is_duplicate_title`, {
       headers,
       body: { title, id },
     });

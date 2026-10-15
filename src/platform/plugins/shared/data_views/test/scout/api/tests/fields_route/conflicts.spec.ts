@@ -25,7 +25,7 @@ apiTest.describe(`GET /${FIELDS_ROUTE_PATH} - conflicts`, { tag: tags.deployment
   });
 
   apiTest('flags fields with mismatched types as conflicting', async ({ apiClient }) => {
-    const response = await apiClient.get(`${FIELDS_ROUTE_PATH}?pattern=logs-*`, {
+    const response = await apiClient.get(`${FIELDS_ROUTE_PATH}?pattern=logs-2017.01.*`, {
       headers: {
         ...INTERNAL_COMMON_HEADERS,
         ...viewerApiCredentials.apiKeyHeader,
