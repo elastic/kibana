@@ -9,9 +9,6 @@
           "error",
           "@kbn/ambient-ftr-types"
         ],
-        "@typescript-eslint/triple-slash-reference": [
-          "off"
-        ],
         "spaced-comment": [
           "off"
         ]
