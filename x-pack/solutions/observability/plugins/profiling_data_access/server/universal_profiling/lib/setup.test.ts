@@ -27,14 +27,6 @@ function createResourceState({
   };
 }
 
-function createSettingsState(configured: boolean): PartialSetupState {
-  return {
-    settings: {
-      configured,
-    },
-  };
-}
-
 function createProfilingState(enabled: boolean): PartialSetupState {
   return {
     profiling: {
@@ -49,7 +41,6 @@ describe('Merging partial state operations', () => {
   it('returns partial states with missing key', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [createDataState(true)]);
     expect(mergedState.data.available).toEqual(true);
-    expect(mergedState.settings.configured).toEqual(false);
     expect(mergedState.resources.created).toEqual(false);
   });
 
@@ -65,7 +56,6 @@ describe('Merging partial state operations', () => {
   it('returns false when resource management is not enabled', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: false, created: true }),
-      createSettingsState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -74,16 +64,6 @@ describe('Merging partial state operations', () => {
   it('returns false when resources are not created', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: false }),
-      createSettingsState(true),
-    ]);
-
-    expect(areResourcesSetup(mergedState)).toBeFalsy();
-  });
-
-  it('returns false when settings are not configured', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(false),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -92,7 +72,6 @@ describe('Merging partial state operations', () => {
   it('returns true when all checks are valid', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
       createProfilingState(true),
     ]);
 

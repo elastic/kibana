@@ -41,14 +41,6 @@ function createResourceState({
   };
 }
 
-function createSettingsState(configured: boolean): PartialCloudSetupState {
-  return {
-    settings: {
-      configured,
-    },
-  };
-}
-
 describe('Merging partial state operations', () => {
   const defaultSetupState = createDefaultCloudSetupState();
 
@@ -79,7 +71,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(true),
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: false, created: true }),
-      createSettingsState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -91,19 +82,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(true),
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: true, created: false }),
-      createSettingsState(true),
-    ]);
-
-    expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
-  });
-
-  it('returns false when settings are not configured', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCollectorPolicyState(true),
-      createSymbolizerPolicyState(true),
-      createProfilingInApmPolicyState(true),
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(false),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -115,7 +93,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(true),
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
       createProfilingState(true),
     ]);
 
@@ -128,7 +105,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(true),
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -140,7 +116,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(false),
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -152,7 +127,6 @@ describe('Merging partial state operations', () => {
       createSymbolizerPolicyState(true),
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
