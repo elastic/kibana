@@ -440,6 +440,34 @@ describe('conversations utils', () => {
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
+    it('forwards the caller-supplied activity to create, and no attribution otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const receipt = {
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+      };
+      const activity = {
+        actor: { type: EventActorType.agent, id: 'parent-agent' },
+        execution_id: 'parent-round::execution',
+      };
+
+      await persistUserMessage({ ...receipt, activity });
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { source: 'execution', activity }
+      );
+
+      await persistUserMessage(receipt);
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { source: 'execution' }
+      );
+    });
+
     it('defaults an undefined message to an empty string so the receipt-time snapshot is a valid RoundInput', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
@@ -1557,7 +1585,10 @@ describe('conversations utils', () => {
     it('fresh round, aborted: persists the abort reason carried by the error as aborted_by', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);
-      const abortReason = { source: 'api', actor: { id: 'u1', username: 'alice' } };
+      const abortReason = {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      };
 
       await persistExecutionInterruption({
         ...baseParams(conversationClient),

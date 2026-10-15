@@ -24,6 +24,7 @@ import type {
 import {
   AgentExecutionMode,
   ChatTriggerMode,
+  EventActorType,
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
@@ -75,6 +76,11 @@ import {
   createConversationUpdatedEvent,
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
+
+/** The still-recorded parent execution that spawned a sub-agent execution. */
+interface ParentExecution {
+  agentId: string;
+}
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -137,7 +143,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const conversationClient = await this.getConversationClient({
+    const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
       parentExecutionId: params.parentExecutionId,
@@ -169,7 +175,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        owner: { id: owner.id, username: owner.username },
+        owner: {
+          id: owner.id,
+          username: owner.username,
+          ...(owner.type ? { type: owner.type } : {}),
+        },
         agentParams:
           conversationParams && conversation
             ? {
@@ -236,6 +246,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          parentExecution,
           // The run reads the conversation by id (real-time). The conversation is already listed,
           // so a list search before the next scheduled refresh only sees the previous `updated_at`.
           appendRefresh: false,
@@ -687,9 +698,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
    * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
-   * the running parent that spawned it.
+   * the running parent that spawned it. The same lookup identifies the parent execution, so the
+   * conversations this execution creates can be attributed to it. The attribution names the
+   * parent agent only: the record id is not a conversation `execution_id`, and the parent round
+   * already points at the child conversation through its sub-agent entry.
    */
-  private async getConversationClient({
+  private async resolveConversationClient({
     request,
     executionClient,
     parentExecutionId,
@@ -697,25 +711,29 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest;
     executionClient: AgentExecutionClient;
     parentExecutionId?: string;
-  }): Promise<ConversationClient> {
+  }): Promise<{ conversationClient: ConversationClient; parentExecution?: ParentExecution }> {
     const { conversationService } = this.deps;
 
     const requestClient = await conversationService.getScopedClient({ request });
 
     if (!parentExecutionId) {
-      return requestClient;
+      return { conversationClient: requestClient };
     }
 
-    const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
+    const parent = await executionClient.peek(parentExecutionId);
+    const parentExecution = parent?.agentId ? { agentId: parent.agentId } : undefined;
 
-    if (!parentOwner) {
-      return requestClient;
+    if (!parent?.owner) {
+      return { conversationClient: requestClient, parentExecution };
     }
 
-    return conversationService.getScopedClientAsUser({
-      request,
-      user: { ...requestClient.getUser(), ...parentOwner },
-    });
+    return {
+      conversationClient: await conversationService.getScopedClientAsUser({
+        request,
+        user: { ...requestClient.getUser(), ...parent.owner },
+      }),
+      parentExecution,
+    };
   }
 
   private async isIdempotentReplay({
@@ -812,6 +830,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    parentExecution,
     appendRefresh,
   }: {
     conversation: ConversationWithOperation;
@@ -821,6 +840,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin } = params;
@@ -834,6 +854,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       author,
       appendRefresh,
       ...(origin ? { origin } : {}),
+      ...(parentExecution
+        ? {
+            activity: {
+              actor: { type: EventActorType.agent, id: parentExecution.agentId },
+            },
+          }
+        : {}),
     };
 
     // The round rewrite falls back to the conversation owner, not the requester.

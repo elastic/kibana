@@ -1,5 +1,5 @@
 {
-  "sha1": "11369bca9e5eb09989af3dbe94e83a1e6bd6d267",
+  "sha1": "354370793d3a875ec4dcbee393fd549517b5d06d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 7
       }
     },
@@ -248,7 +248,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 7
       }
     },

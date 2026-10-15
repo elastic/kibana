@@ -62,8 +62,8 @@ export const EngineDescriptor = lazySchema(() =>
     logExtractionState: EngineLogExtractionState,
     /** Per entity-type log extraction overrides. Optional: descriptors written before model version 8 do not have the field. */
     logExtractionConfig: LogExtractionTypeOverride.optional(),
-    /** Non-priority-specific per entity-type overrides. Not exposed via any API - populated only
-     * by internal server logic. Optional: descriptors written before model version 11 do not have the field. */
+    /** Non-priority-specific per entity-type overrides, written through `nonPriorityOverride` on internal
+     * `PUT /internal/security/entity_store/{entityType}`. Optional: descriptors written before model version 11 do not have the field. */
     nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride.optional(),
     /** Non-priority process cursor. Absent before model version 9, null when the non-priority process
      * is not running. Both mean no cursor: extraction starts from now - lookbackPeriod. */

@@ -449,7 +449,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           retryDelay === null ? 'terminal' : 'retryable'
         } failure)`
       );
-      throw new ServiceAccountTokenExchangeError(cause, retryDelay !== null, retryDelay ?? 0);
+      throw new ServiceAccountTokenExchangeError(cause, {
+        retryable: retryDelay !== null,
+        retryAfterMs: retryDelay ?? 0,
+        statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
+      });
     }
 
     const parsed = exchangeTokenResponseSchema.safeParse(result);
@@ -457,7 +461,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(
         `Token exchange payload from UIAM failed validation for service account ${serviceAccountId}`
       );
-      throw new ServiceAccountTokenExchangeError(parsed.error, false);
+      throw new ServiceAccountTokenExchangeError(parsed.error, { retryable: false });
     }
 
     return parsed.data;
