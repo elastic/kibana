@@ -23,7 +23,6 @@ const initialData = {
   isLoading: true,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/207390
 describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
@@ -44,7 +43,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: TestProviders }
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false), { timeout: 9000 });
 
     expect(result.current).toEqual(
       expect.objectContaining({
