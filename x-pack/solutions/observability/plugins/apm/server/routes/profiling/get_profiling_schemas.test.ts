@@ -50,7 +50,6 @@ describe('APM profiling schemas with data', () => {
         esClient,
         indices: ['traces-apm*'],
         stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
-        durationSeconds: 900,
         query: getTransactionsProfilingQuery({ ...range, ...filters }),
       });
     });

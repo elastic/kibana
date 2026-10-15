@@ -48,7 +48,6 @@ export function getProfilingSchemas({
     esClient,
     indices,
     stacktraceIdsField,
-    durationSeconds: end - start,
     query: getTransactionsProfilingQuery({
       start,
       end,
