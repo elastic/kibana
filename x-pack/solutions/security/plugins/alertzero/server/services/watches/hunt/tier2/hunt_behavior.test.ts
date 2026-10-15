@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { HuntBehaviorModels } from '../types';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { getMitreCatalog } from './mitre_catalog';
@@ -43,15 +44,16 @@ const generateByTechnique = (queries: Record<string, string>) =>
 
 const buildMockModel = (
   candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> = []
-): ScopedModel => {
+): HuntBehaviorModels => {
   const withStructuredOutput = jest.fn().mockReturnValue({
     invoke: jest.fn().mockResolvedValue({ candidates }),
   });
-  return {
+  const model: ScopedModel = {
     chatModel: { withStructuredOutput } as unknown as ScopedModel['chatModel'],
     inferenceClient: {} as ScopedModel['inferenceClient'],
     connector: {} as ScopedModel['connector'],
   };
+  return { extraction: model, esql: model };
 };
 
 // Carries a stub `esql.query` because the probe-scoping wrapper reads `esClient.esql` when the
@@ -176,6 +178,25 @@ describe('huntBehavior', () => {
     // The whole placeholder stays commented out, which is the property that makes it
     // non-executable — a single uncommented line would be ES|QL.
     expect(rule.split('\n').every((line) => line.startsWith('//'))).toBe(true);
+  });
+
+  it('reads the report on the extraction model and generates ES|QL on the esql model', async () => {
+    // Distinct models, so a job wired to the wrong one fails here. Every other test hands both
+    // jobs the same object and could not tell.
+    const { extraction: extractionModel } = buildMockModel([t1078Candidate]);
+    const esqlModel = { connector: { id: 'esql' } } as unknown as ScopedModel;
+
+    await huntBehavior(
+      { extraction: extractionModel, esql: esqlModel },
+      logger,
+      { text: REPORT_TEXT },
+      esClient
+    );
+
+    expect(extractionModel.chatModel.withStructuredOutput).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock.mock.calls[0][0].model).toBe(esqlModel);
+    expect(generateEsqlMock.mock.calls[0][0].model).not.toBe(extractionModel);
   });
 
   it('returns one generateEsql call per validated behavior', async () => {

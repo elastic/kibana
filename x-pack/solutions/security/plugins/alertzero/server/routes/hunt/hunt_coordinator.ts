@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -21,35 +18,10 @@ import { InvalidHuntWindowError } from '../../services/watches/hunt/common/asser
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
-import { resolveScopedModel } from './lib/scoped_model';
+import { resolveHuntModels } from './lib/hunt_models';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
-
-/**
- * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
- * connector is the ordinary outcome, not an error, so it never fails the request: the
- * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
- */
-const resolveModelForHunt = async ({
-  resolve,
-  logger,
-}: {
-  resolve: () => ReturnType<typeof resolveScopedModel>;
-  logger: Logger;
-}): Promise<ScopedModel | undefined> => {
-  try {
-    const outcome = await resolve();
-    return outcome.ok ? outcome.model : undefined;
-  } catch (err) {
-    logger.debug(
-      `hunt_coordinator: model resolution failed, running without a model — ${
-        (err as Error).message
-      }`
-    );
-    return undefined;
-  }
-};
 
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
@@ -119,28 +91,35 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
-          // one that actually runs Tier 2 in production) resolves the same model. It is
-          // resolved regardless of `tier2_when`, since resolving a connector spends no
-          // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
+          // One model per tier, resolved independently: a tier with no usable endpoint is
+          // absent from `models` and only its consumers degrade (see `HuntModels`). A missing
+          // connector is the ordinary outcome, not an error, so it never fails the request.
+          // They are resolved regardless of `tier2_when`, since resolving a connector spends
+          // no tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
           // so a `never` run stays `never`.
-          const model = await resolveModelForHunt({
-            resolve: () =>
-              resolveScopedModel({
-                inference: getInference(),
-                searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-                request,
-                uiSettingsClient: core.uiSettings.client,
-                logger,
-              }),
+          const { models, failures } = await resolveHuntModels({
+            inference: getInference(),
+            searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            request,
+            uiSettingsClient: core.uiSettings.client,
             logger,
           });
+          for (const failure of failures) {
+            // A missing connector is the ordinary outcome, but a resolution that threw is a
+            // fault, and at debug it would be invisible in production.
+            const log =
+              failure.reason === 'resolution_error'
+                ? logger.warn.bind(logger)
+                : logger.debug.bind(logger);
+            log(
+              `hunt_coordinator: ${failure.tier} model unavailable, its consumers will degrade — ${failure.message}`
+            );
+          }
 
           // The Worker fan-out supplies a run id so one sweep's children share it,
           // which is what the packaging barrier and conclusion dedupe key off. Only
           // mint one when the caller has no sweep to tie the run to.
-          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
+          const result = await huntCoordinator({ esClient, reportsEsClient }, models, logger, {
             report_id,
             spaceId,
             text,

@@ -1,5 +1,5 @@
 {
-  "sha1": "420797461098f097d2669438e484659bce566917",
+  "sha1": "bcc0924237ab30465cd2e6caa3953f34750e4e53",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1131,6 +1131,656 @@
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
         "line": 115,
         "column": 25
+      }
+    },
+    {
+      "id": "0bc0055023e12dd-bc448c4c909166b",
+      "title": "get_module: load each module by ID loads each module and verifies response shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_by_id.spec.ts",
+        "line": 15,
+        "column": 59
+      }
+    },
+    {
+      "id": "15559f47520e6d4-ff34449c74c2488",
+      "title": "get_module: list and filter lists all modules in expected order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 15,
+        "column": 59
+      }
+    },
+    {
+      "id": "15559f47520e6d4-d500007acd75850",
+      "title": "get_module: list and filter lists only security modules when filtered by security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 24,
+        "column": 45
+      }
+    },
+    {
+      "id": "15559f47520e6d4-74d1139b211281e",
+      "title": "get_module: list and filter returns 404 when filtering a non-security module by security tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 39,
+        "column": 23
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-959ad4fb230792e",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery finds jobs installed by module without a prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 39,
+        "column": 31
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-d18e4fc184b1a1b",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery finds jobs installed by module with a prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 62,
+        "column": 48
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-0a8d744b50432bd",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery does not find jobs installed into a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 85,
+        "column": 29
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-d0fe09741089a24",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery returns jobsExist: false for a module that has not been installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 120,
+        "column": 33
+      }
+    },
+    {
+      "id": "c558d01dad887b3-3830b5422f0fd1e",
+      "title": "recognize_module: data stream datasets (requires Fleet packages) recognizes apache data stream dataset as apache_data_stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_data_streams.spec.ts",
+        "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": "c558d01dad887b3-64b3fdb91b273c0",
+      "title": "recognize_module: data stream datasets (requires Fleet packages) recognizes nginx data stream dataset as nginx_data_stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_data_streams.spec.ts",
+        "line": 34,
+        "column": 49
+      }
+    },
+    {
+      "id": "85678f85cde8537-d9387363878b4cc",
+      "title": "recognize_module: infrastructure datasets recognizes heartbeat dataset as uptime_heartbeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 19,
+        "column": 24
+      }
+    },
+    {
+      "id": "85678f85cde8537-1aead738b9e255f",
+      "title": "recognize_module: infrastructure datasets recognizes auditbeat dataset as security_linux_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 37,
+        "column": 48
+      }
+    },
+    {
+      "id": "85678f85cde8537-84b54f532e17ed0",
+      "title": "recognize_module: infrastructure datasets recognizes metricbeat dataset as metricbeat_system_ecs and security_linux_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 51,
+        "column": 27
+      }
+    },
+    {
+      "id": "85678f85cde8537-e239a047e24a664",
+      "title": "recognize_module: infrastructure datasets recognizes metrics UI dataset as security_linux_v3 (metrics UI modules have no recognizer query)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 65,
+        "column": 17
+      }
+    },
+    {
+      "id": "85678f85cde8537-e317bbf91dbba35",
+      "title": "recognize_module: infrastructure datasets recognizes APM transaction dataset as apm_transaction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 80,
+        "column": 27
+      }
+    },
+    {
+      "id": "69b4bb25291df43-a203ae8002b52e3",
+      "title": "recognize_module: sample data and logs datasets recognizes sample logs dataset as sample_data_weblogs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 19,
+        "column": 24
+      }
+    },
+    {
+      "id": "69b4bb25291df43-2948a06af71eeb1",
+      "title": "recognize_module: sample data and logs datasets recognizes apache dataset as apache_ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 33,
+        "column": 64
+      }
+    },
+    {
+      "id": "69b4bb25291df43-0e1c5a37c9714a0",
+      "title": "recognize_module: sample data and logs datasets returns no modules for logs dataset (logs modules have no recognizer query)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "69b4bb25291df43-f24b31667c9f0a4",
+      "title": "recognize_module: sample data and logs datasets recognizes nginx dataset as nginx_ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 59,
+        "column": 27
+      }
+    },
+    {
+      "id": "69b4bb25291df43-98723377771f15b",
+      "title": "recognize_module: sample data and logs datasets recognizes sample ecommerce dataset as sample_data_ecommerce",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 71,
+        "column": 6
+      }
+    },
+    {
+      "id": "69b4bb25291df43-5b3145267c2c67c",
+      "title": "recognize_module: sample data and logs datasets returns empty list for non-existent index pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 81,
+        "column": 19
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2484b7f64d46c0d",
+      "title": "recognize_module: security datasets recognizes security auditbeat dataset as security_auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 40,
+        "column": 40
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-3d020245bd82d02",
+      "title": "recognize_module: security datasets recognizes security packetbeat dataset as security_packetbeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 58,
+        "column": 5
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2d763360e666a1d",
+      "title": "recognize_module: security datasets recognizes security winlogbeat dataset as security_auth, security_network, security_windows_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 71,
+        "column": 30
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-d6b788a0c626e9a",
+      "title": "recognize_module: security datasets recognizes security endpoint dataset as 5 security modules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 89,
+        "column": 19
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-c2849679153768f",
+      "title": "recognize_module: security datasets recognizes security cloudtrail dataset as security_cloudtrail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 108,
+        "column": 30
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-f92ddef38566eed",
+      "title": "recognize_module: security datasets recognizes security azure activity logs dataset as security_azure_activitylogs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 130,
+        "column": 25
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2263032fe91f22d",
+      "title": "recognize_module: security datasets recognizes security GCP audit dataset as security_gcp_audit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 148,
+        "column": 25
+      }
+    },
+    {
+      "id": "2c85c05b5fe2469-6a5dbdb1ff58944",
+      "title": "setup_module: apache_ecs with startDatafeed true sets up apache_ecs module with datafeed and verifies saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apache_ecs.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-5f2547064fb2c61",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up apm_transaction module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-eb8dd7341439c8f",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up logs_ui_analysis module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-afb77b11a17f100",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up logs_ui_categories module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "145da0ef6016ae4-0b95ccc7b047aeb",
+      "title": "setup_module: data stream modules with startDatafeed true (requires Fleet packages) sets up apache_data_stream module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_data_streams.spec.ts",
+        "line": 127,
+        "column": 52
+      }
+    },
+    {
+      "id": "145da0ef6016ae4-0b88f87964a6005",
+      "title": "setup_module: data stream modules with startDatafeed true (requires Fleet packages) sets up nginx_data_stream module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_data_streams.spec.ts",
+        "line": 127,
+        "column": 52
+      }
+    },
+    {
+      "id": "91d4c1e78788788-c7ec9aab239d34e",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metricbeat_system_ecs module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "91d4c1e78788788-821b67cfcf6776b",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metrics_ui_hosts module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "91d4c1e78788788-cf828201db23c90",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metrics_ui_k8s module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-c200d66ceac0454",
+      "title": "setup_module: estimate model memory limit estimates model memory limits when estimateModelMemory is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 27,
+        "column": 13
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-4c264b473357710",
+      "title": "setup_module: estimate model memory limit uses module default memory limits when estimateModelMemory is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 49,
+        "column": 11
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-f411510741442af",
+      "title": "setup_module: estimate model memory limit estimates model memory limits by default when estimateModelMemory is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 75,
+        "column": 31
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-1c42e01f732e3e5",
+      "title": "setup_module: estimate model memory limit preserves a larger jobOverrides memory limit over the estimate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 102,
+        "column": 17
+      }
+    },
+    {
+      "id": "4355470211fbb69-36d3a012e1dc64e",
+      "title": "setup_module: rejected requests returns 400 when a non-existent data view is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_negative.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "4355470211fbb69-68b9f446bd5ea20",
+      "title": "setup_module: rejected requests returns 403 when the user lacks ML write permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_negative.spec.ts",
+        "line": 31,
+        "column": 48
+      }
+    },
+    {
+      "id": "12656e5c68baa69-e6892dbfeb12a0a",
+      "title": "setup_module: nginx_ecs with startDatafeed true sets up nginx_ecs module with datafeed and verifies saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_nginx_ecs.spec.ts",
+        "line": 65,
+        "column": 66
+      }
+    },
+    {
+      "id": "059a47ad69cff83-00fd022892d8996",
+      "title": "setup_module: sample_data_weblogs with startDatafeed false creates jobs and stopped datafeeds without starting them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_no_datafeed.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "a81d9dee88b7f2b-befe8d19c1ae238",
+      "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_weblogs module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
+        "line": 78,
+        "column": 24
+      }
+    },
+    {
+      "id": "a81d9dee88b7f2b-04dc44a1dd37d1e",
+      "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_ecommerce module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
+        "line": 78,
+        "column": 24
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-431d8b8f7f6c9f3",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up security_packetbeat module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-646bc9e0030174e",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up uptime_heartbeat module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-db56d176f90d2a7",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up security_cloudtrail module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
       }
     },
     {

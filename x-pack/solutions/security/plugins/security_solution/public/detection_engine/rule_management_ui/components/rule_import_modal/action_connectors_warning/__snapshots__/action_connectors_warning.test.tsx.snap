@@ -10,7 +10,6 @@ exports[`ActionConnectorWarnings should render if 1 connectors were imported and
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
     data-size="m"
     data-test-subj="actionConnectorsWarningsCallOut"
-    style="--euiCallOutTypeColor: #966B03;"
   >
     <div
       class="css-1slkmya-wrapper"
@@ -91,7 +90,6 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
     data-size="m"
     data-test-subj="actionConnectorsWarningsCallOut"
-    style="--euiCallOutTypeColor: #966B03;"
   >
     <div
       class="css-1slkmya-wrapper"
@@ -172,7 +170,6 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
     data-size="m"
     data-test-subj="actionConnectorsWarningsCallOut"
-    style="--euiCallOutTypeColor: #966B03;"
   >
     <div
       class="css-1slkmya-wrapper"

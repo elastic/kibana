@@ -546,10 +546,27 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'highlightMissingOnClause':
+    case 'highlightInvalidOnPattern':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
-          defaultMessage: '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightInvalidOnPattern', {
+          defaultMessage:
+            '[HIGHLIGHT] Invalid pattern [{pattern}] in ON, expected field names or [*]',
+          values: { pattern: out.pattern },
+        }),
+        type: 'error',
+      };
+    case 'highlightWildcardWithFields':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightWildcardWithFields', {
+          defaultMessage: '[HIGHLIGHT] [*] cannot be combined with other fields in ON',
+        }),
+        type: 'error',
+      };
+    case 'highlightQueryFieldNotInOn':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightQueryFieldNotInOn', {
+          defaultMessage: '[HIGHLIGHT] Query field [{field}] is not in the ON fields [{fields}]',
+          values: { field: out.field, fields: out.fields },
         }),
         type: 'error',
       };

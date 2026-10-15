@@ -647,11 +647,28 @@ Update all model + judge labels:
 
 Update Vault config:
 
+| `--vault` | Path                                        | Read by                 |
+| --------- | ------------------------------------------- | ----------------------- |
+| `ci-prod` | `kv/ci-shared/kbn-evals/golden` (KV v2)     | CI (`setup_job_env.sh`) |
+| `dev`     | `secret/kibana-issues/dev/kbn-evals/golden` | `--profile dev-vault`   |
+
+Log in to the matching Vault first; the scripts print the login command if your token is missing or expired. `--vault ci-prod` ignores `VAULT_ADDR`; set `KBN_EVALS_CI_PROD_VAULT_ADDR` to override its address.
+
 ```bash
-# Edit scripts/vault/config.json, then generate a vault write command:
-node scripts/vault/get_command.js --vault ci-prod
-# Sync from Vault:
+# Sync scripts/vault/config.json from Vault, edit it, then upload it:
 node scripts/vault/retrieve_secrets.js --vault ci-prod
+node scripts/vault/upload_secrets.js --vault ci-prod
+
+# Or print the vault command instead of running it. The command holds the whole config inline,
+# so running it puts the secret in your shell history; prefer upload_secrets.js.
+node scripts/vault/get_command.js --vault ci-prod
+```
+
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again. Retrieve validates the config and fails before touching `config.json` if the version can't be read:
+
+```bash
+node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>
+node scripts/vault/upload_secrets.js --vault ci-prod
 ```
 
 ### CI telemetry

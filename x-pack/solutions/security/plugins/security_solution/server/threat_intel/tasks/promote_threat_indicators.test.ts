@@ -501,7 +501,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
  * tests drive the real runner so that regression cannot come back silently.
  */
 describe('promote task runner', () => {
-  const setupRunner = (searchResponses: Array<Record<string, unknown>>) => {
+  const setupRunner = (
+    searchResponses: Array<Record<string, unknown>>,
+    getBootstrapReady: () => Promise<void> = () => Promise.resolve()
+  ) => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
@@ -527,6 +530,7 @@ describe('promote task runner', () => {
       coreSetup,
       logger: loggingSystemMock.createLogger(),
       getReconcileAttributeWorkflows: jest.fn().mockResolvedValue(undefined),
+      getBootstrapReady,
     });
 
     const definition = definitions[PROMOTE_THREAT_INDICATORS_TASK_TYPE];
@@ -572,6 +576,70 @@ describe('promote task runner', () => {
     expect(result.state).toEqual(
       expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
     );
+  });
+
+  describe('when bootstrap has not completed', () => {
+    const run = async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }], () =>
+        Promise.reject(new Error('bootstrap failed'))
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      );
+      const result = await runner.run();
+      return { result, esClient };
+    };
+
+    it('returns the previous state', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('does not write indicators', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the task is aborted while waiting for bootstrap', () => {
+    const run = async () => {
+      const controller = new AbortController();
+      const { definition, esClient } = setupRunner(
+        [{ hits: { hits: [reportHit('r-1')] } }],
+        () => new Promise<void>(() => {})
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+          signal: controller.signal,
+        })
+      );
+      const pending = runner.run();
+      controller.abort();
+      return { result: await pending, esClient };
+    };
+
+    it('returns the previous state instead of timing out', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
   });
 
   it('holds the cursor when the run is aborted mid-scan', async () => {
