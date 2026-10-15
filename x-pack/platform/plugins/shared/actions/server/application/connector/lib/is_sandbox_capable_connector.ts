@@ -19,7 +19,7 @@ export const isSandboxCapableConnector = ({
 }: {
   actionTypeId: string;
   config?: Record<string, unknown>;
-  /** Only pass secrets that are already in memory (in-memory connectors); list paths omit it. */
+  /** Persisted connector lists omit secrets; credential resolution supplies validated secrets. */
   secrets?: Record<string, unknown>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'get'>;
 }): boolean => {
@@ -33,7 +33,7 @@ export const isSandboxCapableConnector = ({
   }
 
   const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
-  const authType = config?.authType ?? secrets?.authType;
+  const authType = secrets === undefined ? config?.authType : secrets.authType;
   return (
     typeof authType === 'string' &&
     authType.length > 0 &&
