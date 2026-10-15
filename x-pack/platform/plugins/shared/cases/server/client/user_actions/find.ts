@@ -123,7 +123,7 @@ const findWithSearch = async ({
    * `matchesSearch` only reads `type`, `payload`, and `created_by` off the raw
    * (transformed but undecoded) attributes, so we skip `decodeOrThrow` here and
    * only decode the page of results we actually return. Otherwise we'd pay the
-   * io-ts decode cost for every user action in the case just to discard most of
+   * zod decode cost for every user action in the case just to discard most of
    * them during filtering/pagination.
    */
   const allUserActions = await userActionService.finder.findAll({

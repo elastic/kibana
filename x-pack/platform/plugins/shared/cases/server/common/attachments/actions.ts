@@ -51,17 +51,16 @@ export const LEGACY_ACTIONS_SYNTHETIC_ATTACHMENT_ID = 'legacy-actions';
 
 /**
  * Persisted-attribute shape of a legacy `actions` row (top-level `actions` type
- * is being retired). We re-use the canonical io-ts–derived payload type instead
+ * is being retired). We re-use the canonical zod-derived payload type instead
  * of redeclaring it inline so the transformer and the route validator stay in
  * sync if the legacy shape ever evolves before retirement.
  */
 type LegacyActionsAttributes = ActionsAttachmentPayload;
 
 /**
- * Delegates the structural check to the same io-ts codec that decodes inbound
- * `actions` requests so the transformer and route validator can't drift. Extra
- * audit fields on persisted SO rows are ignored by the strict codec, so we
- * narrow the input to the payload slice before calling `.is`.
+ * Delegates the structural check to the same zod schema that decodes inbound
+ * `actions` requests so the transformer and route validator can't drift. We narrow
+ * the input to the payload slice (dropping persisted audit fields) before calling `safeParse`.
  */
 function isLegacyActionsShape(attributes: unknown): attributes is LegacyActionsAttributes {
   if (!isPlainObject(attributes) || attributes === null) return false;

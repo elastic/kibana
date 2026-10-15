@@ -127,7 +127,7 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
  * Unified attachment shape fields that must NOT appear on the legacy
  * `cases-comments` SO. When a unified-shape payload (e.g.
  * `{ type: 'security.endpoint', attachmentId, metadata }`) is written to the
- * legacy SO type, the request attributes still carry those keys after io-ts
+ * legacy SO type, the request attributes still carry those keys after zod
  * decoding and may otherwise leak into `_source` (mapping is `dynamic: false`,
  * so they would be stored but not indexed). Stripping here guarantees
  * byte-for-byte equivalence with pre-migration legacy writes.
