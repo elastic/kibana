@@ -152,6 +152,23 @@ describe('useContextEngineBreadcrumbs', () => {
     ]);
   });
 
+  it('does not reset breadcrumbs when the trail content is unchanged', () => {
+    const appChrome = createAppChromeMock();
+    createServices('classic', { appChrome });
+
+    const { rerender } = renderHook(
+      ({ breadcrumbs }: { breadcrumbs: ContextEngineBreadcrumb[] }) =>
+        useContextEngineBreadcrumbs(breadcrumbs),
+      { initialProps: { breadcrumbs: [{ text: 'my-ai-index' }] } }
+    );
+
+    appChrome.breadcrumbs.setAppBreadcrumbs.mockClear();
+
+    rerender({ breadcrumbs: [{ text: 'my-ai-index' }] });
+
+    expect(appChrome.breadcrumbs.setAppBreadcrumbs).not.toHaveBeenCalled();
+  });
+
   it('falls back to core breadcrumbs in classic chrome when appChrome is unavailable', () => {
     const { core } = createServices('classic', { appChrome: undefined });
 

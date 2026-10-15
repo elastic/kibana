@@ -27,7 +27,7 @@ describe('getAiIndexKnowledgeIndicatorsPath', () => {
 });
 
 describe('getViewKiPath', () => {
-  it('encodes the AI index id and KI id', () => {
+  it('builds the path with an unencoded AI index id and encoded KI id', () => {
     expect(getViewKiPath('my-ai-index', 'ki-1')).toBe('/ai_index/my-ai-index/ki/ki-1');
   });
 

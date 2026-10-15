@@ -30,15 +30,15 @@ import {
   getAiIndexDetailPath,
   getAiIndexKnowledgeIndicatorsPath,
 } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { AiIndexDetailPage } from './ai_index_detail_page';
+import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
   CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
 ] as const;
-import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
-import { AiIndexDetailPage } from './ai_index_detail_page';
-import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
-import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -975,6 +975,50 @@ describe('AiIndexDetailPage', () => {
       screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('shows the Knowledge Indicators tab on a deep link before the AI index has loaded', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+    services.http.get.mockImplementation(
+      () =>
+        new Promise<GetAiIndexResponse>((resolve) => {
+          resolveAiIndexGet = resolve;
+        })
+    );
+    const history = createMemoryHistory({
+      initialEntries: [{ pathname: getAiIndexKnowledgeIndicatorsPath(aiIndex.id) }],
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    expect(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanel')).not.toBeInTheDocument();
+
+    resolveAiIndexGet(aiIndex);
+
+    expect(await screen.findByTestId('contextListKiPanel')).toBeInTheDocument();
   });
 
   it('opens the Knowledge Indicators tab from the URL while the KI summary is loading', async () => {

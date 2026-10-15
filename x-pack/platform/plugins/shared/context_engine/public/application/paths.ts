@@ -25,7 +25,7 @@ export const getAiIndexKnowledgeIndicatorsPath = (id: string): string =>
  * `index` query param.
  */
 export const getViewKiPath = (aiIndexId: string, kiId: string): string =>
-  `/ai_index/${encodeURIComponent(aiIndexId)}/ki/${encodeURIComponent(kiId)}`;
+  `/ai_index/${aiIndexId}/ki/${encodeURIComponent(kiId)}`;
 
 /**
  * Best-effort decode for a KI id read from the URL. `history` already runs

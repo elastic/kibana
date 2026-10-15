@@ -29,7 +29,7 @@ import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_secti
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useNavigation, type ContextEngineLocationState } from '../hooks/use_navigation';
+import { useNavigation } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
   contextEngineBackDestinationLabel,
@@ -43,6 +43,7 @@ import {
   getAiIndexDetailPath,
   getAiIndexKnowledgeIndicatorsPath,
 } from '../paths';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -75,8 +76,8 @@ const signalsLockedAriaLabel = i18n.translate(
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation<ContextEngineLocationState | undefined>();
-  const history = useHistory<ContextEngineLocationState | undefined>();
+  const location = useLocation<AiIndexCreatedLocationState | undefined>();
+  const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
@@ -85,10 +86,7 @@ export const AiIndexDetailPage = () => {
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
-    () =>
-      location.state !== undefined &&
-      'aiIndexCreated' in location.state &&
-      location.state.aiIndexCreated === true
+    () => location.state?.aiIndexCreated === true
   );
 
   // Hide the callout as soon as the user adds a source.
@@ -100,11 +98,7 @@ export const AiIndexDetailPage = () => {
 
   // Remove aiIndexCreated from location state after it has been shown
   useEffect(() => {
-    if (
-      location.state === undefined ||
-      !('aiIndexCreated' in location.state) ||
-      !location.state.aiIndexCreated
-    ) {
+    if (!location.state?.aiIndexCreated) {
       return;
     }
 
@@ -120,10 +114,7 @@ export const AiIndexDetailPage = () => {
 
   const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryLoading;
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
-
-  const showKnowledgeIndicatorsTabInHeader =
-    aiIndex !== undefined &&
-    (hasKnowledgeIndicators || (isKiSummaryLoading && isKnowledgeIndicatorsTab));
+  const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
   const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
     useAiIndexOverviewSections({
@@ -185,31 +176,6 @@ export const AiIndexDetailPage = () => {
     navigateToContextEngine,
     resolvedAiIndexId,
     showKnowledgeIndicatorsTabInHeader,
-    summary.total,
-  ]);
-
-  useEffect(() => {
-    if (
-      !isKnowledgeIndicatorsTab ||
-      !hasLoadedKiSummary ||
-      summary.total > 0 ||
-      !resolvedAiIndexId
-    ) {
-      return;
-    }
-
-    history.replace({
-      pathname: getAiIndexDetailPath(resolvedAiIndexId),
-      search: location.search,
-      state: location.state,
-    });
-  }, [
-    hasLoadedKiSummary,
-    history,
-    isKnowledgeIndicatorsTab,
-    location.search,
-    location.state,
-    resolvedAiIndexId,
     summary.total,
   ]);
 

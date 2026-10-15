@@ -27,11 +27,7 @@ import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
-import {
-  decodeRouteParam,
-  getAiIndexDetailPath,
-  getAiIndexKnowledgeIndicatorsPath,
-} from '../paths';
+import { decodeRouteParam, getAiIndexKnowledgeIndicatorsPath } from '../paths';
 
 type ViewKiTabId = 'details' | 'document';
 
@@ -47,11 +43,10 @@ const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
 };
 
 export const ViewKiPage = () => {
-  const { id: aiIndexIdParam = '', kiId: kiIdParam = '' } = useParams<{
+  const { id: aiIndexId = '', kiId: kiIdParam = '' } = useParams<{
     id: string;
     kiId: string;
   }>();
-  const aiIndexId = useMemo(() => decodeRouteParam(aiIndexIdParam), [aiIndexIdParam]);
   const kiId = useMemo(() => decodeRouteParam(kiIdParam), [kiIdParam]);
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -70,10 +65,11 @@ export const ViewKiPage = () => {
   const [selectedTab, setSelectedTab] = useState<ViewKiTabId>('details');
 
   const pageTitle = getPageTitle(ki, kiId);
-  const backHref = createContextEngineUrl(getAiIndexDetailPath(aiIndexId));
+  const backPath = getAiIndexKnowledgeIndicatorsPath(aiIndexId);
+  const backHref = createContextEngineUrl(backPath);
 
   useContextEngineBreadcrumbs([
-    { text: aiIndex?.id ?? aiIndexId, path: getAiIndexKnowledgeIndicatorsPath(aiIndexId) },
+    { text: aiIndex?.id ?? aiIndexId, path: backPath },
     { text: pageTitle },
   ]);
 
@@ -124,9 +120,9 @@ export const ViewKiPage = () => {
   const handleBackClick = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
-      navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(aiIndexId));
+      navigateToContextEngine(backPath);
     },
-    [aiIndexId, navigateToContextEngine]
+    [backPath, navigateToContextEngine]
   );
 
   const resolvedKiId = ki?.id ?? kiId;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
@@ -14,7 +14,6 @@ import { useKibana } from './use_kibana';
 
 export interface ContextEngineBreadcrumb {
   text: string;
-  /** Path within the Context Engine app to link to; omit for the current (non-clickable) page. */
   path?: string;
 }
 
@@ -26,14 +25,14 @@ const contextTitle = i18n.translate('xpack.contextEngine.landing.breadcrumbs.tit
  * Sets breadcrumbs for the Context Engine app.
  *
  * Each page passes its own trail, from directly under the app root down to itself
- * (e.g. `[{ text: aiIndexId, path }, { text: kiTitle }]`); this hook prepends the
- * shared Build > Context root in classic chrome and resolves `path` to an href.
+ * (e.g. `[{ text: aiIndexId, path }, { text: kiTitle }]`);
  */
 export const useContextEngineBreadcrumbs = (breadcrumbs: ContextEngineBreadcrumb[] = []) => {
   const { application, appChrome, chrome } = useKibana().services;
   const chromeStyle = chrome.getChromeStyle();
 
-  useEffect(() => {
+  // Perf improvement since breadcrumbs might change on every render
+  useDeepCompareEffect(() => {
     const getHref = (path: string) => application.getUrlForApp(CONTEXT_ENGINE_APP_ID, { path });
 
     const tail: ChromeBreadcrumb[] = breadcrumbs.map(({ text, path }) => ({
