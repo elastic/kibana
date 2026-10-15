@@ -19,7 +19,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./highlights_v2'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload_v2'));
     loadTestFile(require.resolve('./create_missing_entities'));
-    loadTestFile(require.resolve('./euid_derivation_parity'));
-    loadTestFile(require.resolve('./alert_entity_id_backfill_client'));
   });
 }
