@@ -46,7 +46,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
       <DashboardRenderer
         getCreationOptions={() =>
           Promise.resolve({
-            getInitialInput: () => initialState.current,
+            getInitialInput: () => ({ ...initialState.current, viewMode: 'non-interactive' }),
           })
         }
         onApiAvailable={setDashboardApi}
