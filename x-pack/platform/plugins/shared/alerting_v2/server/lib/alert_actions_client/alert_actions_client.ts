@@ -57,9 +57,19 @@ import {
   loadAlertActionStatesByEpisodeId,
   type AlertActionState,
 } from './context_loaders/load_alert_action_states';
+import {
+  EMPTY_SERIES_ACTION_STATE,
+  loadSeriesActionStatesBySeries,
+  type SeriesActionState,
+} from './context_loaders/load_series_action_states';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
-import { ACTION_HANDLERS, prepareWithHandler, requiresActionState } from './handlers';
+import {
+  ACTION_HANDLERS,
+  prepareWithHandler,
+  requiresActionState,
+  requiresSeriesActionState,
+} from './handlers';
 import { decodeSeriesIdOrThrow, toDecodedSeries } from './utils/series_id';
 
 /** A single per-item error in a bulk create alert actions response. */
@@ -155,7 +165,7 @@ export class AlertActionsClient {
     const { seriesId, action } = params;
     const series = decodeSeriesIdOrThrow(seriesId);
 
-    const [userProfileUid, alertEvent] = await Promise.all([
+    const [userProfileUid, alertEvent, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
@@ -163,6 +173,12 @@ export class AlertActionsClient {
         seriesId,
         series,
       }),
+      // A series of another space is not found by the lookup above, so its state is not needed.
+      this.loadSeriesActionStates(
+        requiresSeriesActionState(action.action_type) && series.space_id === this.spaceId
+          ? [series]
+          : []
+      ),
     ]);
 
     const prepared = this.prepareAction({
@@ -170,8 +186,8 @@ export class AlertActionsClient {
       alertEvent,
       userProfileUid,
       docAlertId: null,
-      // Series actions carry no precondition, so no state is loaded for them.
-      actionState: EMPTY_ALERT_ACTION_STATE,
+      seriesActionState:
+        seriesActionStates.get(encodeSeriesId(series) ?? seriesId) ?? EMPTY_SERIES_ACTION_STATE,
     });
 
     await this.persistPreparedActions([prepared]);
@@ -220,7 +236,7 @@ export class AlertActionsClient {
       alertEvent,
       userProfileUid,
       docAlertId: alertEvent.episode_id,
-      actionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
+      alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
     await this.persistPreparedActions([prepared]);
@@ -237,6 +253,21 @@ export class AlertActionsClient {
       queryService: this.queryService,
       spaceId: this.spaceId,
       episodeIds,
+    });
+  }
+
+  /**
+   * Resolves the snooze of the series whose actions are preconditioned, keyed
+   * by the canonical series id. A series is identified by its owner and hash,
+   * so another rule's snooze on a shared `group_hash` is never read.
+   */
+  private loadSeriesActionStates(
+    series: readonly DecodedSeriesId[]
+  ): Promise<Map<string, SeriesActionState>> {
+    return loadSeriesActionStatesBySeries({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      series,
     });
   }
 
@@ -310,10 +341,19 @@ export class AlertActionsClient {
      * id for episode-scoped actions, `null` for series-scoped actions.
      */
     docAlertId: string | null;
-    /** Current state of the targeted alert, for the preconditioned actions. */
-    actionState: AlertActionState;
+    /** Current state of the targeted alert, for the preconditioned episode actions. */
+    alertActionState?: AlertActionState;
+    /** Current snooze of the targeted series, for the preconditioned series actions. */
+    seriesActionState?: SeriesActionState;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid, docAlertId, actionState } = params;
+    const {
+      action,
+      alertEvent,
+      userProfileUid,
+      docAlertId,
+      alertActionState = EMPTY_ALERT_ACTION_STATE,
+      seriesActionState = EMPTY_SERIES_ACTION_STATE,
+    } = params;
     const alertActionDoc = this.buildAlertActionDocument({
       action,
       alertEvent,
@@ -321,7 +361,10 @@ export class AlertActionsClient {
       docAlertId,
     });
 
-    return prepareWithHandler({ action, alertEvent, alertActionDoc, actionState }, ACTION_HANDLERS);
+    return prepareWithHandler(
+      { action, alertEvent, alertActionDoc, alertActionState, seriesActionState },
+      ACTION_HANDLERS
+    );
   }
 
   /**
@@ -360,9 +403,10 @@ export class AlertActionsClient {
    * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: every
    * `series_id` is decoded up front (a malformed one fails the whole request
    * with a 400), then one latest-event query covers every series of the
-   * request's space. Series that don't exist, or belong to another space, get
-   * a per-item `errors[]` entry; `alert_id: null` on every persisted audit doc
-   * and `episodeId: null` on every emitted domain event.
+   * request's space and one snooze-state query covers the preconditioned
+   * items. Series that don't exist, or belong to another space, and failed
+   * preconditions get a per-item `errors[]` entry; `alert_id: null` on every
+   * persisted audit doc and `episodeId: null` on every emitted domain event.
    */
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
@@ -373,13 +417,18 @@ export class AlertActionsClient {
     }));
     const requestSpaceItems = decodedItems.filter(({ series }) => series.space_id === this.spaceId);
 
-    const [userProfileUid, latestEvents] = await Promise.all([
+    const [userProfileUid, latestEvents, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsBySeries({
         queryService: this.queryService,
         spaceId: this.spaceId,
         series: requestSpaceItems.map(({ series }) => series),
       }),
+      this.loadSeriesActionStates(
+        requestSpaceItems
+          .filter(({ item }) => requiresSeriesActionState(item.action_type))
+          .map(({ series }) => series)
+      ),
     ]);
 
     const errors: BulkAlertActionError[] = [];
@@ -406,7 +455,8 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docAlertId: null,
-            actionState: EMPTY_ALERT_ACTION_STATE,
+            seriesActionState:
+              seriesActionStates.get(canonicalSeriesId ?? '') ?? EMPTY_SERIES_ACTION_STATE,
           })
         );
       } catch (error) {
@@ -499,7 +549,7 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docAlertId: alertEvent.episode_id,
-            actionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
+            alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
           })
         );
       } catch (error) {

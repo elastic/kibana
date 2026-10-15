@@ -14,6 +14,8 @@ import {
   getAlertSeriesNotFoundMessage,
   getAssigneeUnchangedMessage,
   getEpisodeNotLatestMessage,
+  getSeriesAlreadySnoozedMessage,
+  getSeriesNotSnoozedMessage,
   getTagsUnchangedMessage,
 } from '../../lib/errors/alert_error_messages';
 import { invalidResponseExample } from '../oas_utils';
@@ -28,7 +30,7 @@ export const SAMPLE_SERIES_ID =
 /** `series_id` of the `memory-high` rule's series for `SAMPLE_OTHER_GROUP_HASH` in the `default` space. */
 export const SAMPLE_OTHER_SERIES_ID =
   'MTo6cnVsZTo6ZGVmYXVsdDo6bWVtb3J5LWhpZ2g6OjYyYjg2ZWNhNDY3MGMyYTBhMDFmYThiYjU1NzBjNWMyZGZhN2QyMGE5ZDlkZWY1YjZhY2ZkZWY0ZDk4ZDMwN2E';
-export const SAMPLE_EPISODE_ID = 'episode-1';
+export const SAMPLE_EPISODE_ID = 'alert-1';
 
 /** Shared 400 body for series-level alert-action routes (missing path params). */
 export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
@@ -58,9 +60,41 @@ export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
   } satisfies ErrorResponse,
 };
 
+export const SAMPLE_SNOOZED_UNTIL = '2026-01-16T12:00:00.000Z';
+
+/** Shared 409 body for `_snooze` with the expiry of the snooze already in effect. */
+export const ALERT_SERIES_ALREADY_SNOOZED_RESPONSE: OasExampleEntry = {
+  name: 'alertSeriesAlreadySnoozed',
+  summary: 'The series is already snoozed until the requested time',
+  value: {
+    code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
+    error: 'Conflict',
+    message: getSeriesAlreadySnoozedMessage(SAMPLE_GROUP_HASH, SAMPLE_SNOOZED_UNTIL),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+    },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for `_unsnooze` on a series with no snooze in effect. */
+export const ALERT_SERIES_NOT_SNOOZED_RESPONSE: OasExampleEntry = {
+  name: 'alertSeriesNotSnoozed',
+  summary: 'The series is not snoozed, so the request would change nothing',
+  value: {
+    code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    error: 'Conflict',
+    message: getSeriesNotSnoozedMessage(SAMPLE_GROUP_HASH),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+    },
+  } satisfies ErrorResponse,
+};
+
 /** Shared 404 body for episode-level alert-action routes. */
 export const ALERT_EPISODE_NOT_FOUND_RESPONSE: OasExampleEntry = {
-  name: 'alertEpisodeNotFound',
+  name: 'alertNotFound',
   summary: 'No alert exists for the given alert_id',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
@@ -140,7 +174,7 @@ export const ALERT_TAGS_UNCHANGED_RESPONSE: OasExampleEntry = {
 
 /** Shared 409 body for the lifecycle episode actions, which require the latest episode. */
 export const ALERT_EPISODE_NOT_LATEST_RESPONSE: OasExampleEntry = {
-  name: 'alertEpisodeNotLatest',
+  name: 'alertNotLatest',
   summary: 'The alert has been superseded by a newer alert of its series',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,

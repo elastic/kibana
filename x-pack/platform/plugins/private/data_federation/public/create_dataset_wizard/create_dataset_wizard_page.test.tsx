@@ -19,7 +19,9 @@ import { CREATE_DATASET_PATH, DATASETS_PATH } from '../app_paths';
 import { useLoadList } from '../use_load_list';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+
 import { UI_COUNTER_EVENTS } from '../ui_counters';
+import { docLinksMock } from '../doc_links_mock';
 
 // `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
 // Loading the real module pulls in Monaco language registration which evaluates generated i18n
@@ -33,35 +35,6 @@ jest.mock('@kbn/code-editor', () => ({
     <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
   ),
 }));
-
-const docLinksMock = {
-  links: {
-    elasticsearch: {
-      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
-      mappingKeyword:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
-      mappingBoolean:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
-      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
-      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
-      mappingUnsignedLong:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
-      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
-    },
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
 
 describe('CreateDatasetWizardPage', () => {
   const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {

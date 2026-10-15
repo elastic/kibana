@@ -125,6 +125,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
     });
     await apiServices.alertingV2.ruleEvents.seed([event]);
 
+    const snoozeResponse = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
+      headers: writerHeaders,
+      body: { items: [{ series_id: buildSeriesId(event) }] },
+    });
+    expect(snoozeResponse).toHaveStatusCode(200);
+
     const response = await apiClient.post(BULK_UNSNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [{ series_id: buildSeriesId(event) }] },
@@ -145,6 +151,53 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       rule_id: ruleId,
     });
   });
+
+  apiTest(
+    'precondition: reports INVALID_ALERT_STATE_TRANSITION for a series that is not snoozed',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-series-unsnooze-no-op-rule';
+      const snoozedEvent = buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: buildGroupHash('bulk-series-unsnooze-no-op-snoozed-group'),
+        alert: { id: 'bulk-series-unsnooze-no-op-snoozed-episode', status: 'active' },
+      });
+      const notSnoozedEvent = buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: buildGroupHash('bulk-series-unsnooze-no-op-not-snoozed-group'),
+        alert: { id: 'bulk-series-unsnooze-no-op-not-snoozed-episode', status: 'active' },
+      });
+      await apiServices.alertingV2.ruleEvents.seed([snoozedEvent, notSnoozedEvent]);
+
+      const snoozeResponse = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ series_id: buildSeriesId(snoozedEvent) }] },
+      });
+      expect(snoozeResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.post(BULK_UNSNOOZE_SERIES_ACTION_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [
+            { series_id: buildSeriesId(snoozedEvent) },
+            { series_id: buildSeriesId(notSnoozedEvent) },
+          ],
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(buildSeriesId(notSnoozedEvent));
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unsnooze'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({ group_hash: snoozedEvent.group_hash });
+    }
+  );
 
   apiTest(
     'partial success: reports ALERT_GROUP_NOT_FOUND when some series_ids are unknown',

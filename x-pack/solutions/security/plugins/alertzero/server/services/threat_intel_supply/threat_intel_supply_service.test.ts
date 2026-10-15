@@ -69,6 +69,9 @@ describe('ThreatIntelSupplyService', () => {
   const esClient = {
     indices: {
       exists: jest.fn(async () => true),
+      getMapping: jest.fn(async () => ({
+        '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
+      })),
       getFieldMapping: jest.fn(async () => ({
         '.kibana-threat-reports': {
           mappings: {
@@ -120,7 +123,11 @@ describe('ThreatIntelSupplyService', () => {
     updateWorkflow.mockClear();
     getWorkflowStatus.mockClear();
     ensureInstaller.mockClear();
+    (esClient.inference.get as jest.Mock).mockClear();
     (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
+    });
     (esClient.inference.get as jest.Mock).mockResolvedValue({});
   });
 
@@ -143,6 +150,117 @@ describe('ThreatIntelSupplyService', () => {
     expect(await createService().evaluateHardGate(request)).toEqual({
       ok: false,
       reasonCodes: ['reports_index_missing'],
+    });
+  });
+
+  describe('when the reports index exists without its template', () => {
+    beforeEach(() => {
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+        '.kibana-threat-reports': { mappings: { dynamic: 'true' } },
+      });
+    });
+
+    it('returns reports_index_unmanaged', async () => {
+      expect(await createService().evaluateHardGate(request)).toEqual({
+        ok: false,
+        reasonCodes: ['reports_index_unmanaged'],
+      });
+    });
+
+    it('skips the embedding check', async () => {
+      await createService().evaluateHardGate(request);
+      expect(esClient.inference.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when ensuring supply fails on the attribute workflow', () => {
+    const ensureWithMissingAttribute = async () => {
+      workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
+      workflows.set(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, { enabled: false });
+      // ATTR_A is missing and there is no installer to create it.
+      return createService([SPACE_A, SPACE_B], { withInstaller: false })
+        .ensureSupplyForSpace(SPACE_A, request)
+        .catch((error) => error);
+    };
+
+    it('rethrows the original error', async () => {
+      expect(await ensureWithMissingAttribute()).toBeInstanceOf(ThreatIntelSupplyNotInstalledError);
+    });
+
+    it('leaves ingest off when no other space has Hunt on', async () => {
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(false);
+    });
+
+    it('leaves enrich off when no other space has Hunt on', async () => {
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID)?.enabled).toBe(false);
+    });
+
+    it('leaves ingest on when a concurrent request enabled Hunt in this space', async () => {
+      huntEnabledBySpace.set(SPACE_A, true);
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
+    it('leaves ingest on when the Hunt status check fails', async () => {
+      getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
+    it('still rethrows the original error when the Hunt status check fails', async () => {
+      getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+      expect(await ensureWithMissingAttribute()).toBeInstanceOf(ThreatIntelSupplyNotInstalledError);
+    });
+
+    it('keeps globals on when this call flipped them but another space has Hunt on', async () => {
+      huntEnabledBySpace.set(SPACE_B, true);
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
+    it('leaves ingest on when another space enables Hunt during the enrich undo', async () => {
+      const defaultUpdate = updateWorkflow.getMockImplementation()!;
+      updateWorkflow.mockImplementation(async (id: string, patch: { enabled: boolean }) => {
+        const result = await defaultUpdate(id, patch);
+        if (id === THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID && patch.enabled === false) {
+          huntEnabledBySpace.set(SPACE_B, true);
+        }
+        return result;
+      });
+      try {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+      } finally {
+        updateWorkflow.mockImplementation(defaultUpdate);
+      }
+    });
+
+    describe('when an undo step fails', () => {
+      // The first status call is the this-space check. Undo then runs in reverse, so enrich
+      // is undone first and its other-space Hunt check is the call that fails.
+      beforeEach(() => {
+        getWorkflowStatus
+          .mockResolvedValueOnce({ installed: true, enabled: false, workflowId: 'hunt-a' })
+          .mockRejectedValueOnce(new Error('status unavailable'));
+      });
+
+      it('still rethrows the original error', async () => {
+        expect(await ensureWithMissingAttribute()).toBeInstanceOf(
+          ThreatIntelSupplyNotInstalledError
+        );
+      });
+
+      it('leaves the workflow whose undo failed on', async () => {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID)?.enabled).toBe(true);
+      });
+
+      it('still undoes the remaining flips', async () => {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(false);
+      });
     });
   });
 

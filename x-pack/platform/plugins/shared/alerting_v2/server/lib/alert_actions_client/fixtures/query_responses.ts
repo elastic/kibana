@@ -138,3 +138,31 @@ export const getAlertActionStateESQLResponse = (
   columns: [...ALERT_ACTION_STATE_COLUMNS],
   values: rows.map(toAlertActionStateRow) as EsqlQueryResponse['values'],
 });
+
+/**
+ * Column order of the series-state projection in
+ * `context_loaders/load_series_action_states.ts`.
+ */
+const SERIES_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: 'series_id', type: 'keyword' },
+  { name: 'last_snooze_action', type: 'keyword' },
+  { name: 'snoozed_until', type: 'date' },
+];
+
+/** One series-state row as the loader reads it; omitted columns are null. */
+export interface SeriesActionStateRowOverrides {
+  series_id?: string;
+  last_snooze_action?: 'snooze' | 'unsnooze' | null;
+  snoozed_until?: string | null;
+}
+
+export const getSeriesActionStateESQLResponse = (
+  rows: readonly SeriesActionStateRowOverrides[] = []
+): EsqlQueryResponse => ({
+  columns: [...SERIES_ACTION_STATE_COLUMNS],
+  values: rows.map((row) => [
+    row.series_id ?? 'series-1',
+    row.last_snooze_action ?? null,
+    row.snoozed_until ?? null,
+  ]),
+});

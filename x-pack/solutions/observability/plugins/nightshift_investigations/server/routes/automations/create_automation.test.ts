@@ -23,7 +23,7 @@ const body = {
   name: 'Triage',
   trigger: { rows: [{ kind: 'alert' as const }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
 };
 
@@ -76,8 +76,8 @@ it('stores tags and the requested enabled state', async () => {
 
 it('turns the UI channel action into an investigation lifecycle destination', async () => {
   const completion = { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' };
-  const result = await call({ completion });
-  expect(result.completion).toEqual(completion);
+  const result = await call({ completions: [completion] });
+  expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
   expect(workflow.steps[0].with.notificationDestinations).toEqual([
     {

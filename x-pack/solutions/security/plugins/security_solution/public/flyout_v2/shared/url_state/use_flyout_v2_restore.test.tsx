@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { encode } from '@kbn/rison';
-import { openDescriptorAsStart, useFlyoutV2RestoreFromUrl } from './use_flyout_v2_restore';
+import { useFlyoutV2RestoreFromUrl } from './use_flyout_v2_restore';
 import { FLYOUT_V2_URL_PARAM, FLYOUT_V2_TIMELINE_URL_PARAM } from './flyout_v2_url_param';
 import type { FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { useFlyoutApi } from '../../use_flyout_api';
@@ -433,61 +433,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       documentId: 'doc-1',
       indexName: '.siem-signals-*',
       origin: FLYOUT_ORIGIN.URL_RESTORE,
-    });
-  });
-
-  it('forwards an origin flyout size for an attack, document, or rule opened as start', () => {
-    openDescriptorAsStart(
-      { kind: 'attack', attackId: 'atk-1', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 'm' }
-    );
-    openDescriptorAsStart(
-      { kind: 'document', documentId: 'alert-1', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 640 }
-    );
-    openDescriptorAsStart(
-      { kind: 'documentFromPattern', documentId: 'alert-2', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 640 }
-    );
-    openDescriptorAsStart(
-      { kind: 'rule', ruleId: 'rule-1' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 's' }
-    );
-
-    expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
-      attackId: 'atk-1',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 'm',
-    });
-    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
-      documentId: 'alert-1',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 640,
-    });
-    expect(mockFlyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
-      documentId: 'alert-2',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 640,
-    });
-    expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
-      ruleId: 'rule-1',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 's',
     });
   });
 

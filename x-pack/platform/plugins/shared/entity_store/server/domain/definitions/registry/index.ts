@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+export { EntityDefinitionRegistry } from './entity_definition_registry';
 export {
-  EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
   ENTITY_DEFINITION_TYPE_MAX_LENGTH,
-} from './entity_definition_registry';
+} from '../../../../common/domain/definitions/entity_schema';
 export type {
   RegistrableEntityDefinition,
   RegisteredEntityDefinition,
