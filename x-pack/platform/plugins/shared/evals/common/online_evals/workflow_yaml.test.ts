@@ -9,6 +9,7 @@ import { WorkflowSchema } from '@kbn/workflows/spec/schema';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import {
   buildOnlineEvalWorkflowYaml,
+  isLegacyOnlineEvalWorkflowYaml,
   parseOnlineEvalWorkflowYaml,
   type OnlineEvalWorkflowConfig,
 } from './workflow_yaml';
@@ -70,6 +71,32 @@ describe('online eval workflow yaml', () => {
 
     expect(yaml).toContain(CURRENT_TRACE_FILTER_LINE);
     expect(yaml).not.toContain('attributes.evaluator.name IS NULL');
+  });
+
+  it('targets the workflow space for the evaluate and persist steps', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
+
+    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/_evaluate');
+    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/online_scores');
+  });
+
+  it('parses legacy workflows whose step paths have no space prefix', () => {
+    const config = getConfig();
+    const yaml = buildOnlineEvalWorkflowYaml(config).replaceAll('/s/{{ workflow.spaceId }}', '');
+
+    expect(yaml).toContain('path: /internal/evals/_evaluate');
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+  });
+
+  it('flags only online eval workflows whose step paths have no space prefix as legacy', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
+    const legacyYaml = yaml.replaceAll('/s/{{ workflow.spaceId }}', '');
+
+    expect(isLegacyOnlineEvalWorkflowYaml(yaml)).toBe(false);
+    expect(isLegacyOnlineEvalWorkflowYaml(legacyYaml)).toBe(true);
+    expect(isLegacyOnlineEvalWorkflowYaml(legacyYaml.replace('evals-online', 'not-online'))).toBe(
+      false
+    );
   });
 
   it('returns undefined for non-online-evals workflows', () => {
