@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  ThreeWayDiffOutcome,
+  UpgradeConflictResolutionEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
@@ -666,6 +669,52 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
             getService
           );
         });
+      });
+
+      describe('customized with an upgrade (-AB diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            interval: '60m',
+            from: 'now-24h',
+            to: 'now',
+          },
+          patch: {
+            interval: '1h',
+            from: 'now-2d',
+          },
+          upgrade: {
+            type: 'query',
+            interval: '60m',
+            from: 'now-24h',
+            to: 'now',
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'rule_schedule',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: { interval: '1h', from: 'now-2d', to: 'now' },
+              target: { interval: '1h', from: 'now-1d', to: 'now' },
+              merged: { interval: '1h', from: 'now-1d', to: 'now' },
+            },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'rule_schedule',
+            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+            expectedFieldsAfterUpgrade: { interval: '1h', from: 'now-1d', to: 'now' },
+          },
+          getService
+        );
       });
     });
   });
