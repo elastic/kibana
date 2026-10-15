@@ -20,7 +20,8 @@ import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
 const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';
 /** The brief tool's name on the wire: Agent Builder replaces dots with underscores. */
 const BRIEF_TOOL_LLM_NAME = 'security_generate_entity_analytics_brief';
-const SUBMIT_BRIEF_TOOL_NAME = 'submit_entity_analytics_brief';
+/** The inference plugin's structured-output tool, which the brief's model call forces. */
+const SUBMIT_BRIEF_TOOL_NAME = 'structuredOutput';
 const SCOPE_ATTACHMENT_ID = 'brief-scope';
 
 export const SEEDED_USER = { id: 'user:brief-scout-user', name: 'brief-scout-user' } as const;

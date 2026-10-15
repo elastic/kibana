@@ -56,13 +56,12 @@ export const generateBrief = async ({
   });
   const fetched = Date.now();
 
-  const { draft, repaired } = await draftBrief({
+  const draft = await draftBrief({
     inferenceClient,
     scope,
     facts,
     coverage: describeCoverage(scope, entities),
     abortSignal,
-    logger,
   });
   const composed = Date.now();
   const verified = verifyDraft(draft, facts, scope);
@@ -82,7 +81,7 @@ export const generateBrief = async ({
   logger.debug(
     `AI brief: fetch ${fetched - started}ms, compose ${composed - fetched}ms, total ${took}ms; ` +
       `${candidates.length} candidates, ${verified.priorities.length} priorities, ` +
-      `${verified.droppedPriorityCount} dropped, repaired ${repaired}`
+      `${verified.droppedPriorityCount} dropped`
   );
   return {
     brief: renderBrief({

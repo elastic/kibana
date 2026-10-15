@@ -7,22 +7,8 @@
 
 import { once, uniq } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/core/server';
-import type {
-  BoundInferenceClient,
-  Message,
-  ToolCall,
-  ToolCallArguments,
-  ToolDefinition,
-  ToolSchema,
-} from '@kbn/inference-common';
-import {
-  createInferenceInternalError,
-  isInferenceProviderError,
-  isInferenceRequestAbortedError,
-  isToolValidationError,
-  MessageRole,
-} from '@kbn/inference-common';
+import type { BoundInferenceClient, ToolSchema } from '@kbn/inference-common';
+import { createInferenceInternalError } from '@kbn/inference-common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityFacts } from './brief_types';
@@ -34,143 +20,36 @@ import {
   formatCount,
 } from './describe_scope';
 
-/** Provider statuses the inference plugin doesn't retry by default. */
-const NON_RETRYABLE_STATUSES = new Set([400, 401, 402, 403, 404, 405, 406, 407, 409]);
-
-/** The plugin's default retry policy minus tool validation errors, which get our single repair. */
-const shouldRetry = (error: Error): boolean => {
-  if (isInferenceProviderError(error)) {
-    return error.status === undefined || !NON_RETRYABLE_STATUSES.has(error.status);
-  }
-  return isInferenceRequestAbortedError(error);
-};
-
-interface Attempt {
-  toolCall?: ToolCall;
-  draft?: BriefDraft;
-  errors: string[];
-}
-
-/** The model drafts the brief with one forced tool call, repairing a schema-invalid answer once. */
+/** The model drafts the brief in one structured-output call. The inference plugin retries an invalid answer once. */
 export const draftBrief = async ({
   inferenceClient,
   scope,
   facts,
   coverage,
   abortSignal,
-  logger,
 }: {
   inferenceClient: BoundInferenceClient;
   scope: EntityAnalyticsScope;
   facts: EntityFacts[];
   coverage: string;
   abortSignal?: AbortSignal;
-  logger: Logger;
-}): Promise<{ draft: BriefDraft; repaired: boolean }> => {
-  const messages: Message[] = [
-    { role: MessageRole.User, content: buildUserMessage({ scope, facts, coverage }) },
-  ];
-
-  const callModel = async (conversation: Message[]): Promise<Attempt> => {
-    try {
-      const { toolCalls } = await inferenceClient.chatComplete({
-        system: SYSTEM_PROMPT,
-        messages: conversation,
-        tools: { [SUBMIT_BRIEF_TOOL_NAME]: getSubmitBriefTool() },
-        toolChoice: { function: SUBMIT_BRIEF_TOOL_NAME },
-        // The same view should give the same brief. Models without temperature support drop it.
-        temperature: 0,
-        abortSignal,
-        retryConfiguration: { retryOn: shouldRetry },
-      });
-      const toolCall = toolCalls.find(({ function: fn }) => fn.name === SUBMIT_BRIEF_TOOL_NAME);
-      return parseToolCall(toolCall);
-    } catch (error) {
-      if (!isToolValidationError(error)) {
-        throw error;
-      }
-      // The plugin rejected the arguments against the JSON schema: recover them for the repair.
-      const failed = error.meta.toolCalls?.find(
-        ({ function: fn }) => fn.name === SUBMIT_BRIEF_TOOL_NAME
-      );
-      const toolCall = failed && {
-        toolCallId: failed.toolCallId,
-        function: {
-          name: SUBMIT_BRIEF_TOOL_NAME,
-          arguments: parseArguments(error.meta.arguments ?? failed.function.arguments),
-        },
-      };
-      return { toolCall, errors: [error.meta.errorsText ?? error.message] };
-    }
-  };
-
-  const first = await callModel(messages);
-  if (first.draft) {
-    return { draft: first.draft, repaired: false };
-  }
-  logger.debug(
-    `AI brief needs a repair: ${first.errors.join(' | ')}; got keys [${Object.keys(
-      first.toolCall?.function.arguments ?? {}
-    ).join(', ')}]`
-  );
-  const second = await callModel([...messages, ...repairMessages(first.toolCall, first.errors)]);
-  if (!second.draft) {
+}): Promise<BriefDraft> => {
+  const { output } = await inferenceClient.output({
+    id: 'entity_analytics_ai_brief',
+    system: SYSTEM_PROMPT,
+    input: buildUserMessage({ scope, facts, coverage }),
+    schema: getBriefSchema(),
+    retry: { onValidationError: 1 },
+    abortSignal,
+  });
+  const parsed = BriefDraft.safeParse(output);
+  if (!parsed.success) {
     throw createInferenceInternalError(
-      `The AI output did not match the brief schema after one repair: ${second.errors
-        .slice(0, 5)
-        .join(' ')}`
+      `The AI output did not match the brief schema: ${parsed.error.message}`
     );
   }
-  return { draft: second.draft, repaired: true };
+  return parsed.data;
 };
-
-const parseToolCall = (toolCall: ToolCall | undefined): Attempt => {
-  if (!toolCall) {
-    return { errors: [`No ${SUBMIT_BRIEF_TOOL_NAME} tool call was made; call it with the brief.`] };
-  }
-  const parsed = BriefDraft.safeParse(toolCall.function.arguments);
-  if (!parsed.success) {
-    return {
-      toolCall,
-      errors: parsed.error.issues.map(
-        ({ path, message }) => `invalid output: ${path.join('.') || '(root)'}: ${message}`
-      ),
-    };
-  }
-  return { toolCall, draft: parsed.data, errors: [] };
-};
-
-const parseArguments = (raw: string | undefined): ToolCallArguments => {
-  try {
-    const parsed: unknown = JSON.parse(raw ?? '');
-    const isObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
-    return isObject ? { ...parsed } : {};
-  } catch {
-    return {};
-  }
-};
-
-/** The problems go back as the response to the model's tool call, or as a user message without one. */
-const repairMessages = (toolCall: ToolCall | undefined, errors: string[]): Message[] => {
-  const problems = errors.slice(0, 20).map((error) => error.slice(0, 400));
-  if (!toolCall) {
-    const list = problems.map((problem) => `- ${problem}`).join('\n');
-    return [{ role: MessageRole.User, content: `${REPAIR_INSTRUCTIONS}\n\nProblems:\n${list}` }];
-  }
-  return [
-    { role: MessageRole.Assistant, content: '', toolCalls: [toolCall] },
-    {
-      role: MessageRole.Tool,
-      name: SUBMIT_BRIEF_TOOL_NAME,
-      toolCallId: toolCall.toolCallId,
-      response: { status: 'rejected', instructions: REPAIR_INSTRUCTIONS, problems },
-    },
-  ];
-};
-
-// The prompt and the forced tool
-
-const SUBMIT_BRIEF_TOOL_NAME = 'submit_entity_analytics_brief';
 
 const isToolSchema = (value: unknown): value is ToolSchema =>
   typeof value === 'object' &&
@@ -179,8 +58,8 @@ const isToolSchema = (value: unknown): value is ToolSchema =>
   value.type === 'object' &&
   'properties' in value;
 
-/** The forced tool: the contract's `BriefDraft` as JSON schema, without `$schema` and zod's safe-integer bounds. */
-const getSubmitBriefTool = once((): Required<ToolDefinition<ToolSchema>> => {
+/** `BriefDraft` as JSON schema, without `$schema` and zod's safe-integer bounds. */
+const getBriefSchema = once((): ToolSchema => {
   const schema: unknown = JSON.parse(
     JSON.stringify(z.toJSONSchema(BriefDraft), (key, value) =>
       key === '$schema' || Math.abs(value) === Number.MAX_SAFE_INTEGER ? undefined : value
@@ -189,15 +68,10 @@ const getSubmitBriefTool = once((): Required<ToolDefinition<ToolSchema>> => {
   if (!isToolSchema(schema)) {
     throw new Error('The BriefDraft schema did not convert to an object JSON schema');
   }
-  return {
-    description: 'Submit the Entity Analytics brief. Call exactly once with the complete brief.',
-    schema,
-  };
+  return schema;
 });
 
-const REPAIR_INSTRUCTIONS = `The brief did not match the ${SUBMIT_BRIEF_TOOL_NAME} schema. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief. Keep what was not listed.`;
-
-const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from the facts about the entities in the page's needs-attention tiles. Call ${SUBMIT_BRIEF_TOOL_NAME} exactly once with the complete brief.
+const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from the facts about the entities in the page's needs-attention tiles. Answer with the complete brief in the required structure.
 
 ## The view and the entities
 - <view> lists the page's counts of flagged entities, with their change as the page shows it, and how many flagged entities <entities> covers.
