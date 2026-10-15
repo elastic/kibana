@@ -100,7 +100,7 @@ describe('bulkCreate', () => {
           { attachments: [{ ...comment, data: { content: longComment } }], caseId },
           clientArgs
         )
-      ).rejects.toThrow(`Too big: expected string to have <=${MAX_COMMENT_LENGTH} characters`);
+      ).rejects.toThrow(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
     });
 
     it('should throw an error if the comment is an empty string', async () => {
