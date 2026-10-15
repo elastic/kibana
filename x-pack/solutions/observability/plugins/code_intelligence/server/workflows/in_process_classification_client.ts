@@ -19,6 +19,7 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 
 import {
   hasCompleteFinding,
+  isWorkflowWrapperName,
   loggingClassificationRequestRt,
   loggingClassificationRt,
   MAX_WORKFLOW_REQUEST_BYTES,
@@ -30,6 +31,7 @@ import {
   type OtelClassification,
   type OtelClassificationRequest,
 } from '../domain/models/classification_codec';
+import { isSourceCodeMessage } from '../domain/logging/logging_wrappers';
 import type { OperationResult } from '../domain/models/operation_result';
 import type { ClassificationWorkflowClient } from '../domain/ports/workflows';
 
@@ -86,6 +88,19 @@ const withoutEmptyFinding = (value: unknown): unknown => {
 };
 
 /**
+ * The model fills `wrapperName` on most answers with placeholders such as `n/a` or the sink
+ * itself (`console.warn`). Only a plain identifier can name a wrapper, so anything else is removed
+ * instead of invalidating the classification.
+ */
+const withoutInvalidWrapperName = (value: unknown): unknown => {
+  const result = record(value);
+  if (result === undefined || !('wrapperName' in result)) return value;
+  if (isWorkflowWrapperName(result.wrapperName)) return result;
+  const { wrapperName: _wrapperName, ...rest } = result;
+  return rest;
+};
+
+/**
  * Keeps each result that satisfies its contract on its own; an invalid result is dropped so its
  * candidate counts as omitted and joins the caller's retry instead of failing every other result.
  */
@@ -95,7 +110,9 @@ const validResults = <Value>(
   textFields: readonly string[]
 ): readonly Value[] =>
   results.flatMap((result) => {
-    const decoded = codec.decode(withoutBlankText(withoutEmptyFinding(result), textFields));
+    const decoded = codec.decode(
+      withoutInvalidWrapperName(withoutBlankText(withoutEmptyFinding(result), textFields))
+    );
     return isLeft(decoded) ? [] : [decoded.right];
   });
 
@@ -130,14 +147,25 @@ const sourceBackedLoggingResults = (
 ): readonly LoggingClassification[] =>
   results.map((result) => {
     const candidate = request.candidates.find(({ id }) => id === result.id);
+    const { wrapperName } = result;
+    /** A wrapper must be named in the source the model saw; calls to a wrapper never name another. */
+    const sourceNamesWrapper =
+      wrapperName !== undefined &&
+      candidate !== undefined &&
+      candidate.wrapperName === undefined &&
+      [candidate.excerpt, ...candidate.evidence.map(({ excerpt }) => excerpt)].some((text) =>
+        text.includes(wrapperName)
+      );
     return {
       id: result.id,
       keep: result.keep,
       ...(result.level === undefined ? {} : { level: result.level }),
       ...(result.staticMessage !== undefined &&
-      candidate?.excerpt.includes(result.staticMessage) === true
+      candidate?.excerpt.includes(result.staticMessage) === true &&
+      !isSourceCodeMessage(result.staticMessage, candidate.excerpt)
         ? { staticMessage: result.staticMessage }
         : {}),
+      ...(sourceNamesWrapper ? { wrapperName } : {}),
       ...findingFields(result),
     };
   });
@@ -229,7 +257,7 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
       validated.value,
       loggingClassificationRt,
-      ['staticMessage', 'findingTitle', 'findingSummary']
+      ['staticMessage', 'wrapperName', 'findingTitle', 'findingSummary']
     );
     return result.status === 'failure'
       ? result

@@ -32,9 +32,10 @@ export const generateLogTemplates = ({
     );
     if (segments.length === 0) return [];
     /** Produces an ANDed MATCH_PHRASE predicate with safely escaped source-derived literals. */
-    const clauses: readonly string[] = segments.map(
-      (segment) => `MATCH_PHRASE(message, ${esqlStringLiteral(segment)})`
-    );
+    const clauses: readonly string[] =
+      signature.likePattern === undefined
+        ? segments.map((segment) => `MATCH_PHRASE(message, ${esqlStringLiteral(segment)})`)
+        : [`message LIKE ${esqlStringLiteral(signature.likePattern)}`];
     /** Keeps every dynamic interpolation bounded by its surrounding static anchors. */
     const query: string = `FROM logs*\n| WHERE ${clauses.join(' AND ')}`;
     /** Builds the codec-compatible, source-reader-neutral template value. */

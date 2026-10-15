@@ -24,9 +24,18 @@ export type {
   LoggingCandidate,
   LoggingDiscoveryDiagnostic,
   LoggingDiscoveryResult,
+  LoggingWrapperCall,
 } from './logging/discover_logging_candidates';
 export {
+  discoverWrapperCallCandidates,
+  MAX_LOGGING_WRAPPERS,
+  MAX_WRAPPER_CALL_CANDIDATES,
+  type WrapperCallDiscoveryResult,
+} from './logging/discover_wrapper_calls';
+export { loggingWrapperFor, type LoggingWrapper } from './logging/logging_wrappers';
+export {
   extractLogSignatures,
+  extractWrapperCallSignatures,
   staticPrefixOf,
   staticSegmentsOf,
 } from './logging/extract_log_signatures';

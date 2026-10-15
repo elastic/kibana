@@ -30,4 +30,7 @@ export const loggingIdiomPatterns: readonly string[] = [
   'println[ (]',
   '[lL]og(ger|ging)?[.]log[(]',
   '[lL]og(ger)?->log[(]',
+  // OpenTelemetry Logs API sinks; a bare `.emit(` is left out because it is usually an event emitter.
+  '[lL]ogger[.][eE]mit[(]',
+  '[.]logRecordBuilder[(][)]',
 ] as const;

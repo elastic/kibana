@@ -9,6 +9,7 @@ import { generateLogTemplates } from './generate_log_templates';
 import {
   decodeSourceLiteral,
   extractLogSignatures,
+  extractWrapperCallSignatures,
   staticPrefixOf,
   staticSegmentsOf,
 } from './extract_log_signatures';
@@ -438,5 +439,102 @@ describe('log signatures followed by a process exit', () => {
     expect(
       extractLogSignatures({ content: 'logger.info("shutting down");\nexitCode(1);' })
     ).toEqual([expect.objectContaining({ level: 'info' })]);
+  });
+});
+
+describe('wrapper call signatures', () => {
+  const evidence = [{ excerpt: 'emit(...)', line: 3, path: 'src/telemetry.ts' }];
+
+  it('takes the literal argument from source and the level from its words', () => {
+    const [signature] = extractWrapperCallSignatures({
+      callNames: ['emit', 'event'],
+      classified: {},
+      content: 'const a = 1;\n  emit("slack.turn.failed", { reason });',
+      evidence,
+      matchedLineIndex: 1,
+    });
+
+    expect(signature).toMatchObject({ level: 'error', message: 'slack.turn.failed', severity: 70 });
+    expect(signature.likePattern).toBeUndefined();
+    expect(
+      generateLogTemplates({ context: templateContext, signatures: [signature] })[0].query
+    ).toBe('FROM logs*\n| WHERE MATCH_PHRASE(message, "slack.turn.failed")');
+  });
+
+  it('prefers the source literal over a different classifier message, but keeps its level', () => {
+    expect(
+      extractWrapperCallSignatures({
+        callNames: ['emit'],
+        classified: { level: 'warn', staticMessage: 'slack.turn' },
+        content: 'emit("slack.turn.failed")',
+        evidence,
+        matchedLineIndex: 0,
+      })
+    ).toEqual([expect.objectContaining({ level: 'warn', message: 'slack.turn.failed' })]);
+  });
+
+  it('turns a template event name into a LIKE query', () => {
+    const signatures = extractWrapperCallSignatures({
+      callNames: ['event'],
+      classified: {},
+      content: 'telemetry?.event(`acp.retry.${recovery.phase}`, { attempt });',
+      evidence,
+      matchedLineIndex: 0,
+    });
+
+    expect(signatures).toEqual([
+      expect.objectContaining({ level: 'warn', likePattern: 'acp.retry.*' }),
+    ]);
+    expect(generateLogTemplates({ context: templateContext, signatures })[0].query).toBe(
+      'FROM logs*\n| WHERE message LIKE "acp.retry.*"'
+    );
+  });
+
+  it('escapes LIKE wildcards in the static text', () => {
+    expect(
+      extractWrapperCallSignatures({
+        callNames: ['emit'],
+        classified: {},
+        content: 'emit(`job*?.${id}`)',
+        evidence,
+        matchedLineIndex: 0,
+      })
+    ).toEqual([expect.objectContaining({ likePattern: 'job\\*\\?.*' })]);
+  });
+
+  it('keeps a phrase query for a message with spaces', () => {
+    expect(
+      extractWrapperCallSignatures({
+        callNames: ['report'],
+        classified: {},
+        content: 'report(`payment failed for ${id}`)',
+        evidence,
+        matchedLineIndex: 0,
+      })
+    ).toEqual([expect.objectContaining({ staticSegments: ['payment failed for'] })]);
+  });
+
+  it('falls back to the classifier message when the call spans lines', () => {
+    expect(
+      extractWrapperCallSignatures({
+        callNames: ['emit'],
+        classified: { staticMessage: 'job.done' },
+        content: 'emit(\n  "job.done")',
+        evidence,
+        matchedLineIndex: 0,
+      })
+    ).toEqual([expect.objectContaining({ level: 'info', message: 'job.done' })]);
+  });
+
+  it('produces nothing without a literal or classifier message', () => {
+    expect(
+      extractWrapperCallSignatures({
+        callNames: ['emit'],
+        classified: {},
+        content: 'emit(name)',
+        evidence,
+        matchedLineIndex: 0,
+      })
+    ).toEqual([]);
   });
 });

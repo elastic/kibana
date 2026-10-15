@@ -84,6 +84,18 @@ const workflowSourceLocationRt = t.type({
 const boundedWorkflowArray = <Value extends t.Mixed>(codec: Value, maximum: number, name: string) =>
   t.refinement(t.readonlyArray(codec), (value) => value.length <= maximum, name);
 
+/** Maximum length of a logging wrapper name crossing the workflow boundary. */
+export const MAX_WORKFLOW_WRAPPER_NAME_LENGTH = 128;
+
+/** Whether a value is a plain identifier short enough to name a logging wrapper. */
+export const isWorkflowWrapperName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length <= MAX_WORKFLOW_WRAPPER_NAME_LENGTH &&
+  /^[A-Za-z_][A-Za-z0-9_]*$/.test(value);
+
+/** Bounds a logging wrapper name to a plain identifier. */
+const wrapperNameRt = t.refinement(t.string, isWorkflowWrapperName, 'WrapperName');
+
 /** Validates logging evidence supplied to classification. */
 export const loggingClassificationCandidateRt = t.intersection([
   t.type({
@@ -95,7 +107,8 @@ export const loggingClassificationCandidateRt = t.intersection([
     excerpt: workflowExcerptRt,
     id: candidateIdRt,
   }),
-  t.partial({ language: workflowLanguageRt }),
+  /** `wrapperName` marks a call to that logging wrapper; the other evidence shows the wrapper. */
+  t.partial({ language: workflowLanguageRt, wrapperName: wrapperNameRt }),
 ]);
 
 /** A logging candidate validated before it is sent to the classification workflow. */
@@ -178,7 +191,12 @@ export const loggingClassificationRt = t.refinement(
   t.exact(
     t.intersection([
       t.type({ id: candidateIdRt, keep: t.boolean }),
-      t.partial({ level: logLevelRt, staticMessage: nonEmptyStringRt }),
+      t.partial({
+        level: logLevelRt,
+        staticMessage: nonEmptyStringRt,
+        /** A function the excerpt declares that passes its own parameter as this call's message. */
+        wrapperName: wrapperNameRt,
+      }),
       classificationFindingFieldsRt,
     ])
   ),

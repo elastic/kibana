@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { spawnSync } from 'node:child_process';
+
 import type {
   CatalogWriter,
   ClassificationWorkflowClient,
@@ -766,6 +768,163 @@ describe('extractRepository', () => {
       expect(result).toMatchObject({ error: { code: 'incomplete_classification' } });
       expect(findingsWriter.write.mock.calls[0]?.[0]).toHaveLength(1);
       expect(findingsWriter.prune).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('logging wrapper pass', () => {
+    const wrapperFiles: Readonly<Record<string, readonly string[]>> = {
+      'src/acp-runtime.ts': [
+        'telemetry?.event(`acp.retry.${recovery.phase}`, {});',
+        'turn.event("acp.retry.failed", {});',
+      ],
+      'src/slack.ts': ['app.event("app_mention", handler);'],
+      'src/telemetry.ts': [
+        'const emit = (name: string) =>',
+        '  logger.emit({ body: name });',
+        'emit("slack.turn.failed", {});',
+        'return {',
+        '  event: emit,',
+        '};',
+      ],
+    };
+    /** Standard idioms find only the sink; wrapper searches, which are case-sensitive, run real `grep -E`. */
+    const wrapperReader = (
+      failWrapperSearch = false,
+      files: Readonly<Record<string, readonly string[]>> = wrapperFiles
+    ): jest.Mocked<SourceReader> => ({
+      grep: jest.fn(async ({ caseSensitive, path, pattern }) => {
+        if (caseSensitive !== true) {
+          return pattern === '[lL]ogger[.][eE]mit[(]'
+            ? {
+                items: [
+                  { line: 2, path: 'src/telemetry.ts', text: '  logger.emit({ body: name });' },
+                ],
+                status: 'complete' as const,
+              }
+            : { items: [], status: 'complete' as const };
+        }
+        if (failWrapperSearch) {
+          return {
+            error: { code: 'grep_failed', message: 'sandbox down', retryable: true },
+            status: 'failure' as const,
+          };
+        }
+        return {
+          items: Object.entries(files)
+            .filter(([file]) => path === undefined || file === path)
+            .flatMap(([file, lines]) =>
+              lines.flatMap((text, index) =>
+                spawnSync('grep', ['-E', pattern], { encoding: 'utf8', input: text }).status === 0
+                  ? [{ line: index + 1, path: file, text }]
+                  : []
+              )
+            ),
+          status: 'complete' as const,
+        };
+      }),
+      listSourcePage: jest.fn<
+        ReturnType<SourceReader['listSourcePage']>,
+        Parameters<SourceReader['listSourcePage']>
+      >(async () => ({ items: [], status: 'complete' })),
+      readWindow: jest.fn(async ({ endLine, path, startLine }) => {
+        const lines = files[path] ?? [];
+        const last = Math.min(endLine, lines.length);
+        return {
+          status: 'success' as const,
+          value: { endLine: last, lines: lines.slice(startLine - 1, last), path, startLine },
+        };
+      }),
+    });
+    /** Names the given wrapper for the sink and rejects the Slack Bolt subscription that shares a name. */
+    const wrapperWorkflows = (
+      wrapperName: string | undefined
+    ): jest.Mocked<ClassificationWorkflowClient> => ({
+      classifyLogging: jest.fn(async ({ candidates }) => ({
+        status: 'success' as const,
+        value: candidates.map(({ excerpt, id, wrapperName: called }) =>
+          called === undefined
+            ? {
+                id,
+                keep: true,
+                level: 'info' as const,
+                ...(wrapperName === undefined ? {} : { wrapperName }),
+              }
+            : { id, keep: !excerpt.includes('app.event') }
+        ),
+      })),
+      classifyOtel: jest.fn(workflows.classifyOtel),
+    });
+
+    it('classifies literal calls to a named wrapper and its alias in a second pass', async () => {
+      const catalogWriter = successfulWriter();
+      const classification = wrapperWorkflows('emit');
+
+      const result = await run(catalogWriter, wrapperReader(), classification);
+
+      expect(result.status).toBe('success');
+      expect(classification.classifyLogging).toHaveBeenCalledTimes(2);
+      const secondPass = classification.classifyLogging.mock.calls[1][0].candidates;
+      expect(secondPass.map(({ wrapperName }) => wrapperName)).toEqual([
+        'emit',
+        'emit',
+        'emit',
+        'emit',
+      ]);
+      expect(secondPass[0].evidence).toEqual([
+        expect.objectContaining({ path: 'src/acp-runtime.ts' }),
+        expect.objectContaining({ line: 2, path: 'src/telemetry.ts' }),
+        { excerpt: '  event: emit,', line: 5, path: 'src/telemetry.ts' },
+      ]);
+      const queries = catalogWriter.write.mock.calls[0][0].map(({ document }) => document.query);
+      expect(queries.sort()).toEqual([
+        'FROM logs*\n| WHERE MATCH_PHRASE(message, "acp.retry.failed")',
+        'FROM logs*\n| WHERE MATCH_PHRASE(message, "slack.turn.failed")',
+        'FROM logs*\n| WHERE message LIKE "acp.retry.*"',
+      ]);
+      const levels = catalogWriter.write.mock.calls[0][0].map(({ document }) => document.logLevel);
+      expect(levels.sort()).toEqual(['error', 'error', 'warn']);
+      expect(catalogWriter.prune).toHaveBeenCalled();
+    });
+
+    it('finds the wrapper from the source when the classifier leaves wrapperName out', async () => {
+      const catalogWriter = successfulWriter();
+      const classification = wrapperWorkflows(undefined);
+
+      const result = await run(catalogWriter, wrapperReader(), classification);
+
+      expect(result.status).toBe('success');
+      expect(classification.classifyLogging).toHaveBeenCalledTimes(2);
+      const queries = catalogWriter.write.mock.calls[0][0].map(({ document }) => document.query);
+      expect(queries).toContain('FROM logs*\n| WHERE MATCH_PHRASE(message, "slack.turn.failed")');
+    });
+
+    it('runs no second pass when the named wrapper is not declared in the source', async () => {
+      /** The sink's body is not a parameter, so the source proves no wrapper either. */
+      const reader = wrapperReader(false, {
+        ...wrapperFiles,
+        'src/telemetry.ts': ['const emit = () =>', '  logger.emit({ body: name });'],
+      });
+      const classification = wrapperWorkflows('publishEvent');
+
+      const result = await run(successfulWriter(), reader, classification);
+
+      expect(result.status).toBe('success');
+      expect(classification.classifyLogging).toHaveBeenCalledTimes(1);
+      expect(reader.grep.mock.calls.some(([request]) => request.caseSensitive === true)).toBe(
+        false
+      );
+    });
+
+    it('fails without writing when the wrapper search fails, like the first pass', async () => {
+      const catalogWriter = successfulWriter();
+
+      const result = await run(catalogWriter, wrapperReader(true), wrapperWorkflows('emit'));
+
+      expect(result).toMatchObject({
+        error: { code: 'incomplete_source_discovery', message: 'sandbox down sandbox down' },
+        status: 'failure',
+      });
+      expect(catalogWriter.write).not.toHaveBeenCalled();
     });
   });
 

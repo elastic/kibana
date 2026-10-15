@@ -429,6 +429,114 @@ describe('discoverLoggingCandidates', () => {
     expect(result.diagnostics[1]).toMatchObject({ line: 1, path: 'src/app.ts' });
   });
 
+  describe('wrapper context', () => {
+    /** A file whose OpenTelemetry sink at line 20 sits in a closure declared at line 5. */
+    const source: readonly string[] = Array.from({ length: 24 }, (_, index) => {
+      if (index === 4) return 'const emit = (name: string, details = {}) =>';
+      if (index === 5) return '  safe(() => {';
+      if (index === 19) return '    logger.emit({ body: name, attributes });';
+      return '    const value = compute();';
+    });
+    const sourceReader = (sink: string, failContext = false): jest.Mocked<SourceReader> => {
+      const lines = source.map((line, index) => (index === 19 ? sink : line));
+      return {
+        grep: jest.fn(async ({ pattern }) =>
+          pattern === '[lL]ogger[.][eE]mit[(]'
+            ? {
+                items: [{ line: 20, path: 'src/telemetry.ts', text: sink }],
+                status: 'complete' as const,
+              }
+            : { items: [], status: 'complete' as const }
+        ),
+        listSourcePage: jest.fn<
+          ReturnType<SourceReader['listSourcePage']>,
+          Parameters<SourceReader['listSourcePage']>
+        >(async () => ({ items: [], status: 'complete' })),
+        readWindow: jest.fn(async ({ endLine, path, startLine }) =>
+          failContext && endLine < 20
+            ? {
+                error: { code: 'show_failed', message: 'gone', retryable: true },
+                status: 'failure' as const,
+              }
+            : {
+                status: 'success' as const,
+                value: { endLine, lines: lines.slice(startLine - 1, endLine), path, startLine },
+              }
+        ),
+      };
+    };
+
+    it('adds the enclosing declaration of a sink with a non-literal message', async () => {
+      const reader = sourceReader('    logger.emit({ body: name, attributes });');
+
+      const result = await discoverLoggingCandidates({ reader, repository });
+
+      expect(reader.readWindow).toHaveBeenLastCalledWith(
+        expect.objectContaining({ endLine: 16, startLine: 1 })
+      );
+      expect(result.diagnostics).toEqual([]);
+      expect(result.candidates).toHaveLength(1);
+      expect(result.candidates[0].evidence).toEqual([
+        expect.objectContaining({ line: 20 }),
+        {
+          excerpt:
+            'const emit = (name: string, details = {}) =>\n  safe(() => {\n    const value = compute();\n    const value = compute();',
+          line: 5,
+          path: 'src/telemetry.ts',
+        },
+      ]);
+      expect(result.candidates[0].declaredWrapperName).toBe('emit');
+    });
+
+    it('reads nothing more for a literal message', async () => {
+      const reader = sourceReader('    logger.emit({ body: "job.failed" });');
+
+      const result = await discoverLoggingCandidates({ reader, repository });
+
+      expect(reader.readWindow).toHaveBeenCalledTimes(1);
+      expect(result.candidates[0].evidence).toHaveLength(1);
+      expect(result.candidates[0].declaredWrapperName).toBeUndefined();
+    });
+
+    it('reports a failed context read as a window diagnostic', async () => {
+      const reader = sourceReader('    logger.emit({ body: name, attributes });', true);
+
+      const result = await discoverLoggingCandidates({ reader, repository });
+
+      expect(result.candidates).toEqual([]);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({ kind: 'window', line: 20, path: 'src/telemetry.ts' }),
+      ]);
+    });
+
+    it('reads nothing more when the declaration is inside the window', async () => {
+      const reader = readerWith({
+        grep: async ({ pattern }) =>
+          pattern === loggingIdiomPatterns[2]
+            ? {
+                items: [{ line: 2, path: 'src/log.ts', text: '  console.error(message)' }],
+                status: 'complete',
+              }
+            : { items: [], status: 'complete' },
+        readWindow: jest.fn(async ({ path, startLine }) => ({
+          status: 'success' as const,
+          value: {
+            endLine: 3,
+            lines: ['function reportFailure(message) {', '  console.error(message)', '}'],
+            path,
+            startLine,
+          },
+        })),
+      });
+
+      const result = await discoverLoggingCandidates({ reader, repository });
+
+      expect(reader.readWindow).toHaveBeenCalledTimes(1);
+      expect(result.candidates[0].evidence).toHaveLength(1);
+      expect(result.candidates[0].declaredWrapperName).toBe('reportFailure');
+    });
+  });
+
   it('reports a repeated cursor instead of looping forever', async () => {
     /** Every page repeats the same cursor, violating the paging contract. */
     const reader = readerWith({

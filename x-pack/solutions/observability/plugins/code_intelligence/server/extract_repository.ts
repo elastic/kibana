@@ -13,7 +13,10 @@ import {
   detectOtelInstrumentation,
   discoverLoggingCandidates,
   discoverOtelSignals,
+  discoverWrapperCallCandidates,
   extractLogSignatures,
+  extractWrapperCallSignatures,
+  loggingWrapperFor,
   findingDocumentId,
   generateLogTemplates,
   generateOtelTemplates,
@@ -33,6 +36,8 @@ import {
   type GeneratedTemplate,
   type LoggingCandidate,
   type LoggingClassificationCandidate,
+  type LoggingWrapper,
+  type LogSignature,
   type OperationError,
   type OperationResult,
   type OtelDiscoveryResult,
@@ -520,81 +525,141 @@ export const extractRepository = async (
     repository: repository.repository,
     revision: repository.commitSha,
   };
-  /** Keeps original logging source candidates paired with workflow-safe transport DTOs. */
-  const loggingWorkflowCandidates: readonly (LoggingClassificationCandidate & {
-    readonly source: LoggingCandidate;
-  })[] = loggingCandidates.map((candidate) => ({
-    evidence: workflowEvidence(candidate.evidence),
-    excerpt: firstWorkflowExcerpt(candidate.excerpt),
-    id: candidate.id,
-    source: candidate,
-  }));
-  /** Splits every logging candidate by both cardinality and exact workflow wire-size limits. */
-  const loggingBatches = workflowBatches<
-    LoggingClassificationCandidate & { readonly source: LoggingCandidate }
-  >({
-    requestFor: (candidates) => ({
-      candidates: candidates.map(({ source: _source, ...candidate }) => candidate),
-    }),
-    values: loggingWorkflowCandidates,
-  });
-  if (loggingBatches.status === 'failure') return loggingBatches;
   /** Counts candidates the workflow never decided; they produce no templates and block the prune. */
   let unclassifiedLogging = 0;
   /** Retains source-backed templates from every batch; only a non-retryable workflow failure stops the run. */
   const loggingTemplates: GeneratedTemplate[] = [];
   /** Collects review findings from both classifiers; `keep` and a finding are independent. */
   const findingDrafts: FindingDraft[] = [];
-  for (const candidates of loggingBatches.value) {
-    const classified = await classifyWorkflowBatch({
-      candidates,
-      logger: dependencies.logger,
-      repository: repository.repository,
-      run: (batch) =>
-        dependencies.workflows.classifyLogging({
-          candidates: batch.map(({ source: _source, ...candidate }) => candidate),
-        }),
-      workflow: 'logging',
+  /** Classifies one discovery pass of logging candidates and returns the wrappers it named. */
+  const classifyLoggingPass = async (
+    passCandidates: readonly LoggingCandidate[]
+  ): Promise<OperationResult<readonly LoggingWrapper[]>> => {
+    /** Keeps original logging source candidates paired with workflow-safe transport DTOs. */
+    const loggingWorkflowCandidates: readonly (LoggingClassificationCandidate & {
+      readonly source: LoggingCandidate;
+    })[] = passCandidates.map((candidate) => ({
+      evidence: workflowEvidence(candidate.evidence),
+      excerpt: firstWorkflowExcerpt(candidate.excerpt),
+      id: candidate.id,
+      ...(candidate.wrapper === undefined ? {} : { wrapperName: candidate.wrapper.name }),
+      source: candidate,
+    }));
+    /** Splits every logging candidate by both cardinality and exact workflow wire-size limits. */
+    const loggingBatches = workflowBatches<
+      LoggingClassificationCandidate & { readonly source: LoggingCandidate }
+    >({
+      requestFor: (candidates) => ({
+        candidates: candidates.map(({ source: _source, ...candidate }) => candidate),
+      }),
+      values: loggingWorkflowCandidates,
     });
-    if (classified.status === 'failure') return classified;
-    unclassifiedLogging += classified.value.unclassifiedIds.length;
-    const decisions = new Map(
-      classified.value.decisions.map((decision) => [decision.id, decision])
-    );
-    for (const candidate of candidates) {
-      /** Unclassified candidates have no decision and produce neither templates nor findings. */
-      const decision = decisions.get(candidate.id);
-      if (decision === undefined) continue;
-      /** Rejected candidates generate nothing for the catalog but may still carry a finding. */
-      const generated: readonly GeneratedTemplate[] =
-        decision.keep === true
-          ? generateLogTemplates({
-              context,
-              /** Classifier text is optional; source extraction remains the deterministic fallback. */
-              signatures: extractLogSignatures({
+    if (loggingBatches.status === 'failure') return loggingBatches;
+    const wrappers: LoggingWrapper[] = [];
+    for (const candidates of loggingBatches.value) {
+      const classified = await classifyWorkflowBatch({
+        candidates,
+        logger: dependencies.logger,
+        repository: repository.repository,
+        run: (batch) =>
+          dependencies.workflows.classifyLogging({
+            candidates: batch.map(({ source: _source, ...candidate }) => candidate),
+          }),
+        workflow: 'logging',
+      });
+      if (classified.status === 'failure') return classified;
+      unclassifiedLogging += classified.value.unclassifiedIds.length;
+      const decisions = new Map(
+        classified.value.decisions.map((decision) => [decision.id, decision])
+      );
+      for (const candidate of candidates) {
+        /** Unclassified candidates have no decision and produce neither templates nor findings. */
+        const decision = decisions.get(candidate.id);
+        if (decision === undefined) continue;
+        const { source } = candidate;
+        /**
+         * Only first-pass candidates can name a wrapper, so the second pass never recurses. The
+         * model often leaves `wrapperName` blank, so a name the source proves counts as well.
+         */
+        if (source.wrapper === undefined) {
+          for (const name of new Set([decision.wrapperName, source.declaredWrapperName])) {
+            const wrapper: LoggingWrapper | undefined =
+              name === undefined
+                ? undefined
+                : loggingWrapperFor({
+                    evidence: source.evidence,
+                    name,
+                    sourceWindow: source.sourceWindow,
+                  });
+            if (wrapper !== undefined) wrappers.push(wrapper);
+          }
+        }
+        /** Rejected candidates generate nothing for the catalog but may still carry a finding. */
+        const signatures = (): readonly LogSignature[] =>
+          source.wrapper === undefined
+            ? extractLogSignatures({
+                /** Classifier text is optional; source extraction remains the deterministic fallback. */
                 ...(decision.level !== undefined && decision.staticMessage !== undefined
                   ? {
                       classified: { level: decision.level, staticMessage: decision.staticMessage },
-                      content: candidate.source.sourceWindow,
+                      content: source.sourceWindow,
                     }
-                  : { content: candidate.source.sourceWindow }),
-                evidence: candidate.source.evidence,
-                matchedLineIndex: candidate.source.matchedLineIndex,
-              }),
-            })
-          : [];
-      loggingTemplates.push(...generated);
-      const finding = findingDraftFor({
-        candidateId: candidate.id,
-        decision,
-        evidence: candidate.source.evidence,
-        ...(decision.level === undefined ? {} : { logLevel: decision.level }),
-        signalType: 'log',
-        templates: generated,
-      });
-      if (finding !== undefined) findingDrafts.push(finding);
+                  : { content: source.sourceWindow }),
+                evidence: source.evidence,
+                matchedLineIndex: source.matchedLineIndex,
+              })
+            : extractWrapperCallSignatures({
+                callNames: source.wrapper.callNames,
+                classified: {
+                  ...(decision.level === undefined ? {} : { level: decision.level }),
+                  ...(decision.staticMessage === undefined
+                    ? {}
+                    : { staticMessage: decision.staticMessage }),
+                },
+                content: source.sourceWindow,
+                evidence: source.evidence,
+                matchedLineIndex: source.matchedLineIndex,
+              });
+        const generated: readonly GeneratedTemplate[] =
+          decision.keep === true ? generateLogTemplates({ context, signatures: signatures() }) : [];
+        loggingTemplates.push(...generated);
+        const finding = findingDraftFor({
+          candidateId: candidate.id,
+          decision,
+          evidence: source.evidence,
+          ...(decision.level === undefined ? {} : { logLevel: decision.level }),
+          signalType: 'log',
+          templates: generated,
+        });
+        if (finding !== undefined) findingDrafts.push(finding);
+      }
     }
+    return { status: 'success', value: wrappers };
+  };
+  const firstPass = await classifyLoggingPass(loggingCandidates);
+  if (firstPass.status === 'failure') return firstPass;
+  /** The single second pass classifies literal calls to the wrappers the first pass named. */
+  const wrapperDiscovery = await discoverWrapperCallCandidates({
+    knownIds: new Set(loggingCandidates.map(({ id }) => id)),
+    reader: dependencies.reader,
+    repository,
+    wrappers: firstPass.value,
+  });
+  /** A failed wrapper search leaves coverage incomplete, exactly like a failed first pass. */
+  const wrapperCoverageFailure = sourceCoverageFailure(wrapperDiscovery.diagnostics);
+  if (wrapperCoverageFailure !== undefined) {
+    return { error: wrapperCoverageFailure, status: 'failure' };
   }
+  const wrapperCandidates: readonly LoggingCandidate[] = wrapperDiscovery.candidates;
+  /** Explains invalid template exclusion without converting it into a required workflow failure. */
+  const diagnostics: ExtractionDiagnostic[] = [];
+  if (wrapperDiscovery.skippedWrappers > 0 || wrapperDiscovery.skippedCalls > 0) {
+    const message = `Logging wrapper search for ${repository.repository} left out ${wrapperDiscovery.skippedWrappers} wrappers and ${wrapperDiscovery.skippedCalls} call sites over its limits.`;
+    dependencies.logger.warn(message);
+    diagnostics.push({ code: 'logging_wrapper_calls_capped', message });
+  }
+  const secondPass = await classifyLoggingPass(wrapperCandidates);
+  if (secondPass.status === 'failure') return secondPass;
 
   /** Assigns stable opaque IDs so multiple signals from one source line remain independently classifiable. */
   const otelCandidates = otelCandidatesFor(otelSignals);
@@ -674,10 +739,8 @@ export const extractRepository = async (
   const templates = deduplicateTemplates([...loggingTemplates, ...otelTemplates]);
   /** Retains validation results for every deduplicated template. */
   const validation = new Map<string, QueryValidationResult>();
-  /** Explains invalid template exclusion without converting it into a required workflow failure. */
-  const diagnostics: ExtractionDiagnostic[] = [];
   const unclassified = unclassifiedLogging + unclassifiedOtel;
-  const classifiable = loggingCandidates.length + otelSignals.length;
+  const classifiable = loggingCandidates.length + wrapperCandidates.length + otelSignals.length;
   /** A large repository-wide gap signals a broken workflow rather than an occasional skipped ID. */
   const incompleteClassification = (written: boolean): OperationResult<never> => ({
     error: {

@@ -65,6 +65,57 @@ describe('InProcessClassificationWorkflowClient', () => {
     });
   });
 
+  it('forwards a wrapper name the source shows, and drops a placeholder, an unseen name, one on a wrapper call, or source code as a message', async () => {
+    const client = clientReturning({
+      results: [
+        { id: 'c1', keep: true, level: 'info', wrapperName: ' emit ' },
+        { id: 'c2', keep: true, level: 'info', wrapperName: 'publishEvent' },
+        { id: 'c3', keep: true, wrapperName: 'emit' },
+        { id: 'c4', keep: true, wrapperName: 'emit|.*' },
+        { id: 'c5', keep: true, level: 'warn', wrapperName: 'n/a' },
+        { id: 'c6', keep: true, level: 'warn', wrapperName: 'console.warn' },
+        { id: 'c7', keep: true, level: 'info', staticMessage: 'logger.emit({ body: name });' },
+        { id: 'c8', keep: true, level: 'info', staticMessage: 'name' },
+        { id: 'c9', keep: true, level: 'error', staticMessage: 'pi.error' },
+      ],
+    });
+
+    const result = await client.classifyLogging({
+      candidates: [
+        {
+          ...loggingCandidate('c1', '  logger.emit({ body: name });'),
+          evidence: [
+            { excerpt: '  logger.emit({ body: name });', line: 20, path: 'src/telemetry.ts' },
+            { excerpt: 'const emit = (name) =>', line: 5, path: 'src/telemetry.ts' },
+          ],
+        },
+        loggingCandidate('c2', '  logger.emit({ body: name });'),
+        { ...loggingCandidate('c3', 'emit("pi.error")'), wrapperName: 'emit' },
+        loggingCandidate('c4', 'emit(name)'),
+        loggingCandidate('c5', 'console.warn("slow")'),
+        loggingCandidate('c6', 'console.warn("slow")'),
+        loggingCandidate('c7', '  logger.emit({ body: name });'),
+        loggingCandidate('c8', '  logger.emit({ body: name });'),
+        loggingCandidate('c9', 'emit("pi.error", {});'),
+      ],
+    });
+
+    expect(result).toEqual({
+      status: 'success',
+      value: [
+        { id: 'c1', keep: true, level: 'info', wrapperName: 'emit' },
+        { id: 'c2', keep: true, level: 'info' },
+        { id: 'c3', keep: true },
+        { id: 'c4', keep: true },
+        { id: 'c5', keep: true, level: 'warn' },
+        { id: 'c6', keep: true, level: 'warn' },
+        { id: 'c7', keep: true, level: 'info' },
+        { id: 'c8', keep: true, level: 'info' },
+        { id: 'c9', keep: true, level: 'error', staticMessage: 'pi.error' },
+      ],
+    });
+  });
+
   it('keeps valid results when another result breaks its contract', async () => {
     const client = clientReturning({
       results: [
