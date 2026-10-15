@@ -2540,6 +2540,9 @@ importers:
       '@kbn/isomer-primitives-charts':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-charts
+      '@kbn/isomer-primitives-maps':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-maps
       '@kbn/isomer-primitives-vega':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-vega
@@ -9066,6 +9069,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-components: {}
 
   x-pack/platform/packages/shared/isomer/isomer-primitives-charts: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-maps: {}
 
   x-pack/platform/packages/shared/isomer/isomer-primitives-vega: {}
 

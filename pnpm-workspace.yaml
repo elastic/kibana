@@ -1289,6 +1289,7 @@ packages:
   - 'x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node'
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
   - 'x-pack/platform/packages/shared/isomer/isomer-primitives-charts'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-maps'
   - 'x-pack/platform/packages/shared/isomer/isomer-primitives-vega'
   - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'

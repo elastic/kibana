@@ -14,6 +14,8 @@ import type { ChartHints } from '@kbn/isomer-charts-elastic';
 import { componentsPack } from '@kbn/isomer-components';
 import { defineChartsPack, prepareCharts } from '@kbn/isomer-primitives-charts';
 import { cardContentWidth } from '@kbn/isomer-theme';
+import { defineMapsPack, type MapGeometry } from '@kbn/isomer-primitives-maps';
+import { vegaPack } from '@kbn/isomer-primitives-vega';
 import { fromRoot } from '@kbn/repo-info';
 
 const FONTS = fromRoot('src/core/packages/apps/server-internal/assets/fonts');
@@ -53,7 +55,12 @@ export interface ChartsDrawing {
  */
 export const createChartsDrawing = async ({
   hints,
-}: { hints?: ChartHints } = {}): Promise<ChartsDrawing> => {
+  geometry,
+}: {
+  hints?: ChartHints;
+  /** Boundary files for the maps pack, which ships none. */
+  geometry?: MapGeometry;
+} = {}): Promise<ChartsDrawing> => {
   const { defineElasticChartsNodeEngine } = await import('@kbn/isomer-charts-elastic-node');
   const engine = await defineElasticChartsNodeEngine({
     ...(hints ? { hints } : {}),
@@ -61,7 +68,12 @@ export const createChartsDrawing = async ({
   });
   // The snapshot surface draws in the runtime's default card frame; charts size themselves for it at DEFAULT_CHART_SIZE.
   const runtime = createKibanaIsomerRuntime({
-    packs: [componentsPack, defineChartsPack(engine, { drawHeight: DEFAULT_CHART_SIZE.height })],
+    packs: [
+      componentsPack,
+      vegaPack,
+      defineChartsPack(engine, { drawHeight: DEFAULT_CHART_SIZE.height }),
+      defineMapsPack(geometry ? { geometry } : {}),
+    ],
   });
   const walk = createChildNodeWalker(runtime.primitives);
   const takumi = createTakumiImageBackend({
