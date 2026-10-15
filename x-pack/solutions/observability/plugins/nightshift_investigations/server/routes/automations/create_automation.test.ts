@@ -23,7 +23,7 @@ const body = {
   name: 'Triage',
   trigger: { rows: [{ kind: 'alert' as const }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
 };
 
@@ -76,8 +76,8 @@ it('stores tags and the requested enabled state', async () => {
 
 it('turns the UI channel action into an investigation lifecycle destination', async () => {
   const completion = { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' };
-  const result = await call({ completion });
-  expect(result.completion).toEqual(completion);
+  const result = await call({ completions: [completion] });
+  expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
   expect(workflow.steps[0].with.notificationDestinations).toEqual([
     {
@@ -113,5 +113,24 @@ describe('request validation', () => {
 
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
+  });
+
+  it.each([
+    ['no filters', {}],
+    ['empty filter lists', { channels: [], users: [] }],
+    ['blank filter values', { channels: [' '], users: [''], messageFilter: '  ' }],
+  ])('rejects a Slack trigger row with %s', (_name, filters) => {
+    expect(() => parseRows([{ kind: 'slack', event: 'message', ...filters }])).toThrow(
+      'at least one of channels, users or messageFilter'
+    );
+  });
+
+  it.each([
+    ['channels', { channels: ['C123'] }],
+    ['users', { users: ['U123'] }],
+    ['messageFilter', { messageFilter: 'outage' }],
+  ])('accepts a Slack trigger row with only %s', (_name, filters) => {
+    const row = { kind: 'slack', event: 'message', ...filters };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
   });
 });

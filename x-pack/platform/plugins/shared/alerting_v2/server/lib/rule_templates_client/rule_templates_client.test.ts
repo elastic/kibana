@@ -11,6 +11,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RulesClient } from '../rules_client';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RuleTemplatesClient } from './rule_templates_client';
 import { buildRuleTemplateTagsAggregation } from './utils';
@@ -48,8 +50,9 @@ const createClient = (
   savedObjectsClient: SavedObjectsClientContract = savedObjectsClientMock.create()
 ) => {
   const { loggerService, mockLogger } = createLoggerService();
-  const client = new RuleTemplatesClient(savedObjectsClient, loggerService);
-  return { client, savedObjectsClient, loggerService, mockLogger };
+  const rulesClient = { createRule: jest.fn() } as unknown as jest.Mocked<RulesClient>;
+  const client = new RuleTemplatesClient(savedObjectsClient, loggerService, rulesClient);
+  return { client, savedObjectsClient, loggerService, mockLogger, rulesClient };
 };
 
 describe('RuleTemplatesClient', () => {
@@ -324,6 +327,84 @@ describe('RuleTemplatesClient', () => {
             rule_template_id: 'classic-template',
           },
         })
+      );
+    });
+  });
+
+  describe('installRuleTemplate', () => {
+    const data = {
+      ...validTemplateAttributes.rule,
+      metadata: { name: 'Pod CrashLoopBackOff (edited)' },
+    } as CreateRuleData;
+    const createdRule = { id: 'rule-1' } as RuleResponse;
+
+    const clientWithTemplate = () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'template-1',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: validTemplateAttributes,
+        references: [],
+      });
+      return createClient(savedObjectsClient);
+    };
+
+    it('creates the rule from the request body and records the template id', async () => {
+      const { client, rulesClient } = clientWithTemplate();
+      rulesClient.createRule.mockResolvedValue(createdRule);
+
+      await expect(client.installRuleTemplate({ id: 'template-1', data })).resolves.toBe(
+        createdRule
+      );
+
+      expect(rulesClient.createRule).toHaveBeenCalledTimes(1);
+      expect(rulesClient.createRule).toHaveBeenCalledWith({
+        data,
+        options: { template: { id: 'template-1' } },
+      });
+    });
+
+    it('does not create a rule when the template does not exist', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          'missing'
+        )
+      );
+      const { client, rulesClient } = createClient(savedObjectsClient);
+
+      await expect(client.installRuleTemplate({ id: 'missing', data })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND },
+      });
+      expect(rulesClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('does not create a rule when the stored template is unusable', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'broken-template',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: { engine: 'v2', rule: { kind: 'alert' } },
+        references: [],
+      });
+      const { client, rulesClient } = createClient(savedObjectsClient);
+
+      await expect(
+        client.installRuleTemplate({ id: 'broken-template', data })
+      ).rejects.toMatchObject({
+        data: { code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND },
+      });
+      expect(rulesClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('propagates rule creation failures', async () => {
+      const { client, rulesClient } = clientWithTemplate();
+      rulesClient.createRule.mockRejectedValue(new Error('Invalid rule'));
+
+      await expect(client.installRuleTemplate({ id: 'template-1', data })).rejects.toThrow(
+        'Invalid rule'
       );
     });
   });

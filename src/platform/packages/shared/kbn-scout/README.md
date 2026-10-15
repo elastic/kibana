@@ -536,7 +536,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 `cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
 
-- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- `projectType` (serverless only) must be one of `es | oblt | security | vectordb`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
 - You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
@@ -608,8 +608,7 @@ Enable it via the `http2` server config set; tests don't need any changes.
 
 ```bash
 node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
-node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.

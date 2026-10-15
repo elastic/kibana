@@ -1,0 +1,70 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkUpdateRequestExample1:
+          summary: Mixed patches
+          description: Run `PUT /api/synthetics/monitors/_bulk_update` to apply a different partial update to each monitor.
+          value:
+            updates:
+              - id: monitor1-id
+                attributes:
+                  enabled: false
+              - id: monitor2-id
+                attributes:
+                  tags: [bulk-patched]
+              - id: monitor3-id
+                attributes:
+                  schedule:
+                    number: '15'
+                    unit: m
+responses:
+  200:
+    description: >
+      A successful response. The `result` array is in request order.
+      Per-id failures (not found, validation, Fleet sync) set `updated: false` and `error` without failing the whole batch.
+      `errors` is present only when there are service-level sync errors.
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - result
+          properties:
+            result:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                  - updated
+                properties:
+                  id:
+                    type: string
+                    description: The monitor config ID from the request.
+                  updated:
+                    type: boolean
+                    description: If `true`, the monitor was updated. If `false`, see `error`.
+                  error:
+                    type: string
+                    description: Present when `updated` is `false`.
+            errors:
+              type: array
+              description: Optional service-level errors from the bulk sync.
+              items:
+                description: A service-level error from the bulk sync.
+        examples:
+          bulkUpdateResponseExample1:
+            description: A response from a bulk update with one failure.
+            value:
+              result:
+                - id: monitor1-id
+                  updated: true
+                - id: missing-id
+                  updated: false
+                  error: Monitor id missing-id not found!
+                - id: monitor3-id
+                  updated: true
+  400:
+    description: >
+      Bad request. Returned when `updates` is missing or empty, an `attributes` object is empty, or the same `id` appears more than once.

@@ -14,6 +14,7 @@ import { capitalize, uniqBy } from 'lodash';
 import {
   ToolType,
   apiTargets,
+  applyAgentApprovals,
   isApiAutoApproved,
   isRoundCompleteEvent,
   internalTools,
@@ -26,6 +27,7 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  AgentApprovals,
   ApiTarget,
   AssistantResponse,
   AutoApprovedApi,
@@ -198,12 +200,14 @@ const formatGrantedApis = (apis: readonly AutoApprovedApi[]): string =>
 const resolveSubagentApiGrant = async ({
   requested,
   interactivity,
+  subagentApprovals,
   prompts,
   promptId,
   agentId,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
+  subagentApprovals?: AgentApprovals;
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
@@ -232,8 +236,9 @@ const resolveSubagentApiGrant = async ({
     return settled('not_required');
   }
 
+  const coveredGrant = applyAgentApprovals({ interactivity, approvals: subagentApprovals });
   const pending = destructive.filter(
-    ({ target, api }) => !isApiAutoApproved({ interactivity, target, api })
+    ({ target, api }) => !isApiAutoApproved({ interactivity: coveredGrant, target, api })
   );
   if (pending.length === 0) {
     return settled('granted');
@@ -332,6 +337,9 @@ export const createSubagentTool = ({
   const allowedIdsSet = new Set(allowedIds);
   const inferenceFeatureIdBySubagent = new Map(
     orderedAllowed.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+  );
+  const approvalsBySubagentId = new Map(
+    orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
   );
 
   const schema = z.object({
@@ -441,6 +449,7 @@ export const createSubagentTool = ({
         const grant = await resolveSubagentApiGrant({
           requested: requestedApis,
           interactivity,
+          subagentApprovals: approvalsBySubagentId.get(agent_id),
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,

@@ -64,15 +64,21 @@ export {
   ProposedActionButton,
   type ProposedActionButtonProps,
 } from './src/components/details/proposed_action_button';
+export {
+  ProposedActionsList,
+  type ProposedActionsListProps,
+} from './src/components/details/proposed_actions_list';
 
 export {
   FlyoutGroupedAttachments,
   createFlyoutGroupedAttachmentsRegistry,
+  GroupedAttachmentList,
   GroupedAttachmentRow,
   GroupedAttachmentsSection,
   type FlyoutGroupedAttachmentDefinition,
   type FlyoutGroupedAttachmentRendererProps,
   type FlyoutGroupedAttachmentsRegistry,
+  type GroupedAttachmentListProps,
   type GroupedAttachmentRowAction,
   type GroupedAttachmentRowProps,
   type GroupedAttachmentsSectionProps,
@@ -126,6 +132,8 @@ export {
 } from './src/components/impact/impact_details_renderer';
 export {
   entityStoreIdType,
+  impactEntityFlyoutType,
+  type ImpactEntityFlyoutType,
   type ImpactEntityTarget,
 } from './src/components/impact/open_impact_entity';
 export {
