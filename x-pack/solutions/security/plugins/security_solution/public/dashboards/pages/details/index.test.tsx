@@ -110,7 +110,7 @@ describe('DashboardView', () => {
     });
     (useDashboardRenderer as jest.Mock).mockReturnValue(emptyRenderer);
     (getESQLAdHocDataview as jest.Mock).mockReset();
-    (SiemSearchBar as jest.Mock).mockClear();
+    (SiemSearchBar as unknown as jest.Mock).mockClear();
   });
   test('render when no error state', () => {
     const { queryByTestId } = render(
