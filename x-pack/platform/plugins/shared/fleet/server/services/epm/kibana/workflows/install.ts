@@ -123,28 +123,53 @@ export const installWorkflows = async ({
     workflows.push({ workflowId, yaml });
   }, isWorkflowAssetPath);
 
-  const refs = await pMap(
-    workflows,
-    async ({ workflowId, yaml }): Promise<KibanaAssetReference> => {
-      await client.install(FLEET_PACKAGE_WORKFLOW_ID, { spaceId, workflowId, values: { yaml } });
+  const previousIds = new Set(previousRefs.map(({ id }) => id));
+  const installedNewIds: string[] = [];
+  const failures: Error[] = [];
 
-      // install() resolves even when nothing was written (license, availability, ES readiness).
-      const { status } = await client.getWorkflowStatus(FLEET_PACKAGE_WORKFLOW_ID, {
-        spaceId,
-        workflowId,
-      });
-      const deferred = status === 'missing' || status === 'not_managed';
-      if (deferred) {
-        logger.warn(`Workflow ${workflowId} was not installed, deferring it`);
-      } else if (status === 'invalid') {
-        logger.warn(
-          `Workflow ${workflowId} was installed but does not pass workflow validation, it will stay disabled until fixed`
-        );
+  const results = await pMap(
+    workflows,
+    async ({ workflowId, yaml }): Promise<KibanaAssetReference | undefined> => {
+      try {
+        await client.install(FLEET_PACKAGE_WORKFLOW_ID, { spaceId, workflowId, values: { yaml } });
+        if (!previousIds.has(workflowId)) {
+          installedNewIds.push(workflowId);
+        }
+
+        // install() resolves even when nothing was written (license, availability, ES readiness).
+        const { status } = await client.getWorkflowStatus(FLEET_PACKAGE_WORKFLOW_ID, {
+          spaceId,
+          workflowId,
+        });
+        const deferred = status === 'missing' || status === 'not_managed';
+        if (deferred) {
+          logger.warn(`Workflow ${workflowId} was not installed, deferring it`);
+        } else if (status === 'invalid') {
+          logger.warn(
+            `Workflow ${workflowId} was installed but does not pass workflow validation, it will stay disabled until fixed`
+          );
+        }
+        return { id: workflowId, type: KibanaSavedObjectType.workflow, deferred };
+      } catch (error) {
+        failures.push(error);
+        return undefined;
       }
-      return { id: workflowId, type: KibanaSavedObjectType.workflow, deferred };
     },
     { concurrency: MAX_CONCURRENT_WORKFLOW_OPERATIONS }
   );
+
+  if (failures.length) {
+    // The refs are only saved once every workflow is installed, so workflows created by this
+    // run would be orphaned: no later uninstall or rollback would know about them.
+    await uninstallWorkflows({
+      client,
+      refs: installedNewIds.map((id) => ({ id, type: KibanaSavedObjectType.workflow })),
+      spaceId,
+      logger,
+    });
+    throw failures[0];
+  }
+  const refs = results.filter((ref): ref is KibanaAssetReference => ref !== undefined);
 
   const currentIds = new Set(refs.map(({ id }) => id));
   const removedRefs = previousRefs.filter(({ id }) => !currentIds.has(id));

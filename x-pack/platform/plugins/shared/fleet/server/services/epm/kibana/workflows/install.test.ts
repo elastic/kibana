@@ -194,6 +194,40 @@ describe('workflow assets', () => {
         workflowId: 'old-workflow',
       });
     });
+
+    it('removes the workflows created by a failed run and rethrows', async () => {
+      const client = createClient();
+      client.install.mockImplementation(async (_owner, { workflowId }) => {
+        if (workflowId?.endsWith('-broken')) {
+          throw new Error('boom');
+        }
+      });
+
+      await expect(
+        installWorkflows({
+          client,
+          packageInstallContext: createContext({
+            [WORKFLOW_PATH]: 'name: hello',
+            'my_pkg-1.0.0/kibana/workflow/my_pkg-kept.yml': 'name: kept',
+            'my_pkg-1.0.0/kibana/workflow/my_pkg-broken.yml': 'name: broken',
+          }),
+          spaceId: 'default',
+          logger,
+          previousRefs: [
+            {
+              id: `${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-kept`,
+              type: KibanaSavedObjectType.workflow,
+            },
+          ],
+        })
+      ).rejects.toThrow('boom');
+
+      expect(client.uninstall).toHaveBeenCalledTimes(1);
+      expect(client.uninstall).toHaveBeenCalledWith(FLEET_PACKAGE_WORKFLOW_ID, {
+        spaceId: 'default',
+        workflowId: `${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-hello`,
+      });
+    });
   });
 
   describe('uninstallWorkflows', () => {
