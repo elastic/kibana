@@ -11,9 +11,10 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
- * Service accounts are off by default, so they need their own config set: the shared
- * configurations cannot reach the feature at all. The test plugin exposes the workload API
- * (bind, unbind, run as the bound account) over HTTP for the security plugin's suites.
+ * Service accounts are on by default outside serverless, but off by default on serverless. The
+ * serverless configs need this flag to reach the feature, and the stateful config keeps it so
+ * every config in the set boots the same way. The test plugin exposes the workload API (bind,
+ * unbind, run as the bound account) over HTTP for the security plugin's suites.
  */
 export const serviceAccountsServerArgs = [
   '--xpack.security.serviceAccounts.enabled=true',
