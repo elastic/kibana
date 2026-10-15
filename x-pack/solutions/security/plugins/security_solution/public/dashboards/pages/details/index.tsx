@@ -113,6 +113,19 @@ const loadClickTimeDataViews = async (
   );
 };
 
+const mergeDataViews = (
+  published: DataView[] | undefined,
+  clickTimeViews: DataView[]
+): DataView[] => {
+  const merged = new Map<string, DataView>();
+  for (const view of [...(published ?? []), ...clickTimeViews]) {
+    if (view.id && !merged.has(view.id)) {
+      merged.set(view.id, view);
+    }
+  }
+  return [...merged.values()];
+};
+
 interface DashboardViewProps {
   initialViewMode: ViewMode;
 }
@@ -153,17 +166,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
 
     let cancelled = false;
     let requestId = 0;
-    const subscription = dashboardContainer.dataViews$.subscribe(() => {
+    const subscription = dashboardContainer.dataViews$.subscribe((publishedDataViews) => {
       const currentRequest = ++requestId;
       loadClickTimeDataViews(dashboardContainer, dataViews, http)
-        .then((views) => {
+        .then((clickTimeViews) => {
           if (!cancelled && currentRequest === requestId) {
-            setDashboardDataViews(views);
+            setDashboardDataViews(mergeDataViews(publishedDataViews, clickTimeViews));
           }
         })
         .catch(() => {
           if (!cancelled && currentRequest === requestId) {
-            setDashboardDataViews(undefined);
+            setDashboardDataViews(publishedDataViews?.length ? publishedDataViews : undefined);
           }
         });
     });

@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { getTranslationResultNode } from './translation_result';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { TranslateDashboardPanelState } from '../../types';
-
-const readAdHocDataViews = (panel: object | undefined) =>
-  get(panel, 'embeddableConfig.attributes.state.adHocDataViews') as unknown as Record<
-    string,
-    { timeFieldName?: string }
-  >;
 
 const baseState = {
   parsed_panel: {
@@ -83,130 +74,5 @@ describe('getTranslationResultNode', () => {
       expect(comment.message).toContain('logs-test-*');
       expect(comment.message).not.toContain(MISSING_INDEX_PATTERN_PLACEHOLDER);
     }
-  });
-
-  it('uses the @timestamp data view id when field caps finds the field', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({
-      fields: { '@timestamp': { date: {} } },
-    });
-    const node = getTranslationResultNode({
-      logger,
-      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
-    });
-    const esqlQuery = 'FROM logs-test-* | STATS count = COUNT(*) BY process.name';
-    const state = { ...baseState, esql_query: esqlQuery, index_pattern: 'logs-test-*' };
-
-    const result = await node(state, {});
-
-    expect(fieldCaps).toHaveBeenCalledWith({
-      index: 'logs-test-*',
-      fields: '@timestamp',
-      include_unmapped: false,
-    });
-    const expectedId = await getESQLAdHocDataviewId({
-      indexPattern: 'logs-test-*',
-      timeFieldName: '@timestamp',
-      projectRouting: undefined,
-    });
-    const adHocDataViews = readAdHocDataViews(result.elastic_panel);
-    expect(Object.keys(adHocDataViews)).toEqual([expectedId]);
-    expect(adHocDataViews[expectedId].timeFieldName).toBe('@timestamp');
-  });
-
-  it('hashes @timestamp from field caps when the query filters on another time field', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({
-      fields: { '@timestamp': { date: {} } },
-    });
-    const node = getTranslationResultNode({
-      logger,
-      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
-    });
-    const esqlQuery =
-      'FROM logs-test-* | WHERE event.time >= ?_tstart AND event.time < ?_tend | STATS count = COUNT(*)';
-    const state = { ...baseState, esql_query: esqlQuery, index_pattern: 'logs-test-*' };
-
-    const result = await node(state, {});
-
-    const timestampId = await getESQLAdHocDataviewId({
-      indexPattern: 'logs-test-*',
-      timeFieldName: '@timestamp',
-      projectRouting: undefined,
-    });
-    const eventTimeId = await getESQLAdHocDataviewId({
-      indexPattern: 'logs-test-*',
-      timeFieldName: 'event.time',
-      projectRouting: undefined,
-    });
-    const adHocDataViews = readAdHocDataViews(result.elastic_panel);
-    expect(Object.keys(adHocDataViews)).toEqual([timestampId]);
-    expect(adHocDataViews[timestampId].timeFieldName).toBe('@timestamp');
-    expect(Object.keys(adHocDataViews)).not.toContain(eventTimeId);
-  });
-
-  it('retries field caps and still builds the panel when a later attempt succeeds', async () => {
-    const fieldCaps = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('es unavailable'))
-      .mockResolvedValueOnce({
-        fields: { '@timestamp': { date: {} } },
-      });
-    const node = getTranslationResultNode({
-      logger,
-      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
-    });
-    const esqlQuery = 'FROM logs-test-* | STATS count = COUNT(*) BY process.name';
-    const state = { ...baseState, esql_query: esqlQuery, index_pattern: 'logs-test-*' };
-
-    const result = await node(state, {});
-
-    expect(fieldCaps).toHaveBeenCalledTimes(2);
-    const expectedId = await getESQLAdHocDataviewId({
-      indexPattern: 'logs-test-*',
-      timeFieldName: '@timestamp',
-      projectRouting: undefined,
-    });
-    const adHocDataViews = readAdHocDataViews(result.elastic_panel);
-    expect(Object.keys(adHocDataViews)).toEqual([expectedId]);
-  });
-
-  it('does not build a lens panel when field caps keeps failing', async () => {
-    const fieldCaps = jest.fn().mockRejectedValue(new Error('es unavailable'));
-    const node = getTranslationResultNode({
-      logger,
-      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
-    });
-    const esqlQuery = 'FROM logs-test-* | STATS count = COUNT(*) BY process.name';
-    const state = { ...baseState, esql_query: esqlQuery, index_pattern: 'logs-test-*' };
-
-    await expect(node(state, {})).rejects.toThrow(
-      'Failed to resolve @timestamp for migrated dashboard data view "logs-test-*"'
-    );
-    expect(fieldCaps).toHaveBeenCalledTimes(3);
-  });
-
-  it('does not call field caps for a placeholder index and omits the time field', async () => {
-    const fieldCaps = jest.fn();
-    const node = getTranslationResultNode({
-      logger,
-      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
-    });
-    const esqlQuery = `FROM ${TRANSLATION_INDEX_PATTERN}\n| STATS count = COUNT(*) BY process.name`;
-    const state = {
-      ...baseState,
-      esql_query: esqlQuery,
-      index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER,
-    };
-
-    const result = await node(state, {});
-
-    expect(fieldCaps).not.toHaveBeenCalled();
-    const expectedId = await getESQLAdHocDataviewId({
-      indexPattern: 'indexPattern',
-      timeFieldName: undefined,
-      projectRouting: undefined,
-    });
-    const adHocDataViews = readAdHocDataViews(result.elastic_panel);
-    expect(Object.keys(adHocDataViews)).toEqual([expectedId]);
-    expect(adHocDataViews[expectedId].timeFieldName).toBeUndefined();
   });
 });

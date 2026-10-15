@@ -109,6 +109,39 @@ describe('SearchBarComponent', () => {
     );
   });
 
+  it('deduplicates dashboard data views that repeat the page data view or each other', () => {
+    const pageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const duplicatePageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const repeatedPanelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent
+          {...props}
+          dataView={pageDataView}
+          additionalDataViews={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+        />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [pageDataView, panelDataView],
+      }),
+      expect.anything()
+    );
+  });
+
   it('calls useUpdateUrlParam for filter and query', () => {
     const query = { query: 'testQuery', language: 'kuery' };
     const filters = [

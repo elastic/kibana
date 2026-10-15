@@ -188,7 +188,11 @@ describe('DashboardView', () => {
     await waitFor(() => {
       expect(SiemSearchBar).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          additionalDataViews: [{ id: 'click:FROM filebeat-*' }, { id: 'click:FROM winlogbeat-*' }],
+          additionalDataViews: [
+            { id: templateDataViewId },
+            { id: 'click:FROM filebeat-*' },
+            { id: 'click:FROM winlogbeat-*' },
+          ],
         }),
         expect.anything()
       );
@@ -199,10 +203,6 @@ describe('DashboardView', () => {
     expect(getESQLAdHocDataview).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM winlogbeat-*' })
     );
-    const passedViews = (SiemSearchBar as jest.Mock).mock.lastCall[0].additionalDataViews as Array<{
-      id: string;
-    }>;
-    expect(passedViews.map((view) => view.id)).not.toContain(templateDataViewId);
 
     (useDashboardRenderer as jest.Mock).mockReturnValue(emptyRenderer);
     // initialViewMode must change so React.memo does not skip the update.
@@ -218,5 +218,40 @@ describe('DashboardView', () => {
         expect.anything()
       );
     });
+  });
+
+  test('keeps published data views for library panels that omit attributes', async () => {
+    const libraryDataView = { id: 'library-data-view' };
+    const dataViews$ = new BehaviorSubject([libraryDataView]);
+    const dashboardContainer = {
+      dataViews$,
+      children$: new BehaviorSubject({ libraryPanel: {} }),
+      getDashboardPanelFromId: () => ({
+        type: 'lens',
+        serializedState: { ref_id: 'saved-lens-id' },
+      }),
+    };
+    (useDashboardRenderer as jest.Mock).mockReturnValue({
+      dashboardContainer,
+      dashboardInternalApi: undefined,
+      handleDashboardLoaded: jest.fn(),
+    });
+
+    render(
+      <Router history={mockHistory}>
+        <DashboardView initialViewMode={'view'} />
+      </Router>,
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() => {
+      expect(SiemSearchBar).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          additionalDataViews: [libraryDataView],
+        }),
+        expect.anything()
+      );
+    });
+    expect(getESQLAdHocDataview).not.toHaveBeenCalled();
   });
 });

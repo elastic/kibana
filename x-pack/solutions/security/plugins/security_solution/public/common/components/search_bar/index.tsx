@@ -310,18 +310,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       if (dataView == null) {
         return null;
       }
-      const seen = new Set<string>();
-      if (dataView.id) {
-        seen.add(dataView.id);
-      }
-      const extras = (additionalDataViews ?? []).filter((view) => {
-        if (!view.id || seen.has(view.id)) {
-          return false;
+      const extras = new Map<string, DataView>();
+      for (const view of additionalDataViews ?? []) {
+        if (view.id && view.id !== dataView.id && !extras.has(view.id)) {
+          extras.set(view.id, view);
         }
-        seen.add(view.id);
-        return true;
-      });
-      return [dataView, ...extras];
+      }
+      return [dataView, ...extras.values()];
     }, [additionalDataViews, dataView]);
 
     const onTimeRangeChange = useCallback(
