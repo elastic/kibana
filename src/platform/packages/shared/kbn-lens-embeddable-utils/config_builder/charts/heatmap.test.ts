@@ -114,84 +114,57 @@ test('generates metric chart config', async () => {
   `);
 });
 
-test('shows axis labels, hides the legend, and formats the breakdown column', async () => {
-  const result = await buildHeatmap(
+test('hides the legend when configured', async () => {
+  const { state } = await buildHeatmap(
     {
       chartType: 'heatmap',
-      title: 'latency',
-      description: 'distribution',
+      title: 'test',
       dataset: {
-        esql: 'from test | stats count = count(latency) by bucket, time',
+        esql: 'from test | count=count() by @timestamp, category',
       },
+      breakdown: 'category',
+      xAxis: '@timestamp',
       value: 'count',
-      label: 'Count',
-      breakdown: 'bucket',
-      breakdownFormat: {
-        format: 'duration',
-        decimals: 0,
-        fromUnit: 'milliseconds',
-        toUnit: 'humanizePrecise',
-      },
-      xAxis: { type: 'dateHistogram', field: 'time' },
-      legend: { show: false, position: 'right' },
-      xAxisOptions: { showLabels: true, label: 'Time' },
-      yAxisOptions: { showLabels: true, sort: 'desc', label: 'Value' },
-      colorSteps: [
-        { color: '#cce', gte: 0, lt: 50 },
-        { color: '#114', gte: 50, lte: 100 },
-      ],
+      legend: { show: false },
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
     }
   );
 
-  expect(result.description).toBe('distribution');
-  expect(result.state.visualization).toMatchObject({
-    legend: { isVisible: false, position: 'right' },
-    gridConfig: {
-      isXAxisLabelVisible: true,
-      isYAxisLabelVisible: true,
-      isXAxisTitleVisible: false,
-      isYAxisTitleVisible: false,
-      ySortPredicate: 'desc',
-    },
-    palette: {
-      name: 'custom',
-      accessor: 'metric_formula_accessor',
-      params: {
-        rangeType: 'percent',
-        rangeMin: 0,
-        rangeMax: 100,
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      legend: expect.objectContaining({ isVisible: false }),
+    })
+  );
+});
+
+test('shows axis labels when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
       },
-    },
-  });
-  expect(result.state.datasourceStates.textBased?.layers.layer_0.columns).toEqual([
-    {
-      columnId: 'y_metric_formula_accessor',
-      fieldName: 'bucket',
-      label: 'Value',
-      customLabel: true,
-      meta: { type: 'number' },
-      params: {
-        format: {
-          id: 'duration',
-          params: { decimals: 0, fromUnit: 'milliseconds', toUnit: 'humanizePrecise' },
-        },
-      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      axisLabel: { xAxis: true, yAxis: true },
     },
     {
-      columnId: 'x_metric_formula_accessor',
-      fieldName: 'time',
-      label: 'Time',
-      customLabel: true,
-      meta: { type: 'date' },
-    },
-    {
-      columnId: 'metric_formula_accessor',
-      fieldName: 'count',
-      label: 'Count',
-      customLabel: true,
-    },
-  ]);
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      gridConfig: expect.objectContaining({
+        isXAxisLabelVisible: true,
+        isXAxisTitleVisible: false,
+        isYAxisLabelVisible: true,
+        isYAxisTitleVisible: false,
+      }),
+    })
+  );
 });

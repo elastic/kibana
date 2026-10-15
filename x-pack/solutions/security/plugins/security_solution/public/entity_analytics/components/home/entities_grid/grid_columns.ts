@@ -12,6 +12,7 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
+import { isOneOf } from './common';
 import type { RowsMode } from './common';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
 
@@ -38,7 +39,7 @@ const COLUMNS = [
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
   { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
   { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
-] as const;
+] as const satisfies readonly EuiDataGridColumn[];
 
 export type GridColumnId = (typeof COLUMNS)[number]['id'];
 
@@ -70,17 +71,17 @@ export const findSortPageFetcher = (id: string): SortPageFetcher | undefined =>
 
 /** Sortable columns with their sort page fetcher, in grid order. */
 export const SORT_PAGE_FETCHERS: ReadonlyArray<[GridColumnId, SortPageFetcher]> = COLUMNS.flatMap(
-  ({ id }) => {
+  ({ id }): Array<[GridColumnId, SortPageFetcher]> => {
     const fetchSortPage = QUERY_SPECS[id]?.fetchSortPage;
-    return fetchSortPage ? [[id, fetchSortPage] as [GridColumnId, SortPageFetcher]] : [];
+    return fetchSortPage ? [[id, fetchSortPage]] : [];
   }
 );
 
 /** Columns with an enricher, with the enricher, in grid order. */
 export const COLUMN_ENRICHERS: ReadonlyArray<[GridColumnId, PageEnricher]> = COLUMNS.flatMap(
-  ({ id }) => {
+  ({ id }): Array<[GridColumnId, PageEnricher]> => {
     const enricher = QUERY_SPECS[id]?.enricher;
-    return enricher ? [[id, enricher] as [GridColumnId, PageEnricher]] : [];
+    return enricher ? [[id, enricher]] : [];
   }
 );
 
@@ -97,7 +98,7 @@ const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
 }));
 
 const getColumnsWithout = (...ids: GridColumnId[]): readonly EuiDataGridColumn[] =>
-  ALL_COLUMNS.filter(({ id }) => !(ids as string[]).includes(id));
+  ALL_COLUMNS.filter(({ id }) => !isOneOf(ids, id));
 
 // Resolved rows: entities grouped by identity; shows "Records" count, hides "Resolved to".
 export const RESOLVED_ROWS_COLUMNS = getColumnsWithout(

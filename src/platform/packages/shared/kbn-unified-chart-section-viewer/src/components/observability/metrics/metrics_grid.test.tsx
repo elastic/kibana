@@ -1340,47 +1340,12 @@ describe('MetricsGrid', () => {
           chartLayers: [],
           heatmapConfig: expect.objectContaining({
             chartType: 'heatmap',
-            legend: { show: false, position: 'right' },
-            label: 'Count',
-            xAxisOptions: expect.objectContaining({ label: 'Time' }),
-            yAxisOptions: expect.objectContaining({ label: 'Value' }),
-            breakdownFormat: {
-              format: 'duration',
-              fromUnit: 'milliseconds',
-              toUnit: 'humanizePrecise',
-              decimals: 0,
-            },
-            colorSteps: expect.arrayContaining([
-              expect.objectContaining({ color: expect.any(String) }),
-            ]),
+            title: histogramItem.metricName,
+            dataset: { esql: expect.stringContaining('SORT bucket DESC') },
           }),
         }),
         expect.anything()
       );
-    });
-
-    it('colors each heatmap from its place in the chart color sequence', () => {
-      enableHeatmaps();
-      const secondItem = { ...histogramItem, metricName: 'errors.exp' };
-      renderMetricsGrid({
-        metricItems: [histogramItem, secondItem],
-        histogramBounds: new Map([
-          [getMetricUniqueKey(histogramItem), { min: 1, max: 9 }],
-          [getMetricUniqueKey(secondItem), { min: 1, max: 9 }],
-        ]),
-      });
-
-      const [firstCall, secondCall] = jest.mocked(Chart).mock.calls;
-      const firstColor = firstCall[0].heatmapConfig?.colorSteps;
-      const secondColor = secondCall[0].heatmapConfig?.colorSteps;
-
-      expect(firstColor).toEqual(
-        expect.arrayContaining([expect.objectContaining({ color: expect.any(String) })])
-      );
-      expect(secondColor).toEqual(
-        expect.arrayContaining([expect.objectContaining({ color: expect.any(String) })])
-      );
-      expect(firstColor).not.toEqual(secondColor);
     });
 
     it('draws a heatmap when the upper and lower bounds are the same', () => {

@@ -7,8 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -18,15 +16,18 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
+  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS, TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
   isInferenceEndpointWithMetadata,
@@ -43,6 +44,8 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getModelStatus,
+  getModelTitle,
+  getProviderKeyForCreator,
   getRegionOptions,
 } from '../../utils/eis_utils';
 import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
@@ -52,7 +55,6 @@ import { ModelUnavailableCallout } from './model_unavailable_callout';
 import { RegionOptions } from './region_options';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
-import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { DataRetention } from './data_retention';
 
 export interface ModelDetailFlyoutProps {
@@ -117,16 +119,17 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     };
   }, [allEndpoints, modelId]);
 
-  const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
+  const modelTitle = getModelTitle(displayName, modelAuthor);
+  const providerKey = getProviderKeyForCreator(modelAuthor);
+  const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
+
+  const taskTypeOptions = useMemo(() => {
     const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
-    return {
-      uniqueTaskTypes: taskTypes,
-      taskTypeOptions: taskTypes.map((tt) => ({
-        value: tt,
-        label: tt,
-        description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
-      })),
-    };
+    return taskTypes.map((tt) => ({
+      value: tt,
+      label: tt,
+      description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
+    }));
   }, [endpoints]);
 
   const handleOpenAddModal = useCallback(() => {
@@ -188,24 +191,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: <DataRetention metadata={modelMetadata} />,
     },
-    {
-      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
-        defaultMessage: 'Documentation',
-      }),
-      description: (
-        <EuiLink
-          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
-          href={docLinks.elasticInferenceService}
-          target="_blank"
-          external
-        >
-          {i18n.translate(
-            'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
-            { defaultMessage: 'View documentation' }
-          )}
-        </EuiLink>
-      ),
-    },
   ];
 
   return (
@@ -216,16 +201,40 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       data-test-subj="modelDetailFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{displayName}</h2>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiBadgeGroup data-test-subj="flyoutTaskBadges">
-          <ModelStatusBadge id={modelId} status={modelStatus} metadata={modelMetadata} />
-          {uniqueTaskTypes.map((taskType) => (
-            <EuiBadge key={taskType}>{taskType}</EuiBadge>
-          ))}
-        </EuiBadgeGroup>
+        <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiPanel hasBorder paddingSize="s" grow={false}>
+              <EuiIcon
+                type={provider?.icon ?? 'machineLearningApp'}
+                size="xl"
+                aria-hidden={true}
+                data-test-subj="modelDetailFlyoutProviderIcon"
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2 id={flyoutTitleId} data-test-subj="modelDetailFlyoutTitle">
+                {modelTitle}
+              </h2>
+            </EuiTitle>
+            <EuiText size="s" color="subdued" data-test-subj="modelDetailFlyoutProvider">
+              <strong>{modelAuthor}</strong>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiLink
+              href={docLinks.elasticInferenceService}
+              target="_blank"
+              external
+              data-test-subj="modelDetailFlyoutViewEisDocumentationLink"
+            >
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.modelDetailFlyout.viewEisDocumentationLink',
+                { defaultMessage: 'View EIS documentation' }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
