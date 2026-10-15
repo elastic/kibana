@@ -16,9 +16,9 @@ import {
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { defineOperation } from './types';
 
-export const updatePanelLayoutsOperation = defineOperation({
+export const movePanelsOperation = defineOperation({
   schema: z.object({
-    operation: z.literal('update_panel_layouts'),
+    operation: z.literal('move_panels'),
     panels: z
       .array(
         z.object({
@@ -46,7 +46,7 @@ export const updatePanelLayoutsOperation = defineOperation({
 
       if (removedPanels.length === 0) {
         context.failures.push({
-          type: DASHBOARD_OPERATION_FAILURE_TYPES.updatePanelLayouts,
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.movePanels,
           identifier: panelId,
           error: `Panel "${panelId}" not found.`,
         });

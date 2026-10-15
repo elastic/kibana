@@ -505,7 +505,7 @@ describe('executeDashboardOperations', () => {
         { operation: 'add_section', key: 'overview', title: 'Metrics' },
         { operation: 'add_section', key: 'details', title: 'Metrics' },
         {
-          operation: 'update_panel_layouts',
+          operation: 'move_panels',
           panels: [
             { panelId: topPanel.id, sectionId: 'overview' },
             {
@@ -571,7 +571,7 @@ describe('executeDashboardOperations', () => {
         operations: [
           { operation: 'add_section', key: 'overview', title: 'Overview' },
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: panel.id, sectionId: 'overview' }],
           },
           { operation: 'remove_section', id: 'overview', panelAction: 'promote' },
@@ -617,7 +617,7 @@ describe('executeDashboardOperations', () => {
         const dashboardData: DashboardAttachmentData = { title: 'Test', panels: [panel] };
         const operations: DashboardOperation[] = [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: panel.id, sectionId: 'overview' }],
           },
         ];
@@ -649,7 +649,7 @@ describe('executeDashboardOperations', () => {
           dashboardData: created.dashboardData,
           operations: [
             {
-              operation: 'update_panel_layouts',
+              operation: 'move_panels',
               panels: [{ panelId: panel.id, sectionId: 'overview' }],
             },
           ],
@@ -662,7 +662,7 @@ describe('executeDashboardOperations', () => {
         dashboardData: created.dashboardData,
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: panel.id, sectionId: section.id }],
           },
         ],
@@ -1213,7 +1213,7 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  describe('update_panel_layouts', () => {
+  describe('move_panels', () => {
     it('places new panels full width below existing panels, which keep their place, without a layout call', async () => {
       const result = await executeDashboardOperations({
         dashboardData: { title: 'Test dashboard', panels: [createLensPanel('existing', 0)] },
@@ -1251,7 +1251,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [
               {
                 panelId: 'top-1',
@@ -1286,7 +1286,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [
               {
                 panelId: 'section-panel-1',
@@ -1321,7 +1321,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: 'top-1', sectionId: 'section-a' }],
           },
         ],
@@ -1351,7 +1351,7 @@ describe('executeDashboardOperations', () => {
         dashboardData,
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: 'section-panel-1', sectionId: 'section-a' }],
           },
         ],
@@ -1370,7 +1370,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
+            operation: 'move_panels',
             panels: [{ panelId: 'missing-panel', sectionId: null }],
           },
         ],
@@ -1379,7 +1379,7 @@ describe('executeDashboardOperations', () => {
 
       expect(result.failures).toEqual([
         {
-          type: 'update_panel_layouts',
+          type: 'move_panels',
           identifier: 'missing-panel',
           error: 'Panel "missing-panel" not found.',
         },

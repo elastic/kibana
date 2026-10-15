@@ -31,7 +31,7 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        "Creates new panels inside the section. To group existing panels, omit this field and move their original panelIds with update_panel_layouts using this section's key."
+        "Creates new panels inside the section. To group existing panels, omit this field and move their original panelIds with move_panels using this section's key."
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {

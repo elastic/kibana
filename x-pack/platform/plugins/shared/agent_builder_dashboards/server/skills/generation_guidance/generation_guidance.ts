@@ -32,7 +32,7 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. For existing panels, create an empty \`add_section\` with a unique \`key\` (e.g. \`"overview"\`), omitting \`panels\`. Then use \`update_panel_layouts\` with the original \`panelId\` values and that key as \`sectionId\`. This moves the panels with their configurations intact.
+1. For existing panels, create an empty \`add_section\` with a unique \`key\` (e.g. \`"overview"\`), omitting \`panels\`. Then use \`move_panels\` with the original \`panelId\` values and that key as \`sectionId\`. This moves the panels with their configurations intact.
 2. Only use \`add_section.panels\` or \`add_panels\` to create new panels. They cannot move existing panels.
 3. Create sections before referencing them. Keys must not match existing section IDs and are not saved; in later calls, use the generated section ID returned by the tool.
 
@@ -46,7 +46,7 @@ For an existing dashboard:
 - For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings. Set \`applyChartRules: true\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
 - Set \`preserveESQL: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`applyChartRules\`, so a query change and presentation enhancement can share one edit.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to move existing panels between the top level and sections without changing panel content.
+- Use \`move_panels\` to move existing panels between the top level and sections without changing panel content.
 
 ## Panel Inputs
 
@@ -128,7 +128,7 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
 
 ## Generation Edge Cases
 
-- When the user wants to resize or rearrange panels, pass their request in \`layout\`. Use \`update_panel_layouts\` only to move panels between sections.
+- When the user wants to resize or rearrange panels, pass their request in \`layout\`. Use \`move_panels\` only to move panels between sections.
 - If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and ML anomaly panels (\`source: "config"\`, \`type: "ml_anomaly_charts"\` / \`"ml_anomaly_swimlane"\` / \`"ml_single_metric_viewer"\`).
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
