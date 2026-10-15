@@ -83,9 +83,7 @@ export const scanHostTool = (
             describe: (host) => {
               // Quoted so leading/trailing whitespace in the path is visible to the analyst.
               const shownPath =
-                typeof toolParams.path === 'string'
-                  ? JSON.stringify(toolParams.path)
-                  : 'the specified path';
+                typeof toolParams.path === 'string' ? `"${toolParams.path}"` : 'the specified path';
               return `This will scan \`${shownPath}\` on ${host} for malware.`;
             },
           }

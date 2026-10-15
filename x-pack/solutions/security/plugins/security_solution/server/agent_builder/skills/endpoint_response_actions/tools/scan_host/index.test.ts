@@ -156,6 +156,14 @@ describe('scanHostTool', () => {
       context: mockContext,
     });
     expect(padded?.message).toContain('"  /tmp/x"');
+
+    // JSON.stringify would escape backslashes here; the analyst must see the real path.
+    const windows = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: 'C:\\Users\\x\\evil.exe' },
+      context: mockContext,
+    });
+    expect(windows?.message).toContain('"C:\\Users\\x\\evil.exe"');
+    expect(windows?.message).not.toContain('\\\\');
   });
 
   it('returns insufficient_privileges and does not dispatch when caller lacks canWriteScanOperations', async () => {
