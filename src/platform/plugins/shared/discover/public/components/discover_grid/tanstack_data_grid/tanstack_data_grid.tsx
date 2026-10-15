@@ -210,7 +210,7 @@ export interface TanStackDataGridProps {
   shouldKeepAdHocDataViewImmutable?: UnifiedDataTableProps['shouldKeepAdHocDataViewImmutable'];
   consumer?: UnifiedDataTableProps['consumer'];
   externalAdditionalControls?: React.ReactNode;
-  /** Same slot as UnifiedDataTable `additionalDisplaySettingsContent` (e.g. grid implementation switch). */
+  /** Same slot as UnifiedDataTable `additionalDisplaySettingsContent`. */
   additionalDisplaySettingsContent?: React.ReactNode;
   toolbarLeftSide?: React.ReactNode;
   toolbarTrailingControl?: React.ReactNode;

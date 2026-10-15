@@ -223,5 +223,4 @@ const createSnapshot = ({
   density: stateManager.density.getValue(),
   documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
   jsonModeSettings: stateManager.jsonModeSettings.getValue(),
-  gridImplementation: stateManager.gridImplementation.getValue(),
 });

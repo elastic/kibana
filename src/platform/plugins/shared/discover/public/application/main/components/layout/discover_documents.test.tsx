@@ -43,19 +43,18 @@ const discoverGridMock = jest.mocked(DiscoverGrid);
 const singleEsHit = esHitsMock.slice(0, 1);
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
-  const toolkit = getDiscoverInternalStateMock({ services });
+  const resolvedServices = services ?? createDiscoverServicesMock();
+  // These layout tests assert EuiDataGrid toolbar subjects; disable TanStack via FF.
+  (resolvedServices.discoverFeatureFlags.getEnableTanstackTable as jest.Mock).mockReturnValue(
+    false
+  );
+  const toolkit = getDiscoverInternalStateMock({ services: resolvedServices });
 
   await toolkit.initializeTabs();
   await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
     skipWaitForDataFetching: true,
   });
-  toolkit.internalState.dispatch(
-    internalStateActions.updateAppState({
-      tabId: toolkit.getCurrentTab().id,
-      appState: { gridImplementation: 'unified' },
-    })
-  );
 
   return { toolkit };
 };

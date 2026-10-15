@@ -194,13 +194,8 @@ describe('cleanupUrlState', () => {
     });
   });
 
-  test('keeps a valid grid implementation from the URL', () => {
-    const state = { gridImplementation: 'unified' } as AppStateUrl;
-    expect(cleanupUrlState(state, services.uiSettings)?.gridImplementation).toBe('unified');
-  });
-
-  test('removes an invalid grid implementation from the URL', () => {
-    const state = { gridImplementation: 'eui' } as unknown as AppStateUrl;
+  test('strips grid implementation from the URL', () => {
+    const state = { gridImplementation: 'unified' } as unknown as AppStateUrl;
     expect(cleanupUrlState(state, services.uiSettings)).toEqual({});
   });
 });

@@ -16,7 +16,6 @@ import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../common';
-import { isDiscoverGridImplementation } from '../../../../components/discover_grid/discover_grid_implementation';
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   /**
@@ -116,12 +115,9 @@ export function cleanupUrlState(
   }
   delete appStateFromUrl.isApproximate;
 
-  if (
-    appStateFromUrl.gridImplementation !== undefined &&
-    !isDiscoverGridImplementation(appStateFromUrl.gridImplementation)
-  ) {
-    delete appStateFromUrl.gridImplementation;
-  }
+  // Grid implementation is controlled by the discover.enableTanstackTable feature flag,
+  // not URL / saved session state.
+  delete (appStateFromUrl as { gridImplementation?: unknown }).gridImplementation;
 
   return appStateFromUrl as DiscoverAppState;
 }

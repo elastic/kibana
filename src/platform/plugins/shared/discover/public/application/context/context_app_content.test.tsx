@@ -22,11 +22,7 @@ import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__m
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 jest.mock('../../components/discover_grid/use_discover_grid_implementation', () => ({
-  useDefaultDiscoverGridImplementation: () => 'unified',
-  useDiscoverGridImplementation: () => ({
-    implementation: 'unified',
-    onChangeImplementation: () => {},
-  }),
+  useDiscoverGridImplementation: () => 'unified',
 }));
 
 const dataViewMock = buildDataViewMock({

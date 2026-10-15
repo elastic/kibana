@@ -41,7 +41,6 @@ type StoredTableSettings = Partial<
     | 'density'
     | 'documentsDisplayMode'
     | 'jsonModeSettings'
-    | 'gridImplementation'
   >
 > & { sort?: StoredSort };
 
@@ -148,7 +147,6 @@ export const fromStoredCommonTableSettings = (
     density,
     documentsDisplayMode,
     jsonModeSettings,
-    gridImplementation,
     grid,
   } = storedState;
   return {
@@ -160,7 +158,6 @@ export const fromStoredCommonTableSettings = (
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
     ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
-    ...(gridImplementation && { grid_implementation: gridImplementation }),
     ...fromStoredJsonModeSettings(jsonModeSettings),
   };
 };
@@ -179,7 +176,6 @@ export const toStoredTableSettings = (
     header_row_height: headerRowHeight,
     density,
     documents_display_mode: documentsDisplayMode,
-    grid_implementation: gridImplementation,
   } = apiState;
   const jsonModeSettings = toStoredJsonModeSettings(apiState);
   return {
@@ -191,7 +187,6 @@ export const toStoredTableSettings = (
     ...(headerRowHeight && { headerRowHeight: toStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
     ...(documentsDisplayMode && { documentsDisplayMode }),
-    ...(gridImplementation && { gridImplementation }),
     ...(jsonModeSettings && { jsonModeSettings }),
     ...(columnSettings &&
       Object.keys(columnSettings).length > 0 && { grid: { columns: columnSettings } }),

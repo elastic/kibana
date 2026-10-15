@@ -78,15 +78,11 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-  GRID_IMPLEMENTATION_FEATURE_FLAG_KEY,
+  ENABLE_TANSTACK_TABLE_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
-import {
-  DEFAULT_DISCOVER_GRID_IMPLEMENTATION,
-  resolveDiscoverGridImplementation,
-  type DiscoverGridImplementation,
-} from './components/discover_grid/discover_grid_implementation';
+import { DEFAULT_ENABLE_TANSTACK_TABLE } from './components/discover_grid/discover_grid_implementation';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 import {
@@ -111,7 +107,7 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  getDefaultGridImplementation: () => DiscoverGridImplementation;
+  getEnableTanstackTable: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -201,17 +197,6 @@ const readBooleanFlag = (core: CoreStart, flagName: string, fallback: boolean): 
   return value;
 };
 
-const readStringFlag = (core: CoreStart, flagName: string, fallback: string): string => {
-  let value = fallback;
-  core.featureFlags
-    .getStringValue$(flagName, fallback)
-    .subscribe((next) => {
-      value = next;
-    })
-    .unsubscribe();
-  return value;
-};
-
 export const buildServices = ({
   core,
   plugins,
@@ -268,13 +253,11 @@ export const buildServices = ({
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
-      getDefaultGridImplementation: () =>
-        resolveDiscoverGridImplementation(
-          readStringFlag(
-            core,
-            GRID_IMPLEMENTATION_FEATURE_FLAG_KEY,
-            DEFAULT_DISCOVER_GRID_IMPLEMENTATION
-          )
+      getEnableTanstackTable: () =>
+        readBooleanFlag(
+          core,
+          ENABLE_TANSTACK_TABLE_FEATURE_FLAG_KEY,
+          DEFAULT_ENABLE_TANSTACK_TABLE
         ),
     },
     docLinks: core.docLinks,

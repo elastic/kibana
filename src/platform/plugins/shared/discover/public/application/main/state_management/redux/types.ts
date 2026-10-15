@@ -145,11 +145,6 @@ export interface DiscoverAppState {
    */
   density?: DataGridDensity;
   /**
-   * Documents grid implementation. Omitted means TanStack.
-   * `unified` renders the EUI data grid.
-   */
-  gridImplementation?: DiscoverGridImplementation;
-  /**
    * Documents display mode: 'table' or 'json'
    */
   documentsDisplayMode?: DocumentsDisplayMode;

@@ -22,7 +22,6 @@ import type {
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
-import type { DiscoverGridImplementation } from '@kbn/discover-session-constants';
 import type { SortOrder } from '@kbn/discover-utils';
 import type {
   DiscoverSessionTab as DiscoverSessionTabSchema,
@@ -85,7 +84,6 @@ export interface SavedSearchAttributes {
   density?: DataGridDensity;
   documentsDisplayMode?: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
-  gridImplementation?: DiscoverGridImplementation;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
@@ -148,7 +146,6 @@ export interface DiscoverSessionTab {
   density?: DataGridDensity;
   documentsDisplayMode?: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
-  gridImplementation?: DiscoverGridImplementation;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabTypeState?: DiscoverSessionTabTypeState;

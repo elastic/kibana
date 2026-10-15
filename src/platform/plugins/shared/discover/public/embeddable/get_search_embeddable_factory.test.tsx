@@ -868,11 +868,13 @@ describe('saved search embeddable', () => {
 
     it('should pass cell renderers from profile', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
+      (discoverServiceMock.discoverFeatureFlags.getEnableTanstackTable as jest.Mock).mockReturnValue(
+        false
+      );
       runtimeState = getInitialRuntimeState({
         searchMock: search,
         partialState: {
           columns: ['rootProfile', 'message', 'extension'],
-          gridImplementation: 'unified',
         },
       });
       const { Component, api } = await factory.buildEmbeddable({

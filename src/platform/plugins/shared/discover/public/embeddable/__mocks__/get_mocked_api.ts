@@ -24,8 +24,6 @@ import type {
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
-import type { DiscoverGridImplementation } from '../../components/discover_grid/discover_grid_implementation';
-
 export const getMockedSearchApi = ({
   searchSource,
   savedSearch,
@@ -68,9 +66,6 @@ export const getMockedSearchApi = ({
       ),
       jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(
         savedSearch.jsonModeSettings
-      ),
-      gridImplementation: new BehaviorSubject<DiscoverGridImplementation | undefined>(
-        savedSearch.gridImplementation
       ),
       grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),

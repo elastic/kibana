@@ -12,7 +12,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
  * Scout server configuration that boots Discover with the classic EuiDataGrid (UnifiedDataTable)
- * as the default grid instead of TanStack, so the Discover data grid suites cover both grids.
+ * by setting `discover.enableTanstackTable=false`, so the Discover data grid suites cover both grids.
  * The flag is read when Discover renders its grid, so it must be present before any test runs.
  *
  * Start servers:
@@ -28,7 +28,7 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--feature_flags.overrides.discover.gridImplementation=unified',
+      '--feature_flags.overrides.discover.enableTanstackTable=false',
     ],
   },
 };

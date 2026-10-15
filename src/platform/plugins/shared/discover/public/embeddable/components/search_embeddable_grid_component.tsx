@@ -37,7 +37,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_from_text_based_grid';
 import { getGridRequestId } from '../../utils/get_grid_request_id';
-import type { DiscoverGridImplementation } from '../../components/discover_grid/discover_grid_implementation';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
@@ -292,9 +291,6 @@ export function SearchEmbeddableGridComponent({
       onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
         stateManager.jsonModeSettings.next(newJsonModeSettings);
       },
-      onChangeGridImplementation: (newGridImplementation: DiscoverGridImplementation) => {
-        stateManager.gridImplementation.next(newGridImplementation);
-      },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
@@ -312,7 +308,6 @@ export function SearchEmbeddableGridComponent({
       stateManager.density,
       stateManager.documentsDisplayMode,
       stateManager.jsonModeSettings,
-      stateManager.gridImplementation,
       stateManager.grid,
       grid,
     ]
@@ -404,7 +399,6 @@ export function SearchEmbeddableGridComponent({
       onUpdateDocumentsDisplayMode={onStateEditedProps.onUpdateDocumentsDisplayMode}
       jsonModeSettingsState={savedSearch.jsonModeSettings}
       onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
-      gridImplementation={savedSearch.gridImplementation}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
       expandedDoc={expandedDoc}

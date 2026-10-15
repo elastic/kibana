@@ -25,15 +25,7 @@ import {
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 import { TanStackDataGrid } from './tanstack_data_grid';
-import { DiscoverGridImplementationSwitch } from './discover_grid_implementation_switch';
-import {
-  resolveDiscoverGridImplementation,
-  type DiscoverGridImplementation,
-} from './discover_grid_implementation';
-import {
-  useDefaultDiscoverGridImplementation,
-  useDiscoverGridImplementation,
-} from './use_discover_grid_implementation';
+import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -52,17 +44,11 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
    * `toolbarBottomSection`; UnifiedDataTable receives it via `renderCustomToolbar`.
    */
   toolbarBottomSection?: ReactNode;
-  /**
-   * App-state grid implementation. Used when `onChangeGridImplementation` is provided
-   * so the choice is stored in Discover URL state instead of local storage.
-   */
-  gridImplementation?: DiscoverGridImplementation;
-  onChangeGridImplementation?: (implementation: DiscoverGridImplementation) => void;
 }
 
 /**
  * Customized Discover documents grid that can render either UnifiedDataTable (EUI)
- * or TanStackDataGrid behind a shared Discover/Unified props surface.
+ * or TanStackDataGrid, selected by the `discover.enableTanstackTable` feature flag.
  */
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
@@ -75,31 +61,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     toolbarLeftSide,
     toolbarTrailingControl,
     toolbarBottomSection,
-    gridImplementation,
-    onChangeGridImplementation,
     ...props
   }) => {
     const { dataView, services } = props;
-    const {
-      implementation: storedGridImplementation,
-      onChangeImplementation: onChangeStoredGridImplementation,
-    } = useDiscoverGridImplementation(services.storage);
-    const defaultGridImplementation = useDefaultDiscoverGridImplementation();
-    const resolvedGridImplementation = onChangeGridImplementation
-      ? resolveDiscoverGridImplementation(gridImplementation, defaultGridImplementation)
-      : storedGridImplementation;
-    const usesUnifiedDataTable = resolvedGridImplementation === 'unified';
-    const toggleImplementation = useCallback(() => {
-      const nextImplementation: DiscoverGridImplementation =
-        resolvedGridImplementation === 'unified' ? 'tanstack' : 'unified';
-
-      if (onChangeGridImplementation) {
-        onChangeGridImplementation(nextImplementation);
-        return;
-      }
-
-      onChangeStoredGridImplementation(nextImplementation);
-    }, [onChangeGridImplementation, onChangeStoredGridImplementation, resolvedGridImplementation]);
+    const gridImplementation = useDiscoverGridImplementation();
+    const usesUnifiedDataTable = gridImplementation === 'unified';
 
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
@@ -172,13 +138,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       isCascadedDocumentsAvailable,
     ]);
 
-    const additionalDisplaySettingsContent = (
-      <DiscoverGridImplementationSwitch
-        usesUnifiedDataTable={usesUnifiedDataTable}
-        onSwitch={toggleImplementation}
-      />
-    );
-
     // Props both implementations already honor — keep this list the swap contract for A/B testing.
     const sharedGridProps = {
       showColumnTokens: true as const,
@@ -189,7 +148,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       shouldKeepAdHocDataViewImmutable: true as const,
       externalAdditionalControls,
       onFullScreenChange,
-      additionalDisplaySettingsContent,
     };
 
     if (isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length) {
@@ -204,7 +162,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
             showKeyboardShortcuts={props.showKeyboardShortcuts}
             externalCustomRenderers={props.externalCustomRenderers}
             onUpdateDataGridDensity={props.onUpdateDataGridDensity}
-            gridImplementation={resolvedGridImplementation}
+            gridImplementation={gridImplementation}
           />
         </CascadedDocumentsProvider>
       );

@@ -65,7 +65,6 @@ export type SearchEmbeddablePublicState = Pick<
   | 'density'
   | 'documentsDisplayMode'
   | 'jsonModeSettings'
-  | 'gridImplementation'
 > & {
   rows: DataTableRecord[];
   /** The ES|QL source of the fetched rows, with the result columns. */

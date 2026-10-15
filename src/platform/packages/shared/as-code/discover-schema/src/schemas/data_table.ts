@@ -87,13 +87,6 @@ export const dataTableSchema = z
       description:
         'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.',
     }),
-    grid_implementation: z
-      .union([z.literal('tanstack'), z.literal('unified')])
-      .optional()
-      .meta({
-        description:
-          'Discover display option: controls which grid implementation renders the documents table. Use "tanstack" for the TanStack Grid or "unified" for the EUI data grid. If omitted, defaults to the TanStack Grid.',
-      }),
     hide_nulls: z.boolean().optional().meta({
       description: 'When `true`, fields with null values are hidden in the JSON document view.',
     }),

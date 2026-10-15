@@ -22,11 +22,7 @@ import {
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
-import {
-  resolveDiscoverGridImplementation,
-  type DiscoverGridImplementation,
-} from '../../components/discover_grid/discover_grid_implementation';
-import { useDefaultDiscoverGridImplementation } from '../../components/discover_grid/use_discover_grid_implementation';
+import { useDiscoverGridImplementation } from '../../components/discover_grid/use_discover_grid_implementation';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
@@ -56,9 +52,6 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
-  /** Grid implementation saved with the Discover session tab, defaults to TanStack. */
-  gridImplementation?: DiscoverGridImplementation;
-  onChangeGridImplementation: (implementation: DiscoverGridImplementation) => void;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -74,11 +67,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   } = props;
   const { euiTheme } = useEuiTheme();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
-  const defaultGridImplementation = useDefaultDiscoverGridImplementation();
-  const gridImplementation = resolveDiscoverGridImplementation(
-    props.gridImplementation,
-    defaultGridImplementation
-  );
+  const gridImplementation = useDiscoverGridImplementation();
 
   const renderDocumentView = useCallback(
     (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (

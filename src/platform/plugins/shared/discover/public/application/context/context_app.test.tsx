@@ -29,11 +29,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 jest.mock('./hooks/use_context_app_fetch');
 jest.mock('./hooks/use_context_app_state');
 jest.mock('../../components/discover_grid/use_discover_grid_implementation', () => ({
-  useDefaultDiscoverGridImplementation: () => 'unified',
-  useDiscoverGridImplementation: () => ({
-    implementation: 'unified',
-    onChangeImplementation: () => {},
-  }),
+  useDiscoverGridImplementation: () => 'unified',
 }));
 
 const services = createDiscoverServicesMock();

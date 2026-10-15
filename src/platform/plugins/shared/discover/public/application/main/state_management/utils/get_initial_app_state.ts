@@ -299,9 +299,6 @@ function getDefaultAppState({
   if (persistedTab?.jsonModeSettings) {
     defaultState.jsonModeSettings = persistedTab.jsonModeSettings;
   }
-  if (persistedTab?.gridImplementation) {
-    defaultState.gridImplementation = persistedTab.gridImplementation;
-  }
 
   return defaultState;
 }

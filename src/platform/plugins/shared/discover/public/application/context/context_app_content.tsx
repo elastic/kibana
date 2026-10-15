@@ -117,8 +117,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const services = useDiscoverServices();
   const { uiSettings: config, uiActions } = services;
-  const { implementation: gridImplementation, onChangeImplementation: onChangeGridImplementation } =
-    useDiscoverGridImplementation(services.storage);
+  const gridImplementation = useDiscoverGridImplementation();
 
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
@@ -294,8 +293,6 @@ export function ContextAppContent({
             settings={grid}
             onResize={onResize}
             externalCustomRenderers={cellRenderers}
-            gridImplementation={gridImplementation}
-            onChangeGridImplementation={onChangeGridImplementation}
           />
         </CellActionsProvider>
       </div>
