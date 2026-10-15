@@ -151,7 +151,7 @@ export class GenAiSettingsPlugin
         }),
         description: i18n.translate('genAiSettings.inferenceStreaming.description', {
           defaultMessage:
-            'Stream LLM responses. Turn this off if your LLM provider does not support streaming, Kibana then waits for the full response. Services that do not support non-streaming chat completion keep streaming.',
+            "Stream LLM responses. If your LLM provider doesn't support streaming, turn this off and Kibana will wait for the full response instead. Services that do not support non-streaming chat completion keep streaming.",
         }),
         readonlyMode: 'ui',
         readonly: true,

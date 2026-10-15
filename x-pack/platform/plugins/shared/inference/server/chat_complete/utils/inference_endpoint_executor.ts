@@ -67,8 +67,9 @@ export const createInferenceEndpointExecutor = ({
           return toEventStream(completionToChunks(completion));
         } catch (error) {
           // ES reports upstream failures as HTTP errors here; surface them like stream error
-          // events, keeping the status so non-retryable failures (4xx) are not retried
-          if (error instanceof errors.ResponseError && typeof error.meta.body === 'object') {
+          // events, keeping the status so non-retryable failures (4xx) are not retried.
+          // Anything without an `error` key (e.g. a proxy response) is rethrown as-is.
+          if (error instanceof errors.ResponseError && isErrorBody(error.meta.body)) {
             return toEventStream([{ ...error.meta.body, status: error.statusCode }]);
           }
           throw error;
@@ -93,6 +94,9 @@ export const createInferenceEndpointExecutor = ({
     },
   };
 };
+
+const isErrorBody = (body: unknown): body is { error: object } =>
+  typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'object';
 
 const toEventStream = (events: unknown[]): Readable =>
   Readable.from(events.map((event) => `data: ${JSON.stringify(event)}\n\n`));

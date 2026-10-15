@@ -437,6 +437,18 @@ describe('createInferenceEndpointExecutor', () => {
       expect(isOutputTokenLimitReachedError(events[2])).toBe(true);
     });
 
+    it('rethrows response errors whose body is not an Elasticsearch error', async () => {
+      const proxyError = new errors.ResponseError({
+        statusCode: 404,
+        body: { ok: false, message: 'Unknown resource.' },
+        warnings: null,
+        meta: {} as never,
+      });
+      mockTransportRequest.mockRejectedValue(proxyError);
+
+      await expect(executor.invoke({ body: {} })).rejects.toBe(proxyError);
+    });
+
     it('propagates other errors', async () => {
       mockTransportRequest.mockRejectedValue(new Error('boom'));
 
