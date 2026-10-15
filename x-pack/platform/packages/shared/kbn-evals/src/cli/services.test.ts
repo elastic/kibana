@@ -208,9 +208,24 @@ describe('stopService (scout)', () => {
     );
   };
 
-  const mockDocker = ({ running, rmFails = false }: { running: string; rmFails?: boolean }) => {
+  const SERVERLESS_IMAGE = 'docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified';
+  const STATEFUL_IMAGE = 'docker.elastic.co/elasticsearch/elasticsearch:9.3.0-SNAPSHOT';
+  const UIAM_IMAGE = 'docker.elastic.co/kibana-ci/uiam:latest-verified';
+
+  const mockDocker = ({
+    containers,
+    psFails = false,
+    rmFails = false,
+  }: {
+    containers: Array<[name: string, image: string]>;
+    psFails?: boolean;
+    rmFails?: boolean;
+  }) => {
     execFileSyncMock.mockImplementation((_command, args) => {
-      if (args?.[0] === 'ps') return running;
+      if (args?.[0] === 'ps') {
+        if (psFails) throw new Error('Cannot connect to the Docker daemon');
+        return containers.map((container) => container.join('\t')).join('\n') + '\n';
+      }
       if (args?.[0] === 'rm' && rmFails) throw new Error('Cannot connect to the Docker daemon');
       return '';
     });
@@ -223,31 +238,49 @@ describe('stopService (scout)', () => {
 
   it('removes the serverless containers and secrets left by a serverless Scout', async () => {
     writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
-    mockDocker({ running: 'es01\nes02\nes03\nuiam-cosmosdb\nuiam\n' });
+    mockDocker({
+      containers: [
+        ['es01', SERVERLESS_IMAGE],
+        ['es02', SERVERLESS_IMAGE],
+        ['uiam-cosmosdb', 'docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified'],
+        ['uiam', UIAM_IMAGE],
+      ],
+    });
 
     await stopService(repoRoot, 'scout', log);
 
     expect(dockerRmCalls()).toEqual([
-      [
-        'docker',
-        ['rm', '--force', 'es01', 'es02', 'es03', 'uiam-cosmosdb', 'uiam'],
-        expect.anything(),
-      ],
+      ['docker', ['rm', '--force', 'es01', 'es02', 'uiam-cosmosdb', 'uiam'], expect.anything()],
     ]);
     expect(secretsRemoved()).toBe(true);
   });
 
   it('removes serverless containers orphaned after Scout is no longer tracked', async () => {
-    mockDocker({ running: 'es01\nuiam\n' });
+    mockDocker({
+      containers: [
+        ['es01', SERVERLESS_IMAGE],
+        ['uiam', UIAM_IMAGE],
+      ],
+    });
 
     await stopService(repoRoot, 'scout', log);
 
-    expect(dockerRmCalls()).toHaveLength(1);
+    expect(dockerRmCalls()).toEqual([
+      ['docker', ['rm', '--force', 'es01', 'uiam'], expect.anything()],
+    ]);
+  });
+
+  it('leaves a stateful es01 started by `es docker` alone', async () => {
+    mockDocker({ containers: [['es01', STATEFUL_IMAGE]] });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([]);
   });
 
   it('leaves serverless containers alone when the tracked Scout is stateful', async () => {
     writeScoutState({ scoutArch: 'stateful', scoutDomain: 'classic' });
-    mockDocker({ running: 'es01\n' });
+    mockDocker({ containers: [['es01', SERVERLESS_IMAGE]] });
 
     await stopService(repoRoot, 'scout', log);
 
@@ -255,9 +288,19 @@ describe('stopService (scout)', () => {
     expect(secretsRemoved()).toBe(false);
   });
 
+  it('keeps the secrets while the containers could not be listed', async () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+    mockDocker({ containers: [], psFails: true });
+
+    await stopService(repoRoot, 'scout', log);
+
+    expect(dockerRmCalls()).toEqual([]);
+    expect(secretsRemoved()).toBe(false);
+  });
+
   it('keeps the secrets while the containers could not be removed', async () => {
     writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
-    mockDocker({ running: 'es01\n', rmFails: true });
+    mockDocker({ containers: [['es01', SERVERLESS_IMAGE]], rmFails: true });
 
     await stopService(repoRoot, 'scout', log);
 

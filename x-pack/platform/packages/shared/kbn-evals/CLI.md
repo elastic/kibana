@@ -132,7 +132,7 @@ node scripts/evals stop --service scout
 node scripts/evals stop --service edot
 ```
 
-Stopping Scout also removes the serverless Elasticsearch and UIAM Docker containers (`es01`–`es03`, `uiam-cosmosdb`, `uiam`) when Scout ran serverless, or when no Scout is tracked so containers orphaned by an earlier stop are cleaned up.
+Stopping Scout also removes the serverless Elasticsearch and UIAM Docker containers (`es01`, `es02`, `uiam-cosmosdb`, `uiam`) when Scout ran serverless, or when no Scout is tracked so containers orphaned by an earlier stop are cleaned up. An `es01` running a non-serverless image, such as one started with `yarn es docker`, is left alone.
 
 | Flag               | Description                                     |
 | ------------------ | ----------------------------------------------- |

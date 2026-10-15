@@ -10,17 +10,27 @@ import Path from 'path';
 import { createHash } from 'crypto';
 import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { SERVERLESS_NODES, SERVERLESS_SECRETS_DIR, getUiamContainers } from '@kbn/es';
+import {
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_REPO_KIBANA,
+  SERVERLESS_NODES,
+  SERVERLESS_SECRETS_DIR,
+  getUiamContainers,
+} from '@kbn/es';
 import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
-const SERVERLESS_CONTAINER_NAMES = [
-  ...SERVERLESS_NODES,
-  ...getUiamContainers({ includeOAuth: true }),
-].map(({ name }) => name);
+const SERVERLESS_ES_NODE_NAMES: readonly string[] = SERVERLESS_NODES.map(({ name }) => name);
+const UIAM_CONTAINER_NAMES: readonly string[] = getUiamContainers({ includeOAuth: true }).map(
+  ({ name }) => name
+);
+const SERVERLESS_ES_REPOS: readonly string[] = [
+  ES_SERVERLESS_REPO_KIBANA,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+];
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -295,24 +305,45 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
   }
 };
 
-const listServerlessContainers = (): string[] => {
+/**
+ * Stateful `es docker` also names its container `es01`, so ES nodes only count
+ * as serverless when they run a serverless image.
+ */
+const isServerlessContainer = (name: string, image: string): boolean =>
+  UIAM_CONTAINER_NAMES.includes(name) ||
+  (SERVERLESS_ES_NODE_NAMES.includes(name) &&
+    SERVERLESS_ES_REPOS.includes(image.replace(/[:@].*$/, '')));
+
+const listServerlessContainers = (): { containers: string[] } | { error: string } => {
   try {
-    return execFileSync(
+    const output = execFileSync(
       'docker',
       [
         'ps',
         '--all',
-        ...SERVERLESS_CONTAINER_NAMES.flatMap((name) => ['--filter', `name=^/${name}$`]),
+        ...[...SERVERLESS_ES_NODE_NAMES, ...UIAM_CONTAINER_NAMES].flatMap((name) => [
+          '--filter',
+          `name=^/${name}$`,
+        ]),
         '--format',
-        '{{.Names}}',
+        '{{.Names}}\t{{.Image}}',
       ],
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5_000 }
-    )
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 5_000 }
+    );
+    const containers = output
       .split('\n')
-      .map((name) => name.trim())
-      .filter(Boolean);
-  } catch {
-    return [];
+      .map((line) => line.trim().split('\t'))
+      .filter(([name, image = '']) => name && isServerlessContainer(name, image))
+      .map(([name]) => name);
+    return { containers };
+  } catch (err) {
+    const { signal, stderr } = err as Record<string, unknown>;
+    if (signal != null) {
+      return { error: 'docker ps timed out' };
+    }
+    return {
+      error: typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err),
+    };
   }
 };
 
@@ -322,7 +353,17 @@ const listServerlessContainers = (): string[] => {
  * leaves them running.
  */
 const removeServerlessDockerContainers = (log: ToolingLog): void => {
-  const containers = listServerlessContainers();
+  const result = listServerlessContainers();
+
+  if ('error' in result) {
+    log.warning(
+      `[scout] Could not list serverless Docker containers (${result.error}). ` +
+        `Leaving ${SERVERLESS_SECRETS_DIR} in place; check with: docker ps --all`
+    );
+    return;
+  }
+
+  const { containers } = result;
 
   if (containers.length > 0) {
     try {
