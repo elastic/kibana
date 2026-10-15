@@ -117,10 +117,11 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const { getUrlForApp } = useKibana().services.application;
   const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
 
-  const { canUseSelectedConnector, missingInferencePrivilege } = useInferenceConnectorAccess({
-    connectors: availableConnectors,
-    selectedConnectorId: connectorId ?? '',
-  });
+  const { canUseSelectedConnector, isCheckingPrivileges, missingInferencePrivilege } =
+    useInferenceConnectorAccess({
+      connectors: availableConnectors,
+      selectedConnectorId: connectorId ?? '',
+    });
   const hasValidConnector = !!connectorId && canUseSelectedConnector;
 
   const isAgentChatExperienceDisabled = !isAgentChatExperienceEnabled;
@@ -128,6 +129,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const generateTooltipContent = getGenerateTooltipContent({
     hasWritePermissionError,
     hasNoUsableConnector,
+    isCheckingPrivileges,
     missingInferencePrivilege,
   });
   const isGenerateDisabled = !!hasWritePermissionError || hasNoUsableConnector;
@@ -244,6 +246,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
       hasGenerated,
       isAgentChatExperienceDisabled,
       hasNoUsableConnector,
+      isCheckingPrivileges,
       missingInferencePrivilege,
     });
 
@@ -425,14 +428,20 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
 const getGenerateTooltipContent = ({
   hasWritePermissionError,
   hasNoUsableConnector,
+  isCheckingPrivileges,
   missingInferencePrivilege,
 }: {
   hasWritePermissionError?: boolean;
   hasNoUsableConnector: boolean;
+  isCheckingPrivileges: boolean;
   missingInferencePrivilege?: boolean;
 }): string | undefined => {
   if (hasWritePermissionError) {
     return i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP;
+  }
+
+  if (isCheckingPrivileges) {
+    return i18n.GENERATE_DISABLED_CHECKING_CONNECTOR_TOOLTIP;
   }
   if (hasNoUsableConnector) {
     return missingInferencePrivilege
@@ -447,12 +456,14 @@ const getEmptyStateDescription = ({
   hasGenerated,
   isAgentChatExperienceDisabled,
   hasNoUsableConnector,
+  isCheckingPrivileges,
   missingInferencePrivilege,
 }: {
   isGenerating: boolean;
   hasGenerated?: boolean;
   isAgentChatExperienceDisabled: boolean;
   hasNoUsableConnector: boolean;
+  isCheckingPrivileges: boolean;
   missingInferencePrivilege?: boolean;
 }): string => {
   if (isGenerating) {
@@ -464,7 +475,7 @@ const getEmptyStateDescription = ({
   if (isAgentChatExperienceDisabled) {
     return i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION;
   }
-  if (hasNoUsableConnector) {
+  if (hasNoUsableConnector && !isCheckingPrivileges) {
     return missingInferencePrivilege
       ? i18n.MISSING_INFERENCE_PRIVILEGE_DESCRIPTION
       : i18n.NO_CONNECTOR_SELECTED_DESCRIPTION;

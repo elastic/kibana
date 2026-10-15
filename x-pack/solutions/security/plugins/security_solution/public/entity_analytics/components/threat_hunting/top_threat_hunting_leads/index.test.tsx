@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AIConnector } from '@kbn/inference-connectors';
 
@@ -251,6 +251,47 @@ describe('TopThreatHuntingLeads', () => {
     expect(generateButton).toBeInTheDocument();
     expect(generateButton).toBeDisabled();
     expect(screen.getByTestId('leadsOptionsButton')).toBeInTheDocument();
+  });
+
+  it('does not claim a connector is missing while the privilege check is still loading', () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: true,
+      missingInferencePrivilege: false,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    expect(
+      screen.queryByText(
+        'No AI connector configured. Add a connector in Options to start generating leads'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Generate leads to surface proactive threat hunting opportunities from your entity data.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('shows a neutral tooltip while the privilege check is still loading', async () => {
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: true,
+      missingInferencePrivilege: false,
+    });
+
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    fireEvent.mouseOver(screen.getByTestId('generateLeadsButton'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Checking connector permissions…')).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText('Add a connector in Options to enable lead generation')
+    ).not.toBeInTheDocument();
   });
 
   it('shows disabled "Generate" with a privilege-specific message when the selected connector requires monitor_inference', () => {

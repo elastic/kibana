@@ -228,6 +228,11 @@ export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
   }
 );
 
+export const GENERATE_DISABLED_CHECKING_CONNECTOR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledCheckingConnectorTooltip',
+  { defaultMessage: 'Checking connector permissions…' }
+);
+
 export const GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoConnectorTooltip',
   { defaultMessage: 'Add a connector in Options to enable lead generation' }
