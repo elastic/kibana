@@ -42,14 +42,12 @@ apiTest.describe(
   () => {
     let workflowId: string;
 
-    apiTest.beforeAll(async ({ apiClient, apiServices, log, samlAuth }) => {
-      log.info('Cleaning up alert events, rule events, rules and action policies');
+    apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
 
-      log.info(`Creating source index [${SOURCE_INDEX}]`);
       await apiServices.alertingV2.sourceIndex.create({
         index: SOURCE_INDEX,
         mappings: {
@@ -62,7 +60,6 @@ apiTest.describe(
         buildWorkflowYaml('scout-dispatch-workflow-execution')
       );
       workflowId = workflow.id;
-      log.info(`Created workflow [${workflowId}]`);
 
       // The policy stores an API key minted from the request credential. With UIAM (serverless)
       // that must be a UIAM credential, which basic auth used by `apiServices` is not, so the
@@ -80,13 +77,9 @@ apiTest.describe(
         }
       );
       expect(createPolicyResponse).toHaveStatusCode(201);
-      log.info(
-        `Created action policy [${ACTION_POLICY_ID}] with destination workflow [${workflowId}]`
-      );
     });
 
-    apiTest.afterAll(async ({ apiServices, log }) => {
-      log.info('Cleaning up test data');
+    apiTest.afterAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
@@ -97,10 +90,9 @@ apiTest.describe(
 
     apiTest(
       'a breaching rule fires the policy and its workflow runs to completion',
-      async ({ apiServices, log }) => {
+      async ({ apiServices }) => {
         const host = 'host-dispatch-workflow';
 
-        log.info(`Indexing a breaching document for host [${host}]`);
         await apiServices.alertingV2.sourceIndex.indexDocs({
           index: SOURCE_INDEX,
           docs: [{ '@timestamp': new Date().toISOString(), 'host.name': host, value: 1 }],
@@ -114,14 +106,12 @@ apiTest.describe(
             },
           })
         );
-        log.info(`Created rule [${rule.id}], waiting for the dispatcher to fire the policy`);
 
         // The dispatcher matched the alert to the policy.
         await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: rule.id,
           actionTypes: ['fire'],
         });
-        log.info(`Dispatcher recorded a fire action for rule [${rule.id}]`);
 
         await apiServices.alertingV2.workflows.waitForSuccessfulExecution(workflowId, {
           triggeredBy: ACTION_POLICY_TRIGGER,
