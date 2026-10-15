@@ -154154,6 +154154,7 @@ components:
                             description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
+                            description: The data view used by the tab, specified by reference or defined inline.
                             discriminator:
                               mapping:
                                 data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
