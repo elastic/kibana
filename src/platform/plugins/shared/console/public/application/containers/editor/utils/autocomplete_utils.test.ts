@@ -21,6 +21,19 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
     },
   };
 });
+
+const mockGetTopLevelUrlCompleteComponents = jest.fn();
+
+jest.mock('../../../../lib/kb', () => {
+  const actual = jest.requireActual('../../../../lib/kb');
+  return {
+    ...actual,
+    getTopLevelUrlCompleteComponents: (method: string) => {
+      mockGetTopLevelUrlCompleteComponents(method);
+      return actual.getTopLevelUrlCompleteComponents(method);
+    },
+  };
+});
 import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
@@ -323,6 +336,16 @@ describe('autocomplete_utils', () => {
       // _cat and _search should match '_' prefix
       expect(items.length).toBe(2);
       expect(items.map((item) => item.label).sort()).toEqual(['_cat', '_search']);
+    });
+
+    it('looks up endpoints by the upper-cased method right after the method', () => {
+      const mockModel = {
+        getValueInRange: () => 'Post ',
+        getWordUntilPosition: () => ({ startColumn: 6 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
+      getUrlPathCompletionItems(mockModel, mockPosition);
+      expect(mockGetTopLevelUrlCompleteComponents).toHaveBeenLastCalledWith('POST');
     });
 
     it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot', () => {

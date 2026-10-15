@@ -87,13 +87,23 @@ const getConversationPath = ({
   conversationId,
   agentId,
   openDetails,
+  collapseSidebar,
 }: {
   conversationId: string;
   agentId: string;
   openDetails?: boolean;
+  collapseSidebar?: boolean;
 }): string => {
   const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
-  return openDetails ? `${basePath}?${searchParamNames.openConversationDetails}=true` : basePath;
+  const searchParams = new URLSearchParams();
+  if (openDetails) {
+    searchParams.set(searchParamNames.openConversationDetails, 'true');
+  }
+  if (collapseSidebar) {
+    searchParams.set(searchParamNames.sidebarCollapsed, 'true');
+  }
+  const search = searchParams.toString();
+  return search ? `${basePath}?${search}` : basePath;
 };
 
 export class AgentBuilderPlugin

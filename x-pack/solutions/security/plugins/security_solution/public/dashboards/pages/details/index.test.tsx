@@ -161,6 +161,7 @@ describe('DashboardView', () => {
     const dataViews$ = new BehaviorSubject([{ id: templateDataViewId }]);
     const dashboardContainer = {
       dataViews$,
+      title$: new BehaviorSubject('Dashboard'),
       children$: new BehaviorSubject({ panelA: {}, panelB: {} }),
       getDashboardPanelFromId: (panelId: string) => ({
         type: 'lens',
@@ -225,6 +226,7 @@ describe('DashboardView', () => {
     const dataViews$ = new BehaviorSubject([libraryDataView]);
     const dashboardContainer = {
       dataViews$,
+      title$: new BehaviorSubject('Dashboard'),
       children$: new BehaviorSubject({ libraryPanel: {} }),
       getDashboardPanelFromId: () => ({
         type: 'lens',

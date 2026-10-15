@@ -32,7 +32,29 @@ export class ServiceAccountsTestPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
-    core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
+    // Resolves jobs by the prefix of their ID, so tests can pick what the management page gets
+    // back: no details, a path Core must refuse, a title alone, or a title and a path.
+    core.security.serviceAccounts.registerWorkloadType({
+      type: 'job',
+      name: 'Test job',
+      resolveWorkloads: async (workloads) =>
+        workloads.map(({ workloadId }) => {
+          if (workloadId.startsWith('unresolved-')) {
+            return undefined;
+          }
+          const title = `Test job ${workloadId}`;
+          if (workloadId.startsWith('bad-path-')) {
+            return { title, path: '/app/../api/status' };
+          }
+          if (workloadId.startsWith('title-only-')) {
+            return { title };
+          }
+          return {
+            title,
+            path: `/app/service_accounts_test/jobs/${encodeURIComponent(workloadId)}`,
+          };
+        }),
+    });
     const router = core.http.createRouter();
     taskManager.registerTaskDefinitions({
       [NOOP_TASK_TYPE]: {

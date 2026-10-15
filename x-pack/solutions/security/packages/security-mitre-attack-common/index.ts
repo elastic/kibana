@@ -14,7 +14,19 @@ export type {
   MitreEntity,
 } from './src/schema';
 
-export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+export {
+  MITRE_FRAMEWORKS,
+  mitreFrameworkSchema,
+  mitreEntitySchema,
+  mitreEntitiesSchema,
+} from './src/schema';
+
+export {
+  THREAT_FRAMEWORK_NAME,
+  getMitreFrameworkByThreatName,
+  getMitreFrameworkById,
+  buildMitreReferenceUrl,
+} from './src/threat_framework';
 
 export type {
   MitreEntityStatus,

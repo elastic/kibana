@@ -56,7 +56,7 @@ export const READINESS_API_PATH = `${THREAT_INTEL_API_BASE}/readiness` as const;
 /**
  * Text-embedding endpoint backing the `semantic_text` Diamond summary fields in
  * the reports mapping. This is not the chat model that performs Diamond
- * extraction (that one resolves through the AlertZero Reasoning tier).
+ * extraction (that one resolves through the AlertZero Frontier tier).
  */
 export const DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID = '.jina-embeddings-v5-text-small' as const;
 
