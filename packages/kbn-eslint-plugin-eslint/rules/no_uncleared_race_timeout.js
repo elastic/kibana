@@ -605,6 +605,30 @@ function nodeStart(node) {
 }
 
 /**
+ * @param {any} node
+ * @returns {number}
+ */
+function nodeEnd(node) {
+  if (node && node.range) {
+    return node.range[1];
+  }
+  const end = node && node.loc && node.loc.end;
+  if (end) {
+    return end.line * 100000 + end.column;
+  }
+  return nodeStart(node);
+}
+
+/**
+ * @param {any} node
+ * @param {number} at
+ * @returns {boolean}
+ */
+function rangeContains(node, at) {
+  return Boolean(node) && nodeStart(node) <= at && at < nodeEnd(node);
+}
+
+/**
  * The value this identifier refers to at this point in the function.
  * A later assignment to the same binding is not visible yet.
  *
@@ -747,10 +771,10 @@ function firstSuspensionAt(fn) {
  * @param {any} fn
  * @param {number} beforeAt
  * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
- * @returns {Array<{ at: number, fn: any, conditional: boolean }>}
+ * @returns {Array<{ at: number, node: any, fn: any, conditional: boolean, awaited: boolean }>}
  */
 function callsIn(fn, beforeAt, functions) {
-  /** @type {Array<{ at: number, fn: any, conditional: boolean }>} */
+  /** @type {Array<{ at: number, node: any, fn: any, conditional: boolean, awaited: boolean }>} */
   const calls = [];
   const root = fn && fn.type === 'Program' ? fn : fn && fn.body;
   if (!root || FUNCTION_TYPES.has(root.type)) {
@@ -771,6 +795,7 @@ function callsIn(fn, beforeAt, functions) {
       if (target && FUNCTION_TYPES.has(target.type)) {
         calls.push({
           at: nodeStart(node),
+          node,
           fn: target,
           conditional: isConditional(node, fn),
           awaited: isAwaitedCall(node),
@@ -910,41 +935,180 @@ function ifStatementsBefore(home, useAt) {
 }
 
 /**
- * Promises this branch always assigns, when every path through it does.
- * An `else if` chain counts when each of its arms assigns.
+ * @param {any[]} left
+ * @param {any[]} right
+ * @returns {any[]}
+ */
+function unionValues(left, right) {
+  /** @type {any[]} */
+  const values = [];
+  const seen = new Set();
+  for (const value of left.concat(right)) {
+    if (!seen.has(value)) {
+      seen.add(value);
+      values.push(value);
+    }
+  }
+  return values;
+}
+
+/**
+ * True when `node` sits inside a function nested under `stop`.
+ *
+ * @param {any} node
+ * @param {any} stop
+ * @returns {boolean}
+ */
+function isInNestedFunction(node, stop) {
+  let current = node && node.parent;
+  while (current && current !== stop) {
+    if (FUNCTION_TYPES.has(current.type)) {
+      return true;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+/**
+ * Writes of this binding inside `branch` that run as part of `branch`.
  *
  * @param {any} branch
- * @param {Array<{ value: any, at: number, ordered: boolean, anchor: any }>} versions
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
  * @param {number} useAt
- * @returns {any[] | null}
+ * @returns {Array<{ value: any, at: number, anchor: any }>}
  */
-function definiteBranchPromises(branch, versions, useAt) {
-  if (!branch) {
-    return null;
-  }
-  const statement =
-    branch.type === 'BlockStatement' && branch.body.length === 1 ? branch.body[0] : branch;
-  if (statement.type === 'IfStatement' && statement.alternate) {
-    const thenValues = definiteBranchPromises(statement.consequent, versions, useAt);
-    const elseValues = definiteBranchPromises(statement.alternate, versions, useAt);
-    if (thenValues && elseValues) {
-      return thenValues.concat(elseValues);
-    }
-    return null;
-  }
-
-  const writes = versions.filter(
+function writesReaching(branch, versions, useAt) {
+  return versions.filter(
     (version) =>
-      version.ordered &&
+      version.anchor &&
+      version.ordered !== false &&
       version.at <= useAt &&
       containsNode(branch, version.anchor) &&
-      !isConditional(version.anchor, branch)
+      !isInNestedFunction(version.anchor, branch)
+  );
+}
+
+/**
+ * Values that reach the end of `branch`. `definite` means every path assigns.
+ * A later conditional assignment stays possible; an earlier one does not.
+ *
+ * @param {any} branch
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {{ definite: boolean, values: any[] }}
+ */
+function branchFlow(branch, versions, useAt) {
+  if (!branch) {
+    return { definite: false, values: [] };
+  }
+  if (branch.type === 'BlockStatement') {
+    /** @type {any[]} */
+    let possible = [];
+    let definite = false;
+    for (const statement of branch.body) {
+      const step = branchFlow(statement, versions, useAt);
+      if (step.definite) {
+        possible = step.values.slice();
+        definite = true;
+      } else if (step.values.length) {
+        possible = unionValues(possible, step.values);
+      }
+    }
+    return { definite, values: possible };
+  }
+  if (branch.type === 'IfStatement' && branch.alternate) {
+    const thenResult = branchFlow(branch.consequent, versions, useAt);
+    const elseResult = branchFlow(branch.alternate, versions, useAt);
+    const values = unionValues(thenResult.values, elseResult.values);
+    return { definite: thenResult.definite && elseResult.definite, values };
+  }
+  if (branch.type === 'IfStatement') {
+    return { definite: false, values: branchFlow(branch.consequent, versions, useAt).values };
+  }
+  if (branch.type === 'TryStatement' || branch.type === 'SwitchStatement') {
+    return {
+      definite: false,
+      values: writesReaching(branch, versions, useAt).map((version) => version.value),
+    };
+  }
+
+  const writes = writesReaching(branch, versions, useAt).filter(
+    (version) => !isConditional(version.anchor, branch)
   );
   if (!writes.length) {
-    return null;
+    return { definite: false, values: [] };
   }
   writes.sort((left, right) => left.at - right.at);
-  return [writes[writes.length - 1].value];
+  return { definite: true, values: [writes[writes.length - 1].value] };
+}
+
+/**
+ * Local assignments that can reach `useAt`. An if/else that assigns on every
+ * path replaces whatever came before it, including nested conditional writes
+ * that can still reach the end of a branch.
+ *
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {any} home
+ * @param {number} useAt
+ * @returns {Array<{ at: number, values: any[], replace: boolean }>}
+ */
+function localAssignmentEvents(versions, home, useAt) {
+  /** @type {Array<{ at: number, values: any[], replace: boolean }>} */
+  const events = [];
+  const covered = new Set();
+  for (const statement of ifStatementsBefore(home, useAt)) {
+    if (!home || isConditional(statement, home) || rangeContains(statement, useAt)) {
+      continue;
+    }
+    const thenResult = branchFlow(statement.consequent, versions, useAt);
+    const elseResult = branchFlow(statement.alternate, versions, useAt);
+    if (!thenResult.definite || !elseResult.definite) {
+      continue;
+    }
+    events.push({
+      at: nodeStart(statement),
+      values: unionValues(thenResult.values, elseResult.values),
+      replace: true,
+    });
+    for (const version of versions) {
+      if (
+        version.anchor &&
+        version.ordered !== false &&
+        version.at <= useAt &&
+        containsNode(statement, version.anchor) &&
+        !isInNestedFunction(version.anchor, statement)
+      ) {
+        covered.add(version);
+      }
+    }
+  }
+  for (const version of versions) {
+    if (covered.has(version) || version.ordered === false || version.at > useAt) {
+      continue;
+    }
+    const conditional = Boolean(version.anchor && home && isConditional(version.anchor, home));
+    events.push({
+      at: version.at,
+      values: [version.value],
+      replace: !conditional,
+    });
+  }
+  return events;
+}
+
+/**
+ * @param {Array<{ at: number, values: any[], replace: boolean }>} events
+ * @returns {any[]}
+ */
+function reduceEvents(events) {
+  const ordered = events.slice().sort((left, right) => left.at - right.at);
+  /** @type {any[]} */
+  let possible = [];
+  for (const event of ordered) {
+    possible = event.replace ? event.values.slice() : unionValues(possible, event.values);
+  }
+  return possible;
 }
 
 /**
@@ -958,45 +1122,13 @@ function definiteBranchPromises(branch, versions, useAt) {
 function possiblePromises(versions, bindingScope, useAt) {
   const home = scopeFunction(bindingScope);
   const functions = functionValuesByScope(home);
-  /** @type {Array<{ at: number, values: any[], replace: boolean }>} */
-  const events = [];
-  const covered = new Set();
-  for (const statement of ifStatementsBefore(home, useAt)) {
-    if (isConditional(statement, home)) {
-      continue;
-    }
-    const thenValues = definiteBranchPromises(statement.consequent, versions, useAt);
-    const elseValues = definiteBranchPromises(statement.alternate, versions, useAt);
-    if (!thenValues || !elseValues) {
-      continue;
-    }
-    events.push({
-      at: nodeStart(statement),
-      values: thenValues.concat(elseValues),
-      replace: true,
-    });
-    for (const version of versions) {
-      if (
-        version.ordered &&
-        (containsNode(statement.consequent, version.anchor) ||
-          (statement.alternate && containsNode(statement.alternate, version.anchor)))
-      ) {
-        covered.add(version);
-      }
-    }
-  }
-  for (const version of versions) {
-    if (covered.has(version) || !version.ordered || version.at > useAt) {
-      continue;
-    }
-    const conditional = isConditional(version.anchor, home);
-    events.push({
-      at: version.at,
-      values: [version.value],
-      replace: !conditional,
-    });
-  }
+  const events = localAssignmentEvents(versions, home, useAt);
   for (const call of callsIn(home, useAt + 1, functions)) {
+    // Arguments are evaluated before the callee runs, so a race inside this
+    // call does not see assignments the call makes.
+    if (rangeContains(call.node, useAt)) {
+      continue;
+    }
     const installed = syncInstalls(call.fn, versions, functions, new Set(), call.awaited);
     if (!installed.values.length) {
       continue;
@@ -1007,24 +1139,7 @@ function possiblePromises(versions, bindingScope, useAt) {
       replace: installed.definite && !call.conditional,
     });
   }
-  events.sort((left, right) => left.at - right.at);
-
-  /** @type {any[]} */
-  let possible = [];
-  for (const event of events) {
-    possible = event.replace ? event.values.slice() : possible.concat(event.values);
-  }
-
-  /** @type {any[]} */
-  const unique = [];
-  const seen = new Set();
-  for (const value of possible) {
-    if (value && !seen.has(value)) {
-      seen.add(value);
-      unique.push(value);
-    }
-  }
-  return unique;
+  return reduceEvents(events).filter((value) => value);
 }
 
 /**
@@ -1208,7 +1323,7 @@ function functionValuesByScope(scope) {
 
 /**
  * Functions this identifier may still refer to. A conditional overwrite keeps
- * the previous callback as well.
+ * the previous callback. An if/else that assigns on every path replaces it.
  *
  * @param {any} identifier
  * @param {Map<any, Map<string, Array<{ value: any, at: number, anchor: any }>>>} valuesByScope
@@ -1223,19 +1338,9 @@ function lookupPossibleFunctions(identifier, valuesByScope) {
     seen.add(scope);
     const versions = valuesByScope.get(scope) && valuesByScope.get(scope).get(identifier.name);
     if (versions) {
-      const stop = scopeFunction(scope);
-      /** @type {any[]} */
-      let possible = [];
-      const ordered = versions
-        .filter((version) => version.at <= useAt)
-        .sort((left, right) => left.at - right.at);
-      for (const version of ordered) {
-        const conditional = Boolean(version.anchor && stop && isConditional(version.anchor, stop));
-        possible = conditional ? possible.concat(version.value) : [version.value];
-      }
-      const functions = possible.filter((value) => value && FUNCTION_TYPES.has(value.type));
-      if (possible.length) {
-        return functions;
+      const possible = reduceEvents(localAssignmentEvents(versions, scopeFunction(scope), useAt));
+      if (versions.some((version) => version.at <= useAt)) {
+        return possible.filter((value) => value && FUNCTION_TYPES.has(value.type));
       }
     }
     if (bindingsOf(scope).has(identifier.name)) {
