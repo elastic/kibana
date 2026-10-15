@@ -102,7 +102,7 @@ TS metrics-*
         metricItem: mockMetric,
         whereStatements: ['@timestamp IS NOT NULL', 'data_stream.namespace == "default"'],
         splitAccessors: ['data_stream.type'],
-      }).startsWith('SET ')
+      }).startsWith(`${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n`)
     ).toBe(false);
   });
 

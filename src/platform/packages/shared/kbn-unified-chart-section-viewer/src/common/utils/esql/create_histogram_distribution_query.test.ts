@@ -72,7 +72,7 @@ describe('createHistogramDistributionQuery', () => {
       originalSource: 'metrics-*',
     });
 
-    expect(query?.startsWith('SET ')).toBe(false);
+    expect(query?.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
     expect(query).toContain('| WHERE @timestamp IS NOT NULL');
     expect(query).toContain('| WHERE 1 == 1');
   });

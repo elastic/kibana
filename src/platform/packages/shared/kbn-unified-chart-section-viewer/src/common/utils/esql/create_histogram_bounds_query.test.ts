@@ -117,7 +117,7 @@ describe('createHistogramBoundsQuery', () => {
       originalSource: 'metrics-*',
     });
 
-    expect(boundsQuery?.esqlQuery.startsWith('SET ')).toBe(false);
+    expect(boundsQuery?.esqlQuery.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
     expect(boundsQuery?.esqlQuery).toContain('| WHERE @timestamp IS NOT NULL');
     expect(boundsQuery?.esqlQuery).toContain('| WHERE 1 == 1');
   });

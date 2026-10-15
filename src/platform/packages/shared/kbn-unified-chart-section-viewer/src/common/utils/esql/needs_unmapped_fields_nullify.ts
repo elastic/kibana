@@ -16,6 +16,7 @@ import {
   isParens,
   Parser,
 } from '@elastic/esql';
+import type { ESQLAstItem } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
 import {
   comparisonFunctions,
@@ -41,7 +42,11 @@ const ALWAYS_MAPPED_FIELDS: ReadonlySet<string> = new Set([
 
 const isAlwaysMappedField = (field: string): boolean => ALWAYS_MAPPED_FIELDS.has(field);
 
-const isSafeExpression = (node: unknown): boolean => {
+/**
+ * True when every column in the expression is in {@link ALWAYS_MAPPED_FIELDS}.
+ * Parameters, unknown nodes, and functions other than comparison, logical, and null checks are unsafe.
+ */
+const isSafeExpression = (node: ESQLAstItem): boolean => {
   if (Array.isArray(node)) {
     return node.every(isSafeExpression);
   }
