@@ -14,7 +14,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { alertEpisodeStatusSchema } from '@kbn/alerting-v2-schemas';
-import { isoDateTime, z } from '@kbn/zod/v4';
+import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { EpisodesClient } from '../../../lib/episodes_client';
@@ -25,34 +25,36 @@ import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/p
 const TOOL_RESULT_LIMIT = 100;
 const TOOL_FETCH_LIMIT = TOOL_RESULT_LIMIT + 1;
 
-const getRuleEventsSchema = z
-  .object({
-    start: isoDateTime()
-      .optional()
-      .describe(
-        'Start of an optional @timestamp window (inclusive), ISO 8601. Pass together with end to narrow the window.'
-      ),
-    end: isoDateTime()
-      .optional()
-      .describe(
-        'End of an optional @timestamp window (inclusive), ISO 8601. Pass together with start to narrow the window.'
-      ),
-    status: alertEpisodeStatusSchema
-      .optional()
-      .describe(
-        'If set, only return events in this lifecycle state (inactive, pending, active, recovering).'
-      ),
-  })
-  .refine((value) => (value.start === undefined) === (value.end === undefined), {
-    message: 'start and end must both be provided',
-  })
-  .refine(
-    (value) =>
-      value.start === undefined ||
-      value.end === undefined ||
-      Date.parse(value.start) <= Date.parse(value.end),
-    { message: 'start must be less than or equal to end' }
-  );
+const getRuleEventsSchema = lazySchema(() =>
+  z
+    .object({
+      start: isoDateTime()
+        .optional()
+        .describe(
+          'Start of an optional @timestamp window (inclusive), ISO 8601. Pass together with end to narrow the window.'
+        ),
+      end: isoDateTime()
+        .optional()
+        .describe(
+          'End of an optional @timestamp window (inclusive), ISO 8601. Pass together with start to narrow the window.'
+        ),
+      status: alertEpisodeStatusSchema
+        .optional()
+        .describe(
+          'If set, only return events in this lifecycle state (inactive, pending, active, recovering).'
+        ),
+    })
+    .refine((value) => (value.start === undefined) === (value.end === undefined), {
+      message: 'start and end must both be provided',
+    })
+    .refine(
+      (value) =>
+        value.start === undefined ||
+        value.end === undefined ||
+        Date.parse(value.start) <= Date.parse(value.end),
+      { message: 'start must be less than or equal to end' }
+    )
+);
 
 const parseEventData = (
   data: EpisodeEventRow['data']
