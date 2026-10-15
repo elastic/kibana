@@ -33,6 +33,7 @@ import { DashboardGridItem } from './dashboard_grid_item';
 import { SelectionMarquee } from './selection_marquee';
 import { useLayoutStyles } from './use_layout_styles';
 import { usePanelSelectionGestures } from './use_panel_selection_gestures';
+import { useSelectionModifierHeld } from './use_selection_modifier_held';
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
@@ -77,11 +78,13 @@ export const DashboardGrid = () => {
 
   const appFixedViewport = useAppFixedViewport();
 
+  const isSelectionEnabled = viewMode === 'edit' && expandedPanelId === undefined;
   const marqueeRect = usePanelSelectionGestures({
     layoutRef,
     panelRefs,
-    enabled: viewMode === 'edit' && expandedPanelId === undefined,
+    enabled: isSelectionEnabled,
   });
+  const isSelectionModifierHeld = useSelectionModifierHeld(isSelectionEnabled);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -234,7 +237,8 @@ export const DashboardGrid = () => {
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-        'dshLayout--selectionMode': viewMode === 'edit' && selectedPanelIds.length > 0,
+        'dshLayout--selectionMode': isSelectionEnabled && selectedPanelIds.length > 0,
+        'dshLayout--selectionModifierHeld': isSelectionModifierHeld,
         'dshLayout--scrolled': isScrolled,
       })}
       css={styles.dashboard}
@@ -273,11 +277,22 @@ const dashboardGridStyles = {
       '.dshDashboardGrid__item--hideHoverActions .embPanel__selectPanel': {
         display: 'none',
       },
-      // While panels are selected, every panel acts as a selection item
-      '&.dshLayout--selectionMode .dshDashboardGrid__item, &.dshLayout--selectionMode .dshDashboardGrid__item .embPanel *':
-        {
-          cursor: 'pointer',
-        },
+      // While panels are selected, or the selection modifier is held, every panel acts as a selection item
+      [[
+        '&.dshLayout--selectionMode .dshDashboardGrid__item',
+        '&.dshLayout--selectionMode .dshDashboardGrid__item .embPanel *',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item .embPanel *',
+      ].join(', ')]: {
+        cursor: 'pointer',
+      },
+      // ... and the hovered panel is called out as selectable (selected panels keep their solid outline)
+      [[
+        '&.dshLayout--selectionMode .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
+      ].join(', ')]: {
+        outline: `${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary}`,
+      },
       // ... and cannot be resized (same approach the grid uses for `.kbnGrid--static`)
       '&.dshLayout--selectionMode .kbnGridPanel--resizeHandle': {
         display: 'none',
