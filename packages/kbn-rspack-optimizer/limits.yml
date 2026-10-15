@@ -61,6 +61,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
+  elasticsearchHome: 2777
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -133,7 +134,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 2762
+  nightshift: 3160
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -185,7 +186,7 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 9436
+  serverlessVectordb: 8809
   sessionView: 647
   share: 379
   shared-core: 311749
@@ -202,6 +203,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 6955
   streamsApp: 55882
+  subscriptionStatus: 5000
   synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738

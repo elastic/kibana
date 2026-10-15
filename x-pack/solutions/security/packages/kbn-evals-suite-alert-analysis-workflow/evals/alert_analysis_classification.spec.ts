@@ -10,8 +10,10 @@
  *
  * Unlike a chat/agent eval, this drives the real workflow end-to-end: `beforeAll` points the
  * space's runtime config at the model under test, then each example indexes a fresh alert, runs
- * the workflow via its `alert` trigger, and grades the `ai.agent` step's structured verdict
- * against the golden label.
+ * the workflow via its `alert` trigger, and grades the classification step's structured verdict
+ * against the golden label. The same dataset runs twice, once with the space classifying with its
+ * agent (`ai.agent`) and once with a single prompt (`ai.prompt`), one test each. The agent test
+ * keeps its original name so its weekly trend continues; the prompt test is reported next to it.
  *
  * Each task indexes a UNIQUE alert (fresh alert id, rule uuid, and entity-correlation fields) and
  * deletes it afterwards. Three independent reasons require the freshness:
@@ -30,7 +32,8 @@
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
  *   - ValidVerdict (CODE): structured output conforms (enum classification + confidence in [0,1]).
- *   - trajectory (CODE): zero-tool guardrail — agent must not call tools after pre-built context.
+ *   - trajectory (CODE, agent only): zero-tool guardrail — agent must not call tools after
+ *     pre-built context. A prompt has no tools, so the guardrail is not run for it.
  *   - RationaleQuality (LLM): the rationale is grounded in the alert's observable evidence and
  *     names the decision gate / confidence tier it applied.
  *
@@ -41,17 +44,11 @@
 import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import {
-  selectEvaluators,
-  type EvalConnector,
-  type EvaluationDataset,
-  type Example,
-} from '@kbn/evals';
+import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { runAlertAnalysisWorkflow } from '../src/workflow_task';
+import { runAlertAnalysisWorkflow, type ClassificationMethod } from '../src/workflow_task';
 import { configureAlertAnalysisWorkflow } from '../src/space_config';
 import {
   classificationAccuracy,
@@ -84,27 +81,6 @@ evaluate.describe(
     // Alerts created by tasks, deleted after each run; afterAll sweeps any that slipped through.
     const createdAlertIds = new Set<string>();
 
-    evaluate.beforeAll(
-      async ({
-        fetch,
-        connector,
-        log,
-      }: {
-        fetch: HttpHandler;
-        connector: EvalConnector;
-        log: ToolingLog;
-      }) => {
-        // Point this space's alert-analysis workflow at the connector under test so the
-        // workflow's `ai.agent` step is routed to the model being evaluated.
-        await configureAlertAnalysisWorkflow({
-          fetch,
-          log,
-          connectorId: connector.id,
-          agentId: agentBuilderDefaultAgentId,
-        });
-      }
-    );
-
     evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       if (createdAlertIds.size === 0) {
         return;
@@ -118,99 +94,135 @@ evaluate.describe(
       });
     });
 
-    evaluate(
-      'classifies alerts with the expected true/false positive verdict',
-      async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
-        const examples: AlertAnalysisExample[] = ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({
-          id: alert.id,
-          input: { alertId: alert.id },
-          output: { classification: alert.expected },
-          metadata: {
-            alertId: alert.id,
-            alertIndex: ALERTS_INDEX,
-            expected: alert.expected,
-            description: alert.description,
-          },
-        }));
+    const METHODS: Array<{
+      method: ClassificationMethod;
+      title: string;
+      datasetName: string;
+    }> = [
+      {
+        method: 'agent',
+        title: 'classifies alerts with the expected true/false positive verdict',
+        datasetName: 'security: alert-analysis-workflow-classification',
+      },
+      {
+        method: 'prompt',
+        title: 'classifies alerts with the expected true/false positive verdict using a prompt',
+        datasetName: 'security: alert-analysis-workflow-classification (prompt)',
+      },
+    ];
 
-        const selectedEvaluators = selectEvaluators([
-          classificationAccuracy,
-          validVerdict,
-          createAlertAnalysisTrajectoryEvaluator(),
-          evaluators.criteria(RATIONALE_CRITERIA),
-        ]);
+    // One test per method, run one after the other: both write the same space setting.
+    METHODS.forEach(({ method, title, datasetName }) => {
+      evaluate(
+        title,
+        async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient, connector }) => {
+          // Point this space's alert-analysis workflow at the connector under test, classifying with
+          // the agent or a prompt, so the workflow's classification step is routed to the model
+          // being evaluated.
+          await configureAlertAnalysisWorkflow({
+            fetch,
+            log,
+            connectorId: connector.id,
+            agentId: agentBuilderDefaultAgentId,
+            usePrompt: method === 'prompt',
+          });
 
-        await executorClient.runExperiment(
-          {
-            datasets: [
-              {
-                name: 'security: alert-analysis-workflow-classification',
-                description:
-                  'Runs the managed system-security-alert-analysis workflow end-to-end against ' +
-                  `${ALERT_ANALYSIS_EVAL_ALERTS.length} labeled synthetic alerts spanning the four ` +
-                  'confidence tiers (Tier 1/2 → true_positive, Tier 3/4 → false_positive) and grades ' +
-                  "the ai.agent step's classification against the golden label.",
-                examples,
-              } satisfies EvaluationDataset,
-            ],
-            task: async ({ metadata }) => {
-              const { alertId, alertIndex } = metadata as {
-                alertId: string;
-                alertIndex: string;
-              };
-              const base = ALERT_BY_ID.get(alertId);
-              if (!base) {
-                throw new Error(`No synthetic alert found for id ${alertId}`);
-              }
-
-              // Fresh alert id, rule uuid, and entity ids per run so concurrent repetitions never
-              // share state: the unique `_id` bypasses the workflow's `already_analyzed` tag gate,
-              // the unique rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes
-              // rule-filtered enrichment queries, and unique entity ids keep `get_related_alerts`
-              // from correlating in-flight repetitions of the same base alert. Overriding flattened
-              // keys via spread is safe because `base.doc` stores dotted keys as top-level properties
-              // (primitive values), so this clones without mutating the shared base document.
-              const uniqueAlertId = `${alertId}-${randomUUID()}`;
-              const uniqueRuleId = `${uniqueAlertId}-rule`;
-              const document = {
-                ...base.doc,
-                'kibana.alert.uuid': uniqueAlertId,
-                'kibana.alert.rule.uuid': uniqueRuleId,
-                'kibana.alert.rule.rule_id': uniqueRuleId,
-                // Break entity-graph correlation between concurrent repetitions of the same base
-                // alert: get_related_alerts correlates on these (base-keyed) entity ids, not rule uuid.
-                'process.entity_id': `entity-${uniqueAlertId}`,
-                'host.id': `host-${uniqueAlertId}`,
-              };
-              createdAlertIds.add(uniqueAlertId);
-              await esClient.index({
-                index: alertIndex,
-                id: uniqueAlertId,
-                document,
-                refresh: 'wait_for',
-              });
-
-              try {
-                return await runAlertAnalysisWorkflow({
-                  fetch,
-                  log,
-                  traceEsClient,
-                  alertId: uniqueAlertId,
-                  alertIndex,
-                });
-              } finally {
-                await esClient
-                  .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })
-                  .then(() => createdAlertIds.delete(uniqueAlertId))
-                  .catch(() => {
-                    // Leave it in createdAlertIds so afterAll sweeps it.
-                  });
-              }
+          const examples: AlertAnalysisExample[] = ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({
+            id: alert.id,
+            input: { alertId: alert.id },
+            output: { classification: alert.expected },
+            metadata: {
+              alertId: alert.id,
+              alertIndex: ALERTS_INDEX,
+              expected: alert.expected,
+              description: alert.description,
             },
-          },
-          selectedEvaluators
-        );
-      }
-    );
+          }));
+
+          const selectedEvaluators = selectEvaluators([
+            classificationAccuracy,
+            validVerdict,
+            // A prompt has no tools to call, so the zero-tool guardrail only applies to the agent.
+            ...(method === 'agent' ? [createAlertAnalysisTrajectoryEvaluator()] : []),
+            evaluators.criteria(RATIONALE_CRITERIA),
+          ]);
+
+          await executorClient.runExperiment(
+            {
+              metadata: { classificationMethod: method },
+              datasets: [
+                {
+                  name: datasetName,
+                  description:
+                    'Runs the managed system-security-alert-analysis workflow end-to-end against ' +
+                    `${ALERT_ANALYSIS_EVAL_ALERTS.length} labeled synthetic alerts spanning the four ` +
+                    'confidence tiers (Tier 1/2 → true_positive, Tier 3/4 → false_positive) and grades ' +
+                    `the ${
+                      method === 'agent' ? 'ai.agent' : 'ai.prompt'
+                    } step's classification against the golden label.`,
+                  examples,
+                } satisfies EvaluationDataset,
+              ],
+              task: async ({ metadata }) => {
+                const { alertId, alertIndex } = metadata as {
+                  alertId: string;
+                  alertIndex: string;
+                };
+                const base = ALERT_BY_ID.get(alertId);
+                if (!base) {
+                  throw new Error(`No synthetic alert found for id ${alertId}`);
+                }
+
+                // Fresh alert id, rule uuid, and entity ids per run so concurrent repetitions never
+                // share state: the unique `_id` bypasses the workflow's `already_analyzed` tag gate,
+                // the unique rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes
+                // rule-filtered enrichment queries, and unique entity ids keep `get_related_alerts`
+                // from correlating in-flight repetitions of the same base alert. Overriding flattened
+                // keys via spread is safe because `base.doc` stores dotted keys as top-level properties
+                // (primitive values), so this clones without mutating the shared base document.
+                const uniqueAlertId = `${alertId}-${randomUUID()}`;
+                const uniqueRuleId = `${uniqueAlertId}-rule`;
+                const document = {
+                  ...base.doc,
+                  'kibana.alert.uuid': uniqueAlertId,
+                  'kibana.alert.rule.uuid': uniqueRuleId,
+                  'kibana.alert.rule.rule_id': uniqueRuleId,
+                  // Break entity-graph correlation between concurrent repetitions of the same base
+                  // alert: get_related_alerts correlates on these (base-keyed) entity ids, not rule uuid.
+                  'process.entity_id': `entity-${uniqueAlertId}`,
+                  'host.id': `host-${uniqueAlertId}`,
+                };
+                createdAlertIds.add(uniqueAlertId);
+                await esClient.index({
+                  index: alertIndex,
+                  id: uniqueAlertId,
+                  document,
+                  refresh: 'wait_for',
+                });
+
+                try {
+                  return await runAlertAnalysisWorkflow({
+                    fetch,
+                    log,
+                    traceEsClient,
+                    alertId: uniqueAlertId,
+                    alertIndex,
+                    classificationMethod: method,
+                  });
+                } finally {
+                  await esClient
+                    .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })
+                    .then(() => createdAlertIds.delete(uniqueAlertId))
+                    .catch(() => {
+                      // Leave it in createdAlertIds so afterAll sweeps it.
+                    });
+                }
+              },
+            },
+            selectedEvaluators
+          );
+        }
+      );
+    });
   }
 );
