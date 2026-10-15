@@ -152,20 +152,16 @@ function appendRuleToResponse(
 }
 
 /**
- * Extracts a deduplicated list of MITRE ATT&CK Enterprise tactic, technique, and
- * subtechnique IDs referenced by the rule's threat mappings.
- *
- * The coverage overview UI renders the ATT&CK Enterprise matrix only. ATLAS ids are excluded
- * from `coverage` and ATLAS-only rules count as unmapped until the follow-up adds the ATLAS
- * view (see security-team#14858).
+ * Extracts a deduplicated list of MITRE (ATT&CK Enterprise and ATLAS) tactic, technique, and
+ * sub-technique ids referenced by a rule. The coverage overview renders one matrix per
+ * framework from this map; the id spaces do not overlap. A rule with no recognized framework
+ * entries is unmapped.
  */
 function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   // dedupe in case data isn't valid in ES
   const categories = new Set<string>();
-  for (const { id, framework } of iterateMitreThreatEntities(rule.params.threat)) {
-    if (framework === 'enterprise') {
-      categories.add(id);
-    }
+  for (const { id } of iterateMitreThreatEntities(rule.params.threat)) {
+    categories.add(id);
   }
   return Array.from(categories);
 }

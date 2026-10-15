@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
-import { buildMockMitreTacticSummary } from '@kbn/security-mitre-attack-common';
+import { buildMockMitreTacticSummary } from '@kbn/security-mitre-attack-mocks';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';

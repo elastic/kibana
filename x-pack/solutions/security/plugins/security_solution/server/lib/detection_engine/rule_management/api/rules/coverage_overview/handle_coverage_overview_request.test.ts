@@ -430,12 +430,24 @@ describe('handleCoverageOverviewRequest', () => {
       });
     };
 
-    it('excludes ATLAS ids from coverage and counts an ATLAS-only rule as unmapped', async () => {
+    it('includes ATLAS ids in coverage and does not count an ATLAS-only rule as unmapped', async () => {
       const result = await run([makeRule('rule-atlas', [makeAtlasThreat()])], makeClient(true));
 
-      expect(Object.keys(result.coverage).filter((id) => id.startsWith('AML.'))).toEqual([]);
-      expect(result.unmapped_rule_ids).toContain('rule-atlas');
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-atlas']);
+      expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.rules_data['rule-atlas']).toBeDefined();
+    });
+
+    it('counts a rule with no recognized framework as unmapped', async () => {
+      const result = await run(
+        [makeRule('rule-mobile', [{ ...makeAttackThreat(), framework: 'MITRE Mobile' }])],
+        makeClient(true)
+      );
+
+      expect(result.coverage).toEqual({});
+      expect(result.unmapped_rule_ids).toEqual(['rule-mobile']);
     });
 
     it('flags only ATLAS ids missing from the atlas buckets', async () => {
@@ -468,7 +480,7 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.invalid_mitre_ids['rule-attack']).toEqual([BOGUS_TECHNIQUE_ID]);
     });
 
-    it('lists a rule with both frameworks only under its Enterprise ids and not as unmapped', async () => {
+    it('lists a rule with both frameworks under both id sets and not as unmapped', async () => {
       const result = await run(
         [makeRule('rule-both', [makeAttackThreat(), makeAtlasThreat()])],
         makeClient(true)
@@ -476,7 +488,8 @@ describe('handleCoverageOverviewRequest', () => {
 
       expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-both']);
       expect(result.coverage[VALID_TECHNIQUE_ID]).toEqual(['rule-both']);
-      expect(Object.keys(result.coverage).filter((id) => id.startsWith('AML.'))).toEqual([]);
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-both']);
       expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.invalid_mitre_ids).toEqual({});
     });
