@@ -68,7 +68,7 @@ export * from '@kbn/scout/src/playwright/eui_components';
 export { cli } from '@kbn/scout';
 
 // re-exported config-set constants from @kbn/scout
-export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout';
+export { AUDIT_LOG_PATH, ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout';
 
 // TYPE EXPORTS
 
