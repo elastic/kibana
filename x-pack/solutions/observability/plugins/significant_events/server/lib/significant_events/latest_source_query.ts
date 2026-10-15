@@ -41,7 +41,10 @@ export const queryEsql = async ({
   esClient: ElasticsearchClient;
   query: ComposerQuery;
 }): Promise<ESQLSearchResponse> =>
-  (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+  (await esClient.esql.query({
+    ...toEsqlRequest(query),
+    allow_partial_results: false,
+  })) as ESQLSearchResponse;
 
 // Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
 export const esqlToObjects = <T extends Record<string, unknown>>(

@@ -76,7 +76,12 @@ export interface SimilarFeatureHit {
   id: string;
   title: string;
   description: string;
+  type: string;
+  subtype?: string;
+  properties: Record<string, unknown>;
   confidence: number;
+  /** Slugs of every source holding the feature. */
+  sources: string[];
 }
 
 export interface IdentifyFeaturesOptions {

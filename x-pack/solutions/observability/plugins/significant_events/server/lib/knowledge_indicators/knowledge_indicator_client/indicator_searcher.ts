@@ -25,6 +25,7 @@ import {
   inSpace,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
+  IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
   DESCRIPTION,
@@ -59,6 +60,9 @@ import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
+// Ranking runs over raw revisions, and revisions of one feature share an embedding, so the window
+// has to hold many rows per distinct feature.
+const CROSS_SOURCE_RANK_LIMIT = 300;
 const QUERY_FEATURE_ID = 'query.features.id';
 
 type RankedIndicatorRow = Record<string, unknown> & {
@@ -161,6 +165,97 @@ export class IndicatorSearcher {
     return {
       hits: hits.flatMap((h) => (h.type === 'feature' ? [h.feature] : [])),
     };
+  }
+
+  /**
+   * Ranks before resolving latest revisions so the corpus is not capped by `REVISION_SIZE_LIMIT`;
+   * `sourceIds` is the access scope, not a relevance hint.
+   */
+  async findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    return searchWithKeywordFallback(
+      this.logger,
+      { searchMode: options.searchMode, label: 'KnowledgeIndicator', sourceIds },
+      (mode) => this.executeFindFeaturesAcrossSources(mode, sourceIds, query, options)
+    );
+  }
+
+  private async executeFindFeaturesAcrossSources(
+    mode: SearchMode,
+    sourceIds: string[],
+    queryText: string,
+    { featureType, limit }: { featureType: string; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    const rankWhere = andWhere(
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, [KI_TYPE_FEATURE]),
+        inPredicate(FEATURE_TYPE, [featureType]),
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED
+      ),
+      inSpace(this.space)
+    );
+
+    const query = this.buildRankQuery(
+      mode,
+      rankWhere,
+      queryText,
+      [KI_TYPE_FEATURE],
+      CROSS_SOURCE_RANK_LIMIT
+    );
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query })
+    );
+
+    // Any ranked revision counts for its group: revisions of one feature share an embedding and
+    // tie on score, so requiring the latest one to be the ranked row would drop groups arbitrarily.
+    const rankedKeys = new Set<string>();
+    const ids = new Set<string>();
+    for (const row of rankedRows) {
+      const id = row[ID];
+      const sourceId = row[SOURCE_ID];
+      if (typeof id !== 'string' || typeof sourceId !== 'string') {
+        continue;
+      }
+      rankedKeys.add(`${sourceId}:${id}`);
+      ids.add(id);
+    }
+    this.logger.debug(
+      `Cross-source feature search: ${rankedKeys.size} distinct groups in ${rankedRows.length} ranked rows`
+    );
+    if (rankedKeys.size === 0) {
+      return { hits: [] };
+    }
+
+    const latest = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, [KI_TYPE_FEATURE]),
+        inPredicate(ID, Array.from(ids))
+      ),
+      combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED)
+    );
+    const latestByKey = new Map(
+      latest
+        .filter(isStoredFeatureKnowledgeIndicator)
+        .map((doc) => [`${doc['source.id']}:${doc.id}`, doc])
+    );
+
+    const hits: Feature[] = [];
+    for (const key of rankedKeys) {
+      const doc = latestByKey.get(key);
+      if (doc) hits.push(fromStoredFeature(doc));
+    }
+    return { hits: limit === undefined ? hits : hits.slice(0, limit) };
   }
 
   async findQueries(
