@@ -14,7 +14,7 @@ import {
 } from '../../../../common/workflows/triggers';
 import { StatusChange } from './lifecycle/lifecycle_controller';
 import { asRuleEventsClient } from './rule_events_client.mock';
-import { RuleEventsClient } from './rule_events_client';
+import { RuleEventsClient, operatorFallbackAssessmentNote } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 interface MockRow {
@@ -145,7 +145,7 @@ describe('RuleEventsClient', () => {
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
     });
 
-    it('records the given note and keeps the stored one when it is omitted or blank', async () => {
+    it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {
         const alertEventsClient = makeStatusAlertEventsClient();
@@ -161,10 +161,29 @@ describe('RuleEventsClient', () => {
         assessment_note: 'Closed by cleanup.',
       });
       expect(await written('   ')).toMatchObject({
-        assessment_note: 'Operator dismissed as noise.',
+        assessment_note: operatorFallbackAssessmentNote('inactive'),
       });
-      expect(await written()).toMatchObject({ assessment_note: 'Operator dismissed as noise.' });
+      expect(await written()).toMatchObject({
+        assessment_note: operatorFallbackAssessmentNote('inactive'),
+      });
     });
+
+    it.each<'active' | 'inactive'>(['active', 'inactive'])(
+      'uses the operator fallback note stating the %s status when no note is given',
+      async (status) => {
+        const existing = createStatusEvent({ status: status === 'active' ? 'inactive' : 'active' });
+        const alertEventsClient = makeStatusAlertEventsClient();
+
+        await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+          eventId: existing.event_id,
+          change: StatusChange.byOperator(status),
+        });
+
+        expect(lastStatusWritten(alertEventsClient).data).toMatchObject({
+          assessment_note: operatorFallbackAssessmentNote(status),
+        });
+      }
+    );
 
     it.each<[string, StatusChange, string]>([
       ['an operator status', DEACTIVATE_STATUS, 'inactive'],

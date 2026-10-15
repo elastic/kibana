@@ -508,7 +508,7 @@ export class RuleEventsClient {
     const decision = decideStatusChange({
       latest,
       change,
-      assessmentNote: assessmentNote
+      assessmentNote: assessmentNote?.trim()
         ? assessmentNote
         : change.kind === 'operator'
         ? operatorFallbackAssessmentNote(change.status)
