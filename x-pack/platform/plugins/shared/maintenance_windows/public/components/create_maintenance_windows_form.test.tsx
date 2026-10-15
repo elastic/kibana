@@ -284,12 +284,18 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.paste('My window');
     };
 
-    it('does not show the modal and creates with default scope when Alerts is on', async () => {
-      // Alerts defaults ON — submitting without touching toggles must skip the modal.
+    const confirmApplyToAllAlerts = async () => {
+      const modal = await screen.findByTestId('applyToAllAlertsConfirmModal');
+      await expect(modal).toBeInTheDocument();
+      await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
+    };
+
+    it('creates with the default scope when Alerts is on and no filters are set', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
       await fillTitle();
       await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts();
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -301,7 +307,7 @@ describe('CreateMaintenanceWindowForm', () => {
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('calls create when user toggles Alerts off then confirms save without filters modal', async () => {
+    it('calls create when user toggles Alerts off then confirms save without scopes modal', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
       await fillTitle();
@@ -323,7 +329,7 @@ describe('CreateMaintenanceWindowForm', () => {
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('does not call create when user cancels save without filters modal', async () => {
+    it('does not call create when user cancels save without scopes modal', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
       await fillTitle();
@@ -340,13 +346,14 @@ describe('CreateMaintenanceWindowForm', () => {
       expect(createMutate).not.toHaveBeenCalled();
     });
 
-    it('does not show confirmation modal when saving with filters (scoped query present)', async () => {
+    it('does not show confirmation modal when saving with scoped query present', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
       await user.click(await screen.findByTestId('create-submit'));
 
       await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
   });
 

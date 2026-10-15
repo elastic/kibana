@@ -100,7 +100,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSaveWithoutScopeModalVisible, setIsSaveWithoutScopeModalVisible] = useState(false);
+  const [isApplyToAllAlertsModalVisible, setIsApplyToAllAlertsModalVisible] = useState(false);
   const userConfirmedSaveWithoutScopeRef = useRef(false);
+  const userConfirmedApplyToAllAlertsRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
@@ -180,6 +182,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           : null
         : undefined;
 
+      const hasAlertFilters = v1Payload !== null && v2Payload !== null;
+      if (!hasAlertFilters) {
+        if (userConfirmedApplyToAllAlertsRef.current) {
+          userConfirmedApplyToAllAlertsRef.current = false;
+        } else {
+          setIsApplyToAllAlertsModalVisible(true);
+          return;
+        }
+      }
+
       // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
       if (alertingV1.enabled) {
@@ -246,6 +258,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutScopeModalTitleId = useGeneratedHtmlId();
+  const applyToAllAlertsModalTitleId = useGeneratedHtmlId();
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
@@ -470,6 +483,24 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             data-test-subj="saveWithoutScopesConfirmModal"
           >
             <p>{i18n.SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE}</p>
+          </EuiConfirmModal>
+        )}
+        {isApplyToAllAlertsModalVisible && (
+          <EuiConfirmModal
+            aria-labelledby={applyToAllAlertsModalTitleId}
+            title={i18n.APPLY_TO_ALL_ALERTS_MODAL_TITLE}
+            titleProps={{ id: applyToAllAlertsModalTitleId }}
+            onCancel={() => setIsApplyToAllAlertsModalVisible(false)}
+            onConfirm={() => {
+              userConfirmedApplyToAllAlertsRef.current = true;
+              setIsApplyToAllAlertsModalVisible(false);
+              form.submit();
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.APPLY_TO_ALL_ALERTS_MODAL_CONFIRM}
+            data-test-subj="applyToAllAlertsConfirmModal"
+          >
+            <p>{i18n.APPLY_TO_ALL_ALERTS_MODAL_BODY}</p>
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>

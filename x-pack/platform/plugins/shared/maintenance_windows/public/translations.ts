@@ -533,6 +533,27 @@ export const SAVE_WITHOUT_SCOPES_MODAL_CONFIRM = i18n.translate(
   }
 );
 
+export const APPLY_TO_ALL_ALERTS_MODAL_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.title',
+  {
+    defaultMessage: 'Apply this maintenance window to all alerts?',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_MODAL_BODY = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.body',
+  {
+    defaultMessage: 'This maintenance window has no alert filters, so it will apply to all alerts.',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.confirm',
+  {
+    defaultMessage: 'Apply to all alerts',
+  }
+);
+
 export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
   {
