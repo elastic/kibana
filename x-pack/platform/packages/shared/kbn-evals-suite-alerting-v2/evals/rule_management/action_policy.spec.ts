@@ -187,11 +187,16 @@ evaluate.describe(
                       ACTION_POLICY_ATTACHMENT_TYPE
                     );
 
+                    const ruleId = rule?.id;
+                    const workflowId = workflow?.workflowId;
+
+                    expect(ruleId).toEqual(expect.any(String));
+                    expect(workflowId).toEqual(expect.any(String));
                     expect(actionPolicy).toBeDefined();
                     expect(actionPolicy!.matcher?.tags ?? []).toEqual([]);
                     expect(actionPolicy!.matcher?.expression ?? null).toBeNull();
                     expect(actionPolicy!.destinations).toEqual([
-                      { type: 'workflow', id: workflow?.workflowId },
+                      { type: 'workflow', id: workflowId },
                     ]);
                     expect(rule?.metadata?.routing_tags ?? []).toEqual([]);
                   },
