@@ -38,7 +38,7 @@ const doneResult: UploadBinaryResult = {
   attachment: createdAttachment as never,
   fileId: 'file-1',
 };
-const documentAttachmentInput = {
+const binaryAttachmentInput = {
   id: 'att-1',
   type: 'binary',
   origin: 'file-1',
@@ -68,7 +68,7 @@ const setContext = ({
     removeAttachment,
   } as never);
 
-const createDocument = (name = 'invoice.pdf') =>
+const createPdf = (name = 'invoice.pdf') =>
   new File([new Uint8Array(4)], name, { type: 'application/pdf' });
 
 /** A read the test finishes by hand, so it can check the state in between. */
@@ -95,13 +95,12 @@ describe('useBinaryUpload', () => {
     );
   const paste = (
     result: { current: ReturnType<typeof useBinaryUpload> },
-    file = createDocument()
-  ) => {
-    let name: string | undefined;
+    file = createPdf()
+  ): string => {
     act(() => {
-      name = result.current.handlePasteBinary?.(file);
+      result.current.handlePasteBinary?.(file, file.name, 'application/pdf');
     });
-    return name;
+    return file.name;
   };
 
   beforeEach(() => {
@@ -132,7 +131,7 @@ describe('useBinaryUpload', () => {
           conversationId: 'conv-1',
         })
       );
-      expect(upsertAttachments).toHaveBeenCalledWith([documentAttachmentInput]);
+      expect(upsertAttachments).toHaveBeenCalledWith([binaryAttachmentInput]);
       expect(result.current.loadingBinaryNames.size).toBe(0);
       expect(createConversation).not.toHaveBeenCalled();
     });
@@ -152,33 +151,10 @@ describe('useBinaryUpload', () => {
     });
   });
 
-  describe('paste of a Markdown file', () => {
-    it('reads a Markdown file with an empty type and adds a document attachment', async () => {
-      const { result } = renderBinaryUpload();
-
-      expect(paste(result, new File(['# Hi'], 'notes.md', { type: '' }))).toBe('notes.md');
-      await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
-
-      expect(mockUploadBinary).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'notes.md', mimeType: 'text/markdown' })
-      );
-      expect(upsertAttachments).toHaveBeenCalledWith([
-        { id: 'att-1', type: 'binary', origin: 'file-1', description: 'notes.md' },
-      ]);
-    });
-
-    it('names a file without a name by its type', () => {
-      deferUpload();
-      const { result } = renderBinaryUpload();
-
-      expect(paste(result, new File(['# Hi'], '', { type: 'text/markdown' }))).toBe('document.md');
-    });
-  });
-
   describe('paste in a new chat', () => {
     beforeEach(() => setContext({ conversationId: undefined }));
 
-    it('creates the conversation once and reads the document into it', async () => {
+    it('creates the conversation once and reads the PDF into it', async () => {
       const { result } = renderBinaryUpload();
 
       paste(result);
@@ -192,13 +168,36 @@ describe('useBinaryUpload', () => {
       expect(result.current.pendingConversationId).toBe('new-conv');
     });
 
-    it('reuses the conversation for the next document', async () => {
+    it('creates the conversation once when two PDFs are pasted at the same time', async () => {
+      const { result } = renderBinaryUpload();
+
+      act(() => {
+        result.current.handlePasteBinary?.(createPdf('first.pdf'), 'first.pdf', 'application/pdf');
+        result.current.handlePasteBinary?.(
+          createPdf('second.pdf'),
+          'second.pdf',
+          'application/pdf'
+        );
+      });
+      await waitFor(() => expect(upsertAttachments).toHaveBeenCalledTimes(2));
+
+      expect(createConversation).toHaveBeenCalledTimes(1);
+      expect(mockUploadBinary).toHaveBeenCalledTimes(2);
+      expect(mockUploadBinary).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'first.pdf', conversationId: 'new-conv' })
+      );
+      expect(mockUploadBinary).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'second.pdf', conversationId: 'new-conv' })
+      );
+    });
+
+    it('reuses the conversation for the next PDF', async () => {
       const { result } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalledTimes(1));
       act(() => result.current.handleRemoveBinary('invoice.pdf'));
 
-      paste(result, createDocument('second.pdf'));
+      paste(result, createPdf('second.pdf'));
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalledTimes(2));
 
       expect(createConversation).toHaveBeenCalledTimes(1);
@@ -222,42 +221,6 @@ describe('useBinaryUpload', () => {
     });
   });
 
-  describe('checks before the upload', () => {
-    it('refuses a file that is not a document with a toast', () => {
-      const { result } = renderBinaryUpload();
-
-      expect(paste(result, new File(['x'], 'a.csv', { type: 'text/plain' }))).toBeUndefined();
-
-      expect(addErrorToast).toHaveBeenCalledWith({ title: 'This file type is not supported.' });
-      expect(mockUploadBinary).not.toHaveBeenCalled();
-    });
-
-    it('refuses a second document while the first one is loading', () => {
-      deferUpload();
-      const { result } = renderBinaryUpload();
-      paste(result);
-
-      expect(paste(result, createDocument('second.pdf'))).toBeUndefined();
-
-      expect(addErrorToast).toHaveBeenCalledWith({
-        title: 'You can attach 1 document per message.',
-      });
-      expect(result.current.loadingBinaryNames).toEqual(new Set(['invoice.pdf']));
-    });
-
-    it('refuses a second document after the first one is added', async () => {
-      const { result } = renderBinaryUpload();
-      paste(result);
-      await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
-
-      expect(paste(result, createDocument('second.pdf'))).toBeUndefined();
-
-      expect(addErrorToast).toHaveBeenCalledWith({
-        title: 'You can attach 1 document per message.',
-      });
-    });
-  });
-
   it('shows the error and removes the chip when the read fails', async () => {
     mockUploadBinary.mockResolvedValue({
       status: 'failed',
@@ -278,7 +241,7 @@ describe('useBinaryUpload', () => {
     expect(result.current.loadingBinaryNames.size).toBe(0);
   });
 
-  describe('removing a document', () => {
+  describe('removing a PDF', () => {
     it('while loading aborts the work, removes the chip and ignores the late result', async () => {
       const upload = deferUpload();
       const { result } = renderBinaryUpload();
@@ -305,7 +268,7 @@ describe('useBinaryUpload', () => {
       const { result, rerender } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
-      setContext({ conversationId: 'conv-1', attachments: [documentAttachmentInput] });
+      setContext({ conversationId: 'conv-1', attachments: [binaryAttachmentInput] });
       rerender();
 
       act(() => result.current.handleRemoveBinary('invoice.pdf'));
@@ -334,7 +297,7 @@ describe('useBinaryUpload', () => {
   });
 
   describe('handleAfterInput', () => {
-    it('removes a document whose chip was deleted from the text', async () => {
+    it('removes a PDF whose chip was deleted from the text', async () => {
       const { result } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
@@ -346,7 +309,7 @@ describe('useBinaryUpload', () => {
       expect(mockDeleteAttachment).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps a document whose chip is still in the text', async () => {
+    it('keeps a PDF whose chip is still in the text', async () => {
       const { result } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
@@ -357,7 +320,7 @@ describe('useBinaryUpload', () => {
       expect(mockDeleteAttachment).not.toHaveBeenCalled();
     });
 
-    it('cancels a document that is loading when its chip was deleted', () => {
+    it('cancels a PDF that is loading when its chip was deleted', () => {
       deferUpload();
       const { result } = renderBinaryUpload();
       paste(result);
@@ -384,7 +347,7 @@ describe('useBinaryUpload', () => {
       expect(result.current.loadingBinaryNames.size).toBe(0);
     });
 
-    it('deletes the documents that were not sent when the conversation changes', async () => {
+    it('deletes the PDFs that were not sent when the conversation changes', async () => {
       const { result, rerender } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
@@ -411,7 +374,7 @@ describe('useBinaryUpload', () => {
       expect(result.current.pendingConversationId).toBeUndefined();
     });
 
-    it('keeps the documents that were sent, even when the screen changes right after', async () => {
+    it('keeps the PDFs that were sent, even when the screen changes right after', async () => {
       setContext({ conversationId: undefined });
       const { result, rerender } = renderBinaryUpload();
       paste(result);
@@ -425,7 +388,7 @@ describe('useBinaryUpload', () => {
       expect(result.current.pendingConversationId).toBeUndefined();
     });
 
-    it('deletes the documents that were not sent when the input unmounts', async () => {
+    it('deletes the PDFs that were not sent when the input unmounts', async () => {
       const { result, unmount } = renderBinaryUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());

@@ -304,7 +304,14 @@ describe('UserMessageText', () => {
       expect(screen.getByText('photo.png')).toBeInTheDocument();
     });
 
-    it('renders a document badge for document scheme links, with the name decoded', () => {
+    it('renders a file badge for text scheme links, with the name decoded', () => {
+      renderWithProvider(<UserMessageText text="Read [my notes.md](text://my%20notes.md)" />);
+
+      expect(screen.getByText('my notes.md')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('renders a file badge for binary scheme links, with the name decoded', () => {
       renderWithProvider(
         <UserMessageText text="Read [My invoice.pdf](binary://My%20invoice.pdf)" />
       );

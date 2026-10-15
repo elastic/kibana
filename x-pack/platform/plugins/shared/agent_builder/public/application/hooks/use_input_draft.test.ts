@@ -33,9 +33,11 @@ describe('useInputDraft', () => {
   it('strips image, binary and text chips from the saved draft', () => {
     const { result } = renderDraft();
 
-    result.current.saveDraft('see [a.png](image://a.png) and [b.pdf](binary://b.pdf) please');
+    result.current.saveDraft(
+      'see [a.png](image://a.png), [b.pdf](binary://b.pdf) and [c.md](text://c.md) please'
+    );
 
-    expect(renderDraft().result.current.draft).toBe('see  and  please');
+    expect(renderDraft().result.current.draft).toBe('see ,  and  please');
   });
 
   it('keeps other links', () => {

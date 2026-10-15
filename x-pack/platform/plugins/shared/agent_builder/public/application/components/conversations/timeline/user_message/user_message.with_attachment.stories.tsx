@@ -53,19 +53,19 @@ const imageAttachment = createVersionedAttachment({
 });
 
 const binaryAttachment = createVersionedAttachment({
-  id: 'story-document-attachment',
+  id: 'story-binary-attachment',
   type: AttachmentType.binary,
   versions: [
     {
       version: 1,
       data: {
-        file_id: 'story-document-file',
+        file_id: 'story-binary-file',
         name: 'invoice.pdf',
         mime_type: 'application/pdf',
         text: 'Hello',
       },
       created_at: '2026-09-03T11:17:50.000Z',
-      content_hash: 'story-document-hash',
+      content_hash: 'story-binary-hash',
     },
   ],
 });

@@ -6,6 +6,7 @@
  */
 
 import {
+  getFileAttachmentKind,
   getFileMimeType,
   getFileName,
   getFileTypeLabel,
@@ -23,7 +24,11 @@ describe('getFileMimeType', () => {
     ['my.notes.md', '', 'text/markdown'],
     ['', 'application/pdf', 'application/pdf'],
     ['README', 'text/markdown', 'text/markdown'],
-    ['a.csv', 'text/plain', undefined],
+    ['a.csv', 'text/csv', 'text/csv'],
+    ['a.csv', '', 'text/csv'],
+    ['a.csv', 'text/plain', 'text/csv'],
+    ['README', 'text/csv', 'text/csv'],
+    ['a.tsv', 'text/plain', undefined],
     [
       'a.docx',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -47,9 +52,10 @@ describe('getFileName', () => {
   });
 
   it.each([
-    ['application/pdf', 'document.pdf'],
-    ['text/markdown', 'document.md'],
-    ['text/plain', 'document.txt'],
+    ['application/pdf', 'file.pdf'],
+    ['text/markdown', 'file.md'],
+    ['text/plain', 'file.txt'],
+    ['text/csv', 'file.csv'],
   ] as const)('uses a default name for %s when the file has no name', (mimeType, expected) => {
     const file = new File(['x'], '', { type: mimeType });
 
@@ -59,8 +65,8 @@ describe('getFileName', () => {
 
 describe('resolveFileMimeType', () => {
   it('uses the stored mime type when it is supported', () => {
-    expect(resolveFileMimeType({ name: 'a.txt', mimeType: 'text/markdown' })).toBe(
-      'text/markdown'
+    expect(resolveFileMimeType({ name: 'a.txt', mimeType: 'application/pdf' })).toBe(
+      'application/pdf'
     );
   });
 
@@ -81,7 +87,19 @@ describe('getFileTypeLabel', () => {
     ['application/pdf', 'PDF'],
     ['text/markdown', 'MD'],
     ['text/plain', 'TXT'],
+    ['text/csv', 'CSV'],
   ] as const)('labels %s as %s', (mimeType, label) => {
     expect(getFileTypeLabel(mimeType)).toBe(label);
+  });
+});
+
+describe('getFileAttachmentKind', () => {
+  it.each([
+    ['application/pdf', 'binary'],
+    ['text/markdown', 'text'],
+    ['text/plain', 'text'],
+    ['text/csv', 'text'],
+  ] as const)('maps %s to %s', (mimeType, kind) => {
+    expect(getFileAttachmentKind(mimeType)).toBe(kind);
   });
 });

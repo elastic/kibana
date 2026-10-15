@@ -329,7 +329,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const {
     uploadingNames,
-    loadingBinaryNames,
+    loadingFiles,
     uploadingChipNames,
     isUploading,
     acceptedFileMimeTypes,
@@ -337,7 +337,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
-    handleRemoveLoadingBinary,
+    handleRemoveLoadingFile,
     handleSubmitted: handleUploadsSubmitted,
   } = useAttachmentUploads({ addErrorToast, messageEditorController, createConversation });
 
@@ -518,8 +518,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
-            loadingBinaryNames={loadingBinaryNames}
-            onRemoveLoadingBinary={handleRemoveLoadingBinary}
+            loadingFiles={loadingFiles}
+            onRemoveLoadingFile={handleRemoveLoadingFile}
             removable
             onRemoveAttachment={handleRemoveAttachment}
             hoveredAttachmentName={hoveredAttachmentName}

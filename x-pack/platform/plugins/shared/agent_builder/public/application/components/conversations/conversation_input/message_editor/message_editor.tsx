@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
+import type { FileMimeType } from '../file_type';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
 import type { CommandMenuHandle } from './command_menu';
@@ -85,7 +85,7 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
-  acceptedFileMimeTypes?: readonly SupportedBinaryMimeType[];
+  acceptedFileMimeTypes?: readonly FileMimeType[];
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
   uploadingNames?: ReadonlySet<string>;

@@ -17,6 +17,7 @@ import { sortedCommandDefinitions } from '../../conversation_input/message_edito
 import {
   IMAGE_ATTACHMENT_SCHEME,
   BINARY_ATTACHMENT_SCHEME,
+  TEXT_ATTACHMENT_SCHEME,
 } from '../../conversation_input/message_editor/attachment_placeholder';
 import {
   createConversationMarkdownComponents,
@@ -40,6 +41,7 @@ export const ALLOWED_LINK_PROTOCOLS = [
   ...sortedCommandDefinitions.map((definition) => `${definition.scheme}:`),
   `${IMAGE_ATTACHMENT_SCHEME}:`,
   `${BINARY_ATTACHMENT_SCHEME}:`,
+  `${TEXT_ATTACHMENT_SCHEME}:`,
 ];
 
 export const parseSchemeAndPath = (href: string): { scheme: string; path: string } | undefined => {
@@ -125,7 +127,10 @@ export const useUserMessageMarkdownPlugins = ({
           );
         }
 
-        if (parsed?.scheme === BINARY_ATTACHMENT_SCHEME) {
+        if (
+          parsed?.scheme === BINARY_ATTACHMENT_SCHEME ||
+          parsed?.scheme === TEXT_ATTACHMENT_SCHEME
+        ) {
           const name = decodeBadgeName(parsed.path);
           return (
             <EuiToolTip content={name} disableScreenReaderOutput>

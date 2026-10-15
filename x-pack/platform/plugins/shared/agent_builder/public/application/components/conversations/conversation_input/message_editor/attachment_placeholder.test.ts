@@ -120,16 +120,21 @@ describe('removePlaceholderByName', () => {
   });
 });
 
-describe('document placeholders', () => {
+describe('binary and text file placeholders', () => {
   it('marks the chip with its kind and defaults to image', () => {
     expect(
       createAttachmentPlaceholderElement('a.png').getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)
     ).toBe('image');
     expect(
-      createAttachmentPlaceholderElement('a.pdf', 'binary').getAttribute(
-        PLACEHOLDER_KIND_ATTRIBUTE
-      )
+      createAttachmentPlaceholderElement('a.pdf', 'binary').getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)
     ).toBe('binary');
+  });
+
+  it('reads the text kind back', () => {
+    const chip = createAttachmentPlaceholderElement('a.md', 'text');
+
+    expect(chip.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)).toBe('text');
+    expect(getPlaceholderKind(chip)).toBe('text');
   });
 
   it('reads the kind back, treating a chip without the attribute as an image', () => {

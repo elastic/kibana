@@ -212,6 +212,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createAttachmentPlaceholderElement(segment.name));
           } else if (segment.type === 'binary') {
             ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'binary'));
+          } else if (segment.type === 'text_file') {
+            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'text'));
           }
         }
 

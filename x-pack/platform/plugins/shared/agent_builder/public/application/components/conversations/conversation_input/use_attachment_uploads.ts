@@ -7,11 +7,25 @@
 
 import { useCallback, useMemo } from 'react';
 import type { ToastInput } from '@kbn/core/public';
-import { AttachmentType, type ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  isSupportedBinaryMimeType,
+  type ConversationAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { getFileMimeType } from './file_type';
+import {
+  getFileMimeType,
+  getFileName,
+  getTextFileName,
+  TEXT_FILE_MIME_TYPES,
+  type FileMimeType,
+} from './file_type';
+import { rejectIfTooManyFiles, rejectInvalidFile } from './file_checks';
+import { getUniqueName } from './upload_image';
 import { useImageUpload } from './use_image_upload';
 import { useBinaryUpload } from './use_binary_upload';
+import { useTextFileUpload } from './use_text_file_upload';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSupportedBinaryTypes } from '../../../hooks/use_supported_binary_types';
 
 export interface UseAttachmentUploadsParams {
@@ -20,12 +34,30 @@ export interface UseAttachmentUploadsParams {
   createConversation: (agentId: string) => Promise<{ id: string }>;
 }
 
-/** Puts the image and document uploads behind one set of handlers for the message editor and the pills. */
+export interface LoadingFile {
+  name: string;
+  kind: 'binary' | 'text';
+}
+
+/** Names of the files (PDF and text) that are already in the input attachments. */
+const getAddedFileNames = (attachments: readonly ConversationAttachment[] = []): string[] =>
+  attachments.flatMap((attachment) => {
+    if ('items' in attachment) return [];
+    if (attachment.type === AttachmentType.binary && attachment.description) {
+      return [attachment.description];
+    }
+    const textFileName = getTextFileName(attachment);
+    return textFileName ? [textFileName] : [];
+  });
+
+/** Puts the image, PDF and text file uploads behind one set of handlers for the message editor and the pills. */
 export const useAttachmentUploads = ({
   addErrorToast,
   messageEditorController,
   createConversation,
 }: UseAttachmentUploadsParams) => {
+  const { attachments } = useConversationContext();
+
   const {
     uploadingNames,
     handlePasteFile: handlePasteImage,
@@ -36,7 +68,12 @@ export const useAttachmentUploads = ({
     messageEditorController,
   });
 
-  const acceptedFileMimeTypes = useSupportedBinaryTypes();
+  const supportedBinaryMimeTypes = useSupportedBinaryTypes();
+  const acceptedFileMimeTypes = useMemo<readonly FileMimeType[]>(
+    () => [...TEXT_FILE_MIME_TYPES, ...supportedBinaryMimeTypes],
+    [supportedBinaryMimeTypes]
+  );
+
   const {
     loadingBinaryNames,
     pendingConversationId,
@@ -50,44 +87,110 @@ export const useAttachmentUploads = ({
     createConversation,
   });
 
+  const {
+    loadingTextFileNames,
+    handlePasteTextFile,
+    handleAfterInput: handleAfterTextFileInput,
+    handleRemoveTextFile,
+  } = useTextFileUpload({ addErrorToast, messageEditorController });
+
+  const loadingFiles = useMemo<LoadingFile[]>(
+    () => [
+      ...[...loadingBinaryNames].map((name) => ({ name, kind: 'binary' as const })),
+      ...[...loadingTextFileNames].map((name) => ({ name, kind: 'text' as const })),
+    ],
+    [loadingBinaryNames, loadingTextFileNames]
+  );
+
   const uploadingChipNames = useMemo(
-    () => new Set([...uploadingNames, ...loadingBinaryNames]),
-    [uploadingNames, loadingBinaryNames]
+    () => new Set([...uploadingNames, ...loadingBinaryNames, ...loadingTextFileNames]),
+    [uploadingNames, loadingBinaryNames, loadingTextFileNames]
   );
 
   const handlePasteFile = useCallback(
-    (file: File): string | undefined =>
-      getFileMimeType(file) ? handlePasteBinary?.(file) : handlePasteImage?.(file),
-    [handlePasteBinary, handlePasteImage]
+    (file: File): string | undefined => {
+      const mimeType = getFileMimeType(file);
+      if (!mimeType) return handlePasteImage?.(file);
+
+      const isBinary = isSupportedBinaryMimeType(mimeType);
+      if (isBinary ? !handlePasteBinary : !handlePasteTextFile) return undefined;
+      if (rejectInvalidFile({ file, addErrorToast })) return undefined;
+
+      const addedFileNames = getAddedFileNames(attachments);
+      const namesInUse = new Set([
+        ...addedFileNames,
+        ...loadingBinaryNames,
+        ...loadingTextFileNames,
+      ]);
+      if (rejectIfTooManyFiles({ currentFileCount: namesInUse.size, addErrorToast })) {
+        return undefined;
+      }
+
+      const name = getUniqueName(getFileName(file, mimeType), namesInUse);
+      if (isSupportedBinaryMimeType(mimeType)) {
+        handlePasteBinary?.(file, name, mimeType);
+      } else {
+        handlePasteTextFile?.(file, name);
+      }
+      return name;
+    },
+    [
+      attachments,
+      loadingBinaryNames,
+      loadingTextFileNames,
+      addErrorToast,
+      handlePasteImage,
+      handlePasteBinary,
+      handlePasteTextFile,
+    ]
   );
 
   const handleAfterInput = useCallback(() => {
     handleAfterImageInput();
     handleAfterBinaryInput();
-  }, [handleAfterImageInput, handleAfterBinaryInput]);
+    handleAfterTextFileInput();
+  }, [handleAfterImageInput, handleAfterBinaryInput, handleAfterTextFileInput]);
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {
-      if (!('items' in attachment) && attachment.type === AttachmentType.binary) {
-        if (attachment.description) handleRemoveBinary(attachment.description);
-        return;
+      if (!('items' in attachment)) {
+        if (attachment.type === AttachmentType.binary) {
+          if (attachment.description) handleRemoveBinary(attachment.description);
+          return;
+        }
+        const textFileName = getTextFileName(attachment);
+        if (textFileName) {
+          handleRemoveTextFile(textFileName);
+          return;
+        }
       }
       handleRemoveImageAttachment?.(attachment);
     },
-    [handleRemoveBinary, handleRemoveImageAttachment]
+    [handleRemoveBinary, handleRemoveTextFile, handleRemoveImageAttachment]
+  );
+
+  const handleRemoveLoadingFile = useCallback(
+    (name: string) => {
+      if (loadingBinaryNames.has(name)) {
+        handleRemoveBinary(name);
+      } else {
+        handleRemoveTextFile(name);
+      }
+    },
+    [loadingBinaryNames, handleRemoveBinary, handleRemoveTextFile]
   );
 
   return {
     uploadingNames,
-    loadingBinaryNames,
+    loadingFiles,
     uploadingChipNames,
-    isUploading: uploadingNames.size > 0 || loadingBinaryNames.size > 0,
+    isUploading: uploadingNames.size > 0 || loadingFiles.length > 0,
     acceptedFileMimeTypes,
     pendingConversationId,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
-    handleRemoveLoadingBinary: handleRemoveBinary,
+    handleRemoveLoadingFile,
     handleSubmitted: handleBinarySubmitted,
   };
 };

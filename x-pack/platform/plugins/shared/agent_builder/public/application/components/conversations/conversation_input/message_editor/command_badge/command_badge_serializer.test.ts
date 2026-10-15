@@ -144,7 +144,14 @@ describe('serializeEditorContent', () => {
     );
   });
 
-  it('serializes a document placeholder element with the document scheme', () => {
+  it('serializes a text file placeholder element with the text scheme', () => {
+    const div = document.createElement('div');
+    div.appendChild(createAttachmentPlaceholderElement('my notes (1).md', 'text'));
+
+    expect(serializeEditorContent(div)).toBe('[my notes (1).md](text://my%20notes%20%281%29.md)');
+  });
+
+  it('serializes a binary placeholder element with the binary scheme', () => {
     const div = document.createElement('div');
     div.appendChild(createAttachmentPlaceholderElement('My invoice (1).pdf', 'binary'));
 
@@ -282,13 +289,25 @@ describe('deserializeInputSegments', () => {
     expect(segments).toEqual([{ type: 'image', name: 'photo.png' }]);
   });
 
-  it('parses a document segment', () => {
+  it('parses a text file segment', () => {
+    const segments = deserializeInputSegments('[my notes.md](text://my%20notes.md)');
+
+    expect(segments).toEqual([{ type: 'text_file', name: 'my notes.md' }]);
+  });
+
+  it('preserves a text file link with malformed percent-encoding as text', () => {
+    const segments = deserializeInputSegments('[x](text://bad%.md)');
+
+    expect(segments).toEqual([{ type: 'text', value: '[x](text://bad%.md)' }]);
+  });
+
+  it('parses a binary segment', () => {
     const segments = deserializeInputSegments('[My invoice.pdf](binary://My%20invoice.pdf)');
 
     expect(segments).toEqual([{ type: 'binary', name: 'My invoice.pdf' }]);
   });
 
-  it('preserves a document link with malformed percent-encoding as text', () => {
+  it('preserves a binary link with malformed percent-encoding as text', () => {
     const segments = deserializeInputSegments('[x](binary://bad%.pdf)');
 
     expect(segments).toEqual([{ type: 'text', value: '[x](binary://bad%.pdf)' }]);

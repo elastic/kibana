@@ -12,6 +12,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getVersion } from '@kbn/agent-builder-common/attachments';
+import type { ResolvedReference } from '../attachments/use_resolved_attachment_references';
 import { useResolvedAttachmentReferences } from '../attachments/use_resolved_attachment_references';
 
 export interface UseUserMessageFilesParams {
@@ -24,12 +25,24 @@ export interface UseUserMessageFilesParams {
 export interface UserMessageFile {
   key: string;
   attachmentId: string;
-  /** The file name, used to match the document with its badge in the message text. */
+  /** The file name, used to match the file with its badge in the message text. */
   name: string;
   mimeType?: string;
 }
 
-/** Resolves the document attachments of a user message that show as tiles in the bubble. */
+const getFileData = ({ attachment, version }: ResolvedReference) =>
+  getVersion(attachment, version)?.data as { name?: string; mime_type?: string } | undefined;
+
+/** A binary attachment, or a text attachment that comes from a file (it has a name). */
+const isFileAttachment = (ref: ResolvedReference): boolean =>
+  ref.attachment.type === AttachmentType.binary ||
+  (ref.attachment.type === AttachmentType.text && Boolean(getFileData(ref)?.name));
+
+/** Whether the attachment shows as a tile in the message bubble instead of in the references list. */
+export const isTileAttachment = (ref: ResolvedReference): boolean =>
+  ref.attachment.type === AttachmentType.image || isFileAttachment(ref);
+
+/** Resolves the file attachments of a user message that show as tiles in the bubble. */
 export const useUserMessageFiles = ({
   attachmentRefs,
   conversationAttachments,
@@ -43,13 +56,12 @@ export const useUserMessageFiles = ({
     actorFilter,
   });
 
-  return allResolved.reduce<UserMessageFile[]>((acc, { attachment, version }) => {
-    if (attachment.type !== AttachmentType.binary) {
+  return allResolved.reduce<UserMessageFile[]>((acc, ref) => {
+    if (!isFileAttachment(ref)) {
       return acc;
     }
-    const data = getVersion(attachment, version)?.data as
-      | { name?: string; mime_type?: string }
-      | undefined;
+    const { attachment, version } = ref;
+    const data = getFileData(ref);
     acc.push({
       key: `${attachment.id}-v${version}`,
       attachmentId: attachment.id,

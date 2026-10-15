@@ -13,7 +13,8 @@ import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { UserMessage } from './user_message';
 import { ResponseActions } from '../response/response_actions';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
-import { useUserMessageFiles } from './use_user_message_files';
+import { isTileAttachment, useUserMessageFiles } from './use_user_message_files';
+import { AttachmentReferences } from '../attachments/attachment_references';
 import type { UserMessageFile } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
@@ -31,7 +32,7 @@ jest.mock('../response/response_actions', () => ({
 }));
 
 jest.mock('../attachments/attachment_references', () => ({
-  AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
+  AttachmentReferences: jest.fn(() => <div data-test-subj="agentBuilderUserMessageAttachments" />),
 }));
 
 jest.mock('../../../../context/conversation/conversation_context', () => ({
@@ -47,10 +48,11 @@ jest.mock('./use_user_message_files');
 
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseUserMessageThumbnails = jest.mocked(useUserMessageThumbnails);
-const mockUseUserMessageDocuments = jest.mocked(useUserMessageFiles);
+const mockUseUserMessageFiles = jest.mocked(useUserMessageFiles);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 const MockResponseActions = jest.mocked(ResponseActions);
 const MockUserMessageAttachmentTiles = jest.mocked(UserMessageAttachmentTiles);
+const MockAttachmentReferences = jest.mocked(AttachmentReferences);
 
 const thumbnail: UserMessageThumbnail = {
   key: 'img1-v1',
@@ -60,7 +62,7 @@ const thumbnail: UserMessageThumbnail = {
   name: 'photo.png',
 };
 
-const document: UserMessageFile = {
+const file: UserMessageFile = {
   key: 'doc1-v1',
   attachmentId: 'doc1',
   name: 'notes.md',
@@ -86,7 +88,7 @@ describe('UserMessage', () => {
     MockResponseActions.mockClear();
     MockUserMessageAttachmentTiles.mockClear();
     mockUseUserMessageThumbnails.mockReturnValue([]);
-    mockUseUserMessageDocuments.mockReturnValue([]);
+    mockUseUserMessageFiles.mockReturnValue([]);
     mockUseCurrentUser.mockReturnValue({
       currentUser,
       isLoading: false,
@@ -201,8 +203,8 @@ describe('UserMessage', () => {
       expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
     });
 
-    it('keeps the bubble with the document tile when there is a document', () => {
-      mockUseUserMessageDocuments.mockReturnValue([document]);
+    it('keeps the bubble with the file tile when there is a document', () => {
+      mockUseUserMessageFiles.mockReturnValue([file]);
 
       renderMessage('');
 
@@ -212,8 +214,21 @@ describe('UserMessage', () => {
     });
   });
 
-  it('passes the documents to UserMessageAttachmentTiles', () => {
-    mockUseUserMessageDocuments.mockReturnValue([document]);
+  it('keeps the attachments that show as tiles out of the references list', () => {
+    render(
+      <UserMessage
+        input="hello"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
+
+    const [props] = MockAttachmentReferences.mock.calls[0];
+    expect(props.isExcluded).toBe(isTileAttachment);
+  });
+
+  it('passes the files to UserMessageAttachmentTiles', () => {
+    mockUseUserMessageFiles.mockReturnValue([file]);
 
     render(
       <UserMessage
@@ -224,7 +239,7 @@ describe('UserMessage', () => {
     );
 
     const [props] = MockUserMessageAttachmentTiles.mock.calls[0];
-    expect(props.documents).toEqual([document]);
+    expect(props.files).toEqual([file]);
   });
 
   it('passes the thumbnails to UserMessageAttachmentTiles', () => {

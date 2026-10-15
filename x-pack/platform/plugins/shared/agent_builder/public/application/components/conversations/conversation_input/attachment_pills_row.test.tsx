@@ -26,7 +26,7 @@ jest.mock('./attachment_pill', () => ({
     isHighlighted,
     onRemoveAttachment,
   }: {
-    attachment: { id: string; description?: string };
+    attachment: { id: string; type: string; data?: unknown; description?: string };
     isLoading?: boolean;
     isHighlighted?: boolean;
     onRemoveAttachment?: () => void;
@@ -37,6 +37,8 @@ jest.mock('./attachment_pill', () => ({
       data-loading={isLoading ? 'true' : undefined}
       data-highlighted={isHighlighted ? 'true' : undefined}
       data-description={attachment.description}
+      data-type={attachment.type}
+      data-name={(attachment.data as { name?: string } | undefined)?.name}
       onClick={onRemoveAttachment}
     />
   ),
@@ -117,17 +119,18 @@ describe('AttachmentPillsRow', () => {
     expect(onRemove).toBeUndefined();
   });
 
-  describe('loading documents', () => {
-    it('renders nothing for an empty list with no loading documents', () => {
-      const { container } = render(
-        <AttachmentPillsRow attachments={[]} loadingBinaryNames={new Set()} />
-      );
+  describe('loading files', () => {
+    it('renders nothing for an empty list with no loading files', () => {
+      const { container } = render(<AttachmentPillsRow attachments={[]} loadingFiles={[]} />);
       expect(container.firstChild).toBeNull();
     });
 
-    it('renders a named loading pill for each loading document, even with no attachments', () => {
+    it('renders a named loading pill for each loading file, even with no attachments', () => {
       render(
-        <AttachmentPillsRow attachments={[]} loadingBinaryNames={new Set(['invoice.pdf'])} />
+        <AttachmentPillsRow
+          attachments={[]}
+          loadingFiles={[{ name: 'invoice.pdf', kind: 'binary' }]}
+        />
       );
 
       const pill = screen.getByTestId('mock-attachment-pill-invoice.pdf');
@@ -139,7 +142,7 @@ describe('AttachmentPillsRow', () => {
       render(
         <AttachmentPillsRow
           attachments={[makeInput('a1')]}
-          loadingBinaryNames={new Set(['invoice.pdf'])}
+          loadingFiles={[{ name: 'invoice.pdf', kind: 'binary' }]}
         />
       );
 
@@ -150,35 +153,57 @@ describe('AttachmentPillsRow', () => {
       ]);
     });
 
-    it('cancels a loading document by its name when removable', () => {
-      const onRemoveLoadingBinary = jest.fn();
+    it('renders a loading text file as a text attachment with its name', () => {
+      render(
+        <AttachmentPillsRow attachments={[]} loadingFiles={[{ name: 'notes.md', kind: 'text' }]} />
+      );
+
+      const pill = screen.getByTestId('mock-attachment-pill-notes.md');
+      expect(pill).toHaveAttribute('data-type', 'text');
+      expect(pill).toHaveAttribute('data-name', 'notes.md');
+      expect(pill).toHaveAttribute('data-loading', 'true');
+    });
+
+    it('renders a loading PDF as a binary attachment', () => {
+      render(
+        <AttachmentPillsRow attachments={[]} loadingFiles={[{ name: 'a.pdf', kind: 'binary' }]} />
+      );
+
+      expect(screen.getByTestId('mock-attachment-pill-a.pdf')).toHaveAttribute(
+        'data-type',
+        'binary'
+      );
+    });
+
+    it('cancels a loading file by its name when removable', () => {
+      const onRemoveLoadingFile = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingBinaryNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingBinary={onRemoveLoadingBinary}
+          loadingFiles={[{ name: 'invoice.pdf', kind: 'binary' }]}
+          onRemoveLoadingFile={onRemoveLoadingFile}
           removable
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingBinary).toHaveBeenCalledWith('invoice.pdf');
+      expect(onRemoveLoadingFile).toHaveBeenCalledWith('invoice.pdf');
     });
 
     it('offers no cancel when not removable', () => {
-      const onRemoveLoadingBinary = jest.fn();
+      const onRemoveLoadingFile = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingBinaryNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingBinary={onRemoveLoadingBinary}
+          loadingFiles={[{ name: 'invoice.pdf', kind: 'binary' }]}
+          onRemoveLoadingFile={onRemoveLoadingFile}
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingBinary).not.toHaveBeenCalled();
+      expect(onRemoveLoadingFile).not.toHaveBeenCalled();
     });
 
     it('passes the description of an added document to its pill, so the label is its name', () => {
@@ -220,11 +245,11 @@ describe('AttachmentPillsRow', () => {
       expect(screen.getByTestId('mock-attachment-pill-d2')).not.toHaveAttribute('data-highlighted');
     });
 
-    it('highlights the loading document pill whose name matches the hovered chip', () => {
+    it('highlights the loading file pill whose name matches the hovered chip', () => {
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingBinaryNames={new Set(['notes.md'])}
+          loadingFiles={[{ name: 'notes.md', kind: 'binary' }]}
           hoveredAttachmentName="notes.md"
         />
       );

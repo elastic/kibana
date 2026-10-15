@@ -15,8 +15,7 @@ import type {
   SupportedBinaryMimeType,
 } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { getFileMimeType, getFileName } from './file_type';
-import { rejectIfTooManyFiles, rejectInvalidFile, uploadBinary } from './upload_binary';
+import { uploadBinary } from './upload_binary';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -31,10 +30,10 @@ export interface UseBinaryUploadParams {
 export interface UseBinaryUploadResult {
   loadingBinaryNames: Set<string>;
   pendingConversationId: string | undefined;
-  handlePasteBinary?: (file: File) => string | undefined;
+  handlePasteBinary?: (file: File, name: string, mimeType: SupportedBinaryMimeType) => void;
   handleAfterInput: () => void;
   handleRemoveBinary: (name: string) => void;
-  /** Tells the hook the documents went out with a message, so leaving the screen does not delete them. */
+  /** Tells the hook the files went out with a message, so leaving the screen does not delete them. */
   handleSubmitted: () => void;
 }
 
@@ -59,7 +58,7 @@ export const useBinaryUpload = ({
   const [loadingBinaryNames, setLoadingBinaryNames] = useState<Set<string>>(new Set());
   const [pendingConversationId, setPendingConversationId] = useState<string | undefined>();
 
-  // Uploads and reads that are in flight, by document name.
+  // Uploads and reads that are in flight, by file name.
   const controllers = useRef<Map<string, AbortController>>(new Map());
   // Binary files that are read and sit in the input attachments, but are not sent yet.
   const unsentBinaries = useRef<Map<string, UnsentBinary>>(new Map());
@@ -126,7 +125,7 @@ export const useBinaryUpload = ({
     [attachmentsService, removeAttachment, removeFromConversationCache]
   );
 
-  // Stops the work and removes everything the document left in the editor and the input attachments.
+  // Stops the work and removes everything the file left in the editor and the input attachments.
   const removeBinary = useCallback(
     (name: string) => {
       messageEditorController.removePlaceholderByName(name, 'binary');
@@ -174,7 +173,7 @@ export const useBinaryUpload = ({
         signal: controller.signal,
       });
 
-      // The document was removed meanwhile, and its name may belong to a new upload by now.
+      // The file was removed meanwhile, and its name may belong to a new upload by now.
       if (controllers.current.get(name) !== controller) return;
       if (result.status === 'aborted') return;
 
@@ -223,31 +222,17 @@ export const useBinaryUpload = ({
   );
 
   const handlePasteBinary = useCallback(
-    (file: File): string | undefined => {
-      if (!upsertAttachments) return undefined;
-      if (rejectInvalidFile({ file, addErrorToast })) return undefined;
-      const mimeType = getFileMimeType(file);
-      if (!mimeType) return undefined;
-      if (
-        rejectIfTooManyFiles({
-          currentFileCount: controllers.current.size + unsentBinaries.current.size,
-          addErrorToast,
-        })
-      ) {
-        return undefined;
-      }
-
-      const name = getFileName(file, mimeType);
+    (file: File, name: string, mimeType: SupportedBinaryMimeType) => {
+      if (!upsertAttachments) return;
       const controller = new AbortController();
       controllers.current.set(name, controller);
       setLoading(name, true);
       readBinary({ file, name, mimeType, controller });
-      return name;
     },
-    [upsertAttachments, addErrorToast, setLoading, readBinary]
+    [upsertAttachments, setLoading, readBinary]
   );
 
-  // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its document.
+  // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its file.
   const handleAfterInput = useCallback(() => {
     const chipNames = new Set(messageEditorController.getPlaceholderNames('binary'));
     for (const name of [...controllers.current.keys(), ...unsentBinaries.current.keys()]) {
@@ -261,7 +246,7 @@ export const useBinaryUpload = ({
     setPendingConversationId(undefined);
   }, []);
 
-  // Leaving the conversation or the agent drops the documents that were not sent.
+  // Leaving the conversation or the agent drops the files that were not sent.
   const leaveRef = useRef<() => void>(() => {});
   leaveRef.current = () => {
     for (const controller of controllers.current.values()) {

@@ -20,14 +20,14 @@ export interface FileAttachmentPillProps {
   attachmentId: string;
   /** The file name, shown in the tooltip. */
   name: string;
-  /** The stored mime type. Taken from the file name when the document has no data yet. */
+  /** The stored mime type. Taken from the file name when the file has no data yet. */
   mimeType?: string;
   isLoading?: boolean;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
 }
 
-/** A tile for a document, the size of an image tile: the document icon and the file type. */
+/** A tile for a file, the size of an image tile: the document icon and the file type. */
 export const FileAttachmentPill: React.FC<FileAttachmentPillProps> = ({
   attachmentId,
   name,

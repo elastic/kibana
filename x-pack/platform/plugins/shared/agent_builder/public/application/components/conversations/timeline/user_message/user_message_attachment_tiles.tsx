@@ -14,17 +14,17 @@ import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
 export interface UserMessageAttachmentTilesProps {
   thumbnails: UserMessageThumbnail[];
-  documents?: UserMessageFile[];
+  files?: UserMessageFile[];
   /** When set, the tile whose file name matches is highlighted. */
   hoveredAttachmentName?: string | null;
 }
 
 export const UserMessageAttachmentTiles: React.FC<UserMessageAttachmentTilesProps> = ({
   thumbnails,
-  documents = [],
+  files = [],
   hoveredAttachmentName,
 }) => {
-  if (thumbnails.length === 0 && documents.length === 0) {
+  if (thumbnails.length === 0 && files.length === 0) {
     return null;
   }
 
@@ -39,7 +39,7 @@ export const UserMessageAttachmentTiles: React.FC<UserMessageAttachmentTilesProp
             />
           </EuiFlexItem>
         ))}
-        {documents.map(({ key, attachmentId, name, mimeType }) => (
+        {files.map(({ key, attachmentId, name, mimeType }) => (
           <EuiFlexItem grow={false} key={key}>
             <FileAttachmentPill
               attachmentId={attachmentId}

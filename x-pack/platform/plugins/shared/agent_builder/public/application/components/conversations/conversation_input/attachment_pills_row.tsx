@@ -13,6 +13,8 @@ import type { ConversationAttachment } from '@kbn/agent-builder-common/attachmen
 import { AttachmentType, isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { AttachmentGroupPill } from './attachment_group_pill';
+import { getTextFileName } from './file_type';
+import type { LoadingFile } from './use_attachment_uploads';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import {
   ATTACHMENT_PILL_WIDTH,
@@ -27,8 +29,8 @@ export interface AttachmentPillsRowProps {
   justifyContent?: EuiFlexGroupProps['justifyContent'];
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
   uploadingNames?: Set<string>;
-  loadingBinaryNames?: Set<string>;
-  onRemoveLoadingBinary?: (name: string) => void;
+  loadingFiles?: readonly LoadingFile[];
+  onRemoveLoadingFile?: (name: string) => void;
   hoveredAttachmentName?: string | null;
 }
 
@@ -81,13 +83,13 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   justifyContent = 'flexStart',
   onRemoveAttachment,
   uploadingNames,
-  loadingBinaryNames,
-  onRemoveLoadingBinary,
+  loadingFiles,
+  onRemoveLoadingFile,
   hoveredAttachmentName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
-  const loadingFileEntries = loadingBinaryNames ? [...loadingBinaryNames] : [];
+  const loadingFileEntries = loadingFiles ?? [];
 
   if (
     attachments.length === 0 &&
@@ -130,7 +132,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
         const fileName =
           attachment.type === AttachmentType.image || attachment.type === AttachmentType.binary
             ? (attachment.data as { name?: string } | undefined)?.name ?? attachment.description
-            : undefined;
+            : getTextFileName(attachment);
         return (
           <EuiFlexItem key={attachmentId} grow={false} role="listitem">
             <AttachmentPill
@@ -155,18 +157,18 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           </EuiFlexItem>
         );
       })}
-      {loadingFileEntries.map((name) => (
+      {loadingFileEntries.map(({ name, kind }) => (
         <EuiFlexItem key={`loading-file-${name}`} grow={false} role="listitem">
           <AttachmentPill
             attachment={{
               id: name,
-              type: AttachmentType.binary,
-              data: {},
+              type: kind === 'text' ? AttachmentType.text : AttachmentType.binary,
+              data: kind === 'text' ? { content: '', name } : {},
               description: name,
             }}
             isLoading
             isHighlighted={hoveredAttachmentName === name}
-            onRemoveAttachment={removable ? () => onRemoveLoadingBinary?.(name) : undefined}
+            onRemoveAttachment={removable ? () => onRemoveLoadingFile?.(name) : undefined}
           />
         </EuiFlexItem>
       ))}

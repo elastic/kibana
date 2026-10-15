@@ -22,6 +22,7 @@ import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attac
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { getTextFileName } from './file_type';
 import { FileAttachmentPill } from './file_attachment_pill';
 import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
@@ -65,11 +66,12 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     );
   }
 
-  if (attachment.type === AttachmentType.binary) {
+  const textFileName = getTextFileName(attachment);
+  if (attachment.type === AttachmentType.binary || textFileName) {
     return (
       <FileAttachmentPill
         attachmentId={attachment.id}
-        name={label}
+        name={textFileName ?? label}
         mimeType={(attachment.data as { mime_type?: string } | undefined)?.mime_type}
         isLoading={isLoading}
         onRemoveAttachment={onRemoveAttachment}

@@ -7,7 +7,6 @@
 
 import type { RefObject } from 'react';
 import DOMPurify from 'dompurify';
-import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
@@ -16,10 +15,10 @@ import {
 } from './command_badge';
 import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { insertAttachmentPlaceholderChip, type PlaceholderKind } from './attachment_placeholder';
-import { getFileMimeType } from '../file_type';
+import { getFileAttachmentKind, getFileMimeType, type FileMimeType } from '../file_type';
 import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
 
-const NO_BINARY_TYPES: readonly SupportedBinaryMimeType[] = [];
+const NO_FILE_TYPES: readonly FileMimeType[] = [];
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
 
@@ -68,7 +67,7 @@ const createTextAndBadgeFragment = (sanitizedHtml: DocumentFragment): DocumentFr
 
 export interface HandleEditorPasteOpts {
   onPasteFile?: (file: File) => string | undefined;
-  acceptedFileMimeTypes?: readonly SupportedBinaryMimeType[];
+  acceptedFileMimeTypes?: readonly FileMimeType[];
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;
   onAfterInput?: () => void;
@@ -76,17 +75,17 @@ export interface HandleEditorPasteOpts {
 
 const getPastedFileKind = (
   file: File,
-  acceptedFileMimeTypes: readonly SupportedBinaryMimeType[]
+  acceptedFileMimeTypes: readonly FileMimeType[]
 ): PlaceholderKind | undefined => {
   if (file.type.startsWith('image/')) return 'image';
   const mimeType = getFileMimeType(file);
-  if (mimeType && acceptedFileMimeTypes.includes(mimeType)) return 'binary';
+  if (mimeType && acceptedFileMimeTypes.includes(mimeType)) return getFileAttachmentKind(mimeType);
   return undefined;
 };
 
 /** Handles the image and file branch of a paste event. Returns true if consumed. */
 const handleFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): boolean => {
-  const { onPasteFile, acceptedFileMimeTypes = NO_BINARY_TYPES, onChange } = opts;
+  const { onPasteFile, acceptedFileMimeTypes = NO_FILE_TYPES, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
   const fileItem = Array.from(event.clipboardData.items).find((item) => item.kind === 'file');

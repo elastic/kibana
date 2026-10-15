@@ -11,7 +11,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { useUserMessageFiles } from './use_user_message_files';
+import { isTileAttachment, useUserMessageFiles } from './use_user_message_files';
 
 const makeVersioned = (
   id: string,
@@ -32,15 +32,15 @@ const userRef = (attachmentId: string): AttachmentVersionRef => ({
 });
 
 describe('useUserMessageFiles', () => {
-  it('returns the name and mime type of each document ref', () => {
+  it('returns the name and mime type of each binary ref', () => {
     const { result } = renderHook(() =>
       useUserMessageFiles({
         attachmentRefs: [userRef('doc1')],
         conversationAttachments: [
           makeVersioned('doc1', AttachmentType.binary, {
             file_id: 'f1',
-            name: 'notes.md',
-            mime_type: 'text/markdown',
+            name: 'invoice.pdf',
+            mime_type: 'application/pdf',
             text: 'hi',
           }),
         ],
@@ -48,17 +48,32 @@ describe('useUserMessageFiles', () => {
     );
 
     expect(result.current).toEqual([
-      { key: 'doc1-v1', attachmentId: 'doc1', name: 'notes.md', mimeType: 'text/markdown' },
+      { key: 'doc1-v1', attachmentId: 'doc1', name: 'invoice.pdf', mimeType: 'application/pdf' },
     ]);
   });
 
-  it('ignores refs that are not documents', () => {
+  it('returns a text attachment that has a name, without a mime type', () => {
+    const { result } = renderHook(() =>
+      useUserMessageFiles({
+        attachmentRefs: [userRef('txt1')],
+        conversationAttachments: [
+          makeVersioned('txt1', AttachmentType.text, { content: '# Hi', name: 'notes.md' }),
+        ],
+      })
+    );
+
+    expect(result.current).toEqual([
+      { key: 'txt1-v1', attachmentId: 'txt1', name: 'notes.md', mimeType: undefined },
+    ]);
+  });
+
+  it('ignores refs that are not files', () => {
     const { result } = renderHook(() =>
       useUserMessageFiles({
         attachmentRefs: [userRef('img1'), userRef('txt1')],
         conversationAttachments: [
           makeVersioned('img1', AttachmentType.image, { name: 'photo.png' }),
-          makeVersioned('txt1', 'text', {}),
+          makeVersioned('txt1', 'text', { content: 'no name' }),
         ],
       })
     );
@@ -66,7 +81,7 @@ describe('useUserMessageFiles', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('ignores documents that were not added by the user', () => {
+  it('ignores files that were not added by the user', () => {
     const { result } = renderHook(() =>
       useUserMessageFiles({
         attachmentRefs: [{ attachment_id: 'doc1', version: 1, actor: ATTACHMENT_REF_ACTOR.agent }],
@@ -78,5 +93,32 @@ describe('useUserMessageFiles', () => {
     );
 
     expect(result.current).toEqual([]);
+  });
+});
+
+describe('isTileAttachment', () => {
+  const toRef = (attachment: VersionedAttachment) => ({
+    attachment,
+    version: 1,
+    operation: 'created' as const,
+    actor: ATTACHMENT_REF_ACTOR.user,
+  });
+
+  it.each([
+    ['an image', makeVersioned('a', AttachmentType.image, { name: 'photo.png' }), true],
+    ['a binary file', makeVersioned('a', AttachmentType.binary, { name: 'a.pdf' }), true],
+    [
+      'a named text file',
+      makeVersioned('a', AttachmentType.text, { content: '', name: 'a.md' }),
+      true,
+    ],
+    [
+      'a text attachment without a name',
+      makeVersioned('a', AttachmentType.text, { content: 'x' }),
+      false,
+    ],
+    ['another type', makeVersioned('a', AttachmentType.esql, { name: 'q' }), false],
+  ])('is %s: %s', (_label, attachment, expected) => {
+    expect(isTileAttachment(toRef(attachment))).toBe(expected);
   });
 });

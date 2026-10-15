@@ -9,7 +9,11 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
-import { IMAGE_ATTACHMENT_SCHEME, BINARY_ATTACHMENT_SCHEME } from '../attachment_placeholder';
+import {
+  IMAGE_ATTACHMENT_SCHEME,
+  BINARY_ATTACHMENT_SCHEME,
+  TEXT_ATTACHMENT_SCHEME,
+} from '../attachment_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -27,7 +31,16 @@ interface BinarySegment {
   type: 'binary';
   name: string;
 }
-export type ContentSegment = TextSegment | BadgeSegment | ImageSegment | BinarySegment;
+interface TextFileSegment {
+  type: 'text_file';
+  name: string;
+}
+export type ContentSegment =
+  | TextSegment
+  | BadgeSegment
+  | ImageSegment
+  | BinarySegment
+  | TextFileSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -85,9 +98,18 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 //   Group 4: query string  → optional
 const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
+const ATTACHMENT_SEGMENT_TYPE_BY_SCHEME: ReadonlyMap<
+  string,
+  ImageSegment['type'] | BinarySegment['type'] | TextFileSegment['type']
+> = new Map([
+  [IMAGE_ATTACHMENT_SCHEME, 'image'],
+  [BINARY_ATTACHMENT_SCHEME, 'binary'],
+  [TEXT_ATTACHMENT_SCHEME, 'text_file'],
+]);
+
 /**
- * Parses text containing serialized badge, image and document markdown-links into segments.
- * Used to restore badges and image and document chips from serialized content.
+ * Parses text containing serialized badge, image, binary and text file markdown-links into segments.
+ * Used to restore badges and attachment chips from serialized content.
  */
 export const deserializeInputSegments = (text: string): ContentSegment[] => {
   const segments: ContentSegment[] = [];
@@ -103,12 +125,10 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
 
     const [_, displayText, scheme, path, queryString] = match;
 
-    if (scheme === IMAGE_ATTACHMENT_SCHEME || scheme === BINARY_ATTACHMENT_SCHEME) {
+    const attachmentSegmentType = ATTACHMENT_SEGMENT_TYPE_BY_SCHEME.get(scheme);
+    if (attachmentSegmentType) {
       try {
-        segments.push({
-          type: scheme === BINARY_ATTACHMENT_SCHEME ? 'binary' : 'image',
-          name: decodeURIComponent(path),
-        });
+        segments.push({ type: attachmentSegmentType, name: decodeURIComponent(path) });
       } catch {
         // Malformed percent-encoding, preserve as text
         segments.push({ type: 'text', value: match[0] });

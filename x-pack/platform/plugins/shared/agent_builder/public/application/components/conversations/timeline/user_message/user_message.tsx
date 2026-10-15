@@ -22,7 +22,7 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType, ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useUserMessageAuthor } from '../../../../hooks/use_user_message_author';
 import { ResponseActions } from '../response/response_actions';
 import { AttachmentReferences } from '../attachments/attachment_references';
@@ -30,7 +30,7 @@ import { UserMessageText } from './user_message_text';
 import { UserMessageAvatar } from './user_message_avatar';
 import { AuthorHeader } from '../author_header';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
-import { useUserMessageFiles } from './use_user_message_files';
+import { isTileAttachment, useUserMessageFiles } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 
 const labels = {
@@ -50,7 +50,6 @@ interface UserMessageProps {
   fallbackAttachments?: Attachment[];
 }
 
-const TILE_ATTACHMENT_TYPES: AttachmentType[] = [AttachmentType.image, AttachmentType.binary];
 const USER_ACTOR_FILTER = [ATTACHMENT_REF_ACTOR.user];
 
 export const UserMessage = ({
@@ -77,7 +76,7 @@ export const UserMessage = ({
     fallbackAttachments,
     actorFilter: USER_ACTOR_FILTER,
   });
-  const documents = useUserMessageFiles({
+  const files = useUserMessageFiles({
     attachmentRefs,
     conversationAttachments,
     fallbackAttachments,
@@ -85,7 +84,7 @@ export const UserMessage = ({
   });
 
   const hasText = input.trim().length > 0;
-  const hasBubble = hasText || thumbnails.length > 0 || documents.length > 0;
+  const hasBubble = hasText || thumbnails.length > 0 || files.length > 0;
 
   const inputContainerStyles = css`
     width: 100%;
@@ -135,7 +134,7 @@ export const UserMessage = ({
                 <EuiFlexGroup direction="column" gutterSize="s">
                   <UserMessageAttachmentTiles
                     thumbnails={thumbnails}
-                    documents={documents}
+                    files={files}
                     hoveredAttachmentName={hoveredAttachmentName}
                   />
                   <EuiFlexItem grow={false}>
@@ -153,7 +152,7 @@ export const UserMessage = ({
             fallbackAttachments={fallbackAttachments}
             actorFilter={USER_ACTOR_FILTER}
             justifyContent="flexStart"
-            excludeTypes={TILE_ATTACHMENT_TYPES}
+            isExcluded={isTileAttachment}
           />
           {hasText && (
             <EuiFlexItem grow={false}>

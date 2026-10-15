@@ -75,10 +75,8 @@ describe('UserMessageAttachmentTiles', () => {
     expect(highlightByAttachmentId).toEqual({ img1: true, img2: false });
   });
 
-  it('renders a tile for a document, with no thumbnails', () => {
-    render(
-      <UserMessageAttachmentTiles thumbnails={[]} documents={[makeBinary('doc1', 'notes.md')]} />
-    );
+  it('renders a tile for a file, with no thumbnails', () => {
+    render(<UserMessageAttachmentTiles thumbnails={[]} files={[makeBinary('doc1', 'notes.md')]} />);
 
     expect(MockFileAttachmentPill).toHaveBeenCalledTimes(1);
     expect(MockFileAttachmentPill.mock.calls[0][0]).toMatchObject({
@@ -89,20 +87,17 @@ describe('UserMessageAttachmentTiles', () => {
     expect(MockThumbnailAttachmentPill).not.toHaveBeenCalled();
   });
 
-  it('highlights only the document whose name matches hoveredAttachmentName', () => {
+  it('highlights only the file whose name matches hoveredAttachmentName', () => {
     render(
       <UserMessageAttachmentTiles
         thumbnails={[]}
-        documents={[makeBinary('doc1', 'notes.md'), makeBinary('doc2', 'other.md')]}
+        files={[makeBinary('doc1', 'notes.md'), makeBinary('doc2', 'other.md')]}
         hoveredAttachmentName="notes.md"
       />
     );
 
     const highlightByAttachmentId = Object.fromEntries(
-      MockFileAttachmentPill.mock.calls.map(([props]) => [
-        props.attachmentId,
-        props.isHighlighted,
-      ])
+      MockFileAttachmentPill.mock.calls.map(([props]) => [props.attachmentId, props.isHighlighted])
     );
     expect(highlightByAttachmentId).toEqual({ doc1: true, doc2: false });
   });

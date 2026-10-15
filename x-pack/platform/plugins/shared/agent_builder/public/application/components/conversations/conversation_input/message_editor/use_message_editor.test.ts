@@ -101,7 +101,7 @@ describe('useMessageEditor setContent', () => {
     expect(result.current.controller.getPlaceholderNames()).toEqual(['photo.png']);
   });
 
-  it('restores a serialized document placeholder as a document chip', () => {
+  it('restores a serialized binary placeholder as a binary chip', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);
 
@@ -110,6 +110,19 @@ describe('useMessageEditor setContent', () => {
     });
 
     expect(result.current.controller.getPlaceholderNames('binary')).toEqual(['invoice.pdf']);
+    expect(result.current.controller.getPlaceholderNames()).toEqual([]);
+  });
+
+  it('restores a serialized text file placeholder as a text chip', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('[notes.md](text://notes.md)');
+    });
+
+    expect(result.current.controller.getPlaceholderNames('text')).toEqual(['notes.md']);
+    expect(result.current.controller.getPlaceholderNames('binary')).toEqual([]);
     expect(result.current.controller.getPlaceholderNames()).toEqual([]);
   });
 

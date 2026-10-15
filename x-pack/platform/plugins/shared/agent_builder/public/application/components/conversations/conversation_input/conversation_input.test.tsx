@@ -29,6 +29,7 @@ import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useBinaryUpload } from './use_binary_upload';
+import { useTextFileUpload } from './use_text_file_upload';
 import { useSupportedBinaryTypes } from '../../../hooks/use_supported_binary_types';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
@@ -82,6 +83,7 @@ jest.mock('./use_image_upload', () => {
   };
 });
 jest.mock('./use_binary_upload', () => ({ useBinaryUpload: jest.fn() }));
+jest.mock('./use_text_file_upload', () => ({ useTextFileUpload: jest.fn() }));
 jest.mock('../../../hooks/use_supported_binary_types', () => ({
   useSupportedBinaryTypes: jest.fn(),
 }));
@@ -200,6 +202,7 @@ const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseInputDraft = jest.mocked(useInputDraft);
 const mockedUseBinaryUpload = jest.mocked(useBinaryUpload);
+const mockedUseTextFileUpload = jest.mocked(useTextFileUpload);
 const mockedUseSupportedBinaryTypes = jest.mocked(useSupportedBinaryTypes);
 
 const submitMessage = jest.fn();
@@ -208,7 +211,7 @@ const handlePasteBinary = jest.fn();
 const handleAfterBinaryInput = jest.fn();
 const handleRemoveBinary = jest.fn();
 const handleBinarySubmitted = jest.fn();
-const documentUploadState = (
+const binaryUploadState = (
   overrides: Partial<ReturnType<typeof useBinaryUpload>> = {}
 ): ReturnType<typeof useBinaryUpload> => ({
   loadingBinaryNames: new Set(),
@@ -217,6 +220,18 @@ const documentUploadState = (
   handleAfterInput: handleAfterBinaryInput,
   handleRemoveBinary,
   handleSubmitted: handleBinarySubmitted,
+  ...overrides,
+});
+const handlePasteTextFile = jest.fn();
+const handleAfterTextFileInput = jest.fn();
+const handleRemoveTextFile = jest.fn();
+const textFileUploadState = (
+  overrides: Partial<ReturnType<typeof useTextFileUpload>> = {}
+): ReturnType<typeof useTextFileUpload> => ({
+  loadingTextFileNames: new Set(),
+  handlePasteTextFile,
+  handleAfterInput: handleAfterTextFileInput,
+  handleRemoveTextFile,
   ...overrides,
 });
 const sendUserMessage = jest.fn();
@@ -277,8 +292,9 @@ describe('ConversationInput', () => {
       createConversation,
       isCreatingConversation: false,
     });
-    mockedUseSupportedBinaryTypes.mockReturnValue(['application/pdf', 'text/markdown']);
-    mockedUseBinaryUpload.mockReturnValue(documentUploadState());
+    mockedUseSupportedBinaryTypes.mockReturnValue(['application/pdf']);
+    mockedUseBinaryUpload.mockReturnValue(binaryUploadState());
+    mockedUseTextFileUpload.mockReturnValue(textFileUploadState());
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockedUseSendUserMessage.mockReturnValue({
       mutateAsync: sendUserMessage,
@@ -521,14 +537,20 @@ describe('ConversationInput', () => {
     });
   });
 
-  describe('document upload', () => {
-    const binaryFile = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
+  describe('file upload', () => {
+    const pdfFile = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
     const pngFile = new File([new Uint8Array(4)], 'photo.png', { type: 'image/png' });
+    const markdownFile = new File(['# Notes'], 'notes.md', { type: '' });
     const binaryAttachment = {
       id: 'pdf-1',
       type: 'binary',
       origin: 'file-1',
       description: 'invoice.pdf',
+    };
+    const textFileAttachment = {
+      id: 'txt-1',
+      type: 'text',
+      data: { content: '# Notes', name: 'notes.md' },
     };
     const setAttachments = (attachments: unknown[], removeAttachment = jest.fn()) =>
       mockedUseConversationContext.mockReturnValue({
@@ -540,13 +562,12 @@ describe('ConversationInput', () => {
         conversationActions: {} as never,
       } as never);
 
-    it('gives a pasted document to the document upload and a pasted image to the image upload', () => {
-      handlePasteBinary.mockReturnValue('invoice.pdf');
+    it('gives a pasted PDF to the binary upload and a pasted image to the image upload', () => {
       renderInput(<ConversationInput />);
 
-      expect(mockMessageEditorProps.onPasteFile?.(binaryFile)).toBe('invoice.pdf');
-      expect(handlePasteBinary).toHaveBeenCalledWith(binaryFile);
-
+      expect(mockMessageEditorProps.onPasteFile?.(pdfFile)).toBe('invoice.pdf');
+      expect(handlePasteBinary).toHaveBeenCalledWith(pdfFile, 'invoice.pdf', 'application/pdf');
+      expect(handlePasteTextFile).not.toHaveBeenCalled();
       expect(mockHandlePasteImage).not.toHaveBeenCalled();
 
       mockMessageEditorProps.onPasteFile?.(pngFile);
@@ -554,49 +575,158 @@ describe('ConversationInput', () => {
       expect(handlePasteBinary).toHaveBeenCalledTimes(1);
     });
 
-    it('lets the editor accept only the document types the server supports', () => {
+    it('gives a pasted Markdown file with an empty type to the text file upload', () => {
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(markdownFile)).toBe('notes.md');
+
+      expect(handlePasteTextFile).toHaveBeenCalledWith(markdownFile, 'notes.md');
+      expect(handlePasteBinary).not.toHaveBeenCalled();
+      expect(mockHandlePasteImage).not.toHaveBeenCalled();
+    });
+
+    it('lets the editor accept the text types and the binary types the server supports', () => {
       renderInput(<ConversationInput />);
       expect(mockMessageEditorProps.acceptedFileMimeTypes).toEqual([
-        'application/pdf',
         'text/markdown',
+        'text/plain',
+        'text/csv',
+        'application/pdf',
       ]);
 
       mockedUseSupportedBinaryTypes.mockReturnValue([]);
       renderInput(<ConversationInput />);
-      expect(mockMessageEditorProps.acceptedFileMimeTypes).toEqual([]);
+      expect(mockMessageEditorProps.acceptedFileMimeTypes).toEqual([
+        'text/markdown',
+        'text/plain',
+        'text/csv',
+      ]);
     });
 
-    it('gives a pasted Markdown file with an empty type to the document upload', () => {
-      const markdownFile = new File(['# Notes'], 'notes.md', { type: '' });
+    it('still reads a text file when the PDF type is not supported', () => {
+      mockedUseSupportedBinaryTypes.mockReturnValue([]);
       renderInput(<ConversationInput />);
 
       mockMessageEditorProps.onPasteFile?.(markdownFile);
 
-      expect(handlePasteBinary).toHaveBeenCalledWith(markdownFile);
-      expect(mockHandlePasteImage).not.toHaveBeenCalled();
+      expect(handlePasteTextFile).toHaveBeenCalledWith(markdownFile, 'notes.md');
     });
 
-    it('syncs the document upload after the text changes', () => {
+    it('leaves a file type that is not a PDF or text file to the image upload', () => {
+      renderInput(<ConversationInput />);
+      const docx = new File([new Uint8Array(4)], 'report.docx', { type: '' });
+
+      mockMessageEditorProps.onPasteFile?.(docx);
+
+      expect(mockHandlePasteImage).toHaveBeenCalledWith(docx);
+      expect(handlePasteTextFile).not.toHaveBeenCalled();
+      expect(handlePasteBinary).not.toHaveBeenCalled();
+    });
+
+    it('refuses a text file over 256 KB with a toast', () => {
+      renderInput(<ConversationInput />);
+      const bigFile = new File([new Uint8Array(257 * 1024)], 'big.txt', { type: 'text/plain' });
+
+      mockMessageEditorProps.onPasteFile?.(bigFile);
+
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'The file is too large. The maximum size is 256 KB.',
+      });
+      expect(handlePasteTextFile).not.toHaveBeenCalled();
+    });
+
+    it('counts PDFs and text files together against the limit of 10 files', () => {
+      setAttachments([
+        binaryAttachment,
+        ...Array.from({ length: 9 }, (_, index) => ({
+          id: `t${index}`,
+          type: 'text',
+          data: { content: '', name: `note-${index}.md` },
+        })),
+      ]);
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(markdownFile)).toBeUndefined();
+
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'You can attach up to 10 files per message.',
+      });
+      expect(handlePasteTextFile).not.toHaveBeenCalled();
+    });
+
+    it('counts the files that are still loading', () => {
+      mockedUseBinaryUpload.mockReturnValue(
+        binaryUploadState({
+          loadingBinaryNames: new Set(Array.from({ length: 5 }, (_, i) => `a${i}.pdf`)),
+        })
+      );
+      mockedUseTextFileUpload.mockReturnValue(
+        textFileUploadState({
+          loadingTextFileNames: new Set(Array.from({ length: 5 }, (_, i) => `b${i}.md`)),
+        })
+      );
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(markdownFile)).toBeUndefined();
+
+      expect(handlePasteTextFile).not.toHaveBeenCalled();
+    });
+
+    it('gives a second file with the same name a unique name', () => {
+      setAttachments([textFileAttachment]);
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(markdownFile)).toBe('notes 2.md');
+
+      expect(handlePasteTextFile).toHaveBeenCalledWith(markdownFile, 'notes 2.md');
+    });
+
+    it('does not reuse the name of a file that is still loading', () => {
+      mockedUseTextFileUpload.mockReturnValue(
+        textFileUploadState({ loadingTextFileNames: new Set(['notes.md']) })
+      );
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(markdownFile)).toBe('notes 2.md');
+    });
+
+    it('syncs both file uploads after the text changes', () => {
       renderInput(<ConversationInput />);
 
       mockMessageEditorProps.onAfterInput?.();
 
       expect(handleAfterBinaryInput).toHaveBeenCalledTimes(1);
+      expect(handleAfterTextFileInput).toHaveBeenCalledTimes(1);
     });
 
-    it('passes the document loading names to the editor chips', () => {
+    it('passes the loading names of both uploads to the editor chips', () => {
       mockedUseBinaryUpload.mockReturnValue(
-        documentUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
+        binaryUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
+      );
+      mockedUseTextFileUpload.mockReturnValue(
+        textFileUploadState({ loadingTextFileNames: new Set(['notes.md']) })
       );
 
       renderInput(<ConversationInput />);
 
-      expect(mockMessageEditorProps.uploadingNames).toEqual(new Set(['invoice.pdf']));
+      expect(mockMessageEditorProps.uploadingNames).toEqual(new Set(['invoice.pdf', 'notes.md']));
     });
 
-    it('holds the submit while a document is loading, and shows its pill', () => {
+    it('holds the submit while a text file is read, and shows its pill', () => {
+      mockedUseTextFileUpload.mockReturnValue(
+        textFileUploadState({ loadingTextFileNames: new Set(['notes.md']) })
+      );
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mock-remove-attachment-notes.md')).toBeInTheDocument();
+    });
+
+    it('holds the submit while a PDF is loading, and shows its pill', () => {
       mockedUseBinaryUpload.mockReturnValue(
-        documentUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
+        binaryUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
       );
 
       renderInput(<ConversationInput />);
@@ -606,18 +736,31 @@ describe('ConversationInput', () => {
       expect(screen.getByTestId('mock-remove-attachment-invoice.pdf')).toBeInTheDocument();
     });
 
-    it('cancels a loading document from its pill', () => {
+    it('cancels a loading PDF from its pill', () => {
       mockedUseBinaryUpload.mockReturnValue(
-        documentUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
+        binaryUploadState({ loadingBinaryNames: new Set(['invoice.pdf']) })
       );
 
       renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-remove-attachment-invoice.pdf'));
 
       expect(handleRemoveBinary).toHaveBeenCalledWith('invoice.pdf');
+      expect(handleRemoveTextFile).not.toHaveBeenCalled();
     });
 
-    it('removes an added document through the document upload, not as a plain attachment', () => {
+    it('cancels a loading text file from its pill', () => {
+      mockedUseTextFileUpload.mockReturnValue(
+        textFileUploadState({ loadingTextFileNames: new Set(['notes.md']) })
+      );
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-notes.md'));
+
+      expect(handleRemoveTextFile).toHaveBeenCalledWith('notes.md');
+      expect(handleRemoveBinary).not.toHaveBeenCalled();
+    });
+
+    it('removes an added PDF through the binary upload, not as a plain attachment', () => {
       const removeAttachment = jest.fn();
       setAttachments([binaryAttachment], removeAttachment);
 
@@ -628,9 +771,20 @@ describe('ConversationInput', () => {
       expect(removeAttachment).not.toHaveBeenCalled();
     });
 
-    it('sends into the conversation made for the document, then tells the document upload it was sent', () => {
+    it('removes an added text file through the text file upload', () => {
+      const removeAttachment = jest.fn();
+      setAttachments([textFileAttachment], removeAttachment);
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-txt-1'));
+
+      expect(handleRemoveTextFile).toHaveBeenCalledWith('notes.md');
+      expect(removeAttachment).not.toHaveBeenCalled();
+    });
+
+    it('sends into the conversation made for the PDF, then tells the binary upload it was sent', () => {
       mockedUseBinaryUpload.mockReturnValue(
-        documentUploadState({ pendingConversationId: 'pending-conv' })
+        binaryUploadState({ pendingConversationId: 'pending-conv' })
       );
 
       renderInput(<ConversationInput />);
@@ -642,9 +796,9 @@ describe('ConversationInput', () => {
       expect(handleBinarySubmitted).toHaveBeenCalledTimes(1);
     });
 
-    it('tells the document upload it was sent before the submit moves to the new conversation', () => {
+    it('tells the binary upload it was sent before the submit moves to the new conversation', () => {
       mockedUseBinaryUpload.mockReturnValue(
-        documentUploadState({ pendingConversationId: 'pending-conv' })
+        binaryUploadState({ pendingConversationId: 'pending-conv' })
       );
 
       renderInput(<ConversationInput />);
@@ -655,7 +809,7 @@ describe('ConversationInput', () => {
       );
     });
 
-    it('gives the document upload the create conversation call of the submit hook', () => {
+    it('gives the binary upload the create conversation call of the submit hook', () => {
       renderInput(<ConversationInput />);
 
       expect(mockedUseBinaryUpload).toHaveBeenCalledWith(
