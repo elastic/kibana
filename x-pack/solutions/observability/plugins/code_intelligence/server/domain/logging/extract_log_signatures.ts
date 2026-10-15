@@ -7,6 +7,7 @@
 
 import type { SourceLocation } from '../source_location_codec';
 import { loggingIdiomPatterns } from './idiom_patterns';
+import { levelForMessage } from './logging_wrappers';
 
 /** Maps normalized log levels to predictive-query severity scores. */
 const severityByLevel: Readonly<Record<string, number>> = {
@@ -124,6 +125,12 @@ export interface LoggingSignatureInput {
 export interface LogSignature {
   readonly evidence: readonly SourceLocation[];
   readonly level: string;
+  /**
+   * ES|QL `LIKE` pattern for a wrapper message without spaces, such as an event name built from
+   * a template. A phrase query cannot match it, because the analyzer keeps `acp.retry.failed` as
+   * 1 token that the static part `acp.retry.` does not equal.
+   */
+  readonly likePattern?: string;
   readonly message: string;
   readonly severity: number;
   readonly staticPrefix: string;
@@ -519,6 +526,82 @@ const signatureFor = ({
     staticPrefix,
     staticSegments: anchors,
   };
+};
+
+/** Escapes the ES|QL `LIKE` wildcards and escape character in static text. */
+const escapeLikeText = (text: string): string =>
+  text.replace(/[\\*?]/g, (character) => `\\${character}`);
+
+/** Builds a `LIKE` pattern for a message without spaces that has dynamic parts, else undefined. */
+const likePatternOf = (message: string): string | undefined => {
+  if (/\s/.test(message)) return undefined;
+  const ranges: readonly PlaceholderRange[] = placeholderRangesOf(message);
+  if (ranges.length === 0) return undefined;
+  /** Static text between placeholders, each placeholder replaced by a wildcard. */
+  const parts: string[] = [];
+  let start: number = 0;
+  for (const range of ranges) {
+    parts.push(escapeLikeText(message.slice(start, range.start)));
+    start = range.end;
+  }
+  parts.push(escapeLikeText(message.slice(start)));
+  return parts.join('*');
+};
+
+/**
+ * Extracts the signature of a call to a logging wrapper. The message is the call's literal first
+ * argument from source; the classifier's static message is only a fallback, and a missing level
+ * comes from the words of the message.
+ */
+export const extractWrapperCallSignatures = ({
+  callNames,
+  classified,
+  content,
+  evidence,
+  matchedLineIndex,
+}: {
+  readonly callNames: readonly string[];
+  readonly classified: { readonly level?: string; readonly staticMessage?: string };
+  readonly content: string;
+  readonly evidence: readonly SourceLocation[];
+  readonly matchedLineIndex: number;
+}): readonly LogSignature[] => {
+  const names: readonly string[] = callNames.filter((name) =>
+    /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
+  );
+  const line: string | undefined = content.split('\n')[matchedLineIndex];
+  /** The call's first literal argument, with the delimiter that decides its escape grammar. */
+  const literal: readonly [string, string] | undefined = (() => {
+    if (names.length === 0 || line === undefined) return undefined;
+    const match: RegExpExecArray | null = new RegExp(
+      String.raw`(?:^|[^A-Za-z0-9_$])(?:${names.join('|')})\s*\(\s*${sourceLiteralCapturePattern(
+        extensionOf(evidence) === 'go'
+      )}`
+    ).exec(line);
+    if (match === null) return undefined;
+    const found: readonly [string, string | undefined] | undefined = (
+      [
+        ['"', match[1]],
+        ["'", match[2]],
+        ['`', match[3]],
+      ] as const
+    ).find(([, value]) => value !== undefined);
+    return found === undefined || found[1] === undefined ? undefined : [found[0], found[1]];
+  })();
+  const message: string | undefined =
+    (literal === undefined
+      ? undefined
+      : decodeSourceLiteral({ evidence, message: literal[1], quote: literal[0] })) ??
+    classified.staticMessage;
+  if (message === undefined) return [];
+  const signature: LogSignature | undefined = signatureFor({
+    evidence,
+    level: classified.level ?? levelForMessage(message),
+    message,
+  });
+  if (signature === undefined) return [];
+  const likePattern: string | undefined = likePatternOf(message);
+  return [likePattern === undefined ? signature : { ...signature, likePattern }];
 };
 
 /** Extracts deterministic signatures from source or classifier-supplied static messages. */

@@ -46,7 +46,18 @@ describe('loggingIdiomPatterns', () => {
   });
 
   it.each([
+    'logger.emit({ body: name, attributes });',
+    'otelLogger.emit({ body: "job.failed" })',
+    'logger.Emit(ctx, record)',
+    'logger.logRecordBuilder().setBody("job failed").emit();',
+  ])('matches the OpenTelemetry Logs API emission %s', (source) => {
+    expect(matchesAnyIdiom(source)).toBe(true);
+  });
+
+  it.each([
     'catalogService.metrics.Error("not a logger")',
+    'emitter.emit("close")',
+    'this.emit("data", chunk)',
     'logqlmodel.NewParseError("constructor")',
     'getLogger().info("build tooling")',
     'getLog().debug("build tooling")',

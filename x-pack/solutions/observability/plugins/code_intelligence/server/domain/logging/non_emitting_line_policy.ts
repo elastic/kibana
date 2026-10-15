@@ -23,7 +23,7 @@ const nonEmittingUnlessCalledPatterns: readonly RegExp[] = [
 
 /** Calls that prove the matched line can emit despite setup-like text. */
 const emittingCallPattern: RegExp =
-  /[.](info|Info|error|Error|warn|Warn|warning|Warning|debug|Debug|fatal|Fatal|critical|Critical|exception|Exception|log|Log|Msg|Msgf|print|Print|println|Println)[(]|panic[!(]|[ (]println[ (]|fprintf[(]stderr|eprintln/;
+  /[.](info|Info|error|Error|warn|Warn|warning|Warning|debug|Debug|fatal|Fatal|critical|Critical|exception|Exception|log|Log|Msg|Msgf|print|Print|println|Println|emit|Emit)[(]|panic[!(]|[ (]println[ (]|fprintf[(]stderr|eprintln/;
 
 /** Returns whether only the matched source line is known not to emit a message. */
 export const isNonEmittingLoggingLine = (line: string): boolean => {

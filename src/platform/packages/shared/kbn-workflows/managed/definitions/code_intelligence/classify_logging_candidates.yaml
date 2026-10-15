@@ -35,6 +35,10 @@ triggers:
                 type: string
                 minLength: 1
                 maxLength: 512
+              wrapperName:
+                type: string
+                minLength: 1
+                maxLength: 128
               evidence:
                 type: array
                 maxItems: 8
@@ -67,10 +71,14 @@ steps:
         Return exactly one result for every supplied id and no other ids.
         Never omit or merge candidates, even when they share an excerpt or look alike.
         Keep true only for a runtime production log emission.
-        A result may contain only id, keep, level, staticMessage, findingType, findingTitle, and findingSummary.
+        A result may contain only id, keep, level, staticMessage, wrapperName, findingType, findingTitle, and findingSummary.
         Never copy or create evidence, query text, paths, or source metadata.
         When keep is false, omit level and staticMessage.
         When source has no non-empty literal static message, omit staticMessage.
+        Set wrapperName only when the candidate's own code declares a function or method that passes one of its own parameters as the message of this log call, so callers choose the message; use that declared name exactly. Otherwise omit wrapperName.
+        A candidate whose input has wrapperName is a call to that logging wrapper: its first evidence item is the call, and the other items show the wrapper's code.
+        For such a candidate, keep is true only when the call really invokes that wrapper; keep is false for an unrelated function or method with the same name, such as an event subscription or an event emitter.
+        For such a candidate, staticMessage is the call's literal message argument; when the wrapper does not fix the level, choose it from the message's wording, for example error for a failure and warn for a retry or a warning. Never return wrapperName for it.
         When the next statement after the log call exits the process (for example os.Exit, System.exit, process.exit, sys.exit, or exitProcess), set level to fatal.
         Every result states findingType as none or sensitive-data.
         Use none when nothing about the line needs a reviewer's attention; a finding means a careful engineer should look at this exact source line, regardless of keep.
@@ -103,6 +111,10 @@ steps:
                 staticMessage:
                   type: string
                   minLength: 1
+                wrapperName:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
                 findingType:
                   enum: [none, sensitive-data]
                 findingTitle:
