@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -14,15 +14,51 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  SYSTEM_SECURITY_WORKER_CATALOG,
   UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
+import { workerName } from '../../../common/worker_names';
 import type { RouteDependencies } from '../register_routes';
+import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
 
-const UpdateWorkerRequestParams = z.object({
-  workerId: z.string().min(1).max(128),
-});
+const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
+  WorkerEnableBlockedReason,
+  (displayName: string) => string
+> = {
+  huntSupplyPrerequisitesUnmet: () =>
+    i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
+      defaultMessage:
+        'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+    }),
+  huntSupplyReportsIndexUnmanaged: () =>
+    i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
+      defaultMessage:
+        'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
+    }),
+  huntSupplyNotInstalled: () =>
+    i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
+      defaultMessage:
+        'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
+    }),
+  noModel: (displayName) =>
+    i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
+      defaultMessage:
+        '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
+      values: { workerName: displayName },
+    }),
+};
+
+const workerDisplayName = (workerId: string): string =>
+  workerName(workerId, SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name);
+
+const UpdateWorkerRequestParams = lazySchema(() =>
+  z.object({
+    workerId: z.string().min(1).max(128),
+  })
+);
 
 const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.updateManaged.every(
@@ -57,8 +93,19 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
+          if (!(await hasManageSecurity(context))) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerModifyForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Modifying a worker requires the manage_security cluster privilege',
+                }),
+              },
+            });
+          }
+
           if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
             return response.forbidden({
               body: {
@@ -97,6 +144,14 @@ export const registerUpdateWorkerRoute = ({
                     defaultMessage: 'Cannot apply {setting} to worker "{workerId}"',
                     values: { setting: result.what, workerId },
                   }),
+                },
+              });
+            case 'blocked':
+              return response.badRequest({
+                body: {
+                  message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason](
+                    workerDisplayName(workerId)
+                  ),
                 },
               });
             case 'invalid':

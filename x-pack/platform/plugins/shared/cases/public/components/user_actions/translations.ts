@@ -202,47 +202,46 @@ export const getActionSourceKindLabel = (type: ActionSourceType): string =>
   ACTION_SOURCE_KIND_LABELS[type];
 
 export const MORE_ACTIVITIES = (count: number) =>
-  i18n.translate('xpack.cases.caseView.redesign.userActions.moreActivities', {
+  i18n.translate('xpack.cases.caseView.userActions.moreActivities', {
     values: { count },
     defaultMessage: '{count} more {count, plural, =1 {activity} other {activities}}',
   });
 
 export const SHOW_MORE_ACTIVITIES_ARIA = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.showMoreActivitiesAria',
+  'xpack.cases.caseView.userActions.showMoreActivitiesAria',
   { defaultMessage: 'Show more activities' }
 );
 
 export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.noSearchResults.title',
+  'xpack.cases.caseView.userActions.noSearchResults.title',
   {
     defaultMessage: 'No results match your search criteria',
   }
 );
 
 export const NO_SEARCH_RESULTS_BODY = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.noSearchResults.body',
+  'xpack.cases.caseView.userActions.noSearchResults.body',
   {
     defaultMessage: 'Try modifying your search or filters.',
   }
 );
 
 export const COLLAPSE_ACTIVITY = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.collapseActivity',
+  'xpack.cases.caseView.userActions.collapseActivity',
   { defaultMessage: 'Collapse activity' }
 );
 
-export const EXPAND_ACTIVITY = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.expandActivity',
-  { defaultMessage: 'Expand activity' }
-);
+export const EXPAND_ACTIVITY = i18n.translate('xpack.cases.caseView.userActions.expandActivity', {
+  defaultMessage: 'Expand activity',
+});
 
 export const COLLAPSE_ALL_ACTIVITIES = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.collapseAllActivities',
+  'xpack.cases.caseView.userActions.collapseAllActivities',
   { defaultMessage: 'Collapse all' }
 );
 
 export const EXPAND_ALL_ACTIVITIES = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.expandAllActivities',
+  'xpack.cases.caseView.userActions.expandAllActivities',
   { defaultMessage: 'Expand all' }
 );
 
@@ -251,7 +250,7 @@ export const SHOW_MORE_ACTIVITY = i18n.translate('xpack.cases.userActions.showMo
 });
 
 export const NOTHING_TO_COLLAPSE = i18n.translate(
-  'xpack.cases.caseView.redesign.userActions.nothingToCollapse',
+  'xpack.cases.caseView.userActions.nothingToCollapse',
   {
     defaultMessage: 'No comments or attachments to collapse',
   }

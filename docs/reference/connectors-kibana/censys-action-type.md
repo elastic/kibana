@@ -11,6 +11,8 @@ applies_to:
 
 The Censys connector communicates with the [Censys Platform API](https://docs.censys.com/reference/get-started) to enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 Every request issued by the connector is scoped to the configured Censys organization.
 
 ## Create connectors in {{kib}} [define-censys-ui]

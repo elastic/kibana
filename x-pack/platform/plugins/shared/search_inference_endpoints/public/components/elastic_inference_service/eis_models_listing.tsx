@@ -21,6 +21,7 @@ import { DisplayOptions } from './display_options';
 import { EisCardGrid } from './eis_card_grid';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelTypeFilterPart, ModelFamilyFilterPart } from './eis_model_filters';
+import { RegionFilterPart } from './region_filter';
 import { EisTable } from './eis_table';
 
 export type EisViewMode = 'card' | 'table';
@@ -76,6 +77,7 @@ export const EisModelsListing = ({
             <ContentListToolbar.Filters>
               <ModelTypeFilterPart />
               <ModelFamilyFilterPart />
+              <RegionFilterPart />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
         </EuiFlexItem>

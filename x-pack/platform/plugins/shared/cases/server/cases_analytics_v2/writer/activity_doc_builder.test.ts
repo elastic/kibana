@@ -220,4 +220,32 @@ describe('buildActivityDoc', () => {
       expect(doc.action.attachment_reference_id).toBeUndefined();
     });
   });
+
+  describe('source', () => {
+    it('projects every source field', () => {
+      const doc = buildActivityDoc(
+        makeUserAction('ua-1', {
+          source: { type: 'agent', id: 'agent-1', name: 'Triage agent', run_id: 'conv-1' },
+        })
+      );
+      expect(doc.source).toEqual({
+        type: 'agent',
+        id: 'agent-1',
+        name: 'Triage agent',
+        run_id: 'conv-1',
+      });
+    });
+
+    it('omits name and run_id when absent', () => {
+      const doc = buildActivityDoc(makeUserAction('ua-1', { source: { type: 'api', id: 'api' } }));
+      expect(doc.source).toEqual({ type: 'api', id: 'api' });
+    });
+
+    it('omits source when the user action has none', () => {
+      expect(buildActivityDoc(makeUserAction('ua-1'))).not.toHaveProperty('source');
+      expect(buildActivityDoc(makeUserAction('ua-1', { source: null }))).not.toHaveProperty(
+        'source'
+      );
+    });
+  });
 });

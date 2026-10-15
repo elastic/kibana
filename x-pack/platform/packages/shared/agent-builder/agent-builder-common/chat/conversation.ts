@@ -6,7 +6,7 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type { UserIdAndName } from '../base/users';
+import type { UserIdAndName, UserPrincipalType } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
@@ -114,6 +114,8 @@ export enum ConversationRoundStepType {
   relevantSkills = 'relevant_skills',
   preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
+  substitution = 'substitution',
+  injectedContext = 'injected_context',
 }
 
 // tool call step
@@ -222,8 +224,8 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 // compaction step
 
 export interface CompactionStepData {
-  /** Number of conversation rounds that were summarized into a compact form */
-  summarized_round_count: number;
+  /** Number of cycles folded into the summary by this compaction */
+  summarized_cycle_count: number;
   /** Estimated token count of the conversation before compaction */
   token_count_before: number;
   /** Estimated token count of the conversation after compaction */
@@ -237,6 +239,65 @@ export type CompactionStep = ConversationRoundStepMixin<
 
 export const isCompactionStep = (step: ConversationRoundStep): step is CompactionStep => {
   return step.type === ConversationRoundStepType.compaction;
+};
+
+// substitution step
+
+/**
+ * A tool call of a given round. Tool call ids are provider-generated and may repeat across rounds,
+ * so a durable reference to one carries its round.
+ */
+export interface ToolCallRef {
+  round_id: string;
+  tool_call_id: string;
+}
+
+export interface SubstitutionStepData {
+  /** Tool calls whose results are rendered as file references from now on. */
+  substituted_tool_calls: ToolCallRef[];
+  trigger: 'round_start' | 'intra_round';
+  /** Stored result size above which a tool call was substituted. */
+  threshold_tokens: number;
+}
+
+export type SubstitutionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.substitution,
+  SubstitutionStepData
+>;
+
+export const createSubstitutionStep = (data: SubstitutionStepData): SubstitutionStep => ({
+  type: ConversationRoundStepType.substitution,
+  ...data,
+});
+
+export const isSubstitutionStep = (step: ConversationRoundStep): step is SubstitutionStep => {
+  return step.type === ConversationRoundStepType.substitution;
+};
+
+/**
+ * A note a cycle hook put in front of the model. Rendered as a user-role notice at its position.
+ */
+export interface InjectedContextStepData {
+  /** Registration id of the hook that appended the step. Set by the runtime, never by the hook. */
+  hook_id: string;
+  /** What the model reads. */
+  text: string;
+  /** For the UI and analytics; never rendered to the model. */
+  data?: JsonObject;
+}
+
+export type InjectedContextStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.injectedContext,
+  InjectedContextStepData
+>;
+
+export const createInjectedContextStep = (data: InjectedContextStepData): InjectedContextStep => ({
+  type: ConversationRoundStepType.injectedContext,
+  ...data,
+});
+
+export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
+  return step.type === ConversationRoundStepType.injectedContext;
 };
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
@@ -385,7 +446,9 @@ export type ConversationRoundStep =
   | AskUserQuestionStep
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
-  | SubagentRosterUpdatedStep;
+  | SubagentRosterUpdatedStep
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -550,10 +613,12 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** Absent for external authors. */
+  type?: UserPrincipalType;
 }
 
 export const getConversationRoundAuthorDisplayName = (
-  author?: ConversationRoundAuthor
+  author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
   if (!author) {
     return undefined;
@@ -593,21 +658,52 @@ export interface ConversationRoundOrigin {
   type: ConversationOriginType;
 }
 
-export interface RoundModelUsageStats {
+/**
+ * LLM usage of a single connector within a round.
+ */
+export interface ConnectorModelUsageStats {
   /**
-   * Id of the connector used for this round
+   * Id of the connector
    */
   connector_id: string;
   /**
-   * Number of LLM calls which were done during this round.
+   * Number of LLM calls done through this connector.
    */
   llm_calls: number;
   /**
-   * Total number of input tokens sent this round.
+   * Total number of input tokens sent to this connector.
    */
   input_tokens: number;
   /**
-   * Total number of output tokens received this round.
+   * Total number of output tokens received from this connector.
+   */
+  output_tokens: number;
+  /**
+   * Number of input tokens served from cache, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
+   * Model identifier for this connector, if available.
+   */
+  model?: string;
+}
+
+export interface RoundModelUsageStats {
+  /**
+   * Id of the main connector used for this round
+   */
+  connector_id: string;
+  /**
+   * Number of LLM calls which were done during this round, across all connectors.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round, across all connectors.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round, across all connectors.
    */
   output_tokens: number;
   /**
@@ -616,9 +712,19 @@ export interface RoundModelUsageStats {
    */
   cached_input_tokens?: number;
   /**
-   * Model identifier from the provider response, if available.
+   * Model identifier of the main connector from the provider response, if available.
    */
   model?: string;
+  /**
+   * Total input tokens (including cached) of the agent's last LLM call this round.
+   */
+  last_call_input_tokens?: number;
+  /**
+   * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
+   * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.
+   * Absent on rounds persisted before the breakdown existed.
+   */
+  connectors?: ConnectorModelUsageStats[];
 }
 
 /**
@@ -639,10 +745,14 @@ export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
   usage.input_tokens === 0 &&
   usage.output_tokens === 0 &&
   usage.cached_input_tokens === undefined &&
-  usage.model === undefined;
+  usage.model === undefined &&
+  usage.connectors === undefined;
 
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a user chat message (`input` / `message`) */
+export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;
@@ -741,9 +851,9 @@ export interface ConversationInternalState {
    */
   dynamic_tool_ids?: string[];
   /**
-   * Summary of compacted older conversation rounds.
-   * Generated when the conversation approaches the model's context window limit.
-   * Reused across rounds until regeneration is needed.
+   * Summary of the context up to its `summarized_up_to` cursor, rendered in place of it.
+   * Generated when the context approaches the model's context window limit, possibly mid-round.
+   * Reused across rounds until the next compaction replaces it.
    */
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
@@ -854,12 +964,30 @@ export interface CompactionStructuredData {
 }
 
 /**
- * Summary of compacted conversation rounds.
+ * Anchor of a compaction cursor: the summary covers the context timeline up to the end of the
+ * cycle this anchor belongs to. Only ids that are stable across timeline re-serialization are
+ * used: a tool call for a cycle with tool calls, the id of a non-step event (`user_message`,
+ * execution terminal) otherwise.
+ */
+export type CompactionCursor = ToolCallRef | { event_id: string };
+
+/**
+ * Summary of the compacted part of the conversation.
  * Stored at the conversation level and reused across rounds
  * until the context window fills up again and regeneration is needed.
  */
 export interface CompactionSummary {
-  /** Number of rounds that were summarized */
+  /**
+   * What the summary covers: every cycle of the context timeline up to and including the one
+   * holding the anchor; later cycles are visible verbatim. Absent on summaries written before
+   * cycle-based compaction, which are translated on read from `covered_round_ids` /
+   * `summarized_round_count`.
+   */
+  summarized_up_to?: CompactionCursor;
+  /**
+   * Number of rounds fully covered by the summary. Derived from `summarized_up_to` on write, for
+   * readers that predate it.
+   */
   summarized_round_count: number;
   /** When the summary was generated */
   created_at: string;
@@ -868,9 +996,8 @@ export interface CompactionSummary {
   /** Structured summary data */
   structured_data: CompactionStructuredData;
   /**
-   * Ids of the rounds this summary covers, in round order. Absent on summaries written before
-   * coverage became a set; those are interpreted through `summarized_round_count` with the
-   * pre-change fold's membership rule (see `coveredRoundIds`).
+   * Ids of the rounds fully covered by the summary, in round order. Derived from
+   * `summarized_up_to` on write, for readers that predate it.
    */
   covered_round_ids?: string[];
 }

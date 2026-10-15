@@ -7,11 +7,25 @@
 
 import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
-
-const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+import {
+  resetAlertingV2NavSettings,
+  setAlertingV2EnabledSetting,
+} from '../fixtures/alerting_v2_setting';
+import { GENERATED_METRICS } from '../fixtures/constants';
 import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
 
-import { GENERATED_METRICS } from '../fixtures/constants';
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+
+// Keeps the plain Alerts navigation link and the Rules page heading tabs, which change when alerting v2 is on.
+globalSetupHook(
+  'Disable alerting v2',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ kbnClient, log }) => {
+    log.debug('[setup] resetting alerting v2 nav settings and disabling alerting v2');
+    await resetAlertingV2NavSettings(kbnClient);
+    await setAlertingV2EnabledSetting(kbnClient, false);
+  }
+);
 
 globalSetupHook(
   'Ingest data to Elasticsearch',

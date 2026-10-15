@@ -25,9 +25,10 @@ import {
 } from '../../../../test_utils/timeline';
 import {
   customEvents,
-  dropTimelineRounds,
   eventsForContext,
+  executionSteps,
   groupTimelineEntries,
+  groupTimelineExecutions,
   groupTimelineRounds,
   isAwaitingPrompt,
   isInterruptedRound,
@@ -37,7 +38,6 @@ import {
   lastExecutionTerminal,
   roundInterruption,
   roundResponse,
-  sliceTimelineRounds,
   type ContextTimelineEvent,
   type TimelineEntry,
 } from './context_timeline';
@@ -82,6 +82,76 @@ const independentIdsRound = (): TimelineEvent[] =>
       },
     },
   ] as unknown as TimelineEvent[];
+
+/** An execution a schedule started: no user message triggered it, so it forms no round. */
+const scheduledExecutionEvents = (): TimelineEvent[] =>
+  [
+    {
+      id: 'es',
+      type: TimelineEventType.executionStarted,
+      created_at: '2026-01-01T00:02:00.000Z',
+      actor: agentActor,
+      execution_id: 'exec-sched',
+      data: { trigger_type: 'schedule' },
+    },
+    {
+      id: 'et',
+      type: TimelineEventType.executionTerminated,
+      created_at: '2026-01-01T00:02:01.000Z',
+      actor: agentActor,
+      execution_id: 'exec-sched',
+      data: {
+        steps: [{ type: ConversationRoundStepType.reasoning, reasoning: 'snapshot' }],
+        model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+        outcome: { type: 'responded', response: { message: 'tick' } },
+      },
+    },
+  ] as unknown as TimelineEvent[];
+
+describe('groupTimelineExecutions', () => {
+  it('returns every execution with its triggers, including one no user message started', () => {
+    const timeline = [...independentIdsRound(), ...scheduledExecutionEvents()];
+
+    const executions = groupTimelineExecutions(timeline).map(({ id, triggers, events }) => ({
+      id,
+      triggers: triggers.map((event) => event.id),
+      events: events.map((event) => event.id),
+    }));
+
+    expect(executions).toEqual([
+      { id: 'exec-abc', triggers: ['um'], events: ['ec'] },
+      { id: 'exec-sched', triggers: [], events: ['es', 'et'] },
+    ]);
+    // the rounds view keeps only the execution a user message triggered
+    expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['exec-abc']);
+  });
+});
+
+describe('executionSteps', () => {
+  it('orders step events by sequence, and falls back to the terminal snapshot without any', () => {
+    const [started, terminated] = scheduledExecutionEvents();
+    const step = (sequence: number, reasoning: string): TimelineEvent =>
+      ({
+        id: `step-${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2026-01-01T00:02:00.500Z',
+        actor: agentActor,
+        execution_id: 'exec-sched',
+        data: { sequence, step: { type: ConversationRoundStepType.reasoning, reasoning } },
+      } as unknown as TimelineEvent);
+
+    expect(executionSteps([started, step(1, 'second'), step(0, 'first'), terminated])).toEqual([
+      { type: ConversationRoundStepType.reasoning, reasoning: 'first' },
+      { type: ConversationRoundStepType.reasoning, reasoning: 'second' },
+    ]);
+    expect(executionSteps([started, terminated])).toEqual([
+      { type: ConversationRoundStepType.reasoning, reasoning: 'snapshot' },
+    ]);
+    expect(executionSteps(failedExecutionEvents('f', '2026-01-01T00:03:00.000Z'))).toEqual([]);
+  });
+});
 
 describe('groupTimelineRounds', () => {
   it('groups a normalized timeline into rounds, in order', () => {
@@ -199,29 +269,6 @@ describe('groupTimelineRounds — interrupted rounds', () => {
       'r2',
     ]);
     expect(isTimelineStandaloneUserMessage(entries[1])).toBe(true);
-  });
-});
-
-describe('dropTimelineRounds', () => {
-  const timeline = [...timelineFromRounds([{ id: 'a' }, { id: 'b' }]), ...independentIdsRound()];
-
-  it('removes exactly the events of the given rounds and keeps stored order', () => {
-    const dropped = dropTimelineRounds(timeline, new Set(['b']));
-
-    expect(groupTimelineRounds(dropped).map((round) => round.id)).toEqual(['a', 'exec-abc']);
-    expect(dropped.map((event) => event.id)).toEqual(
-      timeline.filter((event) => !event.id.startsWith('b::')).map((event) => event.id)
-    );
-  });
-
-  it('drops rounds whose ids follow no scheme through the trigger link', () => {
-    expect(dropTimelineRounds(timeline, new Set(['exec-abc'])).map((event) => event.id)).toEqual(
-      timeline.filter((event) => !['um', 'ec'].includes(event.id)).map((event) => event.id)
-    );
-  });
-
-  it('returns the timeline unchanged for an empty set', () => {
-    expect(dropTimelineRounds(timeline, new Set())).toBe(timeline);
   });
 });
 
@@ -359,65 +406,5 @@ describe('groupTimelineEntries with custom events', () => {
   it('is ignored by groupTimelineRounds and selected by customEvents', () => {
     expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
     expect(customEvents(timeline).map((event) => event.id)).toEqual(['note']);
-  });
-});
-
-describe('sliceTimelineRounds with non-round events', () => {
-  /** A user message that triggered no execution, sent between rounds `b` and `c`. */
-  const standaloneMessage = {
-    id: 'm',
-    type: TimelineEventType.userMessage,
-    created_at: '2026-01-01T00:03:30.000Z',
-    actor: userActor,
-    data: { message: 'standalone' },
-  } as unknown as TimelineEvent;
-  const timeline: ContextTimelineEvent[] = [
-    customEventFixture({ id: 'n0', created_at: '2025-12-31T00:00:00.000Z' }),
-    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
-    customEventFixture({ id: 'n1', created_at: '2026-01-01T00:01:00.000Z' }),
-    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
-    customEventFixture({ id: 'n2', created_at: '2026-01-01T00:03:00.000Z' }),
-    standaloneMessage,
-    ...completedRoundEvents('c', '2026-01-01T00:04:00.000Z'),
-  ];
-  const entryIds = (events: ContextTimelineEvent[]) =>
-    Array.from(new Set(events.map((event) => event.id.split('::')[0])));
-
-  it('keeps every non-round event when slicing from the start', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0))).toEqual([
-      'n0',
-      'a',
-      'n1',
-      'b',
-      'n2',
-      'm',
-      'c',
-    ]);
-  });
-
-  it('drops non-round events older than the first kept round (the cut) and keeps the newer ones', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'n2', 'm', 'c']);
-  });
-
-  it('drops a standalone user message older than the cut', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 2))).toEqual(['c']);
-  });
-
-  it('keeps non-round events older than the first excluded round when an end bound is given', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0, 2))).toEqual([
-      'n0',
-      'a',
-      'n1',
-      'b',
-      'n2',
-      'm',
-    ]);
-  });
-
-  it('when the cut removes every round, keeps only custom events after the last removed round ended', () => {
-    const late = customEventFixture({ id: 'n3', created_at: '2026-01-01T00:05:00.000Z' });
-
-    expect(entryIds(sliceTimelineRounds([...timeline, late], 3))).toEqual(['n3']);
-    expect(entryIds(sliceTimelineRounds(timeline, 3))).toEqual([]);
   });
 });

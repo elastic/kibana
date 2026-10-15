@@ -33,6 +33,7 @@ import {
 } from '../../../hooks';
 
 import type { AgentPolicy, PackagePolicy } from '../../../types';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
@@ -137,7 +138,9 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       // filtering out the unenrolled agents assigned to this policy
       const agents = await sendGetAgents({
         showInactive: true,
-        kuery: `policy_id:"${agentPolicyToCheck}" and not status: unenrolled`,
+        kuery: `${buildPolicyBaseIdWithFallbackKuery(
+          agentPolicyToCheck
+        )} and not status: unenrolled`,
         perPage: SO_SEARCH_LIMIT,
       });
       setAgentsCount(agents.data?.total ?? 0);

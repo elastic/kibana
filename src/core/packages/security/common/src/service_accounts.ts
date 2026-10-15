@@ -15,6 +15,11 @@
 export interface CreateServiceAccountParams {
   name: string;
   /**
+   * Free text of up to 1,000 characters that describes the account. Kibana trims leading and
+   * trailing whitespace, and treats a blank description as no description.
+   */
+  description?: string;
+  /**
    * Role names that bound the new account's privileges. Required and non-empty: an account is
    * never given its creator's privileges by default, since a workload inheriting whatever its
    * last editor could do is the model service accounts exist to replace.
@@ -87,6 +92,12 @@ export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloa
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */
   expectedServiceAccountId?: string;
+  /**
+   * The id of this run of the workload in the calling plugin's own records, such as a workflow
+   * execution id. Recorded on the run's `service_account_assume` audit events; the other events of
+   * the run share their `trace.id`. Held to the same length limit as a workload ID.
+   */
+  executionId?: string;
 }
 
 /**
@@ -113,6 +124,8 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
+  /** The description the account was created with. It is absent when the account has none. */
+  description?: string;
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];
 }

@@ -26,8 +26,17 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 import type { PageInfoPaginated } from '../../../../../common/search_strategy';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const ID = 'networkUsersQuery';
+
+const NETWORK_USERS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_NETWORK_PAGE,
+  'network_users'
+);
 
 export interface NetworkUsersArgs {
   id: string;
@@ -103,6 +112,7 @@ export const useNetworkUsers = ({
     },
     errorMessage: i18n.FAIL_NETWORK_USERS,
     abort: skip,
+    executionContext: NETWORK_USERS_CONTEXT,
   });
 
   const networkUsersResponse = useMemo(

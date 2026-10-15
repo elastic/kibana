@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { EsClient, KbnClient } from '@kbn/scout';
+import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
+import type { ResolutionGroup } from '../../../../server/domain/resolution/resolution_client';
 import { hashEuid } from '../../../../common/domain/euid';
 import {
+  API_VERSIONS,
+  FF_ENABLE_ENTITY_STORE_V2,
   RESOLUTION_RULE_IDS,
   type EntityType,
   type GetEntityMaintainersResponse,
@@ -24,11 +27,26 @@ import {
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
-import { EntityResolutionRuleTypeName } from '../../../../server/domain/resolution/rules/saved_object/constants';
+import {
+  LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+} from '../../../../server/domain/saved_objects';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+
+const DEFAULT_LOG_EXTRACTION_CONFIG = {
+  docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  additionalIndexPatterns: [] as string[],
+  excludedIndexPatterns: [] as string[],
+};
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
  * log extraction (e.g. `entity.relationships.*` bags).
@@ -79,20 +97,39 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
 };
 
 /**
- * Removes rule enablement overrides so `defaultEnabled` is what the matcher sees.
- * Disable/enable routes write a saved object rather than deleting one, and
- * uninstall does not clean these up.
+ * Clears installed entity documents while keeping indices and aliases intact.
+ * This is used by suites that install once and isolate test files via document wipes.
  */
-export const clearResolutionRuleOverrides = async (kbnClient: KbnClient): Promise<void> => {
-  await kbnClient.savedObjects.clean({ types: [EntityResolutionRuleTypeName] });
+export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => {
+  await esClient.deleteByQuery({
+    index: LATEST_ALIAS,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { match_all: {} },
+    ignore_unavailable: true,
+  });
+
+  const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
+  const historyIndices = resolved.indices.map((i) => i.name);
+  if (historyIndices.length > 0) {
+    // History snapshots use timestamped concrete indices; deleting them entirely is
+    // simpler and safe because no stable write alias points to old snapshot indices.
+    await esClient.indices.delete(
+      { index: historyIndices, ignore_unavailable: true },
+      { ignore: [404] }
+    );
+  }
 };
 
 /**
- * API client shape required by forceUserExtraction.
+ * API client shape required by forceLogExtraction.
  * Use this instead of importing Scout's ApiClient type.
  */
 export interface ForceLogExtractionApiClient {
@@ -167,8 +204,8 @@ export const teardownLogsTestDataStream = async (
   options?: LogsTestDataStreamOptions
 ) => {
   const { index, template } = resolveLogsTestDataStream(options);
-  await esClient.indices.deleteDataStream({ name: index }).catch(() => {});
-  await esClient.indices.deleteIndexTemplate({ name: template }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: index }, { ignore: [404] });
+  await esClient.indices.deleteIndexTemplate({ name: template }, { ignore: [404] });
 };
 
 /** Sets up a plain (non-logs-*) data stream for query translation tests with ECS field mappings. */
@@ -180,13 +217,142 @@ export const setupQueryTranslationTestDataStream = async (esClient: EsClient) =>
     composed_of: ['ecs@mappings'],
     priority: 500,
   });
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
 };
 
 export const teardownQueryTranslationTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
     .catch(() => {});
+};
+
+export const installEntityStoreSuiteWithKbnClient = async ({
+  kbnClient,
+}: {
+  kbnClient: KbnClientFixture;
+}) => {
+  const publicHeaders = { 'elastic-api-version': API_VERSIONS.public.v1 };
+  const internalHeaders = { 'elastic-api-version': API_VERSIONS.internal.v2 };
+  await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+
+  const installResponse = await kbnClient.request({
+    method: 'POST',
+    path: ENTITY_STORE_ROUTES.public.INSTALL,
+    headers: publicHeaders,
+    body: {},
+  });
+  expect([200, 201]).toContain(installResponse.status);
+
+  const updateResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.UPDATE,
+    headers: publicHeaders,
+    body: { logExtraction: DEFAULT_LOG_EXTRACTION_CONFIG },
+  });
+  expect(updateResponse.status).toBe(200);
+
+  const enableEmailRuleResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+    headers: publicHeaders,
+  });
+  expect(enableEmailRuleResponse.status).toBe(200);
+  const enableSidRuleResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+      RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE
+    ),
+    headers: publicHeaders,
+  });
+  expect(enableSidRuleResponse.status).toBe(200);
+
+  const stopResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.STOP,
+    headers: publicHeaders,
+    body: {},
+  });
+  expect(stopResponse.status).toBe(200);
+
+  const initMaintainersResponse = await kbnClient.request({
+    method: 'POST',
+    path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+    headers: internalHeaders,
+    body: {},
+  });
+  expect(initMaintainersResponse.status).toBe(200);
+
+  const startAutomatedResolutionMaintainerResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+    headers: internalHeaders,
+    body: {},
+  });
+  expect(startAutomatedResolutionMaintainerResponse.status).toBe(200);
+};
+
+export const updateLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  logExtraction,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  logExtraction: Record<string, unknown>;
+}) => {
+  const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+    headers,
+    responseType: 'json',
+    body: { logExtraction },
+  });
+  expect(response.statusCode).toBe(200);
+  return response;
+};
+
+export const resetLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  overrides = {},
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  overrides?: Record<string, unknown>;
+}) =>
+  await updateLogExtractionConfig({
+    apiClient,
+    headers,
+    logExtraction: { ...DEFAULT_LOG_EXTRACTION_CONFIG, ...overrides },
+  });
+
+export const uninstallEntityStoreSuiteWithKbnClient = async ({
+  esClient,
+  kbnClient,
+}: {
+  esClient: EsClient;
+  kbnClient: KbnClientFixture;
+}) => {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+      body: {},
+      ignoreErrors: [404],
+    });
+  } finally {
+    try {
+      await clearEntityStoreIndices(esClient);
+    } finally {
+      await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+    }
+  }
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
@@ -349,6 +515,25 @@ export const waitForResolution = async (
   return matchedSource;
 };
 
+/** Asserts the resolution group headed by `targetId` holds exactly `aliasIds`, in any order. */
+export const assertResolutionGroup = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>,
+  { targetId, aliasIds }: { targetId: string; aliasIds: string[] }
+): Promise<void> => {
+  const response = await apiClient.get(
+    `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
+    { headers, responseType: 'json' }
+  );
+  expect(response.statusCode).toBe(200);
+  const group = response.body as ResolutionGroup;
+  expect(getNestedValue(group.target, 'entity.id')).toBe(targetId);
+  expect(group.group_size).toBe(aliasIds.length + 1);
+  expect(group.aliases.map((alias) => getNestedValue(alias, 'entity.id')).sort()).toStrictEqual(
+    [...aliasIds].sort()
+  );
+};
+
 /**
  * Polls the LATEST index and asserts that an entity does NOT gain a
  * `resolved_to` value within the given timeout (shorter default for negative tests).
@@ -493,12 +678,17 @@ export const forceLogExtraction = async (
   headers: Record<string, string>,
   entityType: EntityType,
   fromDateISO: string,
-  toDateISO: string
+  toDateISO: string,
+  /**
+   * Omitted lets the server pick the process this deployment runs. `all` runs priority and
+   * non-priority together and answers with one summary per process.
+   */
+  process?: 'single' | 'priority' | 'nonPriority' | 'all'
 ) =>
   await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
-    body: { fromDateISO, toDateISO },
+    body: { fromDateISO, toDateISO, ...(process ? { process } : {}) },
   });
 
 export const installAllEntityTypes = (

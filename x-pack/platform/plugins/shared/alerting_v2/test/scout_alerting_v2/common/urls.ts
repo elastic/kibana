@@ -88,11 +88,18 @@ export const getListActionPoliciesUrl = (
 export const getRuleTemplateUrl = (id: string) =>
   `${RULE_TEMPLATE_API_PATH}/${encodeURIComponent(id)}`;
 
+export const getInstallRuleTemplateUrl = (id: string) => `${getRuleTemplateUrl(id)}/_install`;
+
 export const getFindRuleTemplatesUrl = (
   query?: Record<string, string | number | string[] | undefined>
 ): string => {
   const qs = query ? toQueryString(query) : '';
   return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
+};
+
+export const getRuleTemplateTagsUrl = (search?: string): string => {
+  const path = `${RULE_TEMPLATE_API_PATH}/tags`;
+  return search === undefined ? path : `${path}?${toQueryString({ search })}`;
 };
 
 const getSeriesActionUrl = (groupHash: string, suffix: string) =>

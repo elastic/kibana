@@ -10,14 +10,14 @@
 const mockDiff = jest.fn();
 const mockRaw = jest.fn();
 
-jest.mock('simple-git', () =>
-  jest.fn().mockImplementation(() => ({
+jest.mock('simple-git', () => ({
+  simpleGit: jest.fn().mockImplementation(() => ({
     diff: mockDiff,
     raw: mockRaw,
-  }))
-);
+  })),
+}));
 
-import SimpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { getFilesForCommit } from './get_files_for_commit';
 
 describe('dev/precommit_hook/get_files_for_commit', () => {
@@ -30,7 +30,7 @@ describe('dev/precommit_hook/get_files_for_commit', () => {
 
     const files = await getFilesForCommit(['bb97506c7071', 'HEAD']);
 
-    expect(SimpleGit).toHaveBeenCalledTimes(1);
+    expect(simpleGit).toHaveBeenCalledTimes(1);
     expect(mockDiff).toHaveBeenCalledWith(['--name-status', 'bb97506c7071']);
     expect(files.map((file) => file.getRelativePath())).toEqual(['foo.ts']);
   });

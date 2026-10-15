@@ -39,6 +39,19 @@ export const registerCommentsRoutes = (router: IRouter, client: Promise<Comments
 
   router.get(
     {
+      path: `${COMMENTS_API_PATH}/{id}`,
+      security,
+      options: access,
+      validate: { params: idParamsSchema },
+    },
+    async (_context, request, response) => {
+      const comment = await (await client).get(request.params.id);
+      return comment ? response.ok({ body: comment }) : response.notFound();
+    }
+  );
+
+  router.get(
+    {
       path: `${COMMENTS_API_PATH}/{id}/snapshot`,
       security,
       options: access,

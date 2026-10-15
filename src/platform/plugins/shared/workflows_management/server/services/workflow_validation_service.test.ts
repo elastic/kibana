@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
@@ -45,7 +46,7 @@ const makeDeps = (
       getCoreStart: () =>
         ({
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            getBooleanValue$: jest.fn().mockReturnValue(of(false)),
           },
         } as any),
     },

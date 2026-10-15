@@ -54,8 +54,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * Data gaps — fields that cannot be faithfully mapped from a ProposalItem:
  *
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
- * - `watch_id`         fabricated `''`; no equivalent on a proposal.
- * - `watch_execution_id` fabricated `''`; no equivalent.
+ * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
  * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
  * - `entityIds`        from the conversation's Impact document; omitted when none.
@@ -81,21 +80,17 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
 
   const impactRank = IMPACT_RANK[proposal.impact];
   const confidenceRank = CONFIDENCE_RANK[proposal.confidence];
+  const conversationTitle = proposal.conversationTitle ?? UNTITLED_INVESTIGATION;
 
   return {
     id: proposal.id,
     template_id: 'investigation',
-    // A card is titled by the investigation it belongs to, never by its action: the
-    // action name is already the call to action, and repeating it as the title loses
-    // the only thing that says which incident this decision is about.
-    title: proposal.conversationTitle ?? UNTITLED_INVESTIGATION,
+    title: proposal.title,
     createdAt: proposal.createdAt,
     // Proposals have no modification timestamp; decidedAt is the closest event.
     updatedAt: proposal.decidedAt ?? proposal.createdAt,
-    // watch_id and watch_execution_id are required by the type but have no
-    // equivalent on a proposal — fabricated as empty strings.
-    watch_id: '',
-    watch_execution_id: '',
+    // Proposals do not carry worker execution IDs.
+    worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
     pendingProposalCount: proposal.decidedAt ? 0 : 1,
     recommendedAction: bucket,
@@ -109,10 +104,9 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    // The title, not the comment: the card renders this as plain text, so the
-    // comment's markdown came through as literal asterisks and headings.
-    summary: proposal.title,
-    primaryActionLabel: proposal.title,
+    summary: conversationTitle,
+    // Decided rows have no action button, and the compact row prints this after the title.
+    primaryActionLabel: isClosed ? conversationTitle : proposal.title,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.

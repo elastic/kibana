@@ -51,6 +51,7 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   ExportShareDerivatives,
@@ -80,6 +81,7 @@ import { untilPluginStartServicesReady, setKibanaServices } from './services/kib
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
@@ -112,6 +114,7 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -257,7 +260,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboards',
+      title: getDashboardPageTitle(),
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -354,7 +357,7 @@ export class DashboardPlugin
             .get$()
             .pipe(
               map((items) =>
-                items.slice(0, 5).map((item) => ({
+                items.map((item) => ({
                   id: item.id,
                   href: core.http.basePath.prepend(item.link),
                   label: item.label,

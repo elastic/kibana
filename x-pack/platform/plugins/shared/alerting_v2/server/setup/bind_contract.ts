@@ -16,10 +16,12 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { InternalRulesClient } from '../lib/internal_rules_client';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
@@ -58,6 +60,9 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         spaceId: SpaceId
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
+        return get(InternalRulesClient);
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest
