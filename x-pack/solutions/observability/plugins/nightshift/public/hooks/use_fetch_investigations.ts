@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
+import type { HttpFetchQuery } from '@kbn/core-http-browser';
 import type {
   InvestigationSeverityFilterValue,
   InvestigationSummary,
@@ -24,11 +25,22 @@ export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations']
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
 
+/**
+ * The list API has no in-progress filter (`in_progress` is computed per returned page), so the
+ * in-progress section reads this many of the most recently updated open investigations and keeps
+ * the ones in progress. Kept small because that section polls and every read resolves the
+ * workflow executions of each returned investigation.
+ */
+export const IN_PROGRESS_WINDOW_SIZE = 25;
+
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
 const SECTION_STALE_TIME_MS = 30_000;
 
 export interface FetchInvestigationsParams {
-  /** True: only investigations an agent is working on; false: the rest. */
+  /**
+   * True: only investigations an agent is working on, read from the most recently updated open
+   * investigations; false: the rest. Filtered on the client, since the list API cannot.
+   */
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
   query?: string;
@@ -77,6 +89,32 @@ export const getInvestigationsNextPageParam = ({
   return loaded < total && loaded + perPage <= MAX_SHARED_INVESTIGATIONS ? page + 1 : undefined;
 };
 
+const toSectionQuery = ({
+  inProgress,
+  severities,
+  query,
+  page,
+}: Pick<FetchInvestigationsParams, 'inProgress' | 'severities' | 'query'> & {
+  page: number;
+}): HttpFetchQuery => ({
+  ...(inProgress
+    ? {
+        sort_field: 'updated_at',
+        sort_order: 'desc',
+        page: 1,
+        per_page: IN_PROGRESS_WINDOW_SIZE,
+        status: ['open'],
+      }
+    : {
+        sort_field: 'created_at',
+        sort_order: 'desc',
+        page,
+        per_page: INVESTIGATIONS_PAGE_SIZE,
+        ...(severities?.length ? { severity: severities } : {}),
+      }),
+  ...(query ? { query } : {}),
+});
+
 /** One landing section's investigations from the shared investigations list API, page by page. */
 export const useFetchInvestigations = ({
   inProgress,
@@ -103,18 +141,16 @@ export const useFetchInvestigations = ({
     queryFn: async ({ pageParam, signal }) =>
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: {
-          sort_field: 'created_at',
-          sort_order: 'desc',
+        query: toSectionQuery({
+          inProgress,
+          severities,
+          query,
           page: typeof pageParam === 'number' ? pageParam : 1,
-          per_page: INVESTIGATIONS_PAGE_SIZE,
-          in_progress: inProgress,
-          ...(severities?.length ? { severity: severities } : {}),
-          ...(query ? { query } : {}),
-        },
+        }),
         signal,
       }),
-    getNextPageParam: getInvestigationsNextPageParam,
+    // The in-progress section is a single window, never paged.
+    getNextPageParam: inProgress ? () => undefined : getInvestigationsNextPageParam,
     refetchInterval,
     staleTime: SECTION_STALE_TIME_MS,
     refetchOnWindowFocus: true,
@@ -125,9 +161,22 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
+  const loadedInvestigations = useMemo(
+    () => flattenInvestigationPages(data?.pages ?? []),
+    [data?.pages]
+  );
 
-  const total = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  const investigations = useMemo(
+    () =>
+      loadedInvestigations.filter(({ in_progress: isInProgress }) => isInProgress === inProgress),
+    [loadedInvestigations, inProgress]
+  );
+
+  const serverTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  // The server total counts the investigations filtered out above; drop the loaded ones from it.
+  const total = inProgress
+    ? investigations.length
+    : serverTotal - (loadedInvestigations.length - investigations.length);
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();

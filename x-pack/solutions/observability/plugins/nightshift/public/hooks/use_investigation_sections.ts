@@ -107,7 +107,7 @@ export const useInvestigationSections = ({
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: { in_progress: false, ...(query ? { query } : {}) },
+        query: query ? { query } : {},
         signal,
       }),
     keepPreviousData: true,
