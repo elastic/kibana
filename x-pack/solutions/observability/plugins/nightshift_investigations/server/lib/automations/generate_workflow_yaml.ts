@@ -131,7 +131,7 @@ function generateAlertWorkflow(
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
-          subject_type: 'alert',
+          subject_type: alertRows.length > 0 ? 'alert' : 'manual',
           subject_id: alertRows.length > 0 ? '{{ trigger.alert.uuid }}' : automationId,
           title: alertRows.length > 0 ? '{{ trigger.rule.name }}' : automation.name,
           summary: automation.name,
