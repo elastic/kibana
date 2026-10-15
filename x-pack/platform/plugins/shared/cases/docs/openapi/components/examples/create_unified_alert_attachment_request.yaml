@@ -1,0 +1,14 @@
+summary: Adds an Elastic Security alert to a case.
+value:
+  {
+    "type": "security.alert",
+    "owner": "securitySolution",
+    "attachmentId": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42",
+    "metadata": {
+      "index": ".internal.alerts-security.alerts-default-000001",
+      "rule": {
+        "id": "94309390-b76c-11ee-b4d6-39d8a0fcbc1b",
+        "name": "Endpoint Security"
+      }
+    }
+  }

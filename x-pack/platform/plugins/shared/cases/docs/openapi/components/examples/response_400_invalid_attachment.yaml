@@ -1,0 +1,7 @@
+summary: The attachment payload is invalid.
+value:
+  {
+    "error": "Bad Request",
+    "message": "Invalid attachment payload for type 'comment': data.content: Comment content must be a non-empty string",
+    "statusCode": 400
+  }

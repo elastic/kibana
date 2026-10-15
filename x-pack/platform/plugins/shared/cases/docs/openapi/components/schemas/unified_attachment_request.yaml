@@ -1,0 +1,20 @@
+title: Create case attachment request
+description: >
+  The attachment to add to the case. Reference attachment types, such as alerts, require
+  `attachmentId`. Value attachment types, such as comments, require `data`. The `owner` must
+  match the owner of the case. Unknown properties are rejected.
+type: object
+required:
+  - owner
+  - type
+properties:
+  attachmentId:
+    $ref: 'unified_attachment_attachment_id.yaml'
+  data:
+    $ref: 'unified_attachment_data.yaml'
+  metadata:
+    $ref: 'unified_attachment_metadata.yaml'
+  owner:
+    $ref: 'owner.yaml'
+  type:
+    $ref: 'unified_attachment_type.yaml'

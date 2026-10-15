@@ -1,0 +1,27 @@
+title: Replace case attachment request
+description: >
+  The full replacement for the attachment. The `type` and `owner` must match the existing
+  attachment. Reference attachment types require `attachmentId` and value attachment types
+  require `data`. Unknown properties are rejected.
+type: object
+required:
+  - owner
+  - type
+  - version
+properties:
+  attachmentId:
+    $ref: 'unified_attachment_attachment_id.yaml'
+  data:
+    $ref: 'unified_attachment_data.yaml'
+  metadata:
+    $ref: 'unified_attachment_metadata.yaml'
+  owner:
+    $ref: 'owner.yaml'
+  type:
+    $ref: 'unified_attachment_type.yaml'
+  version:
+    type: string
+    description: >
+      The current version of the attachment. To retrieve it, use the get case attachment API.
+      If the attachment changed since you read it, the request fails with a 409 status code.
+    example: WzIwNDMxLDFd

@@ -1,0 +1,160 @@
+post:
+  summary: Create a case attachment
+  operationId: createCaseAttachmentDefaultSpace
+  description: >
+    Adds a single attachment, such as a comment or an alert, to a case.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+    NOTE: Each case can have a maximum of 1,000 alerts.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/case_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/unified_attachment_request.yaml'
+        examples:
+          createCommentAttachmentRequest:
+            $ref: '../components/examples/create_unified_comment_attachment_request.yaml'
+          createAlertAttachmentRequest:
+            $ref: '../components/examples/create_unified_alert_attachment_request.yaml'
+  responses:
+    '201':
+      description: Indicates a successful call. Returns the created attachment.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/unified_attachment_response.yaml'
+          examples:
+            createAttachmentResponse:
+              $ref: '../components/examples/get_unified_attachment_response.yaml'
+    '400':
+      description: >
+        The request body is invalid, the attachment type is not registered, the owner does not
+        match the case, or a case limit was exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_attachment.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the required privileges for the case owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The case was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
+
+get:
+  summary: Find case attachments
+  operationId: findCaseAttachmentsDefaultSpace
+  description: >
+    Returns a paginated list of attachments for a case, optionally filtered by type.
+    Attachments that you do not have privileges to read are not returned.
+    You must have `read` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/attachment_type_filter.yaml'
+    - $ref: '../components/parameters/page_index.yaml'
+    - $ref: '../components/parameters/page_size.yaml'
+    - $ref: '../components/parameters/sort_order.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/unified_attachments_find_response.yaml'
+          examples:
+            findAttachmentsResponse:
+              $ref: '../components/examples/find_unified_attachments_response.yaml'
+    '400':
+      description: A query parameter is invalid or exceeds its limit.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+
+delete:
+  summary: Delete all case attachments
+  operationId: deleteCaseAttachmentsDefaultSpace
+  description: >
+    Deletes all attachments from a case.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/case_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the required privileges for the case owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The case has no attachments.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'

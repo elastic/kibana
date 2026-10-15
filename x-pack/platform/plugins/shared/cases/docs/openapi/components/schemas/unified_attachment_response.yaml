@@ -1,0 +1,52 @@
+title: Case attachment response
+type: object
+required:
+  - created_at
+  - created_by
+  - id
+  - owner
+  - pushed_at
+  - pushed_by
+  - type
+  - updated_at
+  - updated_by
+  - version
+properties:
+  attachmentId:
+    $ref: 'unified_attachment_attachment_id.yaml'
+  created_at:
+    type: string
+    format: date-time
+    example: 2026-09-30T09:16:17.416Z
+  created_by:
+    $ref: 'case_response_created_by_properties.yaml'
+  data:
+    $ref: 'unified_attachment_data.yaml'
+  id:
+    type: string
+    description: The attachment identifier.
+    example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+  metadata:
+    $ref: 'unified_attachment_metadata.yaml'
+  owner:
+    $ref: 'owner.yaml'
+  pushed_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  pushed_by:
+    $ref: 'case_response_pushed_by_properties.yaml'
+  type:
+    $ref: 'unified_attachment_type.yaml'
+  updated_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  updated_by:
+    $ref: 'case_response_updated_by_properties.yaml'
+  version:
+    type: string
+    description: The attachment version. Use it to replace the attachment.
+    example: WzIwNDMxLDFd
