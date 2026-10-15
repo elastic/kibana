@@ -8,7 +8,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getNamedParams,
+  fixESQLQueryWithVariables,
+  parseTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { ESQLVariableType, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -94,9 +98,13 @@ export const registerGetSourceInfoRoute = (
         const dateFormatTZ = await core.uiSettings.client.get<string>(DATE_FORMAT_TZ_SETTING);
         const timeZone = getTimeZoneFromSettings(dateFormatTZ ?? 'UTC');
 
+        // `TBUCKET(<count>)` needs the time range as a filter on @timestamp to run, even with LIMIT 0.
+        // The query can tell the time field (TBUCKET, or the column used with ?_tstart / ?_tend).
+        const timeFilterField =
+          timeFieldName ?? (timeRange ? parseTimeFieldFromESQLQuery(fixedQuery) : undefined);
         const timeFilter =
-          timeRange && timeFieldName
-            ? getTime(undefined, timeRange, { fieldName: timeFieldName })
+          timeRange && timeFilterField
+            ? getTime(undefined, timeRange, { fieldName: timeFilterField })
             : undefined;
         const filter = timeFilter
           ? buildEsQuery(undefined, [], [timeFilter], esQueryConfigs)

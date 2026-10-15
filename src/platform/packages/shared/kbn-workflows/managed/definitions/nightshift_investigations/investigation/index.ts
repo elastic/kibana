@@ -15,7 +15,7 @@ export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investiga
 export const NIGHTSHIFT_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {

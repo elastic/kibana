@@ -23,6 +23,13 @@ import type { SandboxSecretsClient } from '../../sandbox_secrets';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
+/**
+ * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
+ * margin to derive the RPC deadline, so no command call can block an investigation for more than
+ * 5 minutes; a slow command returns "Command timed out." with its partial output.
+ */
+export const MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS = 290;
+
 const sandboxBashSchema = z.object({
   command: z
     .string()
@@ -38,7 +45,9 @@ const sandboxBashSchema = z.object({
   timeout_seconds: z
     .number()
     .optional()
-    .describe('Timeout in seconds; 0 or omitted uses the server default of 600s'),
+    .describe(
+      `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
+    ),
   connector_id: z
     .string()
     .optional()
@@ -187,7 +196,10 @@ export const createSandboxBashTool = ({
         command,
         directory: working_directory,
         env: mergedEnv,
-        timeout_seconds,
+        timeout_seconds:
+          timeout_seconds && timeout_seconds > 0
+            ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
+            : MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
       });
 
       const { exit_code, timed_out } = result;

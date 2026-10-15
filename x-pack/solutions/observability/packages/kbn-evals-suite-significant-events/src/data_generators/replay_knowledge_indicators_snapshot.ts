@@ -29,6 +29,17 @@ const KI_REPLAY_SCRIPT = `
   ctx._source['expires_at'] = now.plusMillis(params.ttl_millis).toString();
   // skip semantic search;
   ctx._source.remove('search_embedding');
+  ctx._source.remove('source.id');
+  ctx._source.source = ['id': params.source_id];
+  ctx._source.remove('kibana.space_ids');
+  ctx._source.kibana = ['space_ids': [params.space_id]];
+  def capturedView = ctx._source.remove('snapshot_source_view');
+  // \`rule_backed\` stays as captured: the discovery grounding step searches with \`rule_ids\` and
+  // \`rule_backed: true\`, and search hides unbacked queries by default, so forcing it to false
+  // would make every replayed query invisible to grounding.
+  if (capturedView != null && ctx._source.query != null && ctx._source.query.esql != null) {
+    ctx._source.query.esql = ctx._source.query.esql.replace(capturedView, params.source_view);
+  }
 `;
 
 export interface KnowledgeIndicatorReplayStats {
@@ -40,7 +51,8 @@ export async function replayKnowledgeIndicatorsSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  gcs: GcsConfig
+  gcs: GcsConfig,
+  target: { sourceId: string; spaceId: string; viewName: string }
 ): Promise<KnowledgeIndicatorReplayStats> {
   const basePath = resolveBasePath(gcs);
   const repository = createGcsRepository({ bucket: gcs.bucket, basePath });
@@ -79,7 +91,16 @@ export async function replayKnowledgeIndicatorsSnapshot(
         wait_for_completion: true,
         source: { index: tempIndex },
         dest: { index: KNOWLEDGE_INDICATORS_DATA_STREAM, op_type: 'create' },
-        script: { lang: 'painless', source: KI_REPLAY_SCRIPT, params: { ttl_millis: TTL_MILLIS } },
+        script: {
+          lang: 'painless',
+          source: KI_REPLAY_SCRIPT,
+          params: {
+            ttl_millis: TTL_MILLIS,
+            source_id: target.sourceId,
+            space_id: target.spaceId,
+            source_view: target.viewName,
+          },
+        },
       },
       { requestTimeout: REINDEX_REQUEST_TIMEOUT_MS }
     );

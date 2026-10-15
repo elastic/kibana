@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ai-anonymization-common",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-ui-settings-common",
+    "@kbn/es-errors",
+    "@kbn/i18n",
+    "@kbn/inference-common",
+    "@kbn/inference-langchain",
+    "@kbn/inference-tracing",
+    "@kbn/logging",
+    "@kbn/logging-mocks"
+  ]
+}

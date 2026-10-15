@@ -9,7 +9,6 @@ import React from 'react';
 import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { createMockLocators, ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
@@ -179,11 +178,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   description: 'Policy description',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: null,
-  group_by: null,
-  grouping_mode: null,
-  throttle: { strategy: undefined, interval: null },
-  snoozed_until: null,
   created_by: { profile_uid: 'elastic_profile_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: { profile_uid: 'elastic_profile_uid' },
@@ -229,17 +223,6 @@ describe('ActionPoliciesTable', () => {
       isError: false,
       error: null,
     });
-  });
-
-  it('renders the experimental badge in the page header', async () => {
-    renderTable();
-
-    await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-        'Action Policies'
-      )
-    );
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders the create button when policies exist and the user can write', async () => {

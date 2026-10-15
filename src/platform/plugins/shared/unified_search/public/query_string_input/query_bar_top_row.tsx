@@ -30,6 +30,8 @@ import {
   QuickSearchVisor,
   type ESQLEditorProps,
   type ESQLEditorApi,
+  type QuickSearchVisorProps,
+  type VisorNlResultHandler,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -214,6 +216,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**
+   * When false, hide the date picker's previous / next / zoom time-window buttons.
+   * Defaults to true.
+   */
+  showTimeWindowButtons?: boolean;
+  /**
    * Style of the submit button
    * `iconOnly` - use IconButton
    * `full` - use SuperUpdateButton
@@ -232,6 +239,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
+
+  /**
+   * Restorable state of the ES|QL quick search visor (KQL vs. natural language mode), persisted by the host.
+   */
+  visorInitialState?: QuickSearchVisorProps['initialState'];
+  onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
 
   /**
    * Optional configuration for ES|QL variables.
@@ -379,16 +392,12 @@ export const QueryBarTopRow = React.memo(
 
     const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
-    // Temporary, the empty page will change and we wont need to control it
-    useEffect(() => {
-      esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState]);
-
     const {
       showQueryInput = true,
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      showTimeWindowButtons = true,
       enableDateRangePicker = true,
     } = props;
 
@@ -576,10 +585,12 @@ export const QueryBarTopRow = React.memo(
 
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        // Accepting a pending AI proposal submits the resulting query itself.
+        if (esqlEditorRef.current?.acceptPendingReview()) return;
         if (persistedLog && queryRef.current && isOfQueryType(queryRef.current)) {
           persistedLog.add(queryRef.current.query);
         }
-        event.preventDefault();
         onSubmit(
           {
             query: queryRef.current,
@@ -706,16 +717,14 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
-    const visorNlResultHandlerRef = useRef<((generatedQuery: string) => void) | undefined>(
-      undefined
-    );
+    const visorNlResultHandlerRef = useRef<VisorNlResultHandler | undefined>(undefined);
     const [visorNlResultHandlerReady, setVisorNlResultHandlerReady] = useState(false);
-    const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
+    const onVisorNlResultReady = useCallback((fn: VisorNlResultHandler) => {
       visorNlResultHandlerRef.current = fn;
       setVisorNlResultHandlerReady(true);
     }, []);
-    const onVisorNlResult = useCallback((generatedQuery: string) => {
-      visorNlResultHandlerRef.current?.(generatedQuery);
+    const onVisorNlResult = useCallback<VisorNlResultHandler>((generatedQuery, review) => {
+      visorNlResultHandlerRef.current?.(generatedQuery, review);
     }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
@@ -977,7 +986,7 @@ export const QueryBarTopRow = React.memo(
             isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
             width={isMobile ? 'full' : 'auto'}
             compressed
-            showTimeWindowButtons
+            showTimeWindowButtons={showTimeWindowButtons}
             timeZoneDisplayProps={{
               timeZone: timeZoneName,
               customRender: timeZoneCustomRender,
@@ -1014,7 +1023,7 @@ export const QueryBarTopRow = React.memo(
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
-              showTimeWindowButtons
+              showTimeWindowButtons={showTimeWindowButtons}
               presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
               onPresetSave={dateRangePickerPresets.onPresetSave}
@@ -1406,6 +1415,7 @@ export const QueryBarTopRow = React.memo(
             enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            hasExternalVisor
           />
         )
       );
@@ -1453,6 +1463,8 @@ export const QueryBarTopRow = React.memo(
                     isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
                     disableSubmitAction={Boolean(props.disableSubmitAction)}
                     onKqlSubmitted={focusEsqlEditor}
+                    initialState={props.visorInitialState}
+                    onInitialStateChange={props.onVisorInitialStateChange}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
