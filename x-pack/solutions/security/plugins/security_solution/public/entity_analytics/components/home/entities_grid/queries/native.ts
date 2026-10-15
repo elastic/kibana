@@ -40,10 +40,13 @@ import {
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
 
 const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
+  // Native field sorted by a computed rank: level names sort alphabetically.
   if (args.sort.field === CRITICALITY_FIELD) return fetchSortedByCriticality(args, runQuery);
+  // Native field shown as a computed value on resolved rows: the group's score, else its own.
   if (args.rowsMode === 'resolved' && args.sort.field === RISK_SCORE_NORM_FIELD) {
     return fetchSortedByResolvedRiskScore(args, runQuery);
   }
+  // Native field sorted as stored.
   return runQuery(buildSortedByFieldQuery(args));
 };
 
@@ -67,7 +70,7 @@ const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => 
   return getMergedPage(args, withAliases, others);
 };
 
-/** Sorts before the row fields, so Lucene stops at the limit instead of sorting every entity. */
+/** The default fast sort: `SORT … LIMIT` before the row fields, so Lucene runs it. */
 const buildSortedByFieldQuery = (
   args: QueryArgs,
   sortField: string = args.sort.field,
@@ -79,7 +82,7 @@ const buildSortedByFieldQuery = (
   ...buildRowFieldsSteps(args),
 ];
 
-/** Sorting by a per-row score sorts everything (~13.6s at 10M), so each stored field sorts apart, then merge. */
+/** Two fast sorts, merged: rows with a group score sorted by it, the rest by their own score. */
 const fetchSortedByResolvedRiskScore = async (
   args: QueryArgs,
   runQuery: EsqlRunner
@@ -99,7 +102,7 @@ const fetchSortedByResolvedRiskScore = async (
   return getSortedPage(args, [...withResolvedScore, ...others]);
 };
 
-/** Sorting by a computed rank took ~60s at 10M; one filtered query per level stops early (~1.8s). */
+/** One fast query per level, in rank order, until the page is full. */
 const fetchSortedByCriticality = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
   const limit = args.pageSize + 1;
   // Unassigned (no known level) is the lowest.
@@ -128,21 +131,18 @@ const buildCriticalityLevelQuery = (
   ...buildRowFieldsSteps(args),
 ];
 
+/** Groups with aliases as rows: read from their alias docs, with the group values. */
 const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
   ...buildResolvedEntityRowSteps(args),
-  ...buildResolvedEntityRowsOutput(args),
-];
-
-/** The filters now test the resolved entity's values, which replaced the main entity's. */
-const buildResolvedEntityRowsOutput = (args: QueryArgs): string[] => [
   ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
   ...buildRowFieldsSteps(args),
+  // One extra row tells there are too many groups to merge.
   `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
 ];
 
-/** The value a row sorts by: criticality by its rank, from unassigned to extreme. */
+/** Criticality sorts by its rank, every other field by its value. */
 const getNativeSortValue = (row: Row, field: string): SortValue =>
   field === CRITICALITY_FIELD ? getCriticalitySortRank(row[field]) : getSortValue(row, field);
 
