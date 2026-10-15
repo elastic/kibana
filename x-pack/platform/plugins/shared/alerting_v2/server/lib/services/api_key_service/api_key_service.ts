@@ -15,6 +15,8 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
+import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { ApiKeyServiceSavedObjectsClientToken } from './tokens';
 
 export interface ApiKeyAttributes {
@@ -130,10 +132,9 @@ export class ApiKeyService implements ApiKeyServiceContract {
     }
 
     if (isUiamCredential(authorizationHeader)) {
-      throw Boom.badRequest(
-        `Cannot use a Cloud API key to create or update action policy "${name}". ` +
-          'Authenticate with a user session or a project-scoped Elasticsearch API key instead.'
-      );
+      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+      });
     }
 
     const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);

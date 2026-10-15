@@ -12,6 +12,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { ApiKeyService } from './api_key_service';
 
 const createMockInvalidationDeps = () => ({
@@ -204,7 +205,7 @@ describe('ApiKeyService', () => {
 
       await expect(service.create('My Policy')).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: expect.stringContaining('Cannot use a Cloud API key'),
+        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
       });
       expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
     });
