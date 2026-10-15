@@ -36,6 +36,7 @@ import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
+import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
@@ -63,6 +64,13 @@ export interface AlertingServerSetup {
    * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
+
+  /**
+   * Opts in to the `alerting.alertStatusChanged` workflow trigger. Until a plugin opts in,
+   * nothing is built or published for it. The caller owns its own enablement signal and
+   * answers per rule run or alert write through `isEnabled`.
+   */
+  enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
 }
 
 export interface AlertingServerStart {

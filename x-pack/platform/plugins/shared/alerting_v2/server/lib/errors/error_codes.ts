@@ -335,6 +335,12 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * An integration's `alerting.alertStatusChanged` opt-in check threw. It is
+   * treated as disabled and the remaining opt-ins are still asked; the rule
+   * run or alert write is unaffected.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**

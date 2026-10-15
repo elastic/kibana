@@ -8,6 +8,7 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AsyncDomainEventBus } from '../lib/events/event_bus';
 import { AlertingDomainEventBusToken } from '../lib/events/domain_events';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
 import { AlertActionWorkflowSubscriber } from '../lib/events/alert_action_workflow_subscriber/alert_action_workflow_subscriber';
 import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
@@ -47,4 +48,9 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
   bind(RuleExecutorEventPublisher).toSelf().inRequestScope();
   bind(RuleChangesHistorySubscriber).toSelf().inSingletonScope();
   bind(RuleExecutorWorkflowSubscriber).toSelf().inSingletonScope();
+
+  /**
+   * Opt-ins for the alert status changed trigger, filled through the setup contract.
+   */
+  bind(AlertStatusChangedOptIns).toSelf().inSingletonScope();
 };
