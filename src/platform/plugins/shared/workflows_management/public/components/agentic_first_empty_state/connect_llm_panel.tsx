@@ -38,7 +38,7 @@ export const ConnectLlmPanel = ({ onConnect, docsHref }: ConnectLlmPanelProps) =
           <h3>
             <FormattedMessage
               id="workflows.agenticFirst.connectLlm.title"
-              defaultMessage="Connect an LLM to build workflows with AI"
+              defaultMessage="Connect an LLM to build with AI"
             />
           </h3>
         </EuiTitle>
@@ -46,7 +46,7 @@ export const ConnectLlmPanel = ({ onConnect, docsHref }: ConnectLlmPanelProps) =
           <p>
             <FormattedMessage
               id="workflows.agenticFirst.connectLlm.description"
-              defaultMessage="Describe what you want to automate, and the AI Agent writes the workflow for you."
+              defaultMessage="Describe the automation. AI writes the workflow."
             />
           </p>
         </EuiText>
