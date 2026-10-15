@@ -271,6 +271,54 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 
+  it('shows the existing title and description to the Vega builder and keeps what it returns', async () => {
+    mockedBuildVegaConfig.mockResolvedValue({
+      spec: '{"mark":"line"}',
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+      esqlQuery: 'FROM logs-*',
+    });
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'make it a line chart',
+      renderer: 'vega',
+      existingPanel: {
+        id: 'panel-1',
+        type: VEGA_VIS_TYPE,
+        config: {
+          spec: '{"mark":"bar"}',
+          title: 'Requests by host',
+          description: 'Requests per host over time',
+          hide_border: true,
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingSpec: '{"mark":"bar"}',
+        existingTitle: 'Requests by host',
+        existingDescription: 'Requests per host over time',
+      })
+    );
+    expect(result).toEqual({
+      type: 'success',
+      panelContent: {
+        type: VEGA_VIS_TYPE,
+        config: {
+          spec: '{"mark":"line"}',
+          title: 'Requests by host',
+          description: 'Requests per host over time',
+        },
+      },
+    });
+  });
+
   it('reports unsupported Vega enhancement instead of ignoring the presentation mode', async () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 

@@ -69,8 +69,17 @@ const toEditResolutionRequest = (
   };
 
   if (panelInput.renderer === 'custom_content') {
-    const { query, esql } = panelInput;
-    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
+    const { query, esql, title, description } = panelInput;
+    return {
+      request: {
+        ...base,
+        renderer: panelInput.renderer,
+        nlQuery: query,
+        esql,
+        title,
+        description,
+      },
+    };
   }
   if (renderer === 'custom_content') {
     return {

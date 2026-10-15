@@ -31,11 +31,32 @@ const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
 };
 
+/** Shows the panel's current title and description on edit, so the model keeps them. */
+const formatExistingDisplayText = (
+  existingTitle: string | undefined,
+  existingDescription: string | undefined
+): string => {
+  if (!existingTitle && !existingDescription) {
+    return '';
+  }
+  const lines = [
+    ...(existingTitle ? [`- title: ${JSON.stringify(existingTitle)}`] : []),
+    ...(existingDescription ? [`- description: ${JSON.stringify(existingDescription)}`] : []),
+  ];
+  return `
+Existing panel display text:
+${lines.join('\n')}
+Return it unchanged in "title" and "description" unless the request asks to change it or the chart now shows something it no longer describes.
+`;
+};
+
 export const createAuthorVegaSpecPrompt = ({
   nlQuery,
   esqlQuery,
   columns,
   existingSpec,
+  existingTitle,
+  existingDescription,
   chartType,
   referenceExamples,
 }: {
@@ -43,6 +64,10 @@ export const createAuthorVegaSpecPrompt = ({
   esqlQuery: string;
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
+  /** Title of the panel being edited, if any. */
+  existingTitle?: string;
+  /** Description of the panel being edited, if any. */
+  existingDescription?: string;
   chartType?: SupportedChartType;
   /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
   referenceExamples?: string;
@@ -67,7 +92,7 @@ ${existingSpec}
 </existing_specification>
 `
     : ''
-}
+}${formatExistingDisplayText(existingTitle, existingDescription)}
 DATA SOURCE RULES:
 1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
 2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
@@ -100,6 +125,7 @@ TITLE RULES:
 - Always set "title" to a clear, self-explanatory visualization / dashboard panel title.
 - Prefer the panel title over redundant axis titles.
 - NEVER duplicate information across the panel title and axis titles.
+- Set "description" only when the request asks for one or the panel already has one; otherwise omit it.
 
 LAYOUT & STYLE RULES:
 - DO NOT set top-level "width" or "height"; the system makes the chart fill its container. Do NOT set fixed mark sizes (e.g. arc "outerRadius") that prevent the chart from filling its panel.
@@ -121,10 +147,11 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, "authoring_note" is one factual sentence describing the final chart and notable presentation choices without reasoning, and "spec" is the Vega-Lite specification:
+IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, "description" is the optional panel description shown to users, "authoring_note" is one factual sentence describing the final chart and notable presentation choices without reasoning, and "spec" is the Vega-Lite specification:
 \`\`\`json
 {
   "title": "Concise panel title",
+  "description": "Optional short panel description",
   "authoring_note": "One-sentence description of the authored chart",
   "spec": {
     // Vega-Lite v6 specification

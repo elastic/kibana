@@ -21,6 +21,10 @@ interface BuildVegaConfigParams {
   esql?: string;
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
+  /** Title of the panel being edited, kept unless the request changes it. */
+  existingTitle?: string;
+  /** Description of the panel being edited, kept unless the request changes it. */
+  existingDescription?: string;
   /**
    * Keep the ES|QL query recovered from `existingSpec` instead of regenerating
    * one. The edit then only re-authors the spec around it.
@@ -39,6 +43,8 @@ interface BuildVegaConfigResult {
   spec: string;
   /** Visualization / panel title from the authoring response schema. */
   title?: string;
+  /** Panel description from the authoring response schema. */
+  description?: string;
   /** One-sentence factual description of the chart and notable presentation choices. */
   authoringNote?: string;
   /** Canonical ES|QL query bound into the spec's data source. */
@@ -57,6 +63,8 @@ export const buildVegaConfig = async ({
   index,
   esql,
   existingSpec,
+  existingTitle,
+  existingDescription,
   preserveESQL = false,
   chartType,
   modelProvider,
@@ -109,6 +117,8 @@ export const buildVegaConfig = async ({
     nlQuery,
     index,
     existingSpec,
+    existingTitle,
+    existingDescription,
     existingEsql,
     chartType,
     // Preserving ES|QL reuses the recovered query as the trusted query,
@@ -118,10 +128,11 @@ export const buildVegaConfig = async ({
     actions: [],
     spec: null,
     title: null,
+    description: null,
     error: null,
   });
 
-  const { spec, title, authoringNote, error, esqlQuery } = finalState;
+  const { spec, title, description, authoringNote, error, esqlQuery } = finalState;
 
   if (!spec) {
     throw new Error(
@@ -132,6 +143,9 @@ export const buildVegaConfig = async ({
   return {
     spec,
     ...(typeof title === 'string' && title.trim() ? { title: title.trim() } : {}),
+    ...(typeof description === 'string' && description.trim()
+      ? { description: description.trim() }
+      : {}),
     ...(authoringNote ? { authoringNote } : {}),
     esqlQuery,
   };

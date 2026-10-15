@@ -78,6 +78,18 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
+    it('sets the title and description from the request', async () => {
+      const result = await resolve(
+        addRequest({ title: 'Service status', description: 'Latest status per service' })
+      );
+
+      expect(result).toMatchObject({
+        panelContent: {
+          config: { title: 'Service status', description: 'Latest status per service' },
+        },
+      });
+    });
+
     it('returns a failure attributed to the operation when template generation throws', async () => {
       resolveTemplate.mockRejectedValue(
         new Error('Generated template was rejected: contains a <script> tag.')
@@ -152,6 +164,69 @@ describe('createCustomContentPanelResolver', () => {
         expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: false })
       );
       expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
+    });
+
+    it('keeps the existing title and description when the edit does not set them', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            title: 'Service status',
+            description: 'Latest status per service',
+          }),
+          { nlQuery: 'Use a table' }
+        )
+      );
+
+      expect(result).toEqual({
+        type: 'success',
+        panelContent: {
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: {
+            template: '<div>resolved</div>',
+            title: 'Service status',
+            description: 'Latest status per service',
+          },
+        },
+      });
+    });
+
+    it('replaces or removes the title and description when the edit sets them', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            title: 'Service status',
+            description: 'Latest status per service',
+          }),
+          { nlQuery: 'Use a table', title: 'Services', description: null }
+        )
+      );
+
+      expect(result).toMatchObject({ panelContent: { config: { title: 'Services' } } });
+      expect(result).not.toHaveProperty('panelContent.config.description');
+    });
+
+    it('keeps the template and query without regenerating on a title-only edit', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*'],
+            title: 'Old title',
+          }),
+          { title: 'New title' }
+        )
+      );
+
+      expect(resolveTemplate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        type: 'success',
+        panelContent: {
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { esql_query: ['FROM logs-*'], template: '<div>old</div>', title: 'New title' },
+        },
+      });
     });
   });
 });

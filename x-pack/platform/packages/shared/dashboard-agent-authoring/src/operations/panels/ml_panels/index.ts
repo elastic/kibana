@@ -16,7 +16,7 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
-import { defineConfigPanelKind } from '../panel_kind';
+import { configPanelDisplayTextFields, defineConfigPanelKind } from '../panel_kind';
 
 /**
  * ML anomaly detection panel logic.
@@ -31,7 +31,7 @@ import { defineConfigPanelKind } from '../panel_kind';
  * Config shapes come from `@kbn/ml-server-schemas` so dashboard generation
  * accepts the same payload as ML chart attachments. Anomaly charts additionally
  * accept a numeric `severity_threshold` and map it to the embeddable's
- * open-ended `{ min }` range.
+ * open-ended `{ min }` range. Every config bounds the panel's `title` and `description`.
  */
 
 const panelIdSchema = z.string().max(256);
@@ -40,6 +40,7 @@ const panelIdSchema = z.string().max(256);
 
 export const anomalyChartsPanelConfigSchema = z.object({
   ...anomalyChartsEmbeddableStateSchema.shape,
+  ...configPanelDisplayTextFields,
   // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
   severity_threshold: z
     .union([
@@ -72,7 +73,7 @@ export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigI
   .extend({
     panelId: panelIdSchema.describe('Existing anomaly charts panel id to update.'),
     config: anomalyChartsPanelConfigSchema.describe(
-      'New anomaly charts configuration. Fully replaces the existing config.'
+      'New anomaly charts configuration. Fully replaces the existing config, including its title and description.'
     ),
   });
 
@@ -95,8 +96,12 @@ export const anomalyChartsPanelKind = defineConfigPanelKind({
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
-export const anomalySwimlaneOverallConfigSchema = anomalySwimLaneOverallSchema;
-export const anomalySwimlaneViewByConfigSchema = anomalySwimLaneViewBySchema;
+export const anomalySwimlaneOverallConfigSchema = anomalySwimLaneOverallSchema.extend(
+  configPanelDisplayTextFields
+);
+export const anomalySwimlaneViewByConfigSchema = anomalySwimLaneViewBySchema.extend(
+  configPanelDisplayTextFields
+);
 
 export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type', [
   anomalySwimlaneOverallConfigSchema,
@@ -117,7 +122,7 @@ export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSc
   .extend({
     panelId: panelIdSchema.describe('Existing anomaly swim lane panel id to update.'),
     config: anomalySwimlaneConfigSchema.describe(
-      'New anomaly swim lane configuration. Fully replaces the existing config.'
+      'New anomaly swim lane configuration. Fully replaces the existing config, including its title and description.'
     ),
   });
 
@@ -132,6 +137,7 @@ export const anomalySwimlanePanelKind = defineConfigPanelKind({
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
 
 export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateSchema.extend({
+  ...configPanelDisplayTextFields,
   selected_detector_index: z
     .number()
     .min(0)
@@ -155,7 +161,7 @@ export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigI
   .extend({
     panelId: panelIdSchema.describe('Existing single metric viewer panel id to update.'),
     config: singleMetricViewerConfigSchema.describe(
-      'New single metric viewer configuration. Fully replaces the existing config.'
+      'New single metric viewer configuration. Fully replaces the existing config, including its title and description.'
     ),
   });
 
