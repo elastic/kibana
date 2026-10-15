@@ -44,7 +44,10 @@ export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
   const query = useDeepEqualSelector(getGlobalQuery);
   const globalFilters = useDeepEqualSelector(getGlobalFilters);
 
-  const isLoading = cards.some(({ isLoading: isCardLoading }) => isCardLoading);
+  // Waits for the deltas too, so "What changed" never reads a delta that is still loading as missing.
+  const isLoading = cards.some(
+    ({ isLoading: isCardLoading, isDeltaLoading }) => isCardLoading || isDeltaLoading
+  );
 
   const scope = useMemo((): EntityAnalyticsScope => {
     const activeEntityFilters = Object.fromEntries(
