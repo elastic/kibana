@@ -204,8 +204,6 @@ module.exports = {
             { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
             { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
           ],
-          'import/no-default-export': 'error',
-
           // `no-unused-disable` is intentionally not enabled: oxlint (`node scripts/lint`) honors
           // `eslint-disable` directives for the rules it owns, which ESLint would report as unused
           // and strip on autofix.

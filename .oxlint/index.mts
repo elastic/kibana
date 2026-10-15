@@ -19,7 +19,7 @@
 
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-import { javascriptOverrides, javascriptRules } from './javascript.mts';
+import { javascriptRules } from './javascript.mts';
 import { typescriptRules } from './typescript.mts';
 import { jestRules } from './jest.mts';
 import { reactRules } from './react.mts';
@@ -32,6 +32,7 @@ import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { importPluginOverrides } from './import_plugin.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -77,7 +78,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
   },
   overrides: [
-    ...javascriptOverrides,
+    ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
     ...scoutOverrides,

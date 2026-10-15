@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DummyRuleMap, OxlintOverride } from 'oxlint';
+import type { DummyRuleMap } from 'oxlint';
 
 export const javascriptRules: DummyRuleMap = {
   'dot-notation': ['error', { allowKeywords: true }],
@@ -19,14 +19,6 @@ export const javascriptRules: DummyRuleMap = {
   // '@eslint-community/eslint-comments/no-unused-disable': 'error',
   // '@eslint-community/eslint-comments/no-unused-enable': 'error',
   'guard-for-in': 'error',
-  // 'import/default': 'error',
-  // 'import/export': 'error',
-  // 'import/named': 'error',
-  // 'import/namespace': 'error',
-  // 'import/no-default-export': 'error',
-  // 'import/no-dynamic-require': 'error',
-  // 'import/no-named-as-default': 'error',
-  // 'import/no-named-as-default-member': 'error',
   // 'import/order': [
   //   'error',
   //   {
@@ -104,48 +96,3 @@ export const javascriptRules: DummyRuleMap = {
   // 'valid-typeof': 'error',
   // 'yoda': 'off',
 };
-
-/** `import/no-duplicates` keeps the file scope it had in ESLint: all JS plus the TS packages that opted in. */
-export const javascriptOverrides: OxlintOverride[] = [
-  {
-    files: [
-      '**/*.{js,mjs}',
-      'x-pack/platform/plugins/shared/automatic_import/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-      'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: {
-      'import/no-duplicates': 'error',
-    },
-  },
-];
