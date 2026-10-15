@@ -261,6 +261,58 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        async function load() {
+          let timer;
+          const timeout = new Promise((resolve) => {
+            timer = setTimeout(() => resolve(true), 5000);
+          });
+          function helper() {
+            if (flag) {
+              const timer = unrelated;
+            }
+            clearTimeout(timer);
+          }
+          try {
+            return await Promise.race([work(), timeout]);
+          } finally {
+            helper();
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        async function load() {
+          const state = {};
+          try {
+            return await Promise.race([
+              work(),
+              new Promise((resolve) => {
+                state.timer = setTimeout(() => resolve(true), 5000);
+              }),
+            ]);
+          } finally {
+            clearTimeout(state.timer);
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((resolve) => {
+              const onTimeout = () => track('still waiting');
+              setTimeout(onTimeout, 5000);
+              abort.addEventListener('abort', () => resolve());
+            }),
+          ]);
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -506,6 +558,95 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
                 clearTimeout(timer);
                 resolve(true);
               }, 5000);
+            }),
+          ]);
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timer;
+          const timeout = new Promise((resolve) => {
+            timer = setTimeout(() => resolve(true), 5000);
+          });
+          function helper() {
+            if (flag) {
+              const timer = unrelated;
+              clearTimeout(timer);
+            }
+          }
+          try {
+            return await Promise.race([work(), timeout]);
+          } finally {
+            helper();
+          }
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          const state = {};
+          try {
+            return await Promise.race([
+              work(),
+              new Promise((resolve) => {
+                state.timer = setTimeout(() => resolve(true), 5000);
+              }),
+            ]);
+          } finally {
+            function helper(state) {
+              clearTimeout(state.timer);
+            }
+          }
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          try {
+            return await Promise.race([
+              work(),
+              new Promise((resolve) => {
+                this.timer = setTimeout(() => resolve(true), 5000);
+              }),
+            ]);
+          } finally {
+            function helper() {
+              clearTimeout(this.timer);
+            }
+          }
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          const timeout = new Promise((_, reject) => {
+            const onTimeout = () => reject(new Error('timed out'));
+            setTimeout(onTimeout, 1000);
+          });
+          return Promise.race([work(), timeout]);
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((_, reject) => {
+              setTimeout(onTimeout, 1000);
+              function onTimeout() {
+                reject(new Error('timed out'));
+              }
             }),
           ]);
         }

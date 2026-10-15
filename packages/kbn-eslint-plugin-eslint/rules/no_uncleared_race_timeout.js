@@ -234,44 +234,114 @@ function collectPatternNames(pattern, names) {
   }
 }
 
+const LEXICAL_SCOPE_TYPES = new Set([
+  'Program',
+  'BlockStatement',
+  'StaticBlock',
+  'ForStatement',
+  'ForInStatement',
+  'ForOfStatement',
+  'SwitchStatement',
+  'CatchClause',
+  ...FUNCTION_TYPES,
+]);
+
 /**
- * Bindings in `node` and nested blocks, but not inside nested functions.
- * A nested function's own name is a binding of this scope.
+ * Nearest block, loop, catch, function, or program that contains `node`.
  *
  * @param {any} node
+ * @returns {any | null}
+ */
+function parentLexicalScope(node) {
+  let current = node.parent;
+  while (current) {
+    if (LEXICAL_SCOPE_TYPES.has(current.type)) {
+      return current;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+/**
+ * @param {any} statement
  * @param {Set<string>} names
  */
-function collectDirectBindings(node, names) {
-  if (!node || typeof node.type !== 'string') {
+function collectStatementBindings(statement, names) {
+  if (!statement) {
     return;
   }
-  if (FUNCTION_TYPES.has(node.type)) {
-    if (node.id && node.id.type === 'Identifier') {
-      names.add(node.id.name);
+  if (statement.type === 'VariableDeclaration' && statement.kind !== 'var') {
+    for (const declarator of statement.declarations) {
+      collectPatternNames(declarator.id, names);
     }
     return;
   }
-  if (node.type === 'ClassDeclaration' || node.type === 'ClassExpression') {
-    if (node.id && node.id.type === 'Identifier') {
-      names.add(node.id.name);
-    }
+  if (
+    (statement.type === 'FunctionDeclaration' || statement.type === 'ClassDeclaration') &&
+    statement.id &&
+    statement.id.type === 'Identifier'
+  ) {
+    names.add(statement.id.name);
     return;
   }
-  if (node.type === 'VariableDeclarator') {
-    collectPatternNames(node.id, names);
-  }
-  for (const child of childNodes(node)) {
-    collectDirectBindings(child, names);
+  if (
+    statement.type === 'ExportNamedDeclaration' ||
+    statement.type === 'ExportDefaultDeclaration'
+  ) {
+    collectStatementBindings(statement.declaration, names);
   }
 }
 
 /**
- * Names declared directly in `scope`, ignoring nested functions.
+ * `var` bindings of this function. Nested functions keep their own.
+ *
+ * @param {any} node
+ * @param {Set<string>} names
+ */
+function collectVarBindings(node, names) {
+  if (!node || typeof node.type !== 'string' || FUNCTION_TYPES.has(node.type)) {
+    return;
+  }
+  if (node.type === 'VariableDeclaration' && node.kind === 'var') {
+    for (const declarator of node.declarations) {
+      collectPatternNames(declarator.id, names);
+    }
+  }
+  for (const child of childNodes(node)) {
+    if (FUNCTION_TYPES.has(child.type)) {
+      continue;
+    }
+    collectVarBindings(child, names);
+  }
+}
+
+/**
+ * @param {any} scope
+ * @returns {any[]}
+ */
+function blockStatements(scope) {
+  if (scope.type === 'SwitchStatement') {
+    /** @type {any[]} */
+    const statements = [];
+    for (const switchCase of scope.cases || []) {
+      statements.push(...(switchCase.consequent || []));
+    }
+    return statements;
+  }
+  if (scope.type === 'BlockStatement' || scope.type === 'Program' || scope.type === 'StaticBlock') {
+    return scope.body || [];
+  }
+  return [];
+}
+
+/**
+ * Names declared by this scope. A `const` inside a nested block stays there.
  *
  * @param {any} scope
  * @returns {Set<string>}
  */
-function bindingNames(scope) {
+function bindingsOf(scope) {
   const cached = bindingNameCache.get(scope);
   if (cached) {
     return cached;
@@ -279,13 +349,32 @@ function bindingNames(scope) {
 
   /** @type {Set<string>} */
   const names = new Set();
-  for (const param of scope.params || []) {
-    collectPatternNames(param, names);
+  if (FUNCTION_TYPES.has(scope.type)) {
+    for (const param of scope.params || []) {
+      collectPatternNames(param, names);
+    }
+    if (scope.type !== 'FunctionDeclaration' && scope.id && scope.id.type === 'Identifier') {
+      names.add(scope.id.name);
+    }
+    if (scope.body) {
+      collectVarBindings(scope.body, names);
+    }
   }
-
-  const body = scope.type === 'Program' ? scope : scope.body;
-  if (body) {
-    collectDirectBindings(body, names);
+  if (scope.type === 'CatchClause' && scope.param) {
+    collectPatternNames(scope.param, names);
+  }
+  const loopDeclaration = scope.left || scope.init;
+  if (
+    loopDeclaration &&
+    loopDeclaration.type === 'VariableDeclaration' &&
+    loopDeclaration.kind !== 'var'
+  ) {
+    for (const declarator of loopDeclaration.declarations) {
+      collectPatternNames(declarator.id, names);
+    }
+  }
+  for (const statement of blockStatements(scope)) {
+    collectStatementBindings(statement, names);
   }
 
   bindingNameCache.set(scope, names);
@@ -293,7 +382,7 @@ function bindingNames(scope) {
 }
 
 /**
- * Function or program that declares `identifier`, when one does.
+ * Block or function that declares `identifier`, when one does.
  *
  * @param {any} identifier
  * @returns {any | null}
@@ -301,14 +390,14 @@ function bindingNames(scope) {
 function resolveBindingScope(identifier) {
   /** @type {Set<any>} */
   const seen = new Set();
-  let scope = enclosingScope(identifier);
+  let scope = parentLexicalScope(identifier);
   while (scope && !seen.has(scope)) {
     seen.add(scope);
-    if (bindingNames(scope).has(identifier.name)) {
+    if (bindingsOf(scope).has(identifier.name)) {
       return scope;
     }
-    const parent = enclosingScope(scope);
-    if (parent === scope) {
+    const parent = parentLexicalScope(scope);
+    if (!parent || parent === scope) {
       break;
     }
     scope = parent;
@@ -338,15 +427,42 @@ function memberKey(node) {
     return;
   }
   if (node.object.type === 'ThisExpression') {
-    return `this.${property}`;
+    return `this:${scopeId(thisOwner(node))}.${property}`;
   }
   if (node.object.type === 'Identifier') {
-    return `${node.object.name}.${property}`;
+    return `${identifierKey(node.object)}.${property}`;
   }
   const objectKey = memberKey(node.object);
   if (objectKey) {
     return `${objectKey}.${property}`;
   }
+}
+
+/**
+ * @param {any} node
+ */
+/**
+ * Arrow functions use the `this` of the nearest function that has its own.
+ *
+ * @param {any} node
+ * @returns {any}
+ */
+function thisOwner(node) {
+  /** @type {Set<any>} */
+  const seen = new Set();
+  let scope = enclosingScope(node);
+  while (scope && !seen.has(scope)) {
+    seen.add(scope);
+    if (scope.type !== 'ArrowFunctionExpression') {
+      return scope;
+    }
+    const parent = enclosingScope(scope);
+    if (!parent || parent === scope) {
+      return scope;
+    }
+    scope = parent;
+  }
+  return scope;
 }
 
 /**
@@ -408,10 +524,10 @@ function assignedTimerTarget(ancestors) {
  * Promise constructors stored on the scope that declares the binding.
  *
  * @param {any} scope
- * @returns {Map<any, Map<string, Array<{ init: any, at: number }>>>}
+ * @returns {Map<any, Map<string, Array<{ value: any, at: number }>>>}
  */
 function promiseInitsByScope(scope) {
-  /** @type {Map<any, Map<string, Array<{ init: any, at: number }>>>} */
+  /** @type {Map<any, Map<string, Array<{ value: any, at: number }>>>} */
   const byScope = new Map();
 
   /**
@@ -433,7 +549,7 @@ function promiseInitsByScope(scope) {
       versions = [];
       inits.set(identifier.name, versions);
     }
-    versions.push({ init, at: nodeStart(identifier) });
+    versions.push({ value: init, at: nodeStart(identifier) });
   }
 
   walk(
@@ -477,23 +593,23 @@ function nodeStart(node) {
 }
 
 /**
- * The promise constructor this identifier refers to at this point in the function.
+ * The value this identifier refers to at this point in the function.
  * A later assignment to the same binding is not visible yet.
  *
  * @param {any} identifier
- * @param {Map<any, Map<string, Array<{ init: any, at: number }>>>} initsByScope
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} valuesByScope
  * @returns {any}
  */
-function lookupPromise(identifier, initsByScope) {
+function lookupValue(identifier, valuesByScope) {
   const useAt = nodeStart(identifier);
   /** @type {Set<any>} */
   const seen = new Set();
-  let scope = enclosingScope(identifier);
+  let scope = parentLexicalScope(identifier);
   while (scope && !seen.has(scope)) {
     seen.add(scope);
-    const versions = initsByScope.get(scope) && initsByScope.get(scope).get(identifier.name);
+    const versions = valuesByScope.get(scope) && valuesByScope.get(scope).get(identifier.name);
     if (versions) {
-      /** @type {{ init: any, at: number } | undefined} */
+      /** @type {{ value: any, at: number } | undefined} */
       let chosen;
       for (const version of versions) {
         if (version.at <= useAt) {
@@ -501,18 +617,27 @@ function lookupPromise(identifier, initsByScope) {
         }
       }
       if (chosen) {
-        return chosen.init;
+        return chosen.value;
       }
     }
-    if (bindingNames(scope).has(identifier.name)) {
+    if (bindingsOf(scope).has(identifier.name)) {
       return;
     }
-    const parent = enclosingScope(scope);
-    if (parent === scope) {
+    const parent = parentLexicalScope(scope);
+    if (!parent || parent === scope) {
       break;
     }
     scope = parent;
   }
+}
+
+/**
+ * @param {any} identifier
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} initsByScope
+ * @returns {any}
+ */
+function lookupPromise(identifier, initsByScope) {
+  return lookupValue(identifier, initsByScope);
 }
 
 /**
@@ -604,37 +729,116 @@ function settlerKeys(executor) {
 }
 
 /**
- * True when the timer callback calls the executor's resolve or reject.
+ * Local functions a callback identifier may refer to.
+ * Function declarations are hoisted within their block.
  *
- * @param {any} call
- * @param {Set<string>} settlers
- * @returns {boolean}
+ * @param {any} scope
+ * @returns {Map<any, Map<string, Array<{ value: any, at: number }>>>}
  */
-function callbackSettles(call, settlers) {
-  if (settlers.size === 0) {
-    return false;
-  }
-  const callback = unwrap(call.arguments && call.arguments[0]);
-  if (!callback) {
-    return false;
-  }
-  if (callback.type === 'Identifier') {
-    return settlers.has(identifierKey(callback));
-  }
-  if (!FUNCTION_TYPES.has(callback.type)) {
-    return false;
+function functionValuesByScope(scope) {
+  /** @type {Map<any, Map<string, Array<{ value: any, at: number }>>>} */
+  const byScope = new Map();
+
+  /**
+   * @param {any} identifier
+   * @param {any} fn
+   * @param {number} at
+   */
+  function add(identifier, fn, at) {
+    const bindingScope = resolveBindingScope(identifier);
+    if (!bindingScope) {
+      return;
+    }
+    let values = byScope.get(bindingScope);
+    if (!values) {
+      values = new Map();
+      byScope.set(bindingScope, values);
+    }
+    let versions = values.get(identifier.name);
+    if (!versions) {
+      versions = [];
+      values.set(identifier.name, versions);
+    }
+    versions.push({ value: fn, at });
   }
 
-  let settles = false;
-  const body = callback.body || callback;
   walk(
-    body,
+    scope,
+    (node) => {
+      if (node.type === 'FunctionDeclaration' && node.id && node.id.type === 'Identifier') {
+        add(node.id, node, -1);
+      }
+      if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init) {
+        const init = unwrap(node.init);
+        if (init && FUNCTION_TYPES.has(init.type)) {
+          add(node.id, init, nodeStart(node.id));
+        }
+      }
+      if (
+        node.type === 'AssignmentExpression' &&
+        node.operator === '=' &&
+        node.left.type === 'Identifier'
+      ) {
+        const right = unwrap(node.right);
+        if (right && FUNCTION_TYPES.has(right.type)) {
+          add(node.left, right, nodeStart(node.left));
+        }
+      }
+    },
+    true
+  );
+  return byScope;
+}
+
+/**
+ * True when `node` calls the executor's resolve or reject, following local functions.
+ *
+ * @param {any} node
+ * @param {Set<string>} settlers
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @param {Set<any>} seen
+ * @returns {boolean}
+ */
+function nodeSettles(node, settlers, functions, seen) {
+  if (!node || seen.has(node)) {
+    return false;
+  }
+  if (node.type === 'Identifier') {
+    if (settlers.has(identifierKey(node))) {
+      return true;
+    }
+    const fn = lookupValue(node, functions);
+    if (!fn || seen.has(fn)) {
+      return false;
+    }
+    seen.add(fn);
+    return bodySettles(fn, settlers, functions, seen);
+  }
+  if (FUNCTION_TYPES.has(node.type)) {
+    seen.add(node);
+    return bodySettles(node, settlers, functions, seen);
+  }
+  return false;
+}
+
+/**
+ * @param {any} fn
+ * @param {Set<string>} settlers
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @param {Set<any>} seen
+ * @returns {boolean}
+ */
+function bodySettles(fn, settlers, functions, seen) {
+  let settles = false;
+  walk(
+    fn.body || fn,
     (node) => {
       if (
+        !settles &&
         node.type === 'CallExpression' &&
         node.callee &&
         node.callee.type === 'Identifier' &&
-        settlers.has(identifierKey(node.callee))
+        nodeSettles(node.callee, settlers, functions, seen)
       ) {
         settles = true;
       }
@@ -645,10 +849,27 @@ function callbackSettles(call, settlers) {
 }
 
 /**
+ * True when the timer callback calls the executor's resolve or reject.
+ *
+ * @param {any} call
+ * @param {Set<string>} settlers
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @returns {boolean}
+ */
+function callbackSettles(call, settlers, functions) {
+  if (settlers.size === 0) {
+    return false;
+  }
+  const callback = unwrap(call.arguments && call.arguments[0]);
+  return nodeSettles(callback, settlers, functions, new Set());
+}
+
+/**
  * @param {any} executor
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
  * @returns {any[]}
  */
-function deadlineTimers(executor) {
+function deadlineTimers(executor, functions) {
   /** @type {any[]} */
   const timers = [];
   const ancestors = [];
@@ -659,7 +880,7 @@ function deadlineTimers(executor) {
    */
   function visit(node) {
     ancestors.push(node);
-    if (isSetTimeoutCall(node) && callbackSettles(node, settlers)) {
+    if (isSetTimeoutCall(node) && callbackSettles(node, settlers, functions)) {
       timers.push({ node, target: assignedTimerTarget(ancestors.slice(0, -1)) });
     }
     for (const child of childNodes(node)) {
@@ -682,7 +903,7 @@ function deadlineTimers(executor) {
 
 /**
  * @param {any} race
- * @param {Map<any, Map<string, Array<{ init: any, at: number }>>>} initsByScope
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} initsByScope
  * @returns {any[]}
  */
 function raceExecutors(race, initsByScope) {
@@ -733,9 +954,10 @@ module.exports = {
             }
             const scope = enclosingScope(node);
             const inits = promiseInitsByScope(scope);
+            const functions = functionValuesByScope(scope);
             const cleared = clearedTimerSites(scope);
             for (const executor of raceExecutors(node, inits)) {
-              for (const timer of deadlineTimers(executor)) {
+              for (const timer of deadlineTimers(executor, functions)) {
                 if (isTimerCleared(timer, cleared)) {
                   continue;
                 }
