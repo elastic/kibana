@@ -15,6 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiCheckbox,
   EuiContextMenu,
   EuiIcon,
   EuiIconTip,
@@ -38,6 +39,7 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
+import { getSelectionApi } from './get_selection_api';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -96,13 +98,23 @@ export const PresentationPanelHoverActions = ({
   actionPredicate,
   className,
   viewMode,
-}: PresentationPanelHoverActionsProps) => {
+  selectedPanelIds,
+}: PresentationPanelHoverActionsProps & {
+  /**
+   * Owned by the wrapper (which also toggles the `--selectionMode` anchor class) so that the class
+   * and the rendered actions change in the same render; separate subscriptions would commit in
+   * separate frames and briefly show every action while leaving selection mode.
+   */
+  selectedPanelIds: string[];
+}) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
+
+  const selectionApi = useMemo(() => getSelectionApi(api), [api]);
 
   const [
     title,
@@ -339,9 +351,54 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
+  const isSelected = Boolean(api?.uuid && selectedPanelIds.includes(api.uuid));
+  const canSelect = Boolean(selectionApi && api?.uuid && viewMode === 'edit');
+  // While any panel is selected, every panel only offers the select checkbox
+  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
+  // The checkbox only exists in selection mode and lives in the panel's top right corner (see
+  // `.embPanel__selectPanel` styles) rather than in the floating hover bar, which is gone in that mode
+  const selectPanelLabel = isSelected
+    ? i18n.translate('embeddableApi.deselectPanel', {
+        defaultMessage: 'Deselect panel',
+      })
+    : i18n.translate('embeddableApi.selectPanel', {
+        defaultMessage: 'Select panel',
+      });
+  const selectCheckbox =
+    selectionApi && api?.uuid && isSelectionMode ? (
+      <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
+        <EuiToolTip content={selectPanelLabel} disableScreenReaderOutput>
+          <EuiCheckbox
+            id={`embeddablePanelSelect-${api.uuid}`}
+            className="embPanel--selectPanel"
+            checked={isSelected}
+            aria-label={selectPanelLabel}
+            data-test-subj="embeddablePanelSelectToggle"
+            onChange={() => selectionApi.togglePanelSelection(api.uuid)}
+          />
+        </EuiToolTip>
+      </div>
+    ) : null;
+
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
+
+  if (isSelectionMode) {
+    return (
+      <>
+        {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
+        <span
+          css={css`
+            display: none;
+          `}
+        >
+          {dragHandle}
+        </span>
+        {selectCheckbox}
+      </>
+    );
+  }
 
   return (
     <>

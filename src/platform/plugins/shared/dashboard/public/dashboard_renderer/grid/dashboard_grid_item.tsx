@@ -63,6 +63,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       dashboardContainerRef,
       relatedPanelsIndicatorId,
       blurredPanelIds,
+      selectedPanelIds,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -73,7 +74,8 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
       dashboardApi.relatedPanelsIndicatorId$,
-      dashboardApi.blurredPanelIds$
+      dashboardApi.blurredPanelIds$,
+      dashboardApi.selectedPanelIds$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -87,6 +89,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     const focusedForEdit = focusedPanelId !== undefined && focusedPanelId === id;
 
     const blurPanel = blurredPanelIds.includes(id);
+    const isPanelSelected = selectedPanelIds.includes(id);
 
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
@@ -95,6 +98,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
       'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
+      'dshDashboardGrid__item--panelSelected': isPanelSelected,
       'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
@@ -211,6 +215,10 @@ const dashboardGridItemStyles = {
         // Call out focused panels with a simple border
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
+        // Call out panels selected for bulk actions with a primary border
+        '&.dshDashboardGrid__item--panelSelected .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.primary}`,
         },
         // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
         '&.dshDashboardGrid__item--selected': {

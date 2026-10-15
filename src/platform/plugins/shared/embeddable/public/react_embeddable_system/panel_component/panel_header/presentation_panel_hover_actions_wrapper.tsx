@@ -18,6 +18,7 @@ import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
+import { getSelectionApi } from './get_selection_api';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const customActionsStyles = css({
@@ -35,14 +36,19 @@ const customActionsStyles = css({
 export const PresentationPanelHoverActionsWrapper = (
   props: PropsWithChildren<PresentationPanelHoverActionsProps>
 ) => {
-  const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions] =
+  const selectionApi = getSelectionApi(props.api);
+  const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions, selectedPanelIds] =
     useBatchedPublishingSubjects(
       props.api.defaultTitle$ ?? new BehaviorSubject(undefined),
       props.api.title$ ?? new BehaviorSubject(undefined),
       props.api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
-      props.api.overrideHoverActions$ ?? new BehaviorSubject(false)
+      props.api.overrideHoverActions$ ?? new BehaviorSubject(false),
+      selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
+  const canSelect = Boolean(selectionApi) && props.viewMode === 'edit';
+  // While any panel is selected, every panel keeps its select checkbox visible
+  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
 
   let OverriddenHoverActionsComponent = null;
   if (canOverrideHoverActions(props.api) && overrideHoverActions) {
@@ -55,6 +61,7 @@ export const PresentationPanelHoverActionsWrapper = (
         'embPanel__hoverActionsAnchor--lockHoverActions':
           hasLockedHoverActions || Boolean(OverriddenHoverActionsComponent),
         'embPanel__hoverActionsAnchor--editMode': props.viewMode === 'edit',
+        'embPanel__hoverActionsAnchor--selectionMode': isSelectionMode,
       })}
       data-test-embeddable-id={props.api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
@@ -69,7 +76,9 @@ export const PresentationPanelHoverActionsWrapper = (
         </div>
       )}
       {props.children}
-      {!OverriddenHoverActionsComponent && <PresentationPanelHoverActions {...props} />}
+      {!OverriddenHoverActionsComponent && (
+        <PresentationPanelHoverActions {...props} selectedPanelIds={selectedPanelIds} />
+      )}
     </div>
   );
 };

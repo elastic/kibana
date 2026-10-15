@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getScrollContainer, getScrollPosition } from '@kbn/core-chrome-layout-utils';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
@@ -29,7 +30,10 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { SelectionMarquee } from './selection_marquee';
 import { useLayoutStyles } from './use_layout_styles';
+import { usePanelSelectionGestures } from './use_panel_selection_gestures';
+import { useSelectionModifierHeld } from './use_selection_modifier_held';
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
@@ -40,13 +44,14 @@ export const DashboardGrid = () => {
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
+  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef, selectedPanelIds] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.gridLayout$,
-      dashboardInternalApi.dashboardContainerRef$
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardApi.selectedPanelIds$
     );
 
   useEffect(() => {
@@ -55,7 +60,31 @@ export const DashboardGrid = () => {
     if (newTopOffset !== topOffset) setTopOffset(newTopOffset);
   }, [dashboardContainerRef, topOffset]);
 
+  /**
+   * The hover actions of the top row are raised above the sticky top nav so they are not cut off
+   * when the page is at the top; once the page scrolls, the top row slides under the nav and its
+   * hover actions must stay below it instead of floating over the query bar and controls.
+   */
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const scrollContainer = getScrollContainer();
+    const eventTarget: EventTarget =
+      scrollContainer === document.documentElement ? window : scrollContainer;
+    const onScroll = () => setIsScrolled(getScrollPosition(scrollContainer) > 0);
+    onScroll();
+    eventTarget.addEventListener('scroll', onScroll, { passive: true });
+    return () => eventTarget.removeEventListener('scroll', onScroll);
+  }, []);
+
   const appFixedViewport = useAppFixedViewport();
+
+  const isSelectionEnabled = viewMode === 'edit' && expandedPanelId === undefined;
+  const marqueeRect = usePanelSelectionGestures({
+    layoutRef,
+    panelRefs,
+    enabled: isSelectionEnabled,
+  });
+  const isSelectionModifierHeld = useSelectionModifierHeld(isSelectionEnabled);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -208,10 +237,14 @@ export const DashboardGrid = () => {
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+        'dshLayout--selectionMode': isSelectionEnabled && selectedPanelIds.length > 0,
+        'dshLayout--selectionModifierHeld': isSelectionModifierHeld,
+        'dshLayout--scrolled': isScrolled,
       })}
       css={styles.dashboard}
     >
       {memoizedGridLayout}
+      <SelectionMarquee rect={marqueeRect} />
     </div>
   );
 };
@@ -229,9 +262,9 @@ const dashboardGridStyles = {
   dashboard: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      // for dashboards with no controls, increase the z-index of the hover actions in the
-      // top row so that they overlap the sticky nav in Dashboard
-      ".dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls)) & .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":
+      // while the page is not scrolled, increase the z-index of the hover actions in the top row so
+      // that they overlap the sticky nav in Dashboard instead of being cut off by it
+      "&:not(.dshLayout--scrolled) .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":
         {
           zIndex: euiTheme.levels.toast,
         },
@@ -239,6 +272,30 @@ const dashboardGridStyles = {
       // Hide hover actions when dashboard has an overlay
       '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
         visibility: 'hidden !important' as 'hidden',
+      },
+      // ... and do not offer selection on a panel that is being edited in a flyout (the drag handle stays)
+      '.dshDashboardGrid__item--hideHoverActions .embPanel__selectPanel': {
+        display: 'none',
+      },
+      // While panels are selected, or the selection modifier is held, every panel acts as a selection item
+      [[
+        '&.dshLayout--selectionMode .dshDashboardGrid__item',
+        '&.dshLayout--selectionMode .dshDashboardGrid__item .embPanel *',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item .embPanel *',
+      ].join(', ')]: {
+        cursor: 'pointer',
+      },
+      // ... and the hovered panel is called out as selectable (selected panels keep their solid outline)
+      [[
+        '&.dshLayout--selectionMode .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
+      ].join(', ')]: {
+        outline: `${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary}`,
+      },
+      // ... and cannot be resized (same approach the grid uses for `.kbnGrid--static`)
+      '&.dshLayout--selectionMode .kbnGridPanel--resizeHandle': {
+        display: 'none',
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded

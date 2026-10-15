@@ -388,6 +388,26 @@ export function initializeLayoutManager(
     }
   };
 
+  // Removes several grid panels at once so the layout (and the undo history) only updates once
+  const removePanels = (uuids: string[]) => {
+    const currentLayout = layout$.value;
+    const panels = { ...currentLayout.panels };
+    const gridPanelIds = uuids.filter((uuid) => Boolean(panels[uuid]));
+    if (!gridPanelIds.length) return;
+
+    gridPanelIds.forEach((uuid) => {
+      delete panels[uuid];
+    });
+    layout$.next({ ...currentLayout, panels });
+
+    const children = { ...children$.value };
+    gridPanelIds.forEach((uuid) => {
+      delete children[uuid];
+      delete currentChildState[uuid];
+    });
+    children$.next(children);
+  };
+
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     try {
       childrenStateLoading$.next(true);
@@ -630,6 +650,7 @@ export function initializeLayoutManager(
       addNewPanel,
       addIncomingEmbeddables,
       removePanel,
+      removePanels,
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
