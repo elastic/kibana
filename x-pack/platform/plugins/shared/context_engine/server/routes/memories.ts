@@ -26,7 +26,6 @@ import type { GetAiIndexMemoryWriteServiceParams } from '../types';
 import type { AiIndexMemoryWriteServiceApi } from '../ai_indices/memory_write_service';
 import { MemoryWriteError, type MemoryWriteErrorCode } from '../ai_indices/memory_write_errors';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import { formatErrorMessage } from '../utils/format_es_error';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import {
   deleteMemoryResponseSchema,
@@ -43,6 +42,7 @@ const WRITE_SECURITY: RouteSecurity = {
 
 const DESCRIPTION_SUFFIX =
   'The request uses the current user’s Elasticsearch privileges and the space from the request URL. Returns 404 when Context Engine is turned off in the space.';
+const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while writing the memory.';
 
 const writer = {
   uri: MEMORY_API_PROVENANCE_SOURCE,
@@ -57,7 +57,7 @@ const elasticsearchErrorMessages = {
   429: 'Elasticsearch is temporarily unable to process the memory write.',
 } as const;
 
-const memoryWriteStatusCodes: Record<MemoryWriteErrorCode, 400 | 404 | 409> = {
+const memoryWriteStatusCodes: Record<MemoryWriteErrorCode, 400 | 404 | 409 | 500> = {
   memory_disabled: 404,
   ai_index_memory_disabled: 400,
   destination_not_writable: 400,
@@ -67,8 +67,8 @@ const memoryWriteStatusCodes: Record<MemoryWriteErrorCode, 400 | 404 | 409> = {
   not_a_memory: 400,
   memory_type_mismatch: 409,
   memory_deleted: 409,
-  invalid_memory_timestamp: 409,
-  missing_concurrency_metadata: 409,
+  invalid_memory_timestamp: 500,
+  missing_concurrency_metadata: 500,
 };
 
 const handleMemoryWriteError = (
@@ -86,6 +86,12 @@ const handleMemoryWriteError = (
         return response.notFound({ body });
       case 409:
         return response.conflict({ body });
+      case 500:
+        logger.error(error.stack ?? error.message);
+        return response.customError({
+          statusCode: 500,
+          body: { message: INTERNAL_ERROR_MESSAGE },
+        });
       default:
         return response.badRequest({ body });
     }
@@ -106,7 +112,7 @@ const handleMemoryWriteError = (
   logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
   return response.customError({
     statusCode: 500,
-    body: { message: formatErrorMessage(error) },
+    body: { message: INTERNAL_ERROR_MESSAGE },
   });
 };
 

@@ -11,31 +11,31 @@ responses:
       application/json:
         examples:
           invalid:
-            value: { statusCode: 400, error: Bad Request, message: The memory cannot be deleted. }
+            value: { statusCode: 400, error: Bad Request, message: "Document '98c33351-2504-49da-a390-89e59b30b27e' in AI index 'support' is not a memory." }
   403:
     content:
       application/json:
         examples:
           forbidden:
-            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the write. }
+            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the memory write. }
   404:
     content:
       application/json:
         examples:
           missing:
-            value: { statusCode: 404, error: Not Found, message: The memory was not found. }
+            value: { statusCode: 404, error: Not Found, message: "Memory '98c33351-2504-49da-a390-89e59b30b27e' was not found in AI index 'support'." }
   409:
     content:
       application/json:
         examples:
           conflict:
-            value: { statusCode: 409, error: Conflict, message: The memory write conflicted. }
+            value: { statusCode: 409, error: Conflict, message: The memory write conflicted with another operation. }
   429:
     content:
       application/json:
         examples:
           throttled:
-            value: { statusCode: 429, error: Too Many Requests, message: Too many requests. }
+            value: { statusCode: 429, error: Too Many Requests, message: Elasticsearch is temporarily unable to process the memory write. }
 x-codeSamples:
   - lang: curl
     source: |

@@ -249,6 +249,40 @@ describe('memory routes', () => {
     });
   });
 
+  it('returns a generic 500 for invalid stored Memory state', async () => {
+    reviseMemory.mockRejectedValue(
+      new MemoryWriteError(
+        'invalid_memory_timestamp',
+        "Memory 'memory-1' contains secret-index-name."
+      )
+    );
+
+    await call(
+      'PATCH',
+      AI_INDEX_MEMORY_BY_ID_PATH,
+      { aiIndexId: 'support', memoryId: 'memory-1' },
+      body
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'An unexpected error occurred while writing the memory.' },
+    });
+  });
+
+  it('does not expose Elasticsearch details from a 5xx response', async () => {
+    createMemory.mockRejectedValue(
+      createEsError(503, 'unavailable_shards_exception', 'secret-index-name is unavailable')
+    );
+
+    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'An unexpected error occurred while writing the memory.' },
+    });
+  });
+
   it('bounds request strings and arrays', () => {
     const schema = routes[`POST:${AI_INDEX_MEMORIES_PATH}`].validate.request?.body;
     expect(() => schema?.validate({ ...body, content: 'x'.repeat(65537) })).toThrow();
