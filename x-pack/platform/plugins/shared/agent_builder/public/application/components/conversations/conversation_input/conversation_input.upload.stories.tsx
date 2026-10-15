@@ -25,6 +25,8 @@ import { createStorybookAgentBuilderServices } from '../../../__storybook__/agen
 import { createStorybookKibanaServices } from '../../../__storybook__/kibana_services';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { ConversationInput } from './conversation_input';
+import { MAX_FILES_PER_MESSAGE } from './file_checks';
+import { MAX_TEXT_FILE_BYTES } from './file_type';
 
 const ConversationInputForStorybook: React.FC<React.ComponentProps<typeof ConversationInput>> = (
   props
@@ -84,7 +86,7 @@ trailer << /Root 1 0 R >>
 
 const MINIMAL_MARKDOWN = '# Notes\n\n- First point\n- Second point\n';
 
-const createDocumentFile = (name: string, sizeBytes?: number): File => {
+const createFileToPaste = (name: string, sizeBytes?: number): File => {
   const isPdf = name.endsWith('.pdf');
   const content = isPdf ? MINIMAL_PDF : MINIMAL_MARKDOWN;
   const padding =
@@ -92,7 +94,7 @@ const createDocumentFile = (name: string, sizeBytes?: number): File => {
   return new File([content, ...padding], name, { type: isPdf ? 'application/pdf' : '' });
 };
 
-const pasteBinary = async (
+const pasteFile = async (
   canvasElement: HTMLElement,
   { name, typeText, sizeBytes }: { name: string; typeText?: string; sizeBytes?: number }
 ): Promise<HTMLElement> => {
@@ -107,7 +109,7 @@ const pasteBinary = async (
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   const dt = new DataTransfer();
-  dt.items.add(createDocumentFile(name, sizeBytes));
+  dt.items.add(createFileToPaste(name, sizeBytes));
   await userEvent.paste(dt);
 
   return editor;
@@ -241,21 +243,20 @@ const createStoryBinaryAttachment = (
   name: string,
   mimeType: SupportedBinaryMimeType
 ): VersionedAttachment => ({
-  id: 'story-document-attachment',
+  id: 'story-binary-attachment',
   type: 'binary',
   current_version: 1,
   versions: [
     {
       version: 1,
-      data: { file_id: 'story-document-file', name, mime_type: mimeType, text: 'Hello' },
+      data: { file_id: 'story-binary-file', name, mime_type: mimeType, text: 'Hello' },
       created_at: '2026-10-09T10:00:00.000Z',
-      content_hash: 'story-document-hash',
+      content_hash: 'story-binary-hash',
     },
   ],
 });
 
 const STORY_PDF_ATTACHMENT = createStoryBinaryAttachment('invoice.pdf', 'application/pdf');
-const STORY_MARKDOWN_ATTACHMENT = createStoryBinaryAttachment('notes.md', 'text/markdown');
 
 const STORY_CONVERSATION = {
   id: 'story-conversation',
@@ -273,10 +274,9 @@ const readsBinary = () =>
   new Promise<VersionedAttachment>((resolve) =>
     setTimeout(() => resolve(STORY_PDF_ATTACHMENT), READING_TIME_MS)
   );
-const readsMarkdownFast = () => Promise.resolve(STORY_MARKDOWN_ATTACHMENT);
 const neverReadsBinary = () => new Promise<VersionedAttachment>(() => {});
 
-const createDocumentStoryServices = ({
+const createBinaryStoryServices = ({
   create = readsBinary,
   supportedMimeTypes = [...SUPPORTED_BINARY_MIME_TYPES],
   filesClient,
@@ -287,22 +287,21 @@ const createDocumentStoryServices = ({
 }) => {
   const defaults = createStorybookAgentBuilderServices();
   // Keeps the real attachment types of the storybook service and replaces only the calls.
-  const documentAttachmentsService = Object.assign(Object.create(defaults.attachmentsService), {
+  const binaryAttachmentsService = Object.assign(Object.create(defaults.attachmentsService), {
     create,
     delete: () => Promise.resolve(),
     getSupportedBinaryMimeTypes: () => Promise.resolve(supportedMimeTypes),
   });
   return {
-    binaryFilesClient: (filesClient ??
-      defaults.filesClient) as typeof defaults.binaryFilesClient,
-    attachmentsService: documentAttachmentsService,
+    binaryFilesClient: (filesClient ?? defaults.filesClient) as typeof defaults.binaryFilesClient,
+    attachmentsService: binaryAttachmentsService,
     conversationsService: { create: () => Promise.resolve(STORY_CONVERSATION) } as never,
   };
 };
 
-/** Gives a document story its own query cache, so the supported types answer does not carry over, and shows toasts. */
+/** Gives a file story its own query cache, so the supported types answer does not carry over, and shows toasts. */
 const BinaryStoryProvider: React.FC<{
-  services: ReturnType<typeof createDocumentStoryServices>;
+  services: ReturnType<typeof createBinaryStoryServices>;
   children: React.ReactNode;
 }> = ({ services, children }) => {
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
@@ -341,84 +340,103 @@ const BinaryStoryProvider: React.FC<{
   );
 };
 
-const withBinaryServices = (options: Parameters<typeof createDocumentStoryServices>[0] = {}) => [
+const withBinaryServices = (options: Parameters<typeof createBinaryStoryServices>[0] = {}) => [
   (Story: React.ComponentType) => (
-    <BinaryStoryProvider services={createDocumentStoryServices(options)}>
+    <BinaryStoryProvider services={createBinaryStoryServices(options)}>
       <Story />
     </BinaryStoryProvider>
   ),
 ];
 
-export const BinaryLoading: Story = {
+export const PdfLoading: Story = {
   name: 'PDF - Loading',
   decorators: withBinaryServices({
     create: neverReadsBinary,
     filesClient: neverResolvingFilesClient,
   }),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'invoice.pdf' });
+    await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const BinaryOne: Story = {
+export const PdfOne: Story = {
   name: 'PDF - 1 PDF',
   decorators: withBinaryServices(),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'invoice.pdf', typeText: 'Summarize this: ' });
+    await pasteFile(canvasElement, { name: 'invoice.pdf', typeText: 'Summarize this: ' });
   },
 };
 
-export const BinaryMarkdown: Story = {
-  name: 'Document - Markdown',
-  decorators: withBinaryServices({ create: readsMarkdownFast }),
+export const TextFileMarkdown: Story = {
+  name: 'Text file - Markdown',
+  decorators: withBinaryServices(),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'notes.md', typeText: 'Summarize this: ' });
+    await pasteFile(canvasElement, { name: 'notes.md', typeText: 'Summarize this: ' });
   },
 };
 
-export const BinaryWithImage: Story = {
+export const TextFileTooLarge: Story = {
+  name: 'Text file - Too large',
+  decorators: withBinaryServices(),
+  play: async ({ canvasElement }) => {
+    await pasteFile(canvasElement, { name: 'huge.txt', sizeBytes: MAX_TEXT_FILE_BYTES + 1 });
+  },
+};
+
+export const FilesPdfAndTextFiles: Story = {
+  name: 'Files - 1 PDF + 2 text files',
+  decorators: withBinaryServices(),
+  play: async ({ canvasElement }) => {
+    await pasteFile(canvasElement, { name: 'invoice.pdf', typeText: 'Compare these: ' });
+    await pasteFile(canvasElement, { name: 'notes.md' });
+    await pasteFile(canvasElement, { name: 'data.csv' });
+  },
+};
+
+export const PdfWithImage: Story = {
   name: 'PDF - Image + PDF',
   decorators: withBinaryServices(),
   play: async ({ canvasElement }) => {
     await pasteImage(canvasElement, { name: 'chart.png' });
-    await pasteBinary(canvasElement, { name: 'invoice.pdf' });
+    await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const BinarySecondRefused: Story = {
-  name: 'PDF - Second PDF refused',
+export const FilesLimitReached: Story = {
+  name: 'Files - 11th file refused',
   decorators: withBinaryServices(),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'invoice.pdf' });
-    await pasteBinary(canvasElement, { name: 'contract.pdf' });
+    for (let index = 1; index <= MAX_FILES_PER_MESSAGE + 1; index++) {
+      await pasteFile(canvasElement, { name: `notes-${index}.md` });
+    }
   },
 };
 
-export const BinaryTooLarge: Story = {
+export const PdfTooLarge: Story = {
   name: 'PDF - Too large',
   decorators: withBinaryServices(),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, {
+    await pasteFile(canvasElement, {
       name: 'huge.pdf',
       sizeBytes: MAX_BINARY_BYTES['application/pdf'] + 1,
     });
   },
 };
 
-export const BinaryServerError: Story = {
+export const PdfServerError: Story = {
   name: 'PDF - Server error',
   decorators: withBinaryServices({
     create: () => Promise.reject(new Error('Could not read the PDF. Try again later.')),
   }),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'invoice.pdf' });
+    await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const BinaryNotAvailable: Story = {
+export const PdfNotAvailable: Story = {
   name: 'PDF - Not supported',
   decorators: withBinaryServices({ supportedMimeTypes: [] }),
   play: async ({ canvasElement }) => {
-    await pasteBinary(canvasElement, { name: 'invoice.pdf' });
+    await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },
 };
