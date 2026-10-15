@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 /**
  * Flags a Promise.race deadline whose setTimeout is never cleared.
  *
@@ -172,6 +163,8 @@ function isSetTimeoutCall(node) {
 }
 
 /**
+ * Scope that directly contains `node`, not `node` itself.
+ *
  * @param {any} node
  * @returns {any}
  */
@@ -184,6 +177,176 @@ function enclosingScope(node) {
     current = current.parent;
   }
   return node;
+}
+
+/** @type {WeakMap<any, Set<string>>} */
+const bindingNameCache = new WeakMap();
+
+/** @type {WeakMap<any, number>} */
+const scopeIds = new WeakMap();
+
+let nextScopeId = 1;
+
+/**
+ * @param {any} scope
+ * @returns {number}
+ */
+function scopeId(scope) {
+  const existing = scopeIds.get(scope);
+  if (existing) {
+    return existing;
+  }
+  const id = nextScopeId++;
+  scopeIds.set(scope, id);
+  return id;
+}
+
+/**
+ * @param {any} pattern
+ * @param {Set<string>} names
+ */
+function collectPatternNames(pattern, names) {
+  if (!pattern) {
+    return;
+  }
+  if (pattern.type === 'Identifier') {
+    names.add(pattern.name);
+    return;
+  }
+  if (pattern.type === 'AssignmentPattern' || pattern.type === 'RestElement') {
+    collectPatternNames(pattern.left || pattern.argument, names);
+    return;
+  }
+  if (pattern.type === 'ArrayPattern') {
+    for (const element of pattern.elements) {
+      collectPatternNames(element, names);
+    }
+    return;
+  }
+  if (pattern.type === 'ObjectPattern') {
+    for (const property of pattern.properties) {
+      if (property.type === 'RestElement') {
+        collectPatternNames(property.argument, names);
+      } else if (property.type === 'Property') {
+        collectPatternNames(property.value, names);
+      }
+    }
+  }
+}
+
+/**
+ * Bindings in `node` and nested blocks, but not inside nested functions.
+ * A nested function's own name is a binding of this scope.
+ *
+ * @param {any} node
+ * @param {Set<string>} names
+ */
+function collectDirectBindings(node, names) {
+  if (!node || typeof node.type !== 'string') {
+    return;
+  }
+  if (FUNCTION_TYPES.has(node.type)) {
+    if (node.id && node.id.type === 'Identifier') {
+      names.add(node.id.name);
+    }
+    return;
+  }
+  if (node.type === 'ClassDeclaration' || node.type === 'ClassExpression') {
+    if (node.id && node.id.type === 'Identifier') {
+      names.add(node.id.name);
+    }
+    return;
+  }
+  if (node.type === 'VariableDeclarator') {
+    collectPatternNames(node.id, names);
+  }
+  for (const child of childNodes(node)) {
+    collectDirectBindings(child, names);
+  }
+}
+
+/**
+ * Names declared directly in `scope`, ignoring nested functions.
+ *
+ * @param {any} scope
+ * @returns {Set<string>}
+ */
+function bindingNames(scope) {
+  const cached = bindingNameCache.get(scope);
+  if (cached) {
+    return cached;
+  }
+
+  /** @type {Set<string>} */
+  const names = new Set();
+  for (const param of scope.params || []) {
+    collectPatternNames(param, names);
+  }
+
+  const body = scope.type === 'Program' ? scope : scope.body;
+  if (body) {
+    collectDirectBindings(body, names);
+  }
+
+  bindingNameCache.set(scope, names);
+  return names;
+}
+
+/**
+ * Function or program that declares `identifier`, when one does.
+ *
+ * @param {any} identifier
+ * @returns {any | null}
+ */
+function resolveBindingScope(identifier) {
+  /** @type {Set<any>} */
+  const seen = new Set();
+  let scope = enclosingScope(identifier);
+  while (scope && !seen.has(scope)) {
+    seen.add(scope);
+    if (bindingNames(scope).has(identifier.name)) {
+      return scope;
+    }
+    const parent = enclosingScope(scope);
+    if (parent === scope) {
+      break;
+    }
+    scope = parent;
+  }
+  return null;
+}
+
+/**
+ * @param {any} identifier
+ * @returns {string}
+ */
+function identifierKey(identifier) {
+  const scope = resolveBindingScope(identifier);
+  return scope ? `binding:${scopeId(scope)}:${identifier.name}` : `unresolved:${identifier.name}`;
+}
+
+/**
+ * @param {any} node
+ * @returns {string | undefined}
+ */
+function memberKey(node) {
+  if (!node || node.type !== 'MemberExpression' || node.computed || !node.property) {
+    return;
+  }
+  const property = node.property.type === 'Identifier' ? node.property.name : undefined;
+  if (!property) {
+    return;
+  }
+  if (node.object.type === 'ThisExpression') {
+    return `this.${property}`;
+  }
+  if (node.object.type === 'Identifier') {
+    return `${node.object.name}.${property}`;
+  }
+  const objectKey = memberKey(node.object);
+  if (objectKey) {
+    return `${objectKey}.${property}`;
+  }
 }
 
 /**
@@ -201,9 +364,9 @@ function isTimerMethod(node) {
 
 /**
  * @param {any[]} ancestors Nearest parent last, excluding the setTimeout call.
- * @returns {string | undefined}
+ * @returns {{ identifier?: any, memberKey?: string } | null}
  */
-function assignedTimerName(ancestors) {
+function assignedTimerTarget(ancestors) {
   let index = ancestors.length - 1;
   while (index >= 0) {
     const parent = ancestors[index];
@@ -224,27 +387,50 @@ function assignedTimerName(ancestors) {
 
   const parent = ancestors[index];
   if (!parent) {
-    return;
+    return null;
   }
-  if (
-    parent.type === 'AssignmentExpression' &&
-    parent.operator === '=' &&
-    parent.left.type === 'Identifier'
-  ) {
-    return parent.left.name;
+  if (parent.type === 'AssignmentExpression' && parent.operator === '=') {
+    if (parent.left.type === 'Identifier') {
+      return { identifier: parent.left };
+    }
+    const key = memberKey(unwrap(parent.left));
+    if (key) {
+      return { memberKey: key };
+    }
   }
   if (parent.type === 'VariableDeclarator' && parent.id.type === 'Identifier') {
-    return parent.id.name;
+    return { identifier: parent.id };
   }
+  return null;
 }
 
 /**
+ * Promise constructors stored on the scope that declares the binding.
+ *
  * @param {any} scope
- * @returns {Map<string, any>}
+ * @returns {Map<any, Map<string, any>>}
  */
-function promiseBindings(scope) {
-  /** @type {Map<string, any>} */
-  const bindings = new Map();
+function promiseInitsByScope(scope) {
+  /** @type {Map<any, Map<string, any>>} */
+  const byScope = new Map();
+
+  /**
+   * @param {any} identifier
+   * @param {any} init
+   */
+  function add(identifier, init) {
+    const bindingScope = resolveBindingScope(identifier);
+    if (!bindingScope) {
+      return;
+    }
+    let inits = byScope.get(bindingScope);
+    if (!inits) {
+      inits = new Map();
+      byScope.set(bindingScope, inits);
+    }
+    inits.set(identifier.name, init);
+  }
+
   walk(
     scope,
     (node) => {
@@ -254,7 +440,7 @@ function promiseBindings(scope) {
         node.init &&
         isNewPromise(unwrap(node.init))
       ) {
-        bindings.set(node.id.name, unwrap(node.init));
+        add(node.id, unwrap(node.init));
       }
       if (
         node.type === 'AssignmentExpression' &&
@@ -262,21 +448,46 @@ function promiseBindings(scope) {
         node.left.type === 'Identifier' &&
         isNewPromise(unwrap(node.right))
       ) {
-        bindings.set(node.left.name, unwrap(node.right));
+        add(node.left, unwrap(node.right));
       }
     },
     true
   );
-  return bindings;
+  return byScope;
+}
+
+/**
+ * @param {any} identifier
+ * @param {Map<any, Map<string, any>>} initsByScope
+ * @returns {any}
+ */
+function lookupPromise(identifier, initsByScope) {
+  /** @type {Set<any>} */
+  const seen = new Set();
+  let scope = enclosingScope(identifier);
+  while (scope && !seen.has(scope)) {
+    seen.add(scope);
+    const inits = initsByScope.get(scope);
+    if (inits && inits.has(identifier.name)) {
+      return inits.get(identifier.name);
+    }
+    const parent = enclosingScope(scope);
+    if (parent === scope) {
+      break;
+    }
+    scope = parent;
+  }
 }
 
 /**
  * @param {any} scope
- * @returns {Set<string>}
+ * @returns {{ ids: Set<string>, members: Set<string> }}
  */
-function clearedTimerNames(scope) {
+function clearedTimerKeys(scope) {
   /** @type {Set<string>} */
-  const names = new Set();
+  const ids = new Set();
+  /** @type {Set<string>} */
+  const members = new Set();
   walk(
     scope,
     (node) => {
@@ -284,13 +495,96 @@ function clearedTimerNames(scope) {
         return;
       }
       const argument = unwrap(node.arguments && node.arguments[0]);
-      if (argument && argument.type === 'Identifier') {
-        names.add(argument.name);
+      if (!argument) {
+        return;
+      }
+      if (argument.type === 'Identifier') {
+        ids.add(identifierKey(argument));
+      }
+      const key = memberKey(argument);
+      if (key) {
+        members.add(key);
       }
     },
     true
   );
-  return names;
+  return { ids, members };
+}
+
+/**
+ * @param {{ identifier?: any, memberKey?: string } | null} target
+ * @param {{ ids: Set<string>, members: Set<string> }} cleared
+ * @returns {boolean}
+ */
+function isTimerCleared(target, cleared) {
+  if (!target) {
+    return false;
+  }
+  if (target.memberKey) {
+    return cleared.members.has(target.memberKey);
+  }
+  if (target.identifier) {
+    return cleared.ids.has(identifierKey(target.identifier));
+  }
+  return false;
+}
+
+/**
+ * @param {any} executor
+ * @returns {Set<string>}
+ */
+function settlerKeys(executor) {
+  /** @type {Set<string>} */
+  const keys = new Set();
+  const params = executor.params || [];
+  for (let index = 0; index < Math.min(2, params.length); index++) {
+    const param = params[index];
+    if (param && param.type === 'Identifier') {
+      keys.add(identifierKey(param));
+    }
+  }
+  return keys;
+}
+
+/**
+ * True when the timer callback calls the executor's resolve or reject.
+ *
+ * @param {any} call
+ * @param {Set<string>} settlers
+ * @returns {boolean}
+ */
+function callbackSettles(call, settlers) {
+  if (settlers.size === 0) {
+    return false;
+  }
+  const callback = unwrap(call.arguments && call.arguments[0]);
+  if (!callback) {
+    return false;
+  }
+  if (callback.type === 'Identifier') {
+    return settlers.has(identifierKey(callback));
+  }
+  if (!FUNCTION_TYPES.has(callback.type)) {
+    return false;
+  }
+
+  let settles = false;
+  const body = callback.body || callback;
+  walk(
+    body,
+    (node) => {
+      if (
+        node.type === 'CallExpression' &&
+        node.callee &&
+        node.callee.type === 'Identifier' &&
+        settlers.has(identifierKey(node.callee))
+      ) {
+        settles = true;
+      }
+    },
+    true
+  );
+  return settles;
 }
 
 /**
@@ -301,14 +595,15 @@ function deadlineTimers(executor) {
   /** @type {any[]} */
   const timers = [];
   const ancestors = [];
+  const settlers = settlerKeys(executor);
 
   /**
    * @param {any} node
    */
   function visit(node) {
     ancestors.push(node);
-    if (isSetTimeoutCall(node)) {
-      timers.push({ node, name: assignedTimerName(ancestors.slice(0, -1)) });
+    if (isSetTimeoutCall(node) && callbackSettles(node, settlers)) {
+      timers.push({ node, target: assignedTimerTarget(ancestors.slice(0, -1)) });
     }
     for (const child of childNodes(node)) {
       if (FUNCTION_TYPES.has(child.type)) {
@@ -330,10 +625,10 @@ function deadlineTimers(executor) {
 
 /**
  * @param {any} race
- * @param {Map<string, any>} bindings
+ * @param {Map<any, Map<string, any>>} initsByScope
  * @returns {any[]}
  */
-function raceExecutors(race, bindings) {
+function raceExecutors(race, initsByScope) {
   const list = race.arguments && race.arguments[0];
   if (!list || list.type !== 'ArrayExpression') {
     return [];
@@ -347,7 +642,7 @@ function raceExecutors(race, bindings) {
     }
     let arm = unwrap(element);
     if (arm && arm.type === 'Identifier') {
-      arm = bindings.get(arm.name);
+      arm = lookupPromise(arm, initsByScope);
     }
     if (isNewPromise(arm)) {
       executors.push(arm.arguments[0]);
@@ -380,11 +675,11 @@ module.exports = {
               return;
             }
             const scope = enclosingScope(node);
-            const bindings = promiseBindings(scope);
-            const cleared = clearedTimerNames(scope);
-            for (const executor of raceExecutors(node, bindings)) {
+            const inits = promiseInitsByScope(scope);
+            const cleared = clearedTimerKeys(scope);
+            for (const executor of raceExecutors(node, inits)) {
               for (const timer of deadlineTimers(executor)) {
-                if (timer.name && cleared.has(timer.name)) {
+                if (isTimerCleared(timer.target, cleared)) {
                   continue;
                 }
                 context.report({ node: timer.node, messageId: 'uncleared' });

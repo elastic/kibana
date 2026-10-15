@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 const { RuleTester } = require('eslint');
 const rule = require('..').rules.no_uncleared_race_timeout;
 const dedent = require('dedent');
@@ -109,6 +100,53 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        async function load() {
+          try {
+            return await Promise.race([
+              work(),
+              new Promise((resolve) => {
+                this.timer = setTimeout(() => resolve(true), 5000);
+              }),
+            ]);
+          } finally {
+            clearTimeout(this.timer);
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timer;
+          const timeout = new Promise((resolve) => {
+            timer = setTimeout(() => resolve(true), 5000);
+          });
+          function helper() {
+            clearTimeout(timer);
+          }
+          try {
+            return await Promise.race([work(), timeout]);
+          } finally {
+            helper();
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((resolve) => {
+              setTimeout(() => track('still waiting'), 5000);
+              abort.addEventListener('abort', () => resolve());
+            }),
+          ]);
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -157,6 +195,52 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
               global.setTimeout(() => resolve(true), 5000);
             }),
           ]);
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((resolve) => {
+              this.timer = setTimeout(() => resolve(true), 5000);
+            }),
+          ]);
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          const timeout = new Promise((resolve) => {
+            setTimeout(() => resolve(true), 5000);
+          });
+          function helper() {
+            const timeout = new Promise((resolve) => {
+              setTimeout(() => resolve(true), 10);
+            });
+            return timeout;
+          }
+          helper();
+          return Promise.race([work(), timeout]);
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 3 }],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timer;
+          const timeout = new Promise((resolve) => {
+            timer = setTimeout(() => resolve(true), 5000);
+          });
+          function helper(timer) {
+            clearTimeout(timer);
+          }
+          return Promise.race([work(), timeout]);
         }
       `,
       errors: [error],
