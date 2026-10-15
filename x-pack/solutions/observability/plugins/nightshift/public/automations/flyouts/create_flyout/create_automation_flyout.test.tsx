@@ -102,7 +102,7 @@ describe('CreateAutomationFlyout', () => {
     await addTrigger('Every…');
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
     const instructions = screen.getByTestId('automationInstructions');
-    expect(instructions).toHaveAttribute('maxlength', '10000');
+    expect(instructions).toHaveAttribute('maxlength', '5000');
     fireEvent.change(instructions, {
       target: { value: 'Review checkout errors over the last hour.' },
     });

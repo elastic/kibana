@@ -81,7 +81,12 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
 
     const { workflowId } = so.attributes;
     const stepExecutions = await Promise.all(
-      ['trigger_investigation', 'trigger_alert_investigation'].map((stepId) =>
+      [
+        'trigger_investigation',
+        'trigger_alert_investigation',
+        'trigger_investigation_alert',
+        'trigger_investigation_slack',
+      ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
             workflowId,
@@ -98,14 +103,16 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, alertSteps] = stepExecutions.map(
+    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps] = stepExecutions.map(
       ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
     );
 
     const runs = executions.results.map((exec) => {
       const step =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          : exec.triggeredBy === 'slack2.message'
+          ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'

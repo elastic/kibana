@@ -14,7 +14,7 @@ Schedule rows store structured presets and generate RRULE directly. Daily and we
 Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclusive whole hours.
 All presets accept an IANA `timezone`, defaulting to UTC.
 
-Scheduled automations require nonempty instructions (at most 10,000 characters). Each tick starts a
+Scheduled automations require nonempty instructions (at most 5,000 characters). Each tick starts a
 fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
@@ -63,8 +63,6 @@ An investigation is an Agent Builder conversation with the `investigation` templ
 - **Impact, hypotheses, and proposed actions.** The agent records these.
 - **The query API.** `GET /internal/investigations/investigations[/{id}]`, used for reads.
 
-The legacy `nightshift-investigation` saved object type is still registered, but nothing writes it anymore.
-
 ### Starting an investigation
 
 The start route, the `nightshift.triggerInvestigation` workflow step, and `client.start` work out which subjects the start covers. For an alert, that is one subject per alert in `context.alerts`.
@@ -91,11 +89,11 @@ The `title` of the start route, the `nightshift.triggerInvestigation` step, and 
 
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The investigation reads as in progress while its agent runs.
 
-### Reading and deleting investigations
+### Reading investigations
 
 Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
 
-`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space. It leaves the investigation conversations and their shared data (subjects, claims, impact, hypotheses) alone: Agent Builder has no cross-space delete, and the shared data has no owner that would limit a sweep to Nightshift's investigations.
+Nightshift does not delete investigations. The Significant Events reset leaves the investigation conversations and their shared data (subjects, claims, impact, hypotheses) alone: Agent Builder has no cross-space delete, and the shared data has no owner that would limit a sweep to Nightshift's investigations.
 
 ### Continuing an investigation
 

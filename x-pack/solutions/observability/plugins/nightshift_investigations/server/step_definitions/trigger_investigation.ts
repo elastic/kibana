@@ -26,7 +26,9 @@ const inputSchema = lazySchema(() =>
   z.object({
     subject_type: z
       .enum(INVESTIGATION_SUBJECT_TYPES)
-      .describe('The type of entity being investigated'),
+      .describe(
+        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+      ),
     subject_id: z
       .string()
       .min(1)

@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../../common/automation_limits';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { NightshiftAutomationAttributes } from './types';
 
@@ -22,9 +22,9 @@ export const validateScheduledAutomation = (
     if (!schedule.success) throw badRequest(schedule.error);
   }
   const instructions = automation.execution.promptTemplate;
-  if (!instructions?.trim() || instructions.length > MAX_TEXT_LENGTH) {
+  if (!instructions?.trim() || instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
     throw badRequest(
-      `Scheduled automations require instructions of 1 to ${MAX_TEXT_LENGTH} characters.`
+      `Scheduled automations require instructions of 1 to ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
     );
   }
 };

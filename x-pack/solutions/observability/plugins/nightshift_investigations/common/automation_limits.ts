@@ -6,4 +6,5 @@
  */
 
 export const MAX_RULE_NAMES = 100;
-export { MAX_TEXT_LENGTH as MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '@kbn/significant-events-schema';
+// Leave room in the investigation message for trigger context, including Slack message text.
+export const MAX_AUTOMATION_INSTRUCTIONS_LENGTH = 5000;

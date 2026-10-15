@@ -115,6 +115,39 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects oversized instructions during request parsing before writes', () => {
+    expect(() =>
+      params.parse({
+        body: {
+          ...body,
+          trigger: { rows: [dailySchedule] },
+          execution: { promptTemplate: 'x'.repeat(5001) },
+        },
+      })
+    ).toThrow('Too big');
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(createWorkflow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['no filters', {}],
+    ['empty filter lists', { channels: [], users: [] }],
+    ['blank filter values', { channels: [' '], users: [''], messageFilter: '  ' }],
+  ])('rejects a Slack trigger row with %s', (_name, filters) => {
+    expect(() => parseRows([{ kind: 'slack', event: 'message', ...filters }])).toThrow(
+      'at least one of channels, users or messageFilter'
+    );
+  });
+
+  it.each([
+    ['channels', { channels: ['C123'] }],
+    ['users', { users: ['U123'] }],
+    ['messageFilter', { messageFilter: 'outage' }],
+  ])('accepts a Slack trigger row with only %s', (_name, filters) => {
+    const row = { kind: 'slack', event: 'message', ...filters };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+  });
+
   it.each([
     { kind: 'schedule', schedulePreset: 'hourly', hourWindow: { start: 9, end: 17 } },
     { kind: 'schedule', schedulePreset: 'daily', time: '09:30', timezone: 'Europe/Berlin' },
@@ -156,7 +189,6 @@ it('creates a scheduled workflow with instructions', async () => {
 it.each([
   { trigger: { rows: [dailySchedule] }, execution: {} },
   { trigger: { rows: [dailySchedule] }, execution: { promptTemplate: '   ' } },
-  { trigger: { rows: [dailySchedule] }, execution: { promptTemplate: 'x'.repeat(10001) } },
   { trigger: { rows: [dailySchedule, dailySchedule] } },
   { trigger: { rows: [{ ...dailySchedule, timezone: 'Not/AZone' }] } },
 ])('rejects unusable scheduled configuration before writes: %j', async (overrides) => {

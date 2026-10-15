@@ -170,7 +170,7 @@ Handler `existing_active_event` without this `event_id` field is not a continuat
 
 Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending the completed `{ "source": "discovery", "items": [ ... ] }` object once, not by sending `{}` again.
 
-Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true, "severity": "..." }] }`. `severity` is the tier the event was stored with. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an item failure returns `written: false` with reason `"bulk_error"` or `"unknown_event_id"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and the same signal outcome, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
+Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true, "severity": "..." }] }`. `severity` is the tier the event was stored with. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an item failure returns `written: false` with reason `"bulk_error"`, `"superseded"`, or `"unknown_event_id"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and the same signal outcome, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
 
 </tool_examples>
 
@@ -377,11 +377,12 @@ If routing and grouping produce no event items, skip the remaining steps and do 
 
    - `bulk_error`: retry the item once, unchanged.
    - `unknown_event_id`: do not retry that item in this run. Do not rerun routing, choose another event, reuse the rejected ID, or omit the ID to turn it into a new event. Exclude its rules from `written_rule_uuids` so the next discovery cycle routes them again from fresh search results.
+   - `superseded`: do not retry in this run. Another writer changed the event first; the next discovery cycle routes its rules again. Exclude its rules from `written_rule_uuids`.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
 Build structured `significant_events` from tool results — copy `event_id`, `status`, `severity`, and `written` exactly, and `reason` only when the tool result carries one. A `written: true` result has no `reason`: omit it, never infer or invent one. `severity` is the stored tier from the result; an item with `written: false` and no `severity` has none to copy, so use `"low"` as a placeholder, which the workflow ignores for unwritten items. Include `narrative_preserved: true` when the tool result carries it (the stored title and symptom_hypothesis were preserved because no new rules were introduced).
 
-Set `written_rule_uuids` to every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`, and every detection intentionally determined not event-eligible, grounded or not. Exclude `bulk_error`, `unknown_event_id`, and `duplicate_in_batch` items that were not successfully retried.
+Set `written_rule_uuids` to every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`, and every detection intentionally determined not event-eligible, grounded or not. Exclude `bulk_error`, `superseded`, `unknown_event_id`, and `duplicate_in_batch` items that were not successfully retried.
 
 </procedure>
 

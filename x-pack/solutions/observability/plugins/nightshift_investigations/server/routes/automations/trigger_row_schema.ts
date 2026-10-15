@@ -25,12 +25,20 @@ export const triggerRowSchema = lazySchema(() =>
         scopeQuery: z.string().max(10000).optional(),
       })
     ),
-    z.object({
-      kind: z.literal('slack'),
-      event: z.enum(['message']),
-      channels: z.array(z.string().max(500)).max(100).optional(),
-      users: z.array(z.string().max(500)).max(100).optional(),
-      messageFilter: z.string().max(1000).optional(),
-    }),
+    z
+      .object({
+        kind: z.literal('slack'),
+        event: z.enum(['message']),
+        channels: z.array(z.string().max(500)).max(100).optional(),
+        users: z.array(z.string().max(500)).max(100).optional(),
+        messageFilter: z.string().max(1000).optional(),
+      })
+      .refine(
+        ({ channels, users, messageFilter }) =>
+          [...(channels ?? []), ...(users ?? []), messageFilter ?? ''].some(
+            (value) => value.trim() !== ''
+          ),
+        { message: 'A Slack trigger needs at least one of channels, users or messageFilter' }
+      ),
   ])
 );
