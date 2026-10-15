@@ -773,6 +773,7 @@ function callsIn(fn, beforeAt, functions) {
           at: nodeStart(node),
           fn: target,
           conditional: isConditional(node, fn),
+          awaited: isAwaitedCall(node),
         });
       }
     }
@@ -789,22 +790,41 @@ function callsIn(fn, beforeAt, functions) {
 }
 
 /**
- * Promises a synchronous run of `fn` may assign. Writes after the first await
- * stay in the future. Conditional writes and calls keep the previous value too.
+ * `await arm()` has finished arm's later assignments. `arm()` has not.
+ *
+ * @param {any} node
+ * @returns {boolean}
+ */
+function isAwaitedCall(node) {
+  let current = node && node.parent;
+  while (current && UNWRAP_TYPES.has(current.type)) {
+    if (current.type === 'AwaitExpression') {
+      return true;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+/**
+ * Promises a run of `fn` may assign. A fire-and-forget call only sees writes
+ * before the first await. An awaited call sees writes after that await too.
+ * Conditional writes and calls keep the previous value.
  *
  * @param {any} fn
  * @param {Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>} versions
  * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
  * @param {Set<any>} seen
+ * @param {boolean} includeDeferred
  * @returns {{ values: any[], definite: boolean }}
  */
-function syncInstalls(fn, versions, functions, seen) {
+function syncInstalls(fn, versions, functions, seen, includeDeferred) {
   if (!fn || seen.has(fn)) {
     return { values: [], definite: false };
   }
   seen.add(fn);
 
-  const suspendAt = firstSuspensionAt(fn);
+  const suspendAt = includeDeferred ? Infinity : firstSuspensionAt(fn);
   /** @type {Array<{ at: number, kind: 'write' | 'call', value?: any, fn?: any, conditional: boolean }>} */
   const events = [];
   for (const version of versions) {
@@ -818,7 +838,13 @@ function syncInstalls(fn, versions, functions, seen) {
     }
   }
   for (const call of callsIn(fn, suspendAt, functions)) {
-    events.push({ at: call.at, kind: 'call', fn: call.fn, conditional: call.conditional });
+    events.push({
+      at: call.at,
+      kind: 'call',
+      fn: call.fn,
+      conditional: call.conditional,
+      awaited: call.awaited,
+    });
   }
   events.sort((left, right) => left.at - right.at);
 
@@ -835,7 +861,7 @@ function syncInstalls(fn, versions, functions, seen) {
       }
       continue;
     }
-    const inner = syncInstalls(event.fn, versions, functions, seen);
+    const inner = syncInstalls(event.fn, versions, functions, seen, Boolean(event.awaited));
     if (!inner.values.length) {
       continue;
     }
@@ -847,6 +873,78 @@ function syncInstalls(fn, versions, functions, seen) {
     }
   }
   return { values: possible, definite };
+}
+
+/**
+ * If statements in `home` that have an else and start at or before `useAt`.
+ *
+ * @param {any} home
+ * @param {number} useAt
+ * @returns {any[]}
+ */
+function ifStatementsBefore(home, useAt) {
+  /** @type {any[]} */
+  const found = [];
+  const root = home && home.type === 'Program' ? home : home && home.body;
+  if (!root || FUNCTION_TYPES.has(root.type)) {
+    return found;
+  }
+
+  /**
+   * @param {any} node
+   */
+  function visit(node) {
+    if (node.type === 'IfStatement' && node.alternate && nodeStart(node) <= useAt) {
+      found.push(node);
+    }
+    for (const child of childNodes(node)) {
+      if (FUNCTION_TYPES.has(child.type)) {
+        continue;
+      }
+      visit(child);
+    }
+  }
+
+  visit(root);
+  return found;
+}
+
+/**
+ * Promises this branch always assigns, when every path through it does.
+ * An `else if` chain counts when each of its arms assigns.
+ *
+ * @param {any} branch
+ * @param {Array<{ value: any, at: number, ordered: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {any[] | null}
+ */
+function definiteBranchPromises(branch, versions, useAt) {
+  if (!branch) {
+    return null;
+  }
+  const statement =
+    branch.type === 'BlockStatement' && branch.body.length === 1 ? branch.body[0] : branch;
+  if (statement.type === 'IfStatement' && statement.alternate) {
+    const thenValues = definiteBranchPromises(statement.consequent, versions, useAt);
+    const elseValues = definiteBranchPromises(statement.alternate, versions, useAt);
+    if (thenValues && elseValues) {
+      return thenValues.concat(elseValues);
+    }
+    return null;
+  }
+
+  const writes = versions.filter(
+    (version) =>
+      version.ordered &&
+      version.at <= useAt &&
+      containsNode(branch, version.anchor) &&
+      !isConditional(version.anchor, branch)
+  );
+  if (!writes.length) {
+    return null;
+  }
+  writes.sort((left, right) => left.at - right.at);
+  return [writes[writes.length - 1].value];
 }
 
 /**
@@ -862,18 +960,44 @@ function possiblePromises(versions, bindingScope, useAt) {
   const functions = functionValuesByScope(home);
   /** @type {Array<{ at: number, values: any[], replace: boolean }>} */
   const events = [];
-  for (const version of versions) {
-    if (version.ordered && version.at <= useAt) {
-      const conditional = isConditional(version.anchor, home);
-      events.push({
-        at: version.at,
-        values: [version.value],
-        replace: !conditional,
-      });
+  const covered = new Set();
+  for (const statement of ifStatementsBefore(home, useAt)) {
+    if (isConditional(statement, home)) {
+      continue;
+    }
+    const thenValues = definiteBranchPromises(statement.consequent, versions, useAt);
+    const elseValues = definiteBranchPromises(statement.alternate, versions, useAt);
+    if (!thenValues || !elseValues) {
+      continue;
+    }
+    events.push({
+      at: nodeStart(statement),
+      values: thenValues.concat(elseValues),
+      replace: true,
+    });
+    for (const version of versions) {
+      if (
+        version.ordered &&
+        (containsNode(statement.consequent, version.anchor) ||
+          (statement.alternate && containsNode(statement.alternate, version.anchor)))
+      ) {
+        covered.add(version);
+      }
     }
   }
+  for (const version of versions) {
+    if (covered.has(version) || !version.ordered || version.at > useAt) {
+      continue;
+    }
+    const conditional = isConditional(version.anchor, home);
+    events.push({
+      at: version.at,
+      values: [version.value],
+      replace: !conditional,
+    });
+  }
   for (const call of callsIn(home, useAt + 1, functions)) {
-    const installed = syncInstalls(call.fn, versions, functions, new Set());
+    const installed = syncInstalls(call.fn, versions, functions, new Set(), call.awaited);
     if (!installed.values.length) {
       continue;
     }
@@ -1053,7 +1177,7 @@ function functionValuesByScope(scope) {
       versions = [];
       values.set(identifier.name, versions);
     }
-    versions.push({ value: fn, at });
+    versions.push({ value: fn, at, anchor: identifier });
   }
 
   walk(
@@ -1083,14 +1207,51 @@ function functionValuesByScope(scope) {
 }
 
 /**
- * True when `node` calls the executor's resolve or reject, following local functions.
+ * Functions this identifier may still refer to. A conditional overwrite keeps
+ * the previous callback as well.
  *
- * @param {any} node
- * @param {Set<string>} settlers
- * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
- * @param {Set<any>} seen
- * @returns {boolean}
+ * @param {any} identifier
+ * @param {Map<any, Map<string, Array<{ value: any, at: number, anchor: any }>>>} valuesByScope
+ * @returns {any[]}
  */
+function lookupPossibleFunctions(identifier, valuesByScope) {
+  const useAt = nodeStart(identifier);
+  /** @type {Set<any>} */
+  const seen = new Set();
+  let scope = parentLexicalScope(identifier);
+  while (scope && !seen.has(scope)) {
+    seen.add(scope);
+    const versions = valuesByScope.get(scope) && valuesByScope.get(scope).get(identifier.name);
+    if (versions) {
+      const stop = scopeFunction(scope);
+      /** @type {any[]} */
+      let possible = [];
+      const ordered = versions
+        .filter((version) => version.at <= useAt)
+        .sort((left, right) => left.at - right.at);
+      for (const version of ordered) {
+        const conditional = Boolean(
+          version.anchor && stop && isConditional(version.anchor, stop)
+        );
+        possible = conditional ? possible.concat(version.value) : [version.value];
+      }
+      const functions = possible.filter((value) => value && FUNCTION_TYPES.has(value.type));
+      if (possible.length) {
+        return functions;
+      }
+    }
+    if (bindingsOf(scope).has(identifier.name)) {
+      return [];
+    }
+    const parent = parentLexicalScope(scope);
+    if (!parent || parent === scope) {
+      break;
+    }
+    scope = parent;
+  }
+  return [];
+}
+
 function nodeSettles(node, settlers, functions, seen) {
   if (!node || seen.has(node)) {
     return false;
@@ -1099,12 +1260,16 @@ function nodeSettles(node, settlers, functions, seen) {
     if (settlers.has(identifierKey(node))) {
       return true;
     }
-    const fn = lookupValue(node, functions);
-    if (!fn || seen.has(fn)) {
-      return false;
+    for (const fn of lookupPossibleFunctions(node, functions)) {
+      if (!fn || seen.has(fn)) {
+        continue;
+      }
+      seen.add(fn);
+      if (bodySettles(fn, settlers, functions, seen)) {
+        return true;
+      }
     }
-    seen.add(fn);
-    return bodySettles(fn, settlers, functions, seen);
+    return false;
   }
   if (FUNCTION_TYPES.has(node.type)) {
     seen.add(node);
