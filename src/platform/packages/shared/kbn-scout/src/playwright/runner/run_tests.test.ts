@@ -15,7 +15,7 @@ import {
 } from './run_tests';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import { execPromise, withKibanaSwcRegister } from '../utils';
+import { execPromise, withKibanaBabelRegister } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('@kbn/dev-proc-runner', () => ({ withProcRunner: jest.fn() }));
@@ -159,7 +159,7 @@ describe('runPlaywrightTestCheck', () => {
   beforeEach(() => {
     (withProcRunner as jest.Mock).mockImplementation(async (_log, fn) => fn({ run }));
     (getTimeReporter as jest.Mock).mockReturnValue(jest.fn());
-    (withKibanaSwcRegister as jest.Mock).mockImplementation((env) => env);
+    (withKibanaBabelRegister as jest.Mock).mockImplementation((env) => env);
   });
 
   it('lists the tests of a config with the Scout reporter disabled', async () => {
