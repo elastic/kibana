@@ -18,8 +18,9 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
-import { isError } from 'lodash';
+import { isError, uniqBy } from 'lodash';
 import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
 import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
@@ -29,6 +30,8 @@ import type {
 } from '../../services/license_service/license_service';
 import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import type { StorageServiceContract } from '../../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
@@ -43,8 +46,10 @@ import type {
 import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { toNotifiedActions } from './utils/action_documents';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
+const LOGGED_GROUP_ID_SAMPLE_SIZE = 10;
 
 interface DispatchBatch {
   groups: ActionGroup[];
@@ -82,6 +87,31 @@ const addMapSet = <K, V>(map: Map<K, Set<V>>, key: K, value: V): void => {
   }
 };
 
+/**
+ * Packs schedule items into chunks of at most `maxItems` without splitting a group: once a chunk
+ * returns, every destination of its groups has been attempted. A group with more destinations than
+ * `maxItems` gets a chunk of its own. Relies on a group's items being adjacent in `pending`.
+ */
+const chunkByGroup = (pending: PendingSchedule[], maxItems: number): PendingSchedule[][] => {
+  const chunks: PendingSchedule[][] = [];
+  let current: PendingSchedule[] = [];
+  let start = 0;
+  while (start < pending.length) {
+    const groupId = pending[start].group.id;
+    let end = start + 1;
+    while (end < pending.length && pending[end].group.id === groupId) end++;
+    const groupItems = pending.slice(start, end);
+    if (current.length > 0 && current.length + groupItems.length > maxItems) {
+      chunks.push(current);
+      current = [];
+    }
+    current.push(...groupItems);
+    start = end;
+  }
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+};
+
 @injectable()
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
@@ -89,7 +119,8 @@ export class DispatchStep implements DispatcherStep {
   constructor(
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
   public async execute(
@@ -101,12 +132,14 @@ export class DispatchStep implements DispatcherStep {
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
     const dispatchFailures: DispatchFailure[] = [];
+    const committedGroupIds = new Set<ActionGroupId>();
     const done = (): DispatcherStepOutput => ({
       type: 'continue',
       data: {
         outcome: DispatchOutcome.of({
           executionsByGroup: dispatchedExecutions,
           failures: dispatchFailures,
+          committedGroupIds,
         }),
       },
     });
@@ -151,21 +184,82 @@ export class DispatchStep implements DispatcherStep {
         dispatchFailures,
         logger
       );
-      for (let offset = 0; offset < pending.length; offset += DISPATCH_CHUNK_SIZE) {
+      for (const chunk of chunkByGroup(pending, DISPATCH_CHUNK_SIZE)) {
         if (signal.aborted) {
           break;
         }
         await this.dispatchChunk(
-          pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
+          chunk,
           this.workflowsManagement.getClient(request),
           dispatchedExecutions,
           dispatchFailures,
           logger
         );
+        await this.commitNotified(chunk, dispatchedExecutions, policies, committedGroupIds, logger);
       }
     }
 
     return done();
+  }
+
+  /**
+   * Records `notified` for the chunk's groups that got at least one scheduled execution, so a tick
+   * that aborts before StoreActionsStep does not dispatch them again. Runs even when the signal
+   * has fired: the workflows are already scheduled.
+   */
+  private async commitNotified(
+    chunk: PendingSchedule[],
+    dispatchedExecutions: Map<ActionGroupId, string[]>,
+    policies: PolicyCatalog,
+    committedGroupIds: Set<ActionGroupId>,
+    logger: LoggerServiceContract
+  ): Promise<void> {
+    const groups = uniqBy(
+      chunk.map(({ group }) => group),
+      ({ id }) => id
+    ).filter(({ id }) => dispatchedExecutions.has(id));
+    if (groups.length === 0) {
+      return;
+    }
+
+    try {
+      const { errors } = await this.storageService.bulkIndexDocs({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        docs: groups.flatMap((group) =>
+          toNotifiedActions(group, policies.groupingModeOf(group.policyId))
+        ),
+      });
+      const rejectedGroupIds = new Set(errors.map(({ document }) => document.action_group_id));
+      for (const { id } of groups) {
+        if (!rejectedGroupIds.has(id)) committedGroupIds.add(id);
+      }
+      if (errors.length > 0) {
+        this.logCommitFailure(
+          groups.filter(({ id }) => rejectedGroupIds.has(id)),
+          new Error(errors[0].message),
+          logger
+        );
+      }
+    } catch (err) {
+      this.logCommitFailure(groups, toError(err), logger);
+    }
+  }
+
+  private logCommitFailure(
+    groups: readonly ActionGroup[],
+    error: Error,
+    logger: LoggerServiceContract
+  ): void {
+    const sample = groups.slice(0, LOGGED_GROUP_ID_SAMPLE_SIZE).map(({ id }) => id);
+    const overflow = groups.length - sample.length;
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.DISPATCH_NOTIFIED_COMMIT_FAILED,
+      message: () =>
+        `Failed to record notified actions for ${groups.length} dispatched group(s) ` +
+        `[${sample.join(', ')}${overflow > 0 ? `, and ${overflow} more` : ''}]; ` +
+        `they are dispatched again if this tick aborts. ${error.message}`,
+    });
   }
 
   private recordLicenseNotSupported(

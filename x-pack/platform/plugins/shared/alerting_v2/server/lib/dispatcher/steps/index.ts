@@ -15,6 +15,7 @@ export { FetchRulesStep } from './fetch_rules_step';
 export { FetchPoliciesStep } from './fetch_policies_step';
 export { EvaluateMatchersStep } from './evaluate_matchers_step';
 export { BuildGroupsStep } from './build_groups_step';
+export { ApplyAlreadyNotifiedStep } from './apply_already_notified_step';
 export { ApplyThrottlingStep } from './apply_throttling_step';
 export { DispatchStep } from './dispatch_step';
 export { StoreActionsStep } from './store_actions_step';

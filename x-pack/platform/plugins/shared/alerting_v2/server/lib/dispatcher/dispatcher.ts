@@ -10,6 +10,8 @@ import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { v4 as uuidV4 } from 'uuid';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../services/event_log_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -25,8 +27,9 @@ import {
   TICK_DEADLINE_MS,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import { AlertScan } from './state';
-import { toAction } from './steps/store_actions_step';
+import { AlertScan, RuleCatalog } from './state';
+import { toAction } from './steps/utils/action_documents';
+import { emitDispatchedSummaries } from './steps/store_execution_history_step';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -79,6 +82,7 @@ export class DispatcherService implements DispatcherServiceContract {
   constructor(
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,
     @inject(LoggerServiceToken) logger: LoggerServiceContract
   ) {
     this.parentLogger = logger.forSubsystem('dispatcher');
@@ -125,6 +129,7 @@ export class DispatcherService implements DispatcherServiceContract {
             message: 'pipeline aborted by Task Manager signal.',
           });
         }
+        this.emitCommittedDispatchHistory(input, pipelineResult);
       }
 
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
@@ -161,6 +166,29 @@ export class DispatcherService implements DispatcherServiceContract {
     } finally {
       cleanup();
     }
+  }
+
+  /**
+   * An aborted tick skips StoreExecutionHistoryStep, and the next tick treats its committed groups
+   * as already notified, so their `dispatched` history is emitted here or never.
+   */
+  private emitCommittedDispatchHistory(
+    input: DispatcherPipelineInput,
+    { finalState }: DispatcherPipelineResult
+  ): void {
+    const { outcome, plan, rules = RuleCatalog.empty() } = finalState;
+    if (!outcome || !plan) {
+      return;
+    }
+
+    emitDispatchedSummaries({
+      eventLogService: this.eventLogService,
+      groups: plan.toDispatch.filter(({ id }) => outcome.isCommitted(id)),
+      outcome,
+      rules,
+      timestamp: input.startedAt.toISOString(),
+      executionUuid: input.executionUuid,
+    });
   }
 
   private resolveWatermark({

@@ -14,8 +14,10 @@ import {
   getSeriesSuppressionsQueries,
   getLastNotifiedTimestampsQueries,
   getAlertDataQueries,
+  getAlreadyNotifiedQueries,
+  getMinLastEventTimestamp,
 } from './queries';
-import { createAlert } from './fixtures/test_utils';
+import { createActionGroup, createAlert } from './fixtures/test_utils';
 
 // Without an explicit LIMIT, ES|QL truncates results to 1 000 rows.
 const endsWithRowLimit = (query: string) =>
@@ -981,5 +983,87 @@ describe('getLastNotifiedTimestampsQueries', () => {
     for (const id of [ids[0], ids[ids.length - 1]]) {
       expect(concatenated).toContain(id);
     }
+  });
+});
+
+describe('getAlreadyNotifiedQueries', () => {
+  const alertA = createAlert({ alert_id: 'alert-a' });
+  const alertB = createAlert({ alert_id: 'alert-b' });
+
+  it('returns an empty array for empty input', () => {
+    expect(getAlreadyNotifiedQueries([])).toEqual([]);
+  });
+
+  it('builds one query keyed by action group and alert', () => {
+    const requests = getAlreadyNotifiedQueries([
+      createActionGroup({ id: 'group-1', alerts: [alertA, alertB] }),
+      createActionGroup({ id: 'group-2', alerts: [alertA] }),
+    ]);
+
+    expect(requests).toHaveLength(1);
+    const [{ query }] = requests;
+    expect(query).toContain('.alert-actions');
+    expect(query).toContain('action_type == "notified"');
+    expect(query).toContain('action_group_id IN ("group-1", "group-2")');
+    expect(query).toContain('alert_id IN ("alert-a", "alert-b")');
+    expect(query).toContain('notified_through = MAX(last_series_event_timestamp)');
+    expect(query).toContain('BY action_group_id, alert_id');
+    expect(query).toContain('KEEP action_group_id, alert_id, notified_through');
+    expect(endsWithRowLimit(query)).toBe(true);
+  });
+
+  it('lists each id once when a pair repeats', () => {
+    const [{ query }] = getAlreadyNotifiedQueries([
+      createActionGroup({ id: 'group-1', alerts: [alertA, alertA] }),
+    ]);
+
+    expect(query).toContain('action_group_id IN ("group-1")');
+    expect(query).toContain('alert_id IN ("alert-a")');
+  });
+
+  it('never puts more pairs in a chunk than the row limit returns', () => {
+    // Short ids keep the whole input under the byte budget, so only the pair cap splits it.
+    const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      createAlert({ alert_id: `${i}` })
+    );
+
+    const requests = getAlreadyNotifiedQueries([createActionGroup({ id: 'g', alerts })]);
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`alert_id IN ("${alerts[ESQL_QUERY_ROW_LIMIT].alert_id}")`);
+  });
+
+  it('keeps every chunk under the ES|QL statement cap', () => {
+    const groups = Array.from({ length: 50 }, (_, g) =>
+      createActionGroup({
+        id: `${g}`.padStart(40, 'g'),
+        alerts: Array.from({ length: 200 }, (__, a) =>
+          createAlert({ alert_id: `${g}-${a}`.padStart(36, '0') })
+        ),
+      })
+    );
+
+    const requests = getAlreadyNotifiedQueries(groups);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query.length).toBeLessThan(1_000_000);
+    }
+  });
+});
+
+describe('getMinLastEventTimestamp', () => {
+  it('returns the earliest valid alert timestamp', () => {
+    expect(
+      getMinLastEventTimestamp([
+        createAlert({ last_event_timestamp: '2026-01-22T07:11:00.000Z' }),
+        createAlert({ last_event_timestamp: 'not-a-date' }),
+        createAlert({ last_event_timestamp: '2026-01-22T07:10:00.000Z' }),
+      ])
+    ).toBe('2026-01-22T07:10:00.000Z');
+  });
+
+  it('falls back to the epoch when no timestamp is valid', () => {
+    expect(getMinLastEventTimestamp([])).toBe(new Date(0).toISOString());
   });
 });

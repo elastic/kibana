@@ -8,7 +8,7 @@
 import { esql, type EsqlRequest } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEventType } from '../../resources/datastreams/alert_events';
-import type { Alert, ActionGroupId } from './types';
+import type { Alert, ActionGroup, ActionGroupId } from './types';
 import { alertSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 const ALERT_EVENT_TYPE: AlertEventType = 'alert';
@@ -78,6 +78,10 @@ export const getDispatchableAlertEventsQuery = ({
 
 const PAIR_SEPARATOR = '::';
 
+/** Key of one (action group, alert) pair in the already-notified lookup. */
+export const alreadyNotifiedPairKey = (actionGroupId: ActionGroupId, alertId: string): string =>
+  `${actionGroupId}${PAIR_SEPARATOR}${alertId}`;
+
 // Shared subject-derivation expression used in both dispatchable and suppression queries.
 // null/absent source is treated as 'internal' for backward compat with legacy action rows.
 // Must produce the same key as `alertSubject`, which documents why the space is folded in.
@@ -93,6 +97,11 @@ export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 // bytes, so this budget is smaller than the default to keep `pairs + pre-filter + static body`
 // under the 1 MB ES|QL statement cap.
 export const SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
+
+// Pair budget for the already-notified query. Each chunk emits two IN lists (group ids and alert
+// ids), so this budget is smaller than the default to keep both lists plus the static body under
+// the 1 MB ES|QL statement cap.
+export const ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
 const PER_LITERAL_OVERHEAD_BYTES = 6;
@@ -216,7 +225,7 @@ export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlReque
   });
 };
 
-const getMinLastEventTimestamp = (alerts: readonly Alert[]): string =>
+export const getMinLastEventTimestamp = (alerts: readonly Alert[]): string =>
   alerts.reduce<string | undefined>((min, alert) => {
     const parsedTimestamp = new Date(alert.last_event_timestamp);
     if (Number.isNaN(parsedTimestamp.getTime())) {
@@ -347,6 +356,39 @@ export const getAlertDataQueries = (
         | DROP _source
         | STATS data_json = LAST(data_json, @timestamp) BY alert_id
         | KEEP alert_id, data_json
+        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
+  });
+};
+
+// Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to
+// concat: STATS keys on (action_group_id, alert_id), the pair used for chunking.
+//
+// Matches only `notified` records carrying an alert_id. Records written before notified became
+// per-alert have none, so they never mark content as delivered: a legacy record can cause a
+// duplicate, never a loss.
+export const getAlreadyNotifiedQueries = (groups: readonly ActionGroup[]): EsqlRequest[] => {
+  const pairsByKey = new Map<string, { groupId: ActionGroupId; alertId: string }>();
+  for (const group of groups) {
+    for (const { alert_id: alertId } of group.alerts) {
+      pairsByKey.set(alreadyNotifiedPairKey(group.id, alertId), { groupId: group.id, alertId });
+    }
+  }
+
+  return chunkInClauseLiterals(
+    [...pairsByKey.keys()],
+    ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES
+  ).map((chunk) => {
+    const pairs = chunk.flatMap((key) => {
+      const pair = pairsByKey.get(key);
+      return pair ? [pair] : [];
+    });
+    const groupIds = toUniqueString(pairs.map(({ groupId }) => groupId));
+    const alertIds = toUniqueString(pairs.map(({ alertId }) => alertId));
+
+    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+        | WHERE action_type == "notified" AND action_group_id IN (${groupIds}) AND alert_id IN (${alertIds})
+        | STATS notified_through = MAX(last_series_event_timestamp) BY action_group_id, alert_id
+        | KEEP action_group_id, alert_id, notified_through
         | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

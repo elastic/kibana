@@ -7,20 +7,13 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import {
-  alertActionActorType,
-  type AlertActionDocument,
-} from '../../../resources/datastreams/alert_actions';
-import type {
-  Alert,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
-} from '../types';
+import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
+import type { DispatcherStep, DispatcherPipelineState, DispatcherStepOutput } from '../types';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
+import { DispatchOutcome, DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
+import { toAction, toNotifiedActions } from './utils/action_documents';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -38,15 +31,14 @@ export class StoreActionsStep implements DispatcherStep {
       triage = AlertTriage.empty(),
       plan = DispatchPlan.empty(),
       policies = PolicyCatalog.empty(),
+      outcome = DispatchOutcome.empty(),
     } = state;
     const { suppressed } = triage;
-    const { toDispatch, throttled, unmatched } = plan;
+    const { toDispatch, throttled, alreadyNotified, unmatched } = plan;
 
     if (suppressed.length === 0 && plan.isEmpty() && unmatched.length === 0) {
       return { type: 'halt', reason: 'no_actions' };
     }
-
-    const now = new Date();
 
     // One doc per alert-scoped outcome; their count gates watermark advancement.
     const alertActions: AlertActionDocument[] = [
@@ -78,6 +70,16 @@ export class StoreActionsStep implements DispatcherStep {
           })
         )
       ),
+      ...alreadyNotified.flatMap((group) =>
+        group.alerts.map((alert) =>
+          toAction({
+            alert,
+            actionType: 'fire',
+            reason: `already notified by policy ${group.policyId}`,
+            spaceId: alert.space_id,
+          })
+        )
+      ),
       ...unmatched.map((alert) =>
         toAction({
           alert,
@@ -88,28 +90,11 @@ export class StoreActionsStep implements DispatcherStep {
       ),
     ];
 
-    // One `notified` doc per dispatched group — group-scoped, so excluded from
-    // the recordedAlerts tally.
-    const notifiedActions: AlertActionDocument[] = toDispatch.map((group) => {
-      const groupingMode = policies.groupingModeOf(group.policyId);
-      const firstAlert = group.alerts[0];
-      const spaceId = firstAlert?.space_id ?? 'default';
-      const action: AlertActionDocument = {
-        actor: { type: alertActionActorType.internal },
-        action_type: 'notified',
-        rule_id: firstAlert?.rule_id ?? null,
-        group_hash: firstAlert?.group_hash ?? 'unknown',
-        last_series_event_timestamp: now.toISOString(),
-        action_group_id: group.id,
-        source: firstAlert?.source,
-        reason: `notified by policy ${group.policyId}`,
-        space_id: spaceId,
-      };
-      if (groupingMode === 'per_alert') {
-        action.alert_status = firstAlert?.alert_status;
-      }
-      return action;
-    });
+    // `notified` docs are group-scoped, so excluded from the recordedAlerts tally. DispatchStep
+    // writes them after each chunk; this covers the dispatched groups it did not commit.
+    const notifiedActions = toDispatch
+      .filter((group) => !outcome.isCommitted(group.id))
+      .flatMap((group) => toNotifiedActions(group, policies.groupingModeOf(group.policyId)));
 
     await this.storageService.bulkIndexDocs<AlertActionDocument>({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -118,27 +103,4 @@ export class StoreActionsStep implements DispatcherStep {
 
     return { type: 'continue', data: { recordedAlerts: alertActions.length } };
   }
-}
-
-export function toAction({
-  alert,
-  actionType,
-  reason,
-  spaceId,
-}: {
-  alert: Alert;
-  actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
-  reason?: string;
-  spaceId: string;
-}): AlertActionDocument {
-  return {
-    group_hash: alert.group_hash,
-    last_series_event_timestamp: alert.last_event_timestamp,
-    actor: { type: alertActionActorType.internal },
-    action_type: actionType,
-    rule_id: alert.rule_id,
-    source: alert.source,
-    reason,
-    space_id: spaceId,
-  };
 }

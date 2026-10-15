@@ -77,8 +77,10 @@ export interface DispatcherPipelineStateOverrides
   policies?: Map<ActionPolicyId, ActionPolicy>;
   dispatch?: ActionGroup[];
   throttled?: ActionGroup[];
+  planAlreadyNotified?: ActionGroup[];
   dispatchedExecutions?: Map<ActionGroupId, string[]>;
   dispatchFailures?: DispatchFailure[];
+  committedGroupIds?: Set<ActionGroupId>;
 }
 
 export function createDispatcherPipelineState(
@@ -93,8 +95,10 @@ export function createDispatcherPipelineState(
     policies,
     dispatch,
     throttled,
+    planAlreadyNotified,
     dispatchedExecutions,
     dispatchFailures,
+    committedGroupIds,
     input,
     ...rest
   } = state;
@@ -112,20 +116,22 @@ export function createDispatcherPipelineState(
       : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
-    ...(dispatch || throttled || dispatchable
+    ...(dispatch || throttled || planAlreadyNotified || dispatchable
       ? {
           plan: DispatchPlan.of({
             toDispatch: dispatch ?? [],
             throttled: throttled ?? [],
+            alreadyNotified: planAlreadyNotified ?? [],
             dispatchable: dispatchable ?? [],
           }),
         }
       : {}),
-    ...(dispatchedExecutions || dispatchFailures
+    ...(dispatchedExecutions || dispatchFailures || committedGroupIds
       ? {
           outcome: DispatchOutcome.of({
             executionsByGroup: dispatchedExecutions ?? new Map(),
             failures: dispatchFailures ?? [],
+            committedGroupIds,
           }),
         }
       : {}),

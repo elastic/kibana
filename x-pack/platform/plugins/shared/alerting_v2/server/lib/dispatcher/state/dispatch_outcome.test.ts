@@ -21,6 +21,29 @@ describe('DispatchOutcome', () => {
     expect(outcome.hasFailures()).toBe(false);
   });
 
+  describe('committed groups', () => {
+    it('reports no committed group by default', () => {
+      const outcome = DispatchOutcome.of({ executionsByGroup: new Map(), failures: [] });
+
+      expect(outcome.isCommitted('g1')).toBe(false);
+      expect(DispatchOutcome.empty().isCommitted('g1')).toBe(false);
+    });
+
+    it('reports the groups whose notified records were committed', () => {
+      const outcome = DispatchOutcome.of({
+        executionsByGroup: new Map([
+          ['g1', ['exec-1']],
+          ['g2', ['exec-2']],
+        ]),
+        failures: [],
+        committedGroupIds: new Set(['g1']),
+      });
+
+      expect(outcome.isCommitted('g1')).toBe(true);
+      expect(outcome.isCommitted('g2')).toBe(false);
+    });
+  });
+
   describe('deliveredDestinationsFor', () => {
     const group = createActionGroup({
       id: 'g1',
