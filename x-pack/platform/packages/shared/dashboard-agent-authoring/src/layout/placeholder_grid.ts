@@ -5,52 +5,22 @@
  * 2.0.
  */
 
-import {
-  isSection,
-  type AttachmentPanel,
-  type DashboardSection,
-} from '@kbn/agent-builder-dashboards-common';
+import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { getWidgetsBottomY } from '../dashboard_state';
 import { GRID_COLUMNS } from './types';
 
-/** Size of a new panel until the layout call places it. */
-const DEFAULT_PANEL_SIZE = { w: 24, h: 10 } as const;
-
-type DashboardWidget = AttachmentPanel | DashboardSection;
-
-type PanelGrid = AttachmentPanel['grid'];
-
-const toPanelGrid = (widget: DashboardWidget): PanelGrid =>
-  isSection(widget)
-    ? {
-        x: 0,
-        y: widget.grid.y,
-        w: GRID_COLUMNS,
-        h: Math.max(getWidgetsBottomY([widget]) - widget.grid.y, 1),
-      }
-    : widget.grid;
+/** Height of a new panel until the layout call places it. */
+const PLACEHOLDER_HEIGHT = 10;
 
 /**
- * Returns the grid of a new panel until the layout call places it: default-size panels, two per
- * row, below the existing widgets of the container and never overlapping them.
+ * Returns the grid of a new panel until the layout call places it: full width, below the existing
+ * widgets of its container.
  */
-export const getPlaceholderGrid = (widgets: DashboardWidget[]): PanelGrid => {
-  const { w, h } = DEFAULT_PANEL_SIZE;
-  const grids = widgets.map(toPanelGrid);
-  const lastGrid = grids.reduce<PanelGrid | undefined>((last, grid) => {
-    if (!last) return grid;
-    const bottom = grid.y + grid.h;
-    const lastBottom = last.y + last.h;
-    return bottom > lastBottom || (bottom === lastBottom && grid.y > last.y) ? grid : last;
-  }, undefined);
-
-  if (!lastGrid) {
-    return { x: 0, y: 0, w, h };
-  }
-
-  const rowY = lastGrid.y;
-  const isRightHalfFree = !grids.some(
-    (grid) => grid.x + grid.w > w && grid.y < rowY + h && grid.y + grid.h > rowY
-  );
-  return isRightHalfFree ? { x: w, y: rowY, w, h } : { x: 0, y: getWidgetsBottomY(widgets), w, h };
-};
+export const getPlaceholderGrid = (
+  widgets: Array<AttachmentPanel | DashboardSection>
+): AttachmentPanel['grid'] => ({
+  x: 0,
+  y: getWidgetsBottomY(widgets),
+  w: GRID_COLUMNS,
+  h: PLACEHOLDER_HEIGHT,
+});
