@@ -1224,7 +1224,11 @@ owner: elastic`,
         jest.requireActual<typeof Registry>('../registry').fetchFindLatestPackageOrUndefined
       );
       const lookup = () =>
-        getPackageInfo({ savedObjectsClient: soClient, pkgName: 'my-package', pkgVersion: '1.0.0' });
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
 
       try {
         await runWithCache(async () => {
@@ -1246,7 +1250,11 @@ owner: elastic`,
         .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
       const lookup = () =>
-        getPackageInfo({ savedObjectsClient: soClient, pkgName: 'my-package', pkgVersion: '1.0.0' });
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
 
       await runWithCache(async () => {
         await expect(lookup()).rejects.toBe(storageError);
@@ -1262,7 +1270,11 @@ owner: elastic`,
         new PackageNotFoundError('archive unavailable after a connection failure')
       );
       const lookup = () =>
-        getPackageInfo({ savedObjectsClient: soClient, pkgName: 'my-package', pkgVersion: '1.0.0' });
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
 
       await runWithCache(async () => {
         await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);

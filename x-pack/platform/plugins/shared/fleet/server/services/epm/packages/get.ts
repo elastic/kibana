@@ -547,7 +547,9 @@ export async function getPackageInfo({
     }
 
     // Only cache confirmed absence; archive and storage failures can also surface as not found.
-    const error = new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
+    const error = new PackageNotFoundError(
+      `[${pkgName}] package not installed or found in registry`
+    );
     setPackageInfoCacheError(pkgName, pkgVersion, error, prerelease);
     throw error;
   }
