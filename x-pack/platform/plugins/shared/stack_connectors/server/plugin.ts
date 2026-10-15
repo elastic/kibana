@@ -90,6 +90,10 @@ export class StackConnectorsPlugin
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
       isElasticCloudTrial: this.isElasticCloudTrial,
+      getUiSettingsClient: async (savedObjectsClient) => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+      },
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {

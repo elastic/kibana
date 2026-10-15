@@ -8,6 +8,10 @@
 import { text as streamToString } from 'node:stream/consumers';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { errors } from '@elastic/elasticsearch';
+import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
+import { supportsNonStreamingChat, type InferenceProvider } from '@kbn/inference-common';
 import { Stream } from 'openai/streaming';
 import type { Readable } from 'stream';
 
@@ -56,12 +60,20 @@ import {
   buildInferenceErrorMessage,
   truncateUpstreamBody,
 } from './helpers';
+import { completionToEventStream } from './non_streaming';
 
 // 4xx are the caller's fault, 5xx the provider's. A 429 without the `quota` marker is a transient
 // provider rate limit, not a user quota error (the quota carve-out is thrown earlier by
 // `detectandThrowUserError`), so it stays framework-side.
 const errorSourceForStatus = (statusCode: number): TaskErrorSource =>
   statusCode >= 500 || statusCode === 429 ? TaskErrorSource.FRAMEWORK : TaskErrorSource.USER;
+
+export interface InferenceConnectorDependencies {
+  /** Resolves a uiSettings client for the request's space; absent when settings cannot be read. */
+  getUiSettingsClient?: (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => Promise<IUiSettingsClient>;
+}
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios for requests, but errors may be Axios-shaped or Elasticsearch client ResponseError-shaped.
@@ -72,9 +84,14 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
 
   private inferenceId;
   private taskType;
+  private getUiSettingsClient?: InferenceConnectorDependencies['getUiSettingsClient'];
 
-  constructor(params: ServiceParams<Config, Secrets>) {
+  constructor(
+    params: ServiceParams<Config, Secrets>,
+    { getUiSettingsClient }: InferenceConnectorDependencies = {}
+  ) {
     super(params);
+    this.getUiSettingsClient = getUiSettingsClient;
 
     this.provider = this.config.provider;
     this.taskType = this.config.taskType;
@@ -209,6 +226,16 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     if (parentSpan?.isRecording()) {
       parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
     }
+    const headers = {
+      // always send a value for EIS
+      'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+    };
+
+    if (!(await this.shouldStream())) {
+      const completion = await this.performApiUnifiedCompletionNonStreaming(body, params, headers);
+      return completionToEventStream(completion);
+    }
+
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
@@ -224,8 +251,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         requestTimeout: 180_000,
         signal: params.signal,
         headers: {
-          // always send a value for EIS
-          'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+          ...headers,
           // asStream bypasses the transport's decompression step, so explicitly request
           // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
           'accept-encoding': 'identity',
@@ -249,17 +275,82 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
           errorSourceForStatus(response.statusCode)
         );
       }
-      detectandThrowUserError(error);
-      const message = `Inference endpoint [${this.inferenceId}] returned status code ${
-        response.statusCode
-      }${error ? `: ${error}` : ''}`;
-      throw createTaskRunError(
-        new Error(truncateUpstreamBody(message)),
-        errorSourceForStatus(response.statusCode)
-      );
+      this.throwInferenceStatusError(response.statusCode, error);
     }
 
     return response.body;
+  }
+
+  /**
+   * Calls the chat completion endpoint without `_stream` and waits for the full response.
+   */
+  private async performApiUnifiedCompletionNonStreaming(
+    body: UnifiedChatCompleteParams['body'],
+    params: UnifiedChatCompleteParams,
+    headers: Record<string, string>
+  ): Promise<UnifiedChatCompleteResponse> {
+    try {
+      return await this.esClient.transport.request<UnifiedChatCompleteResponse>(
+        {
+          method: 'POST',
+          path: `_inference/chat_completion/${this.inferenceId}`,
+          querystring: { timeout: '180s' },
+          body,
+        },
+        { requestTimeout: 180_000, signal: params.signal, headers }
+      );
+    } catch (error) {
+      if (error instanceof errors.ResponseError) {
+        const upstream = error.meta.body;
+        this.throwInferenceStatusError(
+          error.statusCode ?? 500,
+          typeof upstream === 'string' ? upstream : JSON.stringify(upstream)
+        );
+      }
+      throw error;
+    }
+  }
+
+  private throwInferenceStatusError(statusCode: number, error: string): never {
+    detectandThrowUserError(error);
+    const message = `Inference endpoint [${this.inferenceId}] returned status code ${statusCode}${
+      error ? `: ${error}` : ''
+    }`;
+    throw createTaskRunError(
+      new Error(truncateUpstreamBody(message)),
+      errorSourceForStatus(statusCode)
+    );
+  }
+
+  /**
+   * Streaming is the default. Non-streaming is only used when the space setting turns streaming
+   * off AND the endpoint's service advertises non-streaming chat completion support, so the toggle
+   * never sends a request Elasticsearch would reject. Any failure falls back to streaming.
+   */
+  private async shouldStream(): Promise<boolean> {
+    if (!this.getUiSettingsClient) {
+      return true;
+    }
+    try {
+      const uiSettingsClient = await this.getUiSettingsClient(this.savedObjectsClient);
+      if (await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING)) {
+        return true;
+      }
+      const services = await this.esClient.transport.request<
+        Array<Pick<InferenceProvider, 'service' | 'features'>>
+      >({ method: 'GET', path: '/_inference/_services' });
+      const service = Array.isArray(services)
+        ? services.find(({ service: name }) => name === this.config.provider)
+        : undefined;
+      return !supportsNonStreamingChat(service);
+    } catch (error) {
+      this.logger.debug(
+        `Could not resolve the inference streaming mode, streaming: ${buildInferenceErrorMessage(
+          error
+        )}`
+      );
+      return true;
+    }
   }
 
   /**
