@@ -158,6 +158,8 @@ describe('significant events persistence workflow contracts', () => {
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
     expect(triggerStep.with?.source_ids).toContain('source_ids');
+    // Open investigations are matched by subject; the start step takes no concurrency key.
+    expect(triggerStep.with).not.toHaveProperty('concurrency_key');
   });
 
   it('bounds the discovery investigation message below the trigger input limit', () => {

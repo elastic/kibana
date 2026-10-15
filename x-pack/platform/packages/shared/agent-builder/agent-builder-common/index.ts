@@ -14,6 +14,8 @@ export {
   toNamespaceSelector,
   isApiWildcardSelector,
   matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
 } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
@@ -153,7 +155,15 @@ export {
   type AgentBuilderAttachmentInvalidError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName, type CurrentUser } from './base/users';
+export {
+  type UserIdAndName,
+  type CurrentUser,
+  type UserPrincipalType,
+  isUserProfileId,
+  SERVICE_ACCOUNT_ID_PREFIX,
+  REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
+} from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
@@ -280,6 +290,10 @@ export {
   type SubstitutionStepData,
   createSubstitutionStep,
   isSubstitutionStep,
+  type InjectedContextStep,
+  type InjectedContextStepData,
+  createInjectedContextStep,
+  isInjectedContextStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
   type SubagentEntry,
@@ -379,6 +393,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type AskUserQuestionStep,
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
@@ -455,6 +472,22 @@ export {
   type AttachmentDeletedEvent,
   type AttachmentTimelineEvent,
   isAttachmentEvent,
+  ConversationActivityEventType,
+  type ConversationCreatedActivityEventData,
+  type ConversationCreatedActivityEvent,
+  type TitleUpdatedEventData,
+  type TitleUpdatedEvent,
+  type MetadataUpdatedEventData,
+  type MetadataUpdatedEvent,
+  type ConversationParticipant,
+  type ParticipantsAddedEventData,
+  type ParticipantsAddedEvent,
+  type ParticipantsRemovedEventData,
+  type ParticipantsRemovedEvent,
+  type VisibilityUpdatedEventData,
+  type VisibilityUpdatedEvent,
+  type ActivityEvent,
+  isActivityEvent,
   type TimelineEvent,
   type TimelineEventInput,
   type ActiveExecution,
@@ -463,14 +496,17 @@ export {
   roundStepEventId,
   roundUserMessageEventId,
   resumeExecutionId,
+  timelineExecutionId,
   parseExecutionId,
   executionTerminatedEventId,
   executionStepEventId,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
+  type BuiltInConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
   isBuiltInConversationEventType,
   isTimelineEvent,
+  isCustomConversationEvent,
   type ValidConversationEventType,
   assertValidConversationEventType,
   type ConversationAddEventInput,
@@ -525,6 +561,7 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export { SYSTEM_USER_ID } from './constants';
 export type {
   ConversationTemplate,
   ConversationTemplateInputType,
