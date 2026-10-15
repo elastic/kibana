@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
+import { KI_LIFECYCLE_STATUSES } from '../../../common/step_types/ki';
 import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
@@ -16,7 +17,7 @@ import { getErrorMessage } from '../utils/get_error_message';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-interface UseKiListArgs {
+interface UseListKiArgs {
   aiIndexId: string | undefined;
   size?: number;
   type?: string;
@@ -24,34 +25,39 @@ interface UseKiListArgs {
   notifyOnError?: boolean;
 }
 
-interface UseKiListSummary {
+interface UseListKiSummary {
   total: number;
   countsByType: KiTypeCount[];
 }
 
-interface UseKiListResult {
+interface UseListKiResult {
   kis: ListKisResponse['kis'];
   total: number;
-  summary: UseKiListSummary;
+  summary: UseListKiSummary;
   isLoading: boolean;
   isFetching: boolean;
   error: Error | undefined;
   refetch: () => void;
 }
 
-export const useKiList = ({
+export const useListKi = ({
   aiIndexId,
   size = DEFAULT_KI_PAGE_SIZE,
   type,
   enabled = true,
   notifyOnError = false,
-}: UseKiListArgs): UseKiListResult => {
+}: UseListKiArgs): UseListKiResult => {
   const {
     services: { http, notifications },
   } = useKibana();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.kiList(aiIndexId ?? '', size, type),
+    queryKey: contextEngineQueryKeys.aiIndex.listKi(
+      aiIndexId ?? '',
+      size,
+      type,
+      KI_LIFECYCLE_STATUSES
+    ),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
         throw new Error('AI index id is required');
@@ -60,6 +66,7 @@ export const useKiList = ({
         aiIndexId,
         size,
         ...(type !== undefined ? { type } : {}),
+        lifecycleStatus: [...KI_LIFECYCLE_STATUSES],
         signal,
       });
     },
@@ -74,7 +81,7 @@ export const useKiList = ({
 
     const toastMessage = getErrorMessage(error);
     notifications.toasts.addError(error, {
-      title: i18n.translate('xpack.contextEngine.kiList.loadErrorTitle', {
+      title: i18n.translate('xpack.contextEngine.listKi.loadErrorTitle', {
         defaultMessage: 'Unable to load Knowledge Indicators',
       }),
       ...(toastMessage ? { toastMessage } : {}),
