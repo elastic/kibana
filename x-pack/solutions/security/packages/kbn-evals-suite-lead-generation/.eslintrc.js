@@ -8,13 +8,6 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   overrides: [
-    // This package is Node-only (Playwright eval suite). Allow Node.js builtins.
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
     // Plain CJS scripts use Node built-ins via require() which the import
     // resolver cannot statically resolve — disable the unresolvable rule.
     {

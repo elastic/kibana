@@ -275,18 +275,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
     /**
      * FormatJS linter for i18n code.
      * https://formatjs.io/docs/tooling/linter
@@ -355,9 +343,7 @@ module.exports = {
         '**/parallel.playwright.config.ts',
       ],
       rules: {
-        'import/no-default-export': 'off',
         'import/no-named-as-default-member': 'off',
-        'import/no-named-as-default': 'off',
       },
     },
 
@@ -387,10 +373,6 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread': 'off',
-        'no-var': 'off',
-        'prefer-const': 'off',
-        'prefer-destructuring': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -420,10 +402,6 @@ module.exports = {
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread': 'off',
-        'no-var': 'off',
-        'prefer-const': 'off',
-        'prefer-destructuring': 'off',
         'no-restricted-syntax': [
           'error',
           'ArrowFunctionExpression',
@@ -456,7 +434,6 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -464,15 +441,6 @@ module.exports = {
           'ExportDefaultDeclaration',
           'ExportAllDeclaration',
         ],
-      },
-    },
-    /**
-     * Jest specific rules
-     */
-    {
-      files: ['**/*.test.{js,mjs,ts,tsx}'],
-      rules: {
-        'jest/valid-describe-callback': 'error',
       },
     },
 
@@ -542,61 +510,6 @@ module.exports = {
               'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
-        'no-restricted-properties': [
-          'error',
-          {
-            object: 'lodash',
-            property: 'set',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: '_',
-            property: 'set',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'setWith',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: '_',
-            property: 'setWith',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'assoc',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: '_',
-            property: 'assoc',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'assocPath',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: '_',
-            property: 'assocPath',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-          {
-            object: '_',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-        ],
       },
     },
     {
@@ -644,33 +557,7 @@ module.exports = {
         'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'no-console': ['warn', { allow: ['error'] }],
-        'react/function-component-definition': [
-          'warn',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react/function-component-definition': [
-          'off',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
       },
     },
     {
@@ -686,18 +573,6 @@ module.exports = {
           {
             additionalHooks:
               '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
-          },
-        ],
-      },
-    },
-    {
-      // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
-      rules: {
-        '@typescript-eslint/explicit-function-return-type': [
-          'error',
-          {
-            allowTypedFunctionExpressions: false,
           },
         ],
       },
@@ -742,7 +617,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         'import/no-duplicates': 'error',
         'no-restricted-imports': [
@@ -806,7 +680,6 @@ module.exports = {
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         'import/no-duplicates': ['error'],
         'no-restricted-imports': [
@@ -817,54 +690,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-      },
-    },
-    // Allow node.js imports for security solution test packages
-    {
-      files: [
-        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-    {
-      // typescript only for front and back end, but excludes the test files.
-      // We use this section to add rules in which we do not want to apply to test files.
-      // This should be a very small set as most linter rules are useful for tests as well.
-      files: [
-        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/automatic_import/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-      ],
-      excludedFiles: [
-        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/plugins/shared/automatic_import/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-non-null-assertion': 'error',
       },
     },
     {
@@ -885,9 +710,6 @@ module.exports = {
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-useless-constructor': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -923,82 +745,23 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'accessor-pairs': 'error',
-        'array-callback-return': 'error',
-        'no-array-constructor': 'error',
         complexity: 'warn',
         'n/no-deprecated-api': 'error',
-        'no-bitwise': 'error',
-        'no-continue': 'error',
-        'no-dupe-keys': 'error',
-        'no-duplicate-case': 'error',
         'no-duplicate-imports': 'off',
-        'no-empty-character-class': 'error',
-        'no-empty-pattern': 'error',
-        'no-ex-assign': 'error',
-        'no-extra-bind': 'error',
-        'no-extra-boolean-cast': 'error',
-        'no-extra-label': 'error',
-        'no-func-assign': 'error',
         'no-implicit-globals': 'error',
-        'no-implied-eval': 'error',
-        'no-invalid-regexp': 'error',
-        'no-inner-declarations': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-assign': 'error',
-        'no-misleading-character-class': 'error',
-        'no-new-native-nonconstructor': 'error',
-        'no-obj-calls': 'error',
-        'no-param-reassign': 'error',
-        'no-process-exit': 'error',
-        'no-prototype-builtins': 'error',
-        'no-self-compare': 'error',
-        'no-shadow-restricted-names': 'error',
-        'no-sparse-arrays': 'error',
-        'no-this-before-super': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-unreachable': 'error',
-        'no-unsafe-finally': 'error',
-        'no-useless-call': 'error',
-        'no-useless-catch': 'error',
-        'no-useless-concat': 'error',
-        'no-useless-computed-key': 'error',
-        'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'prefer-object-spread': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'prefer-rest-params': 'error',
-        'prefer-spread': 'error',
-        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
-        'symbol-description': 'error',
-        'vars-on-top': 'error',
         'import/no-duplicates': ['error'],
       },
       overrides: [
@@ -1044,7 +807,6 @@ module.exports = {
         'x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1077,32 +839,15 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
       },
     },
     {
@@ -1185,17 +930,6 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check all function arguments to catch unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'all',
-            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
-            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
-            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
-          },
-        ],
       },
     },
     {
@@ -1215,7 +949,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react-perf/jsx-no-new-function-as-prop': 'error',
         'react/jsx-no-bind': 'error',
       },
     },
@@ -1227,12 +960,8 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'accessor-pairs': 'error',
-        'array-callback-return': 'error',
-        'no-array-constructor': 'error',
         complexity: 'error',
         'consistent-return': 'error',
-        'func-style': ['error', 'expression'],
         'import/order': [
           'error',
           {
@@ -1240,70 +969,14 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
-        'sort-imports': [
-          'error',
-          {
-            ignoreDeclarationSort: true,
-          },
-        ],
         'n/no-deprecated-api': 'error',
-        'no-bitwise': 'error',
-        'no-continue': 'error',
-        'no-dupe-keys': 'error',
-        'no-duplicate-case': 'error',
         'no-duplicate-imports': 'off',
-        'no-empty-character-class': 'error',
-        'no-empty-pattern': 'error',
-        'no-ex-assign': 'error',
-        'no-extra-bind': 'error',
-        'no-extra-boolean-cast': 'error',
-        'no-extra-label': 'error',
-        'no-func-assign': 'error',
         'no-implicit-globals': 'error',
-        'no-implied-eval': 'error',
-        'no-invalid-regexp': 'error',
-        'no-inner-declarations': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-assign': 'error',
-        'no-misleading-character-class': 'error',
-        'no-new-native-nonconstructor': 'error',
-        'no-obj-calls': 'error',
-        'no-param-reassign': ['error', { props: true }],
-        'no-process-exit': 'error',
-        'no-prototype-builtins': 'error',
-        'no-self-compare': 'error',
-        'no-shadow-restricted-names': 'error',
-        'no-sparse-arrays': 'error',
-        'no-this-before-super': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-unreachable': 'error',
-        'no-unsafe-finally': 'error',
-        'no-useless-call': 'error',
-        'no-useless-catch': 'error',
-        'no-useless-concat': 'error',
-        'no-useless-computed-key': 'error',
-        'no-useless-escape': 'error',
-        'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'no-void': 'error',
-        'prefer-object-spread': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'prefer-rest-params': 'error',
-        'prefer-spread': 'error',
-        'prefer-template': 'error',
         'require-atomic-updates': 'error',
-        'symbol-description': 'error',
-        'vars-on-top': 'error',
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
-        'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
-        'prefer-destructuring': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1317,32 +990,6 @@ module.exports = {
       },
     },
 
-    /**
-     * Alerting Services overrides
-     */
-    {
-      // typescript for front and back end
-      files: [
-        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-    {
-      // typescript only for back end
-      files: [
-        'x-pack/platform/plugins/shared/stack_connectors/server/**/*.ts',
-        'x-pack/platform/plugins/shared/triggers_actions_ui/server/**/*.ts',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
     /**
      * ResponseOps overrides
      */
@@ -1385,7 +1032,6 @@ module.exports = {
     {
       files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         'import/no-duplicates': 'error',
         'no-restricted-imports': [
@@ -1396,10 +1042,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
@@ -1410,18 +1052,6 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
-      rules: {
-        'import/no-default-export': 'off',
       },
     },
     /**
@@ -1440,53 +1070,6 @@ module.exports = {
     },
 
     /**
-     * Lens overrides
-     */
-    {
-      files: ['x-pack/platform/plugins/shared/lens/**/*.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * Onboarding team overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/observability_onboarding/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/fields_metadata/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/dataset_quality/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/data_quality/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-streams-schema/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-streams-ai/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-streamlang/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-streamlang-tests/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-sample-parser/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-grok-heuristics/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-evals-suite-streams/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-dissect-heuristics/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/kbn-content-packs-schema/**/*.{ts,tsx}',
-        'x-pack/platform/packages/private/kbn-data-quality/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-xstate-utils/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-use-tracked-promise/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-timerange/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-synthtrace/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-synthtrace-client/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-react-hooks/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-otel-semantic-conventions/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-otel-demo/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-grok-ui/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
      * Custom Content overrides
      */
     {
@@ -1495,46 +1078,8 @@ module.exports = {
         'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
       ],
       rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
         'react-hooks/exhaustive-deps': 'error',
-        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
-        'react/no-danger': 'error',
       },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
-      ],
-      excludedFiles: ['**/*.test.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/no-non-null-assertion': 'error',
-      },
-    },
-
-    /**
-     * Discover overrides
-     */
-    {
-      files: [
-        'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/ban-ts-comment': [
-          'error',
-          {
-            'ts-expect-error': false,
-          },
-        ],
-      },
-    },
-    {
-      files: [
-        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
-      ],
     },
 
     /**
@@ -1578,25 +1123,9 @@ module.exports = {
             'newlines-between': 'always-and-inside-groups',
           },
         ],
-        'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
-        'react/jsx-boolean-value': ['error', 'never'],
         'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-        ],
-      },
-    },
-    {
-      // Source files only - allow `any` in test/mock files
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: [
-        'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 
@@ -1606,8 +1135,6 @@ module.exports = {
     {
       files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
       rules: {
-        radix: 'error',
-
         // module importing
         'import/order': [
           'error',
@@ -1615,32 +1142,9 @@ module.exports = {
             groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
           },
         ],
-        'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
 
         // react
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
         'react/sort-comp': 'error',
-        'react/jsx-boolean-value': 'error',
-        'react/forbid-elements': [
-          'error',
-          {
-            forbid: [
-              {
-                element: 'EuiConfirmModal',
-                message: 'Use <ConfirmModal> instead',
-              },
-              {
-                element: 'EuiPopover',
-                message: 'Use <Popover> instead',
-              },
-              {
-                element: 'EuiIconTip',
-                message: 'Use <TooltipIcon> instead',
-              },
-            ],
-          },
-        ],
       },
     },
     {
@@ -1673,60 +1177,11 @@ module.exports = {
         browser: true,
       },
     },
-    {
-      files: [
-        'src/platform/packages/shared/kbn-flot-charts/**/*.{js,ts,tsx,d.ts}',
-        'x-pack/platform/plugins/private/canvas/public/**/*.{js,ts,tsx}',
-        'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.{js,ts,tsx}',
-        'x-pack/platform/plugins/private/monitoring/public/components/chart/**/*.{js,ts,tsx}',
-        'x-pack/platform/plugins/private/monitoring/public/components/sparkline/**/*.{js,ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-globals': [
-          'error',
-          ...require('@kbn/eslint-config/restricted_globals'),
-          {
-            name: '$',
-            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
-          },
-          {
-            name: 'jQuery',
-            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
-          },
-        ],
-      },
-    },
-    {
-      files: [
-        'src/platform/packages/shared/kbn-flot-charts/index.js',
-        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
-      ],
-      rules: {
-        'import/no-default-export': 'off',
-      },
-    },
-    /**
-     * TSVB overrides
-     */
-    {
-      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
-      // Playwright resolves its configuration from a default export.
-      excludedFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
-      rules: {
-        'import/no-default-export': 'error',
-      },
-    },
 
     /**
      * Osquery overrides
      */
     {
-      extends: [
-        'eslint:recommended',
-        'plugin:react/recommended',
-        'plugin:@typescript-eslint/recommended',
-      ],
-      plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'padding-line-between-statements': [
@@ -1742,32 +1197,13 @@ module.exports = {
             next: ['return'],
           },
         ],
-        'arrow-body-style': ['error', 'as-needed'],
-        'prefer-arrow-callback': 'error',
-        'no-unused-vars': 'off',
-        'react/prop-types': 'off',
-        // The `recommended` presets above re-enable these rules; they run in oxlint instead.
-        'constructor-super': 'off',
-        'no-cond-assign': 'off',
-        'no-const-assign': 'off',
-        'no-debugger': 'off',
-        'no-empty': 'off',
-        'no-unused-labels': 'off',
-        'no-with': 'off',
-        'use-isnan': 'off',
-        'react/jsx-no-undef': 'off',
-        'react/no-is-mounted': 'off',
-        'react/no-unescaped-entities': 'off',
-        'react/no-unknown-property': 'off',
-        '@typescript-eslint/no-extra-non-null-assertion': 'off',
-        '@typescript-eslint/no-misused-new': 'off',
-        '@typescript-eslint/no-namespace': 'off',
-        '@typescript-eslint/explicit-module-boundary-types': 'off',
-        '@typescript-eslint/no-empty-object-type': 'off',
-        '@typescript-eslint/no-unsafe-function-type': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-unused-vars': 'off',
-        '@typescript-eslint/no-require-imports': 'off',
+        // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
+        'no-dupe-args': 'error',
+        'no-new-symbol': 'error',
+        'no-octal': 'error',
+        'no-unsafe-optional-chaining': 'error',
+        'react/display-name': 'error',
+        'react/no-deprecated': 'error',
       },
     },
     {
@@ -1780,7 +1216,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react-perf/jsx-no-new-function-as-prop': 'error',
         'react/jsx-no-bind': 'error',
       },
     },
@@ -1839,14 +1274,6 @@ module.exports = {
           },
         ],
         'import/no-duplicates': ['error'],
-        'sort-imports': [
-          // This rule sorts imports of multiple members (destructured imports)
-          'error',
-          {
-            ignoreCase: true,
-            ignoreDeclarationSort: true,
-          },
-        ],
       },
     },
     {
@@ -1873,55 +1300,6 @@ module.exports = {
     },
 
     /**
-     * Do not allow `any`
-     */
-    {
-      files: [
-        'src/platform/packages/shared/kbn-analytics/**',
-        'src/platform/plugins/private/kibana_usage_collection/**',
-        'src/platform/plugins/shared/usage_collection/**',
-        'src/platform/plugins/shared/telemetry/**',
-        'src/platform/plugins/shared/telemetry_collection_manager/**',
-        'src/platform/plugins/shared/telemetry_management_section/**',
-        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
-      ],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-    {
-      files: [
-        // core-team owned code
-        'src/core/**',
-        'x-pack/platform/plugins/shared/features/**',
-        'x-pack/platform/plugins/shared/licensing/**',
-        'x-pack/platform/plugins/shared/global_search/**',
-        'x-pack/platform/plugins/shared/cloud/**',
-        'src/platform/packages/shared/kbn-config-schema',
-        'src/platform/plugins/shared/saved_objects_management/**',
-        'src/platform/packages/shared/kbn-analytics/**',
-        'src/platform/packages/private/kbn-telemetry-tools/**',
-        'src/platform/plugins/private/kibana_usage_collection/**',
-        'src/platform/plugins/shared/usage_collection/**',
-        'src/platform/plugins/shared/telemetry/**',
-        'src/platform/plugins/shared/telemetry_collection_manager/**',
-        'src/platform/plugins/shared/telemetry_management_section/**',
-        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
-      ],
-      rules: {
-        '@typescript-eslint/ban-ts-comment': [
-          'error',
-          {
-            'ts-check': false,
-            'ts-expect-error': false,
-            'ts-ignore': true,
-            'ts-nocheck': false,
-          },
-        ],
-      },
-    },
-
-    /**
      * Workflows Team: generic rules
      */
     {
@@ -1937,87 +1315,24 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'accessor-pairs': 'error',
-        'array-callback-return': 'error',
-        'no-array-constructor': 'error',
         complexity: 'warn',
         'n/no-deprecated-api': 'error',
-        'no-bitwise': 'error',
-        'no-continue': 'error',
-        'no-dupe-keys': 'error',
-        'no-duplicate-case': 'error',
         'no-duplicate-imports': 'off',
-        'no-empty-character-class': 'error',
-        'no-empty-pattern': 'error',
-        'no-ex-assign': 'error',
-        'no-extra-bind': 'error',
-        'no-extra-boolean-cast': 'error',
-        'no-extra-label': 'error',
-        'no-func-assign': 'error',
         'no-implicit-globals': 'error',
-        'no-implied-eval': 'error',
-        'no-invalid-regexp': 'error',
-        'no-inner-declarations': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-assign': 'error',
-        'no-misleading-character-class': 'error',
-        'no-new-native-nonconstructor': 'error',
-        'no-obj-calls': 'error',
-        'no-param-reassign': 'error',
-        'no-process-exit': 'error',
-        'no-prototype-builtins': 'error',
-        'no-self-compare': 'error',
-        'no-shadow-restricted-names': 'error',
-        'no-sparse-arrays': 'error',
-        'no-this-before-super': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-unreachable': 'error',
-        'no-unsafe-finally': 'error',
-        'no-useless-call': 'error',
-        'no-useless-catch': 'error',
-        'no-useless-concat': 'error',
-        'no-useless-computed-key': 'error',
-        'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'prefer-object-spread': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'prefer-rest-params': 'error',
-        'prefer-spread': 'error',
-        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
-        'symbol-description': 'error',
-        'vars-on-top': 'error',
         'import/no-duplicates': ['error'],
-        '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-useless-constructor': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -2061,14 +1376,6 @@ module.exports = {
           },
         ],
         'import/no-duplicates': ['error'],
-        'sort-imports': [
-          // This rule sorts imports of multiple members (destructured imports)
-          'error',
-          {
-            ignoreCase: true,
-            ignoreDeclarationSort: true,
-          },
-        ],
       },
     },
     /**
@@ -2084,36 +1391,8 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         'import/no-duplicates': ['error'],
-      },
-    },
-    /**
-     * Workflows Team: test files
-     */
-    {
-      files: [
-        'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'src/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
-      ],
-      rules: {
-        '@typescript-eslint/no-non-null-assertion': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-      },
-    },
-    /**
-     * Workflows Team: scripts files
-     */
-    {
-      files: ['src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-        'no-console': 'off',
-        'no-process-exit': 'off',
       },
     },
 
@@ -2136,7 +1415,6 @@ module.exports = {
         ecmaVersion: 2022,
       },
       rules: {
-        'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
         '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
@@ -2154,20 +1432,6 @@ module.exports = {
       },
     },
 
-    /**
-     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
-     */
-    {
-      files: [
-        'src/platform/packages/*/kbn-repo-*/**/*',
-        'packages/kbn-repo-*/**/*',
-        'packages/kbn-validate-next-docs-cli/**/*',
-        'packages/kbn-find-used-node-modules/**/*',
-      ],
-      rules: {
-        'max-classes-per-file': 'off',
-      },
-    },
     {
       files: [
         // TODO @kibana/operations
@@ -2193,17 +1457,8 @@ module.exports = {
     {
       files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
       rules: {
-        // disabling it since package is a CLI tool
-        'no-console': 'off',
         // disabling it since package is marked as module and it requires extension for files written
         '@kbn/imports/uniform_imports': 'off',
-      },
-    },
-    {
-      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
-      rules: {
-        // disabling it since package is a CLI tool
-        'no-console': 'off',
       },
     },
     {
