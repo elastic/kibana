@@ -68,7 +68,11 @@ export type DispatchPreparation =
  */
 export interface HostNameMismatch {
   providedHostName: string;
-  fleetHostName: string;
+  /**
+   * Every hostname the supplied agent is known by — Fleet's name for it and
+   * the Defend metadata names. The caller supplied none of them.
+   */
+  knownHostNames: string[];
 }
 
 export type ConfirmationTarget =
@@ -78,9 +82,10 @@ export type ConfirmationTarget =
       hostLabel: string;
       endpoint: ResolvedEndpoint;
       /**
-       * Set when both a hostname and an agent id were supplied and the agent's
-       * Fleet hostname is neither. The handler refuses the call, so the card
-       * says so instead of naming a host that will not be acted on.
+       * Set when both a hostname and an agent id were supplied and the hostname
+       * is none of the names that agent is known by (Fleet's or Defend's). The
+       * handler refuses the call, so the card says so instead of naming a host
+       * that will not be acted on.
        */
       mismatch?: HostNameMismatch;
     }
@@ -107,57 +112,99 @@ const resolveTarget = (request: DispatchRequest): Promise<ResolvedDispatchTarget
   );
 
 /**
- * A hostname that disagrees with the Fleet hostname of the supplied agent id.
- * `resolveDispatchTarget` prefers the id, so without this check the two inputs
- * can name different hosts and the model's hostname is what the card shows.
+ * A hostname that disagrees with every hostname the supplied agent id is known
+ * by. `resolveDispatchTarget` prefers the id, so without this check the two
+ * inputs can name different hosts and the model's hostname is what the card
+ * shows.
+ *
+ * Fleet and Defend name the same machine differently under an agent policy
+ * whose hostname format is FQDN (Fleet's `local_metadata.host.name` is the
+ * FQDN; Defend's metadata and `list_endpoints` show the short OS hostname), so
+ * either identity of *that same agent* counts as a match. An alias belonging
+ * to a different agent still does not — the Defend names come from a read
+ * keyed on the supplied id.
  */
 export const findHostNameMismatch = (
   providedHostName: string | undefined,
   endpoint: ResolvedEndpoint
-): HostNameMismatch | undefined =>
-  providedHostName && endpoint.hostName && endpoint.hostName !== providedHostName
-    ? { providedHostName, fleetHostName: endpoint.hostName }
-    : undefined;
+): HostNameMismatch | undefined => {
+  if (!providedHostName) {
+    return undefined;
+  }
+
+  const knownHostNames = [endpoint.hostName, ...(endpoint.defendHostNames ?? [])].filter(
+    (name): name is string => Boolean(name)
+  );
+
+  // No name to compare against: refuse only on evidence the lookup actually
+  // has, as before.
+  if (!knownHostNames.length || knownHostNames.includes(providedHostName)) {
+    return undefined;
+  }
+
+  return { providedHostName, knownHostNames };
+};
+
+/** Renders hostnames for the analyst-facing refusal text. */
+const quotedNames = (names: string[]) => names.map((name) => `'${name}'`).join(', ');
 
 const mismatchResult = (mismatch: HostNameMismatch) =>
   responseActionErrorResult(
     'invalid_argument',
-    `The supplied hostName '${mismatch.providedHostName}' is not the Fleet hostname '${mismatch.fleetHostName}' of the supplied agentId, so the target is ambiguous. Call the tool again with the agentId alone (or with the matching hostname).`
+    `The supplied hostName '${
+      mismatch.providedHostName
+    }' is not a hostname of the supplied agentId (known: ${quotedNames(
+      mismatch.knownHostNames
+    )}), so the target is ambiguous. Call the tool again with the agentId alone (or with one of those hostnames).`
   );
 
 /**
  * Resolves the target for the confirmation card. Never throws and never
- * dispatches: an unresolvable host or a missing privilege is reported in the
- * card text so the analyst is not asked to approve an action that the handler
- * will refuse.
+ * dispatches: an unresolvable host, a missing privilege, or a Fleet/metadata
+ * read that fails while building the card is reported in the card text so the
+ * analyst is not asked to approve an action that the handler will refuse.
+ *
+ * The catch is load-bearing: this phase runs before the tool handler
+ * (`run_tool.ts` awaits `confirmation.getConfirmation` outside its own error
+ * handling), so letting a service read reject here would fail tool execution
+ * with neither a card nor the handler's structured error result.
  */
 export const describeDispatchTargetForConfirmation = async (
   request: DispatchRequest
 ): Promise<ConfirmationTarget> => {
   const { context, endpointAppContextService, requiredPrivilege } = request;
 
-  const authz = await endpointAppContextService.getEndpointAuthz(context.request);
-  if (!authz[requiredPrivilege]) {
+  try {
+    const authz = await endpointAppContextService.getEndpointAuthz(context.request);
+    if (!authz[requiredPrivilege]) {
+      return {
+        kind: 'blocked',
+        message: `You do not have the '${requiredPrivilege}' endpoint privilege, so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
+      };
+    }
+
+    const target = await resolveTarget(request);
+
+    if (target.kind === 'respond') {
+      return { kind: 'blocked', message: target.data.message };
+    }
+
+    const mismatch = findHostNameMismatch(request.params.hostName, target.endpoint);
+
+    return {
+      kind: 'resolved',
+      hostLabel: target.hostLabel,
+      endpoint: target.endpoint,
+      ...(mismatch ? { mismatch } : {}),
+    };
+  } catch (error) {
     return {
       kind: 'blocked',
-      message: `You do not have the '${requiredPrivilege}' endpoint privilege, so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
+      message: `The target host could not be verified (${
+        error instanceof Error ? error.message : String(error)
+      }), so this action cannot be dispatched yet. Retry once Fleet and the Endpoint services are reachable, or perform the action from the Security UI.`,
     };
   }
-
-  const target = await resolveTarget(request);
-
-  if (target.kind === 'respond') {
-    return { kind: 'blocked', message: target.data.message };
-  }
-
-  const mismatch = findHostNameMismatch(request.params.hostName, target.endpoint);
-
-  return {
-    kind: 'resolved',
-    hostLabel: target.hostLabel,
-    endpoint: target.endpoint,
-    ...(mismatch ? { mismatch } : {}),
-  };
 };
 
 /**
@@ -257,7 +304,11 @@ export const buildDispatchConfirmation = async (
     return {
       ...base,
       color: 'warning' as const,
-      message: `**This action will be refused.** The requested hostname '${target.mismatch.providedHostName}' does not match the Fleet hostname '${target.mismatch.fleetHostName}' of agent ID ${target.endpoint.agentId}.`,
+      message: `**This action will be refused.** The requested hostname '${
+        target.mismatch.providedHostName
+      }' is not a hostname of agent ID ${target.endpoint.agentId} (known: ${quotedNames(
+        target.mismatch.knownHostNames
+      )}).`,
     };
   }
 

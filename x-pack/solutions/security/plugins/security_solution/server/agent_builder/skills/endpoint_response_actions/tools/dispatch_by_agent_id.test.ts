@@ -106,12 +106,14 @@ describe.each(CASES)(
     let ensureInCurrentSpace: jest.Mock;
     let getAgent: jest.Mock;
     let listAgents: jest.Mock;
+    let getHostMetadataList: jest.Mock;
 
     beforeEach(() => {
       jest.clearAllMocks();
       service = createMockEndpointAppContext().service;
+      getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
       jest.spyOn(service, 'getEndpointMetadataService').mockImplementation((() => ({
-        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+        getHostMetadataList,
       })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
 
       client = {
@@ -254,6 +256,83 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
+    it('accepts the short Defend hostname of an agent whose Fleet hostname is the FQDN', async () => {
+      // Agent policy hostname format is FQDN: Fleet names the agent
+      // `web-01.example.com` while `list_endpoints` shows `web-01`, because
+      // Defend writes the short OS hostname to the united metadata index.
+      getAgent.mockResolvedValue({
+        id: 'agent-b',
+        status: 'online',
+        packages: ['endpoint'],
+        local_metadata: { host: { name: 'web-01.example.com' } },
+      });
+      getHostMetadataList.mockResolvedValue({
+        data: [
+          {
+            metadata: {
+              elastic: { agent: { id: 'agent-b' } },
+              host: { hostname: 'web-01' },
+            },
+          },
+        ],
+        total: 1,
+      });
+      const tool = build(service);
+
+      const out = results(
+        await tool.handler({ hostName: 'web-01', agentId: 'agent-b', ...extraParams }, mockContext)
+      );
+
+      expect(out[0].type).not.toBe('error');
+      expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+      expect(client[clientMethod].mock.calls[0][0]).toEqual(
+        expect.objectContaining({ endpoint_ids: ['agent-b'] })
+      );
+    });
+
+    it("reads the Defend hostnames keyed on the supplied agent id, so another agent's alias is never accepted", async () => {
+      const tool = build(service);
+
+      await tool.handler({ hostName: 'dup-host', agentId: 'agent-b', ...extraParams }, mockContext);
+
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: expect.stringContaining('agent-b'),
+        }),
+        undefined
+      );
+    });
+
+    it('still refuses a hostname the agent is not known by, even when Defend names it too', async () => {
+      getAgent.mockResolvedValue({
+        id: 'agent-b',
+        status: 'online',
+        packages: ['endpoint'],
+        local_metadata: { host: { name: 'dup-host' } },
+      });
+      getHostMetadataList.mockResolvedValue({
+        data: [
+          {
+            metadata: {
+              elastic: { agent: { id: 'agent-b' } },
+              host: { hostname: 'dup-host-short' },
+            },
+          },
+        ],
+        total: 1,
+      });
+      const tool = build(service);
+
+      const out = results(
+        await tool.handler({ hostName: 'web-01', agentId: 'agent-b', ...extraParams }, mockContext)
+      );
+
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('invalid_argument');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
     it('does not present an approvable card when the hostName and agentId name different hosts', async () => {
       const tool = build(service);
 
@@ -294,6 +373,35 @@ describe.each(CASES)(
 
       expect(card?.message).toContain('will be refused');
       expect(card?.message).toContain(privilege);
+    });
+
+    it('returns a refusal card, not a rejected call, when the privilege read fails', async () => {
+      service.getEndpointAuthz = jest
+        .fn()
+        .mockRejectedValue(new Error('kibana system unavailable'));
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain('kibana system unavailable');
+    });
+
+    it('returns a refusal card, not a rejected call, when the target lookup fails', async () => {
+      getAgent.mockRejectedValue(new Error('fleet search failed'));
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain('fleet search failed');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
     it('shows the model-written comment on the card, since it is logged under the analyst', async () => {

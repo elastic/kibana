@@ -43,11 +43,21 @@ export interface ResolvedEndpoint {
   agentType: ResponseActionAgentType;
   packages: string[];
   /**
-   * The hostname Fleet records for the agent. Set only by `resolveByAgentId`,
-   * where the caller supplied an ID rather than a name, so the audit label and
-   * confirmation can name the host that will really be acted on.
+   * The hostname Fleet records for the agent (`local_metadata.host.name`).
+   * Set only by `resolveByAgentId`, where the caller supplied an ID rather
+   * than a name, so the audit label and confirmation can name the host that
+   * will really be acted on. Under an agent policy whose hostname format is
+   * FQDN this is the FQDN, not the short name Defend reports — see
+   * {@link defendHostNames}.
    */
   hostName?: string;
+  /**
+   * Other hostnames the same agent is known by in the Defend united metadata
+   * index (`host.hostname`, the name `list_endpoints` shows). Set only by
+   * `resolveByAgentId`, from a read keyed on that agent's own id, so these can
+   * only ever be this machine's names — never another agent's alias.
+   */
+  defendHostNames?: string[];
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -112,6 +122,8 @@ interface MetadataCandidate {
     agent?: { id?: string };
     /** Fleet agent id — the identity actions and Fleet candidates key on. */
     elastic?: { agent?: { id?: string } };
+    /** Names Defend reports for the host; `hostname` is what `list_endpoints` shows. */
+    host?: { hostname?: string; name?: string };
   };
   host_status?: string;
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
@@ -379,6 +391,52 @@ export function createEndpointLookupService(
   };
 
   /**
+   * Hostnames Defend itself reports for one agent, read from the united
+   * metadata index keyed on *that agent's id*. Keying on the id is the point:
+   * the read can only return documents belonging to the agent the caller
+   * already named, so a hostname that is another machine's alias can never be
+   * accepted through it.
+   *
+   * Needed because Fleet and Defend disagree about the name of the same host
+   * when the agent policy's hostname format is FQDN: Fleet's
+   * `local_metadata.host.name` is then the FQDN while Defend keeps writing the
+   * short OS hostname that `list_endpoints` shows. Without these names a
+   * correct `{ hostName: <short name>, agentId: <that same agent> }` call is
+   * refused as ambiguous.
+   *
+   * Best effort by design: the names only *widen* what counts as a match for
+   * the agent the caller already named, so an outage here leaves them with
+   * Fleet's hostname alone (the stricter, pre-existing behaviour) instead of
+   * failing a dispatch that Fleet resolved fine.
+   */
+  const listDefendHostNames = async (agentId: string): Promise<string[]> => {
+    try {
+      // Fleet agent id first, endpoint's own id as the legacy fallback — the
+      // same join `getAgentHostNamesWithIds` and the status read use.
+      const quotedAgentId = `"${escapeQuotes(agentId)}"`;
+      const { data } = await endpointAppContextService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList(
+          {
+            page: 0,
+            pageSize: LOOKUP_PAGE_SIZE,
+            kuery: `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
+          },
+          scoped
+        );
+
+      const names = (data ?? []).flatMap((entry) => [
+        entry.metadata?.host?.hostname,
+        entry.metadata?.host?.name,
+      ]);
+
+      return [...new Set(names.filter((name): name is string => Boolean(name)))];
+    } catch {
+      return [];
+    }
+  };
+
+  /**
    * Candidates from the Defend united metadata index, matched exactly on
    * `united.endpoint.host.hostname` — the hostname `list_endpoints` returns
    * and the status read filters on. Read on origin as well as under CPS:
@@ -474,16 +532,22 @@ export function createEndpointLookupService(
       }
 
       const fleetHostName = agent.local_metadata?.host?.name;
+      const agentType = resolveAgentTypeFromPackages(packages);
+      // Fleet's name for the agent is not the only identity a correct caller
+      // can supply — see `listDefendHostNames`. Only a Defend agent has
+      // documents in the metadata index, so only it needs that read.
+      const defendHostNames = agentType === 'endpoint' ? await listDefendHostNames(agent.id) : [];
 
       return {
         kind: 'found',
         endpoint: {
           agentId: agent.id,
-          agentType: resolveAgentTypeFromPackages(packages),
+          agentType,
           packages,
           ...(typeof fleetHostName === 'string' && fleetHostName
             ? { hostName: fleetHostName }
             : {}),
+          ...(defendHostNames.length ? { defendHostNames } : {}),
         },
       };
     },

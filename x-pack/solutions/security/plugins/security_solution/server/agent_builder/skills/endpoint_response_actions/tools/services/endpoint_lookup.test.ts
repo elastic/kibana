@@ -932,7 +932,11 @@ describe('createEndpointLookupService', () => {
   });
 
   describe('resolveByAgentId', () => {
-    const buildByIdService = (agent: Record<string, unknown> | Error, ensure?: jest.Mock) => {
+    const buildByIdService = (
+      agent: Record<string, unknown> | Error,
+      ensure?: jest.Mock,
+      metadata?: jest.Mock
+    ) => {
       const getAgent = jest.fn();
       if (agent instanceof Error) {
         getAgent.mockRejectedValue(agent);
@@ -940,18 +944,20 @@ describe('createEndpointLookupService', () => {
         getAgent.mockResolvedValue(agent);
       }
       const ensureInCurrentSpace = ensure ?? jest.fn().mockResolvedValue(undefined);
+      const getHostMetadataList = metadata ?? jest.fn().mockResolvedValue({ data: [], total: 0 });
       const endpointAppContextService = {
         getInternalFleetServices: jest.fn(() => ({
           agent: { listAgents: jest.fn(), getAgent },
           ensureInCurrentSpace,
         })),
-        getEndpointMetadataService: jest.fn(),
+        getEndpointMetadataService: jest.fn(() => ({ getHostMetadataList })),
       } as unknown as EndpointAppContextService;
 
       return {
         lookup: createEndpointLookupService(endpointAppContextService, spaceId),
         getAgent,
         ensureInCurrentSpace,
+        getHostMetadataList,
       };
     };
 
@@ -1000,6 +1006,84 @@ describe('createEndpointLookupService', () => {
       const { lookup } = buildByIdService({ id: 'agent-sys', packages: ['system'] });
 
       expect(await lookup.resolveByAgentId('agent-sys')).toEqual({ kind: 'not_found' });
+    });
+
+    it("also returns the agent's Defend metadata hostnames, read by its own id", async () => {
+      const getHostMetadataList = jest.fn().mockResolvedValue({
+        data: [
+          {
+            metadata: {
+              elastic: { agent: { id: 'agent-b' } },
+              host: { hostname: 'web-01', name: 'web-01' },
+            },
+          },
+        ],
+        total: 1,
+      });
+      const { lookup } = buildByIdService(
+        {
+          id: 'agent-b',
+          packages: ['endpoint'],
+          local_metadata: { host: { name: 'web-01.example.com' } },
+        },
+        undefined,
+        getHostMetadataList
+      );
+
+      const result = await lookup.resolveByAgentId('agent-b');
+
+      expect(result).toEqual({
+        kind: 'found',
+        endpoint: {
+          agentId: 'agent-b',
+          agentType: 'endpoint',
+          packages: ['endpoint'],
+          hostName: 'web-01.example.com',
+          defendHostNames: ['web-01'],
+        },
+      });
+      // Keyed on the Fleet agent id (endpoint's own id as legacy fallback), so
+      // the read cannot return another agent's names.
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: '(united.agent.agent.id: "agent-b" OR agent.id: "agent-b")',
+        }),
+        undefined
+      );
+    });
+
+    it('resolves the agent even when the Defend metadata identity read fails', async () => {
+      const { lookup } = buildByIdService(
+        {
+          id: 'agent-b',
+          packages: ['endpoint'],
+          local_metadata: { host: { name: 'web-01.example.com' } },
+        },
+        undefined,
+        jest.fn().mockRejectedValue(new Error('metadata index unavailable'))
+      );
+
+      expect(await lookup.resolveByAgentId('agent-b')).toEqual({
+        kind: 'found',
+        endpoint: {
+          agentId: 'agent-b',
+          agentType: 'endpoint',
+          packages: ['endpoint'],
+          hostName: 'web-01.example.com',
+        },
+      });
+    });
+
+    it('does not read the Defend metadata for a non-Defend agent', async () => {
+      const { lookup, getHostMetadataList } = buildByIdService({
+        id: 'agent-s1',
+        packages: ['sentinel_one'],
+        local_metadata: { host: { name: 'sentinel-host' } },
+      });
+
+      await lookup.resolveByAgentId('agent-s1');
+
+      expect(getHostMetadataList).not.toHaveBeenCalled();
     });
 
     it('honours the agentTypes scope on the ID path', async () => {
