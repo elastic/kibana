@@ -139,7 +139,7 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: euiTheme.size.m,
+                  gap: euiTheme.size.l,
                 }}
               >
                 <TargetName name={name} supersededBy={supersedingRule} />
