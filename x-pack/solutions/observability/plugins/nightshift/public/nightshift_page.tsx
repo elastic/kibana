@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,12 +23,14 @@ import { KNOWLEDGE_PAGE_TITLE, NightshiftAppHeader, SETTINGS_PAGE_TITLE } from '
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
-import { useKnowledgeTabsAvailability } from './knowledge/hooks/use_knowledge_tabs_availability';
-import { isKnowledgeMenuItemVisible } from './knowledge/knowledge_tabs';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
+import { NightshiftOnboarding } from './onboarding/onboarding';
+import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
 
+/** Onboarding has a second column for the "Get started" card. */
+const ONBOARDING_MAX_WIDTH = '1040px';
 const KnowledgePage = React.lazy(() =>
   import('./knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
 );
@@ -43,7 +45,8 @@ export function NightshiftPage(): React.ReactElement | null {
     nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const history = useHistory();
   const { canShow, canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
@@ -98,8 +101,22 @@ export function NightshiftPage(): React.ReactElement | null {
   const closeCustomContextFlyout = useCallback(() => setIsCustomContextFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const knowledgeTabsAvailability = useKnowledgeTabsAvailability({ enabled: isAvailable });
-  const isKnowledgeMenuVisible = isKnowledgeMenuItemVisible(knowledgeTabsAvailability);
+
+  const onboarding = useOnboardingVisibility({
+    isEnabled: canManage && nightshiftInvestigations?.investigationsClient != null,
+    canUseAutomations,
+    forceOnboarding: new URLSearchParams(search).get('onboarding') === '1',
+  });
+  const { dismiss: dismissOnboarding } = onboarding;
+  const finishOnboarding = useCallback(() => {
+    const params = new URLSearchParams(history.location.search);
+    params.delete('onboarding');
+    history.replace({ search: params.toString() });
+    dismissOnboarding();
+  }, [dismissOnboarding, history]);
+  const isOnboarding = !canUseAutomationsPage && onboarding.showOnboarding;
+  // Before the first investigation the page is only about onboarding, as in the design.
+  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
   useBreadcrumbs(
     [
@@ -170,8 +187,8 @@ export function NightshiftPage(): React.ReactElement | null {
               headerProps={{
                 onManagementClick: navigateToManagement,
                 managementHref,
-                onKnowledgeClick: isKnowledgeMenuVisible ? navigateToKnowledge : undefined,
-                knowledgeHref: isKnowledgeMenuVisible ? knowledgeHref : undefined,
+                onKnowledgeClick: navigateToKnowledge,
+                knowledgeHref,
                 onSandboxSecretsClick: canManageSandboxSecrets
                   ? openSandboxSecretsFlyout
                   : undefined,
@@ -214,13 +231,15 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onManagementClick={navigateToManagement}
             managementHref={managementHref}
-            onKnowledgeClick={isKnowledgeMenuVisible ? navigateToKnowledge : undefined}
-            knowledgeHref={isKnowledgeMenuVisible ? knowledgeHref : undefined}
+            onKnowledgeClick={navigateToKnowledge}
+            knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
             onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
-            onAutomationsClick={canUseAutomations ? navigateToAutomations : undefined}
-            automationsHref={canUseAutomations ? automationsHref : undefined}
+            onAutomationsClick={
+              canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
+            }
+            automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
             back={
               canUseAutomationsPage
                 ? {
@@ -232,7 +251,13 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
-            restrictWidth={canUseAutomationsPage ? false : '900px'}
+            restrictWidth={
+              canUseAutomationsPage
+                ? false
+                : isOnboarding || onboarding.isLoading
+                ? ONBOARDING_MAX_WIDTH
+                : '900px'
+            }
           >
             {canUseAutomationsPage ? (
               <Routes>
@@ -240,6 +265,16 @@ export function NightshiftPage(): React.ReactElement | null {
                 <Route path="/automations/:id" component={AutomationsPage} />
                 <Route path="/automations" component={AutomationsPage} />
               </Routes>
+            ) : isOnboarding ? (
+              <NightshiftOnboarding
+                latestInvestigation={onboarding.latestInvestigation}
+                automationsHref={canUseAutomations ? automationsHref : undefined}
+                onFinish={finishOnboarding}
+              />
+            ) : onboarding.isLoading ? (
+              <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
+                <EuiLoadingSpinner size="xl" />
+              </EuiFlexGroup>
             ) : (
               <NightshiftApp />
             )}

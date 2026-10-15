@@ -203,8 +203,6 @@ spaceTest.describe(
       expect(await esqlEditor.getHeight()).toBe(initialHeight);
 
       await unifiedTabs.createNewTab();
-      await expect(historyPanel).toBeVisible();
-      await esqlEditor.toggleHistoryPanel();
       await expect(historyPanel).toBeHidden();
       await esqlEditor.setQuery(DEFAULT_ESQL_QUERY);
       await discover.submitQueryAndWait();
