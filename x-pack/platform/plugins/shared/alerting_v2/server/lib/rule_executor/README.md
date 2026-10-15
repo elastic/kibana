@@ -192,7 +192,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 9 | `SuppressRedundantNoDataEventsStep` | Write policy: drop director-enriched `no_data` events that carry no lifecycle change for a group already held in no-data (previous persisted event was `no_data` and episode id / `alert.status` / `status_count` are unchanged), so a held group writes one transition marker instead of one event per run. `breached` / `recovered` are never dropped. Pass-through when no prior state was threaded (`signal` rules). |
 | 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
-The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden. This is intentional: Kibana cannot subscribe to UI setting changes, and a bail-out inside the executor would also stop internally created rules that must always run. The setting's description tells users to disable their rules before turning it off.
 
 ## How recovery and no-data fit together
 

@@ -12,7 +12,7 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
-import { checkOtlpOutputAllowed } from '../outputs/helpers';
+import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
 
 import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -36,6 +36,10 @@ jest.mock('../settings');
 jest.mock('../outputs/helpers');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedCheckKafkaOAuth2Allowed = checkKafkaOAuth2Allowed as jest.MockedFunction<
+  typeof checkKafkaOAuth2Allowed
+>;
+
 const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
   typeof checkOtlpOutputAllowed
 >;
@@ -92,10 +96,13 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
+    mockedCheckKafkaOAuth2Allowed.mockResolvedValue({ result: true });
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
     const serviceTokenHash = (await hashSecret('secretServiceToken')) as string;
+    const nestedTokenHash = (await hashSecret('secretNestedToken')) as string;
+    const clientSecretHash = (await hashSecret('secretClientSecret')) as string;
 
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
@@ -247,6 +254,40 @@ describe('Outputs preconfiguration', () => {
               key: 'secretKey',
             },
           },
+        },
+        {
+          id: 'existing-kafka-output-oauth2-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output OAuth2 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          auth_type: 'oauth2',
+          oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: { id: '654', hash: clientSecretHash } } },
+        },
+        {
+          id: 'existing-kafka-output-with-nested-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output With Nested Secrets 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          secrets: {
+            password: {
+              id: '456',
+              hash: passwordHash,
+            },
+            // a secret nested deeper than the password
+            nested: {
+              token: {
+                id: '987',
+                hash: nestedTokenHash,
+              },
+            },
+          } as any,
         },
         {
           id: 'existing-remote-es-output-1',
@@ -1501,6 +1542,226 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).not.toHaveBeenCalled();
       expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    describe('kafka output with OAuth2 authentication', () => {
+      const oauth2Output = (fields: Record<string, unknown> = {}) =>
+        ({
+          id: 'non-existing-kafka-output-oauth2-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output OAuth2 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          auth_type: 'oauth2',
+          oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: 'secretClientSecret' } },
+          ...fields,
+        } as any);
+
+      it('should create the output when OAuth2 is allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [oauth2Output()]);
+
+        expect(mockedCheckKafkaOAuth2Allowed).toHaveBeenCalledWith(esClient, soClient);
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ auth_type: 'oauth2' }),
+          expect.objectContaining({
+            id: 'non-existing-kafka-output-oauth2-1',
+            fromPreconfiguration: true,
+            secretHashes: { oauth2: { client_secret: expect.stringContaining(':') } },
+          })
+        );
+      });
+
+      describe('existing output', () => {
+        const existingOauth2Output = (oauth2: Record<string, unknown>) =>
+          oauth2Output({
+            id: 'existing-kafka-output-oauth2-1',
+            name: 'Kafka Output OAuth2 1',
+            oauth2,
+          });
+
+        it('should not update the output when its OAuth2 settings did not change', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            existingOauth2Output({
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+            }),
+          ]);
+
+          expect(mockedOutputService.update).not.toHaveBeenCalled();
+          expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+        });
+
+        it('should update the output when an OAuth2 setting changed', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            existingOauth2Output({
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+              scopes: ['read'],
+            }),
+          ]);
+
+          expect(mockedOutputService.update).toHaveBeenCalled();
+          expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
+        });
+
+        it('should update the output when the client secret changed', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            {
+              ...existingOauth2Output({
+                client_id: 'my-client',
+                token_url: 'https://idp.example.com/oauth2/token',
+              }),
+              secrets: { oauth2: { client_secret: 'changedClientSecret' } },
+            },
+          ]);
+
+          expect(mockedOutputService.update).toHaveBeenCalled();
+        });
+      });
+
+      it('should skip the output, without failing, when OAuth2 is not allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        mockedCheckKafkaOAuth2Allowed.mockResolvedValue({
+          result: false,
+          error: 'OAuth2 authentication of Kafka outputs is not enabled',
+        });
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          oauth2Output(),
+          // the other outputs are not affected
+          {
+            id: 'non-existing-kafka-output-1',
+            name: 'Kafka Output 1',
+            type: 'kafka',
+            is_default: false,
+            is_default_monitoring: false,
+          } as any,
+        ]);
+
+        expect(mockedOutputService.create).toHaveBeenCalledTimes(1);
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ name: 'Kafka Output 1' }),
+          expect.anything()
+        );
+      });
+
+      it('should not check OAuth2 when no output uses it', async () => {
+        mockedCheckKafkaOAuth2Allowed.mockClear();
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: 'non-existing-kafka-output-1',
+            name: 'Kafka Output 1',
+            type: 'kafka',
+            is_default: false,
+            is_default_monitoring: false,
+          } as any,
+        ]);
+
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('kafka output with nested secrets', () => {
+      const preconfiguredNestedSecretsOutput = (secrets: Record<string, unknown>) =>
+        ({
+          id: 'existing-kafka-output-with-nested-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output With Nested Secrets 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          secrets,
+        } as any);
+
+      it('should not update the output if its nested secrets did not change', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'secretNestedToken' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+        expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret changed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'changedNestedToken' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+        expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret was removed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({ password: 'secretPassword' }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret was added', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'secretNestedToken', other: 'newSecret' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should hash the nested secrets when creating the output', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            ...preconfiguredNestedSecretsOutput({
+              password: 'secretPassword',
+              nested: { token: 'secretNestedToken' },
+              ssl: { key: 'secretKey' },
+            }),
+            id: 'non-existing-kafka-output-with-nested-secrets-1',
+          },
+        ]);
+
+        const secretHashes = (mockedOutputService.create.mock.calls[0][3] as any).secretHashes;
+        expect(secretHashes).toEqual({
+          password: expect.stringContaining(':'),
+          nested: { token: expect.stringContaining(':') },
+          ssl: { key: expect.stringContaining(':') },
+        });
+      });
     });
 
     it('should not update output if a preconfigured remote ES output with secrets exists and did not change', async () => {

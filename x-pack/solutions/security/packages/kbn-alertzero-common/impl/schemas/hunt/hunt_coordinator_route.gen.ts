@@ -252,6 +252,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .nullable()
       .optional(),
     tier2_skipped_reason: z.string().optional(),
+    /**
+     * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
+     */
+    unavailable_model_tiers: z
+      .array(z.enum(['efficient', 'balanced', 'frontier']))
+      .optional()
+      .describe(
+        'Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.'
+      ),
     message: z.string(),
     next_step: z.string(),
     /**

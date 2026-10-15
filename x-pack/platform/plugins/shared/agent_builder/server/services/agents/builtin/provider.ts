@@ -87,12 +87,14 @@ export const toInternalDefinition = async ({
         : {}),
     },
     type,
+    hidden: definition.hidden ?? false,
     access_control: undefined,
     created_by: undefined,
     readonly: true,
     permissions: {
       update_agent: false,
       update_access_control: false,
+      update_approvals: false,
     },
     isAvailable: async (ctx) => {
       if (definition.availability) {
