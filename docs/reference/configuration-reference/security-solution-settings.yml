@@ -278,7 +278,7 @@ groups:
 
       - setting: xpack.securitySolution.telemetry.queryConfig.pageSize
         description: |
-          The number of documents that each Elasticsearch query for Security Solution usage data retrieves per page. The maximum is `10000`. If you don't set it, Kibana uses the page size from the query configuration that Elastic provides.
+          The number of documents that each Elasticsearch query for Security Solution usage data retrieves per page. The maximum is `10000`. If you don't set it, Kibana uses the page size from the query configuration that Elastic provides. If you do set it, also set `maxResponseSize` and `maxCompressedResponseSize`, because Kibana then takes all three values from `kibana.yml` and ignores the limits from the query configuration that Elastic provides.
         datatype: int
         applies_to:
           stack: ga
@@ -290,7 +290,7 @@ groups:
 
       - setting: xpack.securitySolution.telemetry.queryConfig.maxResponseSize
         description: |
-          The maximum size, in bytes, of an uncompressed Elasticsearch response to a query for Security Solution usage data. Takes effect only when `pageSize` is also set. If you don't set it, Kibana uses the value from the query configuration that Elastic provides.
+          The maximum size, in bytes, of an uncompressed Elasticsearch response to a query for Security Solution usage data. Takes effect only when `pageSize` is also set. If you set `pageSize` but omit this setting, Kibana doesn't fall back to the query configuration that Elastic provides; the Elasticsearch client's default limit applies instead.
         datatype: int
         applies_to:
           stack: ga
@@ -302,7 +302,7 @@ groups:
 
       - setting: xpack.securitySolution.telemetry.queryConfig.maxCompressedResponseSize
         description: |
-          The maximum size, in bytes, of a compressed Elasticsearch response to a query for Security Solution usage data. Takes effect only when `pageSize` is also set. If you don't set it, Kibana uses the value from the query configuration that Elastic provides.
+          The maximum size, in bytes, of a compressed Elasticsearch response to a query for Security Solution usage data. Takes effect only when `pageSize` is also set. If you set `pageSize` but omit this setting, Kibana doesn't fall back to the query configuration that Elastic provides; the Elasticsearch client's default limit applies instead.
         datatype: int
         applies_to:
           stack: ga
