@@ -49,7 +49,7 @@ export const LegendSizeToPixels = {
   [LegendSize.EXTRA_LARGE]: 230,
 } as const;
 
-export const DEFAULT_LEGEND_SIZE = LegendSize.MEDIUM;
+export const DEFAULT_LEGEND_SIZE = LegendSize.AUTO;
 
 /**
  * This is a shared type between XY Expression and Annotation plugins.

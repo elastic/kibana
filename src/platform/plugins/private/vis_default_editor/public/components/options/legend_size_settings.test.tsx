@@ -54,11 +54,11 @@ describe('legend size settings', () => {
     const onChange = instance.find(EuiSuperSelect).props().onChange;
 
     onChange?.(LegendSize.EXTRA_LARGE);
-    onChange?.(LegendSize.AUTO);
+    onChange?.(LegendSize.MEDIUM);
     onChange?.(DEFAULT_LEGEND_SIZE);
 
     expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
-    expect(onSizeChange).toHaveBeenNthCalledWith(2, LegendSize.AUTO);
+    expect(onSizeChange).toHaveBeenNthCalledWith(2, LegendSize.MEDIUM);
     expect(onSizeChange).toHaveBeenNthCalledWith(3, undefined);
   });
 });
