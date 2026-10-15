@@ -684,6 +684,29 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should not select OpAMP collectors', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents, page: 1, perPage: 2 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      const notOpampCollector = 'not type:OPAMP';
+      for (const mocked of [mockedGetAgentsByKuery, mockedFetchAllAgentsByKuery]) {
+        expect(mocked).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ kuery: expect.stringContaining(notOpampCollector) })
+        );
+      }
+    });
+
     describe('agent policies with agents to look at', () => {
       const twoAgentPolicies = [
         { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
@@ -725,6 +748,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         });
         // agents that are inactive by timeout are active in the stored field, like in the agent queries
         expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
+        // OpAMP collectors are never moved between policies
+        expect(request.query.bool.must_not).toEqual([{ term: { type: 'OPAMP' } }]);
         const [onPolicy, onVariant, withoutBaseId] = request.query.bool.should;
         // the policy and its #sentinel copy
         expect(onPolicy).toEqual({
@@ -1469,7 +1494,11 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          expect.objectContaining({ kuery: 'policy_id:("policy-1")' })
+          // OpAMP collectors are left on the plain policy: they cannot acknowledge a policy, so a
+          // reassigned collector would stay updating
+          expect.objectContaining({
+            kuery: 'policy_id:("policy-1") and not type:OPAMP',
+          })
         );
         expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
         expect(mockedReassignAgents).toHaveBeenCalledWith(

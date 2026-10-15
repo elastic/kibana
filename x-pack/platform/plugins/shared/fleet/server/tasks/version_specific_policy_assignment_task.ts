@@ -50,7 +50,9 @@ import {
 import {
   AGENT_POLICY_INDEX,
   AGENT_POLICY_VERSION_SEPARATOR,
+  AGENT_TYPE_OPAMP,
   AGENTS_INDEX,
+  NOT_OPAMP_AGENT_KUERY,
 } from '../../common/constants';
 import { RunMetrics } from './version_specific_policy_assignment_run_metrics';
 import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
@@ -65,6 +67,10 @@ const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 1000;
+
+// OpAMP collectors have no policy to move between: they get no policy action to acknowledge, so a
+// reassigned collector would stay `updating` (its `policy_revision` is cleared). The task never selects them.
+const NOT_OPAMP_COLLECTOR_ES_FILTER = [{ term: { type: AGENT_TYPE_OPAMP } }];
 // Agents moved per reassignment: `reassignAgents` loads the agent documents of its ids and updates them in
 // one bulk request, so a group of tens of thousands of agents (e.g. inactive ones, the first time they are
 // selected) is moved in batches, with a pause point between them for the abort signal.
@@ -441,7 +447,7 @@ export class VersionSpecificPolicyAssignmentTask {
       const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
         kuery: `policy_id:(${agentPolicyPageResults
           .map((p) => `"${escapeQuotes(p.id)}"`)
-          .join(' or ')})`,
+          .join(' or ')}) and ${NOT_OPAMP_AGENT_KUERY}`,
         perPage: AGENTS_BATCHSIZE,
         showInactive: false,
         ...LIGHT_AGENT_QUERY_OPTIONS,
@@ -646,6 +652,7 @@ export class VersionSpecificPolicyAssignmentTask {
       query: {
         bool: {
           filter: [{ term: { active: true } }],
+          must_not: NOT_OPAMP_COLLECTOR_ES_FILTER,
           should: [
             // on the policy or on its `#sentinel` copy
             { terms: { policy_id: parentPolicyIds } },
@@ -744,7 +751,7 @@ export class VersionSpecificPolicyAssignmentTask {
     // Agents already on the correct versioned policy will receive updated revisions
     // automatically through fleet-server after deployPolicies updates .fleet-policies.
 
-    const combinedKuery = `(${parentPolicyKuery}) OR (${versionedPolicyKuery})`;
+    const combinedKuery = `((${parentPolicyKuery}) OR (${versionedPolicyKuery})) AND ${NOT_OPAMP_AGENT_KUERY}`;
 
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
