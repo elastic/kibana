@@ -26,6 +26,7 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
   GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
@@ -64,7 +65,7 @@ export const useGetAgentPoliciesQuery = (
 };
 
 export const useGetAgentPoliciesPackagePoliciesSummaryQuery = (
-  ids: string[],
+  ids: GetAgentPoliciesPackagePoliciesSummaryRequest['body']['ids'],
   options?: { enabled?: boolean }
 ) => {
   return useQuery<GetAgentPoliciesPackagePoliciesSummaryResponse, RequestError>({

@@ -156,6 +156,7 @@ export type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
   GetAgentPoliciesPackagePoliciesSummaryResponse,
   RegistryPolicyIntegrationTemplate,
   EnrollmentSettingsFleetServerPolicy,

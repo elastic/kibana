@@ -163,7 +163,7 @@ export const AgentPolicyActionMenu = memo<{
 
           const deletePolicyItem = (
             <AgentPolicyDeleteProvider
-              hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+              hasFleetServer={policyHasFleetServer(agentPolicy)}
               key="deletePolicy"
               agentPolicy={agentPolicy}
               packagePolicies={agentPolicy.package_policies}
