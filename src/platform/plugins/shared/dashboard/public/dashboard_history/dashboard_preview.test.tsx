@@ -41,8 +41,9 @@ jest.mock('..', () => {
           setState(getInitialInput());
           onApiAvailable({
             setState: (next: Record<string, any>) =>
-              setState((prev: DashboardState) => ({
+              setState((prev: Record<string, any>) => ({
                 ...next,
+                viewMode: prev?.viewMode,
                 time_range: next.time_range ?? prev?.time_range,
               })),
           });
