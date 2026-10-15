@@ -51,10 +51,7 @@ export interface RenderArtifactTemplateParams {
    */
   deploymentId?: string;
   stackParams?: Readonly<Record<string, string>>;
-  /**
-   * More stack parameters for a rendered template, resolved after the render with its details and
-   * merged over `stackParams`. Undefined adds none.
-   */
+  /** Extra stack parameters for the rendered template, merged over `stackParams`. */
   getExtraStackParams?: (rendered: {
     templateSha: string;
     blueprint: RenderedIacBlueprint;

@@ -22,8 +22,8 @@ const PAYLOAD = {
 };
 
 /**
- * Runs with the IaC Provisioner flag on (config.iac_provisioner.ts). The receive route is what
- * the launched stack's Lambda calls: public, authenticated only by the key minted for the record.
+ * The receive route is what the launched stack's Lambda calls. It is public and only accepts
+ * the API key created for the record.
  */
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -106,10 +106,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(created.iac_deployment_id).to.be(PAYLOAD.stack_arn);
       expect(created.name).to.be('ElasticWorkloadIdentity-abc');
 
-      // The key is single use: it was invalidated on the first receive, so Kibana's auth chain
-      // now rejects it before the handler — a replay with the dead key is 401, not 200.
-      // (Idempotent 200 for a replay covers the window before invalidation completes; see the
-      // service unit tests.)
+      // The first receive invalidated the key, so Kibana now rejects it.
       await receive(item.id, apiKey).expect(401);
     });
 
@@ -145,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
     it('answers 404 to a caller that did not authenticate with an API key', async () => {
       const { item } = await createCallback();
 
-      // The superuser's basic auth passes Kibana's auth chain but is not the bound key.
+      // Basic auth is accepted by Kibana but is not the record's key.
       await supertest
         .post(receivePath(item.id))
         .set(PUBLIC_ROUTE_HEADERS)

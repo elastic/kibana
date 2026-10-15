@@ -127,8 +127,6 @@ describe('iacCallbackService', () => {
         },
       });
       expect(apiKey).toBe(Buffer.from('key-1:secret').toString('base64'));
-      // Literal on purpose: the constants barrel lists its exports, so a missing re-export would
-      // make both sides undefined and this assertion meaningless.
       expect(soClient.create).toHaveBeenCalledWith(
         'fleet-iac-callback',
         {

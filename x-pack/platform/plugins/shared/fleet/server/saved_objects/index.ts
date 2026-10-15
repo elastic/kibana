@@ -2199,8 +2199,7 @@ export const getSavedObjectTypes = (
           },
         },
         2: {
-          // Optional identity fields and the cloud connector id written on receive.
-          // No mappings_addition — none of the new fields are indexed (dynamic: false).
+          // Adds the identity fields and `cloud_connector_id`. None of them are indexed.
           changes: [],
           schemas: {
             forwardCompatibility: IacCallbackSchemaV2.extends({}, { unknowns: 'ignore' }),

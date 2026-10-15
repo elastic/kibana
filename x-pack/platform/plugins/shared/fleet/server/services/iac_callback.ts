@@ -32,7 +32,7 @@ export interface CreateIacCallbackOptions {
   provider: 'aws';
   createdBy?: string;
   spaceId?: string;
-  /** Name, account type and template details receive writes onto the cloud connector. */
+  /** Name, account type and template details for the cloud connector created when the stack reports back. */
   identity?: IacCallbackIdentity;
 }
 
@@ -79,8 +79,7 @@ const RECEIVED_FIELDS: Array<keyof IacCallbackReceivedValues> = ['role_arn', 'st
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
 
 const toItem = (id: string, attributes: IacCallbackSOAttributes): IacCallback => {
-  // Never hand the key id out: a caller that knows it has nothing to gain, and the only
-  // legitimate use (matching the receiving key) stays inside this service.
+  // The API key id never leaves this service.
   const { api_key_id: _apiKeyId, ...rest } = attributes;
   return { id, ...rest };
 };
@@ -168,11 +167,8 @@ class IacCallbackService {
   }
 
   /**
-   * Applies what the stack's Lambda reported. The caller must present the key bound to the
-   * record; anything else looks like a missing record so an attacker learns nothing.
-   *
-   * The role ARN and stack ARN are written onto a new cloud connector in the launch space.
-   * The browser is not asked to copy them into the form.
+   * Applies the stack's report. A caller without the record's own key gets the same answer as
+   * for a missing record.
    */
   public async receive(
     soClient: SavedObjectsClientContract,
@@ -189,7 +185,7 @@ class IacCallbackService {
       attributes.status === 'pending' &&
       new Date(attributes.expires_at).getTime() <= Date.now()
     ) {
-      // The key's own expiry matches, but make sure a clock skew cannot keep it usable.
+      // The key expires at the same time; invalidate it anyway in case the clocks differ.
       await invalidateAPIKeys([attributes.api_key_id]);
       return { outcome: 'gone' };
     }
@@ -202,8 +198,7 @@ class IacCallbackService {
     }
 
     if (attributes.status === 'received') {
-      // A Lambda retry after a timed-out success must not fail the stack; a different answer
-      // for the same record is a real conflict.
+      // A retry of the same report gets the same result; a different report is a conflict.
       return isSamePayload(attributes, payload)
         ? { outcome: 'received', item: toItem(so.id, attributes) }
         : { outcome: 'conflict', item: toItem(so.id, attributes) };
@@ -221,7 +216,7 @@ class IacCallbackService {
     };
     await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
 
-    // Single use: the key dies with the first successful receive.
+    // The key is single use.
     await invalidateAPIKeys([attributes.api_key_id]);
 
     auditLoggingService.writeCustomAuditLog({
@@ -233,9 +228,9 @@ class IacCallbackService {
   }
 
   /**
-   * Creates the federated identity in the space the launch happened in. A name the browser
-   * stored wins; otherwise the role's name is used. A name that is already taken gets a short
-   * suffix so the stack's one report still produces an identity.
+   * Creates the federated identity in the space the launch happened in, named after the stored
+   * name or else the role. A taken name gets a short suffix, so the report still creates an
+   * identity.
    */
   private async createCloudConnector(
     callbackId: string,

@@ -37,8 +37,8 @@ const iacCallbackFieldsV1 = {
 export const IacCallbackSchemaV1 = schema.object(iacCallbackFieldsV1);
 
 /**
- * Identity fields the browser sends when it creates the record, and the cloud connector id
- * receive writes once it has created that connector. None of these are indexed.
+ * Identity fields stored at launch, and the id of the cloud connector created when the stack
+ * reports back. None of these are indexed.
  */
 export const IacCallbackSchemaV2 = schema.object({
   ...iacCallbackFieldsV1,
