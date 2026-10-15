@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   ActivityEntry,
+  EngineAutoRunState,
   EngineConfig,
   EngineCostLedger,
   EngineDetection,
@@ -125,6 +126,7 @@ interface StateDocs {
   last_run: EngineRunSummary & { last_evaluated_bucket_end?: string };
   memory: { fingerprint: string; notes: string[] };
   cost: EngineCostLedger;
+  auto_run: EngineAutoRunState;
 }
 type StateKind = keyof StateDocs;
 
@@ -191,7 +193,7 @@ export interface EngineStorage {
   getConfig(): Promise<EngineConfig>;
   /** Removes every engine document of this space. */
   clear(): Promise<void>;
-  /** Removes what runs produced in this space, keeping settings, lab state and the cost ledger. */
+  /** Removes what runs produced in this space, keeping settings, lab state, cost and auto-run. */
   clearRunData(): Promise<void>;
   refresh(): Promise<void>;
 }
@@ -442,7 +444,7 @@ export function createEngineStorage({
         query: {
           bool: {
             filter: [spaceFilter],
-            must_not: [{ terms: { kind: ['config', 'lab', 'cost'] } }],
+            must_not: [{ terms: { kind: ['config', 'lab', 'cost', 'auto_run'] } }],
           },
         },
       });

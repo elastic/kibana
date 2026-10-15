@@ -18,6 +18,7 @@ import { DetectionEngineTab } from '.';
 const mockActions = {
   pendingAction: undefined,
   runEngine: jest.fn(),
+  setAutoRun: jest.fn(),
   replay: jest.fn(),
   updateConfig: jest.fn(),
   setupLab: jest.fn(),
@@ -184,6 +185,7 @@ const mockOverview: EngineOverviewResponse = {
   },
   last_evaluated_bucket_end: '2026-10-15T06:56:00.000Z',
   counts: { open_events: 1, events: 1, detections_last_hour: 3 },
+  auto_run: { enabled: false, workflow_id: 'detection-engine-prototype-autorun-default' },
   cost: {
     ledger: {
       since: '2026-10-15T06:00:00.000Z',
@@ -239,11 +241,12 @@ const mockDetails: EngineEventDetailsResponse = {
 jest.mock('../../../../hooks/use_detection_engine_actions', () => ({
   useDetectionEngineActions: () => mockActions,
 }));
-jest.mock('../../../../hooks/use_detection_engine_auto_run', () => ({
-  useDetectionEngineAutoRun: jest.fn(),
-}));
+let mockOverviewOverride: Partial<EngineOverviewResponse> = {};
 jest.mock('../../../../hooks/use_detection_engine_overview', () => ({
-  useDetectionEngineOverview: () => ({ data: mockOverview, isLoading: false }),
+  useDetectionEngineOverview: () => ({
+    data: { ...mockOverview, ...mockOverviewOverride },
+    isLoading: false,
+  }),
 }));
 jest.mock('../../../../hooks/use_detection_engine_events', () => ({
   useDetectionEngineEvents: () => ({ data: { events: [mockEvent] }, isLoading: false }),
@@ -273,6 +276,11 @@ jest.mock('../../../../hooks/use_genai_connectors', () => ({
 }));
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: {
+      application: {
+        getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
+      },
+    },
     dependencies: {
       start: {
         share: {
@@ -294,6 +302,33 @@ function renderTab() {
 describe('DetectionEngineTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOverviewOverride = {};
+  });
+
+  it('turns on the server-side schedule from the Auto-run switch', () => {
+    renderTab();
+
+    fireEvent.click(screen.getByTestId('detectionEngineAutoRunSwitch'));
+
+    expect(mockActions.setAutoRun).toHaveBeenCalledWith(true);
+  });
+
+  it('warns when auto-run is on but nothing ran for minutes', () => {
+    mockOverviewOverride = {
+      auto_run: {
+        enabled: true,
+        workflow_id: 'detection-engine-prototype-autorun-default',
+        changed_at: '2026-10-15T06:00:00.000Z',
+      },
+    };
+    renderTab();
+
+    expect(screen.getByTestId('detectionEngineStatus').textContent).toContain(
+      'Auto-run is on, but nothing ran for'
+    );
+    expect(screen.getByTestId('detectionEngineWorkflowLink').getAttribute('href')).toBe(
+      '/app/workflows/detection-engine-prototype-autorun-default'
+    );
   });
 
   it('shows the last run as a pipeline from strategies to events', () => {

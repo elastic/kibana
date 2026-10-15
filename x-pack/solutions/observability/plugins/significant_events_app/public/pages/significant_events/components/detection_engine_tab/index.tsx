@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useDetectionEngineActions } from '../../../../hooks/use_detection_engine_actions';
-import { useDetectionEngineAutoRun } from '../../../../hooks/use_detection_engine_auto_run';
 import { useDetectionEngineEvents } from '../../../../hooks/use_detection_engine_events';
 import { useDetectionEngineOverview } from '../../../../hooks/use_detection_engine_overview';
 import { useDetectionEngineServices } from '../../../../hooks/use_detection_engine_services';
@@ -41,11 +40,8 @@ export function DetectionEngineTab() {
   const { data: eventsData, isLoading: isEventsLoading } = useDetectionEngineEvents();
   const { data: servicesData } = useDetectionEngineServices();
   const actions = useDetectionEngineActions();
-  const [autoRun, setAutoRun] = useState(false);
   const [innerTab, setInnerTab] = useState<InnerTab>('events');
   const [openEventId, setOpenEventId] = useState<string | undefined>();
-
-  useDetectionEngineAutoRun({ enabled: autoRun });
 
   if (isLoading || !overview) {
     return <EuiLoadingSpinner size="xl" data-test-subj="detectionEngineLoading" />;
@@ -89,12 +85,7 @@ export function DetectionEngineTab() {
 
   return (
     <div data-test-subj="detectionEngineTab">
-      <EngineHeader
-        overview={overview}
-        actions={actions}
-        autoRun={autoRun}
-        onAutoRunChange={setAutoRun}
-      />
+      <EngineHeader overview={overview} actions={actions} />
       <EuiSpacer size="m" />
       <EngineKpis overview={overview} />
       <EuiSpacer size="m" />

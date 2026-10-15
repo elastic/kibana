@@ -49,6 +49,7 @@ export async function buildOverview({
     detectionsLastHour,
     ledger,
     prices,
+    autoRun,
   ] = await Promise.all([
     storage.getConfig(),
     storage.getState('last_run'),
@@ -59,6 +60,7 @@ export async function buildOverview({
     storage.countDetections({ from: new Date(now - HOUR_MS).toISOString() }),
     storage.getState('cost'),
     getPrices(),
+    storage.getState('auto_run'),
   ]);
 
   const verifierFailures = new Map<string, number>();
@@ -102,6 +104,7 @@ export async function buildOverview({
       prices_available: prices !== null,
       prices_fetched_at: prices?.fetchedAt,
     },
+    auto_run: autoRun ?? { enabled: false },
   };
 }
 

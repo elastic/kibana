@@ -133,6 +133,7 @@ export type {
   ActivityEntry,
   ActivityStep,
   AgentKind,
+  EngineAutoRunState,
   BaselineDecision,
   DetectionOutcome,
   DetectionStrategyDescriptor,

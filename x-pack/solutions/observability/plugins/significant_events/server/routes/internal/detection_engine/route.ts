@@ -16,6 +16,7 @@ import {
   ENGINE_EVENT_STATUSES,
   STRATEGY_MODES,
   type ActivityEntry,
+  type EngineAutoRunState,
   type EngineConfig,
   type EngineDetection,
   type EngineEvent,
@@ -39,6 +40,7 @@ import {
 import { applyOperatorInput, verifyEvent } from '../../../lib/detection_engine/operator_actions';
 import { buildOverview, listServices } from '../../../lib/detection_engine/overview';
 import { LAB_SOURCE_TITLE } from '../../../lib/detection_engine/constants';
+import { setAutoRun } from '../../../lib/detection_engine/auto_run';
 import { createEngineStorage } from '../../../lib/detection_engine/storage';
 import { StatusError } from '../../../lib/errors/status_error';
 import { createServerRoute } from '../../create_server_route';
@@ -195,7 +197,8 @@ const runRoute = createServerRoute({
         /** Evaluates the bucket that ends before this time, to backtest past data in order. */
         now: isoDateTime().optional(),
       })
-      .optional(),
+      // The page's Run now sends no body, which arrives as null.
+      .nullish(),
   }),
   handler: async (resources): Promise<EngineRunSummary> => {
     const deps = await createEngineDependencies(resources);
@@ -206,6 +209,27 @@ const runRoute = createServerRoute({
     // The lab writes logs up to now first, so the bucket being evaluated is complete.
     await deps.createLab().catchUp();
     return runEngine(deps);
+  },
+});
+
+const autoRunRoute = createServerRoute({
+  endpoint: `PUT ${BASE_PATH}/auto_run`,
+  options: {
+    access: 'internal',
+    summary: 'Turn the server-side schedule of the detection engine prototype on or off',
+  },
+  security: MANAGE,
+  params: z.object({ body: z.object({ enabled: z.boolean() }) }),
+  handler: async (resources): Promise<EngineAutoRunState> => {
+    const deps = await createEngineDependencies(resources);
+    await deps.storage.ensure();
+    return setAutoRun({
+      management: resources.server.workflowsManagement?.management,
+      request: resources.request,
+      spaceId: deps.spaceId,
+      storage: deps.storage,
+      enabled: resources.params.body.enabled,
+    });
   },
 });
 
@@ -468,7 +492,7 @@ const labStopRoute = createServerRoute({
   endpoint: `POST ${BASE_PATH}/lab/_stop`,
   options: { access: 'internal', summary: 'Stop one or every lab incident' },
   security: MANAGE,
-  params: z.object({ body: z.object({ id: z.string().max(64).optional() }).optional() }),
+  params: z.object({ body: z.object({ id: z.string().max(64).optional() }).nullish() }),
   handler: async (resources): Promise<LabState> => {
     const deps = await createEngineDependencies(resources);
     return deps.createLab().stopIncident(resources.params?.body?.id);
@@ -494,6 +518,7 @@ export const internalDetectionEngineRoutes = {
   ...overviewRoute,
   ...updateConfigRoute,
   ...runRoute,
+  ...autoRunRoute,
   ...replayRoute,
   ...eventsRoute,
   ...eventRoute,

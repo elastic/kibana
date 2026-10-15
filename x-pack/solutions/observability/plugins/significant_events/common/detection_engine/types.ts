@@ -401,6 +401,16 @@ export interface EngineOverviewResponse {
   counts: { open_events: number; events: number; detections_last_hour: number };
   lab: LabState;
   cost: EngineCostSummary;
+  auto_run: EngineAutoRunState;
+}
+
+/** The server-side schedule that runs the engine every minute in this space. */
+export interface EngineAutoRunState {
+  enabled: boolean;
+  workflow_id?: string;
+  changed_at?: string;
+  /** Why the schedule could not be set, when it could not. */
+  error?: string;
 }
 
 /** Elastic Inference Service list price of one model, in USD per million tokens. */

@@ -20,6 +20,7 @@ import { DETECTION_ENGINE_QUERY_KEY } from './detection_engine_query_keys';
 /** Actions the page can trigger; at most one runs at a time. */
 export type DetectionEngineActionKey =
   | 'run'
+  | 'autoRun'
   | 'replay'
   | 'config'
   | 'labSetup'
@@ -45,6 +46,8 @@ const LAB_INDEX = 'logs-detectionlab-default';
 export interface IDetectionEngineActions {
   pendingAction: DetectionEngineActionKey | undefined;
   runEngine(): Promise<unknown>;
+  /** Turns the server-side schedule on or off; it keeps running with the page closed. */
+  setAutoRun(enabled: boolean): Promise<unknown>;
   replay(minutes: number): Promise<unknown>;
   updateConfig(config: Partial<EngineConfig>): Promise<unknown>;
   setupLab(): Promise<unknown>;
@@ -121,6 +124,30 @@ export function useDetectionEngineActions(): IDetectionEngineActions {
         request: () =>
           client.fetch('POST /internal/significant_events/detection_engine/_run', { signal: null }),
         describe: describeRun,
+      }),
+
+    setAutoRun: (enabled) =>
+      act({
+        key: 'autoRun',
+        request: () =>
+          client.fetch('PUT /internal/significant_events/detection_engine/auto_run', {
+            params: { body: { enabled } },
+            signal: null,
+          }),
+        describe: (result) => {
+          const state = result as { enabled: boolean; error?: string };
+          if (state.error) {
+            return state.error;
+          }
+          return state.enabled
+            ? i18n.translate('xpack.significantEventsApp.detectionEngine.autoRunOnToast', {
+                defaultMessage:
+                  'Auto-run is on. A workflow evaluates every minute on the server, even with this page closed.',
+              })
+            : i18n.translate('xpack.significantEventsApp.detectionEngine.autoRunOffToast', {
+                defaultMessage: 'Auto-run is off. The engine only runs when you press Run now.',
+              });
+        },
       }),
 
     replay: (minutes) =>

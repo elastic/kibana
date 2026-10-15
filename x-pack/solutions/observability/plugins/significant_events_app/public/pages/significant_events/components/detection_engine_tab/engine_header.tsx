@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiHealth,
   EuiHorizontalRule,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
@@ -30,59 +31,82 @@ import { i18n } from '@kbn/i18n';
 import type { EngineOverviewResponse } from '@kbn/significant-events-plugin/common';
 import React, { useState } from 'react';
 import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { IDetectionEngineActions } from '../../../../hooks/use_detection_engine_actions';
 import { formatUsd } from './format';
 import { useNow } from './use_now';
 
 const HEURISTIC_VALUE = '__heuristic__';
 const REPLAY_MINUTES = 60;
-/** A completed bucket is picked up on the next auto-run tick, at most this long after it ends. */
-const AUTO_RUN_SLACK_MS = 15_000;
+/** The schedule runs every minute; this long without a run means it has stalled. */
+const STALLED_AFTER_MS = 3 * 60_000;
+const SCHEDULE_MS = 60_000;
+const WORKFLOWS_APP_ID = 'workflows';
 
 interface IEngineHeaderProps {
   overview: EngineOverviewResponse;
   actions: IDetectionEngineActions;
-  autoRun: boolean;
-  onAutoRunChange: (enabled: boolean) => void;
 }
 
 /** Title, run controls, and the engine settings kept out of the way in a popover. */
-export function EngineHeader({ overview, actions, autoRun, onAutoRunChange }: IEngineHeaderProps) {
+export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
   const resetTitleId = useGeneratedHtmlId();
   const now = useNow(1_000);
   const { connectors, loading: connectorsLoading } = useGenAIConnectors();
-  const { config, cost } = overview;
+  const {
+    core: { application },
+  } = useKibana();
+  const { config, cost, auto_run: autoRun, last_run: lastRun } = overview;
 
-  const bucketMs = config.bucket_minutes * 60_000;
-  const lastEnd = overview.last_evaluated_bucket_end;
-  const nextCheck = lastEnd ? Date.parse(lastEnd) + bucketMs : undefined;
-  const secondsToNext =
-    nextCheck !== undefined ? Math.max(0, Math.ceil((nextCheck - now) / 1000)) : undefined;
   const agentValue =
     config.agent.kind === 'llm' && config.agent.connector_id
       ? config.agent.connector_id
       : HEURISTIC_VALUE;
+  const lastEnd = overview.last_evaluated_bucket_end;
+  // Since the last run that evaluated anything, or since auto-run was turned on.
+  const lastActivity = Math.max(
+    lastRun ? Date.parse(lastRun.finished_at) : 0,
+    autoRun.changed_at ? Date.parse(autoRun.changed_at) : 0
+  );
+  const secondsToNext = Math.max(0, Math.ceil((lastActivity + SCHEDULE_MS - now) / 1000));
+  const isStalled = autoRun.enabled && now - lastActivity > STALLED_AFTER_MS;
+  const workflowHref = autoRun.workflow_id
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${autoRun.workflow_id}` })
+    : undefined;
 
-  const status = autoRun
-    ? secondsToNext !== undefined && secondsToNext > 0
+  const status = autoRun.error
+    ? autoRun.error
+    : autoRun.enabled
+    ? isStalled
+      ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.stalled', {
+          defaultMessage: 'Auto-run is on, but nothing ran for {minutes} min. Check its workflow.',
+          values: { minutes: Math.round((now - lastActivity) / 60_000) },
+        })
+      : secondsToNext > 0
       ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.nextCheck', {
-          defaultMessage: 'Watching · next check in {seconds}s',
+          defaultMessage: 'Running on the server · next check in about {seconds}s',
           values: { seconds: secondsToNext },
         })
       : i18n.translate('xpack.significantEventsApp.detectionEngine.header.checking', {
-          defaultMessage: 'Watching · checking the latest minute',
+          defaultMessage: 'Running on the server · checking the latest minute',
         })
     : lastEnd
     ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.paused', {
-        defaultMessage: 'Paused · last checked the minute ending {time}',
+        defaultMessage: 'Auto-run off · last checked the minute ending {time}',
         values: { time: new Date(lastEnd).toLocaleTimeString() },
       })
     : i18n.translate('xpack.significantEventsApp.detectionEngine.header.notStarted', {
         defaultMessage: 'Not started',
       });
-  const isStale = autoRun && nextCheck !== undefined && now > nextCheck + AUTO_RUN_SLACK_MS * 2;
+  const statusColor = autoRun.error
+    ? 'danger'
+    : autoRun.enabled
+    ? isStalled
+      ? 'warning'
+      : 'success'
+    : 'subdued';
 
   return (
     <div data-test-subj="detectionEngineHeader">
@@ -110,22 +134,47 @@ export function EngineHeader({ overview, actions, autoRun, onAutoRunChange }: IE
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiHealth
-            color={autoRun ? (isStale ? 'warning' : 'success') : 'subdued'}
-            data-test-subj="detectionEngineStatus"
-          >
-            {status}
-          </EuiHealth>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color={statusColor} data-test-subj="detectionEngineStatus">
+                {status}
+              </EuiHealth>
+            </EuiFlexItem>
+            {autoRun.enabled && workflowHref && (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  href={workflowHref}
+                  target="_blank"
+                  data-test-subj="detectionEngineWorkflowLink"
+                >
+                  {i18n.translate(
+                    'xpack.significantEventsApp.detectionEngine.header.workflowLink',
+                    {
+                      defaultMessage: 'View schedule',
+                    }
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            data-test-subj="detectionEngineAutoRunSwitch"
-            label={i18n.translate('xpack.significantEventsApp.detectionEngine.autoRun', {
-              defaultMessage: 'Auto-run',
+          <EuiToolTip
+            content={i18n.translate('xpack.significantEventsApp.detectionEngine.autoRunTooltip', {
+              defaultMessage:
+                'Runs the engine every minute as a workflow in this space. It keeps going when you leave this page or close the browser, until you turn it off.',
             })}
-            checked={autoRun}
-            onChange={(event) => onAutoRunChange(event.target.checked)}
-          />
+          >
+            <EuiSwitch
+              data-test-subj="detectionEngineAutoRunSwitch"
+              label={i18n.translate('xpack.significantEventsApp.detectionEngine.autoRun', {
+                defaultMessage: 'Auto-run',
+              })}
+              checked={autoRun.enabled}
+              disabled={actions.pendingAction === 'autoRun'}
+              onChange={(event) => actions.setAutoRun(event.target.checked)}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton

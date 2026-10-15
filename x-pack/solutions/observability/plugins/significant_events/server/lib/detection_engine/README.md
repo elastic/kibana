@@ -5,7 +5,7 @@ A working prototype of the architecture in `nightshift-program/workstreams/detec
 ## Try it
 
 1. Open the **Detection engine** tab and press **Set up demo system**. It writes three hours of logs for `frontend`, `checkout`, `payments` and `inventory` to `logs-detectionlab-default`, creates the "Detection engine lab" source with its services, dependencies and KI queries, then replays the history so every check has a baseline.
-2. Turn on **Auto-run**. The header counts down to the next one-minute check.
+2. Turn on **Auto-run**. It creates the workflow `detection-engine-prototype-autorun-<space>`, which runs the engine every minute on the server, so it keeps scanning after you leave the page. The header shows when the next check is due, links to the workflow, and warns when nothing has run for three minutes.
 3. In **Break something**, start **Payments outage**. Within about a minute payments turns red on the system map and one event opens; checkout's errors join it, because knowledge says checkout calls payments.
 4. **The customer's own alert** adds a real Kibana rule for checkout 5xx errors. When it fires, the Customer alerts strategy reads the alert and it joins the event.
 5. Press **Recover everything**. The event moves to recovering and closes after two healthy minutes; the verifier re-checks it on the next run.
@@ -50,7 +50,7 @@ The architecture leaves "where do new strategies run?" open. The prototype runs 
 ## Shortcuts taken
 
 - Storage is plain hidden indices written as the current user, not registered data streams.
-- Runs are triggered by the page (Run now, Auto-run), not by a scheduled workflow or task.
+- Auto-run is a regular workflow created on demand, not a managed one installed with the plugin.
 - One bucket size (one minute) and one space at a time; a missed bucket is not evaluated later.
 - The heuristic agent stands in for the model when no connector is chosen; both answer in the same shape.
 - Publishing writes each changed event to `.rule-events`, so the existing Significant events tab shows it too. Resetting the lab does not remove what was already published.
