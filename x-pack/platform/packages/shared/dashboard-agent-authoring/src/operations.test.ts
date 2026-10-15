@@ -1779,6 +1779,103 @@ describe('executeDashboardOperations', () => {
       });
     });
 
+    describe('panel settings on edit', () => {
+      const panelSettings = {
+        title: 'Requests',
+        description: 'All requests',
+        hide_title: true,
+        hide_border: true,
+        time_range: { from: 'now-7d', to: 'now' },
+        drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
+      };
+
+      const editPanel = async (
+        existingPanel: AttachmentPanel,
+        panelInput: Record<string, unknown>,
+        resolvedContent: PanelContentAttempt
+      ): Promise<AttachmentPanel> => {
+        const result = await executeDashboardOperations({
+          dashboardData: { title: 'Test', panels: [existingPanel] },
+          operations: [
+            {
+              operation: 'edit_panels',
+              panels: [
+                {
+                  source: 'request',
+                  panelId: existingPanel.id,
+                  query: 'update the panel',
+                  ...panelInput,
+                },
+              ],
+            } as DashboardOperation,
+          ],
+          logger,
+          resolvePanelContent: async () => resolvedContent,
+        });
+        return getPanelsOnly(result.dashboardData.panels)[0];
+      };
+
+      it('keeps Lens panel settings, lets generated values win, and drops stale chart keys', async () => {
+        const panel = await editPanel(
+          {
+            ...createLensPanel('panel-1'),
+            config: { type: 'xy', breakdown_by: { column: 'host' }, ...panelSettings },
+          },
+          {},
+          createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'line', title: 'Requests over time' },
+          })
+        );
+
+        expect(panel.config).toEqual({
+          ...panelSettings,
+          type: 'line',
+          title: 'Requests over time',
+        });
+      });
+
+      it('keeps the description and other settings of a Vega panel', async () => {
+        const panel = await editPanel(
+          {
+            id: 'vega-1',
+            type: VEGA_VIS_TYPE,
+            config: { spec: '{"mark":"bar"}', ...panelSettings },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+          {},
+          createResolvedPanelContent({
+            type: VEGA_VIS_TYPE,
+            config: { spec: '{"mark":"line"}', title: 'Requests over time' },
+          })
+        );
+
+        expect(panel.config).toEqual({
+          ...panelSettings,
+          spec: '{"mark":"line"}',
+          title: 'Requests over time',
+        });
+      });
+
+      it('keeps custom content panel settings', async () => {
+        const panel = await editPanel(
+          {
+            id: 'cc-1',
+            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+            config: { template: '<div>Old</div>', ...panelSettings },
+            grid: { x: 0, y: 0, w: 24, h: 6 },
+          },
+          { renderer: 'custom_content' },
+          createResolvedPanelContent({
+            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+            config: { template: '<div>New</div>' },
+          })
+        );
+
+        expect(panel.config).toEqual({ ...panelSettings, template: '<div>New</div>' });
+      });
+    });
+
     it('resolves multiple panel edits in one edit_panels op in parallel', async () => {
       const deferredByPanelId = new Map<
         string,

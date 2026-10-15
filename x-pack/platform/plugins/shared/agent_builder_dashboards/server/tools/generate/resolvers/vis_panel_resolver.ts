@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isUndefined, omitBy } from 'lodash';
+import { omit } from 'lodash';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -20,6 +20,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   createPanelFailureResult,
   getErrorMessage,
+  PANEL_SETTINGS_KEYS,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
 } from '@kbn/dashboard-agent-authoring';
@@ -31,6 +32,14 @@ export interface VisPanelResolverDeps {
   events: ToolEventEmitter;
   esClient: IScopedClusterClient;
 }
+
+/**
+ * Panel settings the Lens chart schema can't express, kept out of the model input.
+ * `edit_panels` carries them over. Title and description stay so the model can edit them.
+ */
+const NON_CHART_PANEL_SETTINGS_KEYS = PANEL_SETTINGS_KEYS.filter(
+  (key) => key !== 'title' && key !== 'description'
+);
 
 /** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
 const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
@@ -72,20 +81,6 @@ export const createVisPanelResolver = ({
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
-      // Panel-level settings sit beside the chart keys in `config` but are not part of the
-      // chart schema, so keep them out of generation and carry them over on edits.
-      const {
-        drilldowns,
-        hide_title: hideTitle,
-        hide_border: hideBorder,
-        time_range: timeRange,
-        ...existingChartConfig
-      } = existingPanel?.config ?? {};
-      const panelLevelSettings = omitBy(
-        { drilldowns, hide_title: hideTitle, hide_border: hideBorder, time_range: timeRange },
-        isUndefined
-      );
-
       if (renderer === 'vega') {
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
@@ -111,14 +106,14 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { ...panelLevelSettings, spec, ...(title ? { title } : {}) },
+            config: { spec, ...(title ? { title } : {}) },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };
       }
 
       const existingConfig = existingPanel
-        ? (existingChartConfig as VisualizationConfig)
+        ? (omit(existingPanel.config, NON_CHART_PANEL_SETTINGS_KEYS) as VisualizationConfig)
         : undefined;
 
       const result = await buildLensConfig({
@@ -140,7 +135,7 @@ export const createVisPanelResolver = ({
         type: 'success',
         panelContent: {
           type: LENS_EMBEDDABLE_TYPE,
-          config: { ...panelLevelSettings, ...result.validatedConfig },
+          config: result.validatedConfig,
         },
         ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };

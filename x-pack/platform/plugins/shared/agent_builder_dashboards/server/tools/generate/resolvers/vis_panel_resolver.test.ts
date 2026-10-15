@@ -148,53 +148,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('keeps panel-level settings when editing a Lens panel', async () => {
-    const drilldowns = [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }];
-    mockedBuildLensConfig.mockResolvedValue(
-      createBuildLensConfigResult({ type: 'line', title: 'Requests over time' })
-    );
-
-    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
-
-    const result = await resolveVisPanel({
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
-      nlQuery: 'make it a line chart',
-      existingPanel: {
-        id: 'panel-1',
-        type: LENS_EMBEDDABLE_TYPE,
-        config: {
-          type: 'xy',
-          title: 'Requests',
-          breakdown_by: { column: 'host' },
-          drilldowns,
-          hide_title: true,
-          hide_border: true,
-          time_range: { from: 'now-7d', to: 'now' },
-        },
-        grid: { w: 24, h: 12, x: 0, y: 0 },
-      },
-    });
-
-    expect(result).toMatchObject({
-      type: 'success',
-      panelContent: {
-        type: LENS_EMBEDDABLE_TYPE,
-        config: {
-          type: 'line',
-          title: 'Requests over time',
-          drilldowns,
-          hide_title: true,
-          hide_border: true,
-          time_range: { from: 'now-7d', to: 'now' },
-        },
-      },
-    });
-    // Chart keys from the old config are not carried over.
-    expect(result).not.toHaveProperty('panelContent.config.breakdown_by');
-  });
-
-  it('passes only the chart keys of an existing Lens panel to the Lens builder', async () => {
+  it('keeps panel settings other than title and description out of the Lens builder input', async () => {
     mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
@@ -209,6 +163,7 @@ describe('createVisPanelResolver', () => {
         config: {
           type: 'metric',
           title: 'Requests',
+          description: 'All requests',
           drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
           hide_title: true,
           hide_border: true,
@@ -218,58 +173,13 @@ describe('createVisPanelResolver', () => {
       },
     });
 
-    const chartConfig = { type: 'metric', title: 'Requests' };
+    const chartConfig = { type: 'metric', title: 'Requests', description: 'All requests' };
     expect(mockedBuildLensConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         existingConfig: JSON.stringify(chartConfig),
         parsedExistingConfig: chartConfig,
       })
     );
-  });
-
-  it('keeps panel-level settings when editing a Vega panel', async () => {
-    const drilldowns = [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }];
-    const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
-    mockedBuildVegaConfig.mockResolvedValue({
-      spec: nextSpec,
-      title: 'Requests over time',
-      esqlQuery: 'FROM logs-*',
-    });
-
-    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
-
-    const result = await resolveVisPanel({
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
-      nlQuery: 'make it a line chart',
-      renderer: 'vega',
-      existingPanel: {
-        id: 'panel-1',
-        type: VEGA_VIS_TYPE,
-        config: {
-          spec: '{"$schema":"vega-lite","mark":"bar"}',
-          title: 'Requests',
-          drilldowns,
-          hide_title: true,
-          hide_border: false,
-        },
-        grid: { w: 24, h: 12, x: 0, y: 0 },
-      },
-    });
-
-    expect(result).toEqual({
-      type: 'success',
-      panelContent: {
-        type: VEGA_VIS_TYPE,
-        config: {
-          spec: nextSpec,
-          title: 'Requests over time',
-          drilldowns,
-          hide_title: true,
-          hide_border: false,
-        },
-      },
-    });
   });
 
   it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
