@@ -39,14 +39,15 @@ export function tokenCountFromOpenAI(
   completionUsage: OpenAI.CompletionUsage,
   model?: string
 ): ChatCompletionTokenCountEvent {
+  const thinking = completionUsage.completion_tokens_details?.reasoning_tokens;
   return {
     type: ChatCompletionEventType.ChatCompletionTokenCount,
     tokens: {
-      completion: completionUsage.completion_tokens,
+      completion: completionUsage.completion_tokens - (thinking ?? 0),
       prompt: completionUsage.prompt_tokens,
       total: completionUsage.total_tokens,
       cached: completionUsage.prompt_tokens_details?.cached_tokens,
-      thinking: completionUsage.completion_tokens_details?.reasoning_tokens,
+      thinking,
     },
     ...(model ? { model } : {}),
   };

@@ -76,7 +76,7 @@ describe('chunkFromCompletionResponse', () => {
 });
 
 describe('tokenCountFromOpenAI', () => {
-  it('maps reasoning tokens to thinking', () => {
+  it('maps reasoning tokens to thinking and excludes them from completion', () => {
     expect(
       tokenCountFromOpenAI(
         {
@@ -91,7 +91,7 @@ describe('tokenCountFromOpenAI', () => {
       type: ChatCompletionEventType.ChatCompletionTokenCount,
       tokens: {
         prompt: 10,
-        completion: 20,
+        completion: 8,
         total: 30,
         thinking: 12,
       },

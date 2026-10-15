@@ -131,11 +131,11 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Thinking token count, if available. Included in `completion` for OpenAI-compatible providers.
+   * Thinking token count, if available. Not included in `completion`.
    */
   thinking?: number;
   /**
-   * Total token count (prompt + completion, plus thinking if not already part of completion)
+   * Total token count (prompt + completion + thinking)
    */
   total: number;
   /**

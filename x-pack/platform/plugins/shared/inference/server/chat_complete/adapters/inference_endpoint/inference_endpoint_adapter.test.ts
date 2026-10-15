@@ -345,7 +345,7 @@ describe('inferenceEndpointAdapter', () => {
         {
           type: ChatCompletionEventType.ChatCompletionTokenCount,
           tokens: {
-            completion: 20,
+            completion: 8,
             prompt: 10,
             total: 30,
             thinking: 12,
