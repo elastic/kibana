@@ -10,13 +10,16 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { getValueError, SandboxSecretsFlyout } from './sandbox_secrets_flyout';
+import { getValueError, SandboxSecretsFlyout, SandboxSecretsPanel } from './sandbox_secrets_flyout';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const mockUseKibana = useKibana as jest.Mock;
 
-const setup = (getResponse: { keys: string[]; version?: string; canEncrypt: boolean }) => {
+const setup = (
+  getResponse: { keys: string[]; version?: string; canEncrypt: boolean },
+  ui: 'flyout' | 'panel' = 'flyout'
+) => {
   const fetch = jest.fn(async (endpoint: string, _options?: { params?: { body: unknown } }) => {
     if (endpoint.startsWith('GET ')) return getResponse;
     return { keys: [], version: 'next' };
@@ -34,7 +37,20 @@ const setup = (getResponse: { keys: string[]; version?: string; canEncrypt: bool
   render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <SandboxSecretsFlyout onClose={onClose} />
+        {ui === 'flyout' ? (
+          <SandboxSecretsFlyout onClose={onClose} />
+        ) : (
+          <SandboxSecretsPanel
+            presets={[
+              {
+                id: 'github',
+                label: 'GitHub token',
+                iconType: 'logoGithub',
+                keys: ['GITHUB_TOKEN'],
+              },
+            ]}
+          />
+        )}
       </QueryClientProvider>
     </I18nProvider>
   );
@@ -146,5 +162,36 @@ describe('SandboxSecretsFlyout', () => {
     expect(screen.getByTestId('nightshiftSandboxSecretKey')).toBeDisabled();
     expect(screen.getByTestId('nightshiftSandboxSecretsAdd')).toBeDisabled();
     expect(screen.getByTestId('nightshiftSandboxSecretsSave')).toBeDisabled();
+  });
+});
+
+describe('SandboxSecretsPanel', () => {
+  it('adds a preset row once and enables Save only after a change', async () => {
+    setup({ keys: [], canEncrypt: true }, 'panel');
+    const preset = await screen.findByTestId('nightshiftSandboxSecretsPreset-github');
+    expect(screen.getByTestId('nightshiftSandboxSecretsSave')).toBeDisabled();
+
+    fireEvent.click(preset);
+
+    expect(screen.getByTestId('nightshiftSandboxSecretKey')).toHaveValue('GITHUB_TOKEN');
+    expect(preset).toBeDisabled();
+    expect(screen.getByTestId('nightshiftSandboxSecretsSave')).toBeEnabled();
+  });
+
+  it('saves inline without a flyout to close', async () => {
+    const { getPutBody } = setup({ keys: [], canEncrypt: true }, 'panel');
+    fireEvent.click(await screen.findByTestId('nightshiftSandboxSecretsPreset-github'));
+    fireEvent.change(screen.getByTestId('nightshiftSandboxSecretValue'), {
+      target: { value: 'ghp_example_value' },
+    });
+
+    await act(async () => fireEvent.click(screen.getByTestId('nightshiftSandboxSecretsSave')));
+
+    await waitFor(() =>
+      expect(getPutBody()).toEqual({
+        params: { body: { entries: [{ key: 'GITHUB_TOKEN', value: 'ghp_example_value' }] } },
+        signal: null,
+      })
+    );
   });
 });

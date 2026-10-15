@@ -329,6 +329,12 @@ export const proposalFiltersSchema = z.object({
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**
+   * Drops superseded proposals that were never decided — earlier revisions, whose successor
+   * carries the same ask — while keeping a decided one, such as a failed attempt that a retry
+   * replaced, so the history still shows what ran and how it ended.
+   */
+  excludeUndecidedSuperseded: z.stringbool().default(false),
+  /**
    * Drops proposals whose deadline has passed, by date rather than by status.
    * Distinct from `status: 'expired'`: between the deadline passing and the
    * gate workflow settling the record there is task lag during which it still
@@ -344,6 +350,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });

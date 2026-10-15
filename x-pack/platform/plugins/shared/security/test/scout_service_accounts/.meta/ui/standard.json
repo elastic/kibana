@@ -1,5 +1,5 @@
 {
-  "sha1": "83cebc837810f4ca0a547309b0e6567d778945b5",
+  "sha1": "610ecebc35b784c6c1b674db8689d3bd91acaee5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/delete_service_account.spec.ts",
-        "line": 92,
+        "line": 96,
         "column": 23
       }
     },
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/delete_service_account.spec.ts",
-        "line": 114,
+        "line": 118,
         "column": 8
       }
     }

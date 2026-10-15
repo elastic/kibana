@@ -21,6 +21,7 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -29,6 +30,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -36,7 +38,9 @@ import {
   trackTelemetryBestEffort,
 } from '../bulk_write';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
-import { eventsWriteBulkHandler } from './handler';
+import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
+import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
+import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -44,8 +48,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
   significantEventSchema
     .pick({
       event_id: true,
-      status: true,
-      stream_names: true,
       title: true,
       symptom_hypothesis: true,
       summary: true,
@@ -59,6 +61,17 @@ export const eventsWriteItemSchema = lazySchema(() =>
       conversation_id: true,
     })
     .extend({
+      slugs: nightshiftSourceSlugsField(
+        'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
+      ),
+      // Rejected (not stripped), so a stale caller trying to close an event fails loudly instead of
+      // having its item written `active`.
+      status: z
+        .never({
+          error:
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+        })
+        .optional(),
       event_id: z
         .string()
         .optional()
@@ -72,7 +85,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
 
           Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
           all currently-active events for one that confirms every submitted confirmed rule and
-          shares at least one stream name; non-confirming co-signals do not affect the identity.
+          shares at least one source; non-confirming co-signals do not affect the identity.
           When the item has no confirmed rules, every submitted rule is used instead. If found,
           the write is skipped and the existing event_id is returned (written: false,
           reason: existing_active_event). Otherwise a new event is created with a generated
@@ -109,32 +122,31 @@ export const eventsWriteItemSchema = lazySchema(() =>
     )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
-      const grounded = signals.filter((s) => s.evidence != null);
-      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
+      const hasBreachMember = signals.some(isBreachMemberSignal);
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
         });
       }
-      // Continuations inherit prior severity; this cycle's signals may be
-      // inconclusive (telemetry gap, errored query) without a new confirms.
-      if (
-        item.event_id === undefined &&
-        item.status === 'active' &&
-        (item.severity === 'high' || item.severity === 'critical') &&
-        grounded.length > 0 &&
-        !hasConfirms &&
-        !hasOffTopicObservedError
-      ) {
+      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
+      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
+      // must be written, never dropped.
+      if (item.event_id === undefined && !hasBreachMember) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
+            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+        });
+      }
+      if (item.event_id !== undefined && signals.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A continuation must carry at least one signal.',
         });
       }
     })
@@ -165,7 +177,7 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
+          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );
@@ -191,10 +203,10 @@ export const eventsWriteSchema = lazySchema(() =>
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
 const enrichCausalFeatures = async (
-  items: EventsWriteParams['items'],
+  items: EventsWriteInput[],
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
   logger: Logger
-): Promise<EventsWriteParams['items']> => {
+): Promise<EventsWriteInput[]> => {
   const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
   const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
   if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
@@ -202,24 +214,25 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // `featureIds` matches slug-style references and `id` matches uuid-style references.
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
-    const streamNames = [
+    const sourceIds = [
       ...new Set([
-        ...items.flatMap(({ stream_names: names }) => names),
-        ...references.flatMap(({ stream_name: streamName }) => streamName ?? []),
+        ...items.flatMap(({ source_ids: ids }) => ids),
+        ...references.flatMap(({ source_id: sourceId }) => sourceId ?? []),
       ]),
     ];
     const kiClient = await getKnowledgeIndicatorClient();
     const hits = (
       await Promise.all([
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           featureIds,
           includeExcluded: true,
           includeExpired: true,
         }),
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           id: featureIds,
           includeExcluded: true,
           includeExpired: true,
@@ -230,24 +243,24 @@ const enrichCausalFeatures = async (
     const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
     const featuresByReference = new Map(
       uniqueHits.flatMap((feature) => [
-        [`${feature.stream_name}:${feature.id}`, feature] as const,
-        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+        [`${feature.source_id}:${feature.id}`, feature] as const,
+        [`${feature.source_id}:${feature.uuid}`, feature] as const,
       ])
     );
 
     const resolveFeature = (
       featureId: string,
-      explicitStream: string | undefined,
-      itemStreamNames: string[]
+      explicitSourceId: string | undefined,
+      itemSourceIds: string[]
     ) => {
-      if (explicitStream !== undefined) {
-        return featuresByReference.get(`${explicitStream}:${featureId}`);
+      if (explicitSourceId !== undefined) {
+        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
       }
-      // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
-      // event's own streams so a shared slug on another stream cannot stamp the wrong
+      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
+      // event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
-      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
+      const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
@@ -256,8 +269,8 @@ const enrichCausalFeatures = async (
       causal_features: item.causal_features?.map((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
-          causalFeature.stream_name,
-          item.stream_names
+          causalFeature.source_id,
+          item.source_ids
         );
         return feature
           ? {
@@ -271,7 +284,7 @@ const enrichCausalFeatures = async (
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
-        const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
+        const feature = resolveFeature(entry.feature_id, entry.source_id, item.source_ids);
         return feature
           ? {
               ...entry,
@@ -314,23 +327,27 @@ export function createEventsWriteTool({
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
-      **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
-      investigation makes the stored severity authoritative. It is preserved unless Discovery
-      marks the event inactive, reactivates an inactive event, or submits a confirmed
+      **With event_id**: append a version to an existing event. Its status follows the merged
+      members' verdicts: a breaching member returns a recovering event to active, while healthy or
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under
+      its field contract, decided from the merged confirming signals; the writer stores it as given
+      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
+      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
+      completed investigation makes the stored severity authoritative over the newly proposed
+      one. It is preserved unless Discovery reactivates an inactive event or submits a confirmed
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
-      least one stream name; non-confirming co-signals do not affect the identity. When the item
+      least one source; non-confirming co-signals do not affect the identity. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
       writing (written: false, reason: existing_active_event). Otherwise creates a new event with
       a generated event_id.
     `,
     annotations: {
-      title: 'Write Significant Events',
+      title: 'Write significant events',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,
@@ -341,20 +358,19 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      let storedItems: EventsWriteInput[] | undefined;
       try {
-        const {
-          getEventSearchClient,
-          getKnowledgeIndicatorClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-        } = await getScopedClients({
-          request,
-        });
+        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
+        const catalog = await loadSourceCatalog(sourcesClient);
+        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
-          toolParams.items,
+          resolvedItems,
           getKnowledgeIndicatorClient,
           logger
         );
@@ -366,13 +382,11 @@ export function createEventsWriteTool({
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 
         data.forEach((result) => {
-          const input = toolParams.items[result.index];
+          const input = resolvedItems[result.index];
           if (input === undefined) return;
           const isSkipped = !result.written && 'skipped' in result;
           const isBulkError = !result.written && 'error' in result;
@@ -385,19 +399,40 @@ export function createEventsWriteTool({
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
                 written: result.written,
-                stream_names: input.stream_names,
+                source_ids: input.source_ids,
                 error_message: isBulkError ? result.error.reason : undefined,
+                ...(result.written ? { severity: result.severity } : {}),
               }),
           });
         });
 
         return {
-          results: [{ type: ToolResultType.other, data: { results: data } }],
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                results: data.map((result) => {
+                  const input = resolvedItems[result.index];
+                  if (!input) {
+                    return result;
+                  }
+                  return {
+                    ...result,
+                    sources: input.source_ids.flatMap((sourceId) => {
+                      const source = catalog.byId.get(sourceId);
+                      return source ? [toSourceRef(source)] : [];
+                    }),
+                  };
+                }),
+              },
+            },
+          ],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        toolParams.items.forEach((input) => {
+        // Source ids exist only once the slugs resolved; earlier failures report none.
+        (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
             logger,
             description: 'failed events_write telemetry',
@@ -405,9 +440,8 @@ export function createEventsWriteTool({
               telemetry.trackAgentToolEventsWrite({
                 success: false,
                 event_id: input.event_id ?? 'unknown',
-                status: input.status,
                 written: false,
-                stream_names: input.stream_names,
+                source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
               }),
           });

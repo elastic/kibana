@@ -11,24 +11,97 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import {
+  KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION,
   ENABLE_OTLP_OUTPUT_FLAG,
   OTLP_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../../common/constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
 
-import { checkOtlpOutputAllowed, findAgentlessPolicies, isOtlpOutputSupported } from './helpers';
+import {
+  checkKafkaOAuth2Allowed,
+  checkOtlpOutputAllowed,
+  findAgentlessPolicies,
+  isOtlpOutputSupported,
+} from './helpers';
+import { isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
 
 jest.mock('../agent_policy');
 jest.mock('../app_context');
+jest.mock('../fleet_server');
 jest.mock('../fleet_server/version_requirements');
+jest.mock('./kafka_auth_feature_flags');
 
 const mockedIsFleetServerVersionRequirementMet =
   isFleetServerVersionRequirementMet as jest.MockedFunction<
     typeof isFleetServerVersionRequirementMet
   >;
 
+const mockedIsKafkaOAuth2AuthEnabled = isKafkaOAuth2AuthEnabled as jest.MockedFunction<
+  typeof isKafkaOAuth2AuthEnabled
+>;
+const mockedCheckFleetServerVersions = checkFleetServerVersionsForSecretsStorage as jest.Mock;
+
+describe('checkKafkaOAuth2Allowed', () => {
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const soClientMock = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedIsKafkaOAuth2AuthEnabled.mockResolvedValue(true);
+    mockedCheckFleetServerVersions.mockResolvedValue(true);
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      internal: { fleetServerStandalone: false },
+    });
+  });
+
+  it('returns { result: false } when the feature flag is off, without checking the versions', async () => {
+    mockedIsKafkaOAuth2AuthEnabled.mockResolvedValue(false);
+
+    const result = await checkKafkaOAuth2Allowed(esClientMock, soClientMock);
+
+    expect(result).toEqual({
+      result: false,
+      error: 'OAuth2 authentication of Kafka outputs is not enabled',
+    });
+    expect(mockedCheckFleetServerVersions).not.toHaveBeenCalled();
+  });
+
+  it('returns { result: false, error } when a Fleet Server is below the minimum version', async () => {
+    mockedCheckFleetServerVersions.mockResolvedValue(false);
+
+    const result = await checkKafkaOAuth2Allowed(esClientMock, soClientMock);
+
+    expect(result.result).toBe(false);
+    expect(result.error).toContain(KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION);
+    expect(result.error).toContain('or later');
+    expect(mockedCheckFleetServerVersions).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION
+    );
+  });
+
+  it('returns { result: true } when the flag is on and all Fleet Servers meet the version', async () => {
+    const result = await checkKafkaOAuth2Allowed(esClientMock, soClientMock);
+
+    expect(result).toEqual({ result: true });
+  });
+
+  it('does not check the versions when Fleet Server is standalone', async () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      internal: { fleetServerStandalone: true },
+    });
+    mockedCheckFleetServerVersions.mockResolvedValue(false);
+
+    const result = await checkKafkaOAuth2Allowed(esClientMock, soClientMock);
+
+    expect(result).toEqual({ result: true });
+    expect(mockedCheckFleetServerVersions).not.toHaveBeenCalled();
+  });
+});
 const mockOtlpFlag = (value: boolean) => {
   const getBooleanValue$ = jest.fn().mockReturnValue(of(value));
   (appContextService.getFeatureFlags as jest.Mock).mockReturnValue({ getBooleanValue$ });
