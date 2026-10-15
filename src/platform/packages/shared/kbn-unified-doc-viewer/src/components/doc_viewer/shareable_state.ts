@@ -55,12 +55,13 @@ export const projectShareableTabsState = (
  */
 export const capShareableState = (state: DocViewerShareableState): DocViewerShareableState => {
   if (JSON.stringify(state).length <= DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `per-tab state dropped because it was too long. Max length: ${DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH}`
-    );
     return state;
   }
+
+  // eslint-disable-next-line no-console
+  console.log(
+    `per-tab state dropped because it was too long. Max length: ${DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH}`
+  );
 
   const { tabsState, ...rest } = state;
   return rest;
