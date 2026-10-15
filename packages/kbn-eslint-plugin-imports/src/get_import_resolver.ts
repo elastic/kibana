@@ -16,18 +16,22 @@ import { RUNNING_IN_EDITOR } from './helpers/running_in_editor';
 let importResolverCache: ImportResolver | undefined;
 
 /**
- * Several rules resolve every import of every file, so results are cached per resolver. The
- * resolver already memoizes the file system for its lifetime, so cached results never go stale.
+ * Several rules resolve every import of every file, so successful results are cached per resolver,
+ * matching the resolver's own file system memo. Like that memo, misses are not cached, so a file
+ * created later still resolves in long-lived processes.
  */
 const createImportResolver = (): ImportResolver => {
   const resolver = ImportResolver.create(REPO_ROOT);
   const resolve = resolver.resolve.bind(resolver);
-  const results = new Map<string, ResolveResult | null>();
+  const results = new Map<string, ResolveResult>();
   resolver.resolve = (req, dirname) => {
     const key = `${dirname}\0${req}`;
-    let result = results.get(key);
-    if (result === undefined) {
-      result = resolve(req, dirname);
+    const cached = results.get(key);
+    if (cached) {
+      return cached;
+    }
+    const result = resolve(req, dirname);
+    if (result) {
       results.set(key, result);
     }
     return result;

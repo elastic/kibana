@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import Pw from '@parcel/watcher';
 import execa from 'execa';
+import ignore from 'ignore';
 import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -103,7 +105,14 @@ async function runOxlintShards(args: string[]) {
       cwd: REPO_ROOT,
     }
   );
-  const files = stdout.split('\0').filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)));
+  // oxlint only applies `.eslintignore` while walking down from the paths it is given, so a shard
+  // root inside an ignored directory would be linted; drop ignored files before sharding.
+  const eslintIgnore = ignore().add(
+    Fs.readFileSync(Path.resolve(REPO_ROOT, '.eslintignore'), 'utf8')
+  );
+  const files = stdout
+    .split('\0')
+    .filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)) && !eslintIgnore.ignores(file));
   const shardCount = Math.max(1, Math.round(Os.availableParallelism() / THREADS_PER_SHARD));
 
   const results = await Promise.all(
@@ -117,9 +126,13 @@ async function runOxlintShards(args: string[]) {
     )
   );
 
-  for (const { all } of results) {
-    if (all) {
-      process.stdout.write(`${all}\n`);
+  for (const result of results) {
+    if (result.all) {
+      process.stdout.write(`${result.all}\n`);
+    }
+    // a shard that failed to start or was killed has no exit code; execa's failure carries the reason
+    if (result.exitCode === undefined && 'shortMessage' in result) {
+      process.stdout.write(`${result.shortMessage}\n`);
     }
   }
   if (results.some(({ exitCode }) => exitCode !== 0)) {

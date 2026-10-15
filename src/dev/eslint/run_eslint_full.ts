@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChildProcess } from 'child_process';
 import { fork } from 'child_process';
 import Os from 'os';
 
@@ -49,17 +48,17 @@ run(
     );
 
     let errorCount = 0;
-    const workers: ChildProcess[] = [];
-    const startWorker = () =>
-      new Promise<void>((resolve, reject) => {
+    const workerFailures: string[] = [];
+    const runWorker = () =>
+      new Promise<void>((resolve) => {
         const worker = fork(require.resolve('./eslint_worker'), [JSON.stringify(workerOptions)], {
           cwd: REPO_ROOT,
           // Disable CI stats for the workers, to avoid overloading ci-stats
           env: { ...process.env, CI_STATS_DISABLED: 'true' },
         });
-        workers.push(worker);
         const sendNextChunk = () => {
-          const stop = bail && errorCount > 0;
+          // After a worker fails, the others finish (and write fixes for) their current chunk, then stop.
+          const stop = workerFailures.length > 0 || (bail && errorCount > 0);
           const chunk = stop ? undefined : chunks.shift();
           if (chunk) {
             worker.send(chunk);
@@ -75,18 +74,19 @@ run(
           }
           sendNextChunk();
         });
-        worker.on('exit', (code) =>
-          code === 0 ? resolve() : reject(new Error(`ESLint worker exited with code ${code}`))
-        );
+        worker.on('exit', (code, signal) => {
+          if (code !== 0) {
+            workerFailures.push(`ESLint worker exited with ${signal ?? `code ${code}`}`);
+          }
+          resolve();
+        });
         sendNextChunk();
       });
 
-    try {
-      await Promise.all(Array.from({ length: poolSize }, startWorker));
-    } finally {
-      for (const worker of workers) {
-        worker.kill();
-      }
+    await Promise.all(Array.from({ length: poolSize }, runWorker));
+
+    if (workerFailures.length > 0) {
+      throw createFailError(workerFailures.join('\n'));
     }
 
     if (errorCount > 0) {

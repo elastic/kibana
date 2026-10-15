@@ -43,4 +43,13 @@ describe('getShardPaths', () => {
     expect(shards).toHaveLength(2);
     expect(shards.flat().sort()).toEqual(['a.ts', 'b.ts']);
   });
+
+  it('passes directories within the size budget whole instead of their files', () => {
+    const dirs = Array.from({ length: 32 }, (_, i) => `pkg_${i}`);
+    const dirFiles = dirs.flatMap((dir) =>
+      Array.from({ length: 5 }, (_, i) => `${dir}/file_${i}.ts`)
+    );
+
+    expect(getShardPaths(dirFiles, 2).flat().sort()).toEqual([...dirs].sort());
+  });
 });

@@ -32,7 +32,9 @@ const statSafe = memoize((path) => {
 
 const { fix, cache } = JSON.parse(process.argv[2]);
 const eslint = new ESLint({
-  cache,
+  // A long-lived instance would record fixed files' new mtimes next to their pre-fix results, so a
+  // later cached run would trust stale results; fix runs don't use the cache.
+  cache: cache && !fix,
   // Mirrors ESLint CLI's `--quiet` behavior: only autofix errors, never warnings.
   fix: fix && ((message) => message.severity === 2),
   // Files don't appear or disappear during a run, so eslint-plugin-import keeps resolutions for the
