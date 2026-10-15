@@ -6,107 +6,135 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCode, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButton,
+  EuiCode,
+  EuiEmptyPrompt,
+  EuiIllustration,
+  EuiLink,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { openSourceAi } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
 
 const DEFAULT_ACCOUNT = 'kibana/nightshift-agent-<space>';
 
+/** The accounts, roles and privileges `_enable` grants, until product docs exist. */
+export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =
+  'https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/nightshift_investigations/README.md#accounts-and-roles';
+
 /**
- * First-run step shown instead of Nightshift until the space is set up. Nightshift only works as
- * its service account, so nothing else in the app is usable before this.
+ * The first onboarding step, shown until the space is set up: Nightshift runs as its service
+ * account, so nothing else works before an admin enables it. Enabling requires `manage_security`;
+ * everyone else sees why the button is disabled.
  */
 export const NightshiftSetupPrompt = ({
   status,
-  canManage,
 }: {
   status: InvestigatorServiceAccountStatus | undefined;
-  canManage: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const setUp = useSetUpNightshiftServiceAccount();
   const account = status?.serviceAccountId ?? DEFAULT_ACCOUNT;
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
+  const canEnable = !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
 
-  const renderActions = () => {
-    if (serviceAccountsOff) {
-      return (
-        <KbnInfoCallout
-          size="s"
-          title={i18n.translate('xpack.nightshift.setup.serviceAccountsOffTitle', {
-            defaultMessage: 'Service accounts are turned off in this deployment',
-          })}
-          data-test-subj="nightshiftSetupServiceAccountsOff"
-        >
-          <FormattedMessage
-            id="xpack.nightshift.setup.serviceAccountsOffBody"
-            defaultMessage="Set {setting} in kibana.yml, then come back to set up Nightshift."
-            values={{ setting: <EuiCode>xpack.security.serviceAccounts.enabled: true</EuiCode> }}
-          />
-        </KbnInfoCallout>
-      );
-    }
-    if (!canManage) {
-      return (
-        <EuiText size="s" color="subdued" data-test-subj="nightshiftSetupAskAdmin">
-          {i18n.translate('xpack.nightshift.setup.askAdmin', {
-            defaultMessage: 'Ask an administrator to set up Nightshift in this space.',
-          })}
-        </EuiText>
-      );
-    }
-    return (
-      <>
-        <EuiButton
-          fill
-          iconType="lock"
-          isLoading={setUp.isLoading}
-          onClick={() => setUp.mutate()}
-          data-test-subj="nightshiftSetUpServiceAccount"
-        >
-          {i18n.translate('xpack.nightshift.setup.enableButton', {
-            defaultMessage: 'Enable service account',
-          })}
-        </EuiButton>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.nightshift.setup.privilegeHint"
-            defaultMessage="Requires the {privilege} cluster privilege."
-            values={{ privilege: <EuiCode>manage_security</EuiCode> }}
-          />
-        </EuiText>
-      </>
-    );
-  };
+  const body = serviceAccountsOff ? (
+    <p data-test-subj="nightshiftSetupServiceAccountsOff">
+      <FormattedMessage
+        id="xpack.nightshift.setup.serviceAccountsOffBody"
+        defaultMessage="Service accounts are turned off in this deployment. Set {setting} in kibana.yml, then come back to enable Elastic Nightshift."
+        values={{ setting: <EuiCode>xpack.security.serviceAccounts.enabled: true</EuiCode> }}
+      />
+    </p>
+  ) : canEnable ? (
+    <p>
+      <FormattedMessage
+        id="xpack.nightshift.setup.adminBody"
+        defaultMessage="Grant the agent a {account} account with {privilegesLink}. It will perform investigations and actions on behalf of users in this space. You can revoke privileges anytime in Settings."
+        values={{
+          account: <EuiCode>{account}</EuiCode>,
+          privilegesLink: (
+            <EuiLink
+              href={NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF}
+              target="_blank"
+              external
+              css={css`
+                white-space: nowrap;
+              `}
+              data-test-subj="nightshiftSetupPrivilegesLink"
+            >
+              {i18n.translate('xpack.nightshift.setup.privilegesLink', {
+                defaultMessage: 'these privileges',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    </p>
+  ) : (
+    <p data-test-subj="nightshiftSetupAskAdmin">
+      <FormattedMessage
+        id="xpack.nightshift.setup.askAdminBody"
+        defaultMessage="A space administrator with the {privilege} privilege has to enable Elastic Nightshift once for this space. Ask them to turn it on."
+        values={{ privilege: <EuiCode>manage_security</EuiCode> }}
+      />
+    </p>
+  );
 
   return (
-    <EuiEmptyPrompt
-      iconType="lock"
-      color="plain"
-      hasBorder
-      data-test-subj="nightshiftSetupPrompt"
-      title={
-        <h2>
-          {i18n.translate('xpack.nightshift.setup.title', {
-            defaultMessage: 'Set up Nightshift in this space',
-          })}
-        </h2>
-      }
-      body={
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.nightshift.setup.body"
-              defaultMessage="Nightshift runs its investigations as its own service account, {account}, not as the people who use it. Its access is set by the account's role, which only applies to this space, and its work can be traced to it. An administrator sets it up once per space, which creates the space's Nightshift service accounts and roles if they do not exist yet."
-              values={{ account: <EuiCode>{account}</EuiCode> }}
-            />
-          </p>
-        </EuiText>
-      }
-      actions={renderActions()}
-    />
+    <EuiPanel hasBorder paddingSize="none" data-test-subj="nightshiftSetupPrompt">
+      <EuiEmptyPrompt
+        layout="vertical"
+        color="transparent"
+        paddingSize="l"
+        css={css`
+          max-width: none;
+        `}
+        icon={
+          <EuiIllustration
+            type={openSourceAi}
+            alt=""
+            css={css`
+              max-inline-size: 160px;
+              margin-inline: auto;
+            `}
+          />
+        }
+        title={
+          <h2
+            css={css`
+              font-size: ${euiTheme.size.base};
+            `}
+          >
+            {i18n.translate('xpack.nightshift.setup.title', {
+              defaultMessage: 'One-time admin setup required for this space',
+            })}
+          </h2>
+        }
+        titleSize="xs"
+        body={body}
+        actions={
+          <EuiButton
+            size="s"
+            fill
+            iconType={canEnable ? undefined : 'lock'}
+            isDisabled={!canEnable}
+            isLoading={setUp.isLoading}
+            onClick={() => setUp.mutate()}
+            data-test-subj="nightshiftSetUpServiceAccount"
+          >
+            {i18n.translate('xpack.nightshift.setup.enableButton', {
+              defaultMessage: 'Enable Elastic Nightshift',
+            })}
+          </EuiButton>
+        }
+      />
+    </EuiPanel>
   );
 };

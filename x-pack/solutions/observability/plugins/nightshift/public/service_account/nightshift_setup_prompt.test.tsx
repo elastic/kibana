@@ -31,37 +31,37 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const renderPrompt = (props: { canManage: boolean; serviceAccountsEnabled?: boolean }) =>
+const renderPrompt = (overrides: Record<string, unknown> = {}) =>
   render(
     <I18nProvider>
-      <NightshiftSetupPrompt
-        canManage={props.canManage}
-        status={status({ serviceAccountsEnabled: props.serviceAccountsEnabled ?? true })}
-      />
+      <NightshiftSetupPrompt status={status(overrides)} />
     </I18nProvider>
   );
 
 describe('NightshiftSetupPrompt', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('lets an admin enable the service account', () => {
-    renderPrompt({ canManage: true });
+  it('lets a user with manage_security enable Nightshift', () => {
+    renderPrompt();
 
+    expect(screen.getByText('One-time admin setup required for this space')).toBeInTheDocument();
+    expect(screen.getByText('kibana/nightshift-agent-default')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSetupPrivilegesLink')).toHaveAttribute('target', '_blank');
     fireEvent.click(screen.getByTestId('nightshiftSetUpServiceAccount'));
     expect(mockMutate).toHaveBeenCalledTimes(1);
   });
 
-  it('tells other users to ask an administrator', () => {
-    renderPrompt({ canManage: false });
+  it('tells users without manage_security to ask an administrator', () => {
+    renderPrompt({ canModifyBoundWorkflows: false });
 
-    expect(screen.getByTestId('nightshiftSetupAskAdmin')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftSetUpServiceAccount')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSetupAskAdmin')).toHaveTextContent('manage_security');
+    expect(screen.getByTestId('nightshiftSetUpServiceAccount')).toBeDisabled();
   });
 
   it('explains the missing setting when service accounts are turned off', () => {
-    renderPrompt({ canManage: true, serviceAccountsEnabled: false });
+    renderPrompt({ serviceAccountsEnabled: false });
 
     expect(screen.getByTestId('nightshiftSetupServiceAccountsOff')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftSetUpServiceAccount')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSetUpServiceAccount')).toBeDisabled();
   });
 });

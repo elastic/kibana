@@ -85,8 +85,8 @@ jest.mock('./service_account/use_investigator_service_account', () => ({
   ...jest.requireActual('./service_account/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
-jest.mock('./service_account/nightshift_setup_prompt', () => ({
-  NightshiftSetupPrompt: () => <div data-test-subj="nightshiftSetupPromptStub" />,
+jest.mock('./onboarding/setup_onboarding', () => ({
+  NightshiftSetupOnboarding: () => <div data-test-subj="nightshiftSetupOnboardingStub" />,
 }));
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -176,7 +176,7 @@ describe('NightshiftPage', () => {
       };
       renderPage();
 
-      expect(screen.getByTestId('nightshiftSetupPromptStub')).toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftSetupOnboardingStub')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
     });
 
@@ -184,7 +184,7 @@ describe('NightshiftPage', () => {
       withInvestigations();
       renderPage();
 
-      expect(screen.queryByTestId('nightshiftSetupPromptStub')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftSetupOnboardingStub')).not.toBeInTheDocument();
       expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
     });
 

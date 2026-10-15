@@ -42,10 +42,13 @@ import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'connect' | 'investigate' | undefined;
 
+const MEET_NIGHTSHIFT_TITLE = i18n.translate('xpack.nightshift.onboarding.heroTitle', {
+  defaultMessage: 'Meet Elastic Nightshift',
+});
+
 const HERO_TITLES: Record<OnboardingStepId, string> = {
-  connect: i18n.translate('xpack.nightshift.onboarding.heroTitle', {
-    defaultMessage: 'Meet Elastic Nightshift',
-  }),
+  enable: MEET_NIGHTSHIFT_TITLE,
+  connect: MEET_NIGHTSHIFT_TITLE,
   investigate: i18n.translate('xpack.nightshift.onboarding.heroTitleInvestigate', {
     defaultMessage: 'Try first investigation',
   }),
@@ -161,6 +164,8 @@ export function NightshiftOnboarding({
   }, [agentBuilder, closeInvestigation, selectedInvestigationId, shareInvestigationAction]);
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
+    // This onboarding only shows once the space is set up; see `NightshiftSetupOnboarding`.
+    enable: { status: 'complete' },
     connect: {
       status: step === 'connect' ? 'current' : 'complete',
       onClick: step !== 'connect' ? () => setStepOverride('connect') : undefined,
