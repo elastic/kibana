@@ -579,11 +579,15 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* overflow-y: auto leaves overflow-x hidden, which clips drag-drop extras. */
+              /* Scrollable accordion content area with custom scrollbar styling.
+                 pointer-events handling allows drag-drop to work outside content bounds. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
-                overflow: visible !important;
+                overflow-y: auto !important;
                 pointer-events: none;
+
+                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
+                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
                 > * {
                   pointer-events: auto;
                 }
