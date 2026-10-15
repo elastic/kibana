@@ -153172,13 +153172,14 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         enabled:
-          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
+          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -153204,9 +153205,7 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
