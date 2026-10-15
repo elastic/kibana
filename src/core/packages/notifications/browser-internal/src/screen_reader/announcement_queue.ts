@@ -7,6 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+import {
+  EMPTY,
+  concat,
+  concatMap,
+  debounceTime,
+  exhaustMap,
+  ignoreElements,
+  of,
+  race,
+  startWith,
+  takeUntil,
+  timer,
+  toArray,
+} from 'rxjs';
+
 /**
  * A message to announce, or a function returning it when it's announced. Functions let callers
  * read content that renders later, and return an empty string to skip a stale message.
@@ -41,68 +57,45 @@ const READING_TIME_PER_CHARACTER_MS = 60;
 export const estimateReadingTimeMs = (messages: string[]): number =>
   Math.max(MIN_READING_TIME_MS, messages.join(' ').length * READING_TIME_PER_CHARACTER_MS);
 
+const resolveMessages = (batch: AnnouncementMessage[]): string[] =>
+  [
+    ...new Set(
+      batch.map((message) => (typeof message === 'function' ? message() : message).trim())
+    ),
+  ].filter(Boolean);
+
 /**
- * Collects messages for screen readers and decides when to announce them: in batches, and without
- * interrupting the previous announcement.
+ * Turns messages for screen readers into announcements:
+ * - messages that arrive close together are announced as one, once none arrived for
+ *   {@link ANNOUNCEMENT_SETTLE_MS}, or {@link ANNOUNCEMENT_MAX_BATCH_MS} after the first one;
+ * - an announcement waits until the previous one is likely read.
+ *
+ * `messages$` must be hot (e.g. a `Subject`), because batching subscribes to it more than once.
  */
-export class AnnouncementQueue {
-  private pending: Array<() => string> = [];
-  private firstQueuedAt = 0;
-  private lastQueuedAt = 0;
-  private readingUntil = 0;
-  private lastId = 0;
-  private timeoutId?: ReturnType<typeof setTimeout>;
+export const toAnnouncements = (
+  messages$: Observable<AnnouncementMessage>
+): Observable<Announcement> => {
+  let lastId = 0;
 
-  constructor(private readonly onAnnounce: (announcement: Announcement) => void) {}
-
-  public add(message: AnnouncementMessage) {
-    const now = Date.now();
-    if (!this.pending.length) {
-      this.firstQueuedAt = now;
-    }
-    this.lastQueuedAt = now;
-    this.pending.push(typeof message === 'string' ? () => message : message);
-    this.scheduleCheck();
-  }
-
-  public stop() {
-    clearTimeout(this.timeoutId);
-    this.pending = [];
-  }
-
-  private getReadyAt(): number {
-    const batchReadyAt = Math.min(
-      this.lastQueuedAt + ANNOUNCEMENT_SETTLE_MS,
-      this.firstQueuedAt + ANNOUNCEMENT_MAX_BATCH_MS
-    );
-    return Math.max(batchReadyAt, this.readingUntil);
-  }
-
-  private scheduleCheck(delayMs = this.getReadyAt() - Date.now()) {
-    clearTimeout(this.timeoutId);
-    this.timeoutId = setTimeout(this.check, Math.max(0, delayMs));
-  }
-
-  private check = () => {
-    const now = Date.now();
-
-    if (now < this.getReadyAt()) {
-      this.scheduleCheck();
-      return;
-    }
-
-    this.announce(now);
-  };
-
-  private announce(now: number) {
-    const messages = [...new Set(this.pending.map((getMessage) => getMessage().trim()))].filter(
-      Boolean
-    );
-    this.pending = [];
-
-    if (messages.length) {
-      this.readingUntil = now + estimateReadingTimeMs(messages);
-      this.onAnnounce({ id: ++this.lastId, messages });
-    }
-  }
-}
+  return messages$.pipe(
+    exhaustMap((firstMessage) => {
+      const batch$ = messages$.pipe(startWith(firstMessage));
+      const batchEnd$ = race(
+        batch$.pipe(debounceTime(ANNOUNCEMENT_SETTLE_MS)),
+        timer(ANNOUNCEMENT_MAX_BATCH_MS)
+      );
+      return batch$.pipe(takeUntil(batchEnd$), toArray());
+    }),
+    // Messages are resolved here, so functions read content that has rendered by now
+    concatMap((batch) => {
+      const messages = resolveMessages(batch);
+      if (!messages.length) {
+        return EMPTY;
+      }
+      return concat(
+        of({ id: ++lastId, messages }),
+        timer(estimateReadingTimeMs(messages)).pipe(ignoreElements())
+      );
+    })
+  );
+};

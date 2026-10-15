@@ -9,11 +9,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { BehaviorSubject } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { ScreenReaderStart } from '@kbn/core-notifications-browser';
 import type { Announcement, AnnouncementMessage } from './announcement_queue';
-import { AnnouncementQueue } from './announcement_queue';
+import { toAnnouncements } from './announcement_queue';
 import { ScreenReaderAnnouncer } from './screen_reader_announcer';
 
 interface StartDeps {
@@ -34,14 +35,14 @@ export interface InternalScreenReaderStart extends ScreenReaderStart {
  * announcements are queued instead of interrupting each other.
  */
 export class ScreenReaderService {
-  private queue?: AnnouncementQueue;
+  private subscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
   public start({ rendering, targetDomElement }: StartDeps): InternalScreenReaderStart {
+    const messages$ = new Subject<AnnouncementMessage>();
     const announcement$ = new BehaviorSubject<Announcement | undefined>(undefined);
-    const queue = new AnnouncementQueue((announcement) => announcement$.next(announcement));
 
-    this.queue = queue;
+    this.subscription = toAnnouncements(messages$).subscribe(announcement$);
     this.targetDomElement = targetDomElement;
 
     render(
@@ -50,12 +51,12 @@ export class ScreenReaderService {
     );
 
     return {
-      notify: (message) => queue.add(message),
+      notify: (message) => messages$.next(message),
     };
   }
 
   public stop() {
-    this.queue?.stop();
+    this.subscription?.unsubscribe();
 
     if (this.targetDomElement) {
       unmountComponentAtNode(this.targetDomElement);
