@@ -211,6 +211,9 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
       setStatus('pending');
       startPolling(data.item.id, data.item.expires_at);
 
+      // The key travels in the quick-create link as a stack parameter. It can only be used to
+      // report to this one record: it carries no privileges, works once, expires with the
+      // record, and the template hides it in the AWS console.
       return {
         ElasticKibanaUrl: kibanaUrl,
         ElasticApiKey: data.api_key,

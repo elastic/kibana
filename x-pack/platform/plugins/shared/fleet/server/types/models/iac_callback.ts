@@ -21,9 +21,10 @@ const AccountTypeSchema = schema.oneOf([
 
 /**
  * Stored shape of a `fleet-iac-callback`. Only the API key id is kept so the key can be
- * invalidated and matched against the caller; the key itself is never stored.
+ * invalidated and matched against the caller; the key itself is never stored. The identity
+ * fields are set at launch and copied to the cloud connector the report creates.
  */
-const iacCallbackFieldsV1 = {
+export const IacCallbackSchemaV1 = schema.object({
   provider: schema.literal('aws'),
   status: IacCallbackStatusSchema,
   api_key_id: schema.string({ minLength: 1, maxLength: 256 }),
@@ -34,16 +35,6 @@ const iacCallbackFieldsV1 = {
   received_at: schema.maybe(schema.string({ maxLength: 64 })),
   role_arn: schema.maybe(schema.string({ maxLength: 2048 })),
   stack_arn: schema.maybe(schema.string({ maxLength: 2048 })),
-};
-
-export const IacCallbackSchemaV1 = schema.object(iacCallbackFieldsV1);
-
-/**
- * Identity fields stored at launch, and the id of the cloud connector created when the stack
- * reports back. None of these are indexed.
- */
-export const IacCallbackSchemaV2 = schema.object({
-  ...iacCallbackFieldsV1,
   connector_name: schema.maybe(schema.string({ maxLength: 255 })),
   account_type: schema.maybe(AccountTypeSchema),
   iac_key: schema.maybe(schema.nullable(schema.string({ maxLength: 2048 }))),

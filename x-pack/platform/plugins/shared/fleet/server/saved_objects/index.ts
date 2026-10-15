@@ -63,7 +63,6 @@ import {
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
   IacCallbackSchemaV1,
-  IacCallbackSchemaV2,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2196,14 +2195,6 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: IacCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
             create: IacCallbackSchemaV1,
-          },
-        },
-        2: {
-          // Adds the identity fields and `cloud_connector_id`. None of them are indexed.
-          changes: [],
-          schemas: {
-            forwardCompatibility: IacCallbackSchemaV2.extends({}, { unknowns: 'ignore' }),
-            create: IacCallbackSchemaV2,
           },
         },
       },
