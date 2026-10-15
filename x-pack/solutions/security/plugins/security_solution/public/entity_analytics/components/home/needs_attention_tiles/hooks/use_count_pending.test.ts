@@ -68,6 +68,15 @@ describe.each([
     query();
   });
 
+  it('keeps its result for an hour, so a range that is left and revisited is not fetched again', () => {
+    query();
+    renderHook(() => useCount({ spaceId: 'default' }));
+    const options = mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1][2];
+    expect(options.staleTime).toBe(60 * 60_000);
+    // Default is 5 minutes, which would drop the result of a range left unused for that long.
+    expect(options.cacheTime).toBe(60 * 60_000);
+  });
+
   it('is true while the count loads for the first time and while it refetches', () => {
     query({ isLoading: true, isFetching: true });
     expect(pending()).toBe(true);
