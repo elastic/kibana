@@ -12,7 +12,6 @@ import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
 import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
-import type { KnowledgeIndicatorClient } from './ki';
 
 export class StreamsService {
   constructor(
@@ -23,14 +22,12 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    getKnowledgeIndicatorClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
     isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClient>;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
@@ -47,7 +44,6 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      getKnowledgeIndicatorClient,
       logger,
       esClient,
       esClientAsInternalUser,

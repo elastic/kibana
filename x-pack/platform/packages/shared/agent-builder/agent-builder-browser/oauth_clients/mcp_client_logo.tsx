@@ -23,5 +23,7 @@ export const McpClientLogo = ({ clientLogo, size = 'm' }: McpClientLogoProps) =>
 
   const { media_type: mediaType, data } = clientLogo;
   const imageUrl = `data:${mediaType};base64,${data}`;
-  return <EuiIcon type={imageUrl} size={size} title={labels.logoTitle} />;
+  return (
+    <EuiIcon type={imageUrl} size={size} title={labels.logoTitle} data-test-subj="mcpClientLogo" />
+  );
 };

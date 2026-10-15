@@ -17,7 +17,7 @@ export const PoliciesEmptyState = () => (
       <h2>
         <FormattedMessage
           id="xpack.alertingV2.executionHistory.emptyTitle"
-          defaultMessage="No policy execution activity in the last 24 hours."
+          defaultMessage="No action policy execution activity in the last 24 hours."
         />
       </h2>
     }
@@ -25,7 +25,7 @@ export const PoliciesEmptyState = () => (
       <p>
         <FormattedMessage
           id="xpack.alertingV2.executionHistory.emptyBody"
-          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against a policy."
+          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against an action policy."
         />
       </p>
     }
@@ -35,7 +35,7 @@ export const PoliciesEmptyState = () => (
 export const FilteredEmptyState = () => (
   <EuiEmptyPrompt
     data-test-subj="executionHistoryFilteredEmptyPrompt"
-    iconType="search"
+    iconType="magnify"
     title={
       <h2>
         <FormattedMessage
@@ -55,16 +55,25 @@ export const FilteredEmptyState = () => (
   />
 );
 
-export const RulesPlaceholder = () => (
+export const RulesEmptyState = () => (
   <EuiEmptyPrompt
-    iconType="visGauge"
+    data-test-subj="ruleExecutionHistoryEmptyPrompt"
+    iconType="clock"
     title={
       <h2>
         <FormattedMessage
-          id="xpack.alertingV2.executionHistory.rulesTab.placeholderTitle"
-          defaultMessage="Rules execution history is not available yet."
+          id="xpack.alertingV2.executionHistory.rulesTab.emptyTitle"
+          defaultMessage="No rule execution history."
         />
       </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.rulesTab.emptyBody"
+          defaultMessage="Execution history will appear here after rules run."
+        />
+      </p>
     }
   />
 );

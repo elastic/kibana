@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import type { State, ImmutableMiddlewareFactory } from './types';
 import type { AppAction } from './actions';
 

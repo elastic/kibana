@@ -14,7 +14,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
-import { formatDateRange } from '../utils';
+import { formatDateRange, formatInputDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
 
 const mockUseDateRangePickerContext = jest.fn();
@@ -116,6 +116,7 @@ describe('CalendarPanel', () => {
   });
 
   const defaultSettings = { roundRelativeTime: true };
+  const defaultTransformOptions = {};
 
   /** Context with computed dates. */
   const makeContext = (
@@ -127,6 +128,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: formatDateRange(startDate, endDate),
     timeRange: {
       startDate,
@@ -142,6 +144,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: '',
     timeRange: {
       startDate: null,
@@ -167,7 +170,7 @@ describe('CalendarPanel', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
 
@@ -194,7 +197,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
@@ -206,7 +209,7 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
   });
@@ -219,7 +222,7 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
 
@@ -231,7 +234,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
@@ -248,7 +251,42 @@ describe('CalendarPanel', () => {
       await clickDay(20);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+      );
+    });
+  });
+
+  describe('timePrecision', () => {
+    it.each(['none', 's'] as const)(
+      'keeps the full day up to 23:59:59.999 when the display precision is %s',
+      async (timePrecision) => {
+        mockUseDateRangePickerContext.mockReturnValue({
+          ...makeContextNoDates(),
+          transformOptions: { ...defaultTransformOptions, timePrecision },
+        });
+        renderWithEuiTheme(<CalendarPanel />);
+
+        await clickDay(10);
+        await clickDay(15);
+
+        expect(setText).toHaveBeenLastCalledWith(
+          formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        );
+        expect(mockUseDateRangePickerContext().timeRange.endDate).toEqual(
+          feb2026(15, 23, 59, 59, 999)
+        );
+      }
+    );
+
+    it('does not truncate the existing range when converting to absolute text on mount', () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE]),
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+      });
+      renderWithEuiTheme(<CalendarPanel />);
+
+      expect(setText).toHaveBeenCalledWith(
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
   });
@@ -320,8 +358,11 @@ describe('CalendarPanel', () => {
       expect(applyRange).toHaveBeenCalledWith();
     });
 
-    it('calls onPresetSave when Save as preset is checked', async () => {
-      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
+    it('calls onPresetSave with a precision-aware display label when Save as preset is checked', async () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+      });
       renderWithEuiTheme(<CalendarPanel />);
 
       await user.click(screen.getByRole('checkbox', { name: 'Save as preset' }));
@@ -329,8 +370,11 @@ describe('CalendarPanel', () => {
       await clickDay(15);
       await user.click(screen.getByRole('button', { name: 'Apply' }));
 
+      // 'none' precision drops the seconds, and the label is display-only (uses the → delimiter).
       expect(onPresetSave).toHaveBeenCalledWith(
-        expect.objectContaining({ label: expect.any(String) })
+        expect.objectContaining({
+          label: expect.stringMatching(/^Feb 10(?:, 2026)?, 00:00 → Feb 15(?:, 2026)?, 23:59$/),
+        })
       );
     });
 

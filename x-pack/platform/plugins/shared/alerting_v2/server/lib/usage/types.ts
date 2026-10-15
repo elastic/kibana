@@ -20,6 +20,7 @@ export interface AlertingV2Usage {
   // rule stats
   count_total?: number;
   count_enabled?: number;
+  count_agent_builder_assisted?: number;
   count_by_kind?: { alert?: number; signal?: number };
   count_by_schedule?: NameValuePair[];
   count_by_lookback?: NameValuePair[];
@@ -30,6 +31,18 @@ export interface AlertingV2Usage {
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
   min_created_at?: string | null;
+  count_by_recovery_strategy?: {
+    no_breach?: number;
+    condition?: number;
+    query?: number;
+    manual?: number;
+  };
+  count_by_no_data_strategy?: {
+    ignore?: number;
+    keep_last?: number;
+    resolve?: number;
+    alert?: number;
+  };
 
   // execution stats
   executions_count_24hr?: number;

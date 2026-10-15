@@ -58,8 +58,8 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     }
 
     const streamLink =
-      localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
-        ? renderStreamField({ streamName: localIndexName })
+      renderStreamField && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM
+        ? renderStreamField({ streamName: metricItem.indexName })
         : null;
 
     return {
@@ -67,7 +67,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       kind: sourceKind,
       streamLink,
     };
-  }, [metricItem.indexName, localIndexName, sourceKind, renderStreamField]);
+  }, [metricItem.indexName, sourceKind, renderStreamField]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {

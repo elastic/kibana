@@ -82,6 +82,13 @@ export interface CloudPrivilegedUrls {
    * or if the user does not have the `manage_security` cluster privilege.
    */
   usersAndRolesUrl?: string;
+  /**
+   * The full URL to the serverless project page on Elastic Cloud with the Search Power editor expanded.
+   * Undefined if not running in Serverless, or if the user does not have one of the `superuser`, `admin` or `developer` roles.
+   *
+   * @example `{deploymentUrl}?tab=settings&edit=search_power`
+   */
+  searchPowerUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
@@ -186,6 +193,11 @@ export interface CloudSetup extends CloudBasicUrls {
    * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
    */
   csp?: string;
+  /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
   /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */

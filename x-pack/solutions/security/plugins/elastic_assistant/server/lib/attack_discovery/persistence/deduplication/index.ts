@@ -5,15 +5,10 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import type {
-  AttackDiscoveries,
-  AttackDiscoveryAlertDocument,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
-
-import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
+import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
+import { deduplicateAttackDiscoveries as deduplicateAttackDiscoveriesShared } from '@kbn/attack-discovery-schedules-common';
 
 interface DeduplicateAttackDiscoveriesParams {
   attackDiscoveries: AttackDiscoveries;
@@ -29,65 +24,10 @@ interface DeduplicateAttackDiscoveriesParams {
   spaceId: string;
 }
 
-export const deduplicateAttackDiscoveries = async ({
-  attackDiscoveries,
-  connectorId,
-  esClient,
-  indexPattern,
-  logger,
-  ownerInfo,
-  replacements,
-  spaceId,
-}: DeduplicateAttackDiscoveriesParams): Promise<AttackDiscoveries> => {
-  if (!attackDiscoveries || attackDiscoveries.length === 0) {
-    return attackDiscoveries;
-  }
+const computeSha256Hash = (input: string): string =>
+  createHash('sha256').update(input).digest('hex');
 
-  const { id: ownerId, isSchedule } = ownerInfo;
-
-  // 1. Transform all attackDiscoveries to alert documents and collect alertUuids
-  const alertDocs = attackDiscoveries.map((attack) => {
-    const alertHash = generateAttackDiscoveryAlertHash({
-      attackDiscovery: attack,
-      connectorId,
-      ownerId,
-      replacements,
-      spaceId,
-    });
-    return { attack, alertHash };
-  });
-  const alertUuids = alertDocs.map((doc) => doc.alertHash);
-
-  // 2. Search for existing alerts in ES
-  const searchResult = await esClient.search<AttackDiscoveryAlertDocument>({
-    index: indexPattern,
-    size: alertUuids.length,
-    query: { bool: { must: [{ terms: { [ALERT_INSTANCE_ID]: alertUuids } }] } },
-    ignore_unavailable: true,
-  });
-
-  // 3. Collect found alert IDs
-  const foundIds = new Set(
-    searchResult.hits.hits.map((hit) => hit._source && hit._source[ALERT_INSTANCE_ID])
-  );
-
-  // 4. Filter out duplicates
-  const newDiscoveries = alertDocs
-    .filter((doc) => !foundIds.has(doc.alertHash))
-    .map((doc) => doc.attack);
-
-  const numDuplicates = attackDiscoveries.length - newDiscoveries.length;
-  if (numDuplicates > 0) {
-    const logPrefix = isSchedule
-      ? `Attack Discovery Schedule [${ownerId}]`
-      : 'Ad-hoc Attack Discovery';
-    logger.info(
-      `${logPrefix}: Found ${numDuplicates} duplicate alert(s), skipping report for those.`
-    );
-    logger.debug(
-      () => `${logPrefix}: Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`
-    );
-  }
-
-  return newDiscoveries;
-};
+export const deduplicateAttackDiscoveries = async (
+  params: DeduplicateAttackDiscoveriesParams
+): Promise<AttackDiscoveries> =>
+  deduplicateAttackDiscoveriesShared({ ...params, computeSha256Hash });

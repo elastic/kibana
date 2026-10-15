@@ -32,15 +32,17 @@ export const getPlaywrightTagsFor = (
 export const tags = {
   stateful: {
     classic: getPlaywrightTagsFor('stateful', 'classic'),
-    search: getPlaywrightTagsFor('stateful', 'search'),
-    observability: getPlaywrightTagsFor('stateful', 'observability_complete'),
-    security: getPlaywrightTagsFor('stateful', 'security_complete'),
+
+    // `search` / `observability` / `security` are intentionally not exposed for `stateful`:
+    // CI only schedules stateful runs tagged `classic` (see `getServerRunFlagsFromTags` in
+    // `../tests_discovery/tag_utils.ts`), so other domains would be discovered but never run.
+    // Use `tags.stateful.classic` instead.
 
     /**
-     * Tags to target all stateful deployment types
+     * Tags to target all supported stateful deployment types
      */
     get all(): string[] {
-      return [...this.classic, ...this.search, ...this.observability, ...this.security];
+      return [...this.classic];
     },
   },
   serverless: {
@@ -68,20 +70,13 @@ export const tags = {
         return [...this.complete, ...this.essentials, ...this.ease];
       },
     },
-    workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai'),
     vectordb: getPlaywrightTagsFor('serverless', 'vectordb'),
 
     /**
      * All serverless project types
      */
     get all(): string[] {
-      return [
-        ...this.search,
-        ...this.observability.all,
-        ...this.security.all,
-        ...this.workplaceai,
-        ...this.vectordb,
-      ];
+      return [...this.search, ...this.observability.all, ...this.security.all, ...this.vectordb];
     },
   },
 
@@ -90,7 +85,7 @@ export const tags = {
    * - local stateful (self-managed) & Elastic Cloud hosted (ECH) - all types
    * - local serverless (mock-serverless) & Elastic Cloud projects (MKI) - only types that have a **stateful counterpart**
    *
-   * ⚠️ This does NOT include serverless project subtypes or Workplace AI projects.
+   * ⚠️ This does NOT include serverless project subtypes or VectorDB projects.
    */
   get deploymentAgnostic(): string[] {
     return [

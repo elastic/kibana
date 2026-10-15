@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { parseArrayFilters } from './common';
-import { getSavedObjectKqlFilter } from './common';
+import { getSavedObjectKqlFilter, parseArrayFilters, parseMappingKey, QuerySchema } from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {
@@ -42,6 +41,45 @@ describe('common utils', () => {
   });
 });
 
+describe('QuerySchema', () => {
+  it('coerces query-string numbers and booleans', () => {
+    expect(QuerySchema.parse({ page: '2', perPage: '10', internal: 'true' })).toEqual(
+      expect.objectContaining({ page: 2, perPage: 10, internal: true })
+    );
+  });
+
+  it('keeps the string "false" as false (not z.coerce.boolean)', () => {
+    expect(QuerySchema.parse({ internal: 'false' }).internal).toBe(false);
+  });
+
+  it('defaults missing internal to false', () => {
+    expect(QuerySchema.parse({}).internal).toBe(false);
+  });
+
+  it('accepts a single filter string or an array', () => {
+    expect(QuerySchema.parse({ tags: 'prod' }).tags).toBe('prod');
+    expect(QuerySchema.parse({ tags: ['prod', 'us'] }).tags).toEqual(['prod', 'us']);
+  });
+
+  it('parses JSON-encoded searchAfter the way config-schema arrayOf did', () => {
+    expect(QuerySchema.parse({ searchAfter: '["monitor-1"]' }).searchAfter).toEqual(['monitor-1']);
+    expect(QuerySchema.parse({ searchAfter: ['monitor-1'] }).searchAfter).toEqual(['monitor-1']);
+  });
+
+  it('rejects a non-JSON searchAfter string', () => {
+    expect(QuerySchema.safeParse({ searchAfter: 'monitor-1' }).success).toBe(false);
+  });
+
+  it('rejects unknown query keys the way schema.object did', () => {
+    expect(QuerySchema.safeParse({ filterr: 'prod' }).success).toBe(false);
+  });
+
+  it('accepts case-insensitive boolean query strings', () => {
+    expect(QuerySchema.parse({ internal: 'TRUE' }).internal).toBe(true);
+    expect(QuerySchema.parse({ showFromAllSpaces: 'False' }).showFromAllSpaces).toBe(false);
+  });
+});
+
 describe('getSavedObjectKqlFilter', () => {
   it('returns empty string if no values are provided', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags' })).toBe('');
@@ -69,5 +107,21 @@ describe('getSavedObjectKqlFilter', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
       'synthetics-monitor-multi-space.attributes.tags:("\\"apm" OR "synthetics")'
     );
+  });
+});
+
+describe('parseMappingKey', () => {
+  it.each([
+    ['name', 'name.keyword'],
+    ['tags', 'tags'],
+    ['tags.keyword', 'tags'],
+    ['type', 'type.keyword'],
+    ['schedule', 'schedule.number'],
+    ['schedule.keyword', 'schedule.number'],
+    ['project_id.keyword', 'project_id'],
+    ['name.keyword', 'name.keyword'],
+    ['created_at', 'created_at'],
+  ])('maps %s to %s', (input, expected) => {
+    expect(parseMappingKey(input)).toBe(expected);
   });
 });

@@ -9,28 +9,49 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { AlertingV2KibanaServices } from './kibana_services';
 import { AGENT_BUILDER_NEW_CONVERSATION_PATH, CREATE_WITH_AGENT_INITIAL_PROMPT } from './constants';
 
-const createMockServices = (): RuleFormServices => ({
-  http: httpServiceMock.createStartContract(),
-  data: dataPluginMock.createStartContract(),
-  dataViews: dataViewPluginMocks.createStartContract(),
-  notifications: notificationServiceMock.createStartContract(),
-  application: applicationServiceMock.createStartContract(),
-  lens: lensPluginMock.createStartContract(),
-  uiActions: uiActionsPluginMock.createStartContract(),
-});
+const createMockServices = (): AlertingV2KibanaServices => {
+  const application = applicationServiceMock.createStartContract();
+  application.capabilities = {
+    ...application.capabilities,
+    agentBuilder: {
+      show: true,
+      write: true,
+      manageAgents: true,
+      manageTools: true,
+      manageSkills: true,
+      isAdmin: true,
+    },
+  };
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  (uiSettings.get as jest.Mock).mockReturnValue(true);
+
+  return {
+    http: httpServiceMock.createStartContract(),
+    data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
+    notifications: notificationServiceMock.createStartContract(),
+    application,
+    lens: lensPluginMock.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+    uiSettings,
+    featureFlags: coreMock.createStart().featureFlags,
+    expressions: {} as AlertingV2KibanaServices['expressions'],
+    container: {} as AlertingV2KibanaServices['container'],
+  };
+};
 
 let capturedSelectorProps: Record<string, unknown> = {};
 jest.mock('./components/rule_create_options/rule_create_options_flyout', () => ({
@@ -40,10 +61,7 @@ jest.mock('./components/rule_create_options/rule_create_options_flyout', () => (
       <div data-test-subj="mockRuleCreateOptionsFlyout">
         <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
         <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-        <button
-          data-test-subj="thresholdBtn"
-          onClick={props.onCreateThresholdAlert as () => void}
-        />
+        <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
       </div>
     );
   },
@@ -57,16 +75,40 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   },
 }));
 
+const mockCreateActionPolicyFormFlyout = () => null;
+jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyout', () => ({
+  CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
+}));
+
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./hooks/use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  ...jest.requireActual('@kbn/core-di-browser'),
+  useService: () => ({}),
+}));
+
+jest.mock('./application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    actionPolicyLocators: {
+      getRedirectUrl: ({ actionPolicyId }: { actionPolicyId: string }) =>
+        `/app/observability/alerting/action-policies/edit/${actionPolicyId}`,
+    },
+  }),
+}));
+
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
-const pendingResolvers: Array<(services: RuleFormServices) => void> = [];
-const resolveServices = (services: RuleFormServices) => {
+const pendingResolvers: Array<(services: AlertingV2KibanaServices) => void> = [];
+const resolveServices = (services: AlertingV2KibanaServices) => {
   [...pendingResolvers].forEach((r) => r(services));
   pendingResolvers.length = 0;
 };
 jest.mock('./kibana_services', () => ({
   untilPluginStartServicesReady: () =>
-    new Promise<RuleFormServices>((resolve) => {
+    new Promise<AlertingV2KibanaServices>((resolve) => {
       pendingResolvers.push(resolve);
     }),
 }));
@@ -88,7 +130,7 @@ const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateRuleOptio
   );
 
 describe('CreateRuleOptionsFlyout', () => {
-  let mockServices: RuleFormServices;
+  let mockServices: AlertingV2KibanaServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -96,6 +138,7 @@ describe('CreateRuleOptionsFlyout', () => {
     capturedComposeProps = {};
     pendingResolvers.length = 0;
     mockServices = createMockServices();
+    mockCreateActionPolicyDisabledReason = undefined;
   });
 
   describe('loading state', () => {
@@ -120,6 +163,8 @@ describe('CreateRuleOptionsFlyout', () => {
   describe('selector → esql transition', () => {
     it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
       const onClose = jest.fn();
+      const disabledReason = 'Action policy creation is disabled';
+      mockCreateActionPolicyDisabledReason = disabledReason;
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
 
@@ -136,6 +181,15 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
+      ).toBe(mockCreateActionPolicyFormFlyout);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
+      ).toBe(disabledReason);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).getActionPolicyEditHref!('ap-1')
+      ).toBe('/app/observability/alerting/action-policies/edit/ap-1');
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
@@ -205,6 +259,9 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
+
       fireEvent.click(screen.getByTestId('agentBtn'));
 
       expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(AGENT_BUILDER_APP_ID, {
@@ -212,6 +269,44 @@ describe('CreateRuleOptionsFlyout', () => {
         state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
       });
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not pass agent-builder availability through the external flyout boundary', async () => {
+      mockServices.application.capabilities = {
+        ...mockServices.application.capabilities,
+        agentBuilder: {
+          show: false,
+          write: false,
+          manageAgents: false,
+          manageTools: false,
+          manageSkills: false,
+          isAdmin: false,
+        },
+      };
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
+    });
+
+    it('keeps experimental-setting resolution inside the Alerting V2 context', async () => {
+      (mockServices.uiSettings.get as jest.Mock).mockReturnValue(false);
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
     });
   });
 

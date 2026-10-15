@@ -7,18 +7,13 @@
 import { keyBy } from 'lodash';
 import { rangeQuery, kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ErrorGroupDetailedStat, ErrorGroupPeriodsResponse } from '@kbn/apm-api-shared';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import type { Coordinate } from '../../../../typings/timeseries';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-interface ErrorGroupDetailedStat {
-  groupId: string;
-  timeseries: Coordinate[];
-}
 
 export async function getErrorGroupDetailedStatistics({
   kuery,
@@ -112,11 +107,6 @@ export async function getErrorGroupDetailedStatistics({
       }),
     };
   });
-}
-
-export interface ErrorGroupPeriodsResponse {
-  currentPeriod: Record<string, ErrorGroupDetailedStat>;
-  previousPeriod: Record<string, ErrorGroupDetailedStat>;
 }
 
 export async function getErrorGroupPeriods({

@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  describe('extension getAppMenu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/283711
+  describe.skip('extension getAppMenu', () => {
     after(async () => {
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'

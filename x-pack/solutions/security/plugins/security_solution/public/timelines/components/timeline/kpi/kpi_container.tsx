@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty, pick } from 'lodash/fp';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
@@ -34,9 +34,9 @@ interface KpiExpandedProps {
 }
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
-  const browserFields = useBrowserFields(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);

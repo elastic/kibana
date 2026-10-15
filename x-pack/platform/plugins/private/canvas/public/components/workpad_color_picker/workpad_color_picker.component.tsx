@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { addColor, removeColor } from '../../state/actions/workpad';
 import { getWorkpadColors } from '../../state/selectors/workpad';

@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
@@ -40,52 +23,22 @@ jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
 const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const backfillClient = backfillClientMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
-const kibanaVersion = 'v7.10.0';
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
-  invalidateApiKeyNow: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   backfillClient,
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
+} = getRulesClientMockParams({
+  invalidateApiKeyNow: jest.fn(),
   eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
@@ -108,6 +61,8 @@ describe('delete()', () => {
         bar: true,
       },
       scheduledTaskId: 'task-123',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
       actions: [
         {
           group: 'default',
@@ -510,10 +465,15 @@ describe('delete()', () => {
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: existingDecryptedAlert.attributes,
-              references: existingDecryptedAlert.references,
-            },
+            snapshot: expect.objectContaining({
+              id: '1',
+              name: fakeRuleName,
+              alertTypeId: 'myType',
+              consumer: 'myApp',
+              params: { bar: true },
+              createdAt: '2019-02-12T21:01:22.479Z',
+              updatedAt: '2019-02-12T21:01:22.479Z',
+            }),
           },
         ],
         expect.any(Object)

@@ -29,6 +29,22 @@ describe('risk score history route', () => {
     mockRiskScoreDataClient = riskScoreDataClientMock.create();
     context.securitySolution.getRiskScoreDataClient.mockReturnValue(mockRiskScoreDataClient);
 
+    // TimeBuckets reads these to derive the histogram interval from the range.
+    context.core.uiSettings.client.get.mockImplementation((key: unknown) => {
+      switch (key) {
+        case 'histogram:maxBars':
+          return Promise.resolve(100);
+        case 'histogram:barTarget':
+          return Promise.resolve(50);
+        case 'dateFormat':
+          return Promise.resolve('MMM D, YYYY @ HH:mm:ss.SSS');
+        case 'dateFormat:scaled':
+          return Promise.resolve([['', 'HH:mm:ss.SSS']]);
+        default:
+          return Promise.resolve(undefined);
+      }
+    });
+
     riskScoreHistoryRoute(server.router, logger);
   });
 
@@ -67,16 +83,17 @@ describe('risk score history route', () => {
     expect(response.body).toEqual({
       entity_id: 'test-entity-id',
       entity_type: 'host',
+      // 90d range at barTarget 50 → daily buckets
+      interval: '1d',
       entries,
     });
   });
 
-  it('calls getRiskScoreHistory with correct params', async () => {
+  it('calls getRiskScoreHistory with the derived interval and range', async () => {
     const request = buildRequest({
       from: 'now-30d',
       to: 'now',
       score_type: 'base',
-      page_size: 50,
     });
 
     await server.inject(request, requestContextMock.convertContext(context));
@@ -86,8 +103,13 @@ describe('risk score history route', () => {
       entityId: 'test-entity-id',
       range: { gte: 'now-30d', lte: 'now' },
       scoreType: 'base',
-      pageSize: 50,
+      // 30d range at barTarget 50 → 12h buckets
+      interval: { value: 12, unit: 'h' },
+      includeContributions: false,
     });
+    expect(mockRiskScoreDataClient.getRiskScoreHistory).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pageSize: expect.anything() })
+    );
   });
 
   it('uses defaults when optional params are omitted', async () => {
@@ -100,8 +122,43 @@ describe('risk score history route', () => {
       entityId: 'test-entity-id',
       range: { gte: 'now-90d', lte: 'now' },
       scoreType: undefined,
-      pageSize: 100,
+      interval: { value: 1, unit: 'd' },
+      includeContributions: false,
     });
+  });
+
+  it('floors sub-hour ranges (including the point-in-time from === to fetch) at 1h', async () => {
+    const request = buildRequest({
+      from: '2026-01-02T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+    });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(response.status).toEqual(200);
+    expect(response.body.interval).toEqual('1h');
+    expect(mockRiskScoreDataClient.getRiskScoreHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ interval: { value: 1, unit: 'h' } })
+    );
+  });
+
+  it('returns 400 when the time range cannot be parsed', async () => {
+    const request = buildRequest({ from: 'not-a-real-date' });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(response.status).toEqual(400);
+    expect(mockRiskScoreDataClient.getRiskScoreHistory).not.toHaveBeenCalled();
+  });
+
+  it('threads include_contributions through to the data client', async () => {
+    const request = buildRequest({ include_contributions: 'true' });
+
+    await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockRiskScoreDataClient.getRiskScoreHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ includeContributions: true })
+    );
   });
 
   it('returns 200 with empty entries when no data exists', async () => {
@@ -141,20 +198,6 @@ describe('risk score history route', () => {
 
     it('rejects invalid entity_type', async () => {
       const request = buildRequest({ entity_type: 'invalid' });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
-    it('rejects page_size above 1000', async () => {
-      const request = buildRequest({ page_size: 1001 });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
-    it('rejects page_size below 1', async () => {
-      const request = buildRequest({ page_size: 0 });
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();

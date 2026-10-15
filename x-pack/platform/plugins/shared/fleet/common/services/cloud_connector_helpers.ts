@@ -18,7 +18,7 @@ export function isAwsCloudConnectorVars(
   vars: Partial<CloudConnectorVars>
 ): vars is AwsCloudConnectorVars {
   const awsVars = vars as Partial<AwsCloudConnectorVars>;
-  return !!(awsVars.role_arn && awsVars.external_id);
+  return !!awsVars.role_arn;
 }
 
 /**

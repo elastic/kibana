@@ -100,7 +100,7 @@ Canonical MITRE tactics (Enterprise ATT&CK):
 | TA0002 | Execution |
 | TA0003 | Persistence |
 | TA0004 | Privilege Escalation |
-| TA0005 | Defense Evasion |
+| TA0005 | Stealth |
 | TA0006 | Credential Access |
 | TA0007 | Discovery |
 | TA0008 | Lateral Movement |
@@ -110,10 +110,12 @@ Canonical MITRE tactics (Enterprise ATT&CK):
 | TA0040 | Impact |
 | TA0042 | Resource Development |
 | TA0043 | Reconnaissance |
+| TA0112 | Defense Impairment |
 
 Examples:
 - "rules for T1059" -> \`{ mitreTechnique: "T1059" }\`
-- "rules for Defense Evasion" -> \`{ mitreTactic: "TA0005" }\`
+- "rules for Stealth" -> \`{ mitreTactic: "TA0005" }\`
+- "rules for Defense Impairment" -> \`{ mitreTactic: "TA0112" }\`
 - "rules for TA0006" -> \`{ mitreTactic: "TA0006" }\`
 - "rules for phishing" (technique-flavored, no exact name) -> \`{ searchTerm: "phishing" }\`
 
@@ -157,7 +159,11 @@ Examples:
 
 ## No Actions
 
-This skill is read-only. Never suggest or offer to enable, disable, edit, delete, duplicate, or bulk-edit rules. Do not prompt the user to take any action on the rules returned. If the user asks to modify a rule, direct them to the Detection Rules UI.`,
+This skill is read-only. Never suggest or offer to enable, disable, edit, delete, duplicate, or bulk-edit rules. If the user asks to modify a rule, direct them to the Detection Rules UI.
+
+**Exception — noise/FP queries:** if the user's request was about noisy rules, high alert volume, or false positives (e.g. "which rules fire the most?", "find my noisiest rules"), end your response with:
+"I can investigate any of these rules individually — just let me know which one."
+(On the next turn, the \`investigate-rule\` skill will handle the investigation.)`,
     getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID],
     getInlineTools: () => [
       createFindRulesInlineTool({ getStartServices, logger }),

@@ -468,6 +468,33 @@ describe('DatatableComponent', () => {
     ]);
   });
 
+  test('it normalizes unsupported center alignment for progress columns at render time', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          {
+            columnId: 'c',
+            alignment: 'center',
+            type: 'lens_datatable_column',
+            colorMode: 'progress',
+            fillStyle: JSON.stringify({ fillMode: 'single' }),
+          },
+        ],
+      },
+    });
+
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames[0]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[1]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[2]).toContain('lnsTableCell--right');
+  });
+
   test('it adds default alignment data to context', () => {
     renderDatatableComponent({
       args: {
@@ -765,7 +792,7 @@ describe('DatatableComponent', () => {
 
           renderDatatableComponent();
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
 
         test('caches getCellColorFn by columnId with transpose columns', () => {
@@ -792,7 +819,7 @@ describe('DatatableComponent', () => {
             },
           });
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
       });
 
@@ -834,6 +861,27 @@ describe('DatatableComponent', () => {
           ['1588024800000', ''],
           ['3', 'red'],
         ]);
+      });
+
+      test('should build the default palette with percent stop bounds instead of data bounds', () => {
+        args.columns[2].colorMode = 'cell';
+        data.rows = [150, 300, 450].map((c) => ({ a: 'shoes', b: 1588024800000, c }));
+
+        renderDatatableComponent({ getType: jest.fn().mockReturnValue({ type: 'metrics' }) });
+
+        expect(getCellColorFn).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          { type: 'ranges', bins: 0, min: 150, max: 450 },
+          false,
+          false,
+          false,
+          expect.objectContaining({
+            name: 'custom',
+            params: expect.objectContaining({ range: 'percent', rangeMin: 0, rangeMax: 100 }),
+          }),
+          undefined
+        );
       });
     });
   });

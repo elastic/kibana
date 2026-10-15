@@ -26,6 +26,7 @@ import {
   MaxDimensionsTooltipOverlay,
   MaxDimensionsWarning,
 } from '../dimensions_selector_components';
+import { useTelemetry } from '../../../context/ebt_telemetry_context';
 
 interface UseDimensionsSelectorParams {
   dimensions: Dimension[];
@@ -66,6 +67,7 @@ export const useDimensionsSelector = ({
   isLoading,
   metricItems,
 }: UseDimensionsSelectorParams): UseDimensionsSelectorResult => {
+  const { trackMaxDimensionsReached } = useTelemetry();
   const [localSelectedDimensions, setLocalSelectedDimensions] =
     useState<Dimension[]>(selectedDimensions);
 
@@ -77,6 +79,7 @@ export const useDimensionsSelector = ({
     () => new Set(localSelectedDimensions.map((d) => d.name)),
     [localSelectedDimensions]
   );
+  const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
   // Names of dimensions still carried by at least one metric that has every
   // current selection. `null` means no client-side filter applies (either no
@@ -89,8 +92,6 @@ export const useDimensionsSelector = ({
   }, [metricItems, selectedNamesSet]);
 
   const options = useMemo<DimensionEntry[]>(() => {
-    const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-
     const { orphanSelections, applicableDimensions } = partitionDimensionsForRender({
       dimensions,
       selectedDimensions: localSelectedDimensions,
@@ -119,6 +120,7 @@ export const useDimensionsSelector = ({
     optimisticApplicableNames,
     selectedNamesSet,
     singleSelection,
+    isAtMaxLimit,
   ]);
 
   const onChangeRef = useRef(onChange);
@@ -158,6 +160,10 @@ export const useDimensionsSelector = ({
         .filter((d): d is Dimension => d !== undefined)
         .slice(0, MAX_DIMENSIONS_SELECTIONS);
 
+      if (!isAtMaxLimit && newSelection.length === MAX_DIMENSIONS_SELECTIONS) {
+        trackMaxDimensionsReached(MAX_DIMENSIONS_SELECTIONS);
+      }
+
       if (singleSelection || !debouncedOnChange) {
         setLocalSelectedDimensions(newSelection);
         onChange(newSelection);
@@ -168,7 +174,7 @@ export const useDimensionsSelector = ({
       debouncedOnChange.cancel();
       debouncedOnChange(newSelection);
     },
-    [onChange, singleSelection, debouncedOnChange]
+    [onChange, singleSelection, debouncedOnChange, isAtMaxLimit, trackMaxDimensionsReached]
   );
 
   const handleClearAll = useCallback(() => {

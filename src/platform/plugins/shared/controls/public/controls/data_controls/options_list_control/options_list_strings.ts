@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 
 export const OptionsListStrings = {
@@ -111,12 +112,12 @@ export const OptionsListStrings = {
     },
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
-        defaultMessage: 'Ignore timeout for results',
+        defaultMessage: 'Always load all results',
       }),
     getRunPastTimeoutTooltip: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
         defaultMessage:
-          'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
+          'By default, the list of values available in the control can be partial when the data comes from very large data sets. Turn on this option to always load the full list. It will take longer to load.',
       }),
   },
   popover: {
@@ -273,6 +274,20 @@ export const OptionsListStrings = {
         defaultMessage: 'Bulk selection is only available for fewer than {maxOptions} options',
         values: { maxOptions: MAX_OPTIONS_LIST_BULK_SELECT_SIZE },
       }),
+    getPartialResultsTitle: () =>
+      i18n.translate('controls.optionsList.popover.footer.partialResultsTitle', {
+        defaultMessage: 'Some values might be missing',
+      }),
+    getPartialResultsTooltip: (viewMode: ViewMode) =>
+      viewMode === 'edit'
+        ? i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip.edit', {
+            defaultMessage:
+              'This control is configured to load values fast and can show partial results if it relies on a large data set. To ensure it shows all values, edit the control to "Always load all results". All valid values will show but will take longer to load.',
+          })
+        : i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip.view', {
+            defaultMessage:
+              'This control is configured to load values fast and can show partial results if it relies on a large data set.',
+          }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>

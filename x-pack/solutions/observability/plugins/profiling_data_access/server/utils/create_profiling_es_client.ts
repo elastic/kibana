@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type {
   BaseFlameGraph,
@@ -13,30 +12,28 @@ import type {
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
-import type { ProfilingESClient } from '../../common/profiling_es_client';
-import { unwrapEsResponse } from './unwrap_es_response';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import type { CreateProfilingEsClient } from './profiling_es_client';
 import { withProfilingSpan } from './with_profiling_span';
 
-export function createProfilingEsClient({
-  esClient,
-}: {
-  esClient: ElasticsearchClient;
-}): ProfilingESClient {
+const PROFILING_STATUS_TIMEOUT_SECONDS = 60;
+
+/** Creates a profiling ES client; when `abortSignal` is given, ES requests are cancelled once it aborts. */
+export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abortSignal }) => {
+  const requestOptions = { signal: abortSignal, meta: true } as const;
+
   return {
     search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan(operationName, () => {
-        return esClient.search(searchRequest, {
-          signal: controller.signal,
-          meta: true,
-        }) as unknown as Promise<{
-          body: InferSearchResponseOf<TDocument, TSearchRequest>;
-        }>;
-      });
+      const promise = withProfilingSpan(
+        operationName,
+        () =>
+          esClient.search(searchRequest, requestOptions) as unknown as Promise<{
+            body: InferSearchResponseOf<TDocument, TSearchRequest>;
+          }>
+      );
 
       return unwrapEsResponse(promise);
     },
@@ -53,10 +50,10 @@ export function createProfilingEsClient({
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
-      const controller = new AbortController();
-      const promise = withProfilingSpan('_profiling/stacktraces', () => {
-        return esClient.transport.request(
+      const promise = withProfilingSpan('_profiling/stacktraces', () =>
+        esClient.transport.request(
           {
             method: 'POST',
             path: encodeURI('/_profiling/stacktraces'),
@@ -73,36 +70,14 @@ export function createProfilingEsClient({
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
-        );
-      });
+          requestOptions
+        )
+      );
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
-    },
-    profilingStatus({ waitForResourcesCreated = false } = {}) {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan('_profiling/status', () => {
-        return esClient.transport.request(
-          {
-            method: 'GET',
-            path: encodeURI(
-              `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
-            ),
-          },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
-        );
-      });
-
-      return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
     },
     getEsClient() {
       return esClient;
@@ -120,11 +95,10 @@ export function createProfilingEsClient({
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan('_profiling/flamegraph', () => {
-        return esClient.transport.request(
+      const promise = withProfilingSpan('_profiling/flamegraph', () =>
+        esClient.transport.request(
           {
             method: 'POST',
             path: encodeURI('/_profiling/flamegraph'),
@@ -141,14 +115,13 @@ export function createProfilingEsClient({
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
-        );
-      });
+          requestOptions
+        )
+      );
+
       return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
     },
     topNFunctions({
@@ -166,11 +139,10 @@ export function createProfilingEsClient({
       sampleSize,
       limit,
       durationSeconds,
+      schema,
     }) {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan('_profiling/topn/functions', () => {
-        return esClient.transport.request(
+      const promise = withProfilingSpan('_profiling/topn/functions', () =>
+        esClient.transport.request(
           {
             method: 'POST',
             path: encodeURI('/_profiling/topn/functions'),
@@ -189,15 +161,43 @@ export function createProfilingEsClient({
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
               requested_duration: durationSeconds,
+              schema,
             },
           },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
-        );
-      });
+          requestOptions
+        )
+      );
+
       return unwrapEsResponse(promise) as Promise<ESTopNFunctions>;
     },
+    universalProfiling: {
+      status({ waitForResourcesCreated = false } = {}) {
+        // Waiting for resources to be created can take a while, so give ES more time and retry on timeouts.
+        const waitTimeout = waitForResourcesCreated
+          ? `&timeout=${PROFILING_STATUS_TIMEOUT_SECONDS + 5}s`
+          : '';
+        const waitOptions = waitForResourcesCreated
+          ? {
+              requestTimeout: PROFILING_STATUS_TIMEOUT_SECONDS * 1000,
+              maxRetries: 5,
+              retryOnTimeout: true,
+            }
+          : {};
+
+        const promise = withProfilingSpan('_profiling/status', () =>
+          esClient.transport.request(
+            {
+              method: 'GET',
+              path: encodeURI(
+                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}${waitTimeout}`
+              ),
+            },
+            { ...requestOptions, ...waitOptions }
+          )
+        );
+
+        return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
+      },
+    },
   };
-}
+};

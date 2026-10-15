@@ -7,15 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
+import { distinctUntilChanged, from, map, shareReplay } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type {
+  ProfileStateDefinition,
+  ProfileStateRegistry,
+} from '../../../../../common/context_awareness';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
+import {
+  createProfileStateAdapterFactory,
+  type ProfileStateAdapter,
+} from '../../../../context_awareness';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
+import { selectTab } from './selectors';
 
 export const createContextAwarenessToolkit = ({
   internalState,
+  profileStateRegistry,
   tabId,
 }: {
   internalState: InternalStateStore;
+  profileStateRegistry: ProfileStateRegistry;
   tabId: string;
 }): ContextAwarenessToolkit => {
   return {
@@ -45,5 +59,51 @@ export const createContextAwarenessToolkit = ({
         );
       },
     },
+    getStateAdapter: createProfileStateAdapterFactory({
+      profileStateRegistry,
+      createAdapter: <TState extends SerializableRecord>(
+        definition: ProfileStateDefinition<TState>
+      ): ProfileStateAdapter<TState> => {
+        const getState = () => {
+          const tabState = selectTab(internalState.getState(), tabId);
+          const profileState = tabState.profileState[definition.key];
+
+          return profileState
+            ? { ...definition.defaultState, ...profileState }
+            : definition.defaultState;
+        };
+
+        const state$ = from(internalState).pipe(
+          map(getState),
+          distinctUntilChanged(isEqual),
+          shareReplay({ bufferSize: 1, refCount: true })
+        );
+
+        return {
+          getState,
+          getState$: () => state$,
+          setState: (profileState, options) => {
+            internalState.dispatch(
+              internalStateActions.setProfileState({
+                tabId,
+                profileStateDefinition: definition,
+                profileState,
+                historyMethod: options?.historyMethod,
+              })
+            );
+          },
+          updateState: (stateUpdate, options) => {
+            internalState.dispatch(
+              internalStateActions.setProfileState({
+                tabId,
+                profileStateDefinition: definition,
+                profileState: { ...getState(), ...stateUpdate },
+                historyMethod: options?.historyMethod,
+              })
+            );
+          },
+        };
+      },
+    }),
   };
 };

@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,9 +19,15 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
-import { useAgentAcl } from '../../../hooks/agents/use_agent_acl';
-import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import {
+  agentBuilderDefaultAgentId,
+  getAccessControlEntryKey,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
+import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
+import { useCanUpdateAgentAccess } from '../../../hooks/agents/use_can_update_agent_access';
 import { ROLE_LABEL } from './role_to_capabilities';
 import {
   accessSummaryCardTitle,
@@ -55,32 +60,36 @@ const tokenStackStyles = (euiTheme: EuiThemeComputed) => css`
 export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onManage }) => {
   const { euiTheme } = useEuiTheme();
   const isDefaultAgent = agent.id === agentBuilderDefaultAgentId;
-  const { canManage } = useCanManageAgentAccess(agent);
+  const { canUpdate } = useCanUpdateAgentAccess(agent);
 
-  const { data, isLoading } = useAgentAcl(agent.id, { enabled: canManage && !isDefaultAgent });
+  const { data, isLoading } = useAgentAccessControl(agent.id, {
+    enabled: canUpdate && !isDefaultAgent,
+  });
 
-  const userCount = data?.acl.entries.filter((e) => e.type === 'user').length ?? 0;
+  const userCount = data?.access_control.entries.filter((e) => e.type === 'user').length ?? 0;
   const hasCustom = userCount > 0;
 
   const previewEntries = useMemo(
-    () => (data?.acl.entries ?? []).slice(0, PRINCIPAL_PREVIEW_LIMIT),
+    () => (data?.access_control.entries ?? []).slice(0, PRINCIPAL_PREVIEW_LIMIT),
     [data]
   );
-  const overflow = (data?.acl.entries.length ?? 0) - previewEntries.length;
+  const overflow = (data?.access_control.entries.length ?? 0) - previewEntries.length;
+
+  const profileByUid = useAccessControlEntryProfiles(previewEntries);
 
   if (isDefaultAgent) {
     return null;
   }
 
   const renderDescription = () => {
-    if (isLoading && canManage) {
+    if (isLoading && canUpdate) {
       return (
         <EuiText size="s" color="subdued">
           {accessSummaryLoading}
         </EuiText>
       );
     }
-    if (!canManage) {
+    if (!canUpdate) {
       return (
         <EuiText size="s" color="subdued">
           {hasCustom ? accessSummaryHiddenDescription : accessSummaryDefaultDescription}
@@ -99,14 +108,28 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <div css={tokenStackStyles(euiTheme)} aria-hidden>
-              {previewEntries.map((entry) => (
-                <EuiToolTip
-                  key={`${entry.type}:${entry.name}`}
-                  content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
-                >
-                  <EuiAvatar name={entry.name} size="s" />
-                </EuiToolTip>
-              ))}
+              {previewEntries.map((entry) => {
+                const profile = entry.id !== undefined ? profileByUid.get(entry.id) : undefined;
+                const displayName = profile ? getUserDisplayName(profile.user) : entry.name;
+                const roleLabel = ROLE_LABEL[entry.role];
+                return (
+                  <EuiToolTip
+                    key={getAccessControlEntryKey(entry)}
+                    content={
+                      displayName !== undefined ? `${displayName} — ${roleLabel}` : roleLabel
+                    }
+                  >
+                    {profile ? (
+                      <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+                    ) : (
+                      <UserAvatar
+                        user={entry.name !== undefined ? { username: entry.name } : undefined}
+                        size="s"
+                      />
+                    )}
+                  </EuiToolTip>
+                );
+              })}
               {overflow > 0 ? (
                 <EuiText
                   size="xs"
@@ -144,7 +167,7 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
           <EuiSpacer size="xs" />
           {renderDescription()}
         </EuiFlexItem>
-        {canManage ? (
+        {canUpdate ? (
           <EuiFlexItem grow={false}>
             {hasCustom ? (
               <EuiButtonEmpty

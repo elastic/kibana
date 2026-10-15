@@ -7,7 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
-import { EuiCallOut, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEditPolicyContext } from '../edit_policy_context';
 import { getIndicesListPath } from '../../../services/navigation';
@@ -83,7 +84,7 @@ export const EditWarning: FunctionComponent = () => {
       <EuiText data-test-subj="editWarning">
         {isManagedPolicy && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -91,23 +92,22 @@ export const EditWarning: FunctionComponent = () => {
                   defaultMessage="Editing a managed policy can break Kibana"
                 />
               }
-              color="danger"
-              iconType="warning"
               data-test-subj="editManagedPolicyCallOut"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutDescription"
-                  defaultMessage="Managed policies are critical for internal operations."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutDescription"
+                    defaultMessage="Managed policies are critical for internal operations."
+                  />
+                </p>
+              }
+            />
             <EuiSpacer />
           </>
         )}
         {isDeprecatedPolicy && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -115,17 +115,16 @@ export const EditWarning: FunctionComponent = () => {
                   defaultMessage="This policy is deprecated"
                 />
               }
-              color="warning"
-              iconType="warning"
               data-test-subj="editPolicyWithDeprecation"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyDescription"
-                  defaultMessage="This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyDescription"
+                    defaultMessage="This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one."
+                  />
+                </p>
+              }
+            />
             <EuiSpacer />
           </>
         )}

@@ -64,7 +64,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
               />
             ) : null,
             css: {
-              color: !fieldOption.compatible ? euiTheme.colors.lightShade : undefined,
+              color: !fieldOption.compatible ? euiTheme.colors.textDisabled : undefined,
               backgroundColor: !fieldOptionExists ? euiTheme.colors.lightestShade : undefined,
             },
           };
@@ -78,7 +78,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
         <FieldIcon type={otherAttr.value.dataType} fill="none" className="eui-alignMiddle" />
       ) : null,
       css: {
-        color: !compatible ? euiTheme.colors.lightShade : undefined,
+        color: !compatible ? euiTheme.colors.textDisabled : undefined,
         backgroundColor: !exists ? euiTheme.colors.lightestShade : undefined,
       },
     };

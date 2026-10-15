@@ -9,6 +9,7 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { WORKFLOWS_NOTIFICATION_REQUESTER_ID } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { ConnectorExecutor } from './connector_executor';
 
@@ -199,7 +200,7 @@ describe('ConnectorExecutor', () => {
         source: {
           type: 'NOTIFICATION',
           source: {
-            requesterId: 'workflows',
+            requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID,
             connectorId,
           },
         },

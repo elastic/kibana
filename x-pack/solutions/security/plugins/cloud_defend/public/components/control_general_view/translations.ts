@@ -116,6 +116,14 @@ export const name = i18n.translate('xpack.cloudDefend.name', {
   defaultMessage: 'Name',
 });
 
+export const selectorOptions = i18n.translate('xpack.cloudDefend.selectorOptionsAriaLabel', {
+  defaultMessage: 'Selector options',
+});
+
+export const responseOptions = i18n.translate('xpack.cloudDefend.responseOptionsAriaLabel', {
+  defaultMessage: 'Response options',
+});
+
 export const unusedSelector = i18n.translate('xpack.cloudDefend.unusedSelector', {
   defaultMessage: 'Not in use',
 });

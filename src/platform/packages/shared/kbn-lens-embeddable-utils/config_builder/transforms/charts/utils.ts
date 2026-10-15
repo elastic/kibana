@@ -9,7 +9,7 @@
 
 import { pickBy } from 'lodash';
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
@@ -49,7 +49,7 @@ export function getSharedChartAPIToLensState(config: { title?: string; descripti
 
 export function getMetricAccessor(
   visualization: GaugeVisualizationState | MetricVisualizationState
-) {
+): string | undefined {
   // @ts-expect-error Unfortunately for some obscure reasons there are SO out there with the accessor property instead of the correct one
   return visualization.metricAccessor ?? visualization.accessor;
 }
@@ -167,7 +167,7 @@ export function processMetricColumnsWithReferences(
   return { metricColumns, referencesColumns };
 }
 
-type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
+type LegendTruncateAfterLines = z.output<typeof legendTruncateAfterLinesSchema>;
 
 export function getLegendTruncateAfterLines(
   legend:

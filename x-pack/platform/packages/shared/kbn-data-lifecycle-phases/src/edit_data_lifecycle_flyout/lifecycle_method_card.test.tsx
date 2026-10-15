@@ -46,4 +46,22 @@ describe('LifecycleMethodCard', () => {
     await user.click(radio);
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it('shows a tooltip explaining why the card is disabled', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <LifecycleMethodCard
+        method="ilm"
+        selectedMethod="dlm"
+        disabled
+        disabledTooltipContent="Needs manage_ilm"
+        onChange={() => {}}
+      />
+    );
+
+    await user.hover(screen.getByText('ILM policy'));
+
+    expect(await screen.findByText('Needs manage_ilm')).toBeInTheDocument();
+  });
 });

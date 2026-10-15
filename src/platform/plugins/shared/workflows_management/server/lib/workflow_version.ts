@@ -15,28 +15,30 @@ export const INITIAL_WORKFLOW_VERSION = 1;
 export const getNextWorkflowVersion = (existing?: Pick<WorkflowProperties, 'version'>): number =>
   (existing?.version ?? 0) + 1;
 
-/** Assign the next definition version from fresh primary-index state. */
+/** Same trim normalization as managed `definitionHash`. */
+const hasWorkflowYamlChanged = (
+  previousYaml: string | undefined | null,
+  nextYaml: string | undefined | null
+): boolean => (previousYaml ?? '').trim() !== (nextYaml ?? '').trim();
+
+/**
+ * Assign definition version from fresh primary-index state.
+ * Create (`existing` undefined) → 1. Update → bump only when YAML changed;
+ * otherwise preserve.
+ */
 export const applyWorkflowVersion = (
   document: WorkflowProperties,
   existing?: WorkflowProperties
-): WorkflowProperties => ({
-  ...document,
-  version: getNextWorkflowVersion(existing),
-});
-
-/** Bump version only when workflow versioning is enabled; otherwise preserve existing version if present. */
-export const maybeApplyWorkflowVersion = (
-  document: WorkflowProperties,
-  existing: WorkflowProperties | undefined,
-  versioningEnabled: boolean
 ): WorkflowProperties => {
-  if (versioningEnabled) {
-    return applyWorkflowVersion(document, existing);
+  if (existing && !hasWorkflowYamlChanged(existing.yaml, document.yaml)) {
+    return {
+      ...document,
+      version: existing.version ?? INITIAL_WORKFLOW_VERSION,
+    };
   }
 
-  if (existing?.version != null) {
-    return { ...document, version: existing.version };
-  }
-
-  return document;
+  return {
+    ...document,
+    version: getNextWorkflowVersion(existing),
+  };
 };

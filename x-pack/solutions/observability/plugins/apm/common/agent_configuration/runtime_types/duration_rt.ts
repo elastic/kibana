@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getDurationRt } from '@kbn/apm-common';
+export { getDurationSchema } from '@kbn/apm-common';

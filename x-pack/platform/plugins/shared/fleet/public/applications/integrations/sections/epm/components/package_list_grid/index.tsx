@@ -24,10 +24,12 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useLocalSearch, searchIdField } from '../../../../hooks';
 
 import type { IntegrationCardItem } from '../../screens/home';
+import { withSearchMemberMatch } from '../../screens/home/search_member_match';
 
 import type {
   ExtendedIntegrationCategory,
@@ -44,11 +46,13 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: calc(
-    var(--kbn-application--sticky-headers-offset, 96px) +
-      ${(props) => props.theme.eui.euiSizeL /* 24px */}
-  );
+  @media (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    position: sticky;
+    top: calc(
+      var(--kbn-application--sticky-headers-offset, 96px) +
+        ${(props) => props.theme.eui.euiSizeL /* 24px */}
+    );
+  }
 `;
 
 export interface PackageListGridProps {
@@ -161,9 +165,13 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
-    return sortByFeaturedIntegrations
-      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+    const withMemberMatch = searchTerm
+      ? filteredList.map((item) => withSearchMemberMatch(item, searchTerm))
       : filteredList;
+
+    return sortByFeaturedIntegrations
+      ? promoteFeaturedIntegrations(withMemberMatch, selectedCategory)
+      : withMemberMatch;
   }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
@@ -280,6 +288,9 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {hiddenSubCategoriesItems?.length ? (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate('xpack.fleet.epmList.subcategoriesPopoverAriaLabel', {
+                    defaultMessage: 'More subcategories',
+                  })}
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
@@ -287,7 +298,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                       <EuiButtonIcon
                         display="base"
                         onClick={onButtonClick}
-                        iconType="boxesVertical"
+                        iconType="ellipsis"
                         aria-label="Show more subcategories"
                         size="s"
                       />

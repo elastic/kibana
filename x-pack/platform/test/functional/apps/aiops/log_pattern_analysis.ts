@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const selectedField = '@message';
-  const totalDocCount = 14005;
+  const totalDocCount = 14004;
   const cases = getService('cases');
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
@@ -113,6 +113,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
       await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
       await aiops.logPatternAnalysisPage.clickRunButton();
+
+      await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
+      await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
       await aiops.logPatternAnalysisPage.attachToDashboard();
     });

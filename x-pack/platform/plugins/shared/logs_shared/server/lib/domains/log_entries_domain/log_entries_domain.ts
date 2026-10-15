@@ -58,7 +58,8 @@ export interface ILogsSharedLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.MappingRuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields,
+    projectRouting?: string
   ): Promise<string[]>;
 }
 
@@ -135,7 +136,8 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.MappingRuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields,
+    projectRouting?: estypes.ProjectRouting
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;
@@ -151,7 +153,8 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
           endTime,
           runtimeMappings,
           COMPOSITE_AGGREGATION_BATCH_SIZE,
-          afterLatestBatchKey
+          afterLatestBatchKey,
+          projectRouting
         )
       );
 

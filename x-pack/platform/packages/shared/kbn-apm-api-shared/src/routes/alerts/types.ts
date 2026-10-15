@@ -4,43 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import { AggregationType, type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
-import { rangeRt } from '../../default_api_types';
+import { environmentSchema } from '@kbn/apm-types';
+import { rangeSchema } from '../../default_api_types';
 
-const searchConfigurationRt = t.type({
-  query: t.type({
-    query: t.union([t.string, t.record(t.string, t.any)]),
-    language: t.string,
+const searchConfigurationSchema = z.object({
+  query: z.object({
+    query: z.union([z.string(), z.record(z.string(), z.any())]),
+    language: z.string(),
   }),
 });
 
-export const alertParamsRt = t.intersection([
-  t.partial({
-    aggregationType: t.union([
-      t.literal(AggregationType.Avg),
-      t.literal(AggregationType.P95),
-      t.literal(AggregationType.P99),
-    ]),
-    serviceName: t.string,
-    errorGroupingKey: t.string,
-    transactionType: t.string,
-    transactionName: t.string,
-  }),
-  environmentRt,
-  rangeRt,
-  t.type({
-    interval: t.string,
-  }),
-  t.partial({
-    groupBy: t.array(t.string),
-    searchConfiguration: jsonRt.pipe(searchConfigurationRt),
-  }),
-]);
+// Equivalent of io-ts's jsonRt.pipe(searchConfigurationRt): parse a JSON
+// string, then validate the parsed value against searchConfigurationSchema.
+const searchConfigurationJsonSchema = z
+  .string()
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      ctx.addIssue({ code: 'custom', message: err.message });
+      return z.NEVER;
+    }
+  })
+  .pipe(searchConfigurationSchema);
 
-export type AlertParams = t.TypeOf<typeof alertParamsRt>;
+export const alertParamsSchema = z
+  .object({
+    aggregationType: z
+      .union([
+        z.literal(AggregationType.Avg),
+        z.literal(AggregationType.P95),
+        z.literal(AggregationType.P99),
+      ])
+      .optional(),
+    serviceName: z.string().optional(),
+    errorGroupingKey: z.string().optional(),
+    transactionType: z.string().optional(),
+    transactionName: z.string().optional(),
+    interval: z.string(),
+    groupBy: z.array(z.string()).optional(),
+    searchConfiguration: searchConfigurationJsonSchema.optional(),
+  })
+  .merge(environmentSchema)
+  .merge(rangeSchema);
+
+export type AlertParams = z.infer<typeof alertParamsSchema>;
 
 export interface PreviewChartResponseItem {
   name: string;

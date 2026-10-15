@@ -18,8 +18,9 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-management/autoops_promotion_callout
 dependsOn:
   - '@kbn/i18n-react'
+  - '@kbn/i18n'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

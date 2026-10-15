@@ -11,6 +11,7 @@ import {
   apiTest,
   cleanupSloSummaryDocs,
   createApmSummaryDoc,
+  createGroupedApmSummaryDoc,
   insertSloSummaryDocs,
   mergeSloApiHeaders,
 } from '../fixtures';
@@ -106,6 +107,52 @@ apiTest.describe(
       expect(entities).toContain('service-b');
       expect(entities).not.toContain('service-c');
     });
+
+    apiTest(
+      'buckets grouped-by-service.name instances using slo.groupings.service.name',
+      async ({ apiClient, esClient }) => {
+        const now = new Date().toISOString();
+        await insertSloSummaryDocs(esClient, [
+          createGroupedApmSummaryDoc('grouped-slo-1', 'service-a', 'HEALTHY', now),
+          createGroupedApmSummaryDoc('grouped-slo-2', 'service-b', 'VIOLATED', now),
+        ]);
+
+        const response = await apiClient.post('internal/slos/_grouped_stats', {
+          headers,
+          body: { type: 'apm' },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as {
+          results: Array<{
+            entity: string;
+            summary: { healthy: number; violated: number; degrading: number; noData: number };
+          }>;
+        };
+
+        const serviceA = body.results.find((result) => result.entity === 'service-a');
+        const serviceB = body.results.find((result) => result.entity === 'service-b');
+        expect(serviceA).toBeDefined();
+        expect(serviceA!.summary.healthy).toBe(1);
+        expect(serviceB).toBeDefined();
+        expect(serviceB!.summary.violated).toBe(1);
+
+        const filteredResponse = await apiClient.post('internal/slos/_grouped_stats', {
+          headers,
+          body: {
+            type: 'apm',
+            serviceNames: ['service-a'],
+          },
+          responseType: 'json',
+        });
+        expect(filteredResponse).toHaveStatusCode(200);
+        const filteredEntities = (
+          filteredResponse.body as { results: Array<{ entity: string }> }
+        ).results.map((result) => result.entity);
+        expect(filteredEntities).toContain('service-a');
+        expect(filteredEntities).not.toContain('service-b');
+      }
+    );
 
     apiTest('returns 400 for unsupported SLO type', async ({ apiClient }) => {
       const response = await apiClient.post('internal/slos/_grouped_stats', {

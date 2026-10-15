@@ -18,6 +18,7 @@ jest.mock('@kbn/dev-cli-errors', () => ({
 jest.mock('@kbn/dev-validation-runner', () => ({
   readValidationRunFlags: jest.fn(),
   resolveValidationBaseContext: jest.fn(),
+  resolveValidationAffectedProjects: jest.fn(),
   VALIDATION_RUN_HELP: [],
   VALIDATION_RUN_STRING_FLAGS: [],
 }));
@@ -32,6 +33,10 @@ jest.mock('./type_check_validation_loader', () => ({
 
 jest.mock('./eslint/run_eslint_contract', () => ({
   executeEslintValidation: jest.fn(),
+}));
+
+jest.mock('./oxlint/run_oxlint_contract', () => ({
+  executeOxlintValidation: jest.fn(),
 }));
 
 jest.mock('@kbn/dev-proc-runner', () => ({
@@ -77,10 +82,14 @@ const mockReadValidationRunFlags = jest.requireMock('@kbn/dev-validation-runner'
   .readValidationRunFlags as jest.Mock;
 const mockResolveValidationBaseContext = jest.requireMock('@kbn/dev-validation-runner')
   .resolveValidationBaseContext as jest.Mock;
+const mockResolveValidationAffectedProjects = jest.requireMock('@kbn/dev-validation-runner')
+  .resolveValidationAffectedProjects as jest.Mock;
 const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation_loader')
   .executeTypeCheckValidation as jest.Mock;
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
+const mockExecuteOxlintValidation = jest.requireMock('./oxlint/run_oxlint_contract')
+  .executeOxlintValidation as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
 const mockReaddirSync = jest.requireMock('fs').readdirSync as jest.Mock;
 const mockExeca = mockExecaFn;
@@ -157,7 +166,23 @@ describe('run_check', () => {
       failedFiles: [],
       warningCount: 0,
     });
+    mockExecuteOxlintValidation.mockResolvedValue({
+      fileCount: 3,
+      failedFiles: [],
+      warningCount: 0,
+    });
     mockExecuteTypeCheckValidation.mockResolvedValue({ projectCount: 2 });
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+    });
+
+    // Default: tsproj resolves to no scoped projects (keeps existing assertions stable).
+    mockResolveValidationAffectedProjects.mockResolvedValue({
+      isRootProjectAffected: false,
+      affectedSourceRoots: [],
+    });
 
     // Default: successful Moon jest run
     mockRunJestViaMoon.mockResolvedValue({
@@ -180,6 +205,7 @@ describe('run_check', () => {
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('check  scope=local');
     expect(output).toContain('lint  ✓ 3 files');
+    expect(output).toContain('oxlint✓ 3 files');
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
     expect(output).toContain('tsc   ✓ 2 projects');
   });
@@ -247,6 +273,36 @@ describe('run_check', () => {
     expect(output).toContain('tsc   ✗ failed');
   });
 
+  it('reports oxlint failures with a reproduction command', async () => {
+    mockExecuteOxlintValidation.mockResolvedValue({
+      fileCount: 3,
+      failedFiles: ['src/foo.ts'],
+      warningCount: 0,
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('node scripts/lint src/foo.ts');
+    expect(output).toContain('lint  ✓ 3 files');
+  });
+
+  it('prints oxlint tool failures instead of only marking the step failed', async () => {
+    mockExecuteOxlintValidation.mockRejectedValue(
+      new Error('[oxlint] exited with 2:\nFailed to parse configuration file')
+    );
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('    [oxlint] exited with 2');
+    expect(output).toContain('    Failed to parse configuration file');
+  });
+
   it('shows fixed file count when eslint auto-fixes', async () => {
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 10,
@@ -277,7 +333,40 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
+  it('skips fast path for integration tests even when a unit config sits below the integration config', async () => {
+    // integration test with a unit config nested below the integration config —
+    // the walk hits the unit config first, so it used to be run as a unit test.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
@@ -301,7 +390,11 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
@@ -325,7 +418,11 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
@@ -350,6 +447,42 @@ describe('run_check', () => {
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('jest  ✓ 2 test files · 8 tests');
+  });
+
+  it('runs only the unit test files directly when a unit and integration test change together', async () => {
+    // A unit test and an integration test in the same commit share one unit config
+    // (the integration file has none), so the fast path runs — but it must pass only
+    // the unit file to `scripts/jest`, not the integration file.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'packages/foo/src/bar.test.ts',
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/packages/foo/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
+    );
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: 'Tests:       8 passed, 8 total\n',
+      stderr: '',
+    });
+
+    await handler(createArgs());
+
+    expect(mockExeca).toHaveBeenCalledWith(
+      process.execPath,
+      ['scripts/jest', '--runTestsByPath', '/repo/packages/foo/src/bar.test.ts', '--maxWorkers=2'],
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).not.toHaveBeenCalled();
   });
 
   it('shows failing fast-path Jest output and a minimal rerun command', async () => {
@@ -471,6 +604,39 @@ describe('run_check', () => {
     expect(output).toContain('node scripts/jest --config packages/foo/jest.config.js');
   });
 
+  it('surfaces an OOM note instead of treating a worker crash as a plain failure', async () => {
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 1,
+      cachedCount: 0,
+      totalTests: 0,
+      failed: [
+        {
+          project: '@kbn/foo',
+          configPath: 'packages/foo/jest.config.js',
+          cached: false,
+          passed: false,
+          testCount: 0,
+          failures: [
+            {
+              file: 'packages/foo/src/bar.test.ts',
+              name: 'Test suite failed to run',
+              message: 'Jest worker encountered 4 child process exceptions, exceeding retry limit',
+              oom: true,
+            },
+          ],
+        },
+      ],
+      exitCode: 1,
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('This looks like a Jest worker ran out of memory');
+    expect(output).toContain('NODE_OPTIONS=--max-old-space-size=8192');
+  });
+
   it('uses the repo root tsconfig in the tsc rerun command when no nearer config exists', async () => {
     mockExistsSync.mockImplementation(
       (p: string) => p === '/repo/packages/foo/jest.config.js' || p === '/repo/tsconfig.json'
@@ -490,5 +656,120 @@ describe('run_check', () => {
     expect(output).toContain('src/dev/run_check.ts:852:13: error TS1234: broken');
     expect(output).toContain('node scripts/type_check --project tsconfig.json');
     expect(output).not.toContain('node scripts/type_check --profile quick');
+  });
+
+  const execaCallFor = (script: string) =>
+    mockExeca.mock.calls.find(([, args]: [string, string[]]) => args?.includes(script));
+
+  describe('tsproj step', () => {
+    it('prints "no scoped projects" when only root-level inputs are affected', async () => {
+      mockResolveValidationAffectedProjects.mockResolvedValue({
+        isRootProjectAffected: true,
+        affectedSourceRoots: ['packages/foo'],
+      });
+
+      await handler(createArgs());
+
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('tsproj— no scoped projects');
+      expect(execaCallFor('scripts/lint_ts_projects')).toBeUndefined();
+      expect(process.exitCode).toBeUndefined();
+    });
+
+    it('runs lint_ts_projects on affected roots and reports success', async () => {
+      mockResolveValidationAffectedProjects.mockResolvedValue({
+        isRootProjectAffected: false,
+        affectedSourceRoots: ['packages/foo', 'packages/bar'],
+      });
+
+      await handler(createArgs());
+
+      expect(mockExeca).toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/lint_ts_projects', '--fix', 'packages/foo', 'packages/bar'],
+        expect.objectContaining({ reject: false })
+      );
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('tsproj✓ 2 projects');
+      expect(process.exitCode).toBeUndefined();
+    });
+
+    it('omits --fix when run with --no-fix', async () => {
+      mockResolveValidationAffectedProjects.mockResolvedValue({
+        isRootProjectAffected: false,
+        affectedSourceRoots: ['packages/foo'],
+      });
+
+      await handler(createArgs({ fix: false }));
+
+      const call = execaCallFor('scripts/lint_ts_projects');
+      expect(call?.[1]).toEqual(['scripts/lint_ts_projects', 'packages/foo']);
+    });
+
+    it('reports a failure and rerun command when lint_ts_projects fails', async () => {
+      mockResolveValidationAffectedProjects.mockResolvedValue({
+        isRootProjectAffected: false,
+        affectedSourceRoots: ['packages/foo'],
+      });
+      mockExeca.mockImplementation(async (_bin: string, args: string[]) =>
+        args.includes('scripts/lint_ts_projects')
+          ? { exitCode: 1, stdout: 'tsconfig drift detected', stderr: '' }
+          : { exitCode: 0, stdout: '', stderr: '' }
+      );
+
+      await handler(createArgs());
+
+      expect(process.exitCode).toBe(1);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('tsproj✗ failed');
+      expect(output).toContain('tsconfig drift detected');
+      expect(output).toContain('node scripts/lint_ts_projects --fix packages/foo');
+    });
+  });
+
+  describe('moon step', () => {
+    it('runs regenerate with --update when fixing', async () => {
+      await handler(createArgs({ fix: true }));
+
+      expect(mockExeca).toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/regenerate_moon_projects.js', '--update'],
+        expect.objectContaining({ reject: false })
+      );
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('moon  ✓ projects regenerated');
+    });
+
+    it('runs regenerate with --check (no write) when --no-fix', async () => {
+      await handler(createArgs({ fix: false }));
+
+      expect(mockExeca).toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/regenerate_moon_projects.js', '--check'],
+        expect.objectContaining({ reject: false })
+      );
+      expect(mockExeca).not.toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/regenerate_moon_projects.js', '--update'],
+        expect.anything()
+      );
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('moon  ✓ up to date');
+    });
+
+    it('fails when regenerate reports drift under --no-fix', async () => {
+      mockExeca.mockImplementation(async (_bin: string, args: string[]) =>
+        args.includes('scripts/regenerate_moon_projects.js')
+          ? { exitCode: 1, stdout: '', stderr: '1 Moon project configuration(s) out of date' }
+          : { exitCode: 0, stdout: '', stderr: '' }
+      );
+
+      await handler(createArgs({ fix: false }));
+
+      expect(process.exitCode).toBe(1);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('moon  ✗ failed');
+      expect(output).toContain('node scripts/regenerate_moon_projects.js --update');
+    });
   });
 });

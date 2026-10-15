@@ -372,6 +372,74 @@ describe('MonitorConfigRepository', () => {
     });
   });
 
+  describe('update', () => {
+    it('fully replaces attributes (mergeAttributes: false) so removed map-field keys are deleted', async () => {
+      const id = 'test-id';
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: ['default'],
+        attributes: {
+          name: 'Test Monitor',
+          [ConfigKey.LABELS]: { a: '1', b: '2', team: 'obs' },
+        },
+        references: [],
+      } as any;
+
+      // New attributes drop the `a` and `b` labels, keeping only `team`. A deep-merge
+      // would silently restore the removed keys (see #274387).
+      const data = {
+        name: 'Test Monitor',
+        [ConfigKey.LABELS]: { team: 'obs' },
+        spaces: ['default'],
+      } as any;
+
+      const mockUpdatedMonitor = {
+        id,
+        attributes: data,
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      };
+      soClient.update.mockResolvedValue(mockUpdatedMonitor as any);
+
+      const result = await repository.update(id, data, decryptedPreviousMonitor);
+
+      expect(soClient.update).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, data, {
+        references: undefined,
+        mergeAttributes: false,
+      });
+      expect(result).toBe(mockUpdatedMonitor);
+    });
+
+    it('recreates the saved object when spaces change instead of updating', async () => {
+      const id = 'test-id';
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: ['default'],
+        attributes: {},
+        references: [],
+      } as any;
+      const data = { name: 'Test Monitor', spaces: ['space-2'] } as any;
+
+      soClient.delete.mockResolvedValue({} as any);
+      const mockCreated = { id, attributes: data, type: syntheticsMonitorSavedObjectType };
+      soClient.create.mockResolvedValue(mockCreated as any);
+
+      const result = await repository.update(id, data, decryptedPreviousMonitor);
+
+      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, {
+        force: true,
+      });
+      expect(soClient.create).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, data, {
+        id,
+        initialNamespaces: ['space-2'],
+        references: undefined,
+      });
+      expect(result).toBe(mockCreated);
+    });
+  });
+
   describe('bulkUpdate', () => {
     it('should update multiple monitors in bulk', async () => {
       const monitors = [
@@ -417,11 +485,13 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1' },
+          mergeAttributes: false,
         },
         {
           type: 'synthetics-monitor',
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2' },
+          mergeAttributes: false,
         },
       ]);
 
@@ -488,11 +558,13 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1', spaces: ['default'] },
+          mergeAttributes: false,
         },
         {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+          mergeAttributes: false,
         },
       ]);
 
@@ -629,6 +701,7 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+          mergeAttributes: false,
         },
       ]);
       expect(result).toEqual({
@@ -731,6 +804,92 @@ describe('MonitorConfigRepository', () => {
         perPage: 10000,
         page: 1,
       });
+    });
+  });
+
+  describe('findExistingMonitorName', () => {
+    it('searches both monitor Saved Object types with one terms query', async () => {
+      soClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [
+            {
+              _index: '.kibana',
+              _id: 'monitor-id',
+              fields: {
+                [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`]: [
+                  'Existing monitor',
+                ],
+              },
+            },
+          ],
+        },
+      });
+
+      await expect(
+        repository.findExistingMonitorName(['Existing monitor', 'Another monitor'], 'default')
+      ).resolves.toBe('Existing monitor');
+
+      expect(soClient.search).toHaveBeenCalledWith({
+        type: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
+        namespaces: ['default'],
+        _source: false,
+        fields: [
+          `${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`,
+          `${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`,
+        ],
+        size: 1,
+        terminate_after: 1,
+        track_total_hits: false,
+        query: {
+          bool: {
+            should: [
+              {
+                terms: {
+                  [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`]: [
+                    'Existing monitor',
+                    'Another monitor',
+                  ],
+                },
+              },
+              {
+                terms: {
+                  [`${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`]: [
+                    'Existing monitor',
+                    'Another monitor',
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      });
+    });
+
+    it('does not search when no names are provided', async () => {
+      await expect(repository.findExistingMonitorName([], 'default')).resolves.toBeUndefined();
+
+      expect(soClient.search).not.toHaveBeenCalled();
+    });
+
+    it('does not infer a monitor name when Elasticsearch returns a hit without stored fields', async () => {
+      soClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _index: '.kibana', _id: 'monitor-id', fields: {} }],
+        },
+      });
+
+      await expect(
+        repository.findExistingMonitorName(['Requested monitor'], 'default')
+      ).resolves.toBeUndefined();
     });
   });
 

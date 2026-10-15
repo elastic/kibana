@@ -7,7 +7,6 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { dump } from 'js-yaml';
 import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlyout,
@@ -21,17 +20,20 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiFlyoutFooter,
-  EuiCallOut,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiTextArea,
   EuiLink,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -46,8 +48,10 @@ import {
   useDefaultOutput,
   useStartServices,
 } from '../../../../hooks';
+import { isBeatsOutput } from '../../../../../../../common/services/output_helpers';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
+import { useYaml } from '../../../../../../services';
 
 import { useManagedOtlp } from './use_managed_otlp';
 
@@ -147,7 +151,13 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud, docLinks } = useStartServices();
+  const yaml = useYaml();
+  const { cloud, docLinks, application } = useStartServices();
+  // api_keys.save maps to manage_own_api_key, which is necessary but not sufficient —
+  // the server also requires apm event:write. In the rare case where a user has
+  // manage_own_api_key but not apm event:write the button is enabled and the server
+  // returns a 403; the error handler in use_managed_otlp surfaces the server's message.
+  const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
 
   const esApiKey = useGetCreateApiKey();
   const motlp = useManagedOtlp();
@@ -170,10 +180,17 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
   const { spaceId } = useFleetStatus();
   const { output: defaultOutput } = useDefaultOutput();
-  const defaultEsHost = defaultOutput?.hosts?.[0] ?? DEFAULT_ES_HOST;
+  const defaultEsHost =
+    (defaultOutput && isBeatsOutput(defaultOutput) ? defaultOutput.hosts?.[0] : undefined) ??
+    DEFAULT_ES_HOST;
+  // The active space resolves asynchronously (see useFleetStatus), starting as `undefined`.
+  // Until it's known we must not resolve the OpAMP policy/token, otherwise getOpAMPPolicyId
+  // falls back to the unprefixed default-space id and the collector enrolls into the Default
+  // space instead of the current one. See https://github.com/elastic/kibana/issues/275528
+  const isSpaceResolved = spaceId !== undefined;
   const { enrolledAgentIds } = usePollingAgentCount(getOpAMPPolicyId(spaceId), {
-    noLowerTimeLimit: true,
     pollImmediately: true,
+    enabled: isSpaceResolved,
   });
 
   const {
@@ -183,9 +200,14 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   } = useQuery<string | undefined, Error>({
     queryKey: ['opampPolicyAndToken', spaceId],
     queryFn: () => ensurePolicyAndFetchToken(spaceId),
+    enabled: isSpaceResolved,
   });
 
   const error = queryError?.message ?? null;
+
+  const [collectorRuntime, setCollectorRuntime] = useState<'elastic-agent' | 'otelcol-contrib'>(
+    'elastic-agent'
+  );
 
   // Form state
   const [groupDisplayName, setGroupDisplayName] = useState('OTel Collector Group');
@@ -227,6 +249,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   };
 
   const opampConfig = useMemo(() => {
+    if (!yaml) {
+      return '';
+    }
+
     const nonIdentifyingAttrs: Record<string, any> = {
       'elastic.collector.group_name': groupDisplayName,
       'elastic.collector.group': collectorGroup,
@@ -326,8 +352,15 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
         },
       },
     };
-    return dump(config, { lineWidth: -1, quotingType: '"', forceQuotes: true, noRefs: true });
+    return yaml.stringify(config, {
+      lineWidth: 0,
+      singleQuote: false,
+      defaultStringType: 'QUOTE_DOUBLE',
+      defaultKeyType: 'PLAIN',
+      aliasDuplicateObjects: false,
+    });
   }, [
+    yaml,
     groupDisplayName,
     collectorGroup,
     serviceName,
@@ -546,7 +579,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               </p>
             </EuiText>
           )}
-          {token && defaultFleetServerHost && isFormValid ? (
+          {token && defaultFleetServerHost && isFormValid && yaml ? (
             <>
               <EuiText>
                 <p>
@@ -586,18 +619,36 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={onCreateApiKey}
-                    isLoading={isCreatingApiKey}
-                    isDisabled={!!apiKeyEncoded}
-                    iconType={apiKeyEncoded ? 'check' : undefined}
-                    color={apiKeyEncoded ? 'success' : 'primary'}
+                  <EuiToolTip
+                    content={
+                      !canCreateApiKey
+                        ? i18n.translate(
+                            'xpack.fleet.addCollectorFlyout.createApiKeyNoPermissionTooltip',
+                            {
+                              defaultMessage:
+                                "You don't have permission to create API keys. Contact your administrator.",
+                            }
+                          )
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
-                      defaultMessage="Create API key"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={onCreateApiKey}
+                      isLoading={isCreatingApiKey}
+                      isDisabled={!!apiKeyEncoded || !canCreateApiKey}
+                      // aria-disabled keeps the button focusable and sets pointer-events:none so
+                      // the EuiToolTip anchor span receives hover events cross-browser.
+                      // Scoped to !canCreateApiKey only — the apiKeyEncoded case has no tooltip.
+                      hasAriaDisabled={!canCreateApiKey}
+                      iconType={apiKeyEncoded ? 'check' : undefined}
+                      color={apiKeyEncoded ? 'success' : 'primary'}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
+                        defaultMessage="Create API key"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -628,17 +679,22 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                 {opampConfig}
               </EuiCodeBlock>
             </>
-          ) : loading ? (
-            <EuiCallOut
+          ) : loading || !yaml ? (
+            <KbnInfoCallout
               announceOnMount
               size="m"
-              color="primary"
-              iconType={EuiLoadingSpinner}
               title={
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
-                  defaultMessage="Preparing OpAMP configuration..."
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
+                      defaultMessage="Preparing OpAMP configuration..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             />
           ) : null}
@@ -654,11 +710,41 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           <p>
             <FormattedMessage
               id="xpack.fleet.addCollectorFlyout.runCollectorInstruction"
-              defaultMessage="Run your collector. The following command uses the OTel contrib collector:"
+              defaultMessage="Select a runtime and run your collector:"
             />
           </p>
-          <EuiCodeBlock isCopyable language="yaml" paddingSize="m">
-            {'./otelcol-contrib --config ./otel-opamp.yaml '}
+          <EuiFilterGroup>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'elastic-agent'}
+              hasActiveFilters={collectorRuntime === 'elastic-agent'}
+              onClick={() => setCollectorRuntime('elastic-agent')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeElasticAgent', {
+                defaultMessage: 'Elastic Agent',
+              })}
+            </EuiFilterButton>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'otelcol-contrib'}
+              hasActiveFilters={collectorRuntime === 'otelcol-contrib'}
+              onClick={() => setCollectorRuntime('otelcol-contrib')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeOtelContrib', {
+                defaultMessage: 'OTel Contrib Collector',
+              })}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+          <EuiSpacer size="m" />
+          <EuiCodeBlock
+            isCopyable
+            language="bash"
+            paddingSize="m"
+            data-test-subj="runCollectorCommand"
+          >
+            {collectorRuntime === 'elastic-agent'
+              ? './otelcol --config ./otel-opamp.yaml'
+              : './otelcol-contrib --config ./otel-opamp.yaml'}
           </EuiCodeBlock>
         </EuiText>
       ),

@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import _ from 'lodash';
 import moment from 'moment';
 import type {
@@ -63,11 +64,13 @@ export class WatchlistEntitySourceClient {
       }
       if (!request) {
         throw new Error('Cannot create index-type entity source without a request.');
-      } else {
-        const [coreStart] = await this.dependencies.getStartServices();
-        apiKey =
-          (await grantEntitySourceApiKey(coreStart.security, request, attributes.name)) ?? {};
       }
+
+      if (attributes.indexPattern) {
+        await validateIndexPermissions(this.dependencies.esClient, attributes.indexPattern);
+      }
+      const [coreStart] = await this.dependencies.getStartServices();
+      apiKey = (await grantEntitySourceApiKey(coreStart.security, request, attributes.name)) ?? {};
     }
 
     const { id, attributes: created } =
@@ -130,19 +133,17 @@ export class WatchlistEntitySourceClient {
     }
     // Needs new API key: index pattern changed, type changed from non-index to index, or API key is missing (re-auth)
     if (isNowIndex && (indexPatternChanged || !wasIndex || !currentSource.apiKeyId)) {
-      if (request) {
-        if (!this.dependencies.hasEncryptionKey) {
-          throw new Error(
-            'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
-          );
-        }
-        apiKey =
-          (await grantEntitySourceApiKey(coreStart.security, request, entitySource.name)) ?? {};
-      } else {
-        logger.warn(
-          '[WatchlistEntitySourceClient] Could not grant and store index source API key.'
+      if (!this.dependencies.hasEncryptionKey) {
+        throw new Error(
+          'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
         );
       }
+      if (!request) {
+        throw new Error('Cannot update index-type entity source without a request.');
+      }
+
+      apiKey =
+        (await grantEntitySourceApiKey(coreStart.security, request, entitySource.name)) ?? {};
     }
     // Clears API key fields: type changed from index to non-index
     if (wasIndex && !isNowIndex) {
@@ -217,8 +218,14 @@ export class WatchlistEntitySourceClient {
     query: ListWatchlistEntitySourcesRequestQuery,
     ids?: string[]
   ): Promise<ListWatchlistEntitySourcesResponse> {
+    // find() turns an id filter into a text search, and that search cannot match these saved objects.
+    // bulkGet fetches them directly.
+    if (ids) {
+      return this.listByIds(query, ids);
+    }
+
     return this.find({
-      kuery: this.getQueryFilters(query, ids),
+      kuery: this.getQueryFilters(query),
       sortField: query?.sort_field ?? undefined,
       sortOrder: query?.sort_order ?? undefined,
       page: query?.page ?? 1,
@@ -226,16 +233,58 @@ export class WatchlistEntitySourceClient {
     });
   }
 
-  private getQueryFilters(query?: ListWatchlistEntitySourcesRequestQuery, ids?: string[]): string {
+  private async listByIds(
+    query: ListWatchlistEntitySourcesRequestQuery,
+    ids: string[]
+  ): Promise<ListWatchlistEntitySourcesResponse> {
+    if (ids.length === 0) {
+      return {
+        sources: [],
+        page: query.page ?? 1,
+        per_page: query.per_page ?? 10,
+        total: 0,
+      };
+    }
+
+    const { saved_objects: savedObjects } =
+      await this.dependencies.soClient.bulkGet<MonitoringEntitySource>(
+        ids.map((id) => ({ type: watchlistEntitySourceTypeName, id }))
+      );
+
+    const matched = savedObjects
+      .flatMap((savedObject) =>
+        isSavedObjectErrorResult(savedObject)
+          ? []
+          : [{ ...savedObject.attributes, id: savedObject.id }]
+      )
+      .filter(
+        (source) =>
+          (query.type === undefined || source.type === query.type) &&
+          (query.managed === undefined || Boolean(source.managed) === query.managed) &&
+          (query.name === undefined || source.name === query.name)
+      );
+
+    const sorted = query.sort_field
+      ? _.orderBy(matched, [query.sort_field], [query.sort_order ?? 'asc'])
+      : matched;
+
+    const page = query?.page ?? 1;
+    const perPage = query?.per_page ?? 10;
+    const start = (page - 1) * perPage;
+
+    return {
+      sources: sorted.slice(start, start + perPage),
+      page,
+      per_page: perPage,
+      total: sorted.length,
+    };
+  }
+
+  private getQueryFilters(query?: ListWatchlistEntitySourcesRequestQuery): string {
     const queryParts = _.pick(query ?? {}, ['type', 'managed', 'name']);
     const filters = Object.entries(queryParts).map(
       ([key, value]) => `${watchlistEntitySourceTypeName}.attributes.${key}: "${value}"`
     );
-
-    if (ids?.length) {
-      const idFilter = ids.map((id) => `${watchlistEntitySourceTypeName}.id: "${id}"`).join(' or ');
-      filters.push(`(${idFilter})`);
-    }
 
     return filters.join(' and ');
   }

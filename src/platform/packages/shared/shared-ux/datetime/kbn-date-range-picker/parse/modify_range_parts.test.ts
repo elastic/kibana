@@ -11,8 +11,8 @@ import type { PartKind, RangePart } from './parse_range_parts';
 import { parseInputParts } from './parse_range_parts';
 import { applyPartModification } from './modify_range_parts';
 
-const getPart = (text: string, kind: PartKind, partText?: string) => {
-  const parts = parseInputParts(text);
+const getPart = (text: string, kind: PartKind, partText?: string, locale?: string) => {
+  const parts = parseInputParts(text, undefined, locale);
   const part = parts.find(
     (candidate) => candidate.kind === kind && (!partText || candidate.text === partText)
   );
@@ -24,10 +24,11 @@ const modify = (
   text: string,
   kind: PartKind,
   action: 'increase' | 'decrease',
-  partText?: string
+  partText?: string,
+  locale?: string
 ) => {
-  const { part, parts } = getPart(text, kind, partText);
-  return applyPartModification(text, part, action, parts);
+  const { part, parts } = getPart(text, kind, partText, locale);
+  return applyPartModification(text, part, action, parts, locale);
 };
 
 const modifyOnSide = (
@@ -120,6 +121,50 @@ describe('applyPartModification', () => {
     it('stops at cycle boundaries', () => {
       expect(modify('last 5 years', 'relative-unit', 'increase')).toBeUndefined();
       expect(modify('-5ms', 'relative-unit', 'decrease')).toBeUndefined();
+    });
+
+    describe('locale grammars', () => {
+      it('keeps the phrase language when stepping an ambiguous unit word (de-DE)', () => {
+        // "minute" is a valid unit word in BOTH English and German — the
+        // direction word decides which grammar generates the next unit.
+        expect(modify('letzte 1 minute', 'relative-unit', 'increase', undefined, 'de-DE')).toBe(
+          'letzte 1 Stunde'
+        );
+        expect(modify('last 1 minute', 'relative-unit', 'increase', undefined, 'de-DE')).toBe(
+          'last 1 hour'
+        );
+      });
+
+      it('cycles locale units with plural agreement (de-DE / fr-FR)', () => {
+        expect(modify('letzte 7 Tage', 'relative-unit', 'increase', undefined, 'de-DE')).toBe(
+          'letzte 7 Wochen'
+        );
+        expect(modify('dernières 5 minutes', 'relative-unit', 'increase', undefined, 'fr-FR')).toBe(
+          'dernières 5 heures'
+        );
+      });
+
+      it('applies instant agreement overrides when stepping instant units (de-DE)', () => {
+        // "vor"/"in" take the dative, which inflects the plural of Tag/Monat/Jahr.
+        expect(modify('vor 7 Wochen', 'relative-unit', 'decrease', undefined, 'de-DE')).toBe(
+          'vor 7 Tagen'
+        );
+        expect(modify('vor 7 Monaten', 'relative-unit', 'increase', undefined, 'de-DE')).toBe(
+          'vor 7 Jahren'
+        );
+        expect(modify('il y a 3 jours', 'relative-unit', 'increase', undefined, 'fr-FR')).toBe(
+          'il y a 3 semaines'
+        );
+      });
+
+      it('resolves a fully ambiguous phrase to the active locale', () => {
+        // "in 1 minute" is a valid English AND German instant — the UI
+        // language wins, since the input was most likely typed in it.
+        expect(modify('in 1 minute', 'relative-unit', 'increase', undefined, 'de-DE')).toBe(
+          'in 1 Stunde'
+        );
+        expect(modify('in 1 minute', 'relative-unit', 'increase')).toBe('in 1 hour');
+      });
     });
   });
 

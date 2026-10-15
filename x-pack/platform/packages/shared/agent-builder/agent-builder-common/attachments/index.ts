@@ -11,7 +11,6 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
-  VisualizationAttachment,
   ConnectorAttachment,
 } from './attachments';
 
@@ -27,16 +26,21 @@ export {
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
-  visualizationAttachmentDataSchema,
   connectorAttachmentDataSchema,
+  imageAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGES_PER_ROUND,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type TimeRange,
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
-  type VisualizationAttachmentData,
   type ConnectorAttachmentData,
+  type ImageAttachmentData,
+  type SupportedImageMimeType,
 } from './attachment_types';
 
 export type {
@@ -71,6 +75,7 @@ export {
   isAttachmentActive,
   getActiveAttachments,
   isVersionedAttachmentWithOrigin,
+  isVersionedAttachmentOfType,
   hashContent,
   estimateTokens,
   getContentKey,

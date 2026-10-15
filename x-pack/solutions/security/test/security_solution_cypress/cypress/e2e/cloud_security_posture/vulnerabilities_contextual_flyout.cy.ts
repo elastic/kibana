@@ -11,6 +11,7 @@ import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 import { rootRequest, deleteAlertsAndRules } from '../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { expandFirstAlertHostFlyout } from '../../tasks/asset_criticality/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login } from '../../tasks/login';
@@ -138,6 +139,7 @@ const deleteDataStream = () => {
 
 describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    disableNewFlyout();
     deleteAlertsAndRules();
     login();
     createRule(getNewRule());

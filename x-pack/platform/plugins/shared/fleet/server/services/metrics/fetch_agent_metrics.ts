@@ -43,7 +43,7 @@ export interface UnhealthyReason {
 
 export const fetchAgentMetrics = async (
   core: CoreSetup,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<AgentMetrics | undefined> => {
   const [soClient, esClient] = await getInternalClients(core);
   if (!soClient || !esClient) {
@@ -60,9 +60,9 @@ export const fetchAgentMetrics = async (
 
   const usage = {
     agents: await getAgentUsage(soClient, esClient),
-    agents_per_version: await getAgentsPerVersion(esClient, abortController),
-    upgrading_step: await getUpgradingSteps(esClient, abortController),
-    unhealthy_reason: await getUnhealthyReason(esClient, abortController),
+    agents_per_version: await getAgentsPerVersion(esClient, signal),
+    upgrading_step: await getUpgradingSteps(esClient, signal),
+    unhealthy_reason: await getUnhealthyReason(esClient, signal),
   };
 
   return usage;
@@ -70,7 +70,7 @@ export const fetchAgentMetrics = async (
 
 export const getAgentsPerVersion = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<AgentPerVersion[]> => {
   try {
     const response = await retryTransientEsErrors(() =>
@@ -95,7 +95,7 @@ export const getAgentsPerVersion = async (
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       )
     );
     return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => ({
@@ -114,7 +114,7 @@ export const getAgentsPerVersion = async (
 
 export const getUpgradingSteps = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<UpgradingSteps> => {
   const upgradingSteps = {
     requested: 0,
@@ -150,7 +150,7 @@ export const getUpgradingSteps = async (
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       )
     );
     ((response?.aggregations?.upgrade_details as any).buckets ?? []).forEach((bucket: any) => {
@@ -199,7 +199,7 @@ export const getUpgradingSteps = async (
 
 export const getUnhealthyReason = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<UnhealthyReason> => {
   const unhealthyReason = {
     input: 0,
@@ -218,7 +218,7 @@ export const getUnhealthyReason = async (
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       )
     );
     ((response?.aggregations?.unhealthy_reason as any)?.buckets ?? []).forEach((bucket: any) => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
 import {
@@ -16,8 +15,6 @@ import {
 
 const mockWatchlistClientCreate = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
-const mockSyncWatchlist = jest.fn();
-const mockValidateIndexPermissions = jest.fn();
 const mockGetStartServices = jest.fn();
 
 jest.mock('../../watchlist_config', () => ({
@@ -31,21 +28,17 @@ jest.mock('../../../entity_sources/infra', () => ({
   WatchlistEntitySourceClient: jest.fn(),
 }));
 
-jest.mock('../../../entity_sources/entity_source_api_key', () => ({
-  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-}));
-
 jest.mock('../../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn(),
+  syncWatchlistInBackground: jest.fn(),
 }));
 
 const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = jest.requireMock(
   '../../../entity_sources/infra'
 ) as { WatchlistEntitySourceClient: jest.Mock };
 
-const { createEntitySourcesService: mockCreateEntitySourcesService } = jest.requireMock(
+const { syncWatchlistInBackground: mockSyncWatchlistInBackground } = jest.requireMock(
   '../../../entity_sources/entity_sources_service'
-) as { createEntitySourcesService: jest.Mock };
+) as { syncWatchlistInBackground: jest.Mock };
 
 // Import after mocks are set up
 import { createEntitySourceRoute } from './create';
@@ -66,8 +59,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
     mockWatchlistClientCreate.mockReset();
     mockAddEntitySourceReference.mockReset();
-    mockSyncWatchlist.mockReset();
-    mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
+    mockSyncWatchlistInBackground.mockReset();
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -76,7 +68,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       create: mockWatchlistClientCreate,
     }));
 
-    mockCreateEntitySourcesService.mockReturnValue({ syncWatchlist: mockSyncWatchlist });
+    mockSyncWatchlistInBackground.mockResolvedValue(undefined);
 
     createEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
@@ -101,46 +93,22 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       enabled: true,
     };
 
-    it('returns 403 when index permission validation fails', async () => {
-      mockValidateIndexPermissions.mockRejectedValue(
-        Boom.forbidden('Insufficient privileges to read from the selected index pattern.')
-      );
+    it('does not link source to watchlist when client.create fails', async () => {
+      mockWatchlistClientCreate.mockRejectedValue(new Error('Insufficient index privileges'));
 
-      const response = await server.inject(buildRequest(indexSourceBody), context);
+      await server.inject(buildRequest(indexSourceBody), context);
 
-      expect(response.status).toEqual(403);
-      expect(mockWatchlistClientCreate).not.toHaveBeenCalled();
+      expect(mockAddEntitySourceReference).not.toHaveBeenCalled();
     });
 
-    it('creates the source when privilege check passes', async () => {
+    it('creates the source when client.create resolves', async () => {
       const createdSource = { id: 'es-1', ...indexSourceBody };
       mockWatchlistClientCreate.mockResolvedValue(createdSource);
 
       const response = await server.inject(buildRequest(indexSourceBody), context);
 
       expect(response.status).toEqual(200);
-      expect(mockValidateIndexPermissions).toHaveBeenCalledWith(
-        expect.anything(),
-        indexSourceBody.indexPattern
-      );
       expect(mockWatchlistClientCreate).toHaveBeenCalledWith(indexSourceBody, expect.anything());
-    });
-  });
-
-  describe('non-index source', () => {
-    it('does not validate permissions for a store-type source', async () => {
-      const storeBody = {
-        type: 'store' as const,
-        name: 'store-source',
-        enabled: true,
-        queryRule: 'entity.type: user',
-      };
-      mockWatchlistClientCreate.mockResolvedValue({ id: 'es-2', ...storeBody });
-
-      const response = await server.inject(buildRequest(storeBody), context);
-
-      expect(response.status).toEqual(200);
-      expect(mockValidateIndexPermissions).not.toHaveBeenCalled();
     });
   });
 
@@ -156,7 +124,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
       mockWatchlistClientCreate.mockResolvedValue(sourceResult);
       mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockResolvedValue(undefined);
 
       const request = buildRequest({
         type: 'index',
@@ -191,7 +158,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
       mockWatchlistClientCreate.mockResolvedValue(sourceResult);
       mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockResolvedValue(undefined);
 
       const request = buildRequest({
         type: 'index',
@@ -202,57 +168,12 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith(WATCHLIST_ID);
-    });
-
-    it('logs warning when background sync fails', async () => {
-      const sourceResult = {
-        id: 'es-1',
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      };
-
-      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockRejectedValue(new Error('sync error'));
-
-      const request = buildRequest({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith(WATCHLIST_ID);
-    });
-
-    it('still returns 200 when sync fails', async () => {
-      const sourceResult = {
-        id: 'es-1',
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      };
-
-      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockRejectedValue(new Error('sync error'));
-
-      const request = buildRequest({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual(sourceResult);
+      expect(mockSyncWatchlistInBackground).toHaveBeenCalledWith(
+        expect.objectContaining({
+          watchlistId: WATCHLIST_ID,
+          logContext: 'WatchlistEntitySourceCreate',
+        })
+      );
     });
   });
 

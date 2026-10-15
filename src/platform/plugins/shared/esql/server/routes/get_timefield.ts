@@ -8,10 +8,13 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+  parseTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
@@ -19,24 +22,44 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
+// ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
+// Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
+// small request from a low-privileged account).
+export const MAX_NESTING_DEPTH = 50;
+
+export const getMaxNestingDepth = (query: string): number => {
+  let max = 0;
+  let depth = 0;
+  for (const ch of query) {
+    if (ch === '(' || ch === '[') {
+      depth++;
+      if (depth > max) max = depth;
+    } else if (ch === ')' || ch === ']') {
+      depth--;
+    }
+  }
+  return max;
+};
+
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
 
 const getEsqlColumnsForSource = async ({
   client,
   sourceName,
+  projectRouting,
 }: {
   client: ElasticsearchClient;
   sourceName: string;
-}): Promise<ESQLSearchResponse | undefined> => {
+  projectRouting: string | undefined;
+}): Promise<EsqlQueryResponse | undefined> => {
   // Limit 0 is used to get the schema, more performant
   const query = `FROM ${sourceName} | LIMIT 0`;
 
   try {
-    return await client.transport.request<ESQLSearchResponse>({
-      method: 'POST',
-      path: '/_query',
-      body: { query },
+    return await client.esql.query({
+      query,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     });
   } catch {
     // ignore
@@ -46,12 +69,14 @@ const getEsqlColumnsForSource = async ({
 const checkViewLikeSourceForTimestamp = async ({
   client,
   sourceName,
+  projectRouting,
 }: {
   client: ElasticsearchClient;
   sourceName: string;
+  projectRouting: string | undefined;
 }): Promise<boolean> => {
   // ES|QL views are resolved by ES|QL itself, and their schema is the output schema.
-  const esqlResp = await getEsqlColumnsForSource({ client, sourceName });
+  const esqlResp = await getEsqlColumnsForSource({ client, sourceName, projectRouting });
   return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
 };
 
@@ -71,11 +96,12 @@ const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,
-  isServerless: boolean
+  projectRouting: string | undefined
 ): Promise<{ timeField: string | undefined }> => {
+  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
   // Query is of the form "from index | where timefield >= ?_tstart".
   // At this point we just want to extract the timefield if present in the query
-  const timeField = getTimeFieldFromESQLQuery(query);
+  const timeField = parseTimeFieldFromESQLQuery(query);
   if (timeField) {
     return { timeField };
   }
@@ -89,21 +115,6 @@ const resolveTimeField = async (
   const sources = getIndexPatternFromESQLQuery(query);
   const subqueryArgs = sourceCommand.args.filter(isSubQuery);
   const hasSubqueries = subqueryArgs.length > 0;
-  const service = new EsqlService({ client });
-  // TODO: Remove this once views are available in serverless
-  const { views } = isServerless
-    ? { views: [] }
-    : await service.getViews().catch((viewsError) => {
-        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
-        logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
-          tags: ['esql', 'timefield', 'views'],
-          error: {
-            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
-          },
-        });
-        return { views: [] };
-      });
-  const viewNames = new Set(views.map(({ name }) => name));
   const splitSources = sources
     .split(',')
     .map((s) => s.trim())
@@ -119,6 +130,7 @@ const resolveTimeField = async (
       return { timeField: undefined };
     }
 
+    // The cheapest check comes first: most sources are indices, aliases or data streams.
     const fieldCapsResults = await Promise.all(
       indices.map(async (index) => {
         try {
@@ -126,12 +138,15 @@ const resolveTimeField = async (
             index,
             fields: '@timestamp',
             include_unmapped: false,
+            ...(effectiveProjectRouting ? { project_routing: effectiveProjectRouting } : {}),
           });
           return hasTimestampInFieldCapsResponse(fieldCapsResp);
         } catch (fieldCapsError) {
           const message =
             fieldCapsError instanceof Error ? fieldCapsError.message : String(fieldCapsError);
-          logger.error(
+          // An unknown index is expected for views and datasets, which are checked below
+          const logLevel = getErrorStatusCode(fieldCapsError) === 404 ? 'debug' : 'error';
+          logger[logLevel](
             `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
             {
               tags: ['esql', 'timefield', 'fieldCaps'],
@@ -145,19 +160,54 @@ const resolveTimeField = async (
       })
     );
 
-    const allHaveTimestamp = fieldCapsResults.every(Boolean);
-
-    if (allHaveTimestamp) {
+    if (fieldCapsResults.every(Boolean)) {
       return { timeField: ES_TIMESTAMP_FIELD_NAME };
     }
 
-    // fieldCaps didn't find @timestamp — check if any sources are views
-    const viewSources = splitSources.filter((name) => viewNames.has(name));
+    // fieldCaps didn't find @timestamp: the sources may be views or datasets, which fieldCaps
+    // doesn't know. ES|QL resolves them itself, so their schema is their output schema.
+    const service = new EsqlService({ client });
+    const [{ views }, { datasets }] = await Promise.all([
+      service.getViews().catch((viewsError) => {
+        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
+        logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
+          tags: ['esql', 'timefield', 'views'],
+          error: {
+            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
+          },
+        });
+        return { views: [] };
+      }),
+      service.getDatasets().catch(() => ({ datasets: [] })),
+    ]);
+    const datasetNames = new Set(datasets.map(({ name }) => name));
+    const viewNames = new Set(views.map(({ name }) => name));
 
+    const datasetSources = splitSources.filter((name) => datasetNames.has(name));
+    if (datasetSources.length > 0) {
+      const datasetChecks = await Promise.all(
+        datasetSources.map((sourceName) =>
+          checkViewLikeSourceForTimestamp({
+            client,
+            sourceName,
+            projectRouting: effectiveProjectRouting,
+          })
+        )
+      );
+      if (datasetChecks.every(Boolean)) {
+        return { timeField: ES_TIMESTAMP_FIELD_NAME };
+      }
+    }
+
+    const viewSources = splitSources.filter((name) => viewNames.has(name));
     if (viewSources.length) {
       const viewChecks = await Promise.all(
         viewSources.map((viewName) =>
-          checkViewLikeSourceForTimestamp({ client, sourceName: viewName })
+          checkViewLikeSourceForTimestamp({
+            client,
+            sourceName: viewName,
+            projectRouting: effectiveProjectRouting,
+          })
         )
       );
       if (viewChecks.every(Boolean)) {
@@ -178,8 +228,7 @@ const resolveTimeField = async (
 
 export const registerGetTimeFieldRoute = (
   router: IRouter,
-  { logger }: PluginInitializerContext,
-  isServerless: boolean
+  { logger }: PluginInitializerContext
 ) => {
   router.post(
     {
@@ -192,17 +241,25 @@ export const registerGetTimeFieldRoute = (
       },
       validate: {
         body: schema.object({
-          query: schema.string(),
+          query: schema.string({ maxLength: 1000000 }),
+          projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query } = request.body;
+      const { query, projectRouting } = request.body;
+
+      if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
+        return response.badRequest({
+          body: 'Query nesting depth exceeds the maximum allowed limit',
+        });
+      }
+
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
 
       try {
-        const body = await resolveTimeField(client, query, logger.get(), isServerless);
+        const body = await resolveTimeField(client, query, logger.get(), projectRouting);
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',

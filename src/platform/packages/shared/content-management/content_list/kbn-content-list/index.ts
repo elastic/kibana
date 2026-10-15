@@ -98,6 +98,7 @@ export type { ContentListToolbarProps } from '@kbn/content-list-toolbar';
 export {
   ContentListTable,
   Column,
+  createColumn,
   Action,
   getRowId,
   NameColumn,

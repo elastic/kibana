@@ -24,7 +24,7 @@ export const registerLookupIndexRoutes = (
       path: '/internal/esql/lookup_index/{indexName}/update',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
         body: schema.object({
           // ES bulk payload: heterogeneous action/source pairs, so per-element
@@ -69,7 +69,7 @@ export const registerLookupIndexRoutes = (
       path: '/internal/esql/lookup_index/{indexName}',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {
@@ -110,7 +110,7 @@ export const registerLookupIndexRoutes = (
     {
       path: '/internal/esql/lookup_index/privileges',
       validate: {
-        query: schema.object({ indexName: schema.maybe(schema.string()) }),
+        query: schema.object({ indexName: schema.maybe(schema.string({ maxLength: 1024 })) }),
       },
       security: {
         authz: {

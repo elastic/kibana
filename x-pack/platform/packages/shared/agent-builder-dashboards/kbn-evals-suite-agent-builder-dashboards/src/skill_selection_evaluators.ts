@@ -6,9 +6,9 @@
  */
 
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
-const DASHBOARD_MANAGEMENT_TOOL_ID = 'platform.dashboard.manage_dashboard';
+const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
 const getLowerCaseSkillPaths = (output: DashboardAgentTaskOutput): string[] =>
   getSkillReadPaths(output).map((path) => path.toLowerCase());
@@ -22,7 +22,7 @@ export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] =>
       continue;
     }
 
-    if (step.tool_id === 'filestore.read') {
+    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
       const params = step.params as { path?: string } | undefined;
       if (params?.path) {
         paths.push(params.path);
@@ -65,9 +65,7 @@ export const getToolIds = (output: DashboardAgentTaskOutput): string[] => {
 };
 
 const didLoadDashboardSkill = (output: DashboardAgentTaskOutput): boolean =>
-  getLowerCaseSkillPaths(output).some(
-    (path) => path.includes('dashboard') || path.includes('dashboard-management')
-  );
+  getLowerCaseSkillPaths(output).some((path) => path.includes('dashboard'));
 
 const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
   getLowerCaseSkillPaths(output).some(
@@ -75,7 +73,7 @@ const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
   );
 
 const didCallDashboardTool = (output: DashboardAgentTaskOutput): boolean =>
-  getToolIds(output).includes(DASHBOARD_MANAGEMENT_TOOL_ID);
+  getToolIds(output).includes(DASHBOARD_GENERATE_TOOL_ID);
 
 export const dashboardSkillActivatedEvaluator: Evaluator<
   DashboardDatasetExample,
@@ -83,6 +81,7 @@ export const dashboardSkillActivatedEvaluator: Evaluator<
 > = {
   name: 'Dashboard skill activated',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const dashboardSkillLoaded = didLoadDashboardSkill(output);
@@ -104,6 +103,7 @@ export const visualizationSkillWithoutDashboardEvaluator: Evaluator<
 > = {
   name: 'Visualization skill activated without dashboard',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const toolIds = getToolIds(output);
@@ -139,6 +139,7 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
 > = {
   name: 'Dashboard skill not activated',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const toolIds = getToolIds(output);
@@ -150,8 +151,8 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Dashboard management was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
-        : `Expected no dashboard management. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
+        ? `Dashboards skill was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
+        : `Expected no dashboards skill. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
             skillReadPaths.join(', ') || 'none'
           }. Tool IDs: ${toolIds.join(', ') || 'none'}`,
       metadata: {

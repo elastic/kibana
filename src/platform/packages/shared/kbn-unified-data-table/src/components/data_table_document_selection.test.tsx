@@ -9,6 +9,7 @@
 
 import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
 import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import {
   buildSelectedDocsState,
@@ -204,7 +205,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -263,7 +263,6 @@ describe('document selection', () => {
         enableComparisonMode: false,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -286,13 +285,51 @@ describe('document selection', () => {
       expect(screen.getByText('When two')).toBeInTheDocument();
     });
 
+    it('hides default bulk actions when hideDefaultBulkActions is true', async () => {
+      const props = {
+        columns: ['test'],
+        customBulkActions: [
+          {
+            key: 'myAction',
+            label: 'My action',
+            'data-test-subj': 'myBulkAction',
+            onClick: jest.fn(),
+          },
+        ],
+        enableComparisonMode: false,
+        fieldFormats: servicesMock.fieldFormats,
+        hideDefaultBulkActions: true,
+        isFilterActive: false,
+        pageIndex: 0,
+        pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
+        toastNotifications: servicesMock.toastNotifications,
+      };
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: props.selectedDocsState,
+      };
+
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+      await userEvent.click(getSelectionToolbarButton(2));
+
+      expect(screen.getByText('My action')).toBeInTheDocument();
+      expect(screen.queryByText('Copy selection as text')).not.toBeInTheDocument();
+      expect(screen.queryByText('Copy selection as Markdown')).not.toBeInTheDocument();
+      expect(screen.queryByText('Copy documents as JSON')).not.toBeInTheDocument();
+      expect(screen.queryByText('Show selected documents only')).not.toBeInTheDocument();
+      expect(screen.getByText('Clear selection')).toBeInTheDocument();
+    });
+
     it('it should not render "Select all X" button if less than pageSize is selected', () => {
       const props = {
         columns: ['test'],
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -318,7 +355,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -350,7 +386,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 1,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -376,7 +411,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 1,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -403,7 +437,6 @@ describe('document selection', () => {
       enableComparisonMode: true,
       fieldFormats: servicesMock.fieldFormats,
       isFilterActive: false,
-      isPlainRecord: false,
       pageIndex: 0,
       pageSize: 2,
       rows: dataTableContextRowsMock,
@@ -434,8 +467,9 @@ describe('document selection', () => {
           const menuButton = await screen.findByRole('button', { name: /Selected/ });
 
           await userEvent.click(menuButton);
+          await waitForEuiPopoverOpen();
 
-          return screen.queryByRole('button', { name: /Compare/ });
+          return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
         },
       };
     };

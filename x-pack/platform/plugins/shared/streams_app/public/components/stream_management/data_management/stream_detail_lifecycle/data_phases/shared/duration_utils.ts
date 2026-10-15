@@ -8,6 +8,66 @@
 import { splitSizeAndUnits, toMillis } from '../../../../../../util/format_size_units';
 import type { PreservedTimeUnit } from './time_unit_types';
 
+/**
+ * Compute the `step` for an `EuiFieldNumber` whose value must be a multiple of
+ * `multipleOfMs` (e.g. a downsample interval that must be a multiple of the previous
+ * phase/step interval), expressed in the field's currently selected `unit`.
+ *
+ * Returns `1` (the default increment) when there is no multiple constraint or the
+ * multiple cannot be represented as a positive finite number in the current unit.
+ */
+export const stepFromMultipleMs = (multipleOfMs: number, unit: PreservedTimeUnit): number => {
+  if (!Number.isFinite(multipleOfMs) || multipleOfMs <= 0) return 1;
+  const unitMs = toMillis(`1${unit}`);
+  if (unitMs === undefined || unitMs === 0) return 1;
+  const step = multipleOfMs / unitMs;
+  return Number.isFinite(step) && step > 0 ? step : 1;
+};
+
+/**
+ * Compute the `min` and `step` attributes for an `EuiFieldNumber` whose value must be a
+ * multiple of `multipleOfMs` (e.g. a downsample interval that must be a multiple of the
+ * previous phase/step interval).
+ *
+ * A native `<input type="number">` snaps its increment/decrement to `min + n * step`, so to
+ * land the buttons on valid multiples the `min` (the step base) is anchored to the multiple
+ * itself — but only while the current value is already a valid multiple. When the value is
+ * off-grid (an invalid, in-progress edit) we fall back to `{ baseMin, step: 1 }` so the user
+ * can nudge it back by one rather than having it snap to an unexpected grid point.
+ */
+export const getMultipleStepAttributes = ({
+  currentValue,
+  unit,
+  multipleOfMs,
+  baseMin,
+}: {
+  currentValue: string;
+  unit: PreservedTimeUnit;
+  multipleOfMs: number;
+  baseMin: number;
+}): { min: number; step: number } => {
+  if (!Number.isFinite(multipleOfMs) || multipleOfMs <= 0) {
+    return { min: baseMin, step: 1 };
+  }
+
+  const currentMs = toMilliseconds(currentValue, unit);
+  const isAlignedToMultiple =
+    Number.isFinite(currentMs) && currentMs > 0 && currentMs % multipleOfMs === 0;
+  if (!isAlignedToMultiple) {
+    return { min: baseMin, step: 1 };
+  }
+
+  const step = stepFromMultipleMs(multipleOfMs, unit);
+  // When the multiple can't be expressed as a whole number of the current unit (e.g. a previous
+  // interval of 12h shown while this field is in days), a fractional step would be awkward — fall
+  // back to stepping by 1 instead.
+  if (!Number.isInteger(step)) {
+    return { min: baseMin, step: 1 };
+  }
+
+  return { min: step, step };
+};
+
 export interface DoubledDurationResult {
   value: string;
   unit: PreservedTimeUnit;
@@ -112,26 +172,12 @@ export const formatDuration = (
   if (!value || value.trim() === '') return;
   if (!unit) return;
   const num = Number(value);
+  // A NaN/Infinity duration is never meaningful, so never emit "NaNd"/"Infinityd" regardless of the
+  // caller's options. Negative values stay allowed unless a `minInclusive`/`minExclusive` bound is
+  // given — the DLM live preview intentionally keeps a negative frozen_after to render the phase.
+  if (!Number.isFinite(num)) return;
   if (integerOnly && !Number.isInteger(num)) return;
-  if (minInclusive !== undefined && (!Number.isFinite(num) || num < minInclusive)) return;
-  if (minExclusive !== undefined && (!Number.isFinite(num) || num <= minExclusive)) return;
+  if (minInclusive !== undefined && num < minInclusive) return;
+  if (minExclusive !== undefined && num <= minExclusive) return;
   return `${num}${unit}`;
-};
-
-export const formatMillisecondsInUnit = (
-  ms: number,
-  unit: PreservedTimeUnit,
-  precision = 2
-): string => {
-  const multiplier = toMillis(`1${unit}`);
-  if (multiplier === undefined || multiplier === 0) {
-    return `${ms}ms`;
-  }
-
-  const valueInUnit = ms / multiplier;
-  const formatted =
-    Number.isFinite(valueInUnit) && Number.isInteger(valueInUnit)
-      ? String(valueInUnit)
-      : String(Number(valueInUnit.toFixed(precision)));
-  return `${formatted}${unit}`;
 };

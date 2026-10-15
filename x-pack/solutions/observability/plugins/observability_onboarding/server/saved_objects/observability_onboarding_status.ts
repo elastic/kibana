@@ -25,6 +25,7 @@ type ObservabilityOnboardingType = 'autoDetect';
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;
+  createdBy?: string;
   state: ObservabilityOnboardingFlowState;
   progress: Record<
     string,
@@ -42,6 +43,7 @@ export interface SavedObservabilityOnboardingFlow extends ObservabilityOnboardin
 }
 
 const MAX_FLOW_TYPE_LENGTH = 64;
+const MAX_CREATED_BY_LENGTH = 1024;
 const MAX_DATASET_NAME_LENGTH = 255;
 const MAX_SERVICE_NAME_LENGTH = 256;
 const MAX_CUSTOM_CONFIGURATIONS_LENGTH = 10_000;
@@ -117,13 +119,34 @@ export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
   { maxSize: 100 }
 );
 
+const observabilityOnboardingFlowAttributesSchema = schema.object({
+  type: schema.string({ maxLength: MAX_FLOW_TYPE_LENGTH }),
+  createdBy: schema.maybe(schema.string({ maxLength: MAX_CREATED_BY_LENGTH })),
+  state: schema.maybe(schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema, schema.never()])),
+  progress: schema.mapOf(
+    schema.string({ maxLength: MAX_STEP_NAME_LENGTH }),
+    schema.object({
+      status: schema.string({ maxLength: MAX_STEP_STATUS_LENGTH }),
+      message: schema.maybe(schema.string({ maxLength: MAX_STEP_MESSAGE_LENGTH })),
+      payload: schema.maybe(
+        schema.oneOf([
+          ElasticAgentStepPayloadSchema,
+          InstallIntegrationsStepPayloadSchema,
+          LogsDetectLoadingStepPayloadSchema,
+        ])
+      ),
+    })
+  ),
+});
+
 export const observabilityOnboardingFlow: SavedObjectsType = {
   name: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     properties: {
       type: { type: 'keyword' },
+      createdBy: { type: 'keyword', ignore_above: MAX_CREATED_BY_LENGTH },
       state: { type: 'object', dynamic: false },
       progress: { type: 'object', dynamic: false },
     },
@@ -169,6 +192,23 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
             })
           ),
         }),
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            createdBy: { type: 'keyword', ignore_above: MAX_CREATED_BY_LENGTH },
+          },
+        },
+      ],
+      schemas: {
+        create: observabilityOnboardingFlowAttributesSchema,
+        forwardCompatibility: observabilityOnboardingFlowAttributesSchema.extends(
+          {},
+          { unknowns: 'ignore' }
+        ),
       },
     },
   },

@@ -42,7 +42,7 @@ export function allowRequest(url: string, rules: NetworkPolicyRule[]): boolean {
       return result;
     }
 
-    const hostMatch = rule.host ? isHostMatch(parsed.host || '', rule.host) : true;
+    const hostMatch = rule.host ? isHostMatch(parsed.hostname || '', rule.host) : true;
 
     const protocolMatch = rule.protocol ? parsed.protocol === rule.protocol : true;
 

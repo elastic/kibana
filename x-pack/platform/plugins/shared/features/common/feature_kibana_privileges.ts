@@ -155,6 +155,13 @@ export interface FeatureKibanaPrivileges {
        * muteAlert/unmuteAlert operations internally and is therefore also covered.
        */
       mute_alerts?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have read-only access to per-alert
+       * mute/snooze state (the `findMutedAlerts` operation) when granted this privilege, without the
+       * ability to mute or unmute. This allows reading muted alert instances without requiring full
+       * rule `read`. The broader `mute_alerts` privilege also grants this operation.
+       */
+      read_muted_alerts?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
@@ -296,6 +303,44 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     manageTemplates?: readonly string[];
+  };
+
+  /**
+   * If your feature's content is indexed into an AI Index (`ai-index-idx-*` or `ai-index-ds-*`),
+   * including the Elastic AI Index (formerly known as SML), and should be readable from
+   * there, list the KI (Knowledge Indicator) types this privilege grants read access to.
+   * In the case of Elastic AI Index, a KI Type is the same as the formerly known SML type.
+   *
+   * Each entry produces an `ai_index:<kiType>/read` action.
+   *
+   * @example
+   * ```ts
+   *  {
+   *    aiIndex: { read: ['dashboard'] }
+   *  }
+   * ```
+   *
+   * An AI index is an ES index that is used to store high-level facts (KIs) about the underlying
+   * user-owned data, and used by AI agents at retrieval time to improve relevance and token consumption.
+   * For more details, see x-pack/platform/plugins/shared/context_engine/README.md.
+   */
+  aiIndex?: {
+    read?: readonly string[];
+  };
+
+  /**
+   * If your feature requires read access to the alerting v2 data streams that persist the rule events and alert actions, then specify it here.
+   * Read more about the alerting v2 resources here x-pack/platform/plugins/shared/alerting_v2/server/resources/README.md
+   *
+   * @example
+   * ```ts
+   *  {
+   *    alerts: { read: true }
+   *  }
+   * ```
+   */
+  alerts?: {
+    read?: boolean;
   };
 
   /**

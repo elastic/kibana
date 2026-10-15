@@ -19,13 +19,19 @@ program
     'Run the tests in test/harden directory. If no files are provided, all files within the directory will be run.'
   )
   .action(function (globs) {
-    if (globs.length === 0) globs.push(path.join('test', 'harden', '*'));
+    if (globs.length === 0) globs.push(path.join('src', 'platform', 'test', 'harden', '*'));
+    var testCount = 0;
     globs.forEach(function (glob) {
       syncGlob(glob).forEach(function (filename) {
         if (path.basename(filename)[0] === '_') return;
+        testCount++;
         console.log(process.argv[0], filename);
         execFileSync(process.argv[0], [filename], { stdio: 'inherit' });
       });
     });
+    if (testCount === 0) {
+      console.error('No test files matched: ' + globs.join(', '));
+      process.exit(1);
+    }
   })
   .parse(process.argv);

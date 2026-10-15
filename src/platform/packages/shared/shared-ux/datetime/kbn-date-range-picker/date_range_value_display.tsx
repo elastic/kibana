@@ -27,6 +27,8 @@ interface DateRangeValueDisplayProps {
    * `direction` is 1 for scrolling up (increase) and -1 for scrolling down (decrease).
    */
   onPartWheel?: (part: RangePart, direction: 1 | -1) => void;
+  /** Locale used to recognise `displayText`'s parts. @default `i18n.getLocale()` */
+  locale?: string;
 }
 
 /**
@@ -37,9 +39,10 @@ export function DateRangeValueDisplay({
   onPartClick,
   disabled = false,
   onPartWheel,
+  locale,
 }: DateRangeValueDisplayProps) {
   const styles = useEuiMemoizedStyles(dateRangeValueDisplayStyles);
-  const parts = parseDisplayParts(displayText);
+  const parts = parseDisplayParts(displayText, locale);
 
   const rootRef = useRef<HTMLSpanElement>(null);
   const partsRef = useRef(parts);

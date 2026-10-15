@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ServiceHealthStatus, SloStatus } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import type { AnomalyDetectorType, Environment, SloStatus } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
-  kueryRt,
-  rangeRt,
-  probabilityRt,
-  serviceTransactionDataSourceRt,
+  kuerySchema,
+  rangeSchema,
+  probabilitySchema,
+  serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
 export interface MergedServiceStat {
@@ -25,8 +25,9 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
   anomalyScore?: number;
+  detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
   alertsCount?: number;
   sloStatus?: SloStatus;
   sloCount?: number;
@@ -40,24 +41,22 @@ export interface ServicesItemsResponse {
 
 export const servicesListRoute = defineRoute<ServicesItemsResponse>()({
   endpoint: 'GET /internal/apm/services',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        searchQuery: t.string,
-        serviceGroup: t.string,
-      }),
-      t.intersection([
-        probabilityRt,
-        t.intersection([
-          serviceTransactionDataSourceRt,
-          t.type({
-            useDurationSummary: toBooleanRt,
-          }),
-        ]),
-        environmentRt,
-        kueryRt,
-        rangeRt,
-      ]),
-    ]),
+  params: z.object({
+    query: z
+      .object({
+        searchQuery: z.string(),
+        serviceGroup: z.string(),
+      })
+      .partial()
+      .merge(probabilitySchema)
+      .merge(serviceTransactionDataSourceSchema)
+      .merge(
+        z.object({
+          useDurationSummary: BooleanFromString.default(false),
+        })
+      )
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

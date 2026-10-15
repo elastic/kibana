@@ -532,6 +532,54 @@ describe('useConnectorOAuthConnect', () => {
     });
   });
 
+  describe('mutation onError', () => {
+    it('surfaces body.message from an HttpFetchError', () => {
+      const onError = jest.fn();
+      renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          onError,
+        })
+      );
+
+      const onMutationError = capturedMutationOptions.onError as (error: unknown) => void;
+      // isHttpFetchError requires `request` to be present on the error (see @kbn/core-http-browser).
+      const httpError = Object.assign(new Error('Internal Server Error'), {
+        request: {} as Request,
+        body: {
+          message:
+            'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml',
+        },
+      });
+
+      act(() => onMutationError(httpError));
+
+      expect(onError).toHaveBeenCalledWith(
+        new Error(
+          'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml'
+        )
+      );
+    });
+
+    it('falls back to error.message when body.message is absent', () => {
+      const onError = jest.fn();
+      renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          onError,
+        })
+      );
+
+      const onMutationError = capturedMutationOptions.onError as (error: unknown) => void;
+
+      act(() => onMutationError(new Error('Network request failed')));
+
+      expect(onError).toHaveBeenCalledWith(new Error('Network request failed'));
+    });
+  });
+
   describe('Redirect mode', () => {
     it('calls window.location.assign on mutation success', () => {
       renderHook(() =>

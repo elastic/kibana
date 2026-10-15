@@ -33,6 +33,11 @@ text
     result: `Modified Heading 1\ntext`,
   };
 
+  /**
+   * Purpose: Markdown panel create/edit smoke test
+   *
+   * Migration: migrate to scout - move to markdown plugin
+   */
   describe('inline markdown visualization', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

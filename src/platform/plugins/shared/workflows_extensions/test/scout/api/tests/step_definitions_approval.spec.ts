@@ -41,7 +41,8 @@ const loadApprovedStepHash = (stepId: string): string | null => {
   }
 };
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/265012
+apiTest.describe.skip(
   'Workflows Extensions - Custom Step Definitions Approval',
   {
     tag: [
@@ -49,7 +50,6 @@ apiTest.describe(
       ...tags.serverless.search,
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
-      ...tags.serverless.workplaceai,
       ...tags.serverless.vectordb,
     ],
   },

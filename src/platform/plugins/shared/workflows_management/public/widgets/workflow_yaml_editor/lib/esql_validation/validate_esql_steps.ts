@@ -12,6 +12,7 @@ import type { LineCounter } from 'yaml';
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyLiquidMask,
   classifyLiquidPosition,
@@ -20,15 +21,14 @@ import {
 } from './classify_liquid_position';
 import { collectEsqlRegionsFromLookup, type EsqlStepRegion } from './extract_esql_region';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 
 type EsqlValidationDiagnostic = Awaited<ReturnType<typeof validateQuery>>['errors'][number];
 
 /**
  * Runs `validateQuery` against every `elasticsearch.esql.query` step in the
  * workflow lookup and returns workflow-style `YamlValidationResult`s in YAML
- * coordinates. The host pipeline (`useYamlValidation`) batches these into
- * markers and feeds the bottom-bar accordion alongside every other validator.
+ * coordinates. The host pipeline (`collectFullWorkflowYamlValidationResults`) batches
+ * these into markers and feeds the bottom-bar accordion alongside every other validator.
  *
  * Liquid handling matches the policy used elsewhere in the editor:
  *
@@ -180,6 +180,7 @@ function toValidationResult(
     severity,
     message,
     owner: 'esql-validation',
+    ruleId: 'esqlDiagnostic',
     source: 'esql',
     startLineNumber: startPos.lineNumber,
     startColumn: startPos.column,

@@ -6,18 +6,18 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 
 import {
   EuiButton,
   EuiCallOut,
+  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
   EuiHorizontalRule,
   EuiSkeletonText,
   EuiSpacer,
-  EuiFlexGroup,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -43,6 +43,7 @@ import {
 } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { AlertClosingReason } from '../../../../../common/types';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -59,6 +60,8 @@ import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
@@ -76,9 +79,7 @@ import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } 
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 export interface AddExceptionFlyoutProps {
@@ -101,11 +102,9 @@ export interface AddExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 export const AddExceptionFlyout = memo(function AddExceptionFlyout({
@@ -164,6 +163,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       bulkCloseAlerts,
       closeSingleAlert,
       bulkCloseIndex,
+      closeAlertsReason,
       addExceptionToRadioSelection,
       selectedRulesToAddTo,
       exceptionListsToAddTo,
@@ -189,6 +189,23 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
+  });
 
   /**
    * Reducer action dispatchers
@@ -333,6 +350,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setCloseAlertsReason = useCallback(
+    (reason?: AlertClosingReason): void => {
+      dispatch({
+        type: 'setCloseAlertsReason',
+        reason,
+      });
+    },
+    [dispatch]
+  );
+
   const setDisableBulkCloseAlerts = useCallback(
     (disableBulkCloseAlerts: boolean): void => {
       dispatch({
@@ -441,7 +468,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       });
 
       if (closeAlerts != null && shouldCloseAlerts) {
-        await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
+        await closeAlerts({
+          ruleStaticIds,
+          exceptionItems: addedItems,
+          alertIdToClose,
+          bulkCloseIndex,
+          runtimeFields: runtimeFieldsResolution.runtimeFields,
+          reason: closeAlertsReason,
+        });
       }
 
       invalidateFetchRuleByIdQuery();
@@ -469,6 +503,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    closeAlertsReason,
+    runtimeFieldsResolution.runtimeFields,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
     expireTime,
@@ -495,6 +531,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo,
     listType,
     exceptionListsToAddTo,
+    bulkCloseAlerts,
+    isRuntimeFieldsResolving: runtimeFieldsResolution.isResolving,
   });
 
   const handleDismissError = useCallback((): void => {
@@ -537,6 +575,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   return (
     <EuiFlyout
+      session="never"
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
@@ -655,10 +694,17 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               alertData={alertData}
               alertStatus={alertStatus}
               isAlertDataLoading={isAlertDataLoading ?? false}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
+              closeAlertsReason={closeAlertsReason}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
               onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+              onCloseAlertsReasonChange={setCloseAlertsReason}
             />
           </>
         )}

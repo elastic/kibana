@@ -21,6 +21,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { copyTextToClipboard } from '../lib/copy_text_to_clipboard';
 
 interface Props {
   getCurl: () => Promise<string>;
@@ -80,11 +81,9 @@ export class ConsoleMenu extends Component<Props, State> {
     if (this.state.curlError) {
       throw this.state.curlError;
     }
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
+    if (!(await copyTextToClipboard(text))) {
+      throw new Error('Could not copy to clipboard!');
     }
-    throw new Error('Could not copy to clipboard!');
   }
 
   onButtonClick = () => {
@@ -138,7 +137,6 @@ export class ConsoleMenu extends Component<Props, State> {
         key="Copy as cURL"
         data-test-subj="consoleMenuCopyAsCurl"
         id="ConCopyAsCurl"
-        disabled={!window.navigator?.clipboard}
         onClick={() => {
           this.closePopover();
           this.copyAsCurl();

@@ -230,6 +230,39 @@ describe('ConnectorStepImpl', () => {
     expect(result.error.message).toBe('connector failed');
   });
 
+  it('describes the connector step when the error carries no message', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: null,
+    });
+
+    const step = {
+      name: 'generate_queries',
+      stepId: 'generate_queries',
+      type: 'slack',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error).toBeDefined();
+    expect(result.error.message).not.toBe('Unknown error');
+    expect(result.error.message).toBe(
+      "Connector 'generate_queries' (slack) failed with status 'error'"
+    );
+  });
+
   it('returns ResponseSizeLimitError when maxContentLength exceeded', async () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();

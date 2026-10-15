@@ -19,10 +19,19 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import { type AgentAclEntry, AgentAclRole, type AgentDefinition } from '@kbn/agent-builder-common';
-import { selectableRolesForVisibility } from './role_to_capabilities';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import {
+  getAccessControlEntryKey,
+  isEntryCoveredByOwner,
+  type AgentAccessControlEntry,
+  AgentAccessControlRole,
+  type AgentDefinition,
+  type UserIdAndName,
+} from '@kbn/agent-builder-common';
+import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import {
   accessFlyoutNoPeople,
   accessFlyoutPeopleHelp,
@@ -30,11 +39,11 @@ import {
 } from './access_i18n';
 
 interface AccessFormProps {
-  agent: AgentDefinition;
-  entries: AgentAclEntry[];
-  ownerName?: string;
+  agent: Pick<AgentDefinition, 'access_control'>;
+  entries: AgentAccessControlEntry[];
+  owner?: UserIdAndName;
   isDisabled?: boolean;
-  onChange: (entries: AgentAclEntry[]) => void;
+  onChange: (entries: AgentAccessControlEntry[]) => void;
 }
 
 const sectionStyles = (euiTheme: EuiThemeComputed) => css`
@@ -84,40 +93,60 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
-  ownerName,
+  owner,
   isDisabled,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const visibility = agent.visibility;
+  const accessControlMode = agent.access_control?.access_mode;
+  const profileByUid = useAccessControlEntryProfiles(entries);
 
   const defaultRole = useMemo(() => {
-    const allowed = selectableRolesForVisibility(visibility);
-    return allowed.includes(AgentAclRole.User) ? AgentAclRole.User : allowed[0];
-  }, [visibility]);
+    const allowed = selectableRolesForAccessControlMode(accessControlMode);
+    return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
+  }, [accessControlMode]);
 
-  const handleAdd = (entry: AgentAclEntry) => {
-    onChange([...entries, entry]);
+  const visibleEntries = entries.filter((entry) => !isEntryCoveredByOwner(entry, owner));
+
+  const excludedUids = [...entries.map((entry) => entry.id), owner?.id].filter(
+    (id): id is string => id !== undefined
+  );
+
+  const excludedUsernames = [
+    ...entries.map((entry) => (entry.id === undefined ? entry.name : undefined)),
+    owner?.id === undefined ? owner?.username : undefined,
+  ].filter((name): name is string => name !== undefined);
+
+  const handleAdd = (profile: UserProfileWithAvatar) => {
+    const nextEntry: AgentAccessControlEntry = {
+      type: 'user',
+      id: profile.uid,
+      role: defaultRole,
+    };
+    onChange([...entries, nextEntry]);
   };
 
-  const handleChangeRole = (target: AgentAclEntry, role: AgentAclRole) => {
-    onChange(
-      entries.map((e) => (e.type === target.type && e.name === target.name ? { ...e, role } : e))
-    );
+  const handleChangeRole = (target: AgentAccessControlEntry, role: AgentAccessControlRole) => {
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.map((e) => (getAccessControlEntryKey(e) === targetKey ? { ...e, role } : e)));
   };
 
-  const handleRemove = (target: AgentAclEntry) => {
-    onChange(entries.filter((e) => !(e.type === target.type && e.name === target.name)));
+  const handleRemove = (target: AgentAccessControlEntry) => {
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.filter((e) => getAccessControlEntryKey(e) !== targetKey));
   };
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
       <UserPicker
-        excludedUsernames={entries.map((u) => u.name)}
+        excludedUids={excludedUids}
+        excludedUsernames={excludedUsernames}
         isDisabled={isDisabled}
-        onAdd={(username) => handleAdd({ type: 'user', name: username, role: defaultRole })}
+        onAdd={handleAdd}
       />
-      {entries.length === 0 ? (
+      {visibleEntries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
         </EuiText>
@@ -126,15 +155,15 @@ export const AccessForm: React.FC<AccessFormProps> = ({
           <EuiSpacer size="s" />
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
             <EuiPanel paddingSize="none" hasBorder={true} hasShadow={false}>
-              {ownerName && (
+              {owner?.username && (
                 <div css={ownerRowStyles(euiTheme)}>
                   <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiAvatar size="s" name={ownerName} />
+                      <EuiAvatar size="s" name={owner.username} />
                     </EuiFlexItem>
                     <EuiFlexItem grow>
                       <EuiText size="s">
-                        <strong>{ownerName}</strong>
+                        <strong>{owner.username}</strong>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -143,11 +172,12 @@ export const AccessForm: React.FC<AccessFormProps> = ({
                   </EuiFlexGroup>
                 </div>
               )}
-              {entries.map((entry) => (
+              {visibleEntries.map((entry) => (
                 <PrincipalRow
-                  key={`user:${entry.name}`}
+                  key={getAccessControlEntryKey(entry)}
                   entry={entry}
-                  visibility={visibility}
+                  profile={entry.id !== undefined ? profileByUid.get(entry.id) : undefined}
+                  accessControlMode={accessControlMode}
                   isDisabled={isDisabled}
                   onChangeRole={(role) => handleChangeRole(entry, role)}
                   onRemove={() => handleRemove(entry)}

@@ -9,11 +9,11 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 
 const ATTACK_DETAILS_FLYOUT_BODY_TEST_ID = 'attack-details-flyout-body';
 const ATTACK_DETAILS_INSIGHTS_SECTION_HEADER_TEST_ID =
-  'attack-details-flyout-overview-insights-sectionHeader';
+  'attack-flyout-v2-overview-insights-sectionHeader';
 const ATTACK_DETAILS_INSIGHTS_SECTION_CONTENT_TEST_ID =
-  'attack-details-flyout-overview-insights-sectionContent';
+  'attack-flyout-v2-overview-insights-sectionContent';
 const ATTACK_DETAILS_CORRELATIONS_SECTION_TEST_ID =
-  'attack-details-flyout-overview-insights-correlations';
+  'attack-flyout-v2-overview-insights-correlations';
 export class AttackDetailsRightPanelPage {
   public detailsFlyoutBody: Locator;
   public insightsSectionHeader: Locator;

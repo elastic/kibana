@@ -17,7 +17,7 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { createEntitySourcesService } from '../../../entity_sources/entity_sources_service';
+import { syncWatchlistInBackground } from '../../../entity_sources/entity_sources_service';
 import {
   WatchlistEntitySourceClient,
   getStreamPatternFor,
@@ -25,8 +25,8 @@ import {
   integrationsSourceIndex,
   oktaLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 import type { IntegrationType } from '../../../entity_sources/infra';
-import { validateIndexPermissions } from '../../../entity_sources/entity_source_api_key';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -66,8 +66,9 @@ export const createEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
+            const soClient = getWatchlistSavedObjectClient(core);
             const client = new WatchlistEntitySourceClient({
-              soClient: core.savedObjects.client,
+              soClient,
               namespace,
               getStartServices,
               esClient: core.elasticsearch.client.asCurrentUser,
@@ -75,45 +76,27 @@ export const createEntitySourceRoute = (
               hasEncryptionKey,
             });
 
-            if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {
-              await validateIndexPermissions(
-                core.elasticsearch.client.asCurrentUser,
-                monitoringSource.indexPattern
-              );
-            }
-
             const body = await createSourceForType(client, monitoringSource, namespace, request);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
               namespace,
-              soClient: core.savedObjects.client,
+              soClient,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
 
             // Fire-and-forget sync after new source is linked
-            void (async () => {
-              try {
-                const entitySourcesService = createEntitySourcesService({
-                  esClient: core.elasticsearch.client.asCurrentUser,
-                  soClient: core.savedObjects.client,
-                  logger,
-                  namespace,
-                  getStartServices,
-                  hasEncryptionKey,
-                });
-                await entitySourcesService.syncWatchlist(request.params.watchlist_id);
-                logger.info(
-                  `[WatchlistEntitySourceCreate] Background sync completed for watchlist ${request.params.watchlist_id}`
-                );
-              } catch (syncError) {
-                const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
-                logger.warn(
-                  `[WatchlistEntitySourceCreate] Background sync failed for watchlist ${request.params.watchlist_id}: ${errorMsg}`
-                );
-              }
-            })();
+            void syncWatchlistInBackground({
+              watchlistId: request.params.watchlist_id,
+              logContext: 'WatchlistEntitySourceCreate',
+              esClient: core.elasticsearch.client.asCurrentUser,
+              soClient,
+              logger,
+              namespace,
+              getStartServices,
+              hasEncryptionKey,
+            });
 
             return response.ok({ body });
           } catch (e) {

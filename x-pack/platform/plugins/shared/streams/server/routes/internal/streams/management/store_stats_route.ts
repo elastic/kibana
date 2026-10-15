@@ -7,6 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 
@@ -25,7 +26,7 @@ export const storeStatsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<StreamStoreStat> => {
     const { scopedClusterClient } = await getScopedClients({ request });
@@ -36,7 +37,8 @@ export const storeStatsRoute = createServerRoute({
         index: name,
         metric: ['store'],
       });
-      return { store_size_bytes: stats._all?.primaries?.store?.size_in_bytes ?? 0 };
+      // Use `total` (primaries + replicas) and `total_data_set_size_in_bytes` so DLM frozen (searchable-snapshot) data is counted.
+      return { store_size_bytes: stats._all?.total?.store?.total_data_set_size_in_bytes ?? 0 };
     } catch (error) {
       // Return 0 only when the index doesn't exist yet; re-throw everything else
       // (e.g. 403 authorization errors) so the caller gets a proper HTTP response.

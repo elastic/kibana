@@ -17,6 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Dashboard space + feature controls test
+   *
+   * Migration: Migrate to scout
+   */
   describe('spaces', () => {
     const customSpace = 'custom_space';
     before(async () => {

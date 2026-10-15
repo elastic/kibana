@@ -39,6 +39,12 @@ describe('CreateButton', () => {
               },
             },
           },
+          featureFlags: {
+            useBooleanValue: jest.fn().mockReturnValue(false),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
         },
       });
     });
@@ -82,6 +88,12 @@ describe('CreateButton', () => {
               },
             },
           },
+          featureFlags: {
+            useBooleanValue: jest.fn().mockReturnValue(false),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
         },
       });
     });
@@ -115,6 +127,54 @@ describe('CreateButton', () => {
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
+    });
+  });
+
+  describe('when the workflows execute privilege is missing', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [ATTACK_DISCOVERY_FEATURE_ID]: {
+                updateAttackDiscoverySchedule: true,
+              },
+              workflowsManagement: {
+                executeWorkflow: false,
+              },
+            },
+          },
+          featureFlags: {
+            useBooleanValue: jest.fn().mockReturnValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
+          },
+        },
+      });
+    });
+
+    it('should disable the create schedule button', async () => {
+      renderCreateButton();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('createSchedule')).toBeDisabled();
+      });
+    });
+
+    it('should not call the create schedule button handler', async () => {
+      const onClickMock = jest.fn();
+      renderCreateButton(onClickMock);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('createSchedule')).toBeDisabled();
+      });
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('createSchedule'));
+      });
+
+      expect(onClickMock).not.toHaveBeenCalled();
     });
   });
 });

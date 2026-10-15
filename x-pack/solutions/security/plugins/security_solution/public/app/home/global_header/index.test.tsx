@@ -16,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { dataViewPickerPaths } from '../../../sourcerer/containers/sourcerer_paths';
+import { dataViewPickerPaths } from '../../../data_view_manager/utils/paths';
 
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -167,6 +167,44 @@ describe('global header', () => {
     );
 
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it.each(['/rules/management', '/rules/monitoring', '/rules/updates'])(
+    'does not mount the header action menu on %s, where the page app header owns the actions',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
+      const setHeaderActionMenu = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockUseKibana(),
+        services: { ...mockUseKibana().services, setHeaderActionMenu },
+      });
+
+      render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+      expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+    }
+  );
+
+  it('mounts the header action menu on the rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('shows AI Assistant header link', () => {

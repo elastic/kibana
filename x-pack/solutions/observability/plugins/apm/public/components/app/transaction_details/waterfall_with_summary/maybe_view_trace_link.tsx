@@ -9,22 +9,24 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
-import { getTraceParentChildrenMap } from '../../../shared/trace_waterfall/use_trace_waterfall';
 import {
   TRACE_WATERFALL_EBT_CLICK_ACTIONS,
   TRACE_WATERFALL_EBT_ELEMENTS,
-} from '../../../shared/trace_waterfall/ebt_constants';
+  getTraceParentChildrenMap,
+} from '@kbn/apm-ui-shared';
+import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 
 function FullTraceButton({
   isLoading,
   isDisabled,
   onClick,
+  ebtElement,
 }: {
   isLoading?: boolean;
   isDisabled?: boolean;
   onClick?: () => void;
+  ebtElement?: string;
 }) {
   return (
     <EuiButtonEmpty
@@ -35,7 +37,7 @@ function FullTraceButton({
       {...(onClick
         ? getEbtProps({
             action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.VIEW_FULL_TRACE,
-            element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_VIEW_FULL_TRACE,
+            element: ebtElement ?? TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_VIEW_FULL_TRACE,
           })
         : {})}
       iconType="chartWaterfall"
@@ -55,11 +57,14 @@ export function MaybeViewTraceLink({
   transaction,
   traceItems = [],
   onViewFullTrace,
+  ebtElement,
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
   traceItems?: TraceItem[];
   onViewFullTrace: () => void;
+  /** Overrides the default `waterfallViewFullTrace` element for host-specific location. */
+  ebtElement?: string;
 }) {
   const rootTransactionInfo = useMemo(() => {
     const traceMap = getTraceParentChildrenMap(traceItems, false);
@@ -108,5 +113,5 @@ export function MaybeViewTraceLink({
   }
 
   // the user is viewing a partial trace — open the full trace flyout
-  return <FullTraceButton onClick={onViewFullTrace} />;
+  return <FullTraceButton onClick={onViewFullTrace} ebtElement={ebtElement} />;
 }

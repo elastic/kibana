@@ -6,27 +6,18 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { createWorkflowsClientMock } from '@kbn/workflows-extensions/server/mocks';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
-import { createWorkflowService } from '../../services/workflow_service/workflow_service.mock';
 import {
   EPISODE_ASSIGNED_EVENT_TYPE,
   type EpisodeAssignedEvent,
 } from '../alert_action_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
-import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
+import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber';
-import { ALERT_ACTION_WORKFLOW_TRIGGERS, EPISODE_ASSIGNED_TRIGGER_ID } from './triggers';
-
-type CapturedHandler = (
-  event: AlertingDomainEvent,
-  context: AlertingPublisherContext
-) => void | Promise<void>;
+import { ALERT_ACTION_WORKFLOW_TRIGGERS, ALERT_ASSIGNED_TRIGGER_ID } from './triggers';
 
 const episodeAssignedEvent: EpisodeAssignedEvent = {
   type: EPISODE_ASSIGNED_EVENT_TYPE,
@@ -42,7 +33,6 @@ const episodeAssignedEvent: EpisodeAssignedEvent = {
 describe('AlertActionWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let workflowService: WorkflowService;
-  let workflowsExtensions: jest.Mocked<WorkflowsExtensionsServerPluginStart>;
   let mockEmitEvent: jest.Mock;
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
@@ -50,17 +40,9 @@ describe('AlertActionWorkflowSubscriber', () => {
   let request: KibanaRequest;
 
   beforeEach(() => {
-    bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
-
-    ({ workflowService, workflowsExtensions } = createWorkflowService());
-    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    workflowsExtensions.getClient.mockResolvedValue(
-      createWorkflowsClientMock({ emitEvent: mockEmitEvent })
-    );
-
-    ({ loggerService, mockLogger } = createLoggerService());
+    ({ bus, workflowService, mockEmitEvent, loggerService, mockLogger, request } =
+      createWorkflowSubscriberMocks());
     subscriber = new AlertActionWorkflowSubscriber(bus, workflowService, loggerService);
-    request = httpServerMock.createKibanaRequest();
   });
 
   describe('start()', () => {
@@ -84,28 +66,19 @@ describe('AlertActionWorkflowSubscriber', () => {
   });
 
   describe('event dispatch', () => {
-    /**
-     * Captures the handler the subscriber registered for `eventType` so
-     * tests can invoke it directly without going through the real bus.
-     */
-    const handlerFor = (eventType: AlertingDomainEvent['type']): CapturedHandler => {
-      const call = bus.subscribe.mock.calls.find(([type]) => type === eventType);
-      if (!call) {
-        throw new Error(`No handler registered for "${eventType}"`);
-      }
-      return call[1] as CapturedHandler;
-    };
-
     it("forwards context.request through WorkflowService to workflowsExtensions, with the binding's triggerId and the mapped payload", async () => {
       subscriber.start();
 
-      await handlerFor(EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request });
+      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(EPISODE_ASSIGNED_TRIGGER_ID, {
+      expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
         occurredAt: episodeAssignedEvent.occurredAt,
         groupHash: episodeAssignedEvent.groupHash,
-        episodeId: episodeAssignedEvent.episodeId,
+        alertId: episodeAssignedEvent.episodeId,
         ruleId: episodeAssignedEvent.ruleId,
         spaceId: episodeAssignedEvent.spaceId,
         actorUid: episodeAssignedEvent.actorUid,
@@ -113,17 +86,30 @@ describe('AlertActionWorkflowSubscriber', () => {
       });
     });
 
-    it("catches WorkflowService failures, logs them with the binding's triggerId, and does not let the rejection escape the handler", async () => {
+    it("catches WorkflowService failures, logs them with the binding's eventType, and does not let the rejection escape the handler", async () => {
       const failure = new Error('workflows unreachable');
       mockEmitEvent.mockRejectedValueOnce(failure);
 
       subscriber.start();
 
       await expect(
-        handlerFor(EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request })
+        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
+        labels: {
+          event_type: EPISODE_ASSIGNED_EVENT_TYPE,
+          space_id: episodeAssignedEvent.spaceId,
+          alert_id: episodeAssignedEvent.episodeId,
+          rule_id: episodeAssignedEvent.ruleId,
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
+        },
+        error: expect.objectContaining({ message: 'workflows unreachable' }),
+      });
     });
   });
 

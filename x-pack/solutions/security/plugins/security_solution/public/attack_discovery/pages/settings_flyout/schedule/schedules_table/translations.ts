@@ -66,6 +66,20 @@ export const BULK_DELETE_ACTION = i18n.translate(
   }
 );
 
+export const DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.table.deleteConfirmationTitle',
+  {
+    defaultMessage: 'Delete schedule?',
+  }
+);
+
+export const DELETE_CONFIRMATION_BODY = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.table.deleteConfirmationBody',
+  {
+    defaultMessage: 'This action will delete this scheduled attack discovery.',
+  }
+);
+
 export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.table.bulkDeleteConfirmationTitle',
   {

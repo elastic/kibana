@@ -155,12 +155,6 @@
     "entity_analytics:entity_details:runner:serverless": "npm run run-tests:ea:trial_complete entity_details serverless serverlessEnv",
     "entity_analytics:entity_details:qa:serverless": "npm run run-tests:ea:trial_complete entity_details serverless qaPeriodicEnv",
 
-    "entity_analytics:entity_store:server:serverless": "npm run initialize-server:ea:trial_complete entity_store serverless",
-    "entity_analytics:entity_store:runner:serverless": "npm run run-tests:ea:trial_complete entity_store serverless serverlessEnv",
-    "entity_analytics:entity_store:qa:serverless": "npm run run-tests:ea:trial_complete entity_store serverless qaPeriodicEnv",
-    "entity_analytics:entity_store:qa:serverless:release": "npm run run-tests:ea:trial_complete entity_store serverless qaEnv",
-    "entity_analytics:entity_store:server:ess": "npm run initialize-server:ea:trial_complete entity_store ess",
-    "entity_analytics:entity_store:runner:ess": "npm run run-tests:ea:trial_complete entity_store ess essEnv --",
 
     "entity_analytics:monitoring:server:serverless": "npm run initialize-server:ea:trial_complete monitoring serverless",
     "entity_analytics:monitoring:runner:serverless": "npm run run-tests:ea:trial_complete monitoring serverless serverlessEnv",
@@ -371,6 +365,13 @@
     "unified_alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials unified_alerts serverless qaEnv",
     "unified_alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials unified_alerts ess",
     "unified_alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials unified_alerts ess essEnv",
+
+    "attacks:essentials:server:serverless": "npm run initialize-server:de:basic_essentials attacks serverless",
+    "attacks:essentials:runner:serverless": "npm run run-tests:de:basic_essentials attacks serverless serverlessEnv",
+    "attacks:essentials:qa:serverless": "npm run run-tests:de:basic_essentials attacks serverless qaPeriodicEnv",
+    "attacks:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials attacks serverless qaEnv",
+    "attacks:basic:server:ess": "npm run initialize-server:de:basic_essentials attacks ess",
+    "attacks:basic:runner:ess": "npm run run-tests:de:basic_essentials attacks ess essEnv",
 
     "rule_execution_logic:eql:server:serverless": "npm run initialize-server:de rule_execution_logic/eql serverless",
     "rule_execution_logic:eql:runner:serverless": "npm run run-tests:de rule_execution_logic/eql serverless serverlessEnv",

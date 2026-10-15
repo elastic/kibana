@@ -9,12 +9,9 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  border-top: 1px dashed $euiColorLightShade;
-  border-left: 1px dashed $euiColorLightShade;
 }
 
 .canvasBorderResizeHandle {
-  @include euiSlightShadow;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
   display: block;
@@ -23,8 +20,6 @@
   width: $euiSizeS;
   margin-left: -4px;
   margin-top: -4px;
-  background-color: $euiColorEmptyShade;
-  border: 1px solid $euiColorDarkShade;
 }
 
 .canvasDragBoxAnnotation {
@@ -32,7 +27,6 @@
   background: none;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
-  outline: dashed 1px $euiColorDarkShade;
   pointer-events: none;
 }
 
@@ -41,7 +35,6 @@
   background: none;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
-  outline: solid 1px $euiColorVis0;
   pointer-events: none;
 }
 
@@ -54,8 +47,6 @@
   width: 0;
   margin-left: -1px;
   margin-top: -12px;
-  border-top: 1px dashed $euiColorLightShade;
-  border-left: 1px dashed $euiColorLightShade;
 }
 
 .canvasRotationHandle__handle {
@@ -68,11 +59,9 @@
   margin-left: -5px;
   margin-top: -6px;
   border-radius: 50%;
-  background-color: $euiColorMediumShade;
 }
 
 .tooltipAnnotation {
-  @include euiToolTipStyle($size: 's');
   position: absolute;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;

@@ -34,6 +34,20 @@ export const GRAPH_ALL_ROLE: KibanaRole = {
   ],
 };
 
+export const graphAllDiscoverReadRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: [SECREPO_INDEX], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { graph: ['all'], discover: ['read'] },
+      spaces: [spaceId],
+    },
+  ],
+});
+
 export const GRAPH_READ_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -49,3 +63,19 @@ export const GRAPH_READ_ROLE: KibanaRole = {
 };
 
 export const CUSTOM_SPACE_ID = 'custom_space';
+
+/**
+ * Shared sample graph workspaces and saved-object attributes used by the
+ * graph listing Scout specs. Hoisted into the fixtures module so spec files
+ * can't drift on shape (the `kbnClient.savedObjects.create` payloads have
+ * to stay in lockstep with the `graph-workspace` saved-object schema).
+ */
+
+export const GRAPH_A = { title: 'Graph Alpha', description: 'First test graph' };
+export const GRAPH_B = { title: 'Graph Beta', description: 'Second test graph' };
+
+/**
+ * Required saved-object fields for a `graph-workspace` beyond `title` and
+ * `description`. Empty workspace state is fine for listing-only coverage.
+ */
+export const WORKSPACE_ATTRS = { numLinks: 0, numVertices: 0, wsState: '{}', version: 1 };

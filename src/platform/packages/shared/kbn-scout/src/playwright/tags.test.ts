@@ -34,7 +34,7 @@ describe('getPlaywrightTagsFor', () => {
   });
 
   it('returns empty array for domain/arch combo with no targets', () => {
-    const result = getPlaywrightTagsFor('stateful', 'workplaceai', 'all');
+    const result = getPlaywrightTagsFor('stateful', 'vectordb', 'all');
     expect(result).toEqual([]);
   });
 });
@@ -46,16 +46,16 @@ describe('tags', () => {
       expect(tags.stateful.classic).toContain('@cloud-stateful-classic');
     });
 
-    it('all aggregates stateful types', () => {
+    it('does not expose search, observability, or security domains', () => {
+      expect(tags.stateful).not.toHaveProperty('search');
+      expect(tags.stateful).not.toHaveProperty('observability');
+      expect(tags.stateful).not.toHaveProperty('security');
+    });
+
+    it('all only aggregates the supported (classic) stateful type', () => {
       expect(tags.stateful.all.length).toBeGreaterThan(0);
-      expect(tags.stateful.all).toEqual(
-        expect.arrayContaining([
-          ...tags.stateful.classic,
-          ...tags.stateful.search,
-          ...tags.stateful.observability,
-          ...tags.stateful.security,
-        ])
-      );
+      expect(tags.stateful.all).toEqual(expect.arrayContaining([...tags.stateful.classic]));
+      expect(tags.stateful.all).toHaveLength(tags.stateful.classic.length);
     });
   });
 
@@ -84,14 +84,13 @@ describe('tags', () => {
       );
     });
 
-    it('all includes search, observability, security, workplaceai, and vectordb', () => {
+    it('all includes search, observability, security, and vectordb', () => {
       expect(tags.serverless.all.length).toBeGreaterThan(0);
       expect(tags.serverless.all).toEqual(
         expect.arrayContaining([
           ...tags.serverless.search,
           ...tags.serverless.observability.all,
           ...tags.serverless.security.all,
-          ...tags.serverless.workplaceai,
           ...tags.serverless.vectordb,
         ])
       );

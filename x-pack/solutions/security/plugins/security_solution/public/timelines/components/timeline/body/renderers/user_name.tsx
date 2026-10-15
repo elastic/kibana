@@ -17,7 +17,9 @@ import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useUiSetting } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
   contextId: string;
@@ -38,12 +40,14 @@ const UserNameComponent: React.FC<Props> = ({
   value,
   entityId,
 }) => {
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout } = useFlyoutApi();
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
+  const isInSecurityApp = useIsInSecurityApp();
+
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
-  const { openFlyout } = useExpandableFlyoutApi();
-
-  const isInSecurityApp = useIsInSecurityApp();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const { entityRecord } = useEntityFromStore({
@@ -66,20 +70,34 @@ const UserNameComponent: React.FC<Props> = ({
         return;
       }
 
-      const { timelineID } = eventContext;
-      openFlyout({
-        right: {
-          id: UserPanelKey,
-          params: {
-            userName,
-            entityId: resolvedEntityId,
-            contextID: contextId,
-            scopeId: timelineID,
+      if (newFlyoutSystemEnabled) {
+        openUserFlyout({ userName, entityId: resolvedEntityId });
+      } else {
+        const { timelineID } = eventContext;
+        openFlyout({
+          right: {
+            id: UserPanelKey,
+            params: {
+              userName,
+              entityId: resolvedEntityId,
+              contextID: contextId,
+              scopeId: timelineID,
+            },
           },
-        },
-      });
+        });
+      }
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName, resolvedEntityId]
+    [
+      contextId,
+      eventContext,
+      isInTimelineContext,
+      onClick,
+      openFlyout,
+      userName,
+      resolvedEntityId,
+      newFlyoutSystemEnabled,
+      openUserFlyout,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

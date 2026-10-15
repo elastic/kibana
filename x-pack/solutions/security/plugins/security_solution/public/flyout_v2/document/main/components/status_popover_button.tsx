@@ -8,13 +8,30 @@
 import { EuiContextMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getFieldFormat } from '../../../shared/utils/get_field_format';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { withStatusDotIcons } from '../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ICON_COLORS } from '../../../../common/utils/action_icons';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,
 } from '../../../../detections/components/alerts_table/translations';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
+import type { FlyoutActionType } from '../../../../common/lib/telemetry';
+import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import {
+  ALERT_CLOSE_WITH_REASON_ACTION_ID,
+  ALERT_STATUS_ACTION_IDS,
+} from '../../../../common/constants/action_ids';
+import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
+
+const STATUS_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: FLYOUT_ACTION.STATUS_OPEN,
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  [ALERT_CLOSE_WITH_REASON_ACTION_ID]: FLYOUT_ACTION.STATUS_CLOSED,
+};
 
 export interface StatusPopoverButtonFieldInfo {
   data: {
@@ -54,9 +71,6 @@ interface StatusPopoverButtonProps {
   disabled: boolean;
 }
 
-const getFieldFormat = (field?: { format?: string | SerializedFieldFormat }) =>
-  typeof field?.format === 'string' ? field.format : field?.format?.id;
-
 /**
  * Renders a button and its popover to display the status of an alert and allows the user to change it.
  * It is used in the header of the document details flyout.
@@ -71,18 +85,37 @@ export const StatusPopoverButton = memo(
     disabled,
   }: StatusPopoverButtonProps) => {
     const popoverTitleId = useGeneratedHtmlId();
+    const { reportActionClicked, reportHeaderItemClicked } = useFlyoutTelemetry();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const { actionItems, panels: actionItemsPanels } = useAlertsActions({
+    const handleBadgeClick = useCallback(() => {
+      reportHeaderItemClicked({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        item: FLYOUT_HEADER_ITEM.STATUS,
+      });
+      togglePopover();
+    }, [reportHeaderItemClicked, togglePopover]);
+
+    const { actionItems: rawActionItems, panels: actionItemsPanels } = useAlertsActions({
       closePopover,
       eventId,
       scopeId,
       alertStatus: enrichedFieldInfo.values[0] as Status,
       refetch: onStatusUpdated,
     });
+
+    const actionItems = useMemo(
+      () =>
+        wrapActionTelemetry(
+          withStatusDotIcons(rawActionItems, ALERT_STATUS_ICON_COLORS),
+          STATUS_ACTIONS_BY_ID,
+          reportActionClicked
+        ),
+      [rawActionItems, reportActionClicked]
+    );
 
     const panels = useMemo(
       () => [{ id: 0, items: actionItems }, ...actionItemsPanels],
@@ -109,11 +142,11 @@ export const StatusPopoverButton = memo(
           fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
           truncate={false}
           isButton={statusPopoverVisible}
-          onClick={statusPopoverVisible ? togglePopover : undefined}
+          onClick={statusPopoverVisible ? handleBadgeClick : undefined}
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
-      [contextId, eventId, enrichedFieldInfo, togglePopover, statusPopoverVisible]
+      [contextId, eventId, enrichedFieldInfo, handleBadgeClick, statusPopoverVisible]
     );
 
     // EuiPopover is not needed if statusPopoverVisible is false

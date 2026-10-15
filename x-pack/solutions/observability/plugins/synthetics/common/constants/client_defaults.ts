@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeQuotes } from '@kbn/es-query';
 
 export const CLIENT_DEFAULTS = {
@@ -72,6 +73,17 @@ export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
   },
 });
 
+// Lower bound for "latest state" lookups (latest ping per monitor/location).
+// These fetch only the most recent doc, so a `@timestamp` floor lets ES prune
+// long-retention frozen-tier shards by default (independent of the opt-in
+// searchExcludedDataTiers setting). Matches the get_latest_test_run route's max
+// window; monitors idle longer than this render as pending.
+export const MONITOR_STATUS_LOOKBACK = 'now-30d';
+
+export const STATUS_LOOKBACK_RANGE_FILTER = {
+  range: { '@timestamp': { gte: MONITOR_STATUS_LOOKBACK } },
+} as const;
+
 export const getTimespanFilter = ({ from, to }: { from: string; to: string }) => ({
   range: {
     'monitor.timespan': {
@@ -80,6 +92,38 @@ export const getTimespanFilter = ({ from, to }: { from: string; to: string }) =>
     },
   },
 });
+
+/**
+ * All documents of a single Synthetics check run (summary, steps, screenshots,
+ * network events) are written at essentially the same instant. Queries that
+ * target a specific `monitor.check_group` therefore only need to look at a
+ * narrow window around the run's `@timestamp`.
+ *
+ * Bounding such queries lets Elasticsearch prune shards during the `can_match`
+ * phase — including slow, throttled frozen-tier searchable snapshots — instead
+ * of fanning out across every backing index. The buffer is intentionally far
+ * larger than any realistic journey duration so it can never drop a run's
+ * documents.
+ */
+export const CHECK_GROUP_TIME_RANGE_BUFFER_MS = 60 * 60 * 1000; // 1 hour
+
+export const getCheckGroupTimeRangeFilter = (timestamp: string): QueryDslQueryContainer => {
+  const runTime = new Date(timestamp).getTime();
+  if (Number.isNaN(runTime)) {
+    // These routes are client-callable and validate `timestamp` only by length,
+    // so an unparseable value would make the `toISOString()` calls below throw a
+    // RangeError (HTTP 500). Fall back to no bound instead of crashing.
+    return { match_all: {} };
+  }
+  return {
+    range: {
+      '@timestamp': {
+        gte: new Date(runTime - CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
+        lte: new Date(runTime + CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
+      },
+    },
+  };
+};
 
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 

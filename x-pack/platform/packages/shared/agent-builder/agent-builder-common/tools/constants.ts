@@ -28,6 +28,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDiscoverSession: platformCoreTool('create_discover_session'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
@@ -39,6 +40,26 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
+} as const;
+
+const casesTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.cases.${TName}` => {
+  return `${internalNamespaces.platformCore}.cases.${toolName}`;
+};
+
+/**
+ * Ids of built-in Cases cluster tools, registered by the Cases plugin.
+ * All live under `platform.core.cases.*`.
+ * The read/search tool uses `platformCoreTools.cases` (`platform.core.cases`).
+ */
+export const platformCoreCasesTools = {
+  manage: casesTool('manage'),
+  getAttachments: casesTool('get_attachments'),
+  manageAttachments: casesTool('manage_attachments'),
+  observables: casesTool('observables'),
+  findTemplates: casesTool('find_templates'),
 } as const;
 
 /**
@@ -49,13 +70,36 @@ export const platformCoreTools = {
  * - {entity} is a more granular entity withing the {feature} scope, for example Feature KI or Query KI.
  * - {action} the action to perform on the entity
  */
-export const platformStreamsSigEventsTools = {
-  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.ki_search`,
-  createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
-  createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
-  searchEvent: `${internalNamespaces.platformStreams}.sig_events.event_search`,
-  createEvent: `${internalNamespaces.platformStreams}.sig_events.event_create`,
-  updateEventStatus: `${internalNamespaces.platformStreams}.sig_events.event_status_update`,
+export const platformSignificantEventsTools = {
+  searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
+  createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
+  createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
+  searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
+  createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
+  updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
+  eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
+  attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
+} as const;
+
+/** AI-index tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAiIndexTools = {
+  listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
+  describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
+  queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+} as const;
+
+/** AI-index memory tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineMemoryTools = {
+  remember: `${internalNamespaces.platformContextEngine}.remember`,
+  forget: `${internalNamespaces.platformContextEngine}.forget`,
+} as const;
+
+/** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAutomationTools = {
+  installAutomationTemplate: `${internalNamespaces.platformContextEngine}.install_automation_template`,
+  saveAutomation: `${internalNamespaces.platformContextEngine}.save_automation`,
+  runAutomation: `${internalNamespaces.platformContextEngine}.run_automation`,
 } as const;
 
 export const attachmentTools = {
@@ -68,12 +112,20 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
+  listFiles: 'list_files',
   bash: 'bash',
+  setConversationMetadata: 'set_conversation_metadata',
+  discoverApis: 'discover_apis',
+  describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
+  executeApi: 'execute_api',
 };
 
 export const isAttachmentTool = (toolName: string) =>
@@ -95,7 +147,18 @@ const isInternalToolName = (toolName: string) => Object.values(internalTools).in
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
-export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+/**
+ * Internal tools whose results are still written to the `/tool_calls` filestore.
+ */
+const filestoreAllowedInternalToolIds = new Set<string>([
+  internalTools.discoverApis,
+  internalTools.describeApi,
+  internalTools.describeApiType,
+  internalTools.executeApi,
+]);
+
+export const isExcludedFromFilestore = (toolName: string) =>
+  isInternalTool(toolName) && !filestoreAllowedInternalToolIds.has(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.
@@ -111,13 +174,18 @@ export const defaultAgentToolIds = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
+  platformCoreTools.generateEsql,
+  platformCoreTools.executeEsql,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
   platformCoreTools.listWorkflowExecutions,
+  platformCoreTools.generateWorkflow,
+  platformCoreTools.executeWorkflow,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.productDocumentation,
 ];
 
 /**

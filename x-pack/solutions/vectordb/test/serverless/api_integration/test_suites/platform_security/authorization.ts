@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const ALERTING_V2_FEATURE_IDS = [
+  'alerting_v2_rules',
+  'alerting_v2_alerts',
+  'alerting_v2_action_policies',
+  'alerting_v2_execution_history',
+];
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
@@ -46,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:manage",
@@ -72,6 +81,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -198,11 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -253,6 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -331,6 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:manage",
@@ -352,6 +370,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -442,11 +472,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -498,6 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
+                "ai_index:visualization/read",
                 "api:generateReport",
                 "app:visualize",
                 "app:lens",
@@ -555,6 +581,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:read",
@@ -679,6 +706,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps/show",
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -699,6 +727,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:savedQuery:read",
@@ -831,6 +860,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:maps/show",
                 "ui:maps_v2/show",
                 "ui:savedQueryManagement/showQueries",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -883,6 +913,7 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard_v2": Object {
               "all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "api:store_search_session",
@@ -907,6 +938,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -1021,11 +1064,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -1070,6 +1108,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -1133,6 +1172,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_all": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -1152,6 +1192,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -1230,11 +1282,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -1280,6 +1327,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "api:generateReport",
                 "app:visualize",
                 "app:lens",
@@ -1328,6 +1376,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "minimal_read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -1444,6 +1493,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -1461,6 +1511,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "read": Array [
                 "login:",
+                "ai_index:dashboard/read",
                 "api:bulkGetUserProfiles",
                 "api:dashboardUsageStats",
                 "app:dashboards",
@@ -1585,6 +1636,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -2817,6 +2869,19 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }
         `);
+      });
+
+      it('does not expose alerting v2 feature privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const featureIds = Object.keys(body.features);
+        for (const featureId of ALERTING_V2_FEATURE_IDS) {
+          expect(featureIds).to.not.contain(featureId);
+        }
       });
     });
   });

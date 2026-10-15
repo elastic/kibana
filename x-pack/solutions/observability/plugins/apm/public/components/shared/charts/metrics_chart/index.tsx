@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import type { Maybe } from '@kbn/apm-types-shared';
 import {
   asDecimal,
   asInteger,
@@ -15,7 +16,6 @@ import {
   getDurationFormatter,
   getFixedByteFormatter,
 } from '../../../../../common/utils/formatters';
-import type { Maybe } from '../../../../../typings/common';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';

@@ -6,51 +6,114 @@
  */
 
 import crypto from 'node:crypto';
-import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
-import type { ChangeHistoryFieldsToHash } from './types';
+import { isPlainObject } from 'lodash';
+import type { ChangeHistoryFieldsToMask } from './types';
 
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
 
+/** Placeholder stored in place of a redacted value. */
+export const REDACTED = '[redacted]';
+
+export interface SanitizeFieldsOpts {
+  fieldsToHash?: ChangeHistoryFieldsToMask;
+  fieldsToRedact?: ChangeHistoryFieldsToMask;
+  salt?: string;
+}
+
+const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
+  !!fields && Object.keys(fields).length > 0;
+
+type MaskNode = boolean | ChangeHistoryFieldsToMask | undefined;
+
 /**
- * Hashes certain key fields in a snapshot of an object (Sensitive data etc)
- * @param snapshot - The snapshot to process (a new updated object is returned when hashing applies).
- * @param fieldsToHash - Nested map of field paths to hash.
- * @returns The list of flattened paths that were hashed and the snapshot with those string values replaced.
+ * Resolves the mask that applies to `key` one level down. A `true` mask matches
+ * the whole subtree, so it propagates as-is. Mask keys match snapshot keys
+ * verbatim (dots included); nesting expresses paths.
+ */
+const childMask = (mask: MaskNode, key: string): MaskNode => {
+  if (mask === true) {
+    return true;
+  }
+  if (isPlainObject(mask)) {
+    return (mask as ChangeHistoryFieldsToMask)[key];
+  }
+  return undefined;
+};
+
+/**
+ * Masks sensitive string fields in a snapshot, by hashing or redacting. Redaction wins when a
+ * field matches both maps. Returns a new snapshot when anything changes.
+ *
+ * Snapshot keys are preserved verbatim, including keys that contain dots. Mask keys match
+ * snapshot keys literally (a mask key `'first.name'` matches only a snapshot key named
+ * `'first.name'`); use nesting to select nested fields.
+ *
+ * @param snapshot - The snapshot to process.
+ * @param opts.fieldsToHash - Field paths to replace with a salted SHA-256 digest (high-entropy secrets only).
+ * @param opts.fieldsToRedact - Field paths to replace with a `[redacted]` placeholder (low-entropy data).
+ * @param opts.salt - Salt for the hash, use the object.id. Required only when hashing.
+ * @returns The dot-joined paths that were hashed/redacted and the masked snapshot.
  * @example
- *   const snapshot = { user: { name: 'bob', email: 'bob@example.com' } };
- *   const pathsToHash = { user: { email: true } };
- *   const result = hashFields(snapshot, pathsToHash);
+ *   const snapshot = { api: { key: 'sk-9f8a7b6c5d4e' }, owner: { email: 'bob@example.com' } };
+ *   const result = sanitizeFields(snapshot, {
+ *     fieldsToHash: { api: { key: true } },
+ *     fieldsToRedact: { owner: { email: true } },
+ *     salt: 'rule-id-123',
+ *   });
  *   // {
- *   //  fields: ['user.email'],
- *   //  snapshot: { user: { name: 'bob', email: '5ff860bf1190596c7188ab851db691f0f3169c453936e9e1eba2f9a47f7a0018' } }
+ *   //  fields: { hashed: ['api.key'], redacted: ['owner.email'] },
+ *   //  snapshot: { api: { key: '2da53d7f04d1' }, owner: { email: '[redacted]' } }
  *   // }
  */
-export function hashFields(
+export function sanitizeFields(
   snapshot: Record<string, any>,
-  fieldsToHash?: ChangeHistoryFieldsToHash
-): { fields: Array<string>; snapshot: Record<string, any> } {
-  const fields: string[] = [];
-  if (!fieldsToHash || Object.keys(fieldsToHash).length === 0) {
-    return { fields, snapshot };
+  { fieldsToHash, fieldsToRedact, salt }: SanitizeFieldsOpts = {}
+): { fields: { hashed: string[]; redacted: string[] }; snapshot: Record<string, any> } {
+  const hashed: string[] = [];
+  const redacted: string[] = [];
+  const shouldHash = hasFields(fieldsToHash);
+  const shouldRedact = hasFields(fieldsToRedact);
+  if (!shouldHash && !shouldRedact) {
+    return { fields: { hashed, redacted }, snapshot };
   }
-  const flatSnapshot = flatten(snapshot);
-  const flatFieldsToHash = flatten(fieldsToHash);
-  const shouldBeHashed = (key: string) =>
-    Object.entries(flatFieldsToHash).some(
-      ([k, v]) => !!v && (key === k || key.startsWith(k + '.'))
-    );
+  if (shouldHash && !salt) {
+    throw new Error('sanitizeFields: salt missing when hashing fields, please use the object.id');
+  }
 
-  for (const key of Object.keys(flatSnapshot)) {
-    const value = flatSnapshot[key];
-    // TODO: We might need to expand this for binary blobs.
-    if (typeof value === 'string' && shouldBeHashed(key)) {
-      fields.push(key);
-      flatSnapshot[key] = sha256(value);
+  const walk = (
+    node: Record<string, any>,
+    hashMask: MaskNode,
+    redactMask: MaskNode,
+    parentPath: string
+  ): Record<string, any> => {
+    const result: Record<string, any> = {};
+    for (const key of Object.keys(node)) {
+      const value = node[key];
+      const path = parentPath ? `${parentPath}.${key}` : key;
+      const hashChild = childMask(hashMask, key);
+      const redactChild = childMask(redactMask, key);
+      if (typeof value === 'string' && redactChild === true) {
+        redacted.push(path);
+        result[key] = REDACTED;
+      } else if (typeof value === 'string' && hashChild === true) {
+        hashed.push(path);
+        result[key] = sha256(salt + value).slice(-12);
+      } else if (isPlainObject(value) && (hashChild || redactChild)) {
+        result[key] = walk(value, hashChild, redactChild, path);
+      } else {
+        result[key] = value;
+      }
     }
-  }
+    return result;
+  };
 
   return {
-    fields,
-    snapshot: unflatten(flatSnapshot),
+    fields: { hashed, redacted },
+    snapshot: walk(
+      snapshot,
+      shouldHash ? fieldsToHash : undefined,
+      shouldRedact ? fieldsToRedact : undefined,
+      ''
+    ),
   };
 }

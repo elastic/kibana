@@ -35,6 +35,25 @@ const getDocViewerFor = (record: DataTableRecord) => {
 };
 
 describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
+  it('sets the flyout title to "Alert: <rule_name>" for alert documents', () => {
+    const docViewer = getDocViewerFor(
+      buildRecord({ 'event.kind': 'signal', 'kibana.alert.rule.name': 'My Detection Rule' })
+    );
+    expect(docViewer.title).toBe('Alert: My Detection Rule');
+  });
+
+  it('falls back to the previous title when the alert has no rule name', () => {
+    const docViewer = getDocViewerFor(buildRecord({ 'event.kind': 'signal' }));
+    expect(docViewer.title).toBe('test title');
+  });
+
+  it('does not override the title for non-alert event documents', () => {
+    const docViewer = getDocViewerFor(
+      buildRecord({ 'event.kind': 'event', 'kibana.alert.rule.name': 'Should Not Appear' })
+    );
+    expect(docViewer.title).toBe('test title');
+  });
+
   it('registers the overview tab for a regular alert', () => {
     const registry = new DocViewsRegistry();
     const docViewer = getDocViewerFor(buildRecord({ 'event.kind': 'signal' }));

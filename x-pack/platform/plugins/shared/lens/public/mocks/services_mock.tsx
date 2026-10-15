@@ -23,7 +23,6 @@ import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
-import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -116,7 +115,6 @@ export function makeDefaultServices(
       inspect: jest.fn(),
       closeInspector: jest.fn(),
     },
-    presentationUtil: presentationUtilPluginMock.createStartContract(),
     lensDocumentService: {
       load: jest.fn(),
       search: jest.fn(),

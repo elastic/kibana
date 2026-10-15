@@ -9,10 +9,15 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-export function IlmLink({ lifecycle }: { lifecycle: IngestStreamLifecycleILM }) {
+export function IlmLink({
+  policyName,
+  'data-test-subj': dataTestSubj = 'streamsAppLifecycleBadgeIlmPolicyNameLink',
+}: {
+  policyName: string;
+  'data-test-subj'?: string;
+}) {
   const {
     dependencies: {
       start: { share },
@@ -23,13 +28,13 @@ export function IlmLink({ lifecycle }: { lifecycle: IngestStreamLifecycleILM }) 
   return (
     <EuiLink
       target="_blank"
-      data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
+      data-test-subj={dataTestSubj}
       href={ilmLocator?.getRedirectUrl({
         page: 'policy_edit',
-        policyName: lifecycle.ilm.policy,
+        policyName,
       })}
     >
-      {lifecycle.ilm.policy}
+      {policyName}
     </EuiLink>
   );
 }

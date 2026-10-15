@@ -5,15 +5,26 @@
  * 2.0.
  */
 
+import { promisify } from 'util';
+import { exec } from 'child_process';
 import { randomUUID } from 'crypto';
 import { tags, test as baseTest } from '@kbn/scout-security';
 import type { EsClient, SecurityTestFixtures, SecurityWorkerFixtures } from '@kbn/scout-security';
+
+const execPromise = promisify(exec);
+
+// Container names produced by kbn-es when starting the linked cluster.
+// See src/platform/packages/shared/kbn-es/src/utils/docker.ts (LINKED_CLUSTER_NAME_SUFFIX).
+const LINKED_ES_NODES = ['es01-linked', 'es02-linked'];
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 export const CPS_TAGS = [...tags.serverless.security.complete];
+
+/** Like CPS_TAGS but restricted to local runners only — use for tests that require Docker. */
+export const LOCAL_CPS_TAGS = CPS_TAGS.filter((tag) => tag.startsWith('@local-'));
 
 /** NPRE expression: search only the origin (self-linked) project. */
 export const SPACE_PROJECT_ROUTING_ORIGIN_ONLY = '_alias:_origin';
@@ -132,17 +143,34 @@ export interface CpsSpaceFixture {
   create: (params: { spaceId: string; projectRouting: string }) => Promise<string>;
 }
 
+export interface LinkedClusterBrownoutFixture {
+  /** Pause the linked ES containers. The fixture tears down by unpausing them. */
+  pause: () => Promise<void>;
+}
+
 // ---------------------------------------------------------------------------
 // Extended test with CPS fixtures
 // ---------------------------------------------------------------------------
 
 export const test = baseTest.extend<
-  SecurityTestFixtures & { cpsSpace: CpsSpaceFixture },
+  SecurityTestFixtures & {
+    cpsSpace: CpsSpaceFixture;
+    linkedClusterBrownout: LinkedClusterBrownoutFixture;
+  },
   SecurityWorkerFixtures & {
     cpsTestData: CpsTestDataFixture;
     graphCpsTestData: GraphCpsTestDataFixture;
   }
 >({
+  context: async ({ context }, use) => {
+    // Suppress the CPS onboarding tour before any page loads so it cannot
+    // intercept pointer events during test interactions.
+    await context.addInitScript(() => {
+      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
+    });
+    await use(context);
+  },
+
   cpsTestData: [
     async ({ esClient, linkedProject }, use) => {
       const runId = randomUUID().slice(0, 8);
@@ -211,6 +239,29 @@ export const test = baseTest.extend<
         await kbnClient
           .request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` })
           .catch(() => {});
+      }
+    },
+    { scope: 'test' },
+  ],
+
+  linkedClusterBrownout: [
+    async ({}, use) => {
+      let paused = false;
+      await use({
+        pause: async () => {
+          try {
+            await execPromise(`docker pause ${LINKED_ES_NODES.join(' ')}`);
+            paused = true;
+          } catch (e) {
+            throw new Error(
+              `Failed to pause Docker containers ${LINKED_ES_NODES.join(', ')}. ` +
+                `Is the cps_local stack running?\n${e}`
+            );
+          }
+        },
+      });
+      if (paused) {
+        await execPromise(`docker unpause ${LINKED_ES_NODES.join(' ')}`).catch(() => {});
       }
     },
     { scope: 'test' },

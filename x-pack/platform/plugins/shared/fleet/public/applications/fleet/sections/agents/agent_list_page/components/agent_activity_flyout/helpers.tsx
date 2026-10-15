@@ -76,6 +76,16 @@ const actionNames: {
     completedText: 'changed privilege level',
     cancelledText: 'change privilege level',
   },
+  REMOVE_COLLECTOR: {
+    inProgressText: 'Removing',
+    completedText: 'removed',
+    cancelledText: 'removal',
+  },
+  RESTART: {
+    inProgressText: 'Restarting',
+    completedText: 'restarted',
+    cancelledText: 'restart',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 

@@ -42,5 +42,8 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
 export const lnsGlobalChartStyles = (euiThemeContext: UseEuiTheme) => css`
   [id^='echTooltipPortal'] {
     ${lnsNumericFontStyles(euiThemeContext)}
+    // elastic-charts sets an inline z-index (chartZIndex + 100); override so tooltips
+    // appear above the inline editor flyout.
+    z-index: ${Number(euiThemeContext.euiTheme.levels.flyout) + 1} !important;
   }
 `;

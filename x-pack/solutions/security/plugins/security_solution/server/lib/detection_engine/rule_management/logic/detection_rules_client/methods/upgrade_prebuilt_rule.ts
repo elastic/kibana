@@ -66,6 +66,10 @@ export const upgradePrebuiltRule = async ({
         timeline_title: existingRule.timeline_title,
       },
       id: existingRule.id,
+      // Preserve the revision counter: the same-type upgrade path (rulesClient.update)
+      // increments revision automatically when content changes. To keep both paths
+      // consistent, bump the revision by 1 here as well.
+      initialRevision: existingRule.revision + 1,
       changeTracking: { action: SecurityRuleChangeTrackingAction.ruleUpgrade, ...changeTracking },
     });
 

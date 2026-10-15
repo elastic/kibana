@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import { partition } from 'lodash';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -34,20 +37,21 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { buildSiemResponse } from '../../../../routes/utils';
-import type { RuleAlertType } from '../../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
 import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { sendRuleDuplicateTelemetryEvent } from '../../../logic/detection_rules_client/rule_lifecycle_telemetry';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
 import {
   dryRunValidateBulkEditRule,
   validateBulkDuplicateRule,
 } from '../../../logic/bulk_actions/validations';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
-import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
-import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
@@ -140,6 +144,36 @@ const prepareGapParams = ({
   };
 };
 
+const deleteOrphanedExceptions = async ({
+  exceptions,
+  exceptionsClient,
+  logger,
+}: {
+  exceptions: RuleParams['exceptionsList'];
+  exceptionsClient: ExceptionListClient | undefined;
+  logger: Logger;
+}): Promise<void> => {
+  if (exceptionsClient == null) {
+    return;
+  }
+
+  const orphaned = exceptions.filter(({ type }) => type === ExceptionListTypeEnum.RULE_DEFAULT);
+
+  await Promise.all(
+    orphaned.map(async ({ id, namespace_type: namespaceType, list_id: listId }) => {
+      try {
+        await exceptionsClient.deleteExceptionList({ id, listId: undefined, namespaceType });
+      } catch (cleanupError) {
+        logger.warn(
+          `Failed to delete orphaned exception list "${listId}" after rule duplication error: ${
+            transformError(cleanupError).message
+          }`
+        );
+      }
+    })
+  );
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml']
@@ -218,6 +252,8 @@ export const performBulkActionRoute = (
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
+          const logger = ctx.securitySolution.getLogger();
+          const analytics = ctx.securitySolution.getAnalytics();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -251,11 +287,17 @@ export const performBulkActionRoute = (
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
-          const errors: BulkActionError[] = [...fetchRulesOutcome.errors];
+          const fetchErrors = fetchRulesOutcome.errors;
+          const errors: BulkActionError[] = [];
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
           let skipped: BulkActionSkipResult[] = [];
+
+          // Delete handles fetch errors itself, rules that were not found are reported as skipped
+          if (body.action !== BulkActionTypeEnum.delete) {
+            errors.push(...fetchErrors);
+          }
 
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
@@ -285,6 +327,17 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
+              // Rules not found at fetch time are skipped for delete (idempotent semantics)
+              const [notFoundErrors, otherFetchErrors] = partition(
+                fetchErrors,
+                ({ error }) => error instanceof BulkActionRuleNotFoundError
+              );
+              errors.push(...otherFetchErrors);
+              skipped = notFoundErrors.map(({ item }) => ({
+                id: item,
+                skip_reason: 'RULE_NOT_FOUND',
+              }));
+
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
                 // Populate `deleted` so the summary reflects the correct count of affected rules
@@ -292,11 +345,11 @@ export const performBulkActionRoute = (
                 break;
               }
 
-              const ruleIds = rules.map((rule) => rule.id);
-              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ rules });
 
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
+              skipped = [...skipped, ...bulkDeleteResult.skipped];
               break;
             }
             case BulkActionTypeEnum.duplicate: {
@@ -328,26 +381,8 @@ export const performBulkActionRoute = (
                     shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                   }
 
-                  const duplicateRuleToCreate = await duplicateRule({
-                    rule,
-                  });
-
-                  const createdRule = await rulesClient.create({
-                    data: duplicateRuleToCreate,
-                    changeTracking: {
-                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
-                      metadata: {
-                        bulkCount: rules.length,
-                        originalRuleSoId: rule.id,
-                      },
-                    },
-                  });
-
-                  if (!shouldDuplicateExceptions) {
-                    return createdRule;
-                  }
-
-                  // we try to create exceptions after rule created, and then update rule
+                  // Clone exceptions first so the rule can be created with them already
+                  // attached, avoiding a follow-up update. If this throws, no rule is created.
                   const exceptions = shouldDuplicateExceptions
                     ? await duplicateExceptions({
                         ruleId: rule.params.ruleId,
@@ -357,25 +392,39 @@ export const performBulkActionRoute = (
                       })
                     : [];
 
-                  const updatedRule = await rulesClient.update({
-                    id: createdRule.id,
-                    data: {
-                      ...duplicateRuleToCreate,
-                      params: {
-                        ...duplicateRuleToCreate.params,
-                        exceptionsList: exceptions,
-                      },
-                    },
-                    changeTracking: {
-                      metadata: {
-                        bulkCount: rules.length,
-                      },
-                    },
-                    shouldIncrementRevision: () => false,
+                  const duplicateRuleToCreate = await duplicateRule({
+                    rule,
                   });
 
-                  // TODO: figureout why types can't return just updatedRule
-                  return { ...createdRule, ...updatedRule };
+                  const createdRule = await rulesClient
+                    .create({
+                      data: {
+                        ...duplicateRuleToCreate,
+                        params: {
+                          ...duplicateRuleToCreate.params,
+                          exceptionsList: exceptions,
+                        },
+                      },
+                      changeTracking: {
+                        action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                        metadata: {
+                          bulkCount: rules.length,
+                          originalRuleSoId: rule.id,
+                        },
+                      },
+                    })
+                    .catch(async (createError) => {
+                      await deleteOrphanedExceptions({ exceptions, exceptionsClient, logger });
+                      throw createError;
+                    });
+
+                  sendRuleDuplicateTelemetryEvent(
+                    analytics,
+                    { createdRule, sourceRule: rule },
+                    logger
+                  );
+
+                  return createdRule;
                 },
                 abortSignal: abortController.signal,
               });

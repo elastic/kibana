@@ -18,8 +18,23 @@ import {
   RESOLUTION_CSV_VALID_ENTITY_TYPES,
   RESOLUTION_CSV_REQUIRED_COLUMNS,
 } from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
+import { ResolutionCsvTooManyMatchesError } from './resolution_csv_too_many_matches_error';
 
 export type { ResolutionCsvUploadRowResponse, ResolutionCsvUploadResponse };
+
+export type CsvErrorCategory =
+  | 'invalid_entity_type'
+  | 'missing_resolved_to'
+  | 'no_identifying_fields'
+  | 'target_not_found'
+  | 'target_is_alias'
+  | 'too_many_matches'
+  | 'matching_error'
+  | 'link_error';
+
+export interface ProcessResolutionCsvUploadResult extends ResolutionCsvUploadResponse {
+  errorCounts: Partial<Record<CsvErrorCategory, number>>;
+}
 
 const VALID_ENTITY_TYPES = new Set(RESOLUTION_CSV_VALID_ENTITY_TYPES);
 const RESERVED_COLUMNS = new Set(RESOLUTION_CSV_REQUIRED_COLUMNS);
@@ -44,20 +59,31 @@ interface ValidRow {
 interface InvalidRow {
   valid: false;
   error: string;
+  category: CsvErrorCategory;
 }
 
-type TargetCacheEntry = { valid: true } | { valid: false; error: string };
+type TargetCacheEntry =
+  | { valid: true }
+  | { valid: false; error: string; category: 'target_not_found' | 'target_is_alias' };
+
+function incrementErrorCount(
+  errorCounts: Partial<Record<CsvErrorCategory, number>>,
+  category: CsvErrorCategory
+): void {
+  errorCounts[category] = (errorCounts[category] ?? 0) + 1;
+}
 
 export async function processResolutionCsvUpload(
   fileStream: Readable,
   deps: CsvResolutionUploadDeps
-): Promise<ResolutionCsvUploadResponse> {
+): Promise<ProcessResolutionCsvUploadResult> {
   const rows = await parseCsvRows(fileStream);
   const targetCache = new Map<string, TargetCacheEntry>();
   const items: ResolutionCsvUploadRowResponse[] = [];
+  const errorCounts: Partial<Record<CsvErrorCategory, number>> = {};
 
   for (const row of rows) {
-    const result = await processRow(row, deps, targetCache);
+    const result = await processRow(row, deps, targetCache, errorCounts);
     items.push(result);
   }
 
@@ -67,6 +93,7 @@ export async function processResolutionCsvUpload(
     failed: items.filter((i) => i.status === 'error').length,
     unmatched: items.filter((i) => i.status === 'unmatched').length,
     items,
+    errorCounts,
   };
 }
 
@@ -95,6 +122,7 @@ function validateRow(row: Record<string, string>): ValidRow | InvalidRow {
   if (!type || !VALID_ENTITY_TYPES.has(type)) {
     return {
       valid: false,
+      category: 'invalid_entity_type',
       error: `Invalid entity type: '${
         type ?? ''
       }'. Must be one of: ${RESOLUTION_CSV_VALID_ENTITY_TYPES.join(', ')}`,
@@ -102,7 +130,7 @@ function validateRow(row: Record<string, string>): ValidRow | InvalidRow {
   }
 
   if (!resolvedTo) {
-    return { valid: false, error: 'Missing resolved_to value' };
+    return { valid: false, category: 'missing_resolved_to', error: 'Missing resolved_to value' };
   }
 
   const identityFields: Record<string, string> = {};
@@ -113,7 +141,11 @@ function validateRow(row: Record<string, string>): ValidRow | InvalidRow {
   }
 
   if (Object.keys(identityFields).length === 0) {
-    return { valid: false, error: 'No identifying fields provided' };
+    return {
+      valid: false,
+      category: 'no_identifying_fields',
+      error: 'No identifying fields provided',
+    };
   }
 
   return { valid: true, type, resolvedTo, identityFields };
@@ -138,6 +170,7 @@ async function resolveTarget(
   if (entities.length === 0) {
     const entry: TargetCacheEntry = {
       valid: false,
+      category: 'target_not_found',
       error: `Target entity '${resolvedTo}' not found`,
     };
     cache.set(resolvedTo, entry);
@@ -149,6 +182,7 @@ async function resolveTarget(
   if (targetResolvedTo) {
     const entry: TargetCacheEntry = {
       valid: false,
+      category: 'target_is_alias',
       error: `Target entity '${resolvedTo}' is an alias of '${targetResolvedTo}'`,
     };
     cache.set(resolvedTo, entry);
@@ -192,9 +226,7 @@ async function findMatchingEntities(
     }
 
     if (entityIds.length > MAX_MATCHED_ENTITIES) {
-      throw new Error(
-        `Matched more than ${MAX_MATCHED_ENTITIES} entities. Narrow your identifying fields to be more specific.`
-      );
+      throw new ResolutionCsvTooManyMatchesError(MAX_MATCHED_ENTITIES);
     }
 
     searchAfter = nextSearchAfter;
@@ -206,7 +238,8 @@ async function findMatchingEntities(
 async function processRow(
   row: Record<string, string>,
   deps: CsvResolutionUploadDeps,
-  targetCache: Map<string, TargetCacheEntry>
+  targetCache: Map<string, TargetCacheEntry>,
+  errorCounts: Partial<Record<CsvErrorCategory, number>>
 ): Promise<ResolutionCsvUploadRowResponse> {
   const errorResult = (error: string): ResolutionCsvUploadRowResponse => ({
     status: 'error',
@@ -219,6 +252,7 @@ async function processRow(
   // 1. Validate row
   const validation = validateRow(row);
   if (!validation.valid) {
+    incrementErrorCount(errorCounts, validation.category);
     return errorResult(validation.error);
   }
 
@@ -227,6 +261,7 @@ async function processRow(
   // 2. Resolve target (cached)
   const targetResult = await resolveTarget(resolvedTo, deps, targetCache);
   if (!targetResult.valid) {
+    incrementErrorCount(errorCounts, targetResult.category);
     return errorResult(targetResult.error);
   }
 
@@ -235,7 +270,11 @@ async function processRow(
   try {
     matchedEntityIds = await findMatchingEntities(type, identityFields, resolvedTo, deps);
   } catch (e) {
-    return errorResult(e instanceof Error ? e.message : String(e));
+    const category: CsvErrorCategory =
+      e instanceof ResolutionCsvTooManyMatchesError ? 'too_many_matches' : 'matching_error';
+    const message = e instanceof Error ? e.message : String(e);
+    incrementErrorCount(errorCounts, category);
+    return errorResult(message);
   }
 
   if (matchedEntityIds.length === 0) {
@@ -255,6 +294,7 @@ async function processRow(
       skippedEntities: skipped.length,
     };
   } catch (e) {
+    incrementErrorCount(errorCounts, 'link_error');
     return {
       status: 'error',
       matchedEntities: matchedEntityIds.length,

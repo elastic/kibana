@@ -66,10 +66,9 @@ describe('StepExecutionTreeItemLabel', () => {
     expect(screen.queryByTestId('actionRequiredBadge')).not.toBeInTheDocument();
   });
 
-  it('appends (skipped) label when status is SKIPPED', () => {
+  it('shows Not run in the duration slot when status is SKIPPED', () => {
     renderWithIntl({ ...defaultProps, status: ExecutionStatus.SKIPPED });
-    const stepName = screen.getByTestId('workflowStepName');
-    expect(stepName.parentElement).toHaveTextContent('(skipped)');
+    expect(screen.getByText('Not run')).toBeInTheDocument();
   });
 
   it('does not append (skipped) for non-SKIPPED statuses', () => {
@@ -91,6 +90,18 @@ describe('StepExecutionTreeItemLabel', () => {
   it('does not render execution duration when executionTimeMs is null', () => {
     renderWithIntl({ ...defaultProps, executionTimeMs: null });
     expect(screen.queryByText(/\ds/)).not.toBeInTheDocument();
+  });
+
+  it('renders a sub-millisecond duration when executionTimeMs is 0', () => {
+    renderWithIntl({ ...defaultProps, executionTimeMs: 0 });
+    expect(screen.getByText('<1ms')).toBeInTheDocument();
+    expect(screen.queryByText('0', { exact: true })).not.toBeInTheDocument();
+  });
+
+  it('does not render execution duration for non-finite values', () => {
+    renderWithIntl({ ...defaultProps, executionTimeMs: Number.NaN });
+    expect(screen.queryByText('0ms')).not.toBeInTheDocument();
+    expect(screen.queryByText('0', { exact: true })).not.toBeInTheDocument();
   });
 
   it('renders without a status', () => {

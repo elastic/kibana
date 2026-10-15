@@ -6,8 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertsFilterQuerySchema } from '../../../schemas/alerts_filter_query_schemas';
-import { rRuleRequestSchema } from '../../../../routes/apis/r_rule/request/schemas/v1';
+import {
+  alertsFilterQuerySchema,
+  alertingScopeSchema,
+  alertingV2ScopeSchema,
+} from '../../../schemas/alerts_filter_query_schemas';
+import { rRuleRequestSchema } from '../../../../routes/schemas/r_rule';
 import { scheduleRequestSchema } from '../../../../routes/schemas/schedule';
 import { maintenanceWindowCategoryIdsSchema } from '../../../schemas/maintenance_window';
 
@@ -22,7 +26,8 @@ export const createMaintenanceWindowParamsSchema = schema.object({
     schedule: schema.object({ custom: scheduleRequestSchema }),
     scope: schema.maybe(
       schema.object({
-        alerting: schema.nullable(alertsFilterQuerySchema),
+        alerting: schema.maybe(alertingScopeSchema),
+        alertingV2: schema.maybe(alertingV2ScopeSchema),
       })
     ),
   }),

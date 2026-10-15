@@ -6,36 +6,50 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiExpressionProps } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   title?: ReactNode;
   value: ReactNode;
   children?: ReactNode;
   color?: EuiExpressionProps['color'];
+  disabled?: boolean;
 }
 
 export function PopoverExpression(props: Props) {
-  const { title, value, children, color } = props;
+  const { title, value, children, color, disabled } = props;
   const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // `isOpen` below already hides the popover while disabled, but that alone
+  // leaves `popoverOpen` itself true underneath. Without this, re-enabling
+  // reopens the popover with no click.
+  useEffect(() => {
+    if (disabled) {
+      setPopoverOpen(false);
+    }
+  }, [disabled]);
 
   return (
     <EuiPopover
-      isOpen={popoverOpen}
+      isOpen={!disabled && popoverOpen}
       anchorPosition="downLeft"
       closePopover={() => setPopoverOpen(false)}
       button={
         <EuiExpression
           description={title}
           value={value}
-          isActive={popoverOpen}
-          color={color}
-          onClick={() => setPopoverOpen((state) => !state)}
+          isActive={!disabled && popoverOpen}
+          color={disabled ? 'subdued' : color}
+          {...(disabled ? {} : { onClick: () => setPopoverOpen((state) => !state) })}
         />
       }
       repositionOnScroll
+      aria-label={i18n.translate('xpack.synthetics.popoverExpression.popoverAriaLabel', {
+        defaultMessage: 'Popover expression options',
+      })}
     >
       {children}
     </EuiPopover>

@@ -7,10 +7,11 @@ Public type definitions for Core's browser-side Chrome service. This is the pack
 | Export | Description |
 |---|---|
 | `ChromeStart` | Plugin-facing Chrome contract returned by `core.chrome` in `start()` |
+| `ChromeControls` | Persistent chrome controls on `chrome.controls` |
+| `ChromeHelp` | Newsfeed and Feedback registration on `chrome.help` |
 | `ChromeSetup` | Plugin-facing Chrome contract returned by `core.chrome` in `setup()` |
 | `ChromeBreadcrumb` | Breadcrumb item set via `chrome.setBreadcrumbs()` |
 | `ChromeNavLink` | Navigation link registered by plugins |
-| `ChromeNavControl` | Arbitrary UI controls rendered in the header |
 | `ChromeHelpExtension` | Help-menu extension registered by plugins |
 | `ChromeStyle` | `'classic'` or `'project'` layout mode |
 | `NavigationTreeDefinition` | Project-style navigation tree definition |

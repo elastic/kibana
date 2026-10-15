@@ -7,10 +7,8 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiResizableContainer,
   EuiSpacer,
@@ -49,7 +47,7 @@ import { StepDefineRule } from '../../components/step_define_rule';
 import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
+import { formatRule, getApiOnlyThreatMatchFields } from '../rule_creation/helpers';
 import {
   getActionMessageParams,
   getStepsData,
@@ -81,6 +79,7 @@ import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachm
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { EditRuleFormButtons } from './edit_rule_form_buttons';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -167,6 +166,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    // From the URL, not `rule?.id` — available synchronously at mount, before the rule loads.
+    pageRuleId: ruleId,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -219,7 +220,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading, isIndexPatternSettled } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -420,8 +421,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
     const updatedRule = await updateRule({
       ...formattedRule,
+      ...getApiOnlyThreatMatchFields(rule),
       ...(ruleId ? { id: ruleId } : {}),
-    });
+    } as RuleUpdateProps);
 
     const aiSession = aiRuleCreation.getSession();
     const isAiEdited = isAiRuleUpdateRef.current;
@@ -564,6 +566,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          existingRuleId={rule?.id}
           pathway="rule_editing"
         />
       ) : null,
@@ -574,6 +577,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       scheduleStepData,
       actionsStepData,
       triggersActionsUi.actionTypeRegistry,
+      rule?.id,
     ]
   );
 
@@ -697,24 +701,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         justifyContent="flexEnd"
                         responsive={false}
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                            {i18n.CANCEL}
-                          </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="ruleEditSubmitButton"
-                            fill
-                            onClick={onSubmit}
-                            iconType="save"
-                            isLoading={isLoading}
-                            isDisabled={loading}
-                          >
-                            {i18n.SAVE_CHANGES}
-                          </EuiButton>
-                        </EuiFlexItem>
+                        <EditRuleFormButtons
+                          onCancel={goToDetailsRule}
+                          onSubmit={onSubmit}
+                          isLoading={isLoading}
+                          isDisabled={loading || !isIndexPatternSettled}
+                        />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

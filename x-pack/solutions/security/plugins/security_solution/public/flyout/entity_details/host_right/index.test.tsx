@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockHostRiskScoreState, mockObservedHostData } from '../mocks';
+import { mockHostRiskScoreState, mockObservedHostData, mockHostEntityRiskScores } from '../mocks';
 import type {
   ExpandableFlyoutApi,
   ExpandableFlyoutState,
@@ -33,12 +33,17 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 
 const mockedHostRiskScore = jest.fn().mockReturnValue(mockHostRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedHostRiskScore(),
+  useRiskScore: (params: unknown) => mockedHostRiskScore(params),
+}));
+
+const mockedUseEntityRiskScores = jest.fn();
+jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
+  useEntityRiskScores: () => mockedUseEntityRiskScores(),
 }));
 
 const mockedUseObservedHost = jest.fn().mockReturnValue(mockObservedHostData);
 
-jest.mock('./hooks/use_observed_host', () => ({
+jest.mock('../../../flyout_v2/entity/host/main/hooks/use_observed_host', () => ({
   useObservedHost: () => mockedUseObservedHost(),
 }));
 
@@ -59,12 +64,31 @@ describe('HostPanel', () => {
   beforeEach(() => {
     mockedHostRiskScore.mockReturnValue(mockHostRiskScoreState);
     mockedUseObservedHost.mockReturnValue(mockObservedHostData);
+    mockedUseEntityRiskScores.mockReturnValue(mockHostEntityRiskScores);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('renders', () => {
+    mockedUseObservedHost.mockReturnValue({
+      ...mockObservedHostData,
+      entityRecord: {
+        '@timestamp': '2024-01-15T10:00:00.000Z',
+        entity: {
+          id: 'host-entity-id',
+          name: 'test',
+          type: 'host',
+          risk: {
+            calculated_level: 'High',
+            calculated_score: 80,
+            calculated_score_norm: 80,
+          },
+        },
+        host: { name: 'test' },
+      },
+    });
+
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <HostPanel {...mockProps} />
@@ -75,6 +99,26 @@ describe('HostPanel', () => {
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
     expect(queryByTestId('host-preview-footer')).not.toBeInTheDocument();
+  });
+
+  it('labels the risk score request with the entity details flyout execution context', () => {
+    render(
+      <TestProviders>
+        <HostPanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedHostRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'host_risk_score',
+          },
+        },
+      })
+    );
   });
 
   it('renders loading state when observed host is loading', () => {

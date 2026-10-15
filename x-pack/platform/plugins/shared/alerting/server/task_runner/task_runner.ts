@@ -6,8 +6,8 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
+import { isAlertStatusChangedEnabled } from '../lib/workflow_extensions/alert_status_changed_opt_in';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -33,11 +34,17 @@ import type {
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRuleWithEs,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
+import { AlertAuditAction, alertAuditSystemEvent } from '../lib/alert_audit_events';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -54,6 +61,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
@@ -70,12 +78,16 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
+  evaluatePerAlertSnoozeExpiry,
+  evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
+import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -103,6 +115,7 @@ interface TaskRunnerConstructorParams<
     AlertData
   >;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 export class TaskRunner<
@@ -160,6 +173,7 @@ export class TaskRunner<
     internalSavedObjectsRepository,
     ruleType,
     taskInstance,
+    executionUuid,
   }: TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
@@ -180,7 +194,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.inMemoryMetrics = inMemoryMetrics;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.timer = new TaskRunnerTimer({ logger: this.logger });
@@ -209,6 +223,9 @@ export class TaskRunner<
     this.ruleResult = new RuleResultService();
   }
 
+  /**
+   * Persists the post-run rule attributes to Elasticsearch.
+   */
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
     attributes: {
@@ -216,8 +233,10 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstancesToRemove?: Array<{ instanceId: string; snoozedAt: string }>;
     }
-  ) {
+  ): Promise<boolean> {
+    const { snoozedInstancesToRemove, ...docAttributes } = attributes;
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -232,14 +251,23 @@ export class TaskRunner<
       await partiallyUpdateRuleWithEs(
         client,
         ruleId,
-        { ...attributes, running: false },
+        { ...docAttributes, running: false },
         {
           ignore404: true,
           refresh: false,
         }
       );
+      if (snoozedInstancesToRemove?.length) {
+        // Per-alert snooze expiry is applied via an atomic Painless script.
+        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstancesToRemove, {
+          ignore404: true,
+          refresh: false,
+        });
+      }
+      return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
+      return false;
     }
   }
 
@@ -270,13 +298,51 @@ export class TaskRunner<
     }
   }
 
+  /**
+   * Emits one `alert_auto_unsnooze` audit event per per-alert snooze entry that
+   * the task runner has just decided to drop, attributed to `System` with the
+   * supplied reason. Wrapped defensively so a misconfigured audit sink can never
+   * break rule execution; failures are logged at warn level only.
+   */
+  private logAutoUnsnoozeAuditEvents(
+    instances: RawRuleSnoozedInstance[],
+    reason: 'ttl_expired' | 'condition_met',
+    rule: { id: string; name: string }
+  ): void {
+    if (instances.length === 0 || !this.context.auditService) {
+      return;
+    }
+    try {
+      for (const instance of instances) {
+        this.context.auditService.withoutRequest.log(
+          alertAuditSystemEvent({
+            action: AlertAuditAction.AUTO_UNSNOOZE,
+            id: instance.instanceId,
+            outcome: 'success',
+            reason,
+            ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.name },
+          })
+        );
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`
+      );
+    }
+  }
+
   private async runRule({
     fakeRequest,
     rule,
-    apiKey,
-    uiamApiKey,
+    effectiveApiKey,
+    uiamApiKeyId,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
+      rule.snoozedInstances,
+      this.runDate
+    );
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
     }
@@ -347,6 +413,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -367,7 +434,6 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
@@ -401,6 +467,36 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
+    for (const instance of activeInstances) {
+      if (!instance.conditions?.length) {
+        continue;
+      }
+      const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
+      if (data) {
+        alertAsDataByInstanceId.set(instance.instanceId, data);
+      }
+    }
+
+    const { conditionExpiredInstances } = evaluatePerAlertSnoozeConditions(
+      activeInstances,
+      alertAsDataByInstanceId
+    );
+
+    const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
+    const updatedActiveInstances =
+      conditionExpiredInstances.length > 0
+        ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
+        : activeInstances;
+
+    // Condition evaluation happens after persistAlerts(), so alerts for condition-expired
+    // instances were already written with kibana.alert.snoozed: true. Correct that now.
+    if (conditionExpiredInstances.length > 0) {
+      await alertsClient.clearSnoozedStatusForAlerts(
+        conditionExpiredInstances.map((i) => i.instanceId)
+      );
+    }
+
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -408,7 +504,14 @@ export class TaskRunner<
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey,
+      apiKey: effectiveApiKey,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself.
+      uiamApiKeyId,
+      // Mirror the rule run's own credential treatment onto the connector tasks: the request is
+      // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
+      // it here cannot drift from what the cluster client will decide for this very run.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
@@ -416,9 +519,31 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
+      activeSnoozedIds: new Set(updatedActiveInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
+
+    // ActionScheduler calls alert.unscheduleActions() once it has scheduled a per-alert action,
+    // which clears getScheduledActionOptions(). Snapshot the action group of each new alert
+    // (id -> group) now so the alertStatusChanged payload can still report it afterwards.
+    // Only done when the batch could be built, which needs at least one opt-in. The opt-ins
+    // themselves are asked later, once there is something to emit.
+    const hasAlertStatusChangedOptIns = (this.context.alertStatusChangedOptIns?.length ?? 0) > 0;
+    const newAlertActionGroups = new Map<string, string>();
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
+      for (const [id, alert] of Object.entries(alertsClient.getProcessedAlerts('new'))) {
+        const actionGroup = alert.getScheduledActionOptions()?.actionGroup;
+        if (actionGroup != null) {
+          newAlertActionGroups.set(id, actionGroup);
+        }
+      }
+    }
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -445,11 +570,16 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      // Do not drop recovered alerts from task state unless AAD was persisted
+      // with tracked: false for those same ids.
+      const shouldOptimizeTaskState = this.shouldLogAndScheduleActionsForAlerts();
+      const alerts = alertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
-      alertsToUpdateWithLastScheduledActions =
-        alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      if (shouldOptimizeTaskState) {
+        alertsToUpdateWithLastScheduledActions =
+          alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      }
     }
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -467,6 +597,71 @@ export class TaskRunner<
       );
     }
 
+    // Collect alert status-change events for rules whose alerts recover automatically.
+    // The batch is returned and published to the bus only after processRunResults()
+    // completes. Cancelled runs collect and publish nothing on purpose: a run cancelled
+    // for timeout is treated as a failed run, so its events are dropped (at most once).
+    let alertStatusChangedBatch: RunRuleResult['alertStatusChangedBatch'];
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
+      const newAlerts = alertsClient.getProcessedAlerts('new');
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      const newEntries = Object.entries(newAlerts);
+      const recoveredEntries = Object.entries(recoveredAlerts);
+
+      // The opt-ins are asked only when there is something to emit, and after the executor has
+      // finished, with the rule's own request so the answer can differ per space. When none of
+      // them is enabled, nothing is built or published.
+      if (
+        (newEntries.length > 0 || recoveredEntries.length > 0) &&
+        (await isAlertStatusChangedEnabled({
+          optIns: this.context.alertStatusChangedOptIns ?? [],
+          request: fakeRequest,
+          logger: this.logger,
+        }))
+      ) {
+        const rulePayload: AlertStatusChangedV1Payload['rule'] = {
+          id: ruleId,
+          name: rule.name,
+          spaceId,
+          consumer: rule.consumer,
+          ruleTypeId: this.ruleType.id,
+          tags: rule.tags,
+          ruleTypeName: this.ruleType.name,
+        };
+
+        alertStatusChangedBatch = {
+          request: fakeRequest,
+          events: [
+            ...newEntries.map(([id, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'active' as const,
+                actionGroup: newAlertActionGroups.get(id) ?? null,
+                start: alert.getStart(),
+              },
+            })),
+            ...recoveredEntries.map(([, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'recovered' as const,
+                actionGroup: alert.getLastScheduledActions()?.group ?? null,
+                start: alert.getStart(),
+              },
+            })),
+          ],
+        };
+      }
+    }
+
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       state: {
@@ -475,6 +670,29 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      alertStatusChangedBatch,
+      expiredSnoozedInstances:
+        expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+          ? [
+              ...expiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+              ...conditionExpiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+            ]
+          : undefined,
+      ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+        ? {
+            autoUnsnoozeAudit: {
+              expired: expiredInstances,
+              conditionExpired: conditionExpiredInstances,
+              ruleName: rule.name,
+            },
+          }
+        : {}),
     };
   }
 
@@ -547,8 +765,11 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+      const loadedRuleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
         getDecryptedRule(this.context, ruleId, spaceId)
+      );
+      const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
+        updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
 
       // Check that this task is current
@@ -578,6 +799,7 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        tags: runRuleParams.rule.tags,
         uuid:
           this.ruleType.solution === 'security' &&
           typeof runRuleParams.rule.params.ruleId === 'string'
@@ -685,6 +907,13 @@ export class TaskRunner<
         });
       }
 
+      const expiredSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.expiredSnoozedInstances
+        : undefined;
+      const autoUnsnoozeAudit = isOk(runRuleResult)
+        ? runRuleResult.value.autoUnsnoozeAudit
+        : undefined;
+
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
         if (outcome === 'failure') {
@@ -698,12 +927,26 @@ export class TaskRunner<
           );
         }
 
-        await this.updateRuleSavedObjectPostRun(ruleId, {
+        const updatePersisted = await this.updateRuleSavedObjectPostRun(ruleId, {
           executionStatus: ruleExecutionStatusToRaw(executionStatus),
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          ...(expiredSnoozedInstances !== undefined
+            ? { snoozedInstancesToRemove: expiredSnoozedInstances }
+            : {}),
         });
+
+        // Only emit `alert_auto_unsnooze` events after the SO update.
+        if (updatePersisted && autoUnsnoozeAudit !== undefined) {
+          const ruleRef = { id: ruleId, name: autoUnsnoozeAudit.ruleName };
+          this.logAutoUnsnoozeAuditEvents(autoUnsnoozeAudit.expired, 'ttl_expired', ruleRef);
+          this.logAutoUnsnoozeAuditEvents(
+            autoUnsnoozeAudit.conditionExpired,
+            'condition_met',
+            ruleRef
+          );
+        }
       }
 
       if (startedAt) {
@@ -735,7 +978,16 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
+    this.logger = createTaskRunnerLogger({
+      logger: this.logger,
+      labels: {
+        ruleId,
+        ruleType: this.ruleType.id,
+        spaceId,
+        executionId: this.executionId,
+        taskInstanceId: this.taskInstance.id,
+      },
+    });
 
     let runRuleResult: Result<RunRuleResult, Error>;
     let schedule: Result<IntervalSchedule, Error>;
@@ -764,6 +1016,27 @@ export class TaskRunner<
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
       this.processRunResults({ schedule, runRuleResult })
     );
+
+    // Publish alert status-change events only after processRunResults() has completed.
+    // Events follow persisted state, the same as actions do.
+    // - If the rule type throws, the run result is an error and nothing is published. The state
+    //   falls back to the previous run, so the next run classifies those alerts again.
+    // - If the rule type only records an error (addLastRunError) and finishes, the new alert
+    //   state is persisted and its actions are scheduled, so the events are published too.
+    //   Holding them back would lose them, because the next run sees those alerts as ongoing.
+    // - A run cancelled for timeout publishes nothing.
+    if (isOk(runRuleResult) && !this.cancelled && this.context.alertingEventBus) {
+      const batch = runRuleResult.value.alertStatusChangedBatch;
+      if (batch) {
+        const bus = this.context.alertingEventBus;
+        for (const payload of batch.events) {
+          bus.publish(
+            { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload },
+            { request: batch.request }
+          );
+        }
+      }
+    }
 
     return {
       state: getState({

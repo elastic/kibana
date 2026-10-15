@@ -13,11 +13,18 @@ import { fleetServerHostService } from '../fleet_server_host';
 import type { FleetServerHost } from '../../../common/types';
 
 import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+} from '../../constants';
+
+import {
   createCloudFleetServerHostIfNeeded,
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
+  cleanPreconfiguredFleetServerHosts,
 } from './fleet_server_host';
+
 import { hashSecret } from './outputs';
 
 jest.mock('../fleet_server_host');
@@ -90,7 +97,7 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
       },
       {
         id: 'internal-agentless-fleet-server',
-        name: 'Internal Fleet Server for agentless',
+        name: 'Internal Fleet Server for managed integrations',
         host_urls: ['https://test-deployment.fleet.test.co'],
         is_default: false,
         is_preconfigured: true,
@@ -247,7 +254,7 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
       ],
     };
 
-    expect(() => getPreconfiguredFleetServerHostFromConfig(config)).toThrowError(
+    expect(() => getPreconfiguredFleetServerHostFromConfig(config)).toThrow(
       /Only one default Fleet Server host is allowed/
     );
   });
@@ -343,7 +350,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 
   it('should create only default fleet server host if agentless already exists', async () => {
@@ -378,7 +385,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledTimes(1);
 
     // Verify only default Fleet Server host creation
     expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
@@ -428,7 +435,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledTimes(1);
 
     // Verify only default Fleet Server host creation
     expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
@@ -475,7 +482,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
     // Should not create any Fleet Server hosts since default exists and ECH agentless is now handled via preconfiguration
-    expect(mockedFleetServerHostService.create).toBeCalledTimes(0);
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledTimes(0);
   });
 
   it('should not create any fleet server hosts if both already exist', async () => {
@@ -508,7 +515,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 
   it('should not create agentless fleet server host if default already exists but agentless is disabled', async () => {
@@ -541,7 +548,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 
   it('should not create agentless fleet server host in serverless environment', async () => {
@@ -574,7 +581,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 });
 
@@ -631,7 +638,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_preconfigured: true,
       },
     ]);
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.arrayContaining([
@@ -642,8 +649,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       ]),
       { fromPreconfiguration: true }
     );
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should create a preconfigured fleet server host with secrets that does not exist', async () => {
@@ -667,7 +674,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         },
       },
     ]);
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.arrayContaining([
@@ -684,8 +691,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       ]),
       { fromPreconfiguration: true }
     );
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
@@ -703,8 +710,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-internal',
@@ -730,8 +737,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-internal',
@@ -758,8 +765,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-internal',
@@ -790,8 +797,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-internal',
@@ -828,8 +835,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-internal',
@@ -867,8 +874,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'fleet-with-secrets',
@@ -899,8 +906,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_preconfigured: true,
       },
     ]);
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should not update preconfigured fleet server hosts with secrets if no fields changed', async () => {
@@ -922,7 +929,259 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         },
       },
     ]);
-    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
+  });
+
+  it('should update when allow_edit changes (triggers diff)', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    // Existing host has no allow_edit; config now injects allow_edit: ['is_default']
+    mockedFleetServerHostService.bulkGet.mockResolvedValue([
+      {
+        id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+        name: 'Default',
+        is_default: true,
+        host_urls: ['https://fleet.example.com'],
+        is_preconfigured: true,
+        // no allow_edit
+      },
+    ] as FleetServerHost[]);
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+        name: 'Default',
+        is_default: true,
+        host_urls: ['https://fleet.example.com'],
+        is_preconfigured: true,
+        allow_edit: ['is_default'],
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+      expect.objectContaining({ allow_edit: ['is_default'] }),
+      expect.anything()
+    );
+  });
+
+  it('should preserve allow_edit runtime value (is_default) from existing SO on sync', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    // Simulate: PrivateLink host was set as default at runtime (is_default: true in SO)
+    mockedFleetServerHostService.bulkGet.mockResolvedValue([
+      {
+        id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+        name: 'Private Fleet Server',
+        is_default: true, // set at runtime
+        host_urls: ['https://private.fleet.example.com'],
+        is_preconfigured: true,
+        allow_edit: ['is_default'],
+      },
+    ] as FleetServerHost[]);
+
+    // Config still says is_default: false (the preconfigured definition never changes)
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+        name: 'Private Fleet Server',
+        is_default: false,
+        host_urls: ['https://private.fleet.example.com'],
+        is_preconfigured: true,
+        allow_edit: ['is_default'],
+      },
+    ]);
+
+    // No update should be triggered because nothing actually changed (is_default was preserved from SO)
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('cleanPreconfiguredFleetServerHosts', () => {
+  beforeEach(() => {
+    mockedAppContextService.getLogger.mockReturnValue(
+      new Proxy({} as any, { get: () => jest.fn() })
+    );
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should delete a preconfigured host removed from config (non-default)', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        {
+          id: 'fleet-123',
+          name: 'TEST',
+          is_default: false,
+          is_preconfigured: true,
+          host_urls: ['http://test.fr'],
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+
+    // Pass empty array — fleet-123 has been removed from config
+    await cleanPreconfiguredFleetServerHosts(soClient, esClient, []);
+
+    expect(mockedFleetServerHostService.delete).toHaveBeenCalled();
+    expect(mockedFleetServerHostService.delete).toHaveBeenCalledWith(
+      expect.anything(),
+      'fleet-123',
+      expect.anything()
+    );
+  });
+
+  it('should restore public default when PrivateLink host was default and is removed from config', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        {
+          id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+          name: 'Private Fleet Server',
+          is_default: true,
+          is_preconfigured: true,
+          host_urls: ['https://private.fleet.example.com'],
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+
+    // PrivateLink config entry removed — pass empty array
+    await cleanPreconfiguredFleetServerHosts(soClient, esClient, []);
+
+    // Should restore the public default
+    expect(mockedFleetServerHostService.update).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+      { is_default: true },
+      { fromPreconfiguration: true }
+    );
+
+    // Should delete the private host entirely so it cannot be re-enabled by mistake
+    expect(mockedFleetServerHostService.delete).toHaveBeenCalledWith(
+      expect.anything(),
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+      expect.anything()
+    );
+
+    // Should NOT un-preconfigure (no ghost SO left behind)
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it('should not restore public default when removed host was not the default', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        {
+          id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+          name: 'Private Fleet Server',
+          is_default: false, // not the current default
+          is_preconfigured: true,
+          host_urls: ['https://private.fleet.example.com'],
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+
+    await cleanPreconfiguredFleetServerHosts(soClient, esClient, []);
+
+    // Should delete (not un-preconfigure + restore), since it wasn't the default
+    expect(mockedFleetServerHostService.delete).toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('getPreconfiguredFleetServerHostFromConfig — PrivateLink allow_edit injection', () => {
+  afterEach(() => {
+    mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
+  });
+
+  it('should inject allow_edit: [is_default] on the serverless default Fleet Server host', () => {
+    const config = {
+      fleetServerHosts: [
+        {
+          id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://fleet.example.com'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+    const defaultHost = res.find((h) => h.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID);
+
+    expect(defaultHost?.allow_edit).toContain('is_default');
+  });
+
+  it('should inject allow_edit: [is_default] on the PrivateLink Fleet Server host', () => {
+    const config = {
+      fleetServerHosts: [
+        {
+          id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://fleet.example.com'],
+        },
+        {
+          id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+          name: 'Private Fleet Server',
+          is_default: false,
+          is_internal: true,
+          host_urls: ['https://private.fleet.example.com'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+    const privateHost = res.find((h) => h.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID);
+
+    expect(privateHost?.allow_edit).toContain('is_default');
+  });
+
+  it('should not inject allow_edit on non-PrivateLink hosts', () => {
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'fleet-123',
+          name: 'TEST',
+          is_default: true,
+          host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+    const host = res.find((h) => h.id === 'fleet-123');
+
+    expect(host?.allow_edit).toBeUndefined();
   });
 });

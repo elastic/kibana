@@ -7,7 +7,7 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
     id="transactionActionMenu"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-base-primary"
       data-test-subj="apmActionMenuButtonInvestigateButton"
       type="button"
     >

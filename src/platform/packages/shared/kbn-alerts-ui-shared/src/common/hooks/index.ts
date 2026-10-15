@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './use_alert_field_names';
 export * from './use_alerts_data_view';
 export * from './use_fetch_alerts_index_names_query';
 export * from './use_get_alerts_group_aggregations_query';

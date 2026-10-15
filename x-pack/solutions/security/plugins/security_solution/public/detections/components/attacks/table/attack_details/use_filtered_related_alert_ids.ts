@@ -61,7 +61,7 @@ export const useFilteredRelatedAlertIds = ({
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
 
   const { dataView } = useDataView(PageScope.attacks);
-  const browserFields = useBrowserFields(PageScope.attacks);
+  const browserFields = useBrowserFields(dataView);
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
   const query = useMemo(() => {

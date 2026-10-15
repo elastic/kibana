@@ -8,7 +8,7 @@
 import { isBoom, boomify } from '@hapi/boom';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_VIS_API_PATH,
@@ -16,7 +16,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensSearchIn, LensSavedObject } from '../../../content_management';
+import type { LensSearchIn, LensSavedObject } from '../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
@@ -29,13 +29,14 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Search visualizations',
+    operationId: 'search-visualizations',
     description:
       'Returns a paginated list of Lens visualizations matching the optional `query` text.',
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -78,7 +79,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         // TODO fix IContentClient to type this client based on the actual
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -105,8 +106,8 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
             throw error;
           }
 
-          return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
-            body: {
+          return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
+            body: lensSearchResponseBodySchema.parse({
               data: hits.map((item) => {
                 return getLensResponseItem(builder, item);
               }),
@@ -115,7 +116,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
                 per_page: perPage,
                 total: pagination.total,
               },
-            },
+            }),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

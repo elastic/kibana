@@ -12,15 +12,23 @@ import * as i18n from '../../translations';
 export const getSuccessResultMessage = ({
   alertsContextCount,
   connectorName,
-  discoveries,
   dateFormat,
+  discoveries,
+  duplicatesDroppedCount,
+  generatedCount,
   generationEndTime,
+  hallucinationsFilteredCount,
+  persistedCount,
 }: {
   alertsContextCount: number | null;
   connectorName?: string;
   dateFormat: string;
   discoveries?: number;
+  duplicatesDroppedCount?: number;
+  generatedCount?: number;
   generationEndTime?: string;
+  hallucinationsFilteredCount?: number;
+  persistedCount?: number;
 }): string => {
   const formattedGenerationEndTime =
     getFormattedDate({
@@ -33,6 +41,18 @@ export const getSuccessResultMessage = ({
     return i18n.NO_MATCHING_ALERTS_VIA({
       connectorName,
       formattedGenerationEndTime,
+    });
+  }
+
+  // Use detailed summary breakdown when full summary stats are available
+  if (persistedCount != null && generatedCount != null && duplicatesDroppedCount != null) {
+    return i18n.RAN_SUCCESSFULLY_VIA_WITH_SUMMARY({
+      connectorName,
+      duplicatesDroppedCount,
+      formattedGenerationEndTime,
+      generatedCount,
+      hallucinationsFilteredCount,
+      persistedCount,
     });
   }
 

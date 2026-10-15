@@ -23,7 +23,7 @@ import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
-import { VizChartWarning } from './viz_chart_warning';
+import { VisChartWarning } from './vis_chart_warning';
 import type {
   SavedVisInstance,
   VisualizeAppState,
@@ -236,14 +236,14 @@ export const VisualizeEditorCommon = ({
       {visInstance?.vis?.type?.stage === 'experimental' &&
         !visInstance?.vis?.type?.isDeprecated && <ExperimentalVisInfo />}
       {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
-        <VizChartWarning
+        <VisChartWarning
           chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
           chartConfigToken={chartToken}
         />
       )}
       {((hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
         visInstance?.vis?.type?.isDeprecated) && (
-        <VizChartWarning
+        <VisChartWarning
           chartType={chartName as CHARTS_TO_BE_DEPRECATED}
           chartConfigToken={chartToken ?? undefined}
           mode="new"

@@ -277,11 +277,12 @@ describe('data_fetching related hooks', () => {
         availableCascadeGroups: ['category'],
         selectedCascadeGroups: ['category'],
         cascadedDocumentsFetcher: createMockFetcher(),
-        cascadedColumnsMeta: {},
+        cascadedLeafDataSource: undefined,
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,
-        viewModeToggle: undefined,
+        esqlApproximation: false,
+        renderViewModeToggle: undefined,
         expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
         expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
         getExpandedDocSetter: () => jest.fn(),
@@ -391,7 +392,30 @@ describe('data_fetching related hooks', () => {
           esqlVariables: contextValue.esqlVariables,
           timeRange: contextValue.timeRange,
           dataView,
+          esqlApproximation: contextValue.esqlApproximation,
         });
+      });
+
+      it('forwards esqlApproximation from the context so drill-downs match the active search mode', async () => {
+        const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper({ esqlApproximation: true });
+        const dataView = dataViewWithTimefieldMock;
+
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
+
+        await act(async () => {
+          await result.current.onCascadeLeafNodeExpanded({
+            row: mockRow,
+            nodePath: ['category'],
+            nodePathMap: { category: 'A' },
+          });
+        });
+
+        expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).toHaveBeenCalledWith(
+          expect.objectContaining({ esqlApproximation: true })
+        );
       });
     });
 

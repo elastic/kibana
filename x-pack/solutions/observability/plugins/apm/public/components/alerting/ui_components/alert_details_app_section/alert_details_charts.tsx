@@ -16,6 +16,7 @@ import { ErrorCountChart } from './error_count_chart';
 import { FailedTransactionChart } from './failed_transaction_chart';
 import { LatencyChart } from './latency_chart';
 import { ThroughputChart } from './throughput_chart';
+import type { AnomalyChartInfo } from './anomaly_severity_badge';
 import type { ChartId } from './types';
 
 export function AlertDetailsCharts({
@@ -33,6 +34,7 @@ export function AlertDetailsCharts({
   from,
   to,
   thresholdComponent,
+  anomaly,
 }: {
   alert: TopAlert;
   alertRuleTypeId: ApmRuleType;
@@ -48,6 +50,7 @@ export function AlertDetailsCharts({
   from: string;
   to: string;
   thresholdComponent?: ReactElement;
+  anomaly?: AnomalyChartInfo;
 }) {
   const chartRenderers: Record<ChartId, (isPrimary: boolean) => ReactElement> = {
     latency: (isPrimary) => (
@@ -64,6 +67,7 @@ export function AlertDetailsCharts({
         comparisonEnabled={false}
         offset={''}
         threshold={isPrimary ? thresholdComponent : undefined}
+        anomaly={isPrimary ? anomaly : undefined}
         ruleAggregationType={ruleAggregationType}
         ruleTypeId={alertRuleTypeId}
         compact
@@ -84,6 +88,7 @@ export function AlertDetailsCharts({
         comparisonEnabled={false}
         offset={''}
         threshold={isPrimary ? thresholdComponent : undefined}
+        anomaly={isPrimary ? anomaly : undefined}
         ruleTypeId={alertRuleTypeId}
         compact
         showAlertAnnotations
@@ -103,6 +108,7 @@ export function AlertDetailsCharts({
         offset={''}
         timeZone={timeZone}
         threshold={isPrimary ? thresholdComponent : undefined}
+        anomaly={isPrimary ? anomaly : undefined}
         ruleTypeId={alertRuleTypeId}
         compact
         showAlertAnnotations

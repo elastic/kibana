@@ -13,6 +13,13 @@ import type {
 import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
+  MODEL_CONTEXT_MAX_LENGTH,
+  WORKFLOW_CONTEXT_MAX_BYTES,
+  WORKFLOW_CONTEXT_MAX_DEPTH,
+  WORKFLOW_CONTEXT_MAX_NAMESPACES,
+  WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH,
+  type WorkflowContext,
+  type WorkflowContextEnvelope,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -23,6 +30,7 @@ import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { BeforeAgentWorkflowOutput } from './types';
+import { withDeclaredInputs } from './with_declared_inputs';
 import type { AgentsServiceStart } from '../../services/agents';
 import {
   mergePreExecutionWorkflowIds,
@@ -58,12 +66,119 @@ function isBeforeAgentWorkflowOutput(value: unknown): value is BeforeAgentWorkfl
   return typeof value === 'object' && value !== null;
 }
 
+const normalizeModelContext = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized ? normalized.slice(0, MODEL_CONTEXT_MAX_LENGTH) : undefined;
+};
+
+// Each visited property, array element, and string character consumes from the same budget.
+// The final serialized-byte check remains authoritative for UTF-8 and JSON escaping.
+const isJsonValueWithinDepth = (
+  value: unknown,
+  depth: number,
+  budget: { remaining: number }
+): boolean => {
+  if (budget.remaining-- <= 0) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    budget.remaining -= value.length;
+    return budget.remaining >= 0;
+  }
+  if (value === null || typeof value === 'boolean') {
+    return true;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value);
+  }
+  if (depth >= WORKFLOW_CONTEXT_MAX_DEPTH || typeof value !== 'object') {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    if (value.length > budget.remaining) {
+      return false;
+    }
+    for (const item of value) {
+      if (!isJsonValueWithinDepth(item, depth + 1, budget)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      budget.remaining -= key.length;
+      if (!isJsonValueWithinDepth((value as Record<string, unknown>)[key], depth + 1, budget)) {
+        return false;
+      }
+    }
+  }
+  return budget.remaining >= 0;
+};
+
+const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const context: WorkflowContext = Object.create(null);
+  const budget = { remaining: WORKFLOW_CONTEXT_MAX_BYTES };
+  let namespaceCount = 0;
+  for (const namespace in value) {
+    if (!Object.prototype.hasOwnProperty.call(value, namespace)) {
+      continue;
+    }
+    if (++namespaceCount > WORKFLOW_CONTEXT_MAX_NAMESPACES) {
+      return undefined;
+    }
+    budget.remaining -= namespace.length;
+    const rawEnvelope = (value as Record<string, unknown>)[namespace];
+    if (
+      namespace.length === 0 ||
+      namespace.length > WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH ||
+      budget.remaining < 0 ||
+      typeof rawEnvelope !== 'object' ||
+      rawEnvelope === null ||
+      Array.isArray(rawEnvelope)
+    ) {
+      return undefined;
+    }
+    const envelope = rawEnvelope as Partial<WorkflowContextEnvelope>;
+    if (
+      !Number.isSafeInteger(envelope.version) ||
+      (envelope.version ?? 0) <= 0 ||
+      typeof envelope.data !== 'object' ||
+      envelope.data === null ||
+      Array.isArray(envelope.data) ||
+      !isJsonValueWithinDepth(envelope.data, 0, budget)
+    ) {
+      return undefined;
+    }
+    context[namespace] = {
+      version: envelope.version,
+      data: envelope.data,
+    } as WorkflowContextEnvelope;
+  }
+
+  return Buffer.byteLength(JSON.stringify(context), 'utf8') <= WORKFLOW_CONTEXT_MAX_BYTES
+    ? context
+    : undefined;
+};
+
+const mergeWorkflowContexts = (
+  previous: WorkflowContext | undefined,
+  next: WorkflowContext
+): WorkflowContext | undefined => normalizeWorkflowContext({ ...previous, ...next });
+
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
- * round input when a workflow returns `new_prompt`. Throws on workflow failure
- * or when a workflow aborts the agent.
+ * round input when a workflow returns `new_prompt` and accumulating workflow context. Throws
+ * on workflow failure or when a workflow aborts the agent.
  *
- * @returns Updated nextInput when any workflow returned `new_prompt`, otherwise undefined
+ * @returns Updated input and/or accumulated workflow context, otherwise undefined
  */
 export async function runBeforeAgentWorkflows({
   context,
@@ -87,11 +202,28 @@ export async function runBeforeAgentWorkflows({
 
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   let currentNextInput = context.nextInput;
+  let preExecutionWorkflow = context.preExecutionWorkflow;
+  let nextInputChanged = false;
 
   for (const workflowId of workflowIds) {
+    const workflowParams = await withDeclaredInputs({
+      workflowId,
+      inputs: {
+        prompt: currentNextInput.message ?? '',
+        ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+      },
+      optionalInputs: {
+        round_execution_index: context.roundExecutionIndex ?? 0,
+        agent_id: context.agentId || undefined,
+      },
+      workflowApi,
+      spaceId,
+      request: context.request,
+      logger,
+    });
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: { prompt: currentNextInput.message ?? '' },
+      workflowParams,
       request: context.request,
       spaceId,
       workflowApi,
@@ -123,6 +255,40 @@ export async function runBeforeAgentWorkflows({
 
     if (output.new_prompt) {
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
+      nextInputChanged = true;
+    }
+
+    const modelContext = normalizeModelContext(output.model_context);
+    if (modelContext) {
+      const combinedModelContext = [preExecutionWorkflow?.model_context, modelContext]
+        .filter((fragment): fragment is string => Boolean(fragment))
+        .join('\n\n')
+        .slice(0, MODEL_CONTEXT_MAX_LENGTH);
+      preExecutionWorkflow = {
+        ...preExecutionWorkflow,
+        model_context: combinedModelContext,
+      };
+    }
+
+    const workflowContext = normalizeWorkflowContext(output.workflow_context);
+    if (output.workflow_context !== undefined && !workflowContext) {
+      logger.warn(`Ignoring malformed workflow context from workflow ${execution.workflow_id}`);
+    }
+    if (workflowContext) {
+      const mergedWorkflowContext = mergeWorkflowContexts(
+        preExecutionWorkflow?.workflow_context,
+        workflowContext
+      );
+      if (mergedWorkflowContext) {
+        preExecutionWorkflow = {
+          ...preExecutionWorkflow,
+          workflow_context: mergedWorkflowContext,
+        };
+      } else {
+        logger.warn(
+          `Ignoring workflow context from workflow ${execution.workflow_id}: combined context exceeds limits`
+        );
+      }
     }
 
     if (output.abort || output.abort_message) {
@@ -134,8 +300,11 @@ export async function runBeforeAgentWorkflows({
     }
   }
 
-  if (currentNextInput !== context.nextInput) {
-    return { nextInput: currentNextInput };
+  if (nextInputChanged || preExecutionWorkflow !== context.preExecutionWorkflow) {
+    return {
+      ...(nextInputChanged ? { nextInput: currentNextInput } : {}),
+      ...(preExecutionWorkflow ? { preExecutionWorkflow } : {}),
+    };
   }
 }
 
@@ -156,7 +325,11 @@ async function getWorkflowIds(
   if (context.agentId) {
     const registry = await agents.getRegistry({ request: context.request });
     const agent = await registry.get(context.agentId);
-    agentWorkflowIds = agent?.configuration?.workflow_ids ?? [];
+    const configuration = await agents.resolveAgentConfiguration({
+      agent,
+      request: context.request,
+    });
+    agentWorkflowIds = configuration.workflow_ids ?? [];
   }
 
   return mergePreExecutionWorkflowIds(globalWorkflowIds, agentWorkflowIds);

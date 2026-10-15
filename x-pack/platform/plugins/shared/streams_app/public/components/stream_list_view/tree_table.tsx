@@ -36,6 +36,7 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -95,13 +96,7 @@ import {
   TechnicalPreviewBadge,
 } from '../stream_badges';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function StreamsTreeTable({
   loading,
@@ -123,7 +118,9 @@ export function StreamsTreeTable({
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
 
-  const [searchText, setSearchText] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  // Filtering re-renders up to 25 rows and each new row starts a histogram search.
+  const searchText = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   // Collapsed state: Set of collapsed node names
@@ -149,12 +146,15 @@ export function StreamsTreeTable({
     );
   }, [streams]);
 
-  const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
-    groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: (streamName: string | undefined) =>
-      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
-    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
-  });
+  const { getStreamDocCounts, getStreamHistogram, retainStreamHistogram } = useStreamDocCountsFetch(
+    {
+      groupTotalCountByTimestamp: true,
+      getCanReadFailureStore: (streamName: string | undefined) =>
+        streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+      numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+      fetchIngestionDocCounts: true,
+    }
+  );
 
   const docCountsFetch = getStreamDocCounts();
 
@@ -219,16 +219,10 @@ export function StreamsTreeTable({
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
 
-  const streamNamesWithData = React.useMemo(
-    () => streams.filter((s) => !!s.data_stream).map((s) => s.stream.name),
-    [streams]
-  );
-
-  const { ingestionByStream, ingestionLoaded } = useStreamsIngestionRates({
-    streamNames: streamNamesWithData,
+  const { ingestionByStream, ingestionLoaded, ingestionError } = useStreamsIngestionRates({
+    ingestionDocCount: docCountsFetch.ingestionDocCount,
     timeStart: timeState.start,
     timeEnd: timeState.end,
-    getStreamHistogram,
   });
 
   const { storageByStream, storageLoaded } = useStreamsStorageStats();
@@ -430,14 +424,15 @@ export function StreamsTreeTable({
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
+              compressed
               incremental
               aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
+            <EuiFilterGroup compressed>
               {qualityLoaded && hasFailureStoreAccess && (
                 <FilterGroup
                   label={DATA_QUALITY_FILTER_LABEL}
@@ -461,9 +456,7 @@ export function StreamsTreeTable({
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <div className={datePickerStyle}>
-              <StreamsAppSearchBar showDatePicker />
-            </div>
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -600,7 +593,7 @@ export function StreamsTreeTable({
                               }
                             )}
                           >
-                            <EuiBadge color="default">
+                            <EuiBadge color="default" tabIndex={0}>
                               {i18n.translate(
                                 'xpack.streams.streamsTable.pendingDataStream.label',
                                 {
@@ -649,6 +642,7 @@ export function StreamsTreeTable({
                   <DocumentsColumn
                     indexPattern={item.stream.name}
                     histogramQueryFetch={getStreamHistogram(item.stream.name)}
+                    retainHistogramQueryFetch={retainStreamHistogram}
                     timeState={timeState}
                     numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
                   />
@@ -658,9 +652,10 @@ export function StreamsTreeTable({
               field: 'ingestionRate',
               name: INGESTION_COLUMN_HEADER,
               width: '112px',
-              sortable: ingestionLoaded
-                ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
-                : false,
+              sortable:
+                ingestionLoaded && !ingestionError
+                  ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
+                  : false,
               align: 'right',
               dataType: 'number',
               render: (_: unknown, item: TableRow) =>
@@ -668,6 +663,7 @@ export function StreamsTreeTable({
                   <IngestionColumn
                     rate={ingestionByStream[item.stream.name] ?? 0}
                     isLoading={!ingestionLoaded}
+                    hasError={ingestionError}
                   />
                 ) : (
                   '-'

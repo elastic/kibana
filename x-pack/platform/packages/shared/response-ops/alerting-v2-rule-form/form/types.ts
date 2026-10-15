@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { RuleKind } from '@kbn/alerting-v2-schemas';
-import type { ActionFormValue } from '../actions_form';
+import type {
+  RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
+  StateTransitionOperator,
+} from '@kbn/alerting-v2-schemas';
 
-export type { RuleKind };
+export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -21,36 +25,30 @@ export const DELAY_MODE = {
 export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
 // ---------------------------------------------------------------------------
-// RuleQuery — composed/standalone query schema matching the API.
+// Query / recovery / no-data — form mirrors of the API blocks.
 // ---------------------------------------------------------------------------
 
-export interface ComposedQuery {
-  format: 'composed';
+/** Form state mirrors the API shape but keeps `breach.segment` always present; '' means "no breach condition". */
+export interface RuleQuery {
   base: string;
   breach: { segment: string };
-  recovery?: { segment: string };
 }
 
-export interface StandaloneQuery {
-  format: 'standalone';
-  no_data?: { query: string };
-  breach: { query: string };
-  recovery?: { query: string };
+/**
+ * Widened form state for the API's `recovery` discriminated union: RHF cannot
+ * narrow a union in place, so every member's field is kept and the mapper
+ * projects the one the strategy needs.
+ */
+export interface RuleRecovery {
+  strategy: RecoveryStrategy;
+  segment?: string;
+  query?: string;
 }
 
-export type RuleQuery = ComposedQuery | StandaloneQuery;
-
-export function getBreachQuery(query: RuleQuery | undefined): string {
-  if (!query) return '';
-  if (query.format === 'standalone') return query.breach.query;
-  return [query.base, query.breach.segment].filter(Boolean).join('\n| ');
-}
-
-export function getRecoverQuery(query: RuleQuery | undefined): string {
-  if (!query) return '';
-  if (query.format === 'standalone') return query.recovery?.query ?? '';
-  if (!query.recovery?.segment) return '';
-  return [query.base, query.recovery.segment].filter(Boolean).join('\n| ');
+/** Widened form state for the API's `no_data` discriminated union. */
+export interface RuleNoData {
+  strategy: NoDataStrategy;
+  query?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -61,8 +59,8 @@ export interface RuleMetadata {
   name: string;
   enabled: boolean;
   description?: string;
-  owner?: string;
   tags?: string[];
+  routingTags?: string[];
 }
 
 export interface RuleSchedule {
@@ -77,26 +75,31 @@ export interface RuleGrouping {
 export interface RuleArtifact {
   id: string;
   type: string;
-  value: string;
+  data: Record<string, any>;
 }
 
-export interface RuleNotificationsValue {
-  workflows: ActionFormValue;
-}
-
+/**
+ * Flat form mirror of `state_transition`. The visual form authors one dimension
+ * per phase. `pendingOperator` / `recoveringOperator` are carried so a YAML or
+ * API rule that joins `count` and `timeframe` with `and` or `or` round-trips
+ * unchanged; the form does not default them.
+ */
 export interface StateTransition {
   pendingCount?: number | null;
   pendingTimeframe?: string | null;
+  pendingOperator?: StateTransitionOperator | null;
   recoveringCount?: number | null;
   recoveringTimeframe?: string | null;
+  recoveringOperator?: StateTransitionOperator | null;
 }
 
 // ---------------------------------------------------------------------------
 // FormValues — the single canonical form type for rule creation/editing.
 //
-// Matches the API schema structurally (same `query` discriminated union,
-// same field semantics). Only diverges in casing (camelCase for RHF) and
-// UI-only fields (delay modes, metadata.enabled, split artifact arrays).
+// Matches the API schema structurally (same blocks, same field semantics).
+// Only diverges in casing (camelCase for RHF), in widening the `recovery` and
+// `no_data` unions so RHF can hold a partially-filled member, and in UI-only
+// fields (delay modes, metadata.enabled, split artifact arrays).
 // ---------------------------------------------------------------------------
 
 export interface FormValues {
@@ -105,32 +108,13 @@ export interface FormValues {
   timeField: string;
   schedule: RuleSchedule;
   query: RuleQuery;
+  recovery?: RuleRecovery;
+  noData?: RuleNoData;
   grouping?: RuleGrouping;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
-  notifications?: RuleNotificationsValue;
   runbookArtifacts?: RuleArtifact[];
   dashboardArtifacts?: RuleArtifact[];
 }
-
-/** Derives alert-delay mode from persisted `state_transition`. */
-export const deriveAlertDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
-    return DELAY_MODE.breaches;
-  return DELAY_MODE.immediate;
-};
-
-/** Derives recovery-delay mode from persisted `state_transition`. */
-export const deriveRecoveryDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
-    return DELAY_MODE.recoveries;
-  return DELAY_MODE.immediate;
-};

@@ -13,11 +13,12 @@ import useAsync from 'react-use/lib/useAsync';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { DualDashboardsExample } from './dual_dashboards_example';
 import type { StartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
@@ -29,7 +30,7 @@ const DASHBOARD_LIST_PATH = '/listingDemo';
 
 export const renderApp = async (
   coreStart: CoreStart,
-  { data, dashboard, uiActions }: StartDeps,
+  { data, dashboard }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -38,7 +39,6 @@ export const renderApp = async (
       data={data}
       history={history}
       dashboard={dashboard}
-      uiActions={uiActions}
     />,
     element
   );
@@ -50,13 +50,11 @@ const PortableDashboardsDemos = ({
   data,
   dashboard,
   history,
-  uiActions,
 }: {
   coreStart: CoreStart;
   data: StartDeps['data'];
   dashboard: StartDeps['dashboard'];
   history: AppMountParameters['history'];
-  uiActions: StartDeps['uiActions'];
 }) => {
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -69,12 +67,7 @@ const PortableDashboardsDemos = ({
             <PortableDashboardListingDemo history={history} />
           </Route>
           <Route path={DASHBOARD_DEMO_PATH}>
-            <DashboardsDemo
-              uiActions={uiActions}
-              data={data}
-              dashboard={dashboard}
-              history={history}
-            />
+            <DashboardsDemo data={data} dashboard={dashboard} history={history} />
           </Route>
         </Routes>
       </Router>
@@ -86,12 +79,10 @@ const DashboardsDemo = ({
   data,
   history,
   dashboard,
-  uiActions,
 }: {
   history: AppMountParameters['history'];
   data: StartDeps['data'];
   dashboard: StartDeps['dashboard'];
-  uiActions: StartDeps['uiActions'];
 }) => {
   const { loading, value: dataviewResults } = useAsync(async () => {
     const dataViews = await data.dataViews.find('kibana_sample_data_logs');
@@ -109,7 +100,7 @@ const DashboardsDemo = ({
     const { dataViews, logsSampleDashboardId } = dataviewResults;
     return (
       <>
-        <DashboardWithControlsExample uiActions={uiActions} dataView={dataViews[0]} />
+        <DashboardWithControlsExample dataView={dataViews[0]} />
         <EuiSpacer size="xl" />
         <DualDashboardsExample />
         <EuiSpacer size="xl" />
@@ -118,7 +109,7 @@ const DashboardsDemo = ({
         <StaticByValueExample />
       </>
     );
-  }, [dataviewResults, loading, uiActions]);
+  }, [dataviewResults, loading]);
 
   return (
     <KibanaPageTemplate>
@@ -146,7 +137,7 @@ const PortableDashboardListingDemo = ({ history }: { history: AppMountParameters
         Go back to usage demos
       </EuiButton>
       <EuiSpacer size="xl" />
-      <EuiCallOut title="You can render something cool here" iconType="search" />
+      <KbnInfoCallout title="You can render something cool here" />
       <EuiSpacer size="xl" />
     </DashboardListingTable>
   );

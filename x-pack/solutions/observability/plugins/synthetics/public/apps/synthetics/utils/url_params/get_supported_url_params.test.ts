@@ -83,7 +83,7 @@ describe('getSupportedUrlParams', () => {
       useLogicalAndFor: [],
       view: undefined,
       browserResourceTypes: [],
-      party: [],
+      certOrigin: [],
       issuers: [],
       expiringWithin: undefined,
     });

@@ -4,6 +4,12 @@ required:
   - from
 type: object
 properties:
+  allowHtml:
+    description: >
+      When `true`, the connector can send emails with HTML-formatted content in the body.
+      Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+    default: false
+    type: boolean
   clientId:
     description: >
       The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format.

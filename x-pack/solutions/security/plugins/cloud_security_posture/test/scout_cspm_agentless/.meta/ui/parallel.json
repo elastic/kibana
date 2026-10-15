@@ -1,5 +1,8 @@
 {
-  "sha1": "159b6cffbd429e308f2b1b7bdb8e96fade340878",
+  "sha1": "b391fc84b9e277fa9ff975c849e339b834d888b1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "8f4537eda390f03-adcaac7d214a25d",
@@ -8,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -24,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/create_cloud_connector.spec.ts",
-        "line": 47,
-        "column": 14
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -40,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/create_cloud_connector.spec.ts",
-        "line": 127,
-        "column": 14
+        "line": 97,
+        "column": 9
       }
     },
     {
@@ -56,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/reuse_cloud_connector.spec.ts",
-        "line": 103,
-        "column": 14
+        "line": 93,
+        "column": 9
       }
     },
     {
@@ -72,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/reuse_cloud_connector.spec.ts",
-        "line": 225,
-        "column": 14
+        "line": 199,
+        "column": 29
       }
     },
     {
@@ -88,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -104,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 116,
-        "column": 14
+        "line": 74,
+        "column": 34
       }
     },
     {
@@ -120,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 184,
-        "column": 14
+        "line": 141,
+        "column": 32
       }
     },
     {
@@ -136,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 262,
-        "column": 14
+        "line": 218,
+        "column": 34
       }
     }
   ]

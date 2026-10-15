@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +18,8 @@ import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import * as useServiceMapHook from '../../components/app/service_map/use_service_map';
 import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 
 jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
   const actual = jest.requireActual(
@@ -41,6 +43,13 @@ jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
   useAdHocApmDataView: () => ({
     dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
     apmIndices: undefined,
+  }),
+}));
+
+jest.mock('../../components/app/service_map/use_service_map_badges', () => ({
+  useServiceMapBadges: ({ nodes, nodesStatus }: { nodes: unknown; nodesStatus: string }) => ({
+    nodes,
+    status: nodesStatus,
   }),
 }));
 
@@ -155,7 +164,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when license is not platinum', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the license upgrade prompt', () => {
       const goldLicense = new License({
         signature: 'test',
         license: {
@@ -178,7 +187,8 @@ describe('ServiceMapEmbeddable', () => {
         </ApmEmbeddableContext>
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByTestId('apmLicensePromptStartTrialButton')).toBeInTheDocument();
+      expect(screen.getByText(/Platinum license/)).toBeInTheDocument();
     });
 
     it('calls onBlockingError with license error', () => {
@@ -210,7 +220,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when service map is not enabled', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the disabled prompt', () => {
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -228,7 +238,7 @@ describe('ServiceMapEmbeddable', () => {
         }
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByText('Service map is disabled')).toBeInTheDocument();
     });
 
     it('calls onBlockingError with disabled error', () => {
@@ -315,7 +325,17 @@ describe('ServiceMapEmbeddable', () => {
     it('renders the map with a link to view the full map', () => {
       renderEmbeddable();
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View in Service map/i })).toBeInTheDocument();
+    });
+
+    it('seeds panel kuery into the View in Service map href', () => {
+      renderEmbeddable({ kuery: 'transaction.type: "request"' });
+
+      const fullMapLink = screen.getByRole('link', { name: /View in Service map/i });
+      expect(fullMapLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('kuery=transaction.type')
+      );
     });
 
     it('shows the fit view button when embedded', () => {
@@ -331,6 +351,58 @@ describe('ServiceMapEmbeddable', () => {
         expect.objectContaining({
           start: 'now-2h',
           end: 'now-1h',
+        })
+      );
+    });
+
+    it('re-resolves start and end when a relative range is refreshed', () => {
+      const initialWindow = {
+        start: '2026-10-05T10:00:00.000Z',
+        end: '2026-10-05T10:30:00.000Z',
+      };
+      const refreshedWindow = {
+        start: '2026-10-05T10:05:00.000Z',
+        end: '2026-10-05T10:35:00.000Z',
+      };
+      let currentWindow = initialWindow;
+      mockGetDateRange.mockImplementation(() => currentWindow);
+
+      function RefreshHarness() {
+        const { incrementTimeRangeId } = useTimeRangeId();
+        return (
+          <>
+            <button type="button" onClick={incrementTimeRangeId}>
+              Refresh
+            </button>
+            <ServiceMapEmbeddable {...defaultProps} rangeFrom="now-30m" rangeTo="now" />
+          </>
+        );
+      }
+
+      render(
+        <TimeRangeIdContextProvider>
+          <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-30m" rangeTo="now">
+            <LicenseContext.Provider value={platinumLicense}>
+              <RefreshHarness />
+            </LicenseContext.Provider>
+          </ApmEmbeddableContext>
+        </TimeRangeIdContextProvider>
+      );
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: initialWindow.start,
+          end: initialWindow.end,
+        })
+      );
+
+      currentWindow = refreshedWindow;
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: refreshedWindow.start,
+          end: refreshedWindow.end,
         })
       );
     });
@@ -397,6 +469,115 @@ describe('ServiceMapEmbeddable', () => {
       const { container } = renderEmbeddable({ onEmptyStateChange: jest.fn() });
       expect(screen.queryByText(/No services available/)).not.toBeInTheDocument();
       expect(container.firstChild).toBeNull();
+    });
+  });
+
+  describe('onRendered callback', () => {
+    it('reports not rendered while topology is loading', () => {
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.LOADING,
+      });
+      renderEmbeddable({ onRendered });
+      expect(onRendered).toHaveBeenCalledWith(false);
+      expect(onRendered).not.toHaveBeenCalledWith(true);
+    });
+
+    it('reports not rendered while waiting for a license', () => {
+      const onRendered = jest.fn();
+      renderEmbeddable({ onRendered }, { license: undefined });
+      expect(onRendered).toHaveBeenCalledWith(false);
+      expect(onRendered).not.toHaveBeenCalledWith(true);
+    });
+
+    it('reports rendered when the license prompt is shown', () => {
+      const goldLicense = new License({
+        signature: 'test',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'active',
+          type: 'gold',
+          uid: '1',
+        },
+      });
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      render(
+        <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-15m" rangeTo="now">
+          <LicenseContext.Provider value={goldLicense}>
+            <ServiceMapEmbeddable {...defaultProps} onRendered={onRendered} />
+          </LicenseContext.Provider>
+        </ApmEmbeddableContext>
+      );
+      expect(onRendered).toHaveBeenCalledWith(true);
+    });
+
+    it('reports rendered when the disabled prompt is shown', () => {
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable(
+        { onRendered },
+        {
+          deps: {
+            ...mockDeps,
+            config: {
+              ...mockDeps.config,
+              serviceMapEnabled: false,
+            },
+          },
+        }
+      );
+      expect(onRendered).toHaveBeenCalledWith(true);
+    });
+
+    it('reports rendered for the empty state', () => {
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onRendered });
+      expect(onRendered).toHaveBeenCalledWith(true);
+    });
+
+    it('reports rendered for fetch errors so reporting does not wait forever', () => {
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.FAILURE,
+      });
+      renderEmbeddable({ onRendered });
+      expect(onRendered).toHaveBeenCalledWith(true);
+    });
+
+    it('reports rendered when the map has data', () => {
+      const onRendered = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: {
+          nodes: [
+            {
+              id: 'node-1',
+              data: { id: 'node-1', label: 'service-a', isService: true as const },
+              position: { x: 0, y: 0 },
+              type: 'service',
+            },
+          ],
+          edges: [],
+          nodesCount: 1,
+          tracesCount: 10,
+        },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onRendered });
+      expect(onRendered).toHaveBeenCalledWith(true);
     });
   });
 });

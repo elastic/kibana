@@ -87,7 +87,7 @@ export class RepoSourceClassifier {
       return true;
     }
 
-    if (path.getFilename() === 'webpack.config' && path.getPkgInfo()?.pkgId !== '@kbn/optimizer') {
+    if (path.getFilename() === 'webpack.config') {
       return true;
     }
 
@@ -196,6 +196,8 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'tooling':
+          return 'tooling';
         case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsClientContract,
   SavedObject,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
@@ -40,6 +41,7 @@ import {
 import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
@@ -101,7 +103,11 @@ class FleetServerHostService {
           esClient,
           defaultItem.id,
           { is_default: false },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
@@ -229,7 +235,7 @@ class FleetServerHostService {
 
     const logger = appContextService.getLogger();
     for (const so of res.saved_objects) {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         throw so.error;
       }
       logger.debug(`Created fleet server host ${so.id}`);
@@ -297,7 +303,7 @@ class FleetServerHostService {
   public async delete(
     esClient: ElasticsearchClient,
     id: string,
-    options?: { fromPreconfiguration?: boolean }
+    options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting fleet server host ${id}`);
@@ -314,6 +320,25 @@ class FleetServerHostService {
       throw new FleetServerHostUnauthorizedError(
         `Default Fleet Server hosts ${id} cannot be deleted.`
       );
+    }
+
+    if (options?.request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
+        if (truncated) {
+          throw new FleetServerHostUnauthorizedError(
+            `Unable to verify delete authorization for Fleet Server host ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to delete Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+      }
     }
 
     await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {
@@ -346,6 +371,22 @@ class FleetServerHostService {
       ...omit(data, ['ssl', 'secrets']),
     };
 
+    if (originalItem.is_preconfigured && !options?.fromPreconfiguration) {
+      const allowEditFields = originalItem.allow_edit ?? [];
+      const allKeys = Object.keys(data) as Array<keyof FleetServerHost>;
+      for (const key of allKeys) {
+        if (
+          (!!originalItem[key] || !!data[key]) &&
+          !allowEditFields.includes(key) &&
+          !isEqual(originalItem[key], data[key])
+        ) {
+          throw new FleetServerHostUnauthorizedError(
+            `Preconfigured Fleet Server host ${id} ${key} cannot be updated outside of the Kibana config file.`
+          );
+        }
+      }
+    }
+
     if (data.is_preconfigured && !options?.fromPreconfiguration) {
       throw new FleetServerHostUnauthorizedError(
         `Cannot update ${id} preconfigured fleet server host`
@@ -362,7 +403,11 @@ class FleetServerHostService {
           {
             is_default: false,
           },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
@@ -380,16 +425,18 @@ class FleetServerHostService {
 
     // Store secret values if enabled; if not, store plain text values
     if (await isSecretStorageEnabled(esClient, soClient)) {
-      const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
-        oldFleetServerHost: originalItem,
-        fleetServerHostUpdate: data,
-        esClient,
-        secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
-      });
+      if (data.secrets !== undefined) {
+        const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
+          oldFleetServerHost: originalItem,
+          fleetServerHostUpdate: data,
+          esClient,
+          secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
+        });
 
-      updateData.secrets = secretsRes.fleetServerHostUpdate
-        .secrets as FleetServerHostSOAttributes['secrets'];
-      secretsToDelete = secretsRes.secretsToDelete;
+        updateData.secrets = secretsRes.fleetServerHostUpdate
+          .secrets as FleetServerHostSOAttributes['secrets'];
+        secretsToDelete = secretsRes.secretsToDelete;
+      }
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import { renderHook } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
@@ -30,25 +31,25 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'security.alert',
-    displayName: 'Alert',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Alerts',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   // File type is intentionally registered: the hook must NOT count it from
   // comments — files are counted via the file stats API instead.
   registry.register({
     id: 'file',
-    displayName: 'File',
-    icon: 'document',
-    getAttachmentViewObject: () => ({ event: 'added a file' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Files',
+    getIcon: () => 'document',
+    getCreationActivity: () => ({ event: 'added a file' }),
+    getAttachmentList: () => ({
       children: () => <div />,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   return registry;
 };
@@ -126,7 +127,6 @@ describe('useCaseAttachmentsTotal', () => {
     const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
       wrapper: ({ children }) => (
         <TestProviders
-          features={{ observables: { enabled: true } }}
           license={platinumLicense}
           unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
         >
@@ -149,7 +149,6 @@ describe('useCaseAttachmentsTotal', () => {
     const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
       wrapper: ({ children }) => (
         <TestProviders
-          features={{ observables: { enabled: true } }}
           license={basicLicense}
           unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
         >

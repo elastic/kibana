@@ -36,7 +36,7 @@ jest.mock('@kbn/workflows', () => ({
 jest.mock('../../get_stability_note', () => {
   const actual = jest.requireActual('../../get_stability_note');
   return {
-    getExtensionStepStability: actual.getExtensionStepStability,
+    getExtensionStability: actual.getExtensionStability,
   };
 });
 
@@ -60,7 +60,7 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValue([
-      { id: 'cases.caseCreated', title: 'Case Created' },
+      { id: 'cases.caseCreated', title: 'Cases - Case created', stability: 'tech_preview' },
     ]);
     (getCachedAllConnectors as jest.Mock).mockReturnValue([
       {
@@ -81,6 +81,7 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
     expect(prefixes).toEqual(
       expect.arrayContaining([
         'cases.caseCreated',
+        'Cases - Case created',
         'workflow.execute',
         'workflow.executeAsync',
         'kibana.streams.list',

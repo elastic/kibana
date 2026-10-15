@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import {
   alertsSelector,

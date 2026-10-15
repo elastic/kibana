@@ -7,7 +7,7 @@
 
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { WiredIngestUpsertRequest, IngestUpsertRequest } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -52,7 +52,9 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
   handler: async ({
     params,
@@ -109,18 +111,16 @@ const upsertIngestRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
     body: z.object({
       ingest: IngestUpsertRequest.right,
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, attachmentClient } = await getScopedClients({
+      request,
+    });
 
     const { name } = params.path;
     const { ingest } = params.body;
@@ -140,12 +140,9 @@ const upsertIngestRoute = createServerRoute({
       );
     }
 
-    const kiClient = await getKnowledgeIndicatorClient();
-
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        kiClient,
         attachmentClient,
         name,
         ingest,
@@ -154,7 +151,6 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      kiClient,
       attachmentClient,
       name,
       ingest,

@@ -18,15 +18,16 @@ import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { fetchCandidateEntities } from '../entity_conversion';
-import { runLeadGenerationPipeline } from '../run_pipeline';
 import { upsertLeadGenerationConfig } from '../saved_object';
 import { resolveChatModel } from '../utils';
+import { runLeadGenerationInBackground } from '../run_background_pipeline';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  ml: EntityAnalyticsRoutesDeps['ml']
 ) => {
   router.versioned
     .post({
@@ -62,6 +63,10 @@ export const generateLeadsRoute = (
 
           const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
+          const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+            esClient,
+            spaceId
+          );
           const { connectorId } = request.body;
 
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
@@ -73,50 +78,26 @@ export const generateLeadsRoute = (
             `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
           );
 
-          // The pipeline runs in the background after the 202 is returned.
-          // ES index-level permission errors (security_exception) thrown by
-          // createLeads are caught here, not propagated to the HTTP response.
-          // They surface via the status endpoint's `lastError` field instead.
-          void (async () => {
-            try {
-              await runLeadGenerationPipeline({
-                listEntities: () => fetchCandidateEntities(crudClient, logger),
-                esClient,
-                logger,
-                spaceId,
-                riskScoreDataClient,
-                executionId: executionUuid,
-                sourceType: 'adhoc',
-                analytics: coreStart.analytics,
-                chatModel,
-              });
-              await upsertLeadGenerationConfig(soClient, spaceId, {
-                connectorId,
-                lastExecutionUuid: executionUuid,
-                lastError: null,
-              }).catch((soErr: Error) =>
-                logger.warn(
-                  `[LeadGeneration] Failed to persist success status (executionUuid=${executionUuid}): ${soErr.message}`
-                )
-              );
-              logger.info(
-                `[LeadGeneration] Background generation completed (connectorId=${connectorId}, executionUuid=${executionUuid})`
-              );
-            } catch (pipelineError) {
-              const errorMessage =
-                pipelineError instanceof Error ? pipelineError.message : String(pipelineError);
-              logger.error(
-                `[LeadGeneration] Background generation failed (executionUuid=${executionUuid}): ${errorMessage}`
-              );
-              await upsertLeadGenerationConfig(soClient, spaceId, {
-                connectorId,
-                lastExecutionUuid: executionUuid,
-                lastError: errorMessage,
-              }).catch((e) =>
-                logger.warn(`[LeadGeneration] Failed to persist execution error: ${e.message}`)
-              );
-            }
-          })();
+          runLeadGenerationInBackground({
+            savedObjectsClient: soClient,
+            connectorId,
+            executionUuid,
+            pipelineArgs: {
+              listEntities: () => fetchCandidateEntities(crudClient, logger),
+              esClient,
+              logger,
+              spaceId,
+              riskScoreDataClient,
+              executionId: executionUuid,
+              sourceType: 'adhoc',
+              analytics: coreStart.analytics,
+              chatModel,
+              ml,
+              request,
+              soClient,
+              relationshipsClient,
+            },
+          });
 
           return response.ok({ body: { executionUuid } });
         } catch (e) {

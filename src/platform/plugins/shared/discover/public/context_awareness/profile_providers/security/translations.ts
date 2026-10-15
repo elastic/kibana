@@ -62,3 +62,16 @@ export const iocOverviewTabTitle = i18n.translate(
     defaultMessage: 'Indicator Overview',
   }
 );
+
+export const attackOverviewTabTitle = i18n.translate(
+  'discover.profile.security.flyout.attackOverviewTabTitle',
+  {
+    defaultMessage: 'Attack Overview',
+  }
+);
+
+export const alertFlyoutTitle = (ruleName: string) =>
+  i18n.translate('discover.profile.security.flyout.alertFlyoutTitle', {
+    values: { ruleName },
+    defaultMessage: 'Alert: {ruleName}',
+  });

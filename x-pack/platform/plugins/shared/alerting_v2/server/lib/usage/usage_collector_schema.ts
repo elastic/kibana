@@ -22,6 +22,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of enabled alerting v2 rules.' },
   },
+  count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
+    },
+  },
   count_by_kind: {
     alert: {
       type: 'long',
@@ -87,6 +94,42 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
   min_created_at: {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
+  },
+  count_by_recovery_strategy: {
+    no_breach: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+    },
+    condition: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy condition.' },
+    },
+    query: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy query.' },
+    },
+    manual: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy manual.' },
+    },
+  },
+  count_by_no_data_strategy: {
+    ignore: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy ignore.' },
+    },
+    keep_last: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy keep_last.' },
+    },
+    resolve: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy resolve.' },
+    },
+    alert: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy alert.' },
+    },
   },
 
   executions_count_24hr: {

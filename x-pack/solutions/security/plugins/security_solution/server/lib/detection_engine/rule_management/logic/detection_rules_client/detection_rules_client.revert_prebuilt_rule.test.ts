@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { DETECTION_RULE_REVERT_EVENT } from '../../../../telemetry/event_based/events';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -31,6 +34,7 @@ jest.mock('../../../../machine_learning/validation');
 describe('DetectionRulesClient.revertPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
+  let analytics: AnalyticsServiceSetup;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const rulesAuthz = getMockRulesAuthz();
@@ -63,17 +67,33 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
 
+    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+
     detectionRulesClient = createDetectionRulesClient({
       actionsClient: {
         isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
       } as unknown as jest.Mocked<ActionsClient>,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
+      analytics,
     });
+  });
+
+  it('sends detection_rule_revert telemetry with the correct payload', async () => {
+    const revertedRule = getRuleMock(getEqlRuleParams());
+    rulesClient.update.mockResolvedValue(revertedRule);
+
+    await detectionRulesClient.revertPrebuiltRule({ ruleAsset, existingRule });
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_REVERT_EVENT.eventType,
+      expect.objectContaining({ ruleId: revertedRule.id })
+    );
   });
 
   it('throws if mlAuth fails', async () => {

@@ -76,9 +76,11 @@ export class IndexMgmtUIPlugin
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    enableIndexMode: boolean;
+    enableVectorCount: boolean;
     isServerless: boolean;
   };
-  private canUseSyntheticSource: boolean = false;
+  private hasAtLeastEnterpriseLicense: boolean = false;
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
@@ -102,6 +104,8 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
       enableFailureStoreRetentionDisabling,
+      enableIndexMode,
+      enableVectorCount,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
 
@@ -122,6 +126,8 @@ export class IndexMgmtUIPlugin
       enableSemanticText: enableSemanticText ?? true,
       enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
+      enableIndexMode: enableIndexMode ?? true,
+      enableVectorCount: enableVectorCount ?? false,
     };
 
     this.indexDataEnricher = indexDataEnricher;
@@ -157,7 +163,7 @@ export class IndexMgmtUIPlugin
               kibanaVersion: this.kibanaVersion,
               config: this.config,
               cloud,
-              canUseSyntheticSource: this.canUseSyntheticSource,
+              hasAtLeastEnterpriseLicense: this.hasAtLeastEnterpriseLicense,
               reindexService,
             });
           },
@@ -192,7 +198,7 @@ export class IndexMgmtUIPlugin
           kibanaVersion: this.kibanaVersion,
           config: this.config,
           cloud,
-          canUseSyntheticSource: this.canUseSyntheticSource,
+          hasAtLeastEnterpriseLicense: this.hasAtLeastEnterpriseLicense,
           reindexService,
         });
       },
@@ -251,7 +257,7 @@ export class IndexMgmtUIPlugin
       },
       config: this.config,
       history: deps.history,
-      canUseSyntheticSource: this.canUseSyntheticSource,
+      hasAtLeastEnterpriseLicense: this.hasAtLeastEnterpriseLicense,
       overlays: core.overlays,
       privs: {
         monitor: !!monitor,
@@ -276,7 +282,7 @@ export class IndexMgmtUIPlugin
     this.capabilities$.next(coreStart.application.capabilities);
 
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
-      this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+      this.hasAtLeastEnterpriseLicense = next.hasAtLeast('enterprise');
     });
     return {
       apiService: this.apiService!,

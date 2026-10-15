@@ -25,6 +25,7 @@ export enum RuleAuditAction {
   DISABLE = 'rule_disable',
   DELETE = 'rule_delete',
   FIND = 'rule_find',
+  FIND_MUTED_ALERTS = 'rule_find_muted_alerts',
   MUTE = 'rule_mute',
   UNMUTE = 'rule_unmute',
   BULK_MUTE_ALERTS = 'rule_alert_bulk_mute',
@@ -53,6 +54,7 @@ export enum RuleAuditAction {
   GET_RULES_WITH_GAPS = 'rule_get_rules_with_gaps',
   GET_GAPS_SUMMARY_BY_RULE_IDS = 'rule_get_gaps_summary_by_rule_ids',
   BULK_CREATE = 'rule_bulk_create',
+  BULK_UPDATE = 'rule_bulk_update',
 }
 
 export enum AdHocRunAuditAction {
@@ -92,6 +94,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_disable: ['disable', 'disabling', 'disabled'],
   rule_delete: ['delete', 'deleting', 'deleted'],
   rule_find: ['access', 'accessing', 'accessed'],
+  rule_find_muted_alerts: [
+    'access muted alerts for',
+    'accessing muted alerts for',
+    'accessed muted alerts for',
+  ],
   rule_mute: ['mute', 'muting', 'muted'],
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
   rule_alert_bulk_mute: ['bulk mute', 'bulk muting', 'bulk muted'],
@@ -166,6 +173,7 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'got gaps summary by rule ids',
   ],
   rule_bulk_create: ['bulk create', 'bulk creating', 'bulk created'],
+  rule_bulk_update: ['bulk update', 'bulk updating', 'bulk updated'],
 };
 
 const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
@@ -188,6 +196,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_disable: 'change',
   rule_delete: 'deletion',
   rule_find: 'access',
+  rule_find_muted_alerts: 'access',
   rule_mute: 'change',
   rule_unmute: 'change',
   rule_alert_bulk_mute: 'change',
@@ -214,6 +223,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_get_rules_with_gaps: 'access',
   rule_get_gaps_summary_by_rule_ids: 'access',
   rule_bulk_create: 'creation',
+  rule_bulk_update: 'change',
 };
 
 const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {

@@ -196,4 +196,76 @@ describe('SearchAPI', () => {
       });
     });
   });
+
+  describe('searchEsql', () => {
+    const esqlRequest = { query: 'FROM logs-*', name: 'esql-request' };
+
+    test('should call search with the esql_async strategy', (done) => {
+      const searchAPI = new SearchAPI(mockDependencies);
+      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+        expect(mockSearch).toHaveBeenCalled();
+        const searchOptions = mockSearch.mock.calls[0][1];
+        expect(searchOptions.strategy).toBe('esql_async');
+        done();
+      });
+    });
+
+    test('should include approximation in search options when isApproximate is true', (done) => {
+      const searchAPI = new SearchAPI(
+        mockDependencies,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
+      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+        const searchOptions = mockSearch.mock.calls[0][1];
+        expect(searchOptions.approximation).toBe(true);
+        done();
+      });
+    });
+
+    test('should default approximation to false when isApproximate is not provided', (done) => {
+      const searchAPI = new SearchAPI(mockDependencies);
+      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+        const searchOptions = mockSearch.mock.calls[0][1];
+        expect(searchOptions.approximation).toBe(false);
+        done();
+      });
+    });
+
+    test('should include projectRouting and approximation in the inspector request json', (done) => {
+      const jsonMock = jest.fn();
+      const inspectorAdapters = {
+        requests: {
+          start: jest.fn().mockReturnValue({
+            json: jsonMock,
+            stats: jest.fn().mockReturnThis(),
+            ok: jest.fn(),
+          }),
+        },
+      };
+      const searchAPI = new SearchAPI(
+        mockDependencies,
+        undefined,
+        inspectorAdapters as any,
+        undefined,
+        undefined,
+        '_alias:_origin',
+        true
+      );
+      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+        expect(jsonMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: 'FROM logs-*',
+            projectRouting: '_alias:_origin',
+            approximation: true,
+          })
+        );
+        done();
+      });
+    });
+  });
 });

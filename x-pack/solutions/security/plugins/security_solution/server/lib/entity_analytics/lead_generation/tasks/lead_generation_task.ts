@@ -24,10 +24,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
-import type { StartPlugins } from '../../../../plugin_contract';
+import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -50,6 +51,7 @@ interface RegisterParams {
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
   config: ConfigType;
+  ml: SetupPlugins['ml'];
 }
 
 interface StartParams {
@@ -78,6 +80,7 @@ export const registerLeadGenerationTask = ({
   experimentalFeatures,
   config,
   kibanaVersion,
+  ml,
 }: RegisterParams) => {
   if (!taskManager) {
     logger.info(
@@ -100,6 +103,7 @@ export const registerLeadGenerationTask = ({
         getStartServices,
         config,
         kibanaVersion,
+        ml,
       }),
     },
   });
@@ -117,6 +121,7 @@ const createLeadGenerationTaskRunnerFactory =
     getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     config: ConfigType;
     kibanaVersion: string;
+    ml: SetupPlugins['ml'];
   }): TaskRunCreatorFunction =>
   ({ taskInstance, fakeRequest }) => {
     let cancelled = false;
@@ -125,15 +130,20 @@ const createLeadGenerationTaskRunnerFactory =
     return {
       run: async () => {
         const [core, startPlugins] = await deps.getStartServices();
-        return runLeadGenerationTask({
-          isCancelled,
-          logger: deps.logger,
-          taskInstance,
-          fakeRequest,
-          core,
-          startPlugins,
-          kibanaVersion: deps.kibanaVersion,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, taskInstance.id),
+          () =>
+            runLeadGenerationTask({
+              isCancelled,
+              logger: deps.logger,
+              taskInstance,
+              fakeRequest,
+              core,
+              startPlugins,
+              kibanaVersion: deps.kibanaVersion,
+              ml: deps.ml,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
@@ -153,6 +163,7 @@ const runLeadGenerationTask = async ({
   core,
   startPlugins,
   kibanaVersion,
+  ml,
 }: {
   isCancelled: () => boolean;
   logger: Logger;
@@ -161,6 +172,7 @@ const runLeadGenerationTask = async ({
   core: CoreStart;
   startPlugins: StartPlugins;
   kibanaVersion: string;
+  ml: SetupPlugins['ml'];
 }): Promise<{ state: LeadGenerationTaskState }> => {
   const state = taskInstance.state as LeadGenerationTaskState;
   const taskStartTime = moment().utc().toISOString();
@@ -195,6 +207,10 @@ const runLeadGenerationTask = async ({
     // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
     const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
+    const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+      esClient,
+      state.namespace
+    );
     const riskScoreDataClient = new RiskScoreDataClient({
       logger,
       kibanaVersion,
@@ -229,6 +245,10 @@ const runLeadGenerationTask = async ({
       sourceType: 'scheduled',
       analytics: core.analytics,
       chatModel,
+      ml,
+      request: fakeRequest,
+      soClient,
+      relationshipsClient,
     });
 
     await updateLeadGenerationConfig(soClient, state.namespace, {

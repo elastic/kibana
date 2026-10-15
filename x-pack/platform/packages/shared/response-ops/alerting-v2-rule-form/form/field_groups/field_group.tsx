@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSplitPanel,
+  EuiToolTip,
   useGeneratedHtmlId,
   EuiSpacer,
 } from '@elastic/eui';
@@ -123,18 +124,23 @@ export const FieldGroup = (props: FieldGroupProps) => {
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {isCollapsible ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-                onClick={onToggle}
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
-                  {
-                    defaultMessage: 'Toggle {title}',
-                    values: { title },
-                  }
-                )}
-                color="text"
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel', {
+                  defaultMessage: 'Toggle {title}',
+                  values: { title },
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+                  onClick={onToggle}
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
+                    { defaultMessage: 'Toggle {title}', values: { title } }
+                  )}
+                  color="text"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>

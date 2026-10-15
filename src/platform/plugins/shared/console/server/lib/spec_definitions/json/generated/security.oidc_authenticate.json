@@ -6,6 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "nonce": "",
+      "realm": "",
+      "redirect_uri": "",
+      "state": ""
+    },
     "methods": [
       "POST"
     ],

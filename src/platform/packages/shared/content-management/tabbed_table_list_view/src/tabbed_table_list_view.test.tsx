@@ -52,6 +52,7 @@ describe('TabbedTableListView', () => {
       />
     );
     expect(wrapper.exists()).toBe(true);
+    expect(wrapper.find(KibanaPageTemplate).prop('restrictWidth')).toBe(false);
   });
 
   it('should render the correct title and description', () => {
@@ -74,6 +75,23 @@ describe('TabbedTableListView', () => {
       </span>
     `);
     expect(wrapper.find(KibanaPageTemplate.Header).prop('description')).toContain(description);
+  });
+
+  it('should forward rightSideItems to the page header', () => {
+    const rightSideItems = [<button key="create">Create</button>];
+    const wrapper = shallow(
+      <TabbedTableListView
+        title={title}
+        description={description}
+        headingId={headingId}
+        children={children}
+        tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
+        rightSideItems={rightSideItems}
+      />
+    );
+    expect(wrapper.find(KibanaPageTemplate.Header).prop('rightSideItems')).toBe(rightSideItems);
   });
 
   it('should render the correct number of tabs', () => {

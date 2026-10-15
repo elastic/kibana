@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { CaseUserActionTypeWithAll, InternalFindCaseUserActions } from '../../common/ui/types';
+import type { UserActionFindRequestSources } from '../../common/types/api';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -20,6 +21,9 @@ export const useFindCaseUserActions = (
     sortOrder: 'asc' | 'desc';
     page: number;
     perPage: number;
+    search?: string;
+    authors?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   isEnabled: boolean
 ) => {

@@ -14,16 +14,15 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiLink,
   EuiIcon,
   copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
@@ -65,18 +64,15 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut
+        <KbnWarningCallout
           title={
             <FormattedMessage
               id="xpack.cloudConnect.connectedServices.disconnect.warningTitle"
               defaultMessage="Disconnecting a cluster cannot be reversed"
             />
           }
-          color="warning"
-          iconType="warning"
           data-test-subj="disconnectClusterWarningCallout"
-        >
-          <EuiText size="s">
+          text={
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.disconnect.warningDescription"
@@ -102,8 +98,8 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                 }}
               />
             </p>
-          </EuiText>
-        </EuiCallOut>
+          }
+        />
 
         <EuiSpacer size="m" />
 

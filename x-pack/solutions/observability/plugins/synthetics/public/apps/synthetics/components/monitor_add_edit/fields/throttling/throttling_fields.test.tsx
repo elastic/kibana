@@ -5,10 +5,20 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
-import { render } from '../../../../utils/testing';
+import { fireEvent, render as testLibRender, screen, configure } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
 import { ThrottlingFields } from './throttling_fields';
+
+configure({ testIdAttribute: 'data-test-subj' });
+
+const render = (ui: React.ReactElement) =>
+  testLibRender(
+    <I18nProvider>
+      <EuiThemeProvider>{ui}</EuiThemeProvider>
+    </I18nProvider>
+  );
 
 describe('ThrottlingFields', () => {
   it('renders', async () => {

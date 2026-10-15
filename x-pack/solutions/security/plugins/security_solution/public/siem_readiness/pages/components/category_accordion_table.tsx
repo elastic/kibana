@@ -379,7 +379,7 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
       >
         {filteredCategories.length === 0 ? (
           <EuiEmptyPrompt
-            iconType={isAnyFilterActive ? 'search' : 'documents'}
+            iconType={isAnyFilterActive ? 'magnify' : 'documents'}
             title={<h3>{isAnyFilterActive ? noResultsTitle : noDataTitle}</h3>}
             body={<p>{isAnyFilterActive ? noResultsBody : noDataBody}</p>}
           />

@@ -8,31 +8,26 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import {
+  contextEngineAiIndexTools,
+  contextEngineMemoryTools,
+} from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
   ScopedRunner,
-  BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type {
-  AttachmentsService,
-  SkillsService,
-  IBashService,
-  IFilesystemService,
-} from '@kbn/agent-builder-server/runner';
+import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
-import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { createTodoTool } from '../../../tools/builtin/todo';
-import { createReadFileTool } from '../tools/read_file';
-import { createBashTool } from '../tools/bash';
+import type { AiIndexCatalogEntry } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -48,13 +43,11 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  aiIndexCatalog,
+  aiIndicesEnabled,
   attachmentsService,
-  filesystemService,
-  bashService,
   spaceId,
   runner,
-  experimentalFeatures,
-  todoStateManager,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -63,13 +56,11 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filesystemService: IFilesystemService;
-  bashService?: IBashService;
   agentConfiguration: AgentConfiguration;
+  aiIndexCatalog?: AiIndexCatalogEntry[];
+  aiIndicesEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
-  experimentalFeatures: ExperimentalFeatures;
-  todoStateManager: TodoStateManager;
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -93,17 +84,12 @@ export const selectTools = async ({
     runner,
   });
 
-  // Filesystem tools — always include read_file; include bash when its FF is on.
-  const filesystemTools: ExecutableTool[] = [
-    builtinToolToExecutable({ tool: createReadFileTool({ filesystemService }), runner }),
-    ...(experimentalFeatures.bash && bashService
-      ? [builtinToolToExecutable({ tool: createBashTool({ bashService }), runner })]
-      : []),
+  const hasMemoryEnabledAiIndex =
+    aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
+  const aiIndexToolIds = [
+    ...Object.values(contextEngineAiIndexTools),
+    ...(hasMemoryEnabledAiIndex ? Object.values(contextEngineMemoryTools) : []),
   ];
-
-  const todoTools = experimentalFeatures.todos
-    ? [builtinToolToExecutable({ tool: createTodoTool({ todoStateManager }), runner })]
-    : [];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -112,6 +98,9 @@ export const selectTools = async ({
       ...agentConfiguration.tools,
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
+        : []),
+      ...(aiIndicesEnabled && (agentConfiguration.ai_indices?.length ?? 0) > 0
+        ? [{ tool_ids: aiIndexToolIds }]
         : []),
     ],
     toolProvider,
@@ -122,8 +111,6 @@ export const selectTools = async ({
     ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
     ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
-    ...withOrigin(filesystemTools, ToolOrigin.internal),
-    ...withOrigin(todoTools, ToolOrigin.internal),
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableToolWithOrigin>();
@@ -192,7 +179,7 @@ export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
-  tool: BuiltinToolDefinition;
+  tool: InternalBuiltinToolDefinition;
   runner: ScopedRunner;
 }): ExecutableTool => {
   return {
@@ -205,6 +192,7 @@ export const builtinToolToExecutable = ({
     experimental: tool.experimental ?? false,
     getSchema: () => tool.schema,
     summarizeToolReturn: tool.summarizeToolReturn,
+    maxResultTokens: tool.maxResultTokens,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,

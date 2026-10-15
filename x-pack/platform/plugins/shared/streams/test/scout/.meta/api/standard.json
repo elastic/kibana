@@ -1,17 +1,9 @@
 {
-  "sha1": "f0f47bc3d5813d360763b9200f4cc744c2389b91",
+  "sha1": "df1463254567f3780bcc80dacee80865de1923d8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "4aaafd2a7000640-70ec3e6d9549722",
-      "title": "Teardown environment for Streams API tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
-        "line": 11,
-        "column": 19
-      }
-    },
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
@@ -19,178 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
-        "line": 11,
-        "column": 16
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-ea3faff2f10da6c",
-      "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 45,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-597176718a618d6",
-      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 216,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-24f17689411c1be",
-      "title": "Memory CRUD API removing a category does not return the stale older version",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 305,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-0f36a39d57a31b9",
-      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 379,
-        "column": 12
-      }
-    },
-    {
-      "id": "b44f6c2216cb6bc-695cc6450b8de2c",
-      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
-        "line": 442,
-        "column": 12
-      }
-    },
-    {
-      "id": "504e25785616fe1-1d8b985de6fcd2d",
-      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
-        "line": 29,
-        "column": 12
-      }
-    },
-    {
-      "id": "504e25785616fe1-6eae18e8b4c773e",
-      "title": "Onboarding bulk status API rejects an empty streamNames array",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
-        "line": 55,
-        "column": 12
-      }
-    },
-    {
-      "id": "504e25785616fe1-4d182347c2af93f",
-      "title": "Onboarding bulk status API returns 403 when significant events is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
-        "line": 67,
-        "column": 12
-      }
-    },
-    {
-      "id": "94c80912f6246f4-094ac08f869a28e",
-      "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
-        "line": 30,
-        "column": 12
-      }
-    },
-    {
-      "id": "94c80912f6246f4-b38b60bd6807012",
-      "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
-        "line": 47,
-        "column": 12
-      }
-    },
-    {
-      "id": "94c80912f6246f4-8f29a28b4278864",
-      "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -204,7 +26,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
         "line": 57,
-        "column": 10
+        "column": 99
       }
     },
     {
@@ -217,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 85,
-        "column": 10
+        "line": 83,
+        "column": 5
       }
     },
     {
@@ -231,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 122,
-        "column": 10
+        "line": 118,
+        "column": 17
       }
     },
     {
@@ -245,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 162,
-        "column": 10
+        "line": 153,
+        "column": 26
       }
     },
     {
@@ -259,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 194,
-        "column": 10
+        "line": 183,
+        "column": 25
       }
     },
     {
@@ -273,8 +95,148 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 230,
-        "column": 10
+        "line": 217,
+        "column": 14
+      }
+    },
+    {
+      "id": "bf9123d2f461ba3-a9d65106606d0b3",
+      "title": "Stream lifecycle - inherited ILM config API (classic) returns the ILM policy a classic stream would inherit from its index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited_ilm.spec.ts",
+        "line": 57,
+        "column": 47
+      }
+    },
+    {
+      "id": "65f024391566ce3-2d28bbae0b9d8b6",
+      "title": "Stream lifecycle & failure store - inherited config API returns the lifecycle inherited from the parent wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 70,
+        "column": 63
+      }
+    },
+    {
+      "id": "65f024391566ce3-adcf43381b8b07e",
+      "title": "Stream lifecycle & failure store - inherited config API reflects the parent retention even when the child has its own override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "65f024391566ce3-79ef12b6b6b5402",
+      "title": "Stream lifecycle & failure store - inherited config API returns the failure store inherited from the parent wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 129,
+        "column": 35
+      }
+    },
+    {
+      "id": "65f024391566ce3-5a3c7b3294ce0f7",
+      "title": "Stream lifecycle & failure store - inherited config API returns an inherited failure store result for a stream without explicit failure store config",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 173,
+        "column": 76
+      }
+    },
+    {
+      "id": "65f024391566ce3-395f047424e733f",
+      "title": "Stream lifecycle & failure store - inherited config API returns the ILM policy a classic stream would inherit from its index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 203,
+        "column": 29
+      }
+    },
+    {
+      "id": "65f024391566ce3-b2a69fbf3f40bbc",
+      "title": "Stream lifecycle & failure store - inherited config API returns the failure store a classic stream would inherit from an exact-pattern index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 255,
+        "column": 32
+      }
+    },
+    {
+      "id": "65f024391566ce3-dd1dbebb46efc38",
+      "title": "Stream lifecycle & failure store - inherited config API returns 404 for a non-existent stream lifecycle inheritance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 297,
+        "column": 28
+      }
+    },
+    {
+      "id": "65f024391566ce3-f0ae4f153028d66",
+      "title": "Stream lifecycle & failure store - inherited config API returns 404 for a non-existent stream failure store inheritance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 315,
+        "column": 57
       }
     },
     {
@@ -289,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 96,
+        "column": 18
       }
     },
     {
@@ -305,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 109,
+        "column": 27
       }
     },
     {
@@ -321,8 +283,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 149,
-        "column": 12
+        "line": 123,
+        "column": 26
       }
     },
     {
@@ -337,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 190,
-        "column": 12
+        "line": 157,
+        "column": 15
       }
     },
     {
@@ -353,8 +315,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 229,
-        "column": 12
+        "line": 192,
+        "column": 42
       }
     },
     {
@@ -369,8 +331,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 264,
-        "column": 12
+        "line": 222,
+        "column": 36
       }
     },
     {
@@ -385,8 +347,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 299,
-        "column": 12
+        "line": 250,
+        "column": 22
       }
     },
     {
@@ -401,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 338,
-        "column": 12
+        "line": 284,
+        "column": 26
       }
     },
     {
@@ -417,8 +379,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 398,
-        "column": 12
+        "line": 339,
+        "column": 7
       }
     },
     {
@@ -433,8 +395,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 456,
-        "column": 12
+        "line": 390,
+        "column": 28
       }
     },
     {
@@ -449,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 479,
-        "column": 12
+        "line": 411,
+        "column": 7
       }
     },
     {
@@ -465,8 +427,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 523,
-        "column": 12
+        "line": 441,
+        "column": 15
       }
     },
     {
@@ -481,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 539,
-        "column": 12
+        "line": 456,
+        "column": 95
       }
     },
     {
@@ -497,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 568,
-        "column": 12
+        "line": 485,
+        "column": 36
       }
     },
     {
@@ -513,8 +475,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 598,
-        "column": 12
+        "line": 515,
+        "column": 28
       }
     },
     {
@@ -529,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 652,
-        "column": 12
+        "line": 556,
+        "column": 44
       }
     },
     {
@@ -545,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 76,
+        "column": 18
       }
     },
     {
@@ -561,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 120,
+        "column": 7
       }
     },
     {
@@ -577,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 176,
-        "column": 12
+        "line": 156,
+        "column": 18
       }
     },
     {
@@ -593,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 231,
-        "column": 12
+        "line": 212,
+        "column": 10
       }
     },
     {
@@ -609,8 +571,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 303,
-        "column": 12
+        "line": 280,
+        "column": 36
       }
     },
     {
@@ -625,8 +587,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 367,
-        "column": 12
+        "line": 344,
+        "column": 23
       }
     },
     {
@@ -641,8 +603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 419,
-        "column": 12
+        "line": 389,
+        "column": 32
       }
     },
     {
@@ -657,8 +619,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 486,
-        "column": 12
+        "line": 460,
+        "column": 24
       }
     },
     {
@@ -673,8 +635,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 555,
-        "column": 12
+        "line": 533,
+        "column": 17
       }
     },
     {
@@ -689,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 614,
-        "column": 12
+        "line": 589,
+        "column": 29
       }
     },
     {
@@ -705,8 +667,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 648,
-        "column": 12
+        "line": 613,
+        "column": 5
       }
     },
     {
@@ -721,8 +683,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 20,
+        "column": 5
       }
     },
     {
@@ -737,8 +699,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -753,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 93,
-        "column": 12
+        "line": 85,
+        "column": 25
       }
     },
     {
@@ -769,8 +731,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 123,
+        "column": 27
       }
     },
     {
@@ -785,8 +747,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 157,
+        "column": 14
       }
     },
     {
@@ -801,8 +763,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 201,
-        "column": 12
+        "line": 190,
+        "column": 27
       }
     },
     {
@@ -817,8 +779,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 229,
-        "column": 12
+        "line": 218,
+        "column": 14
       }
     },
     {
@@ -833,8 +795,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 261,
-        "column": 12
+        "line": 241,
+        "column": 19
       }
     },
     {
@@ -849,8 +811,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 296,
-        "column": 12
+        "line": 269,
+        "column": 50
       }
     },
     {
@@ -865,8 +827,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 323,
-        "column": 12
+        "line": 302,
+        "column": 20
       }
     },
     {
@@ -881,8 +843,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 351,
-        "column": 12
+        "line": 326,
+        "column": 15
       }
     },
     {
@@ -897,8 +859,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 383,
-        "column": 12
+        "line": 352,
+        "column": 15
       }
     },
     {
@@ -913,8 +875,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 418,
-        "column": 12
+        "line": 386,
+        "column": 49
       }
     },
     {
@@ -929,8 +891,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 452,
-        "column": 12
+        "line": 421,
+        "column": 13
       }
     },
     {
@@ -945,8 +907,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 480,
-        "column": 12
+        "line": 452,
+        "column": 67
       }
     },
     {
@@ -961,8 +923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 506,
-        "column": 12
+        "line": 475,
+        "column": 8
       }
     },
     {
@@ -977,8 +939,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 532,
-        "column": 12
+        "line": 497,
+        "column": 88
       }
     },
     {
@@ -993,8 +955,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 563,
-        "column": 12
+        "line": 523,
+        "column": 25
       }
     },
     {
@@ -1009,8 +971,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 590,
-        "column": 12
+        "line": 545,
+        "column": 18
       }
     },
     {
@@ -1025,8 +987,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 617,
-        "column": 12
+        "line": 573,
+        "column": 17
       }
     },
     {
@@ -1041,8 +1003,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 648,
-        "column": 12
+        "line": 596,
+        "column": 62
       }
     },
     {
@@ -1057,8 +1019,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 676,
-        "column": 12
+        "line": 623,
+        "column": 25
       }
     },
     {
@@ -1073,8 +1035,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 709,
-        "column": 12
+        "line": 654,
+        "column": 20
       }
     },
     {
@@ -1089,8 +1051,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 752,
-        "column": 12
+        "line": 688,
+        "column": 36
       }
     },
     {
@@ -1105,8 +1067,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 786,
-        "column": 12
+        "line": 728,
+        "column": 25
       }
     },
     {
@@ -1121,8 +1083,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 814,
-        "column": 12
+        "line": 755,
+        "column": 15
       }
     },
     {
@@ -1137,8 +1099,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 839,
-        "column": 12
+        "line": 773,
+        "column": 17
       }
     },
     {
@@ -1153,8 +1115,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 866,
-        "column": 12
+        "line": 794,
+        "column": 22
       }
     },
     {
@@ -1169,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 888,
-        "column": 12
+        "line": 817,
+        "column": 13
       }
     },
     {
@@ -1183,8 +1145,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 71,
+        "column": 37
       }
     },
     {
@@ -1197,8 +1159,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 82,
+        "column": 25
       }
     },
     {
@@ -1211,8 +1173,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 83,
+        "column": 60
       }
     },
     {
@@ -1225,8 +1187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 90,
+        "column": 26
       }
     },
     {
@@ -1239,8 +1201,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 127,
-        "column": 12
+        "line": 99,
+        "column": 34
       }
     },
     {
@@ -1253,8 +1215,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 105,
+        "column": 28
       }
     },
     {
@@ -1267,8 +1229,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 147,
-        "column": 12
+        "line": 112,
+        "column": 34
       }
     },
     {
@@ -1281,8 +1243,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 118,
+        "column": 36
       }
     },
     {
@@ -1295,8 +1257,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 168,
+        "column": 29
       }
     },
     {
@@ -1311,8 +1273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -1327,8 +1289,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 48,
+        "column": 28
       }
     },
     {
@@ -1343,8 +1305,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 66,
+        "column": 47
       }
     },
     {
@@ -1359,8 +1321,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 80,
+        "column": 19
       }
     },
     {
@@ -1375,8 +1337,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 93,
+        "column": 38
       }
     },
     {
@@ -1391,8 +1353,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 111,
+        "column": 25
       }
     },
     {
@@ -1407,8 +1369,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 128,
+        "column": 17
       }
     },
     {
@@ -1423,8 +1385,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 189,
-        "column": 12
+        "line": 142,
+        "column": 21
       }
     },
     {
@@ -1439,8 +1401,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 218,
-        "column": 12
+        "line": 168,
+        "column": 7
       }
     },
     {
@@ -1455,8 +1417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 251,
-        "column": 12
+        "line": 189,
+        "column": 13
       }
     },
     {
@@ -1471,8 +1433,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 300,
-        "column": 12
+        "line": 228,
+        "column": 20
       }
     },
     {
@@ -1487,8 +1449,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 339,
-        "column": 12
+        "line": 265,
+        "column": 59
       }
     },
     {
@@ -1503,8 +1465,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 372,
-        "column": 12
+        "line": 293,
+        "column": 60
       }
     },
     {
@@ -1519,8 +1481,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 395,
-        "column": 12
+        "line": 315,
+        "column": 29
       }
     },
     {
@@ -1535,8 +1497,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 418,
-        "column": 12
+        "line": 339,
+        "column": 63
       }
     },
     {
@@ -1551,8 +1513,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 438,
-        "column": 12
+        "line": 350,
+        "column": 10
       }
     },
     {
@@ -1567,8 +1529,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 466,
-        "column": 12
+        "line": 376,
+        "column": 13
       }
     },
     {
@@ -1583,8 +1545,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 484,
-        "column": 12
+        "line": 387,
+        "column": 10
       }
     },
     {
@@ -1599,8 +1561,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 513,
-        "column": 12
+        "line": 406,
+        "column": 38
       }
     },
     {
@@ -1615,8 +1577,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 535,
-        "column": 12
+        "line": 424,
+        "column": 15
       }
     },
     {
@@ -1631,8 +1593,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 551,
-        "column": 12
+        "line": 438,
+        "column": 74
       }
     },
     {
@@ -1647,8 +1609,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 581,
-        "column": 12
+        "line": 466,
+        "column": 68
       }
     },
     {
@@ -1663,8 +1625,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 601,
-        "column": 12
+        "line": 480,
+        "column": 26
       }
     },
     {
@@ -1679,8 +1641,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 617,
-        "column": 12
+        "line": 491,
+        "column": 19
       }
     },
     {
@@ -1695,8 +1657,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 634,
-        "column": 12
+        "line": 506,
+        "column": 27
       }
     },
     {
@@ -1711,8 +1673,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 702,
-        "column": 12
+        "line": 556,
+        "column": 28
       }
     },
     {
@@ -1727,8 +1689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 767,
-        "column": 12
+        "line": 596,
+        "column": 9
       }
     },
     {
@@ -1743,8 +1705,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 861,
-        "column": 12
+        "line": 652,
+        "column": 18
       }
     },
     {
@@ -1759,8 +1721,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 76,
+        "column": 18
       }
     },
     {
@@ -1775,8 +1737,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 129,
-        "column": 12
+        "line": 111,
+        "column": 10
       }
     },
     {
@@ -1791,8 +1753,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 145,
+        "column": 22
       }
     },
     {
@@ -1807,8 +1769,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 207,
-        "column": 12
+        "line": 181,
+        "column": 18
       }
     },
     {
@@ -1823,8 +1785,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 246,
-        "column": 12
+        "line": 212,
+        "column": 30
       }
     },
     {
@@ -1839,8 +1801,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 285,
-        "column": 12
+        "line": 246,
+        "column": 83
       }
     },
     {
@@ -1855,8 +1817,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 324,
-        "column": 12
+        "line": 282,
+        "column": 7
       }
     },
     {
@@ -1871,8 +1833,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 370,
-        "column": 12
+        "line": 325,
+        "column": 13
       }
     },
     {
@@ -1887,8 +1849,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 442,
-        "column": 12
+        "line": 387,
+        "column": 22
       }
     },
     {
@@ -1903,8 +1865,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 508,
-        "column": 12
+        "line": 443,
+        "column": 13
       }
     },
     {
@@ -1919,8 +1881,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 574,
-        "column": 12
+        "line": 505,
+        "column": 7
       }
     },
     {
@@ -1935,8 +1897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 616,
-        "column": 12
+        "line": 539,
+        "column": 25
       }
     },
     {
@@ -1951,8 +1913,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 648,
-        "column": 12
+        "line": 563,
+        "column": 62
+      }
+    },
+    {
+      "id": "4aaafd2a7000640-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

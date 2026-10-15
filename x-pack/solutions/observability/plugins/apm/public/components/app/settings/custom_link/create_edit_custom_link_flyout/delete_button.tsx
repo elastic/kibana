@@ -9,8 +9,8 @@ import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import React, { useState } from 'react';
-import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { getApmInternalServices } from '../../../../../plugin';
 
 interface Props {
   onDelete: () => void;
@@ -44,6 +44,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
 }
 
 async function deleteConfig(customLinkId: string, toasts: NotificationsStart['toasts']) {
+  const { callApmApi } = getApmInternalServices();
   try {
     await callApmApi('DELETE /internal/apm/settings/custom_links/{id}', {
       signal: null,

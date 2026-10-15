@@ -11,18 +11,21 @@ import { createSkillAttachmentType } from './skill';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
-  id: 'incident-triage',
-  name: 'Incident triage',
-  description: 'Use when investigating production incidents.',
-  content: '## When to Use\n\nUse this skill when triaging incidents.',
-  tool_ids: ['platform.core.execute_esql'],
-  referenced_content: [
-    {
-      name: 'examples',
-      relativePath: './examples',
-      content: '# Triage examples\n\nN/A.',
-    },
-  ],
+  mode: 'create',
+  skill: {
+    id: 'incident-triage',
+    name: 'Incident triage',
+    description: 'Use when investigating production incidents.',
+    content: '## When to Use\n\nUse this skill when triaging incidents.',
+    tool_ids: ['platform.core.execute_esql'],
+    referenced_content: [
+      {
+        name: 'examples',
+        relativePath: './examples',
+        content: '# Triage examples\n\nN/A.',
+      },
+    ],
+  },
 };
 
 const formatContext = {
@@ -43,36 +46,60 @@ describe('skill attachment type', () => {
 
   describe('validate', () => {
     it('accepts a fully populated payload', async () => {
-      const result = await definition.validate(validSkill);
+      const result = await definition.validate(validSkill, formatContext);
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data.id).toBe('incident-triage');
+        expect(result.data.skill.id).toBe('incident-triage');
       }
     });
 
     it('rejects an empty content body', async () => {
-      const result = await definition.validate({ ...validSkill, content: '' });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, content: '' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects an id with uppercase letters', async () => {
-      const result = await definition.validate({ ...validSkill, id: 'Incident-Triage' });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, id: 'Incident-Triage' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects a referenced file with a path outside ./', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+          },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects more than 5 tool_ids', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+          },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
   });
@@ -83,9 +110,10 @@ describe('skill attachment type', () => {
       const formatted = await definition.format(attachment, formatContext);
       const repr = await formatted.getRepresentation?.();
       expect(repr?.type).toBe('text');
-      expect(repr?.value).toContain('Skill (id: incident-triage)');
-      expect(repr?.value).toContain(validSkill.content);
-      expect(repr?.value).toContain('platform.core.execute_esql');
+      if (repr?.type !== 'text') throw new Error('expected text representation');
+      expect(repr.value).toContain('Skill (id: incident-triage)');
+      expect(repr.value).toContain(validSkill.skill.content);
+      expect(repr.value).toContain('platform.core.execute_esql');
     });
   });
 

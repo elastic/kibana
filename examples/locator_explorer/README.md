@@ -6,4 +6,4 @@ This example plugin shows how to:
  - Generate dynamic links, when the target application is not known
  - Handle backward compatibility of urls
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

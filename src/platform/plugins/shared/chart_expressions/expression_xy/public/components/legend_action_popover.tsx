@@ -96,16 +96,16 @@ export const LegendActionPopover: React.FunctionComponent<{
       },
     });
 
-    // Always show the built-in filter actions when filtering is disabled, so the user
-    // can see they exist but are disabled
-    const showDefaultFilterActions =
-      !hasFilterCellAction(legendCellValueActions) || showDisabledFilterActions;
-
+    // When filtering is disabled, show the built-in filter actions as disabled so the user can
+    // see they exist but can't be used — but only alongside a message explaining why; with
+    // nothing to explain (e.g. a suppressed date column), omit them entirely instead.
     const filterPanelItems = (
-      showDefaultFilterActions
-        ? showDisabledFilterActions
+      showDisabledFilterActions
+        ? footerMessage
           ? defaultFilterActions.map((action) => ({ ...action, disabled: true, execute: () => {} }))
-          : defaultFilterActions
+          : []
+        : !hasFilterCellAction(legendCellValueActions)
+        ? defaultFilterActions
         : []
     ).map(toMenuItem);
 
@@ -127,6 +127,10 @@ export const LegendActionPopover: React.FunctionComponent<{
       },
     ];
   }, [label, legendCellValueActions, onFilter, showDisabledFilterActions, footerMessage]);
+
+  if (!panels[0]?.items?.length) {
+    return null;
+  }
 
   const Button = (
     <div

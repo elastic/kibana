@@ -38,13 +38,11 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
         basePath: DASHBOARD_API_PATH,
         routeConfig: {
           access: 'public',
-          description:
-            'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
           options: {
             tags: ['oas-tag:Dashboards'],
             availability: {
-              stability: 'experimental',
-              since: '9.4.0',
+              stability: 'stable',
+              since: '9.5.0',
             },
           },
           security: {

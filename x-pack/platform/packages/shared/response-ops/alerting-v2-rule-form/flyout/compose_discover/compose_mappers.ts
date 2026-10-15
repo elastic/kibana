@@ -5,174 +5,86 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, UpdateRuleData, Query } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import {
   mapArtifacts,
   mergeArtifactsByType,
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
-import type { ComposeFormValues } from './compose_form_types';
-
-const DELAY_IMMEDIATE = 'immediate';
-const DELAY_BREACHES = 'breaches';
-const DELAY_DURATION = 'duration';
-
-const mapStateTransition = (formValues: ComposeFormValues) => {
-  const { kind, stateTransition } = formValues;
-  if (kind !== 'alert') return undefined;
-
-  const alertMode = formValues.stateTransitionAlertDelayMode;
-  const recoveryMode = formValues.stateTransitionRecoveryDelayMode;
-
-  const out: Record<string, number | string> = {};
-
-  if (alertMode === DELAY_IMMEDIATE) {
-    out.pending_count = 0;
-  } else if (alertMode === DELAY_BREACHES && stateTransition?.pendingCount != null) {
-    out.pending_count = stateTransition.pendingCount;
-  } else if (alertMode === DELAY_DURATION) {
-    if (stateTransition?.pendingTimeframe != null)
-      out.pending_timeframe = stateTransition.pendingTimeframe;
-    if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
-  }
-
-  if (recoveryMode === DELAY_IMMEDIATE) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_DURATION) {
-    if (stateTransition?.recoveringTimeframe != null)
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    if (stateTransition?.recoveringCount != null)
-      out.recovering_count = stateTransition.recoveringCount;
-  }
-
-  return Object.keys(out).length ? out : undefined;
-};
-
-/**
- * Maps the compose form query to the API query shape. Recovery strategy is
- * inferred from presence of the recovery block and set as a top-level field
- * in `composeFormToCreateRequest`.
- */
-const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
-  if (q.format === 'composed') {
-    return {
-      format: 'composed',
-      base: q.base,
-      breach: { segment: q.breach.segment },
-      ...(q.recovery ? { recovery: { segment: q.recovery.segment } } : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: q.breach.query },
-    ...(q.recovery ? { recovery: { query: q.recovery.query } } : {}),
-  };
-};
+import { ruleQueryToApiQuery, apiQueryToFormQuery } from '../../form/utils/query_mappers';
+import { toUpdateRuleData } from '../../form/utils/rule_request_mappers';
+import {
+  apiStateTransitionToFormStateTransition,
+  buildStateTransitionRequest,
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from '../../form/utils/state_transition_helpers';
+import {
+  apiNoDataToFormNoData,
+  apiRecoveryToFormRecovery,
+  formNoDataToApiNoData,
+  formRecoveryToApiRecovery,
+} from '../../form/utils/lifecycle_mappers';
+import type { FormValues } from '../../form/types';
 
 export const composeFormToCreateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
-  const hasRecovery = formValues.query.recovery != null;
+  const recovery = formRecoveryToApiRecovery(formValues);
+  const noData = formNoDataToApiNoData(formValues);
 
   return {
     kind: formValues.kind,
     metadata: {
       name: formValues.metadata.name,
-      description: formValues.metadata.description,
-      owner: formValues.metadata.owner,
+      ...(formValues.metadata.description ? { description: formValues.metadata.description } : {}),
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
-      ...(builderType ? { builder_type: builderType } : {}),
+      ...(formValues.metadata.routingTags?.length
+        ? { routing_tags: formValues.metadata.routingTags }
+        : {}),
+      ...(builderType ? { builder: { type: builderType } } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: composeQueryToApiQuery(formValues.query),
-    ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
+    query: ruleQueryToApiQuery(formValues.query),
+    ...(recovery ? { recovery } : {}),
+    ...(noData ? { no_data: noData } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
-    state_transition: mapStateTransition(formValues),
+    state_transition: buildStateTransitionRequest(formValues),
     ...(artifacts ? { artifacts } : {}),
   };
 };
 
 export const composeFormToUpdateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const { grouping, state_transition, artifacts, metadata, ...rest } = request;
+  const update = toUpdateRuleData(request);
+
   return {
-    ...rest,
-    metadata: {
-      ...metadata,
-      builder_type: metadata.builder_type ?? null,
-    },
-    grouping: grouping ?? null,
-    state_transition: state_transition ?? null,
-    artifacts: artifacts ?? null,
+    ...update,
+    metadata: { ...update.metadata, builder: request.metadata.builder ?? null },
   };
 };
 
 // ---------------------------------------------------------------------------
-// API response → ComposeFormValues
+// API response → FormValues
 // ---------------------------------------------------------------------------
 
-/**
- * Maps the API query shape to the compose form's narrower shape. A
- * `recovery_strategy` of `'no_breach'` (or absent) is not surfaced by this
- * form — only `'query'` maps a recovery block onto the form.
- */
-const apiQueryToRuleQuery = (
-  q: RuleResponse['query'],
-  recoveryStrategy?: RuleResponse['recovery_strategy']
-): ComposeFormValues['query'] => {
-  if (q.format === 'composed') {
-    return {
-      format: 'composed',
-      base: q.base,
-      breach: { segment: q.breach.segment },
-      ...(recoveryStrategy === 'query' && q.recovery
-        ? { recovery: { segment: q.recovery.segment } }
-        : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: q.breach.query },
-    ...(recoveryStrategy === 'query' && q.recovery
-      ? { recovery: { query: q.recovery.query } }
-      : {}),
-  };
-};
+/** Bridge YAML parse output into compose form values for the Discover flyout. */
+export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): FormValues => ({
+  ...parsed,
+  ...splitArtifactsByType(parsed.artifacts),
+});
 
-const deriveAlertDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionAlertDelayMode'] => {
-  if (st?.pendingTimeframe != null) return DELAY_DURATION;
-  if (st?.pendingCount != null && st.pendingCount > 0) return DELAY_BREACHES;
-  return DELAY_IMMEDIATE;
-};
-
-const deriveRecoveryDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionRecoveryDelayMode'] => {
-  if (st?.recoveringTimeframe != null) return DELAY_DURATION;
-  if (st?.recoveringCount != null && st.recoveringCount > 0) return 'recoveries';
-  return DELAY_IMMEDIATE;
-};
-
-export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues => {
-  const stateTransition: ComposeFormValues['stateTransition'] = rule.state_transition
-    ? {
-        pendingCount: rule.state_transition.pending_count ?? null,
-        pendingTimeframe: rule.state_transition.pending_timeframe ?? null,
-        recoveringCount: rule.state_transition.recovering_count ?? null,
-        recoveringTimeframe: rule.state_transition.recovering_timeframe ?? null,
-      }
+export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
+  const stateTransition = rule.state_transition
+    ? apiStateTransitionToFormStateTransition(rule.state_transition)
     : undefined;
 
   return {
@@ -181,19 +93,21 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
       name: rule.metadata.name,
       description: rule.metadata.description,
       enabled: rule.enabled,
-      owner: rule.metadata.owner,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    query: apiQueryToFormQuery(rule.query),
+    recovery: apiRecoveryToFormRecovery(rule.recovery),
+    noData: apiNoDataToFormNoData(rule.no_data),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
-    stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
-    stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
+    stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+    stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     ...splitArtifactsByType(rule.artifacts),
   };
 };

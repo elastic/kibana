@@ -11,14 +11,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 export type EuiTheme = EuiThemeComputed;
 
 export const getRetentionSelectableRowStyles = ({ euiTheme }: { euiTheme: EuiTheme }) => ({
-  item: css`
-    /*
-     * Keep row-level styling minimal; list-level styling handles dividers so the
-     * separator spans both the main button and the optional extra action.
-     */
-    width: 100%;
-    padding: ${euiTheme.size.s} ${euiTheme.size.l};
-  `,
   nameColumn: css`
     min-width: 0;
   `,
@@ -30,35 +22,27 @@ export const getRetentionSelectableRowStyles = ({ euiTheme }: { euiTheme: EuiThe
   `,
 });
 
-export const getRetentionSelectorStyles = ({
-  euiTheme,
-  height,
-}: {
-  euiTheme: EuiTheme;
-  height?: number | 'full';
-}) => ({
-  list: css`
-    /*
-     * Dividers + gutters live at the list level so the separator spans both the
-     * main button and the optional extra action button.
-     */
-    // Needed so the line doesn't get cut off
-    .euiListItemLayout__wrapper {
-      border-bottom: ${euiTheme.border.thin};
-      padding-right: ${euiTheme.size.l};
-    }
-    .euiListItemLayout__wrapper:last-child {
-      border-bottom: none;
-    }
-  `,
+export const getRetentionSelectorStyles = ({ euiTheme }: { euiTheme: EuiTheme }) => ({
   paddedSection: css`
     padding: 0 ${euiTheme.size.l};
   `,
-  scrollContainer: css`
-    overflow-y: auto;
-    min-height: 0;
-    ${typeof height === 'number' ? `max-height: ${height}px;` : ''}
-    ${height === 'full' ? 'height: 100%;' : ''}
+  selectable: css`
+    .euiSelectableListItem {
+      padding-block: ${euiTheme.size.s};
+    }
+
+    /*
+     * EUI's text column is flex-grow:1 but has no min-width, so a long,
+     * unbroken option name keeps its intrinsic width and pushes the append
+     * action (e.g. the inspect button) out of the row. Allowing it to shrink
+     * lets the row's own ellipsis styles truncate the name. We can't use
+     * listProps.textWrap="truncate" here because that collapses the whole
+     * multi-line row (name + description) onto a single truncated line.
+     */
+    .euiSelectableListItem__text {
+      padding-block: 0;
+      min-width: 0;
+    }
   `,
   panelListPanel: css`
     overflow: hidden;

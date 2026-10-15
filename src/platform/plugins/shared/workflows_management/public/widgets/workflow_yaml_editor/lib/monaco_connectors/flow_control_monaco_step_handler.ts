@@ -12,7 +12,7 @@ import { getBuiltInStepDefinition, getBuiltInStepStability } from '@kbn/workflow
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
-const FLOW_CONTROL_STEP_TYPES = ['wait', 'waitForInput'] as const;
+const FLOW_CONTROL_STEP_TYPES = ['wait', 'waitForInput', 'waitForApproval'] as const;
 
 export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
   constructor() {
@@ -40,6 +40,14 @@ export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
         ? [
             '- `message` _(optional)_ — Message displayed to the user when waiting for input',
             '- `schema` _(optional)_ — JSON Schema describing the expected input payload',
+            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `email`, `slack2`, `servicenow`, `http`)',
+          ]
+        : connectorType === 'waitForApproval'
+        ? [
+            '- `message` _(optional)_ — Message displayed to approvers',
+            '- `approveLabel` _(optional)_ — Label for the approve action (default: Approve)',
+            '- `rejectLabel` _(optional)_ — Label for the reject action (default: Decline)',
+            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `email`, `slack2`, `servicenow`, `http`)',
           ]
         : ['- `duration` _(required)_ — Duration to wait, e.g. `"5s"`, `"1m"`, `"2h"`'];
 

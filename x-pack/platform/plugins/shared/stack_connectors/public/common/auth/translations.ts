@@ -289,6 +289,13 @@ export const AUTHENTICATION_OAUTH2 = i18n.translate(
   }
 );
 
+export const AUTHENTICATION_OAUTH2_PASSWORD = i18n.translate(
+  'xpack.stackConnectors.components.auth.authenticationMethodOAuth2PasswordLabel',
+  {
+    defaultMessage: 'OAuth 2.0 Password',
+  }
+);
+
 export const INVALID_JSON = i18n.translate(
   'xpack.stackConnectors.components.additionalFieldsFormatErrorMessage',
   {

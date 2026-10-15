@@ -1,0 +1,121 @@
+name: Close stale failed-test issues
+
+# Daily sweep that closes `failed-test` issues created by kibanamachine when
+# they have had no activity for 21 days. Any activity that updates the issue
+# (a new failure comment, a human comment, an edit) restarts the countdown.
+#
+# Closing is safe: the failed test reporter reopens the issue automatically
+# if the test fails again. Issues labeled `skipped-test` are excluded because
+# they stay open on purpose as a reminder to unskip the test.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log what would be closed instead of closing'
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  sweep:
+    name: Close failed-test issues with no activity for 21 days
+    runs-on: ubuntu-slim
+    if: github.repository == 'elastic/kibana'
+    concurrency:
+      group: close-stale-failed-test-issues
+      cancel-in-progress: true
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const LABEL = 'failed-test';
+            const EXCLUDED_LABELS = ['skipped-test'];
+            const CREATOR = 'kibanamachine';
+            const DAYS_UNTIL_CLOSE = 21;
+            // Drain the backlog gradually to avoid rate limits and a
+            // notification storm on the first runs
+            const MAX_CLOSES_PER_RUN = 200;
+            const dryRun = process.env.DRY_RUN === 'true';
+            const cutoff = Date.now() - DAYS_UNTIL_CLOSE * 24 * 60 * 60 * 1000;
+
+            const getLabels = (item) =>
+              item.labels.map((label) => (typeof label === 'string' ? label : label.name));
+
+            const items = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: LABEL,
+              creator: CREATOR,
+              per_page: 100,
+            });
+
+            let closed = 0;
+            for (const item of items) {
+              if (closed >= MAX_CLOSES_PER_RUN) {
+                core.info(`Reached the limit of ${MAX_CLOSES_PER_RUN} closes, stopping`);
+                break;
+              }
+              if (
+                item.pull_request ||
+                new Date(item.updated_at).getTime() > cutoff ||
+                getLabels(item).some((label) => EXCLUDED_LABELS.includes(label))
+              ) {
+                continue;
+              }
+
+              if (dryRun) {
+                closed += 1;
+                core.info(`[dry run] would close #${item.number} (updated ${item.updated_at}): ${item.title}`);
+                continue;
+              }
+
+              // Re-check right before closing to narrow the race with new
+              // failures and manual label changes
+              const { data: fresh } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+              });
+              const freshLabels = getLabels(fresh);
+              if (
+                fresh.state !== 'open' ||
+                !freshLabels.includes(LABEL) ||
+                freshLabels.some((label) => EXCLUDED_LABELS.includes(label)) ||
+                new Date(fresh.updated_at).getTime() > cutoff
+              ) {
+                continue;
+              }
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+                body: [
+                  `Closing as this test hasn't failed in 3 weeks, which likely means the flakiness has resolved itself. This issue will reopen automatically if the test fails again.`,
+                  '',
+                  '<!-- failed-test-stale-closed -->',
+                ].join('\n'),
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              });
+              closed += 1;
+              core.info(`Closed #${item.number} (updated ${item.updated_at}): ${item.title}`);
+            }
+            core.info(
+              `Checked ${items.length} open "${LABEL}" issue(s) created by ${CREATOR}, closed ${closed}${dryRun ? ' (dry run)' : ''}`
+            );

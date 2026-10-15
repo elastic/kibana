@@ -80,9 +80,9 @@ export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActions
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
-
-export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-case-action"]';
+export const CREATE_NEW_CASE_FROM_MODAL_BUTTON =
+  '[data-test-subj="cases-table-add-case-filter-bar"]';
 
 export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
 
@@ -149,10 +149,10 @@ export const ALERT_SUMMARY_CHARTS_COLLAPSED = getDataTestSubjectSelector('chart-
 
 export const ALERTS_HISTOGRAM = getDataTestSubjectSelector('alerts-histogram-panel');
 
-export const ALERTS_HISTOGRAM_LEGEND =
-  '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
-
 export const ALERTS_HISTOGRAM_SERIES = '[data-ech-series-name]';
+
+export const ALERTS_HISTOGRAM_LEGEND_BUTTON = (ruleName: string) =>
+  `[data-test-subj="alerts-histogram-panel"] [data-test-subj="legend-${ruleName}"]`;
 
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 
@@ -221,8 +221,7 @@ export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
 export const ALERT_USER_AVATAR = (assignee: string) => {
   const expectedAssignee = assignee;
 
-  // Use partial match (^=) for title to handle cases where email is appended in parentheses
-  return `[data-test-subj^="securitySolutionUsersAvatar-"][title^='${expectedAssignee}']`;
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][aria-label^='${expectedAssignee}']`;
 };
 
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
@@ -250,9 +249,8 @@ export const HOVER_ACTIONS = {
   SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
 };
 
-export const ADD_TO_NEW_CASE_BUTTON = '[data-test-subj="attach-new-case"]';
-
-export const ADD_TO_EXISTING_CASE_BUTTON = '[data-test-subj="attach-existing-case"]';
+export const ADD_TO_CASE_BUTTON = '[data-test-subj="alerts-table-add-to-case"]';
+export const ADD_TO_CASE_MODAL = '[data-test-subj="all-cases-modal"]';
 
 export const GROUP_ALERTS_BY_BTN = '[data-test-subj="alerts-table-group-selector"]';
 

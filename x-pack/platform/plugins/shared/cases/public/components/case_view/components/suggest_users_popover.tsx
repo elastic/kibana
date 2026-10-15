@@ -45,6 +45,7 @@ export interface SuggestUsersPopoverProps {
   onUsersChange: (users: UserProfileWithAvatar[]) => void;
   togglePopover: () => void;
   onClosePopover: () => void;
+  button?: React.ReactElement;
 }
 
 const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
@@ -55,6 +56,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   onUsersChange,
   togglePopover,
   onClosePopover,
+  button,
 }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,7 +111,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   return (
     <UserProfilesPopover
       title={i18n.EDIT_ASSIGNEES}
-      button={<PopoverButton togglePopover={togglePopover} isDisabled={isDisabled} />}
+      button={button ?? <PopoverButton togglePopover={togglePopover} isDisabled={isDisabled} />}
       isOpen={isPopoverOpen}
       closePopover={onClosePopover}
       panelStyle={{
