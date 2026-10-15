@@ -52,7 +52,7 @@ describe('createRuleAuthoringSkill', () => {
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
-  it('stays available when Alerting V2 experimental features are disabled', async () => {
+  it('stays available when universal alerting experimental features are disabled', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };
 

@@ -37,7 +37,7 @@ export const createActionPolicyAuthoringSkill = (deps: ActionPolicyAuthoringSkil
     name: ACTION_POLICY_AUTHORING_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-authoring skill.',
+      'Compose, discover, and modify universal alerting action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-authoring skill.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
@@ -96,7 +96,7 @@ Use this skill when:
 - The \`rule-authoring\` skill has handed off after composing a complete alert rule and the user agreed to set up notifications.
 
 Do **not** use this skill for:
-- Composing or editing alerting V2 rules themselves — load the \`rule-authoring\` skill for that.
+- Composing or editing universal alerting rules themselves — load the \`rule-authoring\` skill for that.
 - Classic (V1) Kibana stack rules or Security detection rules.
 - Action connector configuration (connectors are managed separately — load \`workflow-authoring\` for connector discovery).
 - Querying or analyzing data — use data exploration skills for that.

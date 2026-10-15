@@ -23,7 +23,7 @@ export type RegisterSkillsDeps = ManageRuleToolDeps &
   };
 
 /**
- * Registers Alerting v2 Agent Builder skills. Unexpected register failures are
+ * Registers universal alerting Agent Builder skills. Unexpected register failures are
  * logged and skipped so one skill cannot block the other.
  */
 export const registerSkills = (

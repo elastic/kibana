@@ -33,7 +33,7 @@ export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
     name: RULE_AUTHORING_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
+      'Compose, discover, and modify universal alerting rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
@@ -156,7 +156,7 @@ The ${
       ALERTING_TOOL_IDS.manageRule
     } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
-- **Create rule** — create a new V2 rule from the in-memory attachment.
+- **Create rule** — create a new universal alerting rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
 - **View in Rules** — navigate to the rule detail page (only for attached saved rules).
 

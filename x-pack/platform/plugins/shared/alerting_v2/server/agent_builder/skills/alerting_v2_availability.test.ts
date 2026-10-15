@@ -17,7 +17,7 @@ const createContext = () => {
 };
 
 describe('createAlertingV2Availability', () => {
-  it('does not consult Alerting V2 or Agent Builder experimental feature settings', async () => {
+  it('does not consult universal alerting or Agent Builder experimental feature settings', async () => {
     const availability = createAlertingV2Availability({
       getActiveSpace: jest.fn().mockResolvedValue({}),
     });
@@ -35,7 +35,7 @@ describe('createAlertingV2Availability', () => {
 
       await expect(availability.handler(createContext().context)).resolves.toEqual({
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability projects',
+        reason: 'Universal alerting skills are only available in Observability projects',
       });
       expect(getActiveSpace).not.toHaveBeenCalled();
     }
@@ -75,7 +75,7 @@ describe('createAlertingV2Availability', () => {
 
       await expect(availability.handler(createContext().context)).resolves.toEqual({
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability or Classic spaces',
+        reason: 'Universal alerting skills are only available in Observability or Classic spaces',
       });
     }
   );

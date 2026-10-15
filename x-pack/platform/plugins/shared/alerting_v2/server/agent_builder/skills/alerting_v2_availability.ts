@@ -21,7 +21,7 @@ const isObservabilityProject = (projectType: AlertingV2AvailabilityDeps['project
 const isObservabilitySolution = (solution?: Space['solution']): boolean =>
   !solution || solution === 'classic' || solution === 'oblt';
 
-/** Shared availability gate for Alerting v2 Agent Builder skills. */
+/** Shared availability gate for universal alerting Agent Builder skills. */
 export const createAlertingV2Availability = ({
   getActiveSpace,
   projectType,
@@ -31,7 +31,7 @@ export const createAlertingV2Availability = ({
     if (!isObservabilityProject(projectType)) {
       return {
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability projects',
+        reason: 'Universal alerting skills are only available in Observability projects',
       };
     }
 
@@ -41,7 +41,7 @@ export const createAlertingV2Availability = ({
         ? { status: 'available' }
         : {
             status: 'unavailable',
-            reason: 'Alerting v2 skills are only available in Observability or Classic spaces',
+            reason: 'Universal alerting skills are only available in Observability or Classic spaces',
           };
     } catch {
       return { status: 'available' };
