@@ -6,22 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_TAGGED_TRIGGER_ID = 'alerting.actions.alertTagged' as const;
 
-export const alertTaggedPayloadSchema = alertActionEnvelopeSchema.extend({
-  tags: z
-    .array(z.string().min(1).max(128))
-    .max(20)
-    .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.alertTagged.schema.tags', {
-        defaultMessage: 'Tags added to the alert.',
-      })
-    ),
-});
+export const alertTaggedPayloadSchema = lazySchema(() =>
+  alertActionEnvelopeSchema.extend({
+    tags: z
+      .array(z.string().min(1).max(128))
+      .max(20)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.alertTagged.schema.tags', {
+          defaultMessage: 'Tags added to the alert.',
+        })
+      ),
+  })
+);
 
 export type AlertTaggedPayload = z.infer<typeof alertTaggedPayloadSchema>;
 
