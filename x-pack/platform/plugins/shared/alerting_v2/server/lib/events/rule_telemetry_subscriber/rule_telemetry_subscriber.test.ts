@@ -11,7 +11,11 @@ import type { EbtServiceContract } from '../../services/ebt_service/ebt_service'
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
-import { RULE_CHANGED_EBT_EVENT_TYPE, RULE_OPERATIONS } from '../../telemetry/rule_changed_event';
+import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  RULE_EBT_EVENT_TYPE_BY_OPERATION,
+  RULE_OPERATIONS,
+} from '../../telemetry/rule_changed_event';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -96,7 +100,7 @@ describe('RuleTelemetrySubscriber', () => {
 
   describe('event dispatch', () => {
     it.each(RULE_OPERATIONS)(
-      'reports %s with the event type as the operation and the projected rule data',
+      'reports %s as its event type with the projected rule data',
       async (type) => {
         subscriber.start();
 
@@ -106,15 +110,17 @@ describe('RuleTelemetrySubscriber', () => {
         );
 
         expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-        expect(ebtService.reportEvent).toHaveBeenCalledWith(RULE_CHANGED_EBT_EVENT_TYPE, {
-          rule_id: 'rule-1',
-          operation: type,
-          template_id: 'template-1',
-          created_at: rule.created_at,
-          kind: 'alert',
-          enabled: true,
-          origin: { actor: 'user', channel: 'api' },
-        });
+        expect(ebtService.reportEvent).toHaveBeenCalledWith(
+          RULE_EBT_EVENT_TYPE_BY_OPERATION[type],
+          {
+            rule_id: 'rule-1',
+            template_id: 'template-1',
+            created_at: rule.created_at,
+            kind: 'alert',
+            enabled: true,
+            origin: { actor: 'user', channel: 'api' },
+          }
+        );
       }
     );
 
@@ -127,7 +133,7 @@ describe('RuleTelemetrySubscriber', () => {
       });
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        RULE_CHANGED_EBT_EVENT_TYPE,
+        RULE_CREATED_EBT_EVENT_TYPE,
         expect.objectContaining({
           rule_id: 'rule-1',
           origin: expect.objectContaining({ actor: 'internal' }),
@@ -150,7 +156,7 @@ describe('RuleTelemetrySubscriber', () => {
       );
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        RULE_CHANGED_EBT_EVENT_TYPE,
+        RULE_CREATED_EBT_EVENT_TYPE,
         expect.objectContaining({
           rule_id: 'rule-1',
           origin: { actor: 'user', channel: 'ui', app: 'discover' },

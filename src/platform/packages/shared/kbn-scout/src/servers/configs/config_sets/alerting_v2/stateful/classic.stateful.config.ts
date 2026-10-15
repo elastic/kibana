@@ -13,7 +13,8 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 // Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules API tests can assert on the `alerting_v2_rule_changed` telemetry. A config set is
+// rules API tests can assert on rule-lifecycle EBT (`alerting_v2_rule_created` and the
+// other `alerting_v2_rule_*` event types). A config set is
 // server args, so those assertions are local-only: Cloud attaches to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,

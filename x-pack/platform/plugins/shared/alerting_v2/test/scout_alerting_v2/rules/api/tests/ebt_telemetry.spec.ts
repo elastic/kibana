@@ -7,6 +7,13 @@
 
 import { expect } from '@kbn/scout/api';
 import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  RULE_DELETED_EBT_EVENT_TYPE,
+  RULE_DISABLED_EBT_EVENT_TYPE,
+  RULE_ENABLED_EBT_EVENT_TYPE,
+  RULE_UPDATED_EBT_EVENT_TYPE,
+} from '../../../../../server/lib/telemetry/rule_changed_event';
+import {
   ALERTING_V2_RULES_ALL_ROLE,
   apiTest,
   buildCreateRuleData,
@@ -51,11 +58,10 @@ apiTest.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: response.body.id,
-        operation: 'rule.created',
+        eventType: RULE_CREATED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: response.body.id,
-        operation: 'rule.created',
         kind: body.kind,
         enabled: true,
         origin: API_ORIGIN,
@@ -75,11 +81,10 @@ apiTest.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
-        operation: 'rule.updated',
+        eventType: RULE_UPDATED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: created.id,
-        operation: 'rule.updated',
         enabled: true,
         origin: API_ORIGIN,
       });
@@ -99,11 +104,10 @@ apiTest.describe(
 
         const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
           ruleId: created.id,
-          operation: 'rule.deleted',
+          eventType: RULE_DELETED_EBT_EVENT_TYPE,
         });
         expect(event.properties).toMatchObject({
           rule_id: created.id,
-          operation: 'rule.deleted',
           enabled: true,
           origin: API_ORIGIN,
         });
@@ -125,11 +129,10 @@ apiTest.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
-        operation: 'rule.enabled',
+        eventType: RULE_ENABLED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: created.id,
-        operation: 'rule.enabled',
         enabled: true,
         origin: API_ORIGIN,
       });
@@ -147,11 +150,10 @@ apiTest.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
-        operation: 'rule.disabled',
+        eventType: RULE_DISABLED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: created.id,
-        operation: 'rule.disabled',
         enabled: false,
         origin: API_ORIGIN,
       });

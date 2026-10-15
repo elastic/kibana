@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rule_changed_event';
 import type { RulesApiService } from '../../../common/services';
 import { test } from '../fixtures';
 
@@ -91,11 +92,10 @@ test.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId,
-        operation: 'rule.created',
+        eventType: RULE_CREATED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: ruleId,
-        operation: 'rule.created',
         origin: { actor: 'user', channel: 'ui', app: 'discover' },
       });
     });
@@ -127,11 +127,10 @@ test.describe(
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId,
-        operation: 'rule.created',
+        eventType: RULE_CREATED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
         rule_id: ruleId,
-        operation: 'rule.created',
         origin: { actor: 'user', channel: 'ui', app: 'observabilityAlerting' },
       });
     });

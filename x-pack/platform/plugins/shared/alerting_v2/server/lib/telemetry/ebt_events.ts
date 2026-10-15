@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { RULE_CHANGED_EBT_EVENT_TYPE } from './rule_changed_event';
-import { type RuleChangedEventData } from './rule_changed_event';
+import type { RuleChangedEventData, RuleEbtEventType } from './rule_changed_event';
 
-/** Maps every EBT event type the plugin registers to the data it is reported with. */
-export interface AlertingEbtEventMap {
-  [RULE_CHANGED_EBT_EVENT_TYPE]: RuleChangedEventData;
-}
+/**
+ * Maps every EBT event type the plugin registers to the data it is reported with.
+ * Rule-lifecycle events share {@link RuleChangedEventData}.
+ */
+export type AlertingEbtEventMap = {
+  [TEventType in RuleEbtEventType]: RuleChangedEventData;
+};
 
 export type AlertingEbtEventType = keyof AlertingEbtEventMap;

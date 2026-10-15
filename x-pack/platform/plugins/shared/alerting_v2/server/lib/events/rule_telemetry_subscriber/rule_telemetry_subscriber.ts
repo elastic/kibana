@@ -14,7 +14,7 @@ import type { EbtServiceContract } from '../../services/ebt_service/ebt_service'
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
 import {
   buildRuleChangedEventData,
-  RULE_CHANGED_EBT_EVENT_TYPE,
+  RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
   type RuleOperation,
 } from '../../telemetry/rule_changed_event';
@@ -84,8 +84,8 @@ export class RuleTelemetrySubscriber {
     }
 
     this.ebtService.reportEvent(
-      RULE_CHANGED_EBT_EVENT_TYPE,
-      buildRuleChangedEventData(rule, { operation, origin: { actor, channel, app } })
+      RULE_EBT_EVENT_TYPE_BY_OPERATION[operation],
+      buildRuleChangedEventData(rule, { actor, channel, app })
     );
   }
 }

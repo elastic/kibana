@@ -9,14 +9,13 @@ import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import {
-  RULE_CHANGED_EBT_EVENT_TYPE,
+  RULE_CREATED_EBT_EVENT_TYPE,
   type RuleChangedEventData,
 } from '../../telemetry/rule_changed_event';
 import { EbtService } from './ebt_service';
 
 const data: RuleChangedEventData = {
   rule_id: 'rule-1',
-  operation: 'rule.created',
   created_at: '2026-10-12T22:05:11.352Z',
   kind: 'alert',
   enabled: true,
@@ -37,10 +36,10 @@ describe('EbtService', () => {
 
   describe('reportEvent', () => {
     it('reports the event through Core analytics', () => {
-      service.reportEvent(RULE_CHANGED_EBT_EVENT_TYPE, data);
+      service.reportEvent(RULE_CREATED_EBT_EVENT_TYPE, data);
 
       expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-      expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_CHANGED_EBT_EVENT_TYPE, data);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_CREATED_EBT_EVENT_TYPE, data);
     });
 
     it('swallows reportEvent failures and logs them at error', () => {
@@ -48,14 +47,14 @@ describe('EbtService', () => {
         throw new Error('analytics unavailable');
       });
 
-      expect(() => service.reportEvent(RULE_CHANGED_EBT_EVENT_TYPE, data)).not.toThrow();
+      expect(() => service.reportEvent(RULE_CREATED_EBT_EVENT_TYPE, data)).not.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const [message, meta] = mockLogger.error.mock.calls[0];
-      expect(message).toBe(`Failed to report ${RULE_CHANGED_EBT_EVENT_TYPE} telemetry event`);
+      expect(message).toBe(`Failed to report ${RULE_CREATED_EBT_EVENT_TYPE} telemetry event`);
       expect(meta).toEqual({
         labels: expect.objectContaining({
-          event_type: RULE_CHANGED_EBT_EVENT_TYPE,
+          event_type: RULE_CREATED_EBT_EVENT_TYPE,
           code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
         }),
         error: expect.objectContaining({

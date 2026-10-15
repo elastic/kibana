@@ -8,9 +8,11 @@
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { COMMON_HEADERS } from '../constants';
-import type { RuleChangedEventData } from '../../../../server/lib/telemetry/rule_changed_event';
+import type {
+  RuleChangedEventData,
+  RuleEbtEventType,
+} from '../../../../server/lib/telemetry/rule_changed_event';
 
-const RULE_CHANGED_EVENT_TYPE = 'alerting_v2_rule_changed';
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
 const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
 
@@ -23,7 +25,7 @@ export interface RuleChangedEbtEvent {
 
 export interface WaitForRuleChangedEventsParams {
   ruleId: string;
-  operation: RuleChangedEventData['operation'];
+  eventType: RuleEbtEventType;
   /** Number of matching events to wait for. Defaults to 1. */
   count?: number;
   timeoutMs?: number;
@@ -37,7 +39,7 @@ export interface EbtService {
   /** Opts the server in to EBT so reported events reach the helpers shipper. */
   optIn: () => Promise<void>;
   /**
-   * Resolves with the `alerting_v2_rule_changed` events reported for the rule and operation.
+   * Resolves with the rule-lifecycle events of `eventType` reported for the rule.
    * Returns as soon as `count` events arrived and throws if they do not within the timeout.
    */
   waitForRuleChangedEvents: (
@@ -66,22 +68,21 @@ export const getEbtService = ({
     optIn,
     waitForRuleChangedEvents: ({
       ruleId,
-      operation,
+      eventType,
       count = 1,
       timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
     }) =>
-      measurePerformanceAsync(log, `ebt.waitForRuleChangedEvents[${operation}]`, async () => {
+      measurePerformanceAsync(log, `ebt.waitForRuleChangedEvents[${eventType}]`, async () => {
         const response = await kbnClient.request<RuleChangedEbtEvent[]>({
           method: 'GET',
           path: `${EBT_HELPERS_PATH}/events`,
           headers: COMMON_HEADERS,
           query: {
             takeNumberOfEvents: count,
-            eventTypes: JSON.stringify([RULE_CHANGED_EVENT_TYPE]),
+            eventTypes: JSON.stringify([eventType]),
             withTimeoutMs: timeoutMs,
             filters: JSON.stringify({
               'properties.rule_id': { eq: ruleId },
-              'properties.operation': { eq: operation },
             }),
           },
         });
@@ -89,7 +90,7 @@ export const getEbtService = ({
         const events = response.data;
         if (events.length < count) {
           throw new Error(
-            `Expected ${count} '${RULE_CHANGED_EVENT_TYPE}' event(s) for rule '${ruleId}' with operation '${operation}' within ${timeoutMs}ms, received ${events.length}`
+            `Expected ${count} '${eventType}' event(s) for rule '${ruleId}' within ${timeoutMs}ms, received ${events.length}`
           );
         }
         return events;
