@@ -57,6 +57,7 @@ const seedUser = (
 
 apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
   let headers: Record<string, string>;
+  const createdRuleIds = new Set<string>();
 
   const readCustomRuleState = async (
     apiClient: Parameters<typeof triggerMaintainerRun>[0],
@@ -106,9 +107,11 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
-    for (const { id } of await listRules(apiClient)) {
+    // A test may already have deleted its rule; a 404 here is fine.
+    for (const id of createdRuleIds) {
       await apiClient.delete(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(id), { headers });
     }
+    createdRuleIds.clear();
   });
 
   apiTest(
@@ -138,6 +141,7 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         });
         expect(created.statusCode).toBe(200);
         ruleId = created.body.id;
+        createdRuleIds.add(ruleId);
       });
 
       const enableRule = () =>
@@ -222,6 +226,7 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       ['unknown request field', { lookup: { index: 'x' } }, 'Excess keys'],
       ['boolean key', { match_value: 'user.name IS NOT NULL' }, 'must not be a boolean'],
     ];
+    const ruleIdsBefore = (await listRules(apiClient)).map(({ id }) => id);
 
     for (const [name, override, expectedMessage] of cases) {
       const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
@@ -233,7 +238,7 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       expect(response.body.message, name).toContain(expectedMessage);
     }
 
-    expect(await listRules(apiClient)).toHaveLength(0);
+    expect((await listRules(apiClient)).map(({ id }) => id)).toStrictEqual(ruleIdsBefore);
   });
 
   apiTest(
@@ -276,6 +281,7 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         });
         expect(created.statusCode).toBe(200);
         ruleId = created.body.id;
+        createdRuleIds.add(ruleId);
         expect(created.body).toMatchObject({
           enabled: true,
           decline_same_namespace_duplicates: true,
