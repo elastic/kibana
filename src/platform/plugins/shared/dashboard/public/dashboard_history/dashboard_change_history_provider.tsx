@@ -14,10 +14,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
-import type { DashboardApi } from '..';
 import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
+import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 
 // the preview embeds a second dashboard renderer, so only load it once a change is previewed
 const LazyDashboardPreview = lazy(async () => {
@@ -26,16 +26,15 @@ const LazyDashboardPreview = lazy(async () => {
 });
 
 export interface DashboardChangeHistoryProviderProps {
-  dashboardId: string;
-  dashboardApi: DashboardApi | undefined;
   children: React.ReactNode;
 }
 
 export const DashboardChangeHistoryProvider = ({
-  dashboardId,
-  dashboardApi,
   children,
 }: DashboardChangeHistoryProviderProps): JSX.Element => {
+  const dashboardApi = useDashboardApi();
+  const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
+
   const { analytics } = coreServices;
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(

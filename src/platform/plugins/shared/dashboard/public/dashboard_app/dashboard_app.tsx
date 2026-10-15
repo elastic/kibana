@@ -40,7 +40,6 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
-import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 
 export interface DashboardAppProps {
@@ -187,46 +186,41 @@ export function DashboardApp({
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
     <QueryClientProvider client={dashboardQueryClient}>
-      <DashboardChangeHistoryProvider
-        dashboardApi={dashboardApi}
-        dashboardId={savedDashboardId ?? 'new-dashboard'}
-      >
-        {dashboardApi && dashboardInternalApi && (
-          <>
-            <DashboardTabTitleSetter dashboardApi={dashboardApi} />
-            <DashboardTopNav
-              key={dashboardApi.uuid}
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardApi={dashboardApi}
-              dashboardInternalApi={dashboardInternalApi}
-            />
-          </>
-        )}
+      {dashboardApi && dashboardInternalApi && (
+        <>
+          <DashboardTabTitleSetter dashboardApi={dashboardApi} />
+          <DashboardTopNav
+            key={dashboardApi.uuid}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardApi={dashboardApi}
+            dashboardInternalApi={dashboardInternalApi}
+          />
+        </>
+      )}
 
-        {getLegacyConflictWarning?.()}
-        <DashboardRenderer
-          key={regenerateId}
-          locator={locator}
-          onApiAvailable={(dashboard, dashboardInternal) => {
-            setDashboardAppApi(dashboard);
-            if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
-              setDashboardApi(dashboard);
-              setDashboardInternalApi(dashboardInternal);
-              if (expandedPanelId) {
-                dashboard?.expandPanel(expandedPanelId);
-              }
+      {getLegacyConflictWarning?.()}
+      <DashboardRenderer
+        key={regenerateId}
+        locator={locator}
+        onApiAvailable={(dashboard, dashboardInternal) => {
+          setDashboardAppApi(dashboard);
+          if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
+            setDashboardApi(dashboard);
+            setDashboardInternalApi(dashboardInternal);
+            if (expandedPanelId) {
+              dashboard?.expandPanel(expandedPanelId);
             }
-          }}
-          onApiCleanup={() => {
-            setDashboardAppApi(undefined);
-          }}
-          dashboardRedirect={redirectTo}
-          savedObjectId={savedDashboardId}
-          showPlainSpinner={showPlainSpinner}
-          getCreationOptions={getCreationOptions}
-        />
-      </DashboardChangeHistoryProvider>
+          }
+        }}
+        onApiCleanup={() => {
+          setDashboardAppApi(undefined);
+        }}
+        dashboardRedirect={redirectTo}
+        savedObjectId={savedDashboardId}
+        showPlainSpinner={showPlainSpinner}
+        getCreationOptions={getCreationOptions}
+      />
     </QueryClientProvider>
   );
 }
