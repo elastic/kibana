@@ -80,7 +80,7 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(
       (runtime) => {
-        this.logger.debug('Built the Isomer runtime with the components, Vega, and charts packs.');
+        this.logger.debug('Built the Isomer runtime with the components, Vega, charts, and maps packs.');
         return runtime;
       },
       (error) => {
