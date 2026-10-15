@@ -48491,7 +48491,6 @@
     "xpack.securitySolution.siemMigrations.common.searchAriaLabel": "移行項目を検索",
     "xpack.securitySolution.siemMigrations.common.searchBarPlaceholder": "移行項目名で検索",
     "xpack.securitySolution.siemMigrations.common.selectionOption.arealLabel": "移行を選択",
-    "xpack.securitySolution.siemMigrations.common.selectionOption.title": "移行",
     "xpack.securitySolution.siemMigrations.common.sentinel.copyrightNotice": "Microsoft、Microsoft Azure、およびMicrosoft Sentinelは、米国およびその他の国におけるMicrosoft Corporationの商標または登録商標です。",
     "xpack.securitySolution.siemMigrations.common.splunk.copyrightNotice": "Splunkおよび関連するマークは、米国およびその他の国におけるSplunk LLCの商標または登録商標です。",
     "xpack.securitySolution.siemMigrations.common.startMigrationModal.aiConnectorLabel": "AIコネクター",

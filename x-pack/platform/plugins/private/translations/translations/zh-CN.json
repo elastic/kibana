@@ -48496,7 +48496,6 @@
     "xpack.securitySolution.siemMigrations.common.searchAriaLabel": "搜索迁移项",
     "xpack.securitySolution.siemMigrations.common.searchBarPlaceholder": "按迁移项名称搜索",
     "xpack.securitySolution.siemMigrations.common.selectionOption.arealLabel": "选择迁移",
-    "xpack.securitySolution.siemMigrations.common.selectionOption.title": "迁移",
     "xpack.securitySolution.siemMigrations.common.sentinel.copyrightNotice": "Microsoft、Microsoft Azure 和 Microsoft Sentinel 是 Microsoft 公司在美国和其他国家的商标或注册商标。",
     "xpack.securitySolution.siemMigrations.common.splunk.copyrightNotice": "Splunk 及相关标志为 Splunk LLC 在美国和其他国家/地区的商标或注册商标。",
     "xpack.securitySolution.siemMigrations.common.startMigrationModal.aiConnectorLabel": "AI 连接器",
