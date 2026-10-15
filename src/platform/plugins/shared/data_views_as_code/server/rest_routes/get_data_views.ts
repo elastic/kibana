@@ -23,9 +23,15 @@ export const registerGetDataViewsAsCodeRoute = ({
   router.versioned
     .get({
       path: BASE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
       description: 'Get all data views paginated',
+      options: {
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           enabled: false,

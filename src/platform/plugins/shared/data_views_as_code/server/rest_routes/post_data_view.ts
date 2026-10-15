@@ -22,13 +22,13 @@ export const registerPostDataViewAsCodeRoute = ({
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
       description: 'Create a data view',
       options: {
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {

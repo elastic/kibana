@@ -24,13 +24,13 @@ export const registerGetDataViewAsCodeRoute = ({
   router.versioned
     .get({
       path: GET_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
       description: 'Get a data view by id',
       options: {
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {
