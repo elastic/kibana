@@ -61,19 +61,25 @@ const mockArrangeLayout = jest.fn<Promise<LayoutArrangement>, [LayoutRequest]>()
   mockArrangeLayout
 );
 
-/** An arrangement that keeps every panel and section where the layout request has it. */
+/** An arrangement that keeps every panel and section where the previous dashboard has it. */
 const keepRequestedLayout = async ({
-  panels,
-  sections,
+  previous,
+  current,
 }: LayoutRequest): Promise<LayoutArrangement> => {
-  const toArrangedPanels = (layoutPanels: LayoutRequest['panels']) =>
-    layoutPanels.map(({ id, grid }) => ({ id, ...grid }));
+  const previousPanels = [
+    ...(previous?.panels ?? []),
+    ...(previous?.sections ?? []).flatMap(({ panels }) => panels),
+  ];
+  const gridById = new Map(previousPanels.map(({ id, grid }) => [id, grid]));
+  const sectionYById = new Map((previous?.sections ?? []).map(({ id, y }) => [id, y]));
+  const toArrangedPanels = (layoutPanels: LayoutRequest['current']['panels']) =>
+    layoutPanels.map(({ id }) => ({ id, ...(gridById.get(id) ?? { x: 0, y: 0, w: 24, h: 10 }) }));
   return {
-    panels: toArrangedPanels(panels),
-    sections: sections.map(({ id, y, panels: sectionPanels }) => ({
+    panels: toArrangedPanels(current.panels),
+    sections: current.sections.map(({ id, panels }) => ({
       id,
-      y,
-      panels: toArrangedPanels(sectionPanels),
+      y: sectionYById.get(id) ?? 0,
+      panels: toArrangedPanels(panels),
     })),
   };
 };
@@ -113,7 +119,6 @@ describe('generateDashboardTool handler', () => {
       dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
-      panelPreferredHeights: new Map(),
     });
   });
 
@@ -174,7 +179,6 @@ describe('generateDashboardTool handler', () => {
         dashboardData,
         failures,
         panelAuthoringNotes: [],
-        panelPreferredHeights: new Map(),
       } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
 
     it('does not create a new dashboard without panels or controls', async () => {
@@ -255,7 +259,6 @@ describe('generateDashboardTool handler', () => {
         dashboardData: structuredClone(latestData),
         failures: [],
         panelAuthoringNotes: [],
-        panelPreferredHeights: new Map(),
       });
     };
 
@@ -265,7 +268,6 @@ describe('generateDashboardTool handler', () => {
         dashboardData: { ...generatedDashboard, panels: [panel] },
         failures: [],
         panelAuthoringNotes: [],
-        panelPreferredHeights: new Map(),
       });
       mockArrangeLayout.mockResolvedValue({
         panels: [{ id: 'panel', ...fullWidthGrid }],

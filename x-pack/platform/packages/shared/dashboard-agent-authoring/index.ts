@@ -7,12 +7,7 @@
 
 export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
 
-export {
-  arrangeDashboardLayout,
-  buildLayoutPrompt,
-  getGridRowsForPixelHeight,
-  layoutArrangementSchema,
-} from './src/layout';
+export { arrangeDashboardLayout, buildLayoutPrompt, layoutArrangementSchema } from './src/layout';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';

@@ -11,6 +11,8 @@ import {
   type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import {
@@ -18,44 +20,108 @@ import {
   layoutArrangementSchema,
   type ArrangeDashboardLayout,
   type LayoutArrangement,
+  type LayoutChanges,
+  type LayoutDashboard,
   type LayoutPanel,
   type LayoutRequest,
-  type Relayout,
 } from './types';
-import { getMarkdownPreferredHeight } from './preferred_height';
 
-/**
- * What the size of a panel depends on: its chart type, or the height of a markdown panel's text,
- * so that small text edits keep the size.
- */
-const getSizeSignature = (panel: AttachmentPanel): string => {
-  const { type, config } = panel;
-  const chartType = typeof config.type === 'string' ? config.type : '';
-  return `${type}:${chartType}:${getMarkdownPreferredHeight(panel) ?? ''}`;
+/** Long content is cut, since its start is enough to judge the height it needs. */
+const MAX_CONTENT_LENGTH = 2000;
+
+type Widgets = DashboardAttachmentData['panels'];
+
+const getContent = ({ type, config }: AttachmentPanel): string | undefined => {
+  if (type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string') {
+    return config.content;
+  }
+  return type === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? JSON.stringify(config) : undefined;
 };
 
-interface PlacedPanel {
-  panel: AttachmentPanel;
-  /** The section id, or null for a top-level panel. */
-  containerId: string | null;
-}
+const toLayoutPanel = (panel: AttachmentPanel, withGrid: boolean): LayoutPanel => {
+  const { id, type, config, grid } = panel;
+  const content = getContent(panel);
+  return {
+    id,
+    type,
+    ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
+    ...(typeof config.title === 'string' ? { title: config.title } : {}),
+    ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
+    ...(withGrid ? { grid } : {}),
+  };
+};
 
-const getPlacedPanels = (widgets: DashboardAttachmentData['panels']): PlacedPanel[] =>
-  widgets.flatMap((widget) =>
-    isSection(widget)
-      ? widget.panels.map((panel): PlacedPanel => ({ panel, containerId: widget.id }))
-      : [{ panel: widget, containerId: null }]
+const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
+  a.grid.y - b.grid.y || a.grid.x - b.grid.x;
+
+const toLayoutDashboard = (widgets: Widgets, withGrid: boolean): LayoutDashboard => {
+  const toLayoutPanels = (panels: AttachmentPanel[]) =>
+    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, withGrid));
+  return {
+    panels: toLayoutPanels(
+      widgets.filter((widget): widget is AttachmentPanel => !isSection(widget))
+    ),
+    sections: widgets
+      .filter(isSection)
+      .sort((a, b) => a.grid.y - b.grid.y)
+      .map(({ id, title, grid, panels }) => ({
+        id,
+        title,
+        ...(withGrid ? { y: grid.y } : {}),
+        panels: toLayoutPanels(panels),
+      })),
+  };
+};
+
+/** Each panel by id, with the id of its section, or null for a top-level panel. */
+const getPanelsById = (
+  widgets: Widgets
+): Map<string, { panel: AttachmentPanel; sectionId: string | null }> =>
+  new Map(
+    widgets.flatMap(
+      (widget): Array<[string, { panel: AttachmentPanel; sectionId: string | null }]> =>
+        isSection(widget)
+          ? widget.panels.map((panel) => [panel.id, { panel, sectionId: widget.id }])
+          : [[widget.id, { panel: widget, sectionId: null }]]
+    )
   );
 
-const getSectionIds = (widgets: DashboardAttachmentData['panels']): string[] =>
-  widgets.filter(isSection).map(({ id }) => id);
+const getChanges = (previousWidgets: Widgets, currentWidgets: Widgets): LayoutChanges => {
+  const previousPanels = getPanelsById(previousWidgets);
+  const currentPanels = getPanelsById(currentWidgets);
+  const previousSectionIds = new Set(previousWidgets.filter(isSection).map(({ id }) => id));
+  const currentSectionIds = new Set(currentWidgets.filter(isSection).map(({ id }) => id));
+  const currentIds = [...currentPanels.keys()];
+  const isEdited = (id: string): boolean => {
+    const previous = previousPanels.get(id)?.panel;
+    const current = currentPanels.get(id)?.panel;
+    return (
+      previous !== undefined &&
+      current !== undefined &&
+      (previous.type !== current.type ||
+        previous.config.type !== current.config.type ||
+        getContent(previous) !== getContent(current))
+    );
+  };
+  const changes: LayoutChanges = {
+    addedPanels: currentIds.filter((id) => !previousPanels.has(id)),
+    removedPanels: [...previousPanels.keys()].filter((id) => !currentPanels.has(id)),
+    movedPanels: currentIds.filter(
+      (id) =>
+        previousPanels.has(id) &&
+        previousPanels.get(id)?.sectionId !== currentPanels.get(id)?.sectionId
+    ),
+    editedPanels: currentIds.filter(isEdited),
+    addedSections: [...currentSectionIds].filter((id) => !previousSectionIds.has(id)),
+    removedSections: [...previousSectionIds].filter((id) => !currentSectionIds.has(id)),
+  };
+  return Object.fromEntries(Object.entries(changes).filter(([, ids]) => ids.length > 0));
+};
 
 interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
-  originalPanels: DashboardAttachmentData['panels'];
+  originalPanels: Widgets;
   dashboardData: DashboardAttachmentData;
-  /** Grid rows that panels authored in this call declare for their content, by panel id. */
-  panelPreferredHeights: ReadonlyMap<string, number>;
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
   arrangeLayout: ArrangeDashboardLayout;
@@ -65,16 +131,14 @@ interface ArrangeLayoutParams {
 
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
- * user asked for a layout change or a change since `originalPanels` affects the layout: a panel or
- * section was added or removed, a panel moved to another container, or its chart type or preferred
- * height changed. Other edits, such as colors or queries, keep the layout without a model call.
- * When the call fails, the dashboard keeps its current layout, and a failure is reported if the user
- * asked for a layout change.
+ * user or the agent asked for a layout, or panels or sections were added, removed, moved to another
+ * container, or changed chart type or content. The call gets the previous dashboard with its grids,
+ * the current one, and what changed. When the call fails, the dashboard keeps its current layout,
+ * and a failure is reported if a layout was asked for.
  */
 export const arrangeDashboardLayout = async ({
   originalPanels,
   dashboardData,
-  panelPreferredHeights,
   instructions,
   arrangeLayout,
   reportFailure,
@@ -97,83 +161,16 @@ export const arrangeDashboardLayout = async ({
     return dashboardData;
   }
 
-  const originalPanelsById = new Map(
-    getPlacedPanels(originalPanels).map((placedPanel) => [placedPanel.panel.id, placedPanel])
-  );
-
-  const getPreferredHeight = (panel: AttachmentPanel): number | undefined =>
-    getMarkdownPreferredHeight(panel) ?? panelPreferredHeights.get(panel.id);
-
-  const getRelayout = ({ panel, containerId }: PlacedPanel): Relayout | undefined => {
-    const original = originalPanelsById.get(panel.id);
-    if (!original) {
-      return 'all';
-    }
-    const isMoved = original.containerId !== containerId;
-    const declaredHeight = panelPreferredHeights.get(panel.id);
-    const isResized =
-      getSizeSignature(original.panel) !== getSizeSignature(panel) ||
-      (declaredHeight !== undefined && declaredHeight !== original.panel.grid.h);
-    if (isMoved) {
-      return isResized ? 'all' : 'position';
-    }
-    return isResized ? 'size' : undefined;
-  };
-
-  const placedPanels = getPlacedPanels(dashboardData.panels);
-  const containerIdByPanelId = new Map(
-    placedPanels.map(({ panel, containerId }) => [panel.id, containerId])
-  );
-  const sectionIds = getSectionIds(dashboardData.panels);
-  const originalSectionIds = getSectionIds(originalPanels);
-  // A container that lost a panel, removed or moved out, keeps a hole at the panel's old grid.
-  const containersWithHoles = new Set(
-    [...originalPanelsById.values()]
-      .filter(({ panel, containerId }) => containerIdByPanelId.get(panel.id) !== containerId)
-      .map(({ containerId }) => containerId)
-  );
-  const hasLayoutChange =
-    placedPanels.some((placedPanel) => getRelayout(placedPanel) !== undefined) ||
-    containersWithHoles.size > 0 ||
-    sectionIds.length !== originalSectionIds.length ||
-    sectionIds.some((id) => !originalSectionIds.includes(id));
-  if (instructions === undefined && !hasLayoutChange) {
+  const changes = getChanges(originalPanels, dashboardData.panels);
+  if (instructions === undefined && Object.keys(changes).length === 0) {
     return dashboardData;
   }
 
-  const toLayoutPanel = (panel: AttachmentPanel, containerId: string | null): LayoutPanel => {
-    const { id, type, config, grid } = panel;
-    const preferredHeight = getPreferredHeight(panel);
-    const relayout = getRelayout({ panel, containerId });
-    return {
-      id,
-      type,
-      ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
-      ...(typeof config.title === 'string' ? { title: config.title } : {}),
-      ...(preferredHeight !== undefined ? { preferredHeight } : {}),
-      grid,
-      ...(relayout ? { relayout } : {}),
-    };
-  };
-
-  const toLayoutPanels = (panels: AttachmentPanel[], containerId: string | null): LayoutPanel[] =>
-    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, containerId));
-
   const request: LayoutRequest = {
     ...(instructions !== undefined ? { instructions } : {}),
-    ...(containersWithHoles.has(null) ? { reflow: true } : {}),
-    panels: toLayoutPanels(
-      dashboardData.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)),
-      null
-    ),
-    sections: dashboardData.panels.filter(isSection).map((section) => ({
-      id: section.id,
-      title: section.title,
-      y: section.grid.y,
-      ...(originalSectionIds.includes(section.id) ? {} : { relayout: 'position' as const }),
-      ...(containersWithHoles.has(section.id) ? { reflow: true } : {}),
-      panels: toLayoutPanels(section.panels, section.id),
-    })),
+    ...(originalPanels.length > 0 ? { previous: toLayoutDashboard(originalPanels, true) } : {}),
+    current: toLayoutDashboard(dashboardData.panels, false),
+    changes,
   };
 
   const result = await requestArrangement(arrangeLayout, request);
@@ -185,9 +182,6 @@ export const arrangeDashboardLayout = async ({
   reportUnappliedRequest(result.error);
   return dashboardData;
 };
-
-const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
-  a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
 const requestArrangement = async (
   arrangeLayout: ArrangeDashboardLayout,
@@ -211,7 +205,7 @@ const requestArrangement = async (
  * rejected as a whole.
  */
 const getIncompleteArrangementIssue = (
-  { panels, sections }: LayoutRequest,
+  { current: { panels, sections } }: LayoutRequest,
   arrangement: LayoutArrangement
 ): string | undefined => {
   const arrangedSectionsById = new Map(

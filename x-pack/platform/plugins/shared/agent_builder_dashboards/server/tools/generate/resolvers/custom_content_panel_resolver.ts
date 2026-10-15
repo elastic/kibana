@@ -16,7 +16,6 @@ import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   createPanelFailureResult,
   getErrorMessage,
-  getGridRowsForPixelHeight,
   type CustomContentPanelResolutionRequest,
   type PanelContentAttempt,
 } from '@kbn/dashboard-agent-authoring';
@@ -24,11 +23,11 @@ import {
 const resolveCustomContentState = async (
   request: CustomContentPanelResolutionRequest,
   resolveTemplate: CustomContentTemplateResolver
-): Promise<{ config: CustomContentState; height: number }> => {
+): Promise<CustomContentState> => {
   const { nlQuery, esql, existingPanel } = request;
   if (!existingPanel) {
-    const { template, height } = await resolveTemplate({ prompt: nlQuery, esqlQuery: esql });
-    return { config: { esql_query: toEsqlQueryState(esql), template }, height };
+    const { template } = await resolveTemplate({ prompt: nlQuery, esqlQuery: esql });
+    return { esql_query: toEsqlQueryState(esql), template };
   }
 
   const existing = existingPanel.config as CustomContentState;
@@ -36,13 +35,13 @@ const resolveCustomContentState = async (
     esql,
     readEsqlQuery(existing)
   );
-  const { template, height } = await resolveTemplate({
+  const { template } = await resolveTemplate({
     prompt: nlQuery ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { config: { esql_query: toEsqlQueryState(mergedEsqlQuery), template }, height };
+  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };
 
 /**
@@ -60,11 +59,12 @@ export const createCustomContentPanelResolver = ({
     const { operationType, identifier } = request;
 
     try {
-      const { config, height } = await resolveCustomContentState(request, resolveTemplate);
       return {
         type: 'success',
-        panelContent: { type: CUSTOM_CONTENT_EMBEDDABLE_TYPE, config },
-        preferredHeight: getGridRowsForPixelHeight(height),
+        panelContent: {
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: await resolveCustomContentState(request, resolveTemplate),
+        },
       };
     } catch (error) {
       return createPanelFailureResult(operationType, identifier, getErrorMessage(error));

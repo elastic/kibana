@@ -49,8 +49,6 @@ export interface OperationExecutionContext {
   logger: Logger;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
-  /** Grid rows that resolved panels declare for their content, by panel id. */
-  panelPreferredHeights: Map<string, number>;
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;
   resolvePanelContent?: ResolvePanelContent;

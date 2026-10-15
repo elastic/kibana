@@ -17,40 +17,46 @@ export interface LayoutPanel {
   /** Lens chart type, e.g. `metric` or `xy`, when known. */
   chartType?: string;
   title?: string;
-  /** Approximate grid rows the content needs at half width, for markdown and custom content panels. */
-  preferredHeight?: number;
-  grid: { x: number; y: number; w: number; h: number };
-  /** Which parts of `grid` to set again; omitted when the panel keeps its grid. */
-  relayout?: Relayout;
+  /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
+  content?: string;
+  /** Set on the panels of the previous dashboard only. */
+  grid?: { x: number; y: number; w: number; h: number };
 }
-
-/**
- * `all` for a panel added in this call, or moved with a new chart type or preferred height;
- * `position` for a panel moved to another container, which keeps its size but not its temporary
- * position; `size` for a panel whose chart type or preferred height changed, which keeps its
- * position.
- */
-export type Relayout = 'all' | 'position' | 'size';
 
 export interface LayoutSection {
   id: string;
   title: string;
-  y: number;
-  /** `position` for a section added in this call, whose `y` is temporary; omitted otherwise. */
-  relayout?: Extract<Relayout, 'position'>;
-  /** Set when panels were moved out of the section or removed from it, leaving holes. */
-  reflow?: boolean;
-  /** Panels of the section, with coordinates relative to the section. */
+  /** Set on the sections of the previous dashboard only. */
+  y?: number;
+  /** Panels of the section; grids are relative to the section. */
   panels: LayoutPanel[];
+}
+
+export interface LayoutDashboard {
+  panels: LayoutPanel[];
+  sections: LayoutSection[];
+}
+
+/** Ids of the panels and sections that changed since the previous dashboard. */
+export interface LayoutChanges {
+  addedPanels?: string[];
+  removedPanels?: string[];
+  /** Panels now in another container. */
+  movedPanels?: string[];
+  /** Panels whose chart type or content changed. */
+  editedPanels?: string[];
+  addedSections?: string[];
+  removedSections?: string[];
 }
 
 export interface LayoutRequest {
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
-  /** Set when top-level panels were moved into a section or removed, leaving holes. */
-  reflow?: boolean;
-  panels: LayoutPanel[];
-  sections: LayoutSection[];
+  /** The dashboard before this call, with its grids; omitted for a new dashboard. */
+  previous?: LayoutDashboard;
+  /** The dashboard after this call, without grids. */
+  current: LayoutDashboard;
+  changes: LayoutChanges;
 }
 
 const arrangedPanelsSchema = z
@@ -69,7 +75,7 @@ const arrangedPanelsSchema = z
   )
   .max(500);
 
-/** Grid positions returned by the layout call, in the containers of the request. */
+/** Grid positions returned by the layout call, in the containers of the current dashboard. */
 export const layoutArrangementSchema = z.object({
   panels: arrangedPanelsSchema.describe('Every top-level panel.'),
   sections: z
