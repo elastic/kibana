@@ -388,6 +388,9 @@ export class MapsPage {
   async getMapboxStyle(): Promise<Record<string, any>> {
     await this.inspector.open();
     try {
+      // openInspectorView skips the view switch when the chooser is not rendered yet,
+      // which leaves the default view open and the mapboxStyleTab missing.
+      await this.inspector.viewChooser.waitFor({ state: 'visible' });
       await this.inspector.openInspectorView('Map details');
       await this.page.testSubj.click('mapboxStyleTab');
       const container = this.page.testSubj.locator('mapboxStyleContainer');
