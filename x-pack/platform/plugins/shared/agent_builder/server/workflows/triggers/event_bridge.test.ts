@@ -22,6 +22,7 @@ import {
   ConversationAttachmentDeletedTriggerId,
   ConversationUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import { createConversationEventBus } from './conversation_event_bus';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
 
@@ -77,7 +78,10 @@ describe('registerConversationWorkflowEventBridge', () => {
     mockClient = createWorkflowsClientMock();
     workflowsExtensions.getClient.mockClear();
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+    // `ai.conversation.updated` is opt-in; the gate itself is covered in its own describe below.
+    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger, [
+      { templateIds: ['investigation'], isEnabled: async () => true },
+    ]);
   });
 
   it('forwards metadata patched events to workflows extensions', async () => {
@@ -117,7 +121,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('does nothing when workflowsExtensions is undefined', async () => {
     const isolatedBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger);
+    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger, []);
 
     isolatedBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -136,7 +140,7 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger);
+    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger, []);
 
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -256,6 +260,97 @@ describe('registerConversationWorkflowEventBridge', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Failed to emit workflow trigger "${ConversationUpdatedTriggerId}"`)
       );
+    });
+
+    describe('opt-in gate', () => {
+      const investigationOptIn = (
+        isEnabled: ConversationUpdatedOptIn['isEnabled']
+      ): ConversationUpdatedOptIn => ({ templateIds: ['investigation'], isEnabled });
+
+      /** Emits on a bus gated by `optIns` and resolves once the forward had a chance to run. */
+      const emitWithOptIns = async (
+        optIns: ConversationUpdatedOptIn[],
+        event: ConversationUpdatedTriggerEvent = payload
+      ) => {
+        const gatedBus = createConversationEventBus();
+        registerConversationWorkflowEventBridge(gatedBus, workflowsExtensions, logger, optIns);
+
+        gatedBus.emitConversationUpdated(request, event);
+        await flushMicrotasks();
+      };
+
+      it('should not emit when no opt-in is registered', async () => {
+        await emitWithOptIns([]);
+
+        expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not emit when every matching opt-in resolves false', async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => false),
+          investigationOptIn(async () => false),
+        ]);
+
+        expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should emit when any matching opt-in resolves true', async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => false),
+          investigationOptIn(async () => true),
+        ]);
+
+        expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+      });
+
+      it('should warn and keep evaluating when a check throws', async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => {
+            throw new Error('settings unavailable');
+          }),
+          investigationOptIn(async () => true),
+        ]);
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `Failed to check whether "${ConversationUpdatedTriggerId}" is enabled`
+          )
+        );
+        expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+      });
+
+      it('should pass the emitting request to each matching check', async () => {
+        const firstCheck = jest.fn().mockResolvedValue(false);
+        const secondCheck = jest.fn().mockResolvedValue(false);
+
+        await emitWithOptIns([investigationOptIn(firstCheck), investigationOptIn(secondCheck)]);
+
+        expect(firstCheck).toHaveBeenCalledWith(request);
+        expect(secondCheck).toHaveBeenCalledWith(request);
+      });
+
+      it('should not run checks or emit when the conversation has no template', async () => {
+        const isEnabled = jest.fn().mockResolvedValue(true);
+
+        await emitWithOptIns([investigationOptIn(isEnabled)], {
+          ...payload,
+          templateId: undefined,
+        });
+
+        expect(isEnabled).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not run checks registered for other templates', async () => {
+        const escalationCheck = jest.fn().mockResolvedValue(true);
+
+        await emitWithOptIns([{ templateIds: ['escalation'], isEnabled: escalationCheck }]);
+
+        expect(escalationCheck).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
     });
   });
 });

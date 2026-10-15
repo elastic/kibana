@@ -68,6 +68,11 @@ const computedFields: Record<string, RuntimeField> = {
     script: { source: "emit('')" },
     customLabel: i18n.RULE_TAGS_FIELD_LABEL,
   },
+  alerting_source: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.SOURCE_FIELD_LABEL,
+  },
 };
 
 const keywordFieldSpec = (name: string): FieldSpec => ({

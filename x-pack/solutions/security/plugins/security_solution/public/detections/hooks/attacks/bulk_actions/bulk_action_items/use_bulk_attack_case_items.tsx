@@ -15,6 +15,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { ATTACK_ADD_TO_CASE_ACTION_ID } from '../../../../../common/constants/action_ids';
+import type { AttackToAttach } from '../../../../../cases/attachments/attack';
+import { useAttackCaseAttachments } from '../use_attack_case_attachments';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
@@ -28,6 +30,11 @@ export interface UseBulkAttackCaseItemsProps {
   closePopover?: () => void;
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
+  /**
+   * The single attack being attached. With `attackAttachmentsEnabled` on it is posted as a
+   * `security.attack` attachment plus its constituent alerts instead of a markdown comment.
+   */
+  attackToAttach?: Omit<AttackToAttach, 'alertsIndex'>;
 }
 
 /**
@@ -38,10 +45,12 @@ export const useBulkAttackCaseItems = ({
   onCasesAdd,
   closePopover,
   telemetrySource,
+  attackToAttach,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
     services: { cases, telemetry },
   } = useKibana();
+  const getAttackAttachments = useAttackCaseAttachments(attackToAttach);
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
   const canUserCreateAndReadCases = useCallback(
@@ -83,10 +92,21 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      onAddToCase({ alertIds, markdownComments });
+      if (getAttackAttachments == null) {
+        onAddToCase({ alertIds, markdownComments });
+      } else {
+        onAddToCase({
+          alertIds: [],
+          markdownComments: [],
+          // Built per case rather than up front: how many of the attack's alerts fit depends on
+          // how many the chosen case already holds, which isn't known until the user picks one.
+          getAttachments: getAttackAttachments,
+        });
+      }
+
       closePopover?.();
     },
-    [closePopover, onAddToCase]
+    [closePopover, getAttackAttachments, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

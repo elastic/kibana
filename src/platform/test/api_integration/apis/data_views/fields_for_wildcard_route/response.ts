@@ -81,6 +81,12 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
+  // Migration recommendation: PARTIALLY COVERED - PORT GAP, THEN DELETE
+  // Mostly covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts
+  // Gap: Scout has no equivalent of the two closed-index tests (`allow_no_index` true returns 200 with
+  // empty fields, false returns 404). They need real ES to close an index; no Jest test covers them
+  // either. Add them to that spec before deleting.
   describe('fields_for_wildcard_route response', () => {
     before(() =>
       esArchiver.load(

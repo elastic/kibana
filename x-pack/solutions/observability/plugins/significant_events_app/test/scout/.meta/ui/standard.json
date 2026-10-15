@@ -1,12 +1,12 @@
 {
-  "sha1": "6c806147fad5fd09bb653942cbfa9ba0e7e4d56a",
+  "sha1": "943f5940e23702ee7078e02974e92762acb8151a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "0bd58b8ab7d8a12-4976b6ba39021f6",
-      "title": "Significant Events app loads and redirects / to /streams tab by default",
+      "id": "0bd58b8ab7d8a12-4cd7c0f5de69760",
+      "title": "Significant Events app loads and redirects / to /sources tab by default",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 46,
+        "column": 25
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 57,
+        "column": 10
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 88,
-        "column": 9
+        "line": 78,
+        "column": 54
       }
     }
   ]

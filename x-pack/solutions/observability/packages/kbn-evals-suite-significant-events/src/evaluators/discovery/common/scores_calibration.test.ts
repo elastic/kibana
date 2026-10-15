@@ -22,7 +22,7 @@ const buildEvent = (status: SignificantEvent['status']): SignificantEvent => ({
   summary: `Event is ${status}`,
   severity: 'low',
   confidence: 0.5,
-  stream_names: ['logs-test'],
+  source_ids: ['logs-test'],
   status,
 });
 

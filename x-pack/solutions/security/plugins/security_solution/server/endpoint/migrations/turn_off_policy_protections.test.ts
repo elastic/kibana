@@ -68,13 +68,13 @@ describe('Turn Off Policy Protections Migration', () => {
       policy.inputs[0].config.policy.value = merge(
         {},
         policy.inputs[0].config.policy.value,
-        resetCustomNotifications()
+        resetCustomNotifications(policy.inputs[0].config.policy.value)
       );
     } else if (withCustomNotifications) {
       policy.inputs[0].config.policy.value = merge(
         {},
         policy.inputs[0].config.policy.value,
-        resetCustomNotifications('custom test')
+        resetCustomNotifications(policy.inputs[0].config.policy.value, 'custom test')
       );
     }
     return policy;

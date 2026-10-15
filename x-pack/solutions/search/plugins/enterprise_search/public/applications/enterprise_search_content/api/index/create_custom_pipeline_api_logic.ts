@@ -20,7 +20,7 @@ export type CreateCustomPipelineApiLogicResponse = Record<string, IngestPipeline
 export const createCustomPipeline = async ({
   indexName,
 }: CreateCustomPipelineApiLogicArgs): Promise<CreateCustomPipelineApiLogicResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipelines`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/pipelines`;
   const result = await HttpLogic.values.http.post<CreateCustomPipelineApiLogicResponse>(route);
   return result;
 };

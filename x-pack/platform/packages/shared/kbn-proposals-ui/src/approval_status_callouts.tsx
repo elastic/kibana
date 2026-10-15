@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 interface ApprovalStatusCalloutsProps {
@@ -29,7 +29,7 @@ interface ApprovalStatusCalloutsProps {
 }
 
 /**
- * The warning callouts `ApprovalContent` shows between the body and the footer: why a proposal is
+ * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is
  * being offered again after a failed attempt, and why an expired one can no longer be actioned.
  * Split out from `ApprovalContent` itself only because both conditions render the same
  * spacer-callout-spacer shape, not because they share any state.
@@ -51,14 +51,14 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
-              <KbnWarningCallout
+              <KbnDangerCallout
                 announceOnMount
                 size="s"
                 title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-previous-failure` : undefined}
               >
                 {previousExecutionError}
-              </KbnWarningCallout>
+              </KbnDangerCallout>
               <EuiSpacer size="m" />
             </div>
           </>

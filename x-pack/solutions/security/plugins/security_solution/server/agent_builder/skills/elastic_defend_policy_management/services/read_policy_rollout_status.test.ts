@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { FleetAgentPolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -232,14 +232,10 @@ const createEndpointUsageAccess = async () => {
     getHostMetadataList,
   } as unknown as ReturnType<typeof endpointAppContextService.getEndpointMetadataService>);
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request, spaceId: SPACE_ID },
-    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
-    getStartServices
+    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ
   );
   const soClient = access.fleet.getSoClient();
   const listByName = jest.spyOn(access.fleet.packagePolicy, 'list');

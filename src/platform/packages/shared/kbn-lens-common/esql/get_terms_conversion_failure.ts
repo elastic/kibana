@@ -17,7 +17,13 @@ import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 const MAX_SUPPORTED_TERMS_BUCKETS = 2;
 
 export interface TermsConversionContext {
-  hasDateHistogram: boolean;
+  /**
+   * The layer nests Top values and a date histogram in a way the generator cannot express:
+   * a Top values dimension between a date histogram and another Top values dimension, or
+   * nested Top values followed by a date histogram. See `generateEsqlQuery` for the shapes
+   * that are supported.
+   */
+  hasUnsupportedDateHistogramNesting: boolean;
   /** Number of terms buckets on the layer, including this column. */
   termsBucketCount: number;
 }
@@ -28,22 +34,22 @@ export interface TermsConversionContext {
  * 1. Other bucket (default-on; also covers missing values — the UI only enables
  *    "Include documents without the selected field" when Other is on, and
  *    toEsAggsFn forces missingBucket = otherBucket && missingBucket)
- * 2. Date histogram / time series
+ * 2. Unsupported nesting of Top values and a date histogram
  * 3. More than two Top values dimensions
  * 4. Multiple fields on one Top values dimension
  * 5. Include / exclude filters
  * 6. Accuracy mode
  * 7. Unsupported ranking (custom, then rarity / significance)
  *
- * Callers may combine eligible terms with other convertible categorical
- * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
+ * Callers may combine eligible terms with other convertible buckets, including a
+ * date histogram, via `WHERE … IN (subquery)` and `LIMIT n BY`.
  *
  * All blockers are evaluated so the priority list stays authoritative; only the
  * highest-priority reason is returned.
  */
 export const getTermsConversionFailure = (
   { params }: TermsIndexPatternColumn,
-  { hasDateHistogram, termsBucketCount }: TermsConversionContext
+  { hasUnsupportedDateHistogramNesting, termsBucketCount }: TermsConversionContext
 ): EsqlConversionFailureReason | undefined => {
   const reasons: EsqlConversionFailureReason[] = [];
 
@@ -52,7 +58,7 @@ export const getTermsConversionFailure = (
     reasons.push('terms_other_bucket_not_supported');
   }
 
-  if (hasDateHistogram) {
+  if (hasUnsupportedDateHistogramNesting) {
     reasons.push('terms_date_histogram_not_supported');
   }
 
