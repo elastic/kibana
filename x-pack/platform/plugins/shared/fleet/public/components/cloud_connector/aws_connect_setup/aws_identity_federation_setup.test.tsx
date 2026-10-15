@@ -32,6 +32,7 @@ jest.mock('../hooks/use_create_cloud_connector');
 jest.mock('../hooks/use_cloud_connector_template');
 jest.mock('../hooks/use_iac_callback');
 jest.mock('../../../hooks', () => ({
+  useDisabledIdentityFederationProviders: jest.fn(),
   useIacProvisioner: jest.fn(),
   useStartServices: jest.fn(),
 }));
@@ -49,8 +50,12 @@ const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFu
 >;
 const mockUseIacCallback = useIacCallback as jest.MockedFunction<typeof useIacCallback>;
 const mockIacKeyCheck = IacKeyCheck as jest.MockedFunction<typeof IacKeyCheck>;
-const { useIacProvisioner: mockUseIacProvisioner } = jest.requireMock('../../../hooks') as {
+const {
+  useIacProvisioner: mockUseIacProvisioner,
+  useDisabledIdentityFederationProviders: mockUseDisabledIdentityFederationProviders,
+} = jest.requireMock('../../../hooks') as {
   useIacProvisioner: jest.MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
+  useDisabledIdentityFederationProviders: jest.MockedFunction<() => readonly string[]>;
 };
 
 const STATIC_TEMPLATE_URL = 'https://console.aws.amazon.com/cloudformation/static';
@@ -200,7 +205,10 @@ describe('AwsIdentityFederationSetup', () => {
     } as unknown as ReturnType<typeof useCreateCloudConnector>);
 
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+    mockUseDisabledIdentityFederationProviders.mockReturnValue([]);
+    // Without the callback the ARN fields always show, which most tests below rely on.
     mockUseIacCallback.mockReturnValue({
+      available: false,
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
@@ -327,8 +335,9 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
-      // The callback gave up, which is when the provisioner flow offers manual entry.
+      // Manual entry shows once the wait for the stack has expired.
       mockUseIacCallback.mockReturnValue({
+        available: true,
         status: 'expired',
         created: undefined,
         start: mockCallbackStart,
@@ -510,10 +519,11 @@ describe('AwsIdentityFederationSetup', () => {
     });
   });
 
-  describe('CloudFormation callback (New Identity tab, provisioner on)', () => {
+  describe('CloudFormation callback (New Identity tab)', () => {
     const callbackState = (
       overrides: Partial<ReturnType<typeof useIacCallback>>
     ): ReturnType<typeof useIacCallback> => ({
+      available: true,
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
@@ -525,6 +535,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
+      mockUseIacCallback.mockReturnValue(callbackState({}));
     });
 
     it('starts the callback at Launch with the typed name and the rendered template details', async () => {
@@ -537,12 +548,7 @@ describe('AwsIdentityFederationSetup', () => {
 
       expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: true });
       const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
-      await getLaunchStackParams?.({
-        key: 'sha256:abc',
-        integrations: [],
-        blueprintId: 'federated-identity',
-        blueprintVersion: '1.0.0',
-      });
+      await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
 
       expect(mockCallbackStart).toHaveBeenCalledWith({
         connectorName: 'my-identity',
@@ -551,6 +557,40 @@ describe('AwsIdentityFederationSetup', () => {
         iacBlueprintId: 'federated-identity',
         iacBlueprintVersion: '1.0.0',
       });
+    });
+
+    it('starts the callback without template details for a static launch with the provisioner off', async () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      const user = userEvent.setup();
+      renderSetup({ cloud });
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
+
+      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: true });
+      const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
+      await getLaunchStackParams?.(undefined);
+
+      expect(mockCallbackStart).toHaveBeenCalledWith({
+        connectorName: 'my-identity',
+        accountType: 'single-account',
+      });
+    });
+
+    it('does not pass getLaunchStackParams to the template hook when the callback is not available', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ available: false }));
+      renderSetup({ cloud, integrations });
+
+      expect(mockUseCloudConnectorTemplate.mock.lastCall![0].getLaunchStackParams).toBeUndefined();
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toBeInTheDocument();
+    });
+
+    it('disables the callback when AWS identity federation is off', () => {
+      mockUseDisabledIdentityFederationProviders.mockReturnValue(['aws']);
+      renderSetup({ cloud, integrations });
+
+      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: false });
     });
 
     it('shows a waiting hint while the stack has not called back yet', () => {
@@ -617,10 +657,20 @@ describe('AwsIdentityFederationSetup', () => {
       ).toBeInTheDocument();
     });
 
+    it('hides the ARN fields and Create before Launch with the provisioner off', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      renderSetup({ cloud });
+
+      expectManualEntry(false);
+    });
+
     it('keeps the ARN fields hidden while waiting on a rendered launch', () => {
       mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
-        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+        provisionerHookResult(mockLaunchOnClick, {
+          iacConfirm: RENDERED_IAC_CONFIRM,
+          hasLaunched: true,
+        })
       );
       renderSetup({ cloud, integrations });
 
@@ -628,9 +678,25 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
     });
 
+    it('keeps the ARN fields hidden while waiting on a static launch', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        ...staticTemplateHookResult,
+        hasLaunched: true,
+      });
+      renderSetup({ cloud });
+
+      expectManualEntry(false);
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
+    });
+
     it('shows the ARN fields when the launch went out without a callback record', () => {
       mockUseCloudConnectorTemplate.mockReturnValue(
-        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+        provisionerHookResult(mockLaunchOnClick, {
+          iacConfirm: RENDERED_IAC_CONFIRM,
+          hasLaunched: true,
+        })
       );
       renderSetup({ cloud, integrations });
 
@@ -653,30 +719,18 @@ describe('AwsIdentityFederationSetup', () => {
       }
     );
 
-    it('shows the ARN fields without a hint after a static-template fallback', () => {
-      mockUseCloudConnectorTemplate.mockReturnValue(
-        provisionerHookResult(mockLaunchOnClick, {
-          iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
-        })
-      );
-      renderSetup({ cloud, integrations });
-
-      expectManualEntry(true);
-      expect(
-        screen.queryByTestId('awsIdentityFederationSetup-callbackManualFallback')
-      ).not.toBeInTheDocument();
-    });
-
-    it('stops waiting after a static-template fallback, which cannot call back', () => {
+    it('keeps waiting after a static-template fallback', () => {
       mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
           iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
+          hasLaunched: true,
         })
       );
       renderSetup({ cloud, integrations });
 
-      expect(mockCallbackStop).toHaveBeenCalled();
+      expect(mockCallbackStop).not.toHaveBeenCalled();
+      expectManualEntry(false);
     });
 
     it('stops waiting when the launch failed', () => {
@@ -692,19 +746,14 @@ describe('AwsIdentityFederationSetup', () => {
     it('keeps waiting on a rendered launch', () => {
       mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
-        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+        provisionerHookResult(mockLaunchOnClick, {
+          iacConfirm: RENDERED_IAC_CONFIRM,
+          hasLaunched: true,
+        })
       );
       renderSetup({ cloud, integrations });
 
       expect(mockCallbackStop).not.toHaveBeenCalled();
-    });
-
-    it('does not enable the callback with the provisioner off', () => {
-      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
-      mockUseCloudConnectorTemplate.mockReturnValue(staticTemplateHookResult);
-      renderSetup({ cloud });
-
-      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: false });
     });
   });
 

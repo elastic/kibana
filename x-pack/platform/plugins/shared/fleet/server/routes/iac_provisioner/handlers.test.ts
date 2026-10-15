@@ -18,6 +18,7 @@ import { iacProvisionerService } from '../../services';
 import { iacCallbackService } from '../../services/iac_callback';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { IacCallback } from '../../../common/types/models/iac_callback';
 import {
@@ -38,20 +39,20 @@ jest.mock('../../services', () => ({
 }));
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
+jest.mock('../../services/utils/aws_identity_federation');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 jest.mock('../../services/iac_callback', () => ({
   iacCallbackService: {
     create: jest.fn(),
     get: jest.fn(),
-    prepare: jest.fn(),
     receive: jest.fn(),
-    cancel: jest.fn(),
   },
 }));
 
 const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
+const mockedIsAwsIdentityFederationEnabled = jest.mocked(isAwsIdentityFederationEnabled);
 
 const buildContext = () =>
   ({
@@ -499,20 +500,32 @@ describe('IaC callback handlers', () => {
     mockedAppContext.getSecurityCore.mockReturnValue({ authc: { getCurrentUser } } as any);
     mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
     mockedAppContext.getInternalUserESClient.mockReturnValue(esClient as any);
-    mockedIsEnabled.mockResolvedValue(true);
+    mockedIsAwsIdentityFederationEnabled.mockResolvedValue(true);
   });
 
   describe('createIacCallbackHandler', () => {
-    it('returns 404 when the IaC Provisioner is not enabled', async () => {
-      mockedIsEnabled.mockResolvedValue(false);
+    it('returns 404 when AWS identity federation is not enabled', async () => {
+      mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
       await createIacCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: 'IaC Provisioner is not enabled' },
+        body: { message: 'AWS identity federation is not enabled' },
       });
       expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
+    it('creates the record when the IaC Provisioner is off', async () => {
+      mockedIsEnabled.mockResolvedValue(false);
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
     });
 
     it('creates the record as the internal user, tagged with the caller and space', async () => {

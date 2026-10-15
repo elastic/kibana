@@ -17,6 +17,7 @@ import {
 } from '../../services/iac_provisioner_integrations';
 import { appContextService } from '../../services/app_context';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -185,13 +186,11 @@ const mapIacProvisionerRouteError = ({
   });
 };
 
-// ── Callbacks ────────────────────────────────────────────────────────────────
-
 const CALLBACK_NOT_FOUND = { body: { message: 'Callback not found' } };
 
 /**
- * Records are space-agnostic (the Lambda has no space), so the browser routes scope them by the
- * space the launch happened in. A record from another space reads as missing.
+ * Records are space-agnostic because the stack calls Kibana without a space. The browser routes
+ * only return records from the space the launch happened in; others read as missing.
  */
 const getCallbackInSpace = async (
   id: string,
@@ -209,15 +208,15 @@ export const createIacCallbackHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateIacCallbackRequestSchema.body>
 > = async (context, request, response) => {
-  if (!(await isIacProvisionerEnabled())) {
-    return response.notFound({ body: { message: 'IaC Provisioner is not enabled' } });
+  if (!(await isAwsIdentityFederationEnabled())) {
+    return response.notFound({ body: { message: 'AWS identity federation is not enabled' } });
   }
   const { spaceId } = await context.fleet;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { provider, ...identity } = request.body;
 
-  // Internal clients: minting the key must not require `manage_api_key` of the end user (it is
-  // unavailable on Serverless), and the type is space-agnostic.
+  // Internal clients: creating the key must not need the user's `manage_api_key` privilege (it
+  // is unavailable on Serverless), and the type is space-agnostic.
   const { item, apiKey } = await iacCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     appContextService.getInternalUserESClient(),
@@ -239,9 +238,8 @@ export const getIacCallbackHandler: FleetRequestHandler<
 };
 
 /**
- * Called by the stack's Lambda. Kibana's auth chain has already accepted the key; the service
- * then requires it to be the key bound to this record. Creates the cloud connector and records
- * the ARNs on the callback.
+ * Called by the stack's Lambda. Kibana has already authenticated the API key; the service then
+ * checks that it is this record's key.
  */
 export const receiveIacCallbackHandler: FleetRequestHandler<
   TypeOf<typeof ReceiveIacCallbackRequestSchema.params>,
@@ -257,7 +255,7 @@ export const receiveIacCallbackHandler: FleetRequestHandler<
     request.params.callbackId,
     { apiKeyId, payload: request.body }
   );
-  // Only the id and outcome: the key never reaches a log line.
+  // Never log the key.
   logger.debug(`IaC callback [id=${request.params.callbackId}] outcome=${result.outcome}`);
 
   switch (result.outcome) {

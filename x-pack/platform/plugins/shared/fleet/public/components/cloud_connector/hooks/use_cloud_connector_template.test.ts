@@ -177,6 +177,75 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.isDisabled).toBe(true);
       expect(result.current.templateGenerationError).toContain('ORGANIZATION_ID');
     });
+
+    describe('with callback stack params (getLaunchStackParams)', () => {
+      const CALLBACK_PARAMS = {
+        ElasticKibanaUrl: 'https://kb.example.com',
+        ElasticApiKey: 'encoded-key',
+        ElasticCallbackId: 'cb-1',
+      };
+
+      it('launches the static template on click with the callback params', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        expect(result.current.hasLaunched).toBe(false);
+        await launch(result);
+
+        expect(getLaunchStackParams).toHaveBeenCalledWith(undefined);
+        expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
+        const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+        expect(params.get('templateURL')).toBe('https://static.example/template.yml');
+        expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
+        expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
+        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(result.current.hasLaunched).toBe(true);
+        expect(result.current.iacConfirm).toBeUndefined();
+        expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      });
+
+      it('launches without the callback params when getLaunchStackParams throws', async () => {
+        const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        expect(cloudFormationTab.location.href).toContain('static.example');
+        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackId');
+        expect(result.current.hasLaunched).toBe(true);
+      });
+
+      it('opens a static URL that is not a quick-create link without asking for callback params', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            iacTemplateUrl: 'https://static.example/template.yml',
+            getLaunchStackParams,
+          })
+        );
+        await launch(result);
+
+        expect(getLaunchStackParams).not.toHaveBeenCalled();
+        expect(cloudFormationTab.location.href).toBe('https://static.example/template.yml');
+        expect(result.current.hasLaunched).toBe(true);
+      });
+
+      it('reports a console that a pop-up blocker kept closed', async () => {
+        windowOpenSpy.mockReturnValue(null);
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        expect(result.current.templateGenerationError).toContain('Allow pop-ups');
+        expect(result.current.hasLaunched).toBe(false);
+      });
+    });
   });
 
   describe('when the IaC Provisioner is enabled', () => {
@@ -885,24 +954,22 @@ describe('useCloudConnectorTemplate', () => {
         );
         await launch(result);
 
-        // Asked only after the render, so the record can carry the rendered template's details.
         expect(getLaunchStackParams).toHaveBeenCalledTimes(1);
         expect(getLaunchStackParams).toHaveBeenCalledWith({
-          key: 'sha256:661cb7def1c7101f',
-          integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
-          blueprintId: 'federated-identity',
-          blueprintVersion: 'v1',
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
         });
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe(ARTIFACT_URL);
         expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
         expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
         expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
-        // The workload identity params are still there.
         expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
+        expect(result.current.hasLaunched).toBe(true);
       });
 
-      it('leaves the static fallback without callback params when the render fails', async () => {
+      it('adds the callback params to the static fallback when the render fails', async () => {
         mockedSendRenderIacTemplate.mockResolvedValue({
           data: null,
           error: { message: 'unrenderable', statusCode: 422 },
@@ -913,22 +980,31 @@ describe('useCloudConnectorTemplate', () => {
         );
         await launch(result);
 
-        const openedUrl = cloudFormationTab.location.href;
-        expect(openedUrl).toContain('static.example');
-        expect(openedUrl).not.toContain('param_ElasticCallbackId');
-        expect(openedUrl).not.toContain('param_ElasticApiKey');
-        expect(getLaunchStackParams).not.toHaveBeenCalled();
+        expect(getLaunchStackParams).toHaveBeenCalledWith(STATIC_FALLBACK_CONFIRM);
+        const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+        expect(params.get('templateURL')).toBe('https://static.example/template.yml');
+        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(result.current.iacConfirm).toEqual(STATIC_FALLBACK_CONFIRM);
+        expect(result.current.hasLaunched).toBe(true);
       });
 
-      it('does not ask for callback params when there is nothing to render', async () => {
+      it('adds the callback params to the static template when there is nothing to render', async () => {
         const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [], getLaunchStackParams })
         );
         await launch(result);
 
-        expect(getLaunchStackParams).not.toHaveBeenCalled();
-        expect(windowOpenSpy.mock.calls[0][0]).not.toContain('param_ElasticCallbackId');
+        expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+        expect(getLaunchStackParams).toHaveBeenCalledWith(STATIC_FALLBACK_CONFIRM);
+        // The tab opens blank during the click and is navigated once the params are known.
+        expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+        expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
+        const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+        expect(params.get('templateURL')).toBe('https://static.example/template.yml');
+        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(result.current.hasLaunched).toBe(true);
       });
 
       it('renders without callback params when getLaunchStackParams returns undefined', async () => {

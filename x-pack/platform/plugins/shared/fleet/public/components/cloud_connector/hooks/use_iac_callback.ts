@@ -21,13 +21,13 @@ export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
 
 export type IacCallbackClientStatus = 'idle' | 'pending' | 'received' | 'expired' | 'error';
 
-/** The cloud connector receive created. The form does not copy ARNs out of the callback. */
+/** The cloud connector created when the stack reported back. */
 export interface IacCallbackCreated {
   id: string;
   name: string;
 }
 
-/** What the form knows at launch, stored on the record so receive can create the connector. */
+/** Identity details stored on the record at launch and used to create the cloud connector. */
 export interface IacCallbackStartInput {
   connectorName?: string;
   accountType?: AccountType;
@@ -37,14 +37,15 @@ export interface IacCallbackStartInput {
 }
 
 export interface UseIacCallbackResult {
+  /** False when the callback can't be used: disabled, or no public https Kibana URL. */
+  available: boolean;
   status: IacCallbackClientStatus;
-  /** Set once receive has created the cloud connector. */
+  /** Set when the stack's report has created the cloud connector. */
   created?: IacCallbackCreated;
   /**
-   * Creates a callback record and returns the stack parameters to put on the quick-create link.
-   * Undefined when the callback cannot be used — disabled, no public https Kibana URL, or the
-   * record could not be created — in which case the launch proceeds without it and the user
-   * pastes the values.
+   * Creates a callback record and returns the stack parameters for the quick-create link.
+   * Returns undefined when the callback is not available or the record could not be created.
+   * The launch then goes ahead without it.
    */
   start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
   /** Stops waiting on the current record. Its key expires on its own. */
@@ -52,9 +53,9 @@ export interface UseIacCallbackResult {
 }
 
 /**
- * The URL the stack's Lambda must reach Kibana on. Uses `serverBasePath`, never `get()`: the
- * public route is space-less. Only an https URL is returned: the template's parameter pattern
- * rejects anything else, and a non-https Kibana is not reachable from AWS anyway.
+ * The URL the stack's Lambda uses to reach Kibana. Uses `serverBasePath` rather than `get()`
+ * because the receive route has no space prefix. Only https URLs are returned, because the
+ * template's `ElasticKibanaUrl` parameter only accepts https.
  */
 export const getIacCallbackKibanaUrl = (
   basePath: { publicBaseUrl?: string; serverBasePath: string },
@@ -97,7 +98,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-  // `start` awaits the create; a record created after the form went away must not be polled.
+  // `start` awaits the create request; don't poll a record created after the form unmounted.
   const mountedRef = useRef(true);
 
   const stopPolling = useCallback(() => {
@@ -197,5 +198,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     };
   }, [stopPolling]);
 
-  return { status, created, start, stop };
+  const available = enabled && getIacCallbackKibanaUrl(http.basePath) !== undefined;
+
+  return { available, status, created, start, stop };
 };

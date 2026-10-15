@@ -86,6 +86,25 @@ describe('useIacCallback', () => {
     jest.useRealTimers();
   });
 
+  it('is available when enabled and Kibana has a public https URL', () => {
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+
+    expect(result.current.available).toBe(true);
+  });
+
+  it('is not available when disabled', () => {
+    const { result } = renderHook(() => useIacCallback({ enabled: false }));
+
+    expect(result.current.available).toBe(false);
+  });
+
+  it('is not available without a public https Kibana URL', () => {
+    setBasePath({ publicBaseUrl: 'http://kb.example.com', serverBasePath: '' });
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+
+    expect(result.current.available).toBe(false);
+  });
+
   it('start() creates a record with the identity details and returns the stack params', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 

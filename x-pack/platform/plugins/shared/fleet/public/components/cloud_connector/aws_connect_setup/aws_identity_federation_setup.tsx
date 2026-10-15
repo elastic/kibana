@@ -26,15 +26,16 @@ import { useQueryClient } from '@kbn/react-query';
 import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
-import { useIacProvisioner } from '../../../hooks';
+import { useDisabledIdentityFederationProviders, useIacProvisioner } from '../../../hooks';
 import type {
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,
 } from '../../../../common/types/rest_spec/iac_provisioner';
+import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
-import type { TemplateRendered } from '../hooks/use_cloud_connector_template';
 import { useIacCallback } from '../hooks/use_iac_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
@@ -97,6 +98,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   onIacTemplateRecorded,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
+  const isAwsIdentityFederationEnabled =
+    !useDisabledIdentityFederationProviders().includes(AWS_CLOUD_PROVIDER);
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
   const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
@@ -138,14 +141,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
 
-  // The launched stack reports its role and stack ARNs to Kibana, which writes them onto a
-  // cloud connector. This form waits; it does not copy the ARNs into the fields below.
   const {
+    available: isCallbackAvailable,
     status: callbackStatus,
     created: callbackCreated,
     start: startCallback,
     stop: stopCallback,
-  } = useIacCallback({ enabled: isIacProvisionerEnabled });
+  } = useIacCallback({ enabled: isAwsIdentityFederationEnabled });
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -185,16 +187,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // No stale-render guard here: see the `integrations` prop contract.
   // The hook's `templateAlreadyCurrent` is not consumed: it only fires when a stored digest is
   // sent, and New Identity never has one.
-  // Receive creates the cloud connector from what the record holds, so the name and account type
-  // are the ones the form has at Launch.
   const getLaunchStackParams = useCallback(
-    (rendered: TemplateRendered) =>
+    (iac: CloudConnectorIacState | undefined) =>
       startCallback({
         connectorName,
         accountType,
-        iacKey: rendered.key,
-        iacBlueprintId: rendered.blueprintId,
-        iacBlueprintVersion: rendered.blueprintVersion,
+        iacKey: iac?.iac_key,
+        iacBlueprintId: iac?.iac_blueprint_id,
+        iacBlueprintVersion: iac?.iac_blueprint_version,
       }),
     [startCallback, connectorName, accountType]
   );
@@ -204,6 +204,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     isGeneratingTemplate,
     templateGenerationError,
     iacConfirm,
+    hasLaunched,
     clearIacConfirm,
   } = useCloudConnectorTemplate({
     provider: 'aws',
@@ -212,29 +213,25 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     iacTemplateUrl,
     packageName,
     policyTemplates,
-    // undefined → static template: a plain href with the provisioner off, the hook's
-    // missing-context fallback (window.open + fallback telemetry) with it on.
+    // undefined → static template: opened directly with the provisioner off, or through the
+    // hook's missing-context fallback (with fallback telemetry) with it on.
     integrations,
-    // Called after a successful render only; the hook applies the parameters to that template.
-    getLaunchStackParams,
+    getLaunchStackParams: isCallbackAvailable ? getLaunchStackParams : undefined,
   });
 
-  // A later launch that fell back to the static template (null key) or never reached the console
-  // cannot call back, so stop waiting on the record an earlier launch created.
-  const isStaticLaunch = iacConfirm !== undefined && iacConfirm.iac_key === null;
+  // A later launch that never reached the console cannot call back, so stop waiting on the
+  // record an earlier launch created.
   useEffect(() => {
-    if (callbackStatus === 'pending' && (isStaticLaunch || templateGenerationError)) {
+    if (callbackStatus === 'pending' && templateGenerationError) {
       stopCallback();
     }
-  }, [callbackStatus, isStaticLaunch, templateGenerationError, stopCallback]);
+  }, [callbackStatus, templateGenerationError, stopCallback]);
 
-  // With the provisioner on, the stack creates the identity through the callback, so the ARN
-  // fields and Create only appear when that cannot happen: the launch went out without a
-  // callback record, or the wait ended without an identity.
+  // When the stack can report back, the ARN fields and Create only show when it won't: the
+  // launch went out without a callback record, or the wait ended without an identity.
   const hasCallbackGivenUp = callbackStatus === 'expired' || callbackStatus === 'error';
-  const hasLaunchedWithoutCallback = iacConfirm !== undefined && callbackStatus === 'idle';
-  const showManualEntry =
-    !isIacProvisionerEnabled || hasCallbackGivenUp || hasLaunchedWithoutCallback;
+  const hasLaunchedWithoutCallback = !!hasLaunched && callbackStatus === 'idle';
+  const showManualEntry = !isCallbackAvailable || hasCallbackGivenUp || hasLaunchedWithoutCallback;
 
   const handledCreatedIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -369,7 +366,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               </EuiText>
             </>
           )}
-          {isIacProvisionerEnabled && hasCallbackGivenUp && (
+          {hasCallbackGivenUp && (
             <>
               <EuiSpacer size="s" />
               <EuiText

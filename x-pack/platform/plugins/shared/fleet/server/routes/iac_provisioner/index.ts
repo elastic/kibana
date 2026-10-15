@@ -48,7 +48,7 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
 
 const IAC_CALLBACK_WRITE_SECURITY = {
   authz: {
-    // Mints an API key: same level as creating an identity.
+    // Creates an API key, so it needs the same privileges as creating an identity.
     requiredPrivileges: [
       {
         anyRequired: [
@@ -110,7 +110,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: () => CreateIacCallbackResponseSchema,
             },
             400: { description: 'A bad request.', body: genericErrorResponse },
-            404: { description: 'The IaC Provisioner is not enabled.', body: notFoundResponse },
+            404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
           },
         },
       },
@@ -142,8 +142,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       getIacCallbackHandler
     );
 
-  // Public: the stack's Lambda calls this with the per-callback key. Kibana's auth chain rejects
-  // any other key before the handler; the handler then binds the key to the record.
+  // Public: the stack's Lambda calls this with the record's API key. Kibana rejects an invalid
+  // key before the handler runs; the handler then checks that the key belongs to the record.
   router.versioned
     .post({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN,
