@@ -10,6 +10,9 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskScoreDataClient } from '../../risk_score_data_client';
+import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
+import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
+import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import { calculateResolutionEntityScores } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import type { ResolutionStepResult } from './pipeline_types';
@@ -62,6 +65,7 @@ export const runResolutionScoringStep = async ({
   let scoresWrittenRiskIndex = 0;
   let scoresWrittenEntityStore = 0;
   let scoresFailed = 0;
+  let scoresCalculated = 0;
   let abortedBetweenPages = false;
   const newScores: Record<string, number> = {};
 
@@ -86,6 +90,7 @@ export const runResolutionScoringStep = async ({
       break;
     }
     pagesProcessed += 1;
+    scoresCalculated += pageScores.length;
     if (pageScores.length > 0) {
       scoresWrittenRiskIndex += await persistScoresToRiskIndex({
         writer,
@@ -130,6 +135,7 @@ export const runResolutionScoringStep = async ({
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
       scores: newScores,
+      scoresCalculated,
     };
   }
 
@@ -143,5 +149,86 @@ export const runResolutionScoringStep = async ({
     scoresFailed,
     pagesProcessed,
     scores: newScores,
+    scoresCalculated,
   };
+};
+
+/**
+ * Writes a zero resolution score for one resolution target, using the modifiers on its entity
+ * store record.
+ *
+ * A resolution group with no alert left to score produces no row above, so the target's last
+ * resolution score stays in place. A full engine run clears that up in `resetToZero`; this lets a
+ * single-entity recalculation do the same right away instead of leaving the old score on screen
+ * until the next run.
+ */
+export const persistZeroResolutionScore = async ({
+  crudClient,
+  logger,
+  entityType,
+  targetId,
+  now,
+  watchlistConfigs,
+  calculationRunId,
+  writer,
+  idBasedRiskScoringEnabled,
+  refresh,
+}: {
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+  entityType: EntityType;
+  targetId: string;
+  now: string;
+  watchlistConfigs: Map<string, WatchlistObject>;
+  calculationRunId: string;
+  writer: RiskEngineDataWriter;
+  idBasedRiskScoringEnabled: boolean;
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+}): Promise<number> => {
+  const entities = await fetchEntitiesByIds({
+    crudClient,
+    entityIds: [targetId],
+    logger,
+    errorContext:
+      'Error fetching the resolution target for the zero resolution score. Skipping the zero score write',
+  });
+
+  // Without the target we would write a score carrying no modifiers at all, which is worse than
+  // leaving the previous score alone.
+  if (!entities.has(targetId)) {
+    logger.debug(`Skipping zero resolution score for ${targetId}: entity not found in store`);
+    return 0;
+  }
+
+  const scores = applyScoreModifiersFromEntities({
+    now,
+    identifierType: entityType,
+    scoreType: 'resolution',
+    calculationRunId,
+    page: {
+      scores: [
+        { entity_id: targetId, alert_count: 0, score: 0, normalized_score: 0, risk_inputs: [] },
+      ],
+      identifierField: 'entity.id',
+    },
+    entities,
+    watchlistConfigs,
+  });
+
+  const scoresWrittenRiskIndex = await persistScoresToRiskIndex({
+    writer,
+    entityType,
+    scores,
+    logger,
+    refresh,
+  });
+  await persistScoresToEntityStore({
+    crudClient,
+    logger,
+    entityType,
+    scores,
+    enabled: idBasedRiskScoringEnabled,
+  });
+
+  return scoresWrittenRiskIndex;
 };

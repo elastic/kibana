@@ -69,4 +69,6 @@ export interface StepResult {
 export interface ResolutionStepResult extends StepResult {
   skippedReason?: 'lookup_empty';
   scores: Record<string, number>;
+  /** Scores calculated before persistence, so a failed write still counts here. */
+  scoresCalculated: number;
 }
