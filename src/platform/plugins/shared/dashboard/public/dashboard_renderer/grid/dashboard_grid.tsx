@@ -242,6 +242,13 @@ const dashboardGridStyles = {
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
+        // `height: 100%` collapses to 0 without a definite-height ancestor (e.g. a `min-height`
+        // flex host), so stretch the layout and let the grid wrapper fill it absolutely.
+        flex: 1,
+        '.kbnGridWrapper': {
+          position: 'absolute',
+          inset: 0,
+        },
         '.dshDashboardGrid__item--expanded': {
           position: 'absolute',
           width: '100%',
