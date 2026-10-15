@@ -45,7 +45,6 @@ import { EuiButton, EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   mockRowAdditionalLeadingControls,
-  testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -117,6 +116,7 @@ const getProps = (): UnifiedDataTableProps => {
       storage: services.storage as unknown as Storage,
       data: services.data,
       theme: services.theme,
+      uiActions: services.uiActions,
     },
     setExpandedDoc: jest.fn(),
     settings: {},
@@ -980,6 +980,43 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it(
+      'should hide the Sort toolbar control when showSortSelector is false without disabling column sorting',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          isSortEnabled: true,
+          showSortSelector: false,
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showSortSelector: false,
+        });
+        expect(getLastEuiDataGridProps().sorting).toEqual(
+          expect.objectContaining({
+            onSort: expect.any(Function),
+          })
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should keep the Sort toolbar control hidden when sorting is disabled',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          isSortEnabled: false,
+          showSortSelector: true,
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showSortSelector: false,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('custom control columns', () => {
@@ -996,13 +1033,11 @@ describe('UnifiedDataTable', () => {
             },
             flattened: { test: jest.fn() },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
           setExpandedDoc: jest.fn(),
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('exampleRowControl-chartBarVerticalStack')[0]).toBeVisible();
 
         // The other actions are within the popover
@@ -1029,40 +1064,12 @@ describe('UnifiedDataTable', () => {
               _id: 'test',
             },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           setExpandedDoc: jest.fn(),
           trailingControlColumns: testTrailingControlColumns,
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('test-trailing-column-popover-button')[0]).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-  });
-
-  describe('externalControlColumns', () => {
-    it(
-      'should render external leading control columns',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            flattened: { test: jest.fn() },
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-          },
-          externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
-        });
-
-        expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toBeVisible();
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1089,7 +1096,6 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         expandedDoc,
-        externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
         setExpandedDoc: setExpandedDocMock,
       });

@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../../common/services/version_specific_policies_utils';
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
@@ -31,14 +32,18 @@ export const StatusColumn: React.FunctionComponent<{
         (value) => value.version === version
       );
       const kuery = failed
-        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
+        ? `${buildPolicyBaseIdWithFallbackKuery(
+            agentPolicyId
+          )} AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
             currentVersionAgentStatus && currentVersionAgentStatus.failedUpgradeActionIds?.length
               ? ` AND (${currentVersionAgentStatus.failedUpgradeActionIds
                   .map((id) => `upgrade_details.action_id:"${id}"`)
                   .join(' OR ')})`
               : ''
           }`
-        : `policy_id:"${agentPolicyId}" AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
+        : `${buildPolicyBaseIdWithFallbackKuery(
+            agentPolicyId
+          )} AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
       return getHref('agent_list', {
         kuery: encodeURIComponent(kuery),
       });

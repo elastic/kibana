@@ -24,18 +24,24 @@ jest.mock('../../application/breadcrumb_context', () => ({
 }));
 
 const mockCanReadRules = true;
+let mockCanAccessClassicRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'chrome') return { docTitle: { change: jest.fn() } };
     if (token === 'application') {
-      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+      return {
+        getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}`,
+        capabilities: {
+          management: { insightsAndAlerting: { triggersActionsRules: mockCanAccessClassicRules } },
+        },
+      };
     }
     if (token === 'settings') {
       return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
     }
     if (token === 'http') {
-      return {};
+      return { basePath: { prepend: (path: string) => path } };
     }
     if (typeof token === 'function') {
       return {
@@ -257,6 +263,7 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanAccessClassicRules = true;
     mockNewEventsCount(0);
     mockRuleExecutionFetchResult();
   });
@@ -270,13 +277,6 @@ describe('ExecutionHistoryPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /rules/i })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
-  });
-
-  it('renders the experimental badge in the page header', () => {
-    mockFetchResult();
-    renderPage();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   describe('Rules tab (default)', () => {
@@ -304,6 +304,23 @@ describe('ExecutionHistoryPage', () => {
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryTable')).toBeInTheDocument();
+    });
+
+    it('links the Rules tab description to the Classic rule logs', () => {
+      renderPage();
+
+      expect(screen.getByTestId('executionHistoryClassicRuleLogsLink')).toHaveAttribute(
+        'href',
+        '/app/management/insightsAndAlerting/triggersActions/logs'
+      );
+    });
+
+    it('omits the Classic rule logs link when the user cannot access Classic rules', () => {
+      mockCanAccessClassicRules = false;
+      renderPage();
+
+      expect(screen.queryByTestId('executionHistoryClassicRuleLogsLink')).not.toBeInTheDocument();
+      expect(screen.getByText('Review past runs for Universal rules.')).toBeInTheDocument();
     });
 
     it('shows the rules empty state when there are no items', () => {
