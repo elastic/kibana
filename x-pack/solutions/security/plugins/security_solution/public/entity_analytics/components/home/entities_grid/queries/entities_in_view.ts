@@ -55,6 +55,7 @@ export const buildEntitiesInViewBranch = (
   `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...fields].join(', ')}`,
 ];
 
+/** Which of these ids are in view, search included: KQL can't run after a join, so joined rows are checked here. */
 export const buildSearchedTargetsQuery = (
   args: QueryArgs,
   targetIds: readonly string[]
