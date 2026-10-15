@@ -151,6 +151,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -357,6 +358,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
             hideHeaderIcons
           />
         )}

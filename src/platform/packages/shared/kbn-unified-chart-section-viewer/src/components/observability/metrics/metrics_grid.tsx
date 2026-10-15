@@ -24,21 +24,16 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
-import { buildHistogramHeatmapConfig } from '../../chart/build_histogram_heatmap_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import {
   createESQLQuery,
-  createHistogramDistributionQuery,
   firstNonNullable,
   getAggregationLabel,
   getMetricUniqueKey,
 } from '../../../common/utils';
-import { isHistogramMetric } from '../../../common/utils/histogram_metric';
-import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
-import { useFeatureFlag } from '../../../hooks';
 import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
 import {
   ACTION_COPY_TO_DASHBOARD,
@@ -49,6 +44,7 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -410,41 +406,16 @@ const ChartItem = React.memo(
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
 
-    const isHeatmapsEnabled = useFeatureFlag(
-      FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
-      FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
-    );
-    // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
-    const isHistogramDistribution =
-      isHeatmapsEnabled &&
-      gridSettings.histogramPercentile === 'distribution' &&
-      isHistogramMetric(
-        firstNonNullable(metricItem.fieldTypes),
-        firstNonNullable(metricItem.metricTypes)
-      );
-    const { bounds, error: boundsError } = isHistogramDistribution
-      ? histogramBounds.get(getMetricUniqueKey(metricItem)) ?? {}
-      : {};
-    // A breakdown splits the series chart. Heatmaps do not encode that split yet.
-    const hasBreakdown = applicableDimensions.length > 0;
-    // Missing bounds skip the histogram and use the series chart. A point (min === max) still draws.
-    // Loading and errors stay on the histogram path so the series chart does not flash first.
-    const shouldRenderHistogram =
-      isHistogramDistribution &&
-      !hasBreakdown &&
-      (histogramBoundsLoading || boundsError !== undefined || bounds !== undefined);
-
-    const distributionQuery = useMemo(() => {
-      if (!shouldRenderHistogram || !bounds) {
-        return undefined;
-      }
-      return createHistogramDistributionQuery({
+    const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
+      useHistogramHeatmap({
         metricItem,
-        bounds,
+        applicableDimensions,
+        histogramBounds,
+        histogramBoundsLoading,
         whereStatements,
         originalSource: userSource,
+        histogramPercentile: gridSettings.histogramPercentile,
       });
-    }, [shouldRenderHistogram, bounds, metricItem, whereStatements, userSource]);
 
     const esqlQuery = useMemo(() => {
       if (shouldRenderHistogram) {
@@ -472,13 +443,6 @@ const ChartItem = React.memo(
     ]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const heatmapConfig = useMemo(
-      () =>
-        distributionQuery
-          ? buildHistogramHeatmapConfig({ query: distributionQuery, title: metricItem.metricName })
-          : undefined,
-      [distributionQuery, metricItem.metricName]
-    );
 
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);

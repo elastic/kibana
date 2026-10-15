@@ -10,8 +10,7 @@
 import { esql, BasicPrettyPrinter } from '@elastic/esql';
 import type { HistogramBounds, ParsedMetricItem } from '../../../types';
 import { firstNonNullable } from '../first_null_nullable';
-import { isHistogramMetric } from '../histogram_metric';
-import { isLegacyHistogram } from '../legacy_histogram';
+import { isHistogramMetric, isLegacyHistogram } from '../histogram_metric';
 import { createTimeBucketAggregation } from './create_aggregation';
 import { fieldNameToColumn, resolveSource } from './helpers';
 
