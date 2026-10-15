@@ -13,16 +13,16 @@ import { oneOfLiterals } from '../common/utils';
 const comparators = Object.values(COMPARATORS);
 
 const searchConfigSchema = schema.object({
-  index: schema.string(),
+  index: schema.string({ maxLength: 10000 }),
 });
 
 export const degradedDocsParamsSchema = schema.object(
   {
-    timeUnit: schema.string(),
+    timeUnit: schema.string({ maxLength: 64 }),
     timeSize: schema.number(),
-    threshold: schema.arrayOf(schema.number()),
+    threshold: schema.arrayOf(schema.number(), { maxSize: 2 }),
     comparator: oneOfLiterals(comparators),
-    groupBy: schema.maybe(schema.arrayOf(schema.string())),
+    groupBy: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
     searchConfiguration: searchConfigSchema,
   },
   {
