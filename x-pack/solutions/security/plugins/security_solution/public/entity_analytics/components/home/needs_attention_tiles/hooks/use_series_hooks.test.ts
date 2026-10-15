@@ -368,6 +368,10 @@ describe('series hooks', () => {
       mockJobs.mockReturnValue({ jobIds: [], loading: true });
       expect(run(ANOMALIES).isTrendLoading).toBe(true);
       expect(isEnabled()).toBe(false);
+
+      mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: true });
+      run(ANOMALIES);
+      expect(isEnabled()).toBe(false);
     });
   });
 
