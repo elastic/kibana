@@ -242,7 +242,7 @@ describe('workspace state', () => {
       label: 'First',
     };
     const duplicate = { ...node, label: 'Last' };
-    const workspace = createWorkspaceMock();
+    const workspace = createRuntimeGraphMock();
     Object.assign(workspace, {
       nodes: [node, duplicate],
       edges: [],
@@ -286,7 +286,7 @@ describe('workspace state', () => {
       nodes: [],
       edges: [],
       blocklistedNodes: [],
-    } as unknown as Workspace);
+    } as unknown as RuntimeGraph);
 
     environment.store.dispatch(initializeWorkspace());
     environment.store.dispatch(workspaceChanged(snapshot));
@@ -407,7 +407,7 @@ describe('workspace state', () => {
 
   it('keeps blocklisted IDs consistent with their map when blocking an existing ID', () => {
     const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
+    const workspace = createRuntimeGraphMock();
     const existing = {
       id: 'field..term',
       data: { field: 'field', term: 'term' },
@@ -517,7 +517,7 @@ describe('workspace state', () => {
 
   it('preserves history across runtime snapshots and initialization across undo and redo', () => {
     const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
+    const workspace = createRuntimeGraphMock();
     Object.assign(workspace, {
       nodes: [{ id: 'selected', data: { field: 'field', term: 'selected' } }],
       edges: [],

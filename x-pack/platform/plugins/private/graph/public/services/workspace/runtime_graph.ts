@@ -7,9 +7,9 @@
 
 import type { RuntimeGraph } from '../../types/workspace_state';
 
-export const createRuntimeGraph = (
-  { topologyChangeHandler }: Pick<RuntimeGraph, 'topologyChangeHandler'> = {}
-): RuntimeGraph => ({
+export const createRuntimeGraph = ({
+  topologyChangeHandler,
+}: Pick<RuntimeGraph, 'topologyChangeHandler'> = {}): RuntimeGraph => ({
   blocklistedNodes: [],
   topologyChangeHandler,
   nodesMap: {},

@@ -102,7 +102,9 @@ const initialWorkspaceState: WorkspaceState = {
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
 export const workspaceLayoutChanged = actionCreator<boolean>('WORKSPACE_LAYOUT_CHANGED');
-export const workspaceRuntimeChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_RUNTIME_CHANGED');
+export const workspaceRuntimeChanged = actionCreator<WorkspaceSnapshot>(
+  'WORKSPACE_RUNTIME_CHANGED'
+);
 export const workspaceGraphMerged = actionCreator<GraphData>('WORKSPACE_GRAPH_MERGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');

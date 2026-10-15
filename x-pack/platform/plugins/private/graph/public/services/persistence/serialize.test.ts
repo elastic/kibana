@@ -6,11 +6,7 @@
  */
 
 import { reduxStateToSavedWorkspace } from './serialize';
-import type {
-  GraphWorkspaceSavedObject,
-  AdvancedSettings,
-  WorkspaceField,
-} from '../../types';
+import type { GraphWorkspaceSavedObject, AdvancedSettings, WorkspaceField } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import type {
   IndexpatternDatasource,
@@ -70,6 +66,11 @@ describe('serialize', () => {
       ],
       workspace: {
         isInitialized: true,
+        isLayoutRunning: false,
+        selectedNodeIds: [],
+        selectedEdgeIds: [],
+        undoHistory: [],
+        redoHistory: [],
         nodesById: {
           'node-0': {
             id: 'node-0',

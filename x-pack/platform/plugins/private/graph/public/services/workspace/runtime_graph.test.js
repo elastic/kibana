@@ -73,7 +73,7 @@ describe('graphui-workspace', function () {
       const { workspace, changeHandler, topologyChangeHandler } = init();
       layoutController.start = jest.fn();
 
-      workspace.mergeGraph({
+      mergeGraph(workspace, {
         nodes: [{ field: 'field1', term: 'a', weight: 1, depth: 0 }],
         edges: [],
       });
@@ -88,7 +88,7 @@ describe('graphui-workspace', function () {
       topologyChangeHandler.mockImplementation(() => createRuntimeGraphState(workspace));
 
       try {
-        workspace.mergeGraph({
+        mergeGraph(workspace, {
           nodes: [
             { field: 'field1', term: 'a', weight: 1, depth: 0 },
             { field: 'field1', term: 'b', weight: 1, depth: 1 },

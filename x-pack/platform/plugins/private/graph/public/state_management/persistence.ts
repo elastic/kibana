@@ -150,11 +150,13 @@ export const registerPersistenceListeners = (
           runtimeGraph,
           savedWorkspace: action.payload,
           getState: () => {
-            const currentWorkspace = deps.getWorkspace();
+            const currentWorkspace = deps.getRuntimeGraph();
             if (currentWorkspace) {
-              listenerApi.dispatch(workspaceRuntimeChanged(
+              listenerApi.dispatch(
+                workspaceRuntimeChanged(
                   createRuntimeGraphState(currentWorkspace, deps.getLayoutController()?.isRunning())
-                ));
+                )
+              );
             }
             return listenerApi.getState();
           },
