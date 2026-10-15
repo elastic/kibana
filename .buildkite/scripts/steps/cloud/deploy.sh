@@ -7,10 +7,6 @@ source .buildkite/scripts/common/util.sh
 ES_SNAPSHOTS_DAILY_BASE_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily"
 ES_SHA_PATTERN="^[0-9a-f]{40}$"
 
-.buildkite/scripts/bootstrap.sh
-
-export KBN_NP_PLUGINS_BUILT=true
-
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 ECCTL_LOGS=$(mktemp --suffix ".json")
 
@@ -47,13 +43,6 @@ case "$ES_HOT_TIER_MEMORY_SIZE" in
     ;;
 esac
 
-echo "--- Download Kibana Distribution"
-
-mkdir -p ./target
-download_tmp_artifact "kibana-default.tar.zst" ./target "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-mv ./target/kibana-default.tar.zst ./target/kibana-$VERSION-linux-x86_64.tar.zst
-
-echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="$ES_SNAPSHOTS_DAILY_BASE_URL/$(jq -r '.version' package.json)/manifest-latest-verified.json"
 ELASTICSEARCH_SHA=$(curl -s "$ELASTICSEARCH_MANIFEST_URL" | jq -r '.sha')
 if [[ ! "$ELASTICSEARCH_SHA" =~ $ES_SHA_PATTERN ]]; then
@@ -71,31 +60,6 @@ else
 fi
 
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$PR_NUMBER"
-
-set +e
-DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
-set -e
-
-if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
-  echo "Distribution already exists, skipping build"
-else
-  node scripts/build \
-    --skip-initialize \
-    --skip-generic-folders \
-    --skip-platform-folders \
-    --skip-archives \
-    --skip-cdn-assets \
-    --tar-zstd \
-    --docker-images \
-    --docker-tag-qualifier="$GIT_COMMIT" \
-    --docker-push \
-    --skip-docker-ubi \
-    --skip-docker-fips \
-    --skip-docker-cloud-fips \
-    --skip-docker-wolfi \
-    --skip-docker-serverless \
-    --skip-docker-contexts
-fi
 
 if is_pr_with_label "ci:cloud-redeploy" || is_pr_with_label "ci:entity-store-performance"; then
   echo "--- Shutdown Previous Deployment"
