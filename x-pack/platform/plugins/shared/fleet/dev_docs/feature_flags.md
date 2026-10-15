@@ -15,7 +15,7 @@ Create the flag in the [elastic/kibana-feature-flags](https://github.com/elastic
 Add a constant to [`common/constants/feature_flags.ts`](../common/constants/feature_flags.ts), with a doc comment stating what it gates and the fallback:
 
 ```ts
-/** LaunchDarkly flag that gates the Restart Agent action in the Fleet UI. Fallback is false. */
+/** LaunchDarkly flag that gates the Restart Agent action in the Fleet UI. Fallback is true. */
 export const ENABLE_RESTART_AGENT_ACTION_FLAG = 'fleet.enableRestartAgentAction';
 ```
 
@@ -30,7 +30,7 @@ Conventions:
 
 ```ts
 const { featureFlags } = useStartServices();
-const isEnabled = featureFlags.useBooleanValue(ENABLE_RESTART_AGENT_ACTION_FLAG, false);
+const isEnabled = featureFlags.useBooleanValue(ENABLE_RESTART_AGENT_ACTION_FLAG, true);
 ```
 
 **Server**: use `appContextService.getFeatureFlags()` and the observable API, see [`iac_provisioner.ts`](../server/services/utils/iac_provisioner.ts):
@@ -43,7 +43,13 @@ return await firstValueFrom(featureFlags.getBooleanValue$(ENABLE_IAC_PROVISIONER
 
 Handle the case where `getFeatureFlags()` returns `undefined`.
 
-### 4. Test
+### 4. Enable the feature on-prem
+
+On-prem deployments do not have access to LaunchDarkly, so they always use the fallback passed in the code. Setting the flag to `true` in the kibana-feature-flags repo only enables the feature in Serverless and ECH.
+
+When a feature is ready to be enabled on-prem, set the fallback to `true` in Kibana (and update the doc comment on the constant). The flag stays in LaunchDarkly as a kill switch for Serverless and ECH until it is removed, see the [deprecation guide](https://github.com/elastic/kibana-feature-flags#how-to-deprecate-or-remove-a-flag).
+
+### 5. Test
 
 Mock `useBooleanValue` (public) or `getBooleanValue$` (server) and assert it is called with the flag constant and the expected fallback. See [`use_iac_provisioner.test.ts`](../public/hooks/use_iac_provisioner.test.ts) and [`iac_provisioner.test.ts`](../server/services/utils/iac_provisioner.test.ts).
 
