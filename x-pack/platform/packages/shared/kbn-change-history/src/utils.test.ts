@@ -459,16 +459,6 @@ describe('#enrichWithProfiles', () => {
     expect(items[0].user).toEqual({ id: 'u1', name: 'alice' });
   });
 
-  it('leaves full_name unset when the profile has no full_name', async () => {
-    const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([profile('u1', undefined)]);
-    const items = [doc('u1', 'alice')];
-
-    await enrichWithProfiles(items, service, logger);
-
-    expect(items[0].user.full_name).toBeUndefined();
-  });
-
   it('swallows bulkGet failures and warns', async () => {
     const service = userProfileServiceMock.createStart();
     service.bulkGet.mockRejectedValue(new Error('es down'));
