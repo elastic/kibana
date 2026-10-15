@@ -1,0 +1,81 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Legacy Vega visualization",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Legacy Vega visualization\",\"type\":\"vega\",\"params\":{\"spec\":\"{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }\"}}"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "legacy_vega_visualization",
+  "migrationVersion": {
+    "visualization": "8.0.0"
+  },
+  "references": [],
+  "type": "visualization",
+  "updated_at": "2026-08-07T12:00:00.000Z",
+  "version": "WzEsMV0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{}",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "timeRestore": false,
+    "title": "Legacy Vega dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "legacy_vega_dashboard",
+  "migrationVersion": {
+    "dashboard": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "legacy_vega_visualization",
+      "name": "1:panel_1",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2026-08-07T12:00:00.000Z",
+  "version": "WzIsMV0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{}",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"savedVis\":{\"title\":\"Legacy Vega hybrid\",\"type\":\"vega\",\"params\":{\"spec\":\"{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}},\"panelRefName\":\"panel_1\"}]",
+    "timeRestore": false,
+    "title": "Legacy Vega hybrid dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "legacy_vega_hybrid_dashboard",
+  "migrationVersion": {
+    "dashboard": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "legacy_vega_visualization",
+      "name": "1:panel_1",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2026-08-07T12:00:00.000Z",
+  "version": "WzQsMV0="
+}

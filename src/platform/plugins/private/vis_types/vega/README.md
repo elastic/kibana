@@ -26,3 +26,18 @@ When the flag is enabled, `visTypeVega` also registers a server embeddable schem
 config. When disabled, the public API treats `vega` as an unmapped panel type: writes reject it
 and reads drop stored panels with a `dropped_panel` warning. The Dashboard app's own internal
 save/load routes store and return it as-is.
+
+## Legacy Vega panel migration
+
+The `dashboard.legacyVegaPanelMigration` feature flag (off by default) converts by-value legacy Vega
+visualization panels (`legacy_vis` panels with a `vega` `savedVis`) into `vega` panels when a
+dashboard is read, through the public REST API and the Dashboard app. The stored dashboard is not
+changed. The migration also requires `vega.standaloneEmbeddable`, which is only read when Kibana
+starts.
+
+- Specs that parse as a JSON object become `{ format: 'json', value }`; any other spec is kept as
+  text with `{ format: 'hjson', value }`.
+- The visualization's query and filters become the panel `query` and `filters`.
+- The panel title and description fall back to the visualization's, so the rendered title does not
+  change.
+- By-reference legacy Vega panels are not migrated and stay `legacy_vis`.

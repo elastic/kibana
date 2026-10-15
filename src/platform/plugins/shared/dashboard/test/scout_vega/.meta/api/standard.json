@@ -1,0 +1,86 @@
+{
+  "sha1": "4f608c8d4774503f1480ae91373d0fc874eb39a0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b5f1ed29f5fabab-a18da893aafac99",
+      "title": "dashboards - legacy Vega panel migration public read migrates by-value legacy Vega panels, including query and filters, when the flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 83,
+        "column": 39
+      }
+    },
+    {
+      "id": "b5f1ed29f5fabab-75d97358b553464",
+      "title": "dashboards - legacy Vega panel migration public read drops legacy Vega panels when the flag is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 111,
+        "column": 66
+      }
+    },
+    {
+      "id": "b5f1ed29f5fabab-e8f8410d7bdf11e",
+      "title": "dashboards - legacy Vega panel migration internal app read migrates by-value legacy Vega panels when the flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 132,
+        "column": 48
+      }
+    },
+    {
+      "id": "b5f1ed29f5fabab-04e4d3369be9477",
+      "title": "dashboards - legacy Vega panel migration internal app read keeps legacy_vis when the flag is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 140,
+        "column": 45
+      }
+    },
+    {
+      "id": "b5f1ed29f5fabab-2e45364ecbbefc8",
+      "title": "dashboards - legacy Vega panel migration by-reference legacy Vega panels are not migrated when the flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 172,
+        "column": 11
+      }
+    },
+    {
+      "id": "b5f1ed29f5fabab-1a76d32f439bca3",
+      "title": "dashboards - legacy Vega panel migration internal app read gives a visualization reference precedence over inline state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_vega/api/tests/legacy_vega_panel_migration.spec.ts",
+        "line": 202,
+        "column": 16
+      }
+    }
+  ]
+}
