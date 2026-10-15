@@ -39852,7 +39852,7 @@ snapshots:
       fast-xml-parser: 5.5.7
       file-type: 21.3.4(supports-color@10.2.2)
       ini: 6.0.0
-      minimatch: 10.2.4
+      minimatch: 10.2.6
       modern-tar: 0.7.7
       papaparse: 5.7.0
       quickjs-emscripten: 0.32.0
@@ -39863,7 +39863,7 @@ snapshots:
       sql.js: 1.14.2
       turndown: 7.2.4
       undici: 7.29.1
-      yaml: 2.9.1
+      yaml: 2.9.0
     optionalDependencies:
       '@mongodb-js/zstd': 7.0.0
       node-liblzma: 2.2.0
