@@ -214,5 +214,6 @@ describe('useAlertBasedTilesSeries', () => {
   it('keeps the series fresh for an hour', () => {
     renderHook(() => useAlertBasedTilesSeries(opts));
     expect(lastCall()[2].staleTime).toBe(60 * 60_000);
+    expect(lastCall()[2].cacheTime).toBe(60 * 60_000);
   });
 });

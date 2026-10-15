@@ -26,7 +26,12 @@ describe('useTileSeriesQuery', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { search: { search: mockSearch } } },
     });
-    mockUseQuery.mockReturnValue({ data: 3, isFetching: false, isError: false });
+    mockUseQuery.mockReturnValue({
+      data: 3,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+    });
   });
 
   it('returns the parsed series and the query state', () => {
@@ -34,6 +39,32 @@ describe('useTileSeriesQuery', () => {
       useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
     );
     expect(result.current).toEqual({ series: 3, isFetching: false, isError: false });
+  });
+
+  it('reports the query as pending while the cache still shows the answer of another range', () => {
+    // keepPreviousData keeps the last range's dots while the new range waits for its counts.
+    mockUseQuery.mockReturnValue({
+      data: 3,
+      isFetching: false,
+      isPreviousData: true,
+      isError: false,
+    });
+    const { result } = renderHook(() =>
+      useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: false, parse })
+    );
+    expect(result.current.isFetching).toBe(true);
+
+    mockUseQuery.mockReturnValue({
+      data: 3,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+    });
+    expect(
+      renderHook(() =>
+        useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
+      ).result.current.isFetching
+    ).toBe(false);
   });
 
   it('keys the cache by the tile and the query, so a range change refetches', () => {
@@ -56,13 +87,14 @@ describe('useTileSeriesQuery', () => {
     expect(lastCall()[2].enabled).toBe(true);
   });
 
-  it('keeps the series fresh for an hour and does not refetch on focus', () => {
+  it('keeps the series for an hour and does not refetch on focus', () => {
     renderHook(() =>
       useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
     );
     expect(lastCall()[2]).toEqual(
       expect.objectContaining({
         staleTime: 60 * 60_000,
+        cacheTime: 60 * 60_000,
         refetchOnWindowFocus: false,
         keepPreviousData: true,
         retry: 1,

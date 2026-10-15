@@ -11,9 +11,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
-
-/** The previous period barely changes between renders, so it stays fresh longer than the count. */
-export const PREVIOUS_PERIOD_STALE_TIME_MS = 30 * 60_000;
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
@@ -59,7 +57,7 @@ const usePreviousPeriodQuery = <T>({
     {
       enabled: enabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: PREVIOUS_PERIOD_STALE_TIME_MS,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }

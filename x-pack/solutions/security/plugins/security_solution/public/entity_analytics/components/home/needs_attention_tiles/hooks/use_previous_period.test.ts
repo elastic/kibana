@@ -10,12 +10,7 @@ import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import {
-  PREVIOUS_PERIOD_STALE_TIME_MS,
-  isDeltaStillComing,
-  parseReachesBack,
-  usePreviousPeriod,
-} from './use_previous_period';
+import { isDeltaStillComing, parseReachesBack, usePreviousPeriod } from './use_previous_period';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -155,13 +150,13 @@ describe('usePreviousPeriod', () => {
     });
   });
 
-  it('keeps the previous period fresh for 30 minutes and does not refetch on focus', () => {
+  it('keeps both queries for an hour and does not refetch on focus', () => {
     renderHook(() => usePreviousPeriod(options));
-    expect(PREVIOUS_PERIOD_STALE_TIME_MS).toBe(30 * 60_000);
     [callOf('HistoryReachesBack'), callOf('PrevPeriod')].forEach((call) =>
       expect(call[2]).toEqual(
         expect.objectContaining({
-          staleTime: PREVIOUS_PERIOD_STALE_TIME_MS,
+          staleTime: 60 * 60_000,
+          cacheTime: 60 * 60_000,
           refetchOnWindowFocus: false,
           keepPreviousData: true,
           retry: 1,

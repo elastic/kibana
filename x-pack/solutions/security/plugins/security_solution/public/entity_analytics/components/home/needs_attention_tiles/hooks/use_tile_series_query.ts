@@ -10,9 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
-
-/** The series moves by one dot per step, so a result is kept for an hour. */
-const SERIES_STALE_TIME_MS = 60 * 60_000;
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 interface TileSeriesQueryOptions<T> {
   /** Identifies the tile in the query cache. */
@@ -39,6 +37,7 @@ export const useTileSeriesQuery = <T>({
   const {
     data: series,
     isFetching,
+    isPreviousData,
     isError,
   } = useQuery<T | undefined, SecurityAppError>(
     [tileKey, query],
@@ -59,13 +58,15 @@ export const useTileSeriesQuery = <T>({
     {
       enabled: enabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: SERIES_STALE_TIME_MS,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }
   );
 
-  return { series, isFetching, isError };
+  // While the query waits (disabled) or runs for a new range, `keepPreviousData` still holds the
+  // answer of the old one: it must not be taken for this range's series.
+  return { series, isFetching: isFetching || isPreviousData, isError };
 };
 
 /**
