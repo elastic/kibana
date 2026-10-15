@@ -165,6 +165,27 @@ describe('validateConfig', () => {
         "Validation error: \nSyntaxError: mismatched input 'BAD_COMMAND'\nUnknown function NOT_A_FUNCTION"
       );
     });
+
+    it('should fall back to "Unknown error" when error has neither text nor message', async () => {
+      const config = {
+        query: 'FROM my_cases',
+        params: {},
+      };
+
+      const unknownErrors = [{ severity: 8 }];
+      mockValidateQuery.mockResolvedValue({ errors: unknownErrors, warnings: [] });
+      mockCreateBadRequestError.mockImplementation((message: string) => {
+        const error = new Error(message);
+        error.name = 'AgentBuilderBadRequestError';
+        return error as any;
+      });
+
+      await expect(validateConfig(config)).rejects.toThrow();
+
+      expect(mockCreateBadRequestError).toHaveBeenCalledWith(
+        'Validation error: \nUnknown error'
+      );
+    });
   });
 
   describe('parameter validation errors', () => {
