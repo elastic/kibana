@@ -50,7 +50,10 @@ jest.mock('./content', () => {
           type="button"
           data-test-subj={`openCspInsights-${subTab}`}
           onClick={() =>
-            props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS, subTab })
+            props.openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: subTab as typeof CspInsightLeftPanelSubTab,
+            })
           }
         />
       ))}

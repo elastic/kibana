@@ -196,6 +196,7 @@ describe('useUserDetails', () => {
     );
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'user:alice' }, user: { email: 'alice@example.com' } };

@@ -184,7 +184,7 @@ export const AlertsDetailsTable = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo((): QueryDslQueryContainer | undefined => {
-      if (!euidApi?.euid || entityRecord == null || entityType == null) {
+      if (!euidApi?.euid || entityRecord == null) {
         return undefined;
       }
       const definition = euidApi.getBuiltInEntityDefinition(entityTypeResolved);
@@ -192,7 +192,7 @@ export const AlertsDetailsTable = memo(
         getEntityGroupRecords(entityRecord, aliasRecords),
         (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
       );
-    }, [euidApi, entityTypeResolved, entityRecord, entityType, aliasRecords]);
+    }, [euidApi, entityTypeResolved, entityRecord, aliasRecords]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */

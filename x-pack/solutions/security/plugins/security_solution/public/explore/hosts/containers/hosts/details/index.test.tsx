@@ -189,6 +189,7 @@ describe('useHostDetails', () => {
     );
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };

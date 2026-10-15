@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiAccordion, EuiSpacer, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiTitle,
+  useEuiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
@@ -50,7 +57,7 @@ const resolutionRiskScoreMetricLabel = i18n.translate(
   }
 );
 
-export const RESOLUTION_RISK_SCORE_QUERY_ID = 'riskSummaryResolutionRiskScoreQuery';
+const RESOLUTION_RISK_SCORE_QUERY_ID_PREFIX = 'riskSummaryResolutionRiskScoreQuery';
 
 const entityCaseAttachmentLabel = (entityType: EntityType, entityName?: string) =>
   i18n.translate('xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel', {
@@ -124,6 +131,9 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
   const { setQuery, deleteQuery } = useGlobalTime();
+  // Flyouts can stack (a child entity flyout shares the Redux store with its parent), so the
+  // registration must be unique per instance or the child would overwrite/delete the parent's.
+  const resolutionQueryId = useGeneratedHtmlId({ prefix: RESOLUTION_RISK_SCORE_QUERY_ID_PREFIX });
 
   const entityBaseRiskScore = entityRiskScores?.base;
   const entityResolutionRiskScore = entityRiskScores?.resolution.state;
@@ -256,7 +266,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   // The group table is backed by the resolution-score query, which has no inspect registration of
   // its own (`queryId` belongs to the entity-store / name-based risk lookups), so register it here.
   useQueryInspector({
-    queryId: RESOLUTION_RISK_SCORE_QUERY_ID,
+    queryId: resolutionQueryId,
     loading: entityResolutionRiskScore?.loading ?? false,
     refetch: entityResolutionRiskScore?.refetch ?? noop,
     inspect: entityResolutionRiskScore?.inspect,
@@ -440,7 +450,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
               caption: showOnlyResolutionRisk ? entityTableCaption : resolutionTableCaption,
               items: resolutionRows,
               loading: (entityResolutionRiskScore?.loading ?? false) || recalculatingScore,
-              inspectQueryId: showOnlyResolutionRisk ? RESOLUTION_RISK_SCORE_QUERY_ID : undefined,
+              inspectQueryId: showOnlyResolutionRisk ? resolutionQueryId : undefined,
             }}
           />
         </>
