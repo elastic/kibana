@@ -121,11 +121,14 @@ export interface HuntThreatIntelSupplyStatus {
 export interface ScanFailureWorker {
   workerId: string;
   watchId: string;
+  workflowId: string;
+  lastFailedAt: string;
 }
 
 export interface ScanFailuresResponse {
   workers: ScanFailureWorker[];
   unknown: boolean;
+  lastFailedAt: string | null;
 }
 
 /** Agent Builder builtin tool wrapping the action catalog API. */

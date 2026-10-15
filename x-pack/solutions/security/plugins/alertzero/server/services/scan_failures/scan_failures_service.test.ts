@@ -41,6 +41,7 @@ import {
 
 const request = httpServerMock.createKibanaRequest();
 const WORKFLOW_STEP = 'workflow-step';
+const FINISHED_AT = '2026-01-01T00:00:00.000Z';
 
 const execution = (
   originManagedWorkflowId: string | null,
@@ -52,6 +53,7 @@ const execution = (
     originManagedWorkflowId,
     workflowId: workflowId ?? originManagedWorkflowId ?? undefined,
     triggeredBy: extras?.triggeredBy,
+    finishedAt: FINISHED_AT,
     context: extras?.parentId ? { parentWorkflowExecutionId: extras.parentId } : undefined,
   } as FailedExecutionPage['results'][number]);
 
@@ -108,7 +110,40 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
+  });
+
+  it('reports the newest failure per Worker and overall', async () => {
+    const older = {
+      ...execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID),
+      finishedAt: '2026-01-01T00:00:00.000Z',
+    };
+    const newer = {
+      ...execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID),
+      finishedAt: '2026-01-01T05:00:00.000Z',
+    };
+    const other = {
+      ...execution(ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID),
+      finishedAt: '2026-01-01T03:00:00.000Z',
+    };
+    const search = jest.fn(async () => ({ results: [older, newer, other], total: 3 }));
+    const { service } = createService(search);
+
+    const body = await service.list(request, 'analyst');
+
+    expect(body.lastFailedAt).toBe('2026-01-01T05:00:00.000Z');
+    expect(body.workers).toEqual([
+      expect.objectContaining({
+        workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+        workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-analyst`,
+        lastFailedAt: '2026-01-01T05:00:00.000Z',
+      }),
+      expect.objectContaining({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+        lastFailedAt: '2026-01-01T03:00:00.000Z',
+      }),
+    ]);
   });
 
   it('reports a catalog Worker that failed on its own', async () => {
@@ -131,9 +166,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -150,9 +188,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -169,9 +210,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
           watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -188,9 +232,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -207,9 +254,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
           watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -241,9 +291,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -282,9 +335,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -317,9 +373,12 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: true,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -339,6 +398,7 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -368,6 +428,7 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -421,13 +482,18 @@ describe('ScanFailuresService', () => {
         {
           workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
           watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
         {
           workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
           watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+          workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}-default`,
+          lastFailedAt: FINISHED_AT,
         },
       ],
       unknown: false,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -474,6 +540,7 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: true,
+      lastFailedAt: FINISHED_AT,
     });
   });
 
@@ -508,6 +575,7 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: false,
+      lastFailedAt: null,
     });
   });
 
@@ -529,6 +597,7 @@ describe('ScanFailuresService', () => {
     await expect(service.list(request, 'default')).resolves.toEqual({
       workers: [],
       unknown: false,
+      lastFailedAt: null,
     });
   });
 });

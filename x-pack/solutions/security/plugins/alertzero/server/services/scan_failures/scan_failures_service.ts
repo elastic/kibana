@@ -23,7 +23,11 @@ const SCAN_FAILURE_ATTRIBUTION_CONCURRENCY = 8;
 const SCAN_FAILURE_MAX_PARENT_HOPS = 8;
 const WORKFLOW_STEP_TRIGGER = 'workflow-step';
 
-const EMPTY_SCAN_FAILURES: ScanFailuresResponse = { workers: [], unknown: false };
+const EMPTY_SCAN_FAILURES: ScanFailuresResponse = {
+  workers: [],
+  unknown: false,
+  lastFailedAt: null,
+};
 
 const CATALOG_WORKER_IDS = new Set<string>(SYSTEM_SECURITY_WORKER_IDS);
 const ACTION_WORKFLOW_IDS = new Set<string>(ALERTZERO_ACTION_WORKFLOW_IDS);
@@ -125,34 +129,51 @@ export const attributeFailedExecution = async (
   return undefined;
 };
 
+const laterOf = (current: string | undefined, candidate: string): string =>
+  !current || Date.parse(candidate) > Date.parse(current) ? candidate : current;
+
 /** Folds failed executions onto distinct catalog Workers, in catalog order. */
 export const foldFailedExecutions = async (
   executions: FailedExecutionPage['results'],
-  loadExecution: LoadExecution
+  loadExecution: LoadExecution,
+  spaceId: string
 ): Promise<ScanFailuresResponse> => {
   const attributed = await pMap(
     executions,
     (execution) => attributeFailedExecution(execution, loadExecution),
     { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
   );
-  const workerIds = new Set<string>();
+  const lastFailedAtByWorker = new Map<string, string>();
+  let lastFailedAt: string | undefined;
 
-  for (const workerId of attributed) {
-    if (workerId) {
-      workerIds.add(workerId);
+  executions.forEach((execution, index) => {
+    const { finishedAt } = execution;
+    if (!finishedAt) {
+      return;
     }
-  }
+    lastFailedAt = laterOf(lastFailedAt, finishedAt);
+    const workerId = attributed[index];
+    if (workerId) {
+      lastFailedAtByWorker.set(workerId, laterOf(lastFailedAtByWorker.get(workerId), finishedAt));
+    }
+  });
 
-  const workers = SYSTEM_SECURITY_WORKER_CATALOG.filter((entry) => workerIds.has(entry.id)).map(
-    (entry) => ({ workerId: entry.id, watchId: entry.watchId })
-  );
+  const workers = SYSTEM_SECURITY_WORKER_CATALOG.filter((entry) =>
+    lastFailedAtByWorker.has(entry.id)
+  ).map((entry) => ({
+    workerId: entry.id,
+    watchId: entry.watchId,
+    workflowId: `${entry.id}-${spaceId}`,
+    lastFailedAt: lastFailedAtByWorker.get(entry.id) as string,
+  }));
 
-  return { workers, unknown: false };
+  return { workers, unknown: false, lastFailedAt: lastFailedAt ?? null };
 };
 
 export const collectScanFailures = async (
   searchPage: (page: number) => Promise<FailedExecutionPage>,
-  loadExecution: LoadExecution
+  loadExecution: LoadExecution,
+  spaceId: string
 ): Promise<ScanFailuresResponse> => {
   const executions: FailedExecutionPage['results'] = [];
   let incomplete = false;
@@ -176,7 +197,7 @@ export const collectScanFailures = async (
     }
   }
 
-  const folded = await foldFailedExecutions(executions, loadExecution);
+  const folded = await foldFailedExecutions(executions, loadExecution, spaceId);
   return incomplete ? { ...folded, unknown: true } : folded;
 };
 
@@ -218,7 +239,8 @@ export class ScanFailuresService {
             spaceId,
             request
           ),
-        loadExecution
+        loadExecution,
+        spaceId
       );
       return lookupFailed ? { ...failures, unknown: true } : failures;
     } catch (error) {
