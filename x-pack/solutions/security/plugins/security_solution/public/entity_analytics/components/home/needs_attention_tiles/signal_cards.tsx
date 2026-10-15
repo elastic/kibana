@@ -80,6 +80,114 @@ const layoutCappedGridCss = ({
   `;
 };
 
+const notEnoughHistory = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.deltaNoHistory',
+  { defaultMessage: 'Not enough history to compare' }
+);
+
+/**
+ * What the pill says, for a screen reader: the signed change and the period, or that the history is
+ * too short. Empty when the pill shows nothing (loading, a zero count, no or a zero change).
+ */
+const getDeltaDescription = (card: SignalCardData, isHidden: boolean): string | undefined => {
+  if (isHidden || card.isDeltaLoading) return undefined;
+  if (card.delta === undefined) return card.isDeltaUnavailable ? notEnoughHistory : undefined;
+  if (card.delta === 0) return undefined;
+  const amount = Math.abs(card.delta).toLocaleString();
+  return card.delta > 0
+    ? i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelUp', {
+        defaultMessage: 'Up {amount} compared with the previous period',
+        values: { amount },
+      })
+    : i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelDown', {
+        defaultMessage: 'Down {amount} compared with the previous period',
+        values: { amount },
+      });
+};
+
+const DeltaPill: React.FC<{
+  delta: number | undefined;
+  isLoading?: boolean;
+  /** The history is too short to compare: say so instead of showing a delta. */
+  isUnavailable?: boolean;
+}> = ({ delta, isLoading, isUnavailable }) => {
+  const { euiTheme } = useEuiTheme();
+
+  // While loading, show "vs previous period" + spinner (Iryna's suggestion).
+  // This also avoids showing a misleading delta while prev count defaults to 0.
+  if (isLoading) {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousPeriod',
+              { defaultMessage: 'vs previous period' }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isUnavailable && delta === undefined) {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" data-test-subj="eaFaceliftSignalCardsDeltaUnavailable">
+            {notEnoughHistory}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (delta === undefined || delta === 0) return null;
+
+  const isPositive = delta > 0;
+  const bg = isPositive
+    ? euiTheme.colors.backgroundBaseDanger
+    : euiTheme.colors.backgroundBaseSuccess;
+  const color = isPositive ? euiTheme.colors.danger : euiTheme.colors.textSuccess;
+  const arrow = isPositive ? '↑' : '↓';
+  const sign = isPositive ? '+' : '';
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <span
+          css={css`
+            display: inline-flex;
+            align-items: center;
+            gap: ${euiTheme.size.xs};
+            padding: 1px ${euiTheme.size.s};
+            border-radius: ${euiTheme.border.radius.medium};
+            background: ${bg};
+            color: ${color};
+            font-size: ${euiTheme.size.m};
+            font-weight: ${euiTheme.font.weight.semiBold};
+            white-space: nowrap;
+          `}
+        >
+          {sign}
+          {delta.toLocaleString()} {arrow}
+        </span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {i18n.translate(
+            'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousPeriod',
+            { defaultMessage: 'vs previous period' }
+          )}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const displayDescriptionFor = (card: SignalCardData): string => card.description;
 
 const filterTableTooltip = (title: string) =>
@@ -258,33 +366,31 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
     [interactive, onToggle]
   );
 
+  const deltaDescription = getDeltaDescription(card, isLoading || isZero);
+  const countLabel = isLoading
+    ? i18n.translate(
+        'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelLoading',
+        {
+          defaultMessage: '{title}: loading. {description}',
+          values: { title: displayTitle, description: displayDescription },
+        }
+      )
+    : i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelCount', {
+        defaultMessage: '{title}: {count}. {description}',
+        values: {
+          title: displayTitle,
+          count: isZero ? 0 : card.value,
+          description: displayDescription,
+        },
+      });
+
   const cardNode = (
     <div
       role="button"
       tabIndex={interactive ? 0 : -1}
       aria-pressed={interactive ? selected : undefined}
       aria-disabled={isZero || undefined}
-      aria-label={
-        isLoading
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelLoading',
-              {
-                defaultMessage: '{title}: loading. {description}',
-                values: { title: displayTitle, description: displayDescription },
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.entityAnalytics.facelift.signalCards.ariaLabelCount',
-              {
-                defaultMessage: '{title}: {count}. {description}',
-                values: {
-                  title: displayTitle,
-                  count: isZero ? 0 : card.value,
-                  description: displayDescription,
-                },
-              }
-            )
-      }
+      aria-label={deltaDescription ? `${countLabel} ${deltaDescription}` : countLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
       onClick={interactive ? onToggle : undefined}
       onKeyDown={onKeyDown}
@@ -423,6 +529,22 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                       {card.noDataMessage}
                     </EuiText>
                   )}
+                  {!isZero &&
+                    (card.isDeltaLoading ||
+                      card.delta !== undefined ||
+                      card.isDeltaUnavailable) && (
+                      <div
+                        css={css`
+                          margin-block-start: ${euiTheme.size.xs};
+                        `}
+                      >
+                        <DeltaPill
+                          delta={card.delta}
+                          isLoading={card.isDeltaLoading}
+                          isUnavailable={card.isDeltaUnavailable}
+                        />
+                      </div>
+                    )}
                 </>
               )}
             </div>

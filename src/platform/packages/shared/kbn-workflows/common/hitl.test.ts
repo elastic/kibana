@@ -10,7 +10,7 @@
 import { getHitlChannelConnectorTypeFromPath, isHitlWaitStepType } from './hitl';
 
 describe('getHitlChannelConnectorTypeFromPath', () => {
-  it('maps slack, slack_api, email, slack2, teams, and http channel connector-id paths', () => {
+  it('maps slack, slack_api, email, slack2, teams, servicenow, and http channel connector-id paths', () => {
     expect(getHitlChannelConnectorTypeFromPath(['with', 'channels', 'slack', 'connector-id'])).toBe(
       'slack'
     );
@@ -33,6 +33,9 @@ describe('getHitlChannelConnectorTypeFromPath', () => {
     expect(getHitlChannelConnectorTypeFromPath(['with', 'channels', 'teams', 'connector-id'])).toBe(
       'microsoft-teams.sendChannelMessage'
     );
+    expect(
+      getHitlChannelConnectorTypeFromPath(['with', 'channels', 'servicenow', 'connector-id'])
+    ).toBe('servicenow_search.addComment');
     expect(getHitlChannelConnectorTypeFromPath(['with', 'channels', 'http', 'connector-id'])).toBe(
       'http'
     );

@@ -423,6 +423,28 @@ export const HitlTeamsChannelSchema = z.object({
     ),
 });
 
+export const HitlServiceNowChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('ServiceNow connector saved object id or name'),
+  table: z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'ServiceNow table name, or Liquid that renders to one (e.g. incident, {{ inputs.table }}).'
+    ),
+  'sys-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'sys_id of the record, or Liquid that renders to one (e.g. {{ inputs.incident_sys_id }}).'
+    ),
+});
+
 const MAX_HITL_HTTP_HEADER_COUNT = 20;
 const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
 
@@ -494,6 +516,8 @@ const hitlChannelDescriptions = {
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
   teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
+  servicenow:
+    'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
   http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
@@ -514,6 +538,9 @@ export const WaitForInputChannelsSchema = z
     teams: HitlTeamsChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.teams),
+    servicenow: HitlServiceNowChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
     http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
@@ -528,6 +555,9 @@ export const WaitForApprovalChannelsSchema = z
     email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
     teams: HitlTeamsChannelSchema.loose().optional().describe(hitlChannelDescriptions.teams),
+    servicenow: HitlServiceNowChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
     http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()

@@ -9,8 +9,11 @@
 
 import {
   assertConnectorSucceeded,
+  escapeServiceNowCommentText,
   escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
   teamsHtmlLink,
@@ -52,16 +55,39 @@ describe('slackApiChannelTarget', () => {
   });
 });
 
+describe('escapeServiceNowCommentText', () => {
+  it('escapes HTML and journal code tags in comment text', () => {
+    expect(escapeServiceNowCommentText('Host <your_input> [code]x[/code] & "q"')).toBe(
+      'Host \uFF1Cyour_input\uFF1E [\u200bcode]x[\u200b/code] & "q"'
+    );
+  });
+});
+
+describe('serviceNowCommentLink', () => {
+  it('keeps the journal anchor and escapes the label', () => {
+    expect(serviceNowCommentLink('Approve[/code]', 'https://example.com?a=1&b=2')).toBe(
+      '[code]<a href="https://example.com?a=1&amp;b=2">Approve[\u200b/code]</a>[/code]'
+    );
+  });
+});
+
 describe('fitHitlTextPreservingSuffix', () => {
   const suffix = 'Approve: https://kibana.example/approve\nDecline: https://kibana.example/reject';
 
-  it('shortens the prompt so the links still fit the Teams content limit', () => {
+  it('shortens the prompt so the links still fit the connector limit', () => {
+    const comment = fitHitlTextPreservingSuffix(
+      'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH),
+      suffix,
+      SERVICENOW_COMMENT_MAX_LENGTH
+    );
     const content = fitHitlTextPreservingSuffix(
       'a'.repeat(TEAMS_CONTENT_MAX_LENGTH),
       suffix,
       TEAMS_CONTENT_MAX_LENGTH
     );
 
+    expect(comment.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
+    expect(comment.endsWith(suffix)).toBe(true);
     expect(content.length).toBe(TEAMS_CONTENT_MAX_LENGTH);
     expect(content.endsWith(suffix)).toBe(true);
   });

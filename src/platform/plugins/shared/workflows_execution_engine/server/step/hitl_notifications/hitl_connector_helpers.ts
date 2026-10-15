@@ -30,6 +30,7 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
   return { channelIds: [channel] };
 }
 
+export const SERVICENOW_COMMENT_MAX_LENGTH = 4000;
 export const TEAMS_CONTENT_MAX_LENGTH = 10000;
 
 /** Keeps `suffix` intact and shortens `prompt` so the joined text fits `maxLength`. */
@@ -54,6 +55,57 @@ export function fitHitlTextPreservingSuffix(
     return suffix;
   }
   return `${prompt.slice(0, promptBudget)}\n\n${suffix}`;
+}
+
+/** Stops ServiceNow from reading `[code]` in user text as journal HTML. */
+function breakServiceNowCodeTag(value: string): string {
+  return value.replace(/\[(\/?code)\]/gi, '[\u200b$1]');
+}
+
+/**
+ * Makes comment text safe to place outside a journal anchor.
+ * Angle brackets are replaced, not encoded: ServiceNow decodes `&lt;` and then rejects the tag.
+ */
+export function escapeServiceNowCommentText(value: string): string {
+  return breakServiceNowCodeTag(value).replace(/</g, '\uFF1C').replace(/>/g, '\uFF1E');
+}
+
+function escapeServiceNowHtml(value: string): string {
+  return breakServiceNowCodeTag(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** ServiceNow journal HTML. The activity stream renders this as an anchor. */
+export function serviceNowCommentLink(label: string, url: string): string {
+  return `[code]<a href="${escapeServiceNowHtml(url)}">${escapeServiceNowHtml(label)}</a>[/code]`;
+}
+
+/** Renders a required ServiceNow channel field and rejects a blank result. */
+export function renderServiceNowField(
+  value: string,
+  renderTemplate: (template: string) => string,
+  field: 'table' | 'sys-id'
+): string {
+  const rendered = renderTemplate(value).trim();
+  if (rendered.length === 0) {
+    throw new Error(`HITL ServiceNow "${field}" rendered empty`);
+  }
+  return rendered;
+}
+
+/** Builds Actions params for a ServiceNow `addComment` call. */
+export function buildServiceNowAddCommentInput(table: string, sysId: string, comment: string) {
+  return {
+    subAction: 'addComment' as const,
+    subActionParams: {
+      table,
+      sysId,
+      comment,
+    },
+  };
 }
 
 /** Makes step text safe to place next to an HTML anchor. Teams renders the body as HTML. */
@@ -199,7 +251,7 @@ export function buildHitlHttpConnectorInput({
 
 /**
  * Builds Actions params for a Slack v2 `sendMessage` call.
- * Unfurling is off so Slack does not GET the resume URL.
+ * Unfurling is off so Slack does not GET the resume URL on preview.
  */
 export function buildSlack2SendMessageInput(channel: string, text: string) {
   return {
