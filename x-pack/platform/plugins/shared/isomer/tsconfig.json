@@ -3,13 +3,17 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["server/**/*"],
+  "include": ["public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/charts-plugin",
+    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/isomer",
+    "@kbn/isomer-charts-elastic",
     "@kbn/isomer-components",
     "@kbn/isomer-primitives-charts",
-    "@kbn/isomer-primitives-vega"
+    "@kbn/isomer-primitives-vega",
+    "@kbn/react-kibana-context-render"
   ]
 }
