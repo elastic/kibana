@@ -15,7 +15,7 @@ browser / curl  →  motel (:14318)
                  →  streams collector (unit `default` in project-dev)
                  →  local serverless ES
                       logs-application.otel-dev / .otel-prod
-                      metrics-streams.metrics.otel-default
+                      metrics-streams.otel-default
 ```
 
 ## Checkouts
@@ -165,7 +165,7 @@ That one command:
 ```esql
 FROM logs-application.otel-dev
 FROM logs-application.otel-prod
-FROM metrics-streams.metrics.otel-default
+FROM metrics-streams.otel-default
 ```
 
 `env=prod` bodies are uppercased; `env=dev` bodies are not. Collector metrics
