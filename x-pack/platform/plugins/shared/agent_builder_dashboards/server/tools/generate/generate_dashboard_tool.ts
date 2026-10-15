@@ -64,7 +64,7 @@ const generateDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'The user\'s own request about arrangement or size, e.g. "put the metrics in one row" or "make the table full width". Omit it unless the user asked: panels are placed and sized automatically.'
+      'The user\'s own request about arrangement or size, e.g. "put the metrics in one row" or "make the table full width". Omit it unless the user asked or the enhance workflow says to set it: panels are placed and sized automatically.'
     ),
 });
 
@@ -145,7 +145,7 @@ Use operations[] to:
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
 
-Panel positions and sizes are set automatically after the operations run. Set \`layout\` only to pass on the user's own arrangement or size request.`,
+Panel positions and sizes are set automatically after the operations run. Set \`layout\` only to pass on the user's own arrangement or size request, or when the enhance workflow says so.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations, layout },

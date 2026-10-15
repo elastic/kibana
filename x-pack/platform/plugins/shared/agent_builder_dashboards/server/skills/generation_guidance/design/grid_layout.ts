@@ -7,4 +7,4 @@
 
 export const gridLayoutPrompt = `## Panel Layout
 
-Panel positions and sizes are set automatically. Set \`layout\` only to pass on the user's own request about arrangement or size, e.g. "put the metrics in one row" or "make the table full width". Never write layout instructions yourself.`;
+Panel positions and sizes are set automatically. Set \`layout\` only to pass on the user's own request about arrangement or size, e.g. "put the metrics in one row" or "make the table full width", or when the enhance workflow says so. Otherwise never write layout instructions yourself.`;
