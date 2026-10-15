@@ -11,8 +11,8 @@ import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/con
 import type {
   DocumentConverter,
   DocumentConverters,
-} from '../attachment_types/document/converters';
-import { registerDocumentSupportedTypesRoute } from './document_supported_types';
+} from '../attachment_types/binary/converters';
+import { registerDocumentSupportedTypesRoute } from './binary_supported_types';
 
 describe('registerDocumentSupportedTypesRoute', () => {
   const createConverter = (available: boolean): DocumentConverter => ({

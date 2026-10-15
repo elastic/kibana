@@ -25,7 +25,7 @@ import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachm
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
 import type { DocumentConverter, DocumentConverters } from './converters';
 import { documentErrors } from './errors';
-import { createDocumentAttachmentType } from './document';
+import { createDocumentAttachmentType } from './binary';
 
 const validData: DocumentAttachmentData = {
   file_id: 'file-abc',

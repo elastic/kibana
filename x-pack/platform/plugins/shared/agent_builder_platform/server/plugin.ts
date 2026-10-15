@@ -22,10 +22,10 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
-import { createDocumentConverters } from './attachment_types/document/converters';
-import type { DocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
-import { createDocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
-import { registerDocumentSupportedTypesRoute } from './routes/document_supported_types';
+import { createDocumentConverters } from './attachment_types/binary/converters';
+import type { DocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
+import { createDocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
+import { registerDocumentSupportedTypesRoute } from './routes/binary_supported_types';
 
 export class AgentBuilderPlatformPlugin
   implements

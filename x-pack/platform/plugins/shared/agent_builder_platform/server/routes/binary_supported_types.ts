@@ -8,8 +8,8 @@
 import type { IRouter } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
-import type { DocumentConverters } from '../attachment_types/document/converters';
-import { getAvailableDocumentMimeTypes } from '../attachment_types/document/converters';
+import type { DocumentConverters } from '../attachment_types/binary/converters';
+import { getAvailableDocumentMimeTypes } from '../attachment_types/binary/converters';
 
 export const registerDocumentSupportedTypesRoute = ({
   router,

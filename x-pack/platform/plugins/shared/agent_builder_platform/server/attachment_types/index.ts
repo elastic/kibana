@@ -16,8 +16,8 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
-import { createDocumentAttachmentType } from './document/document';
-import type { DocumentConverters } from './document/converters';
+import { createDocumentAttachmentType } from './binary/binary';
+import type { DocumentConverters } from './binary/converters';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
