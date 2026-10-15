@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
 import SemVer from 'semver/classes/semver';
 
@@ -105,14 +106,24 @@ const fetchCloudStackVersionsApi = async (
 ): Promise<Response> => {
   const url = version ? `${baseUrl}/${encodeURIComponent(version)}` : baseUrl;
 
-  const signal = overallSignal
-    ? abortSignalAny([overallSignal, AbortSignal.timeout(CLOUD_STACK_VERSIONS_TIMEOUT_MS)])
-    : AbortSignal.timeout(CLOUD_STACK_VERSIONS_TIMEOUT_MS);
+  const deadline = timeoutSignal(CLOUD_STACK_VERSIONS_TIMEOUT_MS);
+  try {
+    const signal = overallSignal ? abortSignalAny([overallSignal, deadline]) : deadline;
 
-  return await fetch(url, {
-    headers: { accept: 'application/json' },
-    signal,
-  });
+    const response = await fetch(url, {
+      headers: { accept: 'application/json' },
+      signal,
+    });
+    // Buffer the body before disposing the deadline so a slow download still aborts.
+    const body = new TextDecoder().decode(await response.arrayBuffer());
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  } finally {
+    deadline.dispose();
+  }
 };
 
 /**
@@ -200,149 +211,152 @@ const resolveLatestAvailableVersion = async (
   directUpgradeableVersionRange?: { min: string; max: string };
 }> => {
   const MAX_ITERATIONS = 10;
-  const overallSignal = AbortSignal.timeout(CLOUD_STACK_VERSIONS_OVERALL_TIMEOUT_MS);
+  const overallSignal = timeoutSignal(CLOUD_STACK_VERSIONS_OVERALL_TIMEOUT_MS);
+  try {
+    const seen = new Set<string>();
+    let lookupVersion = startVersion;
+    let lookupVersionUsed = startVersion;
+    let firstHopVersion: string | undefined;
+    let directUpgradeableVersionRange: { min: string; max: string } | undefined;
 
-  const seen = new Set<string>();
-  let lookupVersion = startVersion;
-  let lookupVersionUsed = startVersion;
-  let firstHopVersion: string | undefined;
-  let directUpgradeableVersionRange: { min: string; max: string } | undefined;
+    const bestEffortResult = () => ({
+      lookupVersionUsed,
+      latestAvailableVersion: lookupVersionUsed,
+      minVersionToUpgradeToLatest: firstHopVersion,
+      directUpgradeableVersionRange,
+    });
 
-  const bestEffortResult = () => ({
-    lookupVersionUsed,
-    latestAvailableVersion: lookupVersionUsed,
-    minVersionToUpgradeToLatest: firstHopVersion,
-    directUpgradeableVersionRange,
-  });
-
-  for (let i = 0; i < MAX_ITERATIONS; i++) {
-    if (seen.has(lookupVersion)) {
-      break;
-    }
-    seen.add(lookupVersion);
-
-    let res: Response;
-    try {
-      res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
-    } catch (e) {
-      if (i === 0) {
-        throw new Error(
-          `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
-        );
+    for (let i = 0; i < MAX_ITERATIONS; i++) {
+      if (seen.has(lookupVersion)) {
+        break;
       }
-      return bestEffortResult();
-    }
+      seen.add(lookupVersion);
 
-    if (!res.ok && (res.status === 404 || res.status === 400)) {
-      let errorBody: unknown;
+      let res: Response;
       try {
-        errorBody = await res.json();
-      } catch {
-        errorBody = undefined;
+        res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
+      } catch (e) {
+        if (i === 0) {
+          throw new Error(
+            `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
+          );
+        }
+        return bestEffortResult();
       }
 
-      // Only fall back when Cloud explicitly reports the version is missing.
-      if (isVersionNotFoundBody(errorBody)) {
-        const publishedVersions = await fetchPublishedCloudStackVersions(baseUrl, overallSignal);
-        const parsedLookupVersion = parseSemver(lookupVersion) ?? parsedForFallback;
-        const fallback =
-          pickBestPublishedFallback(parsedLookupVersion, publishedVersions) ??
-          pickBestPublishedFallback(parsedForFallback, publishedVersions);
+      if (!res.ok && (res.status === 404 || res.status === 400)) {
+        let errorBody: unknown;
+        try {
+          errorBody = await res.json();
+        } catch {
+          errorBody = undefined;
+        }
 
-        if (fallback) {
-          lookupVersion = fallback;
-          try {
-            res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
-          } catch (e) {
-            if (i === 0) {
-              throw new Error(
-                `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
-              );
+        // Only fall back when Cloud explicitly reports the version is missing.
+        if (isVersionNotFoundBody(errorBody)) {
+          const publishedVersions = await fetchPublishedCloudStackVersions(baseUrl, overallSignal);
+          const parsedLookupVersion = parseSemver(lookupVersion) ?? parsedForFallback;
+          const fallback =
+            pickBestPublishedFallback(parsedLookupVersion, publishedVersions) ??
+            pickBestPublishedFallback(parsedForFallback, publishedVersions);
+
+          if (fallback) {
+            lookupVersion = fallback;
+            try {
+              res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
+            } catch (e) {
+              if (i === 0) {
+                throw new Error(
+                  `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
+                );
+              }
+              return bestEffortResult();
             }
-            return bestEffortResult();
           }
         }
       }
-    }
 
-    if (!res.ok) {
-      if (i === 0) {
-        throw new Error(
-          `Failed to retrieve stack versions from Cloud (status ${res.status}) for ${lookupVersion}`
-        );
+      if (!res.ok) {
+        if (i === 0) {
+          throw new Error(
+            `Failed to retrieve stack versions from Cloud (status ${res.status}) for ${lookupVersion}`
+          );
+        }
+
+        // Fall back to the best effort version we were using.
+        return bestEffortResult();
       }
 
-      // Fall back to the best effort version we were using.
-      return bestEffortResult();
-    }
-
-    let body: unknown;
-    try {
-      body = await res.json();
-    } catch {
-      if (i === 0) {
-        throw new Error(`Failed to parse Cloud response JSON for ${lookupVersion}`);
+      let body: unknown;
+      try {
+        body = await res.json();
+      } catch {
+        if (i === 0) {
+          throw new Error(`Failed to parse Cloud response JSON for ${lookupVersion}`);
+        }
+        return bestEffortResult();
       }
-      return bestEffortResult();
-    }
 
-    const errorCodes = getCloudErrorCodes(body);
-    if (errorCodes.length > 0) {
-      if (i === 0) {
-        const errorCodesMessage = errorCodes.join(', ');
-        throw new Error(
-          `Cloud stack versions lookup returned errors for ${lookupVersion}: ${errorCodesMessage}`
-        );
+      const errorCodes = getCloudErrorCodes(body);
+      if (errorCodes.length > 0) {
+        if (i === 0) {
+          const errorCodesMessage = errorCodes.join(', ');
+          throw new Error(
+            `Cloud stack versions lookup returned errors for ${lookupVersion}: ${errorCodesMessage}`
+          );
+        }
+        return bestEffortResult();
       }
-      return bestEffortResult();
+
+      lookupVersionUsed = lookupVersion;
+
+      const typedBody = body as { upgradable_to?: unknown };
+      const upgradableTo = parseStringArray(typedBody.upgradable_to);
+
+      if (i === 0) {
+        directUpgradeableVersionRange = getUpgradableRange(upgradableTo);
+      }
+
+      const stepLatest = getLatestAvailableVersion(upgradableTo, lookupVersion);
+
+      const stepLatestParsed = parseSemver(stepLatest);
+      const lookupParsed = parseSemver(lookupVersion);
+      if (!stepLatestParsed || !lookupParsed) {
+        return {
+          lookupVersionUsed,
+          latestAvailableVersion: stepLatest,
+          minVersionToUpgradeToLatest: firstHopVersion,
+          directUpgradeableVersionRange,
+        };
+      }
+
+      if (stepLatestParsed.compare(lookupParsed) <= 0) {
+        return {
+          lookupVersionUsed,
+          latestAvailableVersion: lookupVersion,
+          minVersionToUpgradeToLatest:
+            firstHopVersion && firstHopVersion !== lookupVersion ? firstHopVersion : undefined,
+          directUpgradeableVersionRange,
+        };
+      }
+
+      if (i === 0) {
+        firstHopVersion = stepLatestParsed.version;
+      }
+
+      lookupVersion = stepLatestParsed.version;
     }
 
-    lookupVersionUsed = lookupVersion;
-
-    const typedBody = body as { upgradable_to?: unknown };
-    const upgradableTo = parseStringArray(typedBody.upgradable_to);
-
-    if (i === 0) {
-      directUpgradeableVersionRange = getUpgradableRange(upgradableTo);
-    }
-
-    const stepLatest = getLatestAvailableVersion(upgradableTo, lookupVersion);
-
-    const stepLatestParsed = parseSemver(stepLatest);
-    const lookupParsed = parseSemver(lookupVersion);
-    if (!stepLatestParsed || !lookupParsed) {
-      return {
-        lookupVersionUsed,
-        latestAvailableVersion: stepLatest,
-        minVersionToUpgradeToLatest: firstHopVersion,
-        directUpgradeableVersionRange,
-      };
-    }
-
-    if (stepLatestParsed.compare(lookupParsed) <= 0) {
-      return {
-        lookupVersionUsed,
-        latestAvailableVersion: lookupVersion,
-        minVersionToUpgradeToLatest:
-          firstHopVersion && firstHopVersion !== lookupVersion ? firstHopVersion : undefined,
-        directUpgradeableVersionRange,
-      };
-    }
-
-    if (i === 0) {
-      firstHopVersion = stepLatestParsed.version;
-    }
-
-    lookupVersion = stepLatestParsed.version;
+    return {
+      lookupVersionUsed,
+      latestAvailableVersion: lookupVersion,
+      minVersionToUpgradeToLatest:
+        firstHopVersion && firstHopVersion !== lookupVersion ? firstHopVersion : undefined,
+      directUpgradeableVersionRange,
+    };
+  } finally {
+    overallSignal.dispose();
   }
-
-  return {
-    lookupVersionUsed,
-    latestAvailableVersion: lookupVersion,
-    minVersionToUpgradeToLatest:
-      firstHopVersion && firstHopVersion !== lookupVersion ? firstHopVersion : undefined,
-    directUpgradeableVersionRange,
-  };
 };
 
 export function registerCloudStackVersionsRoute(deps: RouteDependencies) {

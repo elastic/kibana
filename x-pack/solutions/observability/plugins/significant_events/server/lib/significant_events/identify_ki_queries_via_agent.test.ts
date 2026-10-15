@@ -6,6 +6,7 @@
  */
 
 import { of } from 'rxjs';
+import * as kbnStd from '@kbn/std';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -94,9 +95,11 @@ describe('executeKIQueryGenerationAgent', () => {
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;
     const requestSignal = new AbortController().signal;
-    const timeoutSignal = new AbortController().signal;
+    const deadline = Object.assign(new AbortController().signal, { dispose: jest.fn() });
     const executionSignal = new AbortController().signal;
-    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+    const timeoutSpy = jest
+      .spyOn(kbnStd, 'timeoutSignal')
+      .mockReturnValue(deadline as ReturnType<typeof kbnStd.timeoutSignal>);
     const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
 
     await expect(
@@ -132,7 +135,7 @@ describe('executeKIQueryGenerationAgent', () => {
     });
 
     expect(timeoutSpy).toHaveBeenCalledWith(300_000);
-    expect(anySpy).toHaveBeenCalledWith([requestSignal, timeoutSignal]);
+    expect(anySpy).toHaveBeenCalledWith([requestSignal, deadline]);
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: executionSignal,
