@@ -255,6 +255,8 @@ describe('AlertZero L2 deterministic evidence', () => {
           recommendedActions: [
             {
               actionId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['some-other-endpoint'] },
               confidence: 'high',
             },
@@ -287,6 +289,8 @@ describe('AlertZero L2 deterministic evidence', () => {
           recommendedActions: [
             {
               actionId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['some-other-endpoint'] },
               confidence: 'high',
             },
@@ -321,6 +325,8 @@ describe('AlertZero L2 deterministic evidence', () => {
           recommendedActions: [
             {
               actionId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['az-endpoint'] },
               confidence: 'high',
             },
@@ -355,6 +361,8 @@ describe('AlertZero L2 deterministic evidence', () => {
           recommendedActions: [
             {
               actionId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['az-endpoint'] },
               confidence: 'high',
             },

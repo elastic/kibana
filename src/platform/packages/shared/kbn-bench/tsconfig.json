@@ -23,5 +23,6 @@
     "@kbn/profiler",
     "@kbn/workspaces",
     "@kbn/utility-types",
+    "@kbn/std",
   ]
 }

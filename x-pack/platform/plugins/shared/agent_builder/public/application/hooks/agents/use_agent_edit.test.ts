@@ -13,7 +13,11 @@ const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 const mockUpdateAccessControl = jest.fn();
 type MockAgent = AgentEditState & {
-  permissions?: { update_agent: boolean; update_access_control: boolean };
+  permissions?: {
+    update_agent: boolean;
+    update_access_control: boolean;
+    update_approvals?: boolean;
+  };
 };
 let mockAgent: MockAgent | undefined;
 
@@ -310,6 +314,62 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor }],
     });
     expect(mockUpdateAccessControl.mock.calls[0][1].entries[0]).not.toHaveProperty('added_at');
+  });
+
+  describe('auto-approved APIs', () => {
+    const approvals = { auto_approved_apis: { elasticsearch: ['indices.delete'] } };
+
+    const submitApprovalsUpdate = async (updateApprovals: boolean) => {
+      const existingAgent: MockAgent = {
+        id: 'existing-agent',
+        name: 'Existing Agent',
+        description: 'An existing agent',
+        access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+        labels: [],
+        avatar_color: '',
+        avatar_symbol: '',
+        configuration: { ...baseConfiguration, approvals },
+        permissions: {
+          update_agent: true,
+          update_access_control: false,
+          update_approvals: updateApprovals,
+        },
+      };
+      mockAgent = existingAgent;
+
+      const { result } = renderHook(() =>
+        useAgentEdit({
+          editingAgentId: 'existing-agent',
+          onSaveSuccess: jest.fn(),
+          onSaveError: jest.fn(),
+        })
+      );
+
+      await act(async () => {
+        await result.current.submit({
+          ...existingAgent,
+          configuration: { ...existingAgent.configuration, instructions: 'Updated instructions' },
+        });
+      });
+
+      return mockUpdate.mock.calls[0][1];
+    };
+
+    it('omits approvals from the update payload when the user cannot change them', async () => {
+      const payload = await submitApprovalsUpdate(false);
+
+      expect(payload.configuration).toMatchObject({ instructions: 'Updated instructions' });
+      expect(payload.configuration).not.toHaveProperty('approvals');
+    });
+
+    it('sends approvals in the update payload when the user can change them', async () => {
+      const payload = await submitApprovalsUpdate(true);
+
+      expect(payload.configuration).toMatchObject({
+        instructions: 'Updated instructions',
+        approvals,
+      });
+    });
   });
 
   it('exposes permissions separately from editable form state', async () => {

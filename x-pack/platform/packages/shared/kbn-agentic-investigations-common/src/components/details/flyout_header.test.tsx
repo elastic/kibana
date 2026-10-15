@@ -34,6 +34,17 @@ describe('ConversationDetailsFlyoutHeader', () => {
     expect(screen.getByText('Suspicious login')).toBeInTheDocument();
   });
 
+  it('renders a custom titleNode in place of the title when provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutHeader
+        investigation={investigation}
+        titleNode={<span>Checkout latency</span>}
+      />
+    );
+    expect(screen.getByRole('heading', { name: 'Checkout latency' })).toBeInTheDocument();
+    expect(screen.queryByText('Suspicious login')).not.toBeInTheDocument();
+  });
+
   it('renders a custom statusNode when provided', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutHeader

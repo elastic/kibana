@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  TEMPLATE_ID_ESCALATION,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
@@ -188,6 +192,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             tools,
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
           },
         } as never
       );
@@ -279,6 +284,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
           },
         } as never
       );
@@ -309,6 +315,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
           },
         } as never
       );
@@ -334,6 +341,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         tools: { register: jest.fn() },
         attachments: { registerType: jest.fn() },
         conversationTemplates: { register: jest.fn() },
+        conversations: { enableUpdatedTrigger: jest.fn() },
       };
 
       plugin.setup(
@@ -350,6 +358,61 @@ describe('AlertZeroPlugin feature-flag gating', () => {
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(2);
+    });
+
+    describe('ai.conversation.updated opt-in', () => {
+      const setupWithAgentBuilder = (coreSetup: ReturnType<typeof coreMock.createSetup>) => {
+        const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+        const enableUpdatedTrigger = jest.fn();
+
+        plugin.setup(
+          coreSetup as never,
+          {
+            features: { registerKibanaFeature: jest.fn() },
+            workflowsExtensions: {
+              registerManagedWorkflowOwner: jest.fn(),
+              registerStepDefinition: jest.fn(),
+            },
+            workflowsManagement: { management: {} },
+            proposals: {},
+            agenticInvestigations: {},
+            agentBuilder: {
+              skills: { register: jest.fn() },
+              tools: { register: jest.fn() },
+              attachments: { registerType: jest.fn() },
+              conversationTemplates: { register: jest.fn() },
+              conversations: { enableUpdatedTrigger },
+            },
+          } as never
+        );
+
+        return enableUpdatedTrigger;
+      };
+
+      it('opts in to the trigger for investigation and escalation conversations', () => {
+        const enableUpdatedTrigger = setupWithAgentBuilder(coreMock.createSetup());
+
+        expect(enableUpdatedTrigger).toHaveBeenCalledTimes(1);
+        expect(enableUpdatedTrigger).toHaveBeenCalledWith({
+          templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
+          isEnabled: expect.any(Function),
+        });
+      });
+
+      it('resolves the opt-in from the AlertZero setting of the requesting space', async () => {
+        const coreSetup = coreMock.createSetup();
+        const enableUpdatedTrigger = setupWithAgentBuilder(coreSetup);
+        const [coreStart] = await coreSetup.getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient({} as never);
+        (uiSettingsClient.get as jest.Mock).mockResolvedValue(true);
+        const request = httpServerMock.createKibanaRequest();
+
+        const [{ isEnabled }] = enableUpdatedTrigger.mock.calls[0];
+
+        await expect(isEnabled(request)).resolves.toBe(true);
+        expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
+        expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+      });
     });
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
@@ -373,6 +436,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
           },
           searchInferenceEndpoints,
         } as never

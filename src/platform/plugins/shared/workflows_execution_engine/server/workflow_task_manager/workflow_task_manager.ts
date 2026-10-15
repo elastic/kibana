@@ -48,6 +48,9 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
 
+/** Tasks beyond one page re-arm the wake task when they fire, which removes them. */
+const REMOVE_EXECUTION_TASKS_PAGE_SIZE = 100;
+
 /**
  * Parked runners only run when woken via `runSoon`; the far-future runAt keeps Task Manager
  * from claiming them on its own.
@@ -292,17 +295,36 @@ export class WorkflowTaskManager {
     return { taskId };
   }
 
-  /** Removes a parked immediate runner once its execution is terminal, never an active claim. */
-  async removeParkedImmediateResume(executionId: string): Promise<void> {
-    const taskId = getWorkflowImmediateResumeTaskId(executionId);
-    try {
-      const task = await this.taskManager.get(taskId);
-      if (task.status !== TaskStatus.Idle) return;
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) return;
-      throw error;
-    }
-    await this.taskManager.removeIfExists(taskId);
+  /**
+   * Removes the remaining tasks scoped to a terminal execution, releasing their API keys.
+   * Skips active claims, since Task Manager cannot complete a task deleted mid-run; a claim
+   * taken between the read and the removal only loses its completion write. Also skips tasks
+   * awaiting a retry, which still finish the post-execution work of a failed attempt.
+   */
+  async removeTasksForExecution(
+    executionId: string,
+    { exceptTaskId }: { exceptTaskId?: string } = {}
+  ): Promise<void> {
+    const { docs } = await this.taskManager.fetch({
+      size: REMOVE_EXECUTION_TASKS_PAGE_SIZE,
+      query: {
+        bool: {
+          filter: [{ term: { 'task.scope': `workflow:execution:${executionId}` } }],
+          must_not: [{ terms: { 'task.status': [TaskStatus.Running, TaskStatus.Claiming] } }],
+        },
+      },
+    });
+    const candidateIds = docs.map(({ id }) => id).filter((id) => id !== exceptTaskId);
+    if (!candidateIds.length) return;
+
+    // Search results can trail a fresh claim; re-read each candidate before removing it.
+    const removableIds = (await this.taskManager.bulkGet(candidateIds))
+      .flatMap((result) => (result.tag === 'ok' ? [result.value] : []))
+      .filter(({ status, attempts }) => status === TaskStatus.Idle && attempts === 0)
+      .map(({ id }) => id);
+    if (!removableIds.length) return;
+
+    await this.taskManager.bulkRemove(removableIds);
   }
 
   /** Returns false when a wake-up must be retried after the current runner releases its claim. */

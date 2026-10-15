@@ -39,7 +39,10 @@ export const useLastPage = ({
 
     switch (userActivityQueryParams.type) {
       case 'action':
-        lastPageType = Math.ceil(userActionsStats.totalOtherActions / perPage);
+        // Must match the server `buildActionFilter`.
+        lastPageType = Math.ceil(
+          (userActionsStats.total - userActionsStats.totalCommentCreations) / perPage
+        );
         break;
       case 'user':
         lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);

@@ -17,14 +17,18 @@ document is not installed by the stack: the suite enables it first via the inter
 workers API (`PATCH /internal/alertzero/workers/{workerId}` with
 `{"enabled":true,"settings":{"serviceAccountId":…}}`), which installs the production
 defaults, then runs the sweep test API against the installed production definition.
-The service account is provisioned by the suite (eval-owned
-`alertzero_endpoint_analysis_eval` role (the production role plus one AI-index delta: production's
-`ai-index-idx-security-investigations` grant — `read`, `view_index_metadata`, `index`,
-`auto_configure` — cloned onto `ai-index-idx-alertzero-eval-*` only, so it is a write grant
-mirroring production, not read-only; the parity test derives it from production),
-PUT on every run, even when the account already exists, so a stale definition never wins) +
-account, the account created when missing) because a bare
-enable is rejected with 400 since workers require an account (#295215). A Worker that
+The service account is provisioned by the suite: it is bound to the Worker's built-in
+`alertzero_endpoint_analysis` role (an Elasticsearch reserved role on stateful, the `_`-prefixed
+predefined role on Serverless), which the suite only looks up with a GET and checks for
+`metadata._reserved`. The suite never creates or changes a role, and fails naming the role when the
+stack lacks it. The account is created when missing, because a bare
+enable is rejected with 400 since workers require an account (#295215). The fixture KI is seeded
+into the shared `security-investigations` AI index (the built-in role grants nothing on a private
+one), with a unique `ki_id`; cleanup deletes only that document. The sweep scans the whole index
+oldest-pending-first with no `ki_id` filter, so seeding first refuses to run, naming the ids, when
+any other pending `security.analyze_endpoint` KI exists in the default space within the sweep's
+7-day lookback. Those KIs are never deleted. A concurrent writer can still add one between that
+check and the sweep, so run this suite against a stack nothing else is writing to. A Worker that
 was disabled before the suite is disabled again afterwards, so its schedule never
 outlives the run. L4 uses a non-action endpoint-analysis proposal, so it does not
 isolate or kill a real endpoint. L4 starts the generic gate directly — the production

@@ -7,12 +7,10 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
-import {
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  WORKER_ROLE_DEFINITIONS,
-} from '@kbn/alertzero-common';
+import { ALERTZERO_BALANCED_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   AlertZeroRuntime,
+  assertNoCompetingPendingKis,
   installWorkerAndPinConnector,
   pinAgenticConnector,
   runAllCleanups,
@@ -32,13 +30,46 @@ const createEs = () => {
     },
     index: jest.fn(async () => ({})),
     delete: jest.fn(async () => ({})),
+    search: jest.fn(async () => ({ hits: { hits: [] } })),
   };
   return es as typeof es & Client;
+};
+
+// What the fake stack answers for the Worker's built-in role lookup.
+const stack: { serverless: boolean; role: 'reserved' | 'not_reserved' | 'missing' | 'error' } = {
+  serverless: false,
+  role: 'reserved',
+};
+beforeEach(() => {
+  stack.serverless = false;
+  stack.role = 'reserved';
+});
+const BUILT_IN_ROLE_PREFIX = '/api/security/role/';
+const stackAnswer = (path: string): { handled: boolean; value?: unknown } => {
+  if (path === '/api/status') {
+    return {
+      handled: true,
+      value: { version: { build_flavor: stack.serverless ? 'serverless' : 'traditional' } },
+    };
+  }
+  if (path.startsWith(BUILT_IN_ROLE_PREFIX)) {
+    if (stack.role === 'missing')
+      throw Object.assign(new Error('Not Found'), { response: { status: 404 } });
+    if (stack.role === 'error')
+      throw Object.assign(new Error('boom'), { response: { status: 500 } });
+    return {
+      handled: true,
+      value: { metadata: stack.role === 'reserved' ? { _reserved: true } : {} },
+    };
+  }
+  return { handled: false };
 };
 
 type FetchMock = jest.Mock & HttpHandler;
 const createFetch = (impl?: (path: string, options?: { method?: string }) => unknown) =>
   jest.fn(async (path: string, options?: { method?: string }) => {
+    const answer = stackAnswer(path);
+    if (answer.handled) return answer.value;
     if (impl) return impl(path, options);
     return path === '/api/agent_builder/conversations' ? { id: 'conv-1' } : {};
   }) as unknown as FetchMock;
@@ -137,16 +168,25 @@ describe('AlertZeroRuntime.cancelAll', () => {
 
 describe('AlertZeroRuntime.installWorker', () => {
   const WORKER = 'system-security-forensics-endpoint-analysis';
-  /**
-   * Privileges production grants its own AI index (`ai-index-idx-security-investigations`).
-   * The eval delta is derived from this grant at runtime, so the pin asserts parity with
-   * production rather than a restated list.
-   */
-  const productionAiIndexPrivileges = structuredClone(
-    WORKER_ROLE_DEFINITIONS[WORKER].role.elasticsearch.indices.find((entry: { names: string[] }) =>
-      entry.names.includes('ai-index-idx-security-investigations')
-    )!
-  ).privileges as string[];
+  const roleCalls = (fetch: FetchMock) =>
+    fetch.mock.calls.filter(([path]) => String(path).startsWith('/api/security/role/'));
+  const accountPosts = (fetch: FetchMock) =>
+    fetch.mock.calls
+      .filter(
+        ([path, options]) =>
+          path === '/internal/security/service_account' && options?.method === 'POST'
+      )
+      .map(([, options]) => JSON.parse((options as { body: string }).body));
+  const noAccountsFetch = () =>
+    createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [], nextPage: undefined };
+      }
+      if (path === '/internal/security/service_account' && options?.method === 'POST') {
+        return { id: 'sa-eval-1' };
+      }
+      return {};
+    });
 
   it('enables the worker with a provisioned service account and disables it when it was off', async () => {
     const fetch = createFetch((path, options) => {
@@ -193,7 +233,7 @@ describe('AlertZeroRuntime.installWorker', () => {
     const fetch = createFetch((path, options) => {
       if (path === '/internal/security/service_account' && !options?.method) {
         return {
-          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
+          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }],
         };
       }
       if (path === '/internal/alertzero/workers' && !options?.method) {
@@ -226,7 +266,7 @@ describe('AlertZeroRuntime.installWorker', () => {
     const fetch = createFetch((path, options) => {
       if (path === '/internal/security/service_account' && !options?.method) {
         return {
-          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
+          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }],
         };
       }
       if (path === '/internal/alertzero/workers' && !options?.method) {
@@ -253,137 +293,86 @@ describe('AlertZeroRuntime.installWorker', () => {
     });
   });
 
-  it('re-PUTs the eval role even when the eval service account already exists', async () => {
-    // A stale role definition from an earlier run must not win just because the account
-    // was already created: the role PUT runs before (and regardless of) the account lookup.
-    const fetch = createFetch((path, options) => {
-      if (path === '/internal/security/service_account' && !options?.method) {
-        return {
-          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
-        };
-      }
-      return {};
-    });
+  it('never writes a role: no PUT/POST/DELETE to /api/security/role, only GETs of the built-in one', async () => {
+    const fetch = noAccountsFetch();
     await new AlertZeroRuntime(fetch).installWorker(WORKER);
 
-    const rolePuts = fetch.mock.calls.filter(
-      ([path, options]) =>
-        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
-    );
-    expect(rolePuts).toHaveLength(1);
-    const [rolePath, roleOptions] = rolePuts[0];
-    expect(rolePath).toBe('/api/security/role/alertzero_endpoint_analysis_eval');
-    expect((roleOptions as { query?: unknown }).query).toBeUndefined();
-    const production = WORKER_ROLE_DEFINITIONS[WORKER].role;
-    expect(JSON.parse((roleOptions as { body: string }).body)).toEqual({
-      ...production,
-      description: `${production.description} Eval variant.`,
-      elasticsearch: {
-        ...production.elasticsearch,
-        indices: [
-          ...production.elasticsearch.indices,
-          {
-            names: ['ai-index-idx-alertzero-eval-*'],
-            privileges: productionAiIndexPrivileges,
-          },
-        ],
-      },
-    });
-    // The existing account is still reused, not recreated.
-    expect(
-      fetch.mock.calls.some(
-        ([path, options]) =>
-          path === '/internal/security/service_account' && options?.method === 'POST'
-      )
-    ).toBe(false);
+    const roleLookups = roleCalls(fetch);
+    expect(roleLookups).toHaveLength(1);
+    expect(roleLookups[0][0]).toBe('/api/security/role/alertzero_endpoint_analysis');
+    expect(roleLookups[0][1]?.method).toBe('GET');
   });
 
-  it('provisions the role with read access to the seeded AI index backing pattern', async () => {
-    // The worker sweeps `ai-index-idx-alertzero-eval-*` as the service account; a role
-    // without that pattern cannot find or dispatch the fixture (no hits, no privilege).
-    const fetch = createFetch((path, options) => {
-      if (path === '/internal/security/service_account' && !options?.method) {
-        return { serviceAccounts: [], nextPage: undefined };
-      }
-      if (path === '/internal/security/service_account' && options?.method === 'POST') {
-        return { id: 'sa-eval-1' };
-      }
-      return {};
-    });
+  it('creates the service account with the built-in role, not an eval-specific one', async () => {
+    const fetch = noAccountsFetch();
     await new AlertZeroRuntime(fetch).installWorker(WORKER);
 
-    const rolePut = fetch.mock.calls.find(
-      ([path, options]) =>
-        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
-    );
-    expect(rolePut).toBeDefined();
-    const [rolePath, roleOptions] = rolePut!;
-    // Eval-specific role name: a createOnly PUT against the production role name would
-    // silently lose the eval grant whenever that role already exists.
-    expect(rolePath).toBe('/api/security/role/alertzero_endpoint_analysis_eval');
-    expect((roleOptions as { query?: unknown }).query).toBeUndefined();
-    const role = JSON.parse((rolePut![1] as { body: string }).body);
-    const patterns = role.elasticsearch.indices.flatMap(
-      (entry: { names: string[] }) => entry.names
-    );
-    expect(patterns).toContain('ai-index-idx-alertzero-eval-*');
-  });
-
-  it('grants exactly the production endpoint-analysis role plus the documented AI index delta', async () => {
-    // B2 parity: everything the production `alertzero_endpoint_analysis` role grants must
-    // be granted by the eval role, or the eval exercises a worker with different powers
-    // than production. The only allowed difference is the eval's seeded-AI-index pattern.
-    const fetch = createFetch((path, options) => {
-      if (path === '/internal/security/service_account' && !options?.method) {
-        return { serviceAccounts: [], nextPage: undefined };
-      }
-      if (path === '/internal/security/service_account' && options?.method === 'POST') {
-        return { id: 'sa-eval-1' };
-      }
-      return {};
-    });
-    await new AlertZeroRuntime(fetch).installWorker(WORKER);
-
-    const rolePut = fetch.mock.calls.find(
-      ([path, options]) =>
-        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
-    );
-    expect(rolePut).toBeDefined();
-    const evalRole = JSON.parse((rolePut![1] as { body: string }).body);
-    const production = structuredClone(WORKER_ROLE_DEFINITIONS[WORKER].role) as typeof evalRole;
-    interface IndexEntry {
-      names: string[];
-      privileges: string[];
-    }
-    const isDelta = (entry: IndexEntry) => entry.names.includes('ai-index-idx-alertzero-eval-*');
-    // Pin the delta itself: it must be exactly one entry on exactly that pattern carrying
-    // exactly the privileges production grants its own AI index. Filtering it out of the
-    // comparison without asserting it would let a widened grant (extra privileges or names,
-    // or additional write entries) pass — and a read-only delta would 403 `set_ki_autonomy`.
-    expect(evalRole.elasticsearch.indices.filter(isDelta)).toEqual([
-      { names: ['ai-index-idx-alertzero-eval-*'], privileges: productionAiIndexPrivileges },
+    expect(accountPosts(fetch)).toEqual([
+      expect.objectContaining({
+        name: 'alertzero_endpoint_analysis',
+        roles: ['alertzero_endpoint_analysis'],
+      }),
     ]);
-    // Everything outside the delta must equal production, so extra entries (e.g. a
-    // `.kibana*` write grant) are caught by the comparison below.
-    expect(production.elasticsearch.indices.filter(isDelta)).toEqual([]);
-    const normalize = (role: typeof evalRole) => ({
-      ...role,
-      description: undefined,
-      elasticsearch: {
-        ...role.elasticsearch,
-        indices: role.elasticsearch.indices
-          .filter((entry: IndexEntry) => !isDelta(entry))
-          .map((entry: { names: string[]; privileges: string[] }) => ({
-            names: [...entry.names].sort(),
-            privileges: [...entry.privileges].sort(),
-          }))
-          .sort((a: { names: string[] }, b: { names: string[] }) =>
-            a.names.join(',').localeCompare(b.names.join(','))
-          ),
-      },
-      kibana: role.kibana,
-    });
-    expect(normalize(evalRole)).toEqual(normalize(production));
+  });
+
+  it('uses the _-prefixed predefined role on Serverless', async () => {
+    stack.serverless = true;
+    const fetch = noAccountsFetch();
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    expect(roleCalls(fetch)[0][0]).toBe('/api/security/role/_alertzero_endpoint_analysis');
+    expect(accountPosts(fetch)[0]).toEqual(
+      expect.objectContaining({
+        name: 'alertzero_endpoint_analysis',
+        roles: ['_alertzero_endpoint_analysis'],
+      })
+    );
+  });
+
+  it('fails naming the role, and creates nothing, when the built-in role is missing', async () => {
+    stack.role = 'missing';
+    const fetch = noAccountsFetch();
+    await expect(new AlertZeroRuntime(fetch).installWorker(WORKER)).rejects.toThrow(
+      /reserved role "alertzero_endpoint_analysis" is missing/
+    );
+    expect(roleCalls(fetch).map(([, options]) => options?.method)).toEqual(['GET']);
+    expect(accountPosts(fetch)).toEqual([]);
+  });
+
+  it('fails naming the Serverless role when the predefined role is missing', async () => {
+    stack.serverless = true;
+    stack.role = 'missing';
+    await expect(new AlertZeroRuntime(noAccountsFetch()).installWorker(WORKER)).rejects.toThrow(
+      /predefined role "_alertzero_endpoint_analysis" is missing/
+    );
+  });
+
+  it('rejects a role of that name that is not reserved', async () => {
+    stack.role = 'not_reserved';
+    const fetch = noAccountsFetch();
+    await expect(new AlertZeroRuntime(fetch).installWorker(WORKER)).rejects.toThrow(
+      /reserved role "alertzero_endpoint_analysis" is missing/
+    );
+    expect(accountPosts(fetch)).toEqual([]);
+  });
+
+  it('rethrows a non-404 role lookup error unchanged', async () => {
+    stack.role = 'error';
+    await expect(new AlertZeroRuntime(noAccountsFetch()).installWorker(WORKER)).rejects.toThrow(
+      'boom'
+    );
+  });
+
+  it('still checks the built-in role when the account already exists', async () => {
+    stack.role = 'missing';
+    const fetch = createFetch((path, options) =>
+      path === '/internal/security/service_account' && !options?.method
+        ? { serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }] }
+        : {}
+    );
+    await expect(new AlertZeroRuntime(fetch).installWorker(WORKER)).rejects.toThrow(
+      /alertzero_endpoint_analysis" is missing/
+    );
   });
 });
 
@@ -468,16 +457,97 @@ describe('seedAlertZeroEndpoint', () => {
     }
   });
 
-  it('creates and cleans up the AI index through the registered context_engine route', async () => {
+  it('seeds into the shared security-investigations AI index, registering it only when missing', async () => {
+    const missing = createFetch((path, options) => {
+      if (
+        path === '/api/context_engine/ai_index/security-investigations' &&
+        options?.method === 'GET'
+      ) {
+        throw Object.assign(new Error('Not Found'), { response: { status: 404 } });
+      }
+      return path === '/api/agent_builder/conversations' ? { id: 'conv-1' } : {};
+    });
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, missing);
+    expect(fixture.aiIndexId).toBe('security-investigations');
+    expect(calls(missing)).toContain('POST /api/context_engine/ai_index');
+    expect(indexed(es).find(({ id }) => id === fixture.kiId)?.index).toBe(
+      'ai-index-idx-security-investigations'
+    );
+
+    const present = createFetch();
+    await seedAlertZeroEndpoint(createEs(), present);
+    expect(calls(present)).not.toContain('POST /api/context_engine/ai_index');
+  });
+
+  it('cleanup deletes only the seeded KI, never the shared index or its registration', async () => {
     const fetch = createFetch();
     const es = createEs();
     const fixture = await seedAlertZeroEndpoint(es, fetch);
     await fixture.cleanup();
 
-    const paths = calls(fetch);
-    expect(paths).toContain('POST /api/context_engine/ai_index');
-    expect(paths).toContain(`DELETE /api/context_engine/ai_index/${fixture.aiIndexId}`);
-    expect(paths.filter((path) => path.includes('context-engine'))).toEqual([]);
+    expect(es.delete).toHaveBeenCalledWith(
+      { index: 'ai-index-idx-security-investigations', id: fixture.kiId, refresh: 'wait_for' },
+      { ignore: [404] }
+    );
+    expect(es.indices.delete).not.toHaveBeenCalled();
+    expect(calls(fetch).filter((path) => path.startsWith('DELETE /api/context_engine'))).toEqual(
+      []
+    );
+    const kiDeletes = (es.delete.mock.calls as unknown[][]).filter(
+      ([params]) => (params as { index: string }).index === 'ai-index-idx-security-investigations'
+    );
+    expect(kiDeletes).toHaveLength(1);
+  });
+
+  it('refuses to seed, naming the ids, when another pending analyze_endpoint KI would be swept first', async () => {
+    const es = createEs();
+    es.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'decoy-1', _source: { id: 'decoy-1' } }] },
+    } as never);
+    const fetch = createFetch();
+
+    await expect(seedAlertZeroEndpoint(es, fetch)).rejects.toThrow(/decoy-1/);
+    // Nothing of ours reaches the shared index, and the decoy is never touched.
+    expect(indexed(es).some(({ index }) => index === 'ai-index-idx-security-investigations')).toBe(
+      false
+    );
+    const deletedIds = (es.delete.mock.calls as unknown[][]).map(
+      ([params]) => (params as { id: string }).id
+    );
+    expect(deletedIds).not.toContain('decoy-1');
+  });
+
+  it('seeds once the decoy is gone', async () => {
+    const es = createEs();
+    es.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'decoy-1', _source: { id: 'decoy-1' } }] },
+    } as never);
+    await expect(seedAlertZeroEndpoint(es, createFetch())).rejects.toThrow(/decoy-1/);
+
+    es.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+    expect(indexed(es).some(({ id }) => id === fixture.kiId)).toBe(true);
+  });
+
+  it('the precondition mirrors the sweep filter and excludes only our own KI', async () => {
+    const es = createEs();
+    await assertNoCompetingPendingKis(es, 'own-ki');
+    const params = (es.search.mock.calls as unknown[][])[0][0] as {
+      index: string;
+      query: { bool: { filter: unknown[]; must_not: unknown[] } };
+    };
+    expect(params.index).toBe('ai-index-idx-security-investigations');
+    expect(params.query.bool.filter).toEqual([
+      { term: { type: 'security.analyze_endpoint' } },
+      { term: { 'attributes.status': 'pending' } },
+      { term: { 'attributes.space_id': 'default' } },
+      { range: { '@timestamp': { gte: 'now-7d' } } },
+    ]);
+    expect(params.query.bool.must_not).toEqual([
+      { term: { id: 'own-ki' } },
+      { ids: { values: ['own-ki'] } },
+    ]);
   });
 
   it('seeds the Attack Discovery alert in the production shape the workflow reads', async () => {
@@ -553,8 +623,8 @@ describe('seedAlertZeroEndpoint', () => {
   });
 
   it('removes already-created resources when seeding fails part way', async () => {
-    const fetch = createFetch((path, options) => {
-      if (path === '/api/context_engine/ai_index' && options?.method === 'POST') {
+    const fetch = createFetch((path) => {
+      if (path === '/api/context_engine/ai_index/security-investigations') {
         throw new Error('boom');
       }
       return path === '/api/agent_builder/conversations' ? { id: 'conv-1' } : {};
@@ -563,7 +633,7 @@ describe('seedAlertZeroEndpoint', () => {
 
     await expect(seedAlertZeroEndpoint(es, fetch)).rejects.toThrow('boom');
     expect(calls(fetch)).toContain('DELETE /api/agent_builder/conversations/conv-1');
-    expect(es.indices.delete).toHaveBeenCalled();
+    expect(es.indices.deleteDataStream).toHaveBeenCalled();
     expect(es.delete).toHaveBeenCalled();
   });
 });
@@ -572,7 +642,7 @@ describe('pinAgenticConnector', () => {
   const route = '/internal/search_inference_endpoints/settings';
   const previous = [
     { feature_id: 'agent_builder', endpoints: [{ id: 'keep-me' }] },
-    { feature_id: ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID, endpoints: [{ id: 'old' }] },
+    { feature_id: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID, endpoints: [{ id: 'old' }] },
   ];
 
   it('routes the agentic feature to the eval connector and restores the previous settings', async () => {
@@ -584,7 +654,10 @@ describe('pinAgenticConnector', () => {
       .map(([, options]) => JSON.parse((options as { body: string }).body).features);
     expect(bodies[0]).toEqual([
       previous[0],
-      { feature_id: ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID, endpoints: [{ id: 'eval-connector' }] },
+      {
+        feature_id: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+        endpoints: [{ id: 'eval-connector' }],
+      },
     ]);
 
     await restore();

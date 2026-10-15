@@ -23,6 +23,7 @@ products:
     - security
   default:
     - product: kibana
+    - product: cloud-serverless
       # lifecycle: ga
 
 # Extraction configuration
@@ -57,7 +58,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: 'release_note:fix'
+    bug-fix: 'release_note:fix, release_note:bug'
     deprecation: 'release_note:deprecation'
     feature: 'release_note:feature'
     enhancement: 'release_note:enhancement'
@@ -277,27 +278,25 @@ rules:
   # Bundle — filtering applied during 'changelog bundle' and 'changelog gh-release'.
   # Applied after the primary filter (--prs, --issues, --all, ...) has collected changelogs.
   bundle:
-    exclude_types:
-      'docs'
-      # products:
-      #   'cloud-serverless':
-      #     exclude_types:
-      #       - docs
-      #   'kibana':
-      #     exclude_types:
-      #       - docs
+    products:
+      'cloud-serverless':
+        exclude_types:
+          - docs
+      'kibana':
+        exclude_types:
+          - docs
       #     # match_areas: any
       #     # include_areas:
       #     #   - "Alerting and Reporting":
       #     #   - "Dashboards and Visualizations"
       #     #   - "Discover and ES|QL"
       #     #   - Other
-      #   'observability':
-      #     exclude_types:
-      #       - docs
-      #   'security':
-      #     exclude_types:
-      #       - docs
+      'observability':
+        exclude_types:
+          - docs
+      'security':
+        exclude_types:
+          - docs
 
 # Bundle configuration (profiles and defaults)
 bundle:

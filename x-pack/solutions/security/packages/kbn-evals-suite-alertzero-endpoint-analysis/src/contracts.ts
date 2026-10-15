@@ -13,6 +13,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
@@ -81,6 +82,13 @@ const proposalBridge = getManagedWorkflowDefinition(proposalWorkflowId);
 if (!proposalBridge?.yaml) {
   throw new Error('Missing production AlertZero proposal bridge definition');
 }
+const forensicsGate = getManagedWorkflowDefinition(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID);
+if (!forensicsGate?.yaml) {
+  throw new Error('Missing production AlertZero forensics proposal gate definition');
+}
+const forensicsGateWrapStep = flattenSteps(
+  (parse(forensicsGate.yaml) as AlertZeroDefinition).steps
+).find((step) => step.name === 'create_and_gate_proposal');
 export const proposalBridgeDefinition = parse(proposalBridge.yaml) as AlertZeroDefinition;
 export const assertAlertZeroContracts = () => {
   if (!new Set<string>(ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS).has(workerWorkflowId)) {
@@ -101,8 +109,16 @@ export const assertAlertZeroContracts = () => {
   ) {
     throw new Error('Endpoint sweep does not dispatch the production analysis workflow');
   }
-  if (findAnalysisStep('propose_action').with?.['workflow-id'] !== proposalWorkflowId) {
+  // The analysis proposes through the forensics gate, which wraps the bridge (so `origin` is
+  // still stamped there) and closes the investigation once every proposal has settled.
+  if (
+    findAnalysisStep('propose_action').with?.['workflow-id'] !==
+    ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID
+  ) {
     throw new Error('Endpoint analysis bypasses the AlertZero proposal gate');
+  }
+  if (forensicsGateWrapStep?.with?.['workflow-id'] !== proposalWorkflowId) {
+    throw new Error('Forensics proposal gate does not wrap the AlertZero proposal bridge');
   }
   // The bridge must stamp `origin: alertzero` itself — the gate's inputs close to
   // additional properties and callers cannot pass one — so the worker's proposals land in

@@ -24,6 +24,7 @@ const context = { endpointIds: [HOST_ENDPOINT], conclusive: true };
 
 const isolate = (endpointId: string = HOST_ENDPOINT) => ({
   actionId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  title: 'Isolate host',
   actionInput: { endpoint_ids: [endpointId] },
   confidence: 'high',
   comment: 'Isolate the host',
@@ -85,6 +86,8 @@ describe('Endpoint Analysis action safety', () => {
         { malicious: false },
         {
           actionId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+          title: 'Isolate host',
+          comment: 'Isolate the host.',
           actionInput: { endpoint_ids: [HOST_ENDPOINT], parameters: { pid: 4242 } },
           confidence: 'low',
         },
@@ -245,6 +248,8 @@ describe('Endpoint Analysis action safety', () => {
     it('flags a catalog action that is not an endpoint response action', () => {
       const action = {
         actionId: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
+        title: 'Isolate host',
+        comment: 'Isolate the host.',
         actionInput: { alert_ids: ['a1'] },
         confidence: 'high',
       };

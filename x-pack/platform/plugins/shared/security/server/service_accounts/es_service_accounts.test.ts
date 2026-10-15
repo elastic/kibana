@@ -157,6 +157,20 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    it('rejects platform assumers, which only UIAM supports', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: ['relay'] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('creates the account when the list of platform assumers is empty', async () => {
+      mockHappyPath();
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: [] })
+      ).resolves.toEqual(createdAccount);
+    });
+
     it('rejects an oversized description before creating an account', async () => {
       await expect(
         serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })

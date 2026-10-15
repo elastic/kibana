@@ -34,6 +34,8 @@ const output = (endpointId: string) => ({
   recommendedActions: [
     {
       actionId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+      title: 'Isolate host',
+      comment: 'Isolate the host.',
       actionInput: { endpoint_ids: [endpointId] },
       confidence: 'high',
     },

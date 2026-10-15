@@ -41,6 +41,13 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    // The query bar swaps `querySubmitButton` for `queryCancelButton` while a fetch is in
+    // flight. Unlike the grid and hit count indicators, which are not rendered during a first
+    // fetch with no prior results, it is present only once the fetch has settled. Checked after
+    // the grid wait so its probe overlaps the fetch, and so a fetch started meanwhile is caught.
+    await expect(this.page.testSubj.locator('querySubmitButton')).toBeVisible({
+      timeout: 30_000,
+    });
     await this.waitUntilHitCountHasSettled();
   }
 
@@ -56,8 +63,7 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
    * Seeds the persisted query mode in localStorage on the next page load. Discover
    * ignores `currentMode` unless `defaultMode` matches the resolved default (the
    * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
-   * match today's default. When the flag is flipped to make ES|QL the default,
-   * update `defaultMode` or the seed is ignored.
+   * match the current application default.
    *
    * Not idempotent: each call adds an `addInitScript` that reruns on every later
    * load in order, so the last write wins. Avoid calling it more than once per
