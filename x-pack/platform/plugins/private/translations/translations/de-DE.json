@@ -14676,7 +14676,6 @@
     "xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning": "Dies ist ein Beispieldokument für eine Gruppe aufeinanderfolgender, ähnlicher Abschnitte",
     "xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle": "Datenbankanweisung",
     "xpack.apm.transactionDetails.spanFlyout.dependencyLabel": "Abhängigkeit",
-    "xpack.apm.transactionDetails.spanFlyout.nameLabel": "Name",
     "xpack.apm.transactionDetails.spanFlyout.spanAction": "Aktion",
     "xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle": "Span-Details",
     "xpack.apm.transactionDetails.spanFlyout.spanSubtype": "Subtype",

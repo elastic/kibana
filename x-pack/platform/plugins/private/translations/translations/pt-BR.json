@@ -14705,7 +14705,6 @@
     "xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning": "Este é um documento de exemplo para um grupo de trechos consecutivos e semelhantes",
     "xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle": "Comando de banco de dados",
     "xpack.apm.transactionDetails.spanFlyout.dependencyLabel": "Dependência",
-    "xpack.apm.transactionDetails.spanFlyout.nameLabel": "Nome",
     "xpack.apm.transactionDetails.spanFlyout.spanAction": "Ação",
     "xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle": "Detalhes da duração",
     "xpack.apm.transactionDetails.spanFlyout.spanSubtype": "Subtipo",

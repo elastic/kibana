@@ -14653,7 +14653,6 @@
     "xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning": "Il s'agit d'un exemple de document pour un groupe d'intervalles similaires consécutifs",
     "xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle": "Déclaration de la base de données",
     "xpack.apm.transactionDetails.spanFlyout.dependencyLabel": "Dépendance",
-    "xpack.apm.transactionDetails.spanFlyout.nameLabel": "Nom",
     "xpack.apm.transactionDetails.spanFlyout.spanAction": "Action",
     "xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle": "Détails de l'intervalle",
     "xpack.apm.transactionDetails.spanFlyout.spanSubtype": "Sous-type",
