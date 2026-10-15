@@ -28,7 +28,7 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for SharePoint Online. No app registration is required — select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Elastic's managed OAuth flow for SharePoint Online. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### OAuth client credentials (app-only auth)
 

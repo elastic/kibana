@@ -20,7 +20,7 @@ If you're using connectors for alerting or case management, you can [create rule
 
 {{kib}} provides connectors for LLM providers, Elastic Stack features, and third-party alerting and case management platforms.
 
-Some connectors for Google, Microsoft, and Slack services support [Quick Connect OAuth 2.0](connectors-kibana/quick-connect-oauth.md), which lets you authorize access without registering your own OAuth app.
+Some connectors support [Quick Connect OAuth 2.0](connectors-kibana/quick-connect-oauth.md), which lets you authorize access without registering your own OAuth app.
 
 ## Required permissions [_required_permissions_2]
 

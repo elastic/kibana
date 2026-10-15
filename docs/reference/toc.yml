@@ -74,7 +74,6 @@ toc:
           - file: connectors-kibana/cases-webhook-action-type.md
           - file: connectors-kibana/xmatters-action-type.md
           - file: connectors-kibana/xsoar-action-type.md
-      - file: connectors-kibana/quick-connect-oauth.md
       - file: connectors-kibana/data-context-sources-connectors.md
         children:
           - file: connectors-kibana/abuseipdb-action-type.md
@@ -162,6 +161,7 @@ toc:
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
+      - file: connectors-kibana/quick-connect-oauth.md
   - file: kibana-plugins.md
   - file: commands.md
     children:
