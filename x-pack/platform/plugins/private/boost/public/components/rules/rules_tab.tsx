@@ -151,7 +151,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const columns: Array<EuiBasicTableColumn<RuleRow>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.boost.rulesTab.nameColumn', { defaultMessage: 'Name' }),
+      name: i18n.translate('xpack.boost.rulesTab.nameColumn', { defaultMessage: 'Rule name' }),
       sortable: true,
       // A single span keeps the name and badge in one inline run; table cells are flex containers.
       render: (name: string, { is_builtin: isBuiltin }: RuleRow) => (
@@ -169,7 +169,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     {
       field: 'boost_profile',
       name: i18n.translate('xpack.boost.rulesTab.profileColumn', {
-        defaultMessage: 'Profile',
+        defaultMessage: 'Profile name',
       }),
       sortable: true,
     },

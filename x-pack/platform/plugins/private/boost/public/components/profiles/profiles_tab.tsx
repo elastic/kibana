@@ -156,7 +156,9 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
   const columns: Array<EuiBasicTableColumn<ProfileRow>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.boost.profilesTab.nameColumn', { defaultMessage: 'Name' }),
+      name: i18n.translate('xpack.boost.profilesTab.nameColumn', {
+        defaultMessage: 'Profile name',
+      }),
       sortable: true,
       // A single span keeps the name and badge in one inline run; table cells are flex containers.
       render: (name: string, { is_builtin: isBuiltin }: ProfileRow) => (
