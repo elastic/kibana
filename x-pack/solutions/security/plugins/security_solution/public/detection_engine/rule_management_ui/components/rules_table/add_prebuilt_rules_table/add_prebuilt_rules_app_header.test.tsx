@@ -15,6 +15,11 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { TestProviders } from '../../../../../common/mock';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { ML_JOB_SETTINGS_MENU_ITEM_TEST_ID } from '../../../../../common/components/app_header/use_ml_job_settings_menu_item';
+import { ADD_INTEGRATIONS_MENU_ITEM_TEST_ID } from '../../../../../common/components/app_header/use_add_integrations_menu_item';
+import { RULES_ADD_PATH } from '../../../../../../common/constants';
+import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesAppHeader } from './add_prebuilt_rules_app_header';
 
@@ -26,15 +31,13 @@ jest.mock('../../../../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl: () => () => '/app/security/rules',
 }));
 
-// "ML job settings" and "Add integrations" come from the shared SecurityAppHeader wrapper and are
-// covered by its own test; stub the wrapper's hooks so this suite stays focused on the install items.
-jest.mock('../../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
-  useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
-}));
+jest.mock('../../../../../../common/machine_learning/has_ml_admin_permissions');
+jest.mock('../../../../../../common/machine_learning/has_ml_license');
 
-jest.mock('../../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
-  useAddIntegrationsMenuItem: () => undefined,
-}));
+const mockMlAccess = ({ isLicensed, isMlAdmin }: { isLicensed: boolean; isMlAdmin: boolean }) => {
+  (hasMlLicense as jest.Mock).mockReturnValue(isLicensed);
+  (hasMlAdminPermissions as jest.Mock).mockReturnValue(isMlAdmin);
+};
 
 const installAllRules = jest.fn();
 const installSelectedRules = jest.fn();
@@ -63,10 +66,10 @@ const mockCanEditRules = (edit: boolean) => {
   });
 };
 
-const renderHeader = () =>
+const renderHeader = (pathname = '/') =>
   render(
     <TestProviders>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[pathname]}>
         <MockAppHeaderProvider>
           <AddPrebuiltRulesAppHeader />
         </MockAppHeaderProvider>
@@ -81,6 +84,39 @@ describe('AddPrebuiltRulesAppHeader', () => {
     jest.clearAllMocks();
     mockCanEditRules(true);
     mockContext();
+    mockMlAccess({ isLicensed: false, isMlAdmin: false });
+  });
+
+  describe('shared Security menu items on the Add Elastic rules route', () => {
+    it('renders "Add integrations" in the overflow menu', async () => {
+      renderHeader(RULES_ADD_PATH);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId(ADD_INTEGRATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+    });
+
+    it.each([
+      ['without a Platinum or Trial license', { isLicensed: false, isMlAdmin: false }],
+      [
+        'with a Platinum or Trial license and ML admin permissions',
+        { isLicensed: true, isMlAdmin: true },
+      ],
+    ])('renders "ML job settings" in the overflow menu %s', async (_, mlAccess) => {
+      mockMlAccess(mlAccess);
+      renderHeader(RULES_ADD_PATH);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId(ML_JOB_SETTINGS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('does not render "ML job settings" with a Platinum or Trial license but without ML admin permissions', async () => {
+      mockMlAccess({ isLicensed: true, isMlAdmin: false });
+      renderHeader(RULES_ADD_PATH);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId(ADD_INTEGRATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId(ML_JOB_SETTINGS_MENU_ITEM_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 
   it('renders the page title', () => {
