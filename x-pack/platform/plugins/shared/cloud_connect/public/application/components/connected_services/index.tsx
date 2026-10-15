@@ -128,7 +128,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
           label: i18n.translate('xpack.cloudConnect.connectedServices.actions.disconnectCluster', {
             defaultMessage: 'Disconnect cluster',
           }),
-          iconType: 'unlink',
+          iconType: 'linkSlash',
           overflow: true,
           isDestructive: true,
           run: showDisconnectModal,

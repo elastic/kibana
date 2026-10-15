@@ -150,11 +150,6 @@ export const MigrationSection: React.FC = () => {
               titleSize="xs"
               css={css`
                 box-shadow: none !important;
-                ${index === 0 && 'padding-left: 0 !important;'}
-
-                @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
-                  padding-left: 0 !important;
-                }
               `}
             />
           </EuiFlexItem>
