@@ -17,7 +17,7 @@ export interface MappingHeaderProps {
 }
 
 export function MappingHeader({ docLinks }: MappingHeaderProps) {
-  const datasetMappingsDocLink = `${docLinks.links.dataFederation.datasets}#declare-a-dataset-mapping`;
+  const datasetMappingsDocLink = docLinks.links.dataFederation.datasetMappings;
 
   return (
     <>
@@ -45,7 +45,6 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
           </EuiLink>
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
     </>
   );
 }

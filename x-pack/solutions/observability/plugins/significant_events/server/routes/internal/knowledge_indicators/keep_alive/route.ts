@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
@@ -24,7 +24,7 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
+    body: z.object({ lastRefreshedBefore: isoDateTime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({

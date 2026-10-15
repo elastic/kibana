@@ -40,7 +40,8 @@ export const registerGetRoute = (
             params: z
               .object({
                 id: z.string().meta({
-                  description: 'The Discover session ID.',
+                  description:
+                    'The Discover session ID, as returned by the create or search endpoints.',
                 }),
               })
               .strict(),

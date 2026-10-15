@@ -25,9 +25,6 @@ const createPlugin = (memoryEnabled = false) =>
 const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
-    taskManager: {
-      registerTaskDefinitions: jest.fn(),
-    },
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
