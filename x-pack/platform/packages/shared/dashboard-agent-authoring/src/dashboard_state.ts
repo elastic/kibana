@@ -11,6 +11,7 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
+import { GRID_COLUMNS } from './layout/types';
 
 type DashboardWidget = AttachmentPanel | DashboardSection;
 
@@ -47,6 +48,18 @@ export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
     return Math.max(maxY, widget.grid.y + widget.grid.h);
   }, 0);
 };
+
+/** Height of a new panel until the layout call places it. */
+const PLACEHOLDER_HEIGHT = 10;
+
+/**
+ * Returns the grid of a panel until the layout call places it: below the existing widgets of its
+ * container, full width unless a size is given.
+ */
+export const getPlaceholderGrid = (
+  widgets: DashboardWidget[],
+  { w, h }: Pick<AttachmentPanel['grid'], 'w' | 'h'> = { w: GRID_COLUMNS, h: PLACEHOLDER_HEIGHT }
+): AttachmentPanel['grid'] => ({ x: 0, y: getWidgetsBottomY(widgets), w, h });
 
 export const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
   return panels.findIndex((widget) => isSection(widget) && widget.id === sectionId);

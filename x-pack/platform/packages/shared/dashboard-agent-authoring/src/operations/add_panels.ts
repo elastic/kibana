@@ -7,8 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { appendPanelsToDashboard, getContainerWidgets } from '../dashboard_state';
-import { getPlaceholderGrid } from '../layout/placeholder_grid';
+import {
+  appendPanelsToDashboard,
+  getContainerWidgets,
+  getPlaceholderGrid,
+} from '../dashboard_state';
 import { defineOperation } from './types';
 import { addPanelsItemSchema } from './panels';
 import { createPanelInputMaterializer } from './panel_creation';

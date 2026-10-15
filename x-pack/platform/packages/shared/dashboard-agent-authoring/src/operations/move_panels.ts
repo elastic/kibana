@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import {
   appendPanelsToDashboard,
   getContainerWidgets,
-  getWidgetsBottomY,
+  getPlaceholderGrid,
   removePanelsFromDashboard,
 } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
@@ -64,14 +64,12 @@ export const movePanelsOperation = defineOperation({
 
       // Keep the size, but place the panel below the content of its new container until the
       // layout call places it, since its coordinates belong to the container it left.
-      const targetBottomY = getWidgetsBottomY(
-        getContainerWidgets(dashboardAfterRemoval, targetSectionId)
-      );
+      const targetWidgets = getContainerWidgets(dashboardAfterRemoval, targetSectionId);
       nextDashboardData = appendPanelsToDashboard({
         dashboardData: dashboardAfterRemoval,
         panelsToAdd: removedPanels.map((panel) => ({
           ...panel,
-          grid: { ...panel.grid, x: 0, y: targetBottomY },
+          grid: getPlaceholderGrid(targetWidgets, panel.grid),
         })),
         sectionId: targetSectionId,
       });
