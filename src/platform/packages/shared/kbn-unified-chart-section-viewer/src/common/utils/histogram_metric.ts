@@ -21,3 +21,14 @@ export const isHistogramMetric = (
   type: ES_FIELD_TYPES,
   instrument: MappingTimeSeriesMetricType
 ): boolean => instrument === 'histogram' && HISTOGRAM_FIELD_TYPES.has(type);
+
+/**
+ * A legacy histogram is a metric where both the ES field type and the
+ * metric instrument are histogram.
+ */
+export const isLegacyHistogram = (
+  type: ES_FIELD_TYPES,
+  instrument: MappingTimeSeriesMetricType
+): boolean => {
+  return type === 'histogram' && instrument === 'histogram';
+};
