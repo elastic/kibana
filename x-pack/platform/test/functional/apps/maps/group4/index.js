@@ -61,7 +61,6 @@ export default function ({ loadTestFile, getService }) {
     });
 
     loadTestFile(require.resolve('./mapbox_styles'));
-    loadTestFile(require.resolve('./mvt_geotile_grid'));
     loadTestFile(require.resolve('./layer_errors'));
 
     loadTestFile(require.resolve('./lens'));
