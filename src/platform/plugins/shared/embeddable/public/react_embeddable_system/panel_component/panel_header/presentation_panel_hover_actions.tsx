@@ -357,34 +357,22 @@ export const PresentationPanelHoverActions = ({
   const isSelectionMode = canSelect && selectedPanelIds.length > 0;
   // The checkbox only exists in selection mode and lives in the panel's top right corner (see
   // `.embPanel__selectPanel` styles) rather than in the floating hover bar, which is gone in that mode
+  const selectPanelLabel = isSelected
+    ? i18n.translate('embeddableApi.deselectPanel', {
+        defaultMessage: 'Deselect panel',
+      })
+    : i18n.translate('embeddableApi.selectPanel', {
+        defaultMessage: 'Select panel',
+      });
   const selectCheckbox =
     selectionApi && api?.uuid && isSelectionMode ? (
       <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
-        <EuiToolTip
-          content={
-            isSelected
-              ? i18n.translate('embeddableApi.deselectPanel', {
-                  defaultMessage: 'Deselect panel',
-                })
-              : i18n.translate('embeddableApi.selectPanel', {
-                  defaultMessage: 'Select panel. Shift + click a panel to select multiple panels.',
-                })
-          }
-          disableScreenReaderOutput
-        >
+        <EuiToolTip content={selectPanelLabel} disableScreenReaderOutput>
           <EuiCheckbox
             id={`embeddablePanelSelect-${api.uuid}`}
             className="embPanel--selectPanel"
             checked={isSelected}
-            aria-label={
-              isSelected
-                ? i18n.translate('embeddableApi.deselectPanelAriaLabel', {
-                    defaultMessage: 'Deselect panel',
-                  })
-                : i18n.translate('embeddableApi.selectPanelAriaLabel', {
-                    defaultMessage: 'Select panel',
-                  })
-            }
+            aria-label={selectPanelLabel}
             data-test-subj="embeddablePanelSelectToggle"
             onChange={() => selectionApi.togglePanelSelection(api.uuid)}
           />

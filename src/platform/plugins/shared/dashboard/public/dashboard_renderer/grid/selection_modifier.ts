@@ -9,11 +9,11 @@
 
 import { isMac } from '@kbn/shared-ux-utility';
 
-type ModifierKeys = Pick<MouseEvent, 'shiftKey' | 'metaKey' | 'ctrlKey'>;
+type ModifierKeys = Pick<MouseEvent, 'metaKey' | 'ctrlKey'>;
 
 /**
- * Returns true when the event carries a panel selection modifier: Shift, or Cmd on macOS / Ctrl elsewhere.
- * Ctrl on macOS and Meta on other platforms are deliberately ignored.
+ * Returns true when the event carries the panel selection modifier: Cmd on macOS, Ctrl elsewhere.
+ * Shift, Ctrl on macOS and Meta on other platforms are deliberately ignored.
  */
-export const isSelectionModifier = ({ shiftKey, metaKey, ctrlKey }: ModifierKeys): boolean =>
-  shiftKey || (isMac ? metaKey : ctrlKey);
+export const isSelectionModifier = ({ metaKey, ctrlKey }: ModifierKeys): boolean =>
+  isMac ? metaKey : ctrlKey;
