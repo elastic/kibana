@@ -72,22 +72,23 @@ apiTest.describe(
       expect(list.body.total).toBe(0);
     });
 
-    apiTest('upsert: rejects a Cloud API key when the policy does not exist', async ({
-      apiClient,
-    }) => {
-      const response = await apiClient.put(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: cloudApiKeyHeaders,
-        body: buildCreateActionPolicyData({ name: 'upserted with a Cloud API key' }),
-      });
+    apiTest(
+      'upsert: rejects a Cloud API key when the policy does not exist',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(getActionPolicyUrl(ACTION_POLICY_ID), {
+          headers: cloudApiKeyHeaders,
+          body: buildCreateActionPolicyData({ name: 'upserted with a Cloud API key' }),
+        });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
 
-      const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: sessionHeaders,
-      });
-      expect(get).toHaveStatusCode(404);
-    });
+        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
+          headers: sessionHeaders,
+        });
+        expect(get).toHaveStatusCode(404);
+      }
+    );
 
     apiTest('upsert: rejects a Cloud API key when replacing a policy', async ({ apiClient }) => {
       const created = await createPolicyWithSession(apiClient);
@@ -107,42 +108,44 @@ apiTest.describe(
       expect(get.body.updated_at).toBe(created.updated_at);
     });
 
-    apiTest('update: rejects a Cloud API key and leaves the policy unchanged', async ({
-      apiClient,
-    }) => {
-      const created = await createPolicyWithSession(apiClient);
+    apiTest(
+      'update: rejects a Cloud API key and leaves the policy unchanged',
+      async ({ apiClient }) => {
+        const created = await createPolicyWithSession(apiClient);
 
-      const response = await apiClient.patch(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: cloudApiKeyHeaders,
-        body: { name: 'updated with a Cloud API key' },
-      });
+        const response = await apiClient.patch(getActionPolicyUrl(ACTION_POLICY_ID), {
+          headers: cloudApiKeyHeaders,
+          body: { name: 'updated with a Cloud API key' },
+        });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
 
-      const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: sessionHeaders,
-      });
-      expect(get.body.name).toBe(created.name);
-      expect(get.body.updated_at).toBe(created.updated_at);
-    });
+        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
+          headers: sessionHeaders,
+        });
+        expect(get.body.name).toBe(created.name);
+        expect(get.body.updated_at).toBe(created.updated_at);
+      }
+    );
 
-    apiTest('update API key: rejects a Cloud API key and leaves the policy unchanged', async ({
-      apiClient,
-    }) => {
-      const created = await createPolicyWithSession(apiClient);
+    apiTest(
+      'update API key: rejects a Cloud API key and leaves the policy unchanged',
+      async ({ apiClient }) => {
+        const created = await createPolicyWithSession(apiClient);
 
-      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(ACTION_POLICY_ID), {
-        headers: cloudApiKeyHeaders,
-      });
+        const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(ACTION_POLICY_ID), {
+          headers: cloudApiKeyHeaders,
+        });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
 
-      const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: sessionHeaders,
-      });
-      expect(get.body.updated_at).toBe(created.updated_at);
-    });
+        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
+          headers: sessionHeaders,
+        });
+        expect(get.body.updated_at).toBe(created.updated_at);
+      }
+    );
   }
 );
