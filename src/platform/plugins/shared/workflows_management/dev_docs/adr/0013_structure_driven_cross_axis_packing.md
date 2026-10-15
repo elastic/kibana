@@ -93,5 +93,13 @@ reachability.
   both import `EDGE_LABEL_MAX_CHARS`. If the chip styling changes, update `edge_label_metrics.ts`.
 - A lane's main-axis position still comes from `@kbn/dag-layout`'s cascade; the packer places lanes on
   the cross axis only.
+- Known limitation: the body of a `merge` step shares rows with the items after it (nothing pushes
+  them down, unlike a fallback lane). The packer clears the items that follow in the same sequence, but
+  a `merge` that is last in a branch can still share rows with the join after its fork. No live
+  workflow uses `merge`. The fix is to reserve the body as a lane in `dagLayout`'s main-axis cascade,
+  not to add a cross-axis rule.
+- The layout memo in `useWorkflowLayout` is keyed on the topology fingerprint plus the head and label
+  of every empty branch: the fingerprint skips empty child slots, but each one is a bypass node sized
+  from its label.
 - `separatePositionedOverlapsInPlace` is no longer used by the pipeline; it remains an export of
   `@kbn/dag-layout`.
