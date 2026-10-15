@@ -73,7 +73,7 @@ export const memoryWriteBodySchema = schema.object({
         validate: validateIsoDate,
         meta: {
           description:
-            'ISO 8601 expiry timestamp. Omit to set expiry to 90 days after this write, including on revision, or pass null for a non-expiring memory.',
+            'ISO 8601 expiry timestamp. On create, omit to expire after 90 days. On revision, omit to preserve the existing expiry. Pass null for a non-expiring memory.',
         },
       })
     )
@@ -84,7 +84,7 @@ export const memoryWriteBodySchema = schema.object({
       maxLength: MAX_KI_ID_LENGTH,
       meta: {
         description:
-          'An opaque caller-chosen correlation ID, not an authorization boundary. Reuse an ID returned by an earlier write to continue that session, or omit it to generate a new ID for this write.',
+          'An opaque caller-chosen correlation ID, not an authorization boundary. On create, omit to generate an ID. On revision, omit to preserve the existing ID, generating one only when the memory has none.',
       },
     })
   ),

@@ -118,9 +118,8 @@ const handleMemoryWriteError = (
   });
 };
 
-const toServiceRequest = (aiIndexId: string, body: WriteMemoryRequest, sessionId: string) => ({
+const toServiceRequest = (aiIndexId: string, body: WriteMemoryRequest) => ({
   aiIndexId,
-  sessionId,
   type: body.type,
   title: body.title,
   description: body.description,
@@ -150,7 +149,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'create-context-engine-memory',
       summary: 'Create a memory',
-      description: `Creates a memory in a memory-enabled AI Index. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. ${DESCRIPTION_SUFFIX}`,
+      description: `Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -186,7 +185,10 @@ export const registerMemoryRoutes = ({
           const result = await getAiIndexMemoryWriteService({
             esClient: (await ctx.core).elasticsearch.client.asCurrentUser,
             request,
-          }).createMemory(toServiceRequest(request.params.aiIndexId, request.body, sessionId));
+          }).createMemory({
+            ...toServiceRequest(request.params.aiIndexId, request.body),
+            sessionId,
+          });
           const body: WriteMemoryResponse = { id: result.id, session_id: result.sessionId };
           return response.created({ body });
         } catch (error) {
@@ -202,7 +204,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'revise-context-engine-memory',
       summary: 'Revise a memory',
-      description: `Writes a revision that replaces the memory's title, description, and content; the required type must match the existing memory. Omitted tags are preserved, while omitted expiry resets to 90 days after this write. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
+      description: `Writes a revision using the caller's destination read and write privileges. The revision replaces the memory's title, description, and content; the required type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -233,13 +235,15 @@ export const registerMemoryRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const sessionId = request.body.session_id ?? generateSessionId();
         try {
           const result = await getAiIndexMemoryWriteService({
             esClient: (await ctx.core).elasticsearch.client.asCurrentUser,
             request,
           }).reviseMemory({
-            ...toServiceRequest(request.params.aiIndexId, request.body, sessionId),
+            ...toServiceRequest(request.params.aiIndexId, request.body),
+            ...(request.body.session_id !== undefined && {
+              sessionId: request.body.session_id,
+            }),
             id: request.params.memoryId,
           });
           const body: WriteMemoryResponse = { id: result.id, session_id: result.sessionId };
@@ -257,7 +261,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'delete-context-engine-memory',
       summary: 'Delete a memory',
-      description: `Marks a memory as deleted while retaining its lifecycle tombstone. ${DESCRIPTION_SUFFIX}`,
+      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },

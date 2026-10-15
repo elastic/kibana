@@ -46,6 +46,7 @@ describe('memory routes', () => {
   };
   const getAiIndexMemoryWriteService = jest.fn(() => service);
   const contextEngineEnabled = jest.fn();
+  const generateSessionId = jest.fn(() => 'generated-session');
   const currentUserClient = {};
   const response = httpServerMock.createResponseFactory();
 
@@ -72,7 +73,7 @@ describe('memory routes', () => {
       } as unknown as IRouter,
       logger: loggerMock.create(),
       getAiIndexMemoryWriteService,
-      generateSessionId: () => 'generated-session',
+      generateSessionId,
     });
   });
 
@@ -175,6 +176,23 @@ describe('memory routes', () => {
         sessionId: 'session-1',
       })
     );
+  });
+
+  it('leaves an omitted revision session ID for the service to resolve', async () => {
+    reviseMemory.mockResolvedValue({ id: 'memory-1', sessionId: 'existing-session' });
+
+    await call(
+      'PATCH',
+      AI_INDEX_MEMORY_BY_ID_PATH,
+      { aiIndexId: 'support', memoryId: 'memory-1' },
+      body
+    );
+
+    expect(reviseMemory.mock.calls[0][0]).not.toHaveProperty('sessionId');
+    expect(generateSessionId).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { id: 'memory-1', session_id: 'existing-session' },
+    });
   });
 
   it('tombstones a memory', async () => {

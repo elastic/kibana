@@ -82,6 +82,7 @@ describe('AiIndexMemoryWriteService', () => {
     aiIndexService,
     isMemoryEnabled,
     generateId: () => 'logical-memory-id',
+    generateSessionId: () => 'generated-session-id',
     generateRevisionId: () => 'revision-id',
     getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),
   });
@@ -280,6 +281,91 @@ describe('AiIndexMemoryWriteService', () => {
         document: expect.objectContaining({ references: existingDocument.references }),
       })
     );
+  });
+
+  it('preserves expiry and session when a revision omits them', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'physical-memory-id',
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              ...existingDocument,
+              expires_at: '2027-01-01T00:00:00.000Z',
+              attributes: {
+                ...existingDocument.attributes,
+                'memory.session_id': 'existing-session',
+              },
+            },
+          },
+        ],
+      },
+    });
+    const { sessionId: _, ...requestWithoutSession } = request;
+
+    await expect(
+      service.reviseMemory({ ...requestWithoutSession, id: 'memory-1' })
+    ).resolves.toEqual({
+      id: 'memory-1',
+      sessionId: 'existing-session',
+    });
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          expires_at: '2027-01-01T00:00:00.000Z',
+          attributes: expect.objectContaining({
+            'memory.session_id': 'existing-session',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('preserves non-expiring state when a revision omits expiry', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'physical-memory-id',
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: existingDocument,
+          },
+        ],
+      },
+    });
+
+    await service.reviseMemory({ ...request, id: 'memory-1' });
+
+    expect(index.mock.calls[0][0].document).not.toHaveProperty('expires_at');
+  });
+
+  it('generates a session when a revision omits it and the memory has none', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'physical-memory-id',
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: existingDocument,
+          },
+        ],
+      },
+    });
+    const { sessionId: _, ...requestWithoutSession } = request;
+
+    await expect(
+      service.reviseMemory({ ...requestWithoutSession, id: 'memory-1' })
+    ).resolves.toEqual({
+      id: 'memory-1',
+      sessionId: 'generated-session-id',
+    });
   });
 
   it('uses the current time for a data-stream revision when it is newer than the parent', async () => {

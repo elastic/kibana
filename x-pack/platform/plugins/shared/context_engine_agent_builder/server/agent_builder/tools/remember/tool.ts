@@ -78,7 +78,7 @@ const rememberSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
+      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. On create, omit for the default 90-day expiry. On revision, omit to preserve the existing expiry. Set to null to make the memory non-expiring.'
     ),
 });
 
@@ -118,8 +118,9 @@ export const createRememberTool = ({
     deliberately revising that memory. This tool handles session metadata, the conversation
     reference, and provenance server-side. For MCP calls, omit sessionId unless continuing with the
     sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
-    the current conversation ID. Memory expires 90 days after each write by default; provide
-    expires_at to choose another time, or null to make it non-expiring.
+    the current conversation ID. New memory expires after 90 days by default. Revisions preserve
+    expiry when expires_at is omitted; provide it to choose another time, or null to make the
+    memory non-expiring.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {

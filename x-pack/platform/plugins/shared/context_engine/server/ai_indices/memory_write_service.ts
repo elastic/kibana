@@ -38,8 +38,9 @@ export interface CreateMemoryRequest extends MemoryContent {
   references?: MemoryReference[];
 }
 
-export interface ReviseMemoryRequest extends CreateMemoryRequest {
+export interface ReviseMemoryRequest extends Omit<CreateMemoryRequest, 'sessionId'> {
   id: string;
+  sessionId?: string;
 }
 
 export interface ForgetMemoryRequest {
@@ -81,6 +82,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       aiIndexService: Pick<AiIndexService, 'get'>;
       isMemoryEnabled: () => Promise<boolean>;
       generateId?: () => string;
+      generateSessionId?: () => string;
       generateRevisionId?: () => string;
       getCurrentDate?: () => Date;
     }
@@ -122,8 +124,12 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         );
       }
 
+      const sessionId =
+        request.sessionId ??
+        this.getExistingSessionId(existing.document) ??
+        (this.deps.generateSessionId ?? randomUUID)();
       const document = this.createDocument({
-        request,
+        request: { ...request, sessionId },
         aiIndex,
         id: request.id,
         existingDocument: existing.document,
@@ -152,7 +158,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         refresh: 'wait_for',
       });
 
-      return { id: request.id, sessionId: request.sessionId };
+      return { id: request.id, sessionId };
     });
   }
 
@@ -342,6 +348,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
     ).toISOString();
     const { expires_at: _existingExpiresAt, ...existingFields } = existingDocument ?? {};
+    const expiresAt = this.resolveExpiresAt(request.expiresAt, existingDocument, defaultExpiresAt);
 
     return {
       ...existingFields,
@@ -359,14 +366,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         : existingDocument?.tags !== undefined
         ? { tags: existingDocument.tags }
         : {}),
-      ...(request.expiresAt === null
-        ? {}
-        : {
-            expires_at:
-              request.expiresAt !== undefined
-                ? new Date(request.expiresAt).toISOString()
-                : defaultExpiresAt,
-          }),
+      ...(expiresAt !== undefined && { expires_at: expiresAt }),
       updated_at: now,
       references: request.references ?? existingDocument?.references,
       attributes: {
@@ -383,6 +383,28 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
   private getCurrentDate(): Date {
     return (this.deps.getCurrentDate ?? (() => new Date()))();
+  }
+
+  private getExistingSessionId(existingDocument: StoredMemoryDocument): string | undefined {
+    const sessionId = existingDocument.attributes?.['memory.session_id'];
+    return typeof sessionId === 'string' ? sessionId : undefined;
+  }
+
+  private resolveExpiresAt(
+    requestedExpiresAt: string | null | undefined,
+    existingDocument: StoredMemoryDocument | undefined,
+    defaultExpiresAt: string
+  ): string | undefined {
+    if (requestedExpiresAt === null) {
+      return undefined;
+    }
+    if (requestedExpiresAt !== undefined) {
+      return new Date(requestedExpiresAt).toISOString();
+    }
+    if (existingDocument !== undefined) {
+      return existingDocument.expires_at;
+    }
+    return defaultExpiresAt;
   }
 
   private getNextRevisionDate(existingDocument: StoredMemoryDocument, currentDate: Date): Date {
