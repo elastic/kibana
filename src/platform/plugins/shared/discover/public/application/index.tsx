@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import ReactDOM from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverRouter } from './discover_router';
 import type { DiscoverServices } from '../build_services';
@@ -29,17 +29,21 @@ export const renderApp = ({
 }: RenderAppProps) => {
   const { data, core } = services;
 
-  const unmount = toMountPoint(
-    <DiscoverRouter
-      onAppLeave={onAppLeave}
-      services={services}
-      customizationContext={customizationContext}
-    />,
-    core
-  )(element);
+  // POC: opt in so EUI breakpoint hooks follow the app area with `kbnSurfacePoc = 'js'`.
+  ReactDOM.render(
+    core.rendering.addContext(
+      <DiscoverRouter
+        onAppLeave={onAppLeave}
+        services={services}
+        customizationContext={customizationContext}
+      />,
+      { mountElement: element }
+    ),
+    element
+  );
 
   return () => {
-    unmount();
+    ReactDOM.unmountComponentAtNode(element);
     data.search.session.clear();
   };
 };

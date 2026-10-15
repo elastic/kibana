@@ -40,6 +40,7 @@ interface IntegrationsAppProps {
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  mountElement: HTMLElement;
 }
 const IntegrationsApp = ({
   basepath,
@@ -49,6 +50,7 @@ const IntegrationsApp = ({
   kibanaVersion,
   extensions,
   setHeaderActionMenu,
+  mountElement,
 }: IntegrationsAppProps) => {
   return (
     <IntegrationsAppContext
@@ -59,6 +61,7 @@ const IntegrationsApp = ({
       kibanaVersion={kibanaVersion}
       extensions={extensions}
       setHeaderActionMenu={setHeaderActionMenu}
+      mountElement={mountElement}
     >
       <AppRoutes />
     </IntegrationsAppContext>
@@ -83,6 +86,8 @@ export function renderApp(
         kibanaVersion={kibanaVersion}
         extensions={extensions}
         setHeaderActionMenu={setHeaderActionMenu}
+        // POC: opt in so EUI breakpoint hooks follow the app area with `kbnSurfacePoc = 'js'`.
+        mountElement={element}
       />
     </UsageTracker>,
     element
