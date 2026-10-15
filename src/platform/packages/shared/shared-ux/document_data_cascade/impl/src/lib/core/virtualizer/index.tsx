@@ -164,6 +164,7 @@ export interface CascadeVirtualizerReturnValue
     | 'range'
     | 'measurementsCache'
     | 'calculateRange'
+    | 'scrollToIndex'
   > {
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<string, number>;
@@ -610,6 +611,9 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       scrollToVirtualizedIndex: ((offset, options = {}) => {
         return virtualizerImpl.options.scrollToFn(offset, options, virtualizerImpl);
       }) satisfies CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'],
+      // item-index based scrolling; accounts for the configured scrollMargin, so for a child
+      // virtualizer this scrolls the shared root scroll element to the child's row
+      scrollToIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
       get measurementsCache() {
         return virtualizerImpl.measurementsCache;
       },

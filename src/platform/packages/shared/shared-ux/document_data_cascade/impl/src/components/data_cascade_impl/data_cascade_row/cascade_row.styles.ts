@@ -161,15 +161,6 @@ export const styles = (
   });
 
   return {
-    rowStickyHeaderInner: css({
-      padding: euiSizing[size],
-      position: 'absolute',
-      width: '100%',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
-      borderStyle: 'solid',
-      borderColor: border.color,
-    }),
     rowWrapper: css({
       display: 'flex',
       position: 'absolute',
@@ -258,5 +249,35 @@ export const styles = (
             paddingBottom: 0,
           },
     ]),
+    rowStickyHeaderInner: css({
+      padding: euiSizing[size],
+      position: 'absolute',
+      width: '100%',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
+      borderStyle: 'solid',
+      borderColor: border.color,
+    }),
+    rowStickyHeaderExtensionPointWrapper: css({
+      marginTop: euiSizing[size],
+      marginBottom: `-${euiSizing[size]}`,
+      marginRight: `-${border.width.thin}`,
+      position: 'relative',
+
+      '&:after': {
+        content: '""',
+        display: 'block',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        borderTop: `${border.width.thin} solid ${border.color}`,
+        borderLeft: `${border.width.thin} solid ${border.color}`,
+        borderRight: `${border.width.thin} solid ${border.color}`,
+        borderRadius: `${border.radius.inline} ${border.radius.inline} 0 0`,
+      },
+    }),
   };
 };
