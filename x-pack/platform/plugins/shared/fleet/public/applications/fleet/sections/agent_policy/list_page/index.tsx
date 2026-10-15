@@ -17,6 +17,7 @@ import {
   EuiLink,
   EuiToolTip,
   EuiIconTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +38,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
+  useGetAgentPoliciesPackagePoliciesSummaryQuery,
   useAgentlessResources,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
@@ -105,13 +107,29 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }),
     showAgentless,
     withAgentCount: true, // Explicitly fetch agent count
-    withPackagePoliciesSummary: true, // Avoid loading every package policy of every listed policy
   });
 
   // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
   // The total is kept as returned by the server so that no page becomes unreachable
-  const visiblePolicies = (agentPolicyData?.items ?? []).filter(
-    (policy) => policy.name !== OPAMP_POLICY_NAME
+  const visiblePolicies = useMemo(
+    () => (agentPolicyData?.items ?? []).filter((policy) => policy.name !== OPAMP_POLICY_NAME),
+    [agentPolicyData]
+  );
+
+  // The package policies are not loaded for the list, only a summary of them
+  const { data: packagePoliciesSummaries, isLoading: isLoadingPackagePoliciesSummaries } =
+    useGetAgentPoliciesPackagePoliciesSummaryQuery(
+      visiblePolicies.map(({ id }) => id),
+      { enabled: visiblePolicies.length > 0 }
+    );
+
+  const policies = useMemo(
+    () =>
+      visiblePolicies.map((policy) => ({
+        ...policy,
+        package_policies_summary: packagePoliciesSummaries?.items[policy.id],
+      })),
+    [visiblePolicies, packagePoliciesSummaries]
   );
 
   // Some policies retrieved, set up table props
@@ -234,7 +252,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         }),
         dataType: 'number',
         render: (packagePoliciesSummary: AgentPolicy['package_policies_summary']) =>
-          packagePoliciesSummary?.count ?? 0,
+          packagePoliciesSummary ? (
+            packagePoliciesSummary.count
+          ) : isLoadingPackagePoliciesSummaries ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            '-'
+          ),
       },
       {
         field: 'actions',
@@ -243,12 +267,18 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         }),
         actions: [
           {
-            render: (agentPolicy: AgentPolicy) => (
-              <AgentPolicyActionMenu
-                agentPolicy={agentPolicy}
-                onCopySuccess={() => resendRequest()}
-              />
-            ),
+            // The actions depend on the package policies, wait for their summary
+            render: (agentPolicy: AgentPolicy) =>
+              agentPolicy.package_policies_summary ? (
+                <AgentPolicyActionMenu
+                  agentPolicy={agentPolicy}
+                  onCopySuccess={() => resendRequest()}
+                />
+              ) : isLoadingPackagePoliciesSummaries ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <></>
+              ),
           },
         ],
       },
@@ -260,7 +290,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [isFleetEnabled, resendRequest]);
+  }, [isFleetEnabled, resendRequest, isLoadingPackagePoliciesSummaries]);
 
   const createAgentPolicyButton = useMemo(
     () => (
@@ -393,7 +423,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
           defaultMessage: 'List of agent policies',
         })}
-        items={visiblePolicies}
+        items={policies}
         itemId="id"
         columns={columns}
         pagination={{

@@ -56,6 +56,7 @@ import type {
   CreateAgentAndPackagePolicyRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+  GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
 } from '../../types';
 
 import type {
@@ -71,6 +72,7 @@ import type {
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
@@ -222,20 +224,18 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
   const {
     full: withPackagePolicies = false,
-    withPackagePoliciesSummary = false,
     noAgentCount,
     withAgentCount,
     format,
     ...restOfQuery
   } = request.query;
-  if (!authzFleetReadAgentPolicies && (withPackagePolicies || withPackagePoliciesSummary)) {
+  if (!authzFleetReadAgentPolicies && withPackagePolicies) {
     throw new FleetUnauthorizedError(
-      'full and withPackagePoliciesSummary query parameters require agent policies read permissions'
+      'full query parameter require agent policies read permissions'
     );
   }
   const agentPoliciesResponse = await agentPolicyService.list(soClient, {
     withPackagePolicies,
-    withPackagePoliciesSummary,
     esClient,
     ...restOfQuery,
   });
@@ -1090,6 +1090,26 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   return response.ok({
     body,
   });
+};
+
+export const getAgentPoliciesPackagePoliciesSummaryHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetAgentPoliciesPackagePoliciesSummaryRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const ids = deduplicateIds(request.body.ids);
+
+  const summaries = await packagePolicyService.getSummaryForAgentPolicies(
+    coreContext.savedObjects.client,
+    ids
+  );
+
+  const body: GetAgentPoliciesPackagePoliciesSummaryResponse = {
+    items: Object.fromEntries(summaries),
+  };
+
+  return response.ok({ body });
 };
 
 export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<
