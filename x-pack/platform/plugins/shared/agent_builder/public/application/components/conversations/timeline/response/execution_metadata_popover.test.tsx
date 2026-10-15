@@ -1,0 +1,297 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { ExecutionTerminatedEvent, RoundModelUsageStats } from '@kbn/agent-builder-common';
+import { createExecutionTerminatedEvent } from '../items/execution_terminated_event.factory';
+import { ExecutionMetadataPopover } from './execution_metadata_popover';
+
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { http: {}, settings: {} } }),
+}));
+
+const mockUseLoadConnectors = jest.fn();
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: (props: unknown) => mockUseLoadConnectors(props),
+}));
+
+const eventWithUsage = (modelUsage: RoundModelUsageStats): ExecutionTerminatedEvent => {
+  const event = createExecutionTerminatedEvent();
+  return {
+    ...event,
+    data: { ...event.data, time_to_last_token: 4200, model_usage: modelUsage },
+  };
+};
+
+const usageWithBreakdown: RoundModelUsageStats = {
+  connector_id: 'main-connector',
+  llm_calls: 5,
+  input_tokens: 43136,
+  output_tokens: 343,
+  cached_input_tokens: 11670,
+  model: 'claude-haiku',
+  connectors: [
+    {
+      connector_id: 'main-connector',
+      llm_calls: 3,
+      input_tokens: 25325,
+      output_tokens: 265,
+      cached_input_tokens: 11670,
+      model: 'claude-haiku',
+    },
+    {
+      connector_id: 'fast-connector',
+      llm_calls: 2,
+      input_tokens: 17811,
+      output_tokens: 78,
+      model: 'gemini-flash',
+    },
+  ],
+};
+
+const openPopover = async () => {
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  await user.click(screen.getByTestId('executionMetadataPopoverTrigger'));
+  return user;
+};
+
+describe('ExecutionMetadataPopover', () => {
+  beforeEach(() => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: [
+        {
+          id: 'main-connector',
+          name: 'Anthropic Claude Haiku 4.5',
+          metadata: { display: { model_creator: 'Anthropic' } },
+        },
+        {
+          id: 'fast-connector',
+          name: 'Google Gemini 3.5 Flash Lite',
+          metadata: { display: { model_creator: 'Google' } },
+        },
+      ],
+    });
+  });
+
+  describe('Total tab', () => {
+    it('shows the execution time and the tokens sent and received', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 111,
+            output_tokens: 22,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.getByText('Execution time')).toBeInTheDocument();
+      expect(screen.getByText('Tokens sent')).toBeInTheDocument();
+      expect(screen.getByText('111')).toBeInTheDocument();
+      expect(screen.getByText('Tokens received')).toBeInTheDocument();
+      expect(screen.getByText('22')).toBeInTheDocument();
+    });
+
+    it('shows the cache hit tokens under the tokens sent when they are reported', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 111,
+            output_tokens: 22,
+            cached_input_tokens: 52,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.getByText('Cache hit tokens')).toBeInTheDocument();
+      expect(screen.getByText('52')).toBeInTheDocument();
+    });
+
+    it('hides the cache hit tokens when no model reported them', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 111,
+            output_tokens: 22,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.queryByText('Cache hit tokens')).not.toBeInTheDocument();
+    });
+
+    it('has no tabs when the response has no per-model breakdown', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 111,
+            output_tokens: 22,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.queryByTestId('executionMetadataTabs')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('By model tab', () => {
+    it('shows the Total tab first when there is a breakdown', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      await openPopover();
+
+      expect(screen.getByTestId('executionMetadataTabs')).toBeInTheDocument();
+      expect(screen.queryByTestId('executionMetadataByModelTable')).not.toBeInTheDocument();
+      expect(screen.getByText('Execution time')).toBeInTheDocument();
+    });
+
+    it('lists the totals and one row per model, with the connector names', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      const total = screen.getByTestId('executionMetadataModelRow-all');
+      expect(within(total).getByText('All models')).toBeInTheDocument();
+      expect(within(total).getByText('5')).toBeInTheDocument();
+      expect(within(total).getByText(/43\.1k/)).toBeInTheDocument();
+      expect(within(total).getByText(/11\.7k/)).toBeInTheDocument();
+      expect(within(total).getByText('343')).toBeInTheDocument();
+
+      const main = screen.getByTestId('executionMetadataModelRow-main-connector');
+      expect(within(main).getByText('Claude Haiku 4.5')).toBeInTheDocument();
+      expect(within(main).getByText('3')).toBeInTheDocument();
+      expect(within(main).getByText(/25\.3k/)).toBeInTheDocument();
+      expect(within(main).getByText('265')).toBeInTheDocument();
+
+      const fast = screen.getByTestId('executionMetadataModelRow-fast-connector');
+      expect(within(fast).getByText('Gemini 3.5 Flash Lite')).toBeInTheDocument();
+      expect(within(fast).getByText('2')).toBeInTheDocument();
+      expect(within(fast).getByText('78')).toBeInTheDocument();
+    });
+
+    it('keeps the full connector name when it has no creator or does not start with it', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [
+          { id: 'main-connector', name: 'My Anthropic connector' },
+          {
+            id: 'fast-connector',
+            name: 'Fast model',
+            metadata: { display: { model_creator: 'Google' } },
+          },
+        ],
+      });
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-main-connector')).getByText(
+          'My Anthropic connector'
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-fast-connector')).getByText(
+          'Fast model'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('shows the full connector name in a tooltip when the name was shortened', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      await user.hover(screen.getByText('Claude Haiku 4.5'));
+
+      expect(await screen.findByText('Anthropic Claude Haiku 4.5')).toBeInTheDocument();
+    });
+
+    it('shows a dash for a model that does not report cached tokens', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      const fast = screen.getByTestId('executionMetadataModelRow-fast-connector');
+      expect(within(fast).getByLabelText('Not reported by this model')).toHaveTextContent('—');
+      const main = screen.getByTestId('executionMetadataModelRow-main-connector');
+      expect(within(main).queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the model, then to the connector id, when the connector name is unknown', async () => {
+      mockUseLoadConnectors.mockReturnValue({ data: [] });
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            ...usageWithBreakdown,
+            connectors: [
+              {
+                connector_id: 'main-connector',
+                llm_calls: 3,
+                input_tokens: 25325,
+                output_tokens: 265,
+                model: 'claude-haiku',
+              },
+              {
+                connector_id: 'no-model-connector',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+            ],
+          })}
+        />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-main-connector')).getByText(
+          'claude-haiku'
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-no-model-connector')).getByText(
+          'no-model-connector'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('goes back to the Total tab', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+      await user.click(screen.getByTestId('executionMetadataTotalTab'));
+
+      expect(screen.queryByTestId('executionMetadataByModelTable')).not.toBeInTheDocument();
+      expect(screen.getByText('Cache hit tokens')).toBeInTheDocument();
+    });
+  });
+});

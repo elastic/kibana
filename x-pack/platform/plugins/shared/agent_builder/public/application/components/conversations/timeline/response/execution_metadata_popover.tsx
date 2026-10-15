@@ -9,11 +9,13 @@ import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiI18nNumber,
   EuiPopover,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,10 +24,27 @@ import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ExecutionJsonFlyout } from './execution_json_flyout';
+import { ExecutionMetadataByModel } from './execution_metadata_by_model';
 
-const MIN_WIDTH = 260;
+const POPOVER_WIDTH = 420;
+
+type MetadataTab = 'total' | 'byModel';
+
+const isMetadataTab = (id: string): id is MetadataTab => id === 'total' || id === 'byModel';
 
 const labels = {
+  tabsLegend: i18n.translate('xpack.agentBuilder.response.metadataPopover.tabsLegend', {
+    defaultMessage: 'Execution details view',
+  }),
+  totalTab: i18n.translate('xpack.agentBuilder.response.metadataPopover.totalTab', {
+    defaultMessage: 'Total',
+  }),
+  byModelTab: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModelTab', {
+    defaultMessage: 'By model',
+  }),
+  cacheHitTokens: i18n.translate('xpack.agentBuilder.response.metadataPopover.cacheHitTokens', {
+    defaultMessage: 'Cache hit tokens',
+  }),
   triggerAriaLabel: i18n.translate('xpack.agentBuilder.response.metadataPopover.triggerAriaLabel', {
     defaultMessage: 'Show execution details',
   }),
@@ -33,7 +52,7 @@ const labels = {
     defaultMessage: 'Execution details',
   }),
   execution: i18n.translate('xpack.agentBuilder.response.metadataPopover.execution', {
-    defaultMessage: 'Execution',
+    defaultMessage: 'Execution time',
   }),
   tokensSent: i18n.translate('xpack.agentBuilder.response.metadataPopover.tokensSent', {
     defaultMessage: 'Tokens sent',
@@ -61,6 +80,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<MetadataTab>('total');
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((v) => !v), []);
@@ -76,6 +96,20 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
   if (!timeMs) {
     return null;
   }
+
+  const hasBreakdown = (modelUsage.connectors?.length ?? 0) > 0;
+  const tabOptions = [
+    {
+      id: 'total',
+      label: labels.totalTab,
+      'data-test-subj': 'executionMetadataTotalTab',
+    },
+    {
+      id: 'byModel',
+      label: labels.byModelTab,
+      'data-test-subj': 'executionMetadataByModelTab',
+    },
+  ];
 
   const seconds = Math.round(timeMs / 1000);
   const secondsLabel = i18n.translate('xpack.agentBuilder.response.metadataPopover.seconds', {
@@ -116,22 +150,54 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
           direction="column"
           gutterSize="s"
           css={css`
-            min-width: ${MIN_WIDTH}px;
+            width: ${POPOVER_WIDTH}px;
           `}
         >
-          <MetadataRow label={labels.execution} value={secondsLabel} />
-          <MetadataRow
-            label={labels.tokensSent}
-            value={<EuiI18nNumber value={modelUsage.input_tokens} />}
-          />
-          <MetadataRow
-            label={labels.tokensReceived}
-            value={<EuiI18nNumber value={modelUsage.output_tokens} />}
-          />
+          {hasBreakdown && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={labels.tabsLegend}
+                options={tabOptions}
+                idSelected={selectedTab}
+                onChange={(id) => {
+                  if (isMetadataTab(id)) {
+                    setSelectedTab(id);
+                  }
+                }}
+                buttonSize="compressed"
+                isFullWidth
+                data-test-subj="executionMetadataTabs"
+              />
+              <EuiSpacer size="xs" />
+            </EuiFlexItem>
+          )}
+          {hasBreakdown && selectedTab === 'byModel' ? (
+            <ExecutionMetadataByModel modelUsage={modelUsage} />
+          ) : (
+            <>
+              <MetadataRow label={labels.execution} value={secondsLabel} />
+              <MetadataDivider />
+              <MetadataRow
+                label={labels.tokensSent}
+                value={<EuiI18nNumber value={modelUsage.input_tokens} />}
+              />
+              {modelUsage.cached_input_tokens !== undefined && (
+                <MetadataRow
+                  label={labels.cacheHitTokens}
+                  value={<EuiI18nNumber value={modelUsage.cached_input_tokens} />}
+                  isSubRow
+                />
+              )}
+              <MetadataDivider />
+              <MetadataRow
+                label={labels.tokensReceived}
+                value={<EuiI18nNumber value={modelUsage.output_tokens} />}
+              />
+              <MetadataDivider />
+            </>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xs" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+            <EuiSpacer size="xs" />
             <EuiButton
               iconType="code"
               size="s"
@@ -162,21 +228,30 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
   );
 };
 
+const MetadataDivider: React.FC = () => (
+  <EuiFlexItem grow={false}>
+    <EuiHorizontalRule margin="none" />
+  </EuiFlexItem>
+);
+
 interface MetadataRowProps {
   label: string;
   value: React.ReactNode;
+  isSubRow?: boolean;
 }
 
-const MetadataRow: React.FC<MetadataRowProps> = ({ label, value }) => (
+const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          {label}
+        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+          {isSubRow ? label : <strong>{label}</strong>}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{value}</EuiText>
+        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+          {value}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
