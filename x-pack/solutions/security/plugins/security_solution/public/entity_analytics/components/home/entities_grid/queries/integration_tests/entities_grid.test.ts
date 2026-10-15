@@ -81,16 +81,17 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
     // The entities alone in their group (1 record) come first, by entity id.
     ['host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta', 'host:h1'],
   ],
-  // Criticality sorts by its label. host:h1 is extreme through one of its aliases.
+  // Criticality sorts by its rank, unassigned the lowest. host:h1 is extreme through one of its
+  // aliases; host:h3, service:payments and user:bob@okta are unassigned.
   [
     'asset.criticality',
     'desc',
-    ['host:h2', 'user:alice@okta', 'host:h1', 'host:h3', 'service:payments', 'user:bob@okta'],
+    ['host:h1', 'host:h2', 'user:alice@okta', 'host:h3', 'service:payments', 'user:bob@okta'],
   ],
   [
     'asset.criticality',
     'asc',
-    ['host:h1', 'user:alice@okta', 'host:h2', 'host:h3', 'service:payments', 'user:bob@okta'],
+    ['host:h3', 'service:payments', 'user:bob@okta', 'user:alice@okta', 'host:h2', 'host:h1'],
   ],
   // host:h1 was first seen 40 days ago through one of its aliases, and the others 20 days ago.
   [
@@ -131,7 +132,7 @@ const WEB_SEARCH = { search: { esql: 'KQL("""entity.name: web*""")' } };
 const SEARCH_CASES: readonly FilterCase[] = [
   ['a name search', WEB_SEARCH, 'alert_count', 'desc', ['host:h1', 'host:h2', 'host:h3']],
   ['a name search', WEB_SEARCH, 'group_size', 'desc', ['host:h1', 'host:h2', 'host:h3']],
-  ['a name search', WEB_SEARCH, 'asset.criticality', 'desc', ['host:h2', 'host:h1', 'host:h3']],
+  ['a name search', WEB_SEARCH, 'asset.criticality', 'desc', ['host:h1', 'host:h2', 'host:h3']],
 ];
 
 const FILTER_CASES: readonly FilterCase[] = [

@@ -45,7 +45,7 @@ const RESOLVED_ENTITY_VALUE_FIELDS = [
 ];
 
 /** Criticality levels from the highest: a resolved entity shows the highest of its aliases. */
-const CRITICALITY_LEVELS = Object.values(CriticalityLevels);
+export const CRITICALITY_LEVELS = Object.values(CriticalityLevels);
 
 const getCriticalityRank = (index: number): number => CRITICALITY_LEVELS.length - index;
 
@@ -58,6 +58,12 @@ const buildCriticalityLevelExpression = (rankField: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
     (level, index) => `${rankField} == ${getCriticalityRank(index)}, ${escapeStringValue(level)}`
   ).join(', ')})`;
+
+/** The sort rank of a criticality: extreme the highest, unassigned the lowest (0). */
+export const getCriticalitySortRank = (level: unknown): number => {
+  const index = CRITICALITY_LEVELS.findIndex((criticality) => criticality === level);
+  return index === -1 ? 0 : getCriticalityRank(index);
+};
 
 /** `GREATEST` or `LEAST` of two values, either of which may be missing. */
 const buildExtreme = (fn: 'GREATEST' | 'LEAST', a: string, b: string): string =>

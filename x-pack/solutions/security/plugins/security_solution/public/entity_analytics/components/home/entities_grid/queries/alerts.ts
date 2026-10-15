@@ -7,36 +7,36 @@
 
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
 import {
-  buildIdentityPrefilter,
-  getAlertsIndex,
-  getEntityAlias,
-  buildLookback,
-  buildJoinedPageSteps,
-  buildEntityAggregations,
-  buildStatsByEntityClause,
-  buildAliasesToResolvedEntitySteps,
-  toList,
-} from './esql';
-import type { EntityAggregation } from './esql';
-import {
-  getEntityIds,
-  getEntityId,
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   SEVERITY_COUNT_FIELDS,
+  getEntityId,
+  getEntityIds,
   isOneOf,
 } from '../common';
-import { buildAlertEuidPipeline } from './euid_pipeline';
+import type { QueryArgs, Row } from '../common';
 import {
-  buildEntitiesInViewConditions,
   IN_VIEW_AGGREGATION,
   IN_VIEW_FIELD,
+  buildEntitiesInViewConditions,
 } from './entities_in_view';
-import type { QueryArgs, Row } from '../common';
+import {
+  buildAliasesToResolvedEntitySteps,
+  buildEntityAggregations,
+  buildIdentityPrefilter,
+  buildJoinedPageSteps,
+  buildLookback,
+  buildStatsByEntityClause,
+  getAlertsIndex,
+  getEntityAlias,
+  toList,
+} from './esql';
+import type { EntityAggregation } from './esql';
+import { buildAlertEuidPipeline } from './euid_pipeline';
 import { getPartsByResolvedEntity, withEntityAliases } from './resolved_entities';
-import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
-import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, EnrichedFields, RunContext } from './types';
+import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
+import { fetchComputedColumnSortPage } from './computed_column';
+import type { ComputedColumn } from './computed_column';
 
 const ALERT_COUNT_FIELD = 'alert_count';
 const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
@@ -58,48 +58,34 @@ const ALERT_AGGREGATIONS: readonly EntityAggregation[] = [
   })),
 ];
 
-const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  isOneOf(ALLOWED_ENTITY_TYPES, type);
+const ALERT_COLUMNS_STATS = buildStatsByEntityClause(buildEntityAggregations(ALERT_AGGREGATIONS));
 
-// ── unstamped alert filters ──────────────────────────────────────────────────
-
-interface UnstampedIdentityFilters {
-  unstampedIdentityClause: string;
-  unstampedIdentityPrefilter?: string;
-}
-
-/**
- * Filters the unstamped branch to alerts of the page rows: an OR of per-row EUID
- * clauses and its pushable prefilter. Rows without a clause are left out, so the
- * filter never widens to all unstamped alerts.
- */
-const buildUnstampedIdentityFilters = (
-  pageRows: readonly Row[]
-): UnstampedIdentityFilters | undefined => {
-  const clauses = new Set<string>();
-  const matchedRows: Row[] = [];
-  for (const row of pageRows) {
-    const entityType = row[ENTITY_TYPE_FIELD];
-    if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
-      if (clause) {
-        clauses.add(clause);
-        matchedRows.push(row);
-      }
-    }
-  }
-  if (clauses.size === 0) return undefined;
-  return {
-    unstampedIdentityClause: [...clauses].join(' OR '),
-    unstampedIdentityPrefilter: buildIdentityPrefilter(matchedRows),
-  };
-};
+const ALERT_EMPTY_COLUMNS = [
+  ...ALERT_COUNT_FIELDS.map((field) => `${field} = TO_LONG(0)`),
+  `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
+].join(', ');
 
 // ── what the columns do ──────────────────────────────────────────────────────
 
+/** A column sorted by one alert field; every alert field rides along. */
+const getAlertColumn = (field: string, emptyValue: 0 | null): ComputedColumn => ({
+  field,
+  emptyValue,
+  emptyColumns: ALERT_EMPTY_COLUMNS,
+  columns: [field, ...ALERT_FIELDS],
+  buildSourceRows: (args) => buildOpenAlertRowsSteps(args),
+  aggregations: ALERT_AGGREGATIONS,
+  rollsUpOverAliases: true,
+  fetchValues: (rows, args, ctx) => fetchAlertFields(rows, args, ctx),
+  buildMergedSortQuery: (args) => buildMergedAlertSortQuery(args, field),
+});
+
+// Entities without alerts count 0, so they sort first ascending; their last alert is null.
+const alertCountColumn = getAlertColumn(ALERT_COUNT_FIELD, 0);
+const lastSeenAlertColumn = getAlertColumn(LAST_SEEN_ALERT_FIELD, null);
+
 export const alertCountQuerySpec = {
-  fetchSortPage: (args, ctx) =>
-    fetchSplitSortPage(getAlertSortPlan(ALERT_COUNT_FIELD, args), args, ctx),
+  fetchSortPage: (args, ctx) => fetchComputedColumnSortPage(alertCountColumn, args, ctx),
   enricher: {
     fields: ALERT_FIELDS,
     fetch: (rows, args, ctx) => fetchAlertFields(rows, args, ctx),
@@ -107,106 +93,59 @@ export const alertCountQuerySpec = {
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {
-  fetchSortPage: (args, ctx) =>
-    fetchSplitSortPage(getAlertSortPlan(LAST_SEEN_ALERT_FIELD, args), args, ctx),
+  fetchSortPage: (args, ctx) => fetchComputedColumnSortPage(lastSeenAlertColumn, args, ctx),
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;
 
-// ── sorts ────────────────────────────────────────────────────────────────────
+// ── source rows ──────────────────────────────────────────────────────────────
 
-/** The plan of a sort by an alert column (see split_sort.ts); a resolved row's alerts include its aliases'. */
-const getAlertSortPlan = (sortField: string, { rowsMode }: QueryArgs): SplitSortPlan =>
-  buildEntityListSortPlan({
-    sortField,
-    // Entities without alerts count 0, so they sort first ascending; their last alert is null.
-    emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
-    buildSourceRows: buildOpenAlertRowsSteps,
-    buildSortQuery: (args) =>
-      rowsMode === 'resolved'
-        ? buildResolvedAlertSortQuery(args, sortField)
-        : buildAlertSortQuery(args, sortField),
-    aggregations: ALERT_AGGREGATIONS,
-    columns: [sortField, ...ALERT_FIELDS],
-    emptyColumns: ALERT_EMPTY_COLUMNS,
-  });
-
-/**
- * Every entity in view, sorted by an alert column, in one query: it computes every alert
- * column, so the page needs no alerts enrichment.
- */
-const buildAlertSortQuery = (args: QueryArgs, sortField: string): string[] => [
-  ...buildAlertsAndEntitiesInViewSteps(args),
-  ...buildEntityIdOfEachRowSteps(args),
-  ALERT_COLUMNS_PER_ENTITY_STATS,
-  IN_VIEW_ONLY_FILTER,
-  ...buildJoinedPageSteps(args, sortField, ALERT_FIELDS),
-];
-
-/** The same, with the alerts of an alias counted for its resolved entity. */
-const buildResolvedAlertSortQuery = (args: QueryArgs, sortField: string): string[] => [
-  ...buildAlertsAndEntitiesInViewSteps(args),
-  ...buildEntityIdOfEachRowSteps(args),
-  ALERT_COLUMNS_PER_ENTITY_STATS,
-  ...buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, [
-    ...ALERT_AGGREGATIONS,
-    IN_VIEW_AGGREGATION,
-  ]),
-  IN_VIEW_ONLY_FILTER,
-  ...buildJoinedPageSteps(args, sortField, ALERT_FIELDS),
-];
-
-const isEntityDoc = ({ concreteEntityIndexName }: QueryArgs) =>
-  `_index == "${concreteEntityIndexName}"`;
-
-/**
- * Open alerts in the window and the entities in view, in one FROM: the merge by `entity.id` keeps
- * the entities without alerts. FORK, which maps alerts to entities, can't run inside a FROM
- * subquery, so the two indices share the FROM instead.
- */
-const buildAlertsAndEntitiesInViewSteps = (args: QueryArgs): string[] => {
-  const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
-  return [
-    `FROM ${getAlertsIndex(args.namespace)}, ${getEntityAlias(args.namespace)} METADATA _index`,
-    `| WHERE (NOT ${isEntityDoc(args)} AND \`@timestamp\` >= ${buildLookback(
-      args.timeRange
-    )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc(args), ...entityConditions].join(
-      ' AND '
-    )})`,
-  ];
-};
-
-/** Each alert as the rows of its entities, and each entity doc as its own row, marked in view. */
-const buildEntityIdOfEachRowSteps = (args: QueryArgs): string[] =>
-  buildAlertEuidPipeline({
-    alertBranchCondition: `NOT ${isEntityDoc(args)}`,
-    extraBranch: [
-      `WHERE ${isEntityDoc(args)}`,
-      `| EVAL _ea_entity_id = \`entity.id\`, ${IN_VIEW_FIELD} = 1`,
-      `| KEEP _ea_entity_id, ${IN_VIEW_FIELD}`,
-    ],
-  });
-
-/** The alert columns per entity, from the alert rows only, and whether the entity is in view. */
-const ALERT_COLUMNS_PER_ENTITY_STATS = buildStatsByEntityClause([
-  ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
-  `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
-]);
-
-const IN_VIEW_ONLY_FILTER = `| WHERE ${IN_VIEW_FIELD} == 1`;
-
-/** Open alerts in the time range, as rows of `entity.id`, without entity docs. */
+/** Open alerts in the time range, as rows of `entity.id`. */
 const buildOpenAlertRowsSteps = ({ namespace, timeRange }: QueryArgs): string[] => [
   `FROM ${getAlertsIndex(namespace)}`,
   `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
 ];
 
-const ALERT_EMPTY_COLUMNS = [
-  ...ALERT_COUNT_FIELDS.map((field) => `${field} = TO_LONG(0)`),
-  `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
-].join(', ');
+// ── a search that matches too many entities to look up ───────────────────────
 
-// ── enrich ───────────────────────────────────────────────────────────────────
+/**
+ * Every entity in view, sorted by an alert column, in one query. FORK, which maps alerts to
+ * entities, can't run inside a FROM subquery, so the alerts and the entity docs share the FROM.
+ */
+const buildMergedAlertSortQuery = (args: QueryArgs, sortField: string): string[] => [
+  `FROM ${getAlertsIndex(args.namespace)}, ${getEntityAlias(args.namespace)} METADATA _index`,
+  `| WHERE (NOT ${isEntityDoc(args)} AND \`@timestamp\` >= ${buildLookback(
+    args.timeRange
+  )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[
+    isEntityDoc(args),
+    ...buildEntitiesInViewConditions(args).map((condition) => `(${condition})`),
+  ].join(' AND ')})`,
+  ...buildAlertEuidPipeline({
+    alertBranchCondition: `NOT ${isEntityDoc(args)}`,
+    extraBranch: [
+      `WHERE ${isEntityDoc(args)}`,
+      `| EVAL _ea_entity_id = \`entity.id\`, ${IN_VIEW_FIELD} = 1`,
+      `| KEEP _ea_entity_id, ${IN_VIEW_FIELD}`,
+    ],
+  }),
+  buildStatsByEntityClause([
+    ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
+    `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
+  ]),
+  ...(args.rowsMode === 'resolved'
+    ? buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, [
+        ...ALERT_AGGREGATIONS,
+        IN_VIEW_AGGREGATION,
+      ])
+    : []),
+  `| WHERE ${IN_VIEW_FIELD} == 1`,
+  ...buildJoinedPageSteps(args, sortField, ALERT_FIELDS),
+];
+
+const isEntityDoc = ({ concreteEntityIndexName }: QueryArgs) =>
+  `_index == "${concreteEntityIndexName}"`;
+
+// ── values of given rows ─────────────────────────────────────────────────────
 
 /**
  * Most entities in one alerts query: each entity adds terms to an OR of the query, and ES|QL
@@ -214,38 +153,33 @@ const ALERT_EMPTY_COLUMNS = [
  */
 const MAX_ENTITIES_PER_ALERTS_QUERY = 250;
 
-/** The alert columns of the page's entities; a resolved row's alerts include its aliases'. */
+/** The alert columns of the rows; a resolved row's alerts include its aliases'. */
 const fetchAlertFields = async (
   rows: readonly Row[],
   args: QueryArgs,
-  { runQuery }: RunContext
+  { runQuery }: SortPageContext
 ): Promise<EnrichedFields> => {
   if (!getEntityIds(rows).length) return new Map();
   const isResolved = args.rowsMode === 'resolved';
   const entities = isResolved ? await withEntityAliases(rows, args, runQuery) : rows;
-  const buildQuery = isResolved ? buildResolvedPageAlertColumnsQuery : buildPageAlertColumnsQuery;
   // A resolved entity and its aliases go in one part, which counts their alerts together.
   const parts = getPartsByResolvedEntity(entities, MAX_ENTITIES_PER_ALERTS_QUERY);
-  const alertColumns = await Promise.all(parts.map((part) => runQuery(buildQuery(args, part))));
+  const alertColumns = await Promise.all(
+    parts.map((part) =>
+      runQuery([
+        ...buildOpenAlertsOfSteps(args, part),
+        ALERT_COLUMNS_STATS,
+        ...(isResolved
+          ? buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, ALERT_AGGREGATIONS)
+          : []),
+      ])
+    )
+  );
   return toAlertFields(rows, alertColumns.flat());
 };
 
-const buildPageAlertColumnsQuery = (args: QueryArgs, entities: readonly Row[]): string[] => [
-  ...buildPageOpenAlertsSteps(args, entities),
-  ALERT_COLUMNS_STATS,
-];
-
-const buildResolvedPageAlertColumnsQuery = (
-  args: QueryArgs,
-  entities: readonly Row[]
-): string[] => [
-  ...buildPageOpenAlertsSteps(args, entities),
-  ALERT_COLUMNS_STATS,
-  ...buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, ALERT_AGGREGATIONS),
-];
-
 /** Open alerts in the window of the given entities, as rows of `entity.id`. */
-const buildPageOpenAlertsSteps = (
+const buildOpenAlertsOfSteps = (
   { namespace, timeRange }: QueryArgs,
   entities: readonly Row[]
 ): string[] => {
@@ -262,7 +196,33 @@ const buildPageOpenAlertsSteps = (
   ];
 };
 
-const ALERT_COLUMNS_STATS = buildStatsByEntityClause(buildEntityAggregations(ALERT_AGGREGATIONS));
+const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
+  isOneOf(ALLOWED_ENTITY_TYPES, type);
+
+/**
+ * Filters the unstamped alerts to those of the rows: an OR of per-row EUID clauses and its
+ * pushable prefilter. Rows without a clause are left out, so the filter never widens to all
+ * unstamped alerts.
+ */
+const buildUnstampedIdentityFilters = (rows: readonly Row[]) => {
+  const clauses = new Set<string>();
+  const matchedRows: Row[] = [];
+  for (const row of rows) {
+    const entityType = row[ENTITY_TYPE_FIELD];
+    if (isAllowedEntityType(entityType)) {
+      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
+      if (clause) {
+        clauses.add(clause);
+        matchedRows.push(row);
+      }
+    }
+  }
+  if (clauses.size === 0) return undefined;
+  return {
+    unstampedIdentityClause: [...clauses].join(' OR '),
+    unstampedIdentityPrefilter: buildIdentityPrefilter(matchedRows),
+  };
+};
 
 /** Every alert column of each row; 0 or null without alerts. */
 const toAlertFields = (rows: readonly Row[], alertColumns: Row[]): EnrichedFields => {

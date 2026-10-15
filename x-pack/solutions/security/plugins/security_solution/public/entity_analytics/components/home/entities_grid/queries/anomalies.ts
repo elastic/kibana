@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { ANOMALY_COUNT_FIELD, getEntityId, getEntityIds, getNumber } from '../common';
+import type { QueryArgs, Row } from '../common';
+import { buildComputedColumnSortQuery } from './computed_column_sort';
 import {
-  buildIdentityPrefilter,
-  ML_ANOMALY_INDICES,
   ANOMALY_RECORD_FILTER,
-  buildAnomalyJobFilter,
-  buildLookback,
-  buildEntityAggregations,
-  buildStatsByEntityClause,
+  ML_ANOMALY_INDICES,
   buildAliasesToResolvedEntitySteps,
+  buildAnomalyJobFilter,
+  buildEntityAggregations,
+  buildIdentityPrefilter,
+  buildLookback,
+  buildStatsByEntityClause,
   toList,
 } from './esql';
 import type { EntityAggregation } from './esql';
-import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
-import { buildComputedColumnSortQuery } from './computed_column_sort';
-import type { QueryArgs, Row } from '../common';
 import { withEntityAliases } from './resolved_entities';
-import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
-import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, EnrichedFields, RunContext } from './types';
+import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
+import { fetchComputedColumnSortPage } from './computed_column';
+import type { ComputedColumn } from './computed_column';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
@@ -34,6 +34,37 @@ const ANOMALY_AGGREGATIONS: readonly EntityAggregation[] = [
 ];
 
 const ANOMALY_COUNT_STATS = buildStatsByEntityClause(buildEntityAggregations(ANOMALY_AGGREGATIONS));
+
+// ── what the column does ─────────────────────────────────────────────────────
+
+const anomalyCountColumn: ComputedColumn = {
+  field: ANOMALY_COUNT_FIELD,
+  emptyValue: null,
+  emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
+  settings: [SET_UNMAPPED_NULLIFY],
+  buildSourceRows: (args) => buildAnomalyEntityRows(args),
+  aggregations: ANOMALY_AGGREGATIONS,
+  rollsUpOverAliases: true,
+  fetchValues: (rows, args, ctx) => fetchAnomalyCounts(rows, args, ctx),
+  buildMergedSortQuery: (args) =>
+    buildComputedColumnSortQuery(args, {
+      settings: [SET_UNMAPPED_NULLIFY],
+      sourceRows: [...buildAnomalyEntityRows(args), ANOMALY_COUNT_STATS],
+      mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
+      resolvedEntityAggregations: args.rowsMode === 'resolved' ? ANOMALY_AGGREGATIONS : undefined,
+      sortField: ANOMALY_COUNT_FIELD,
+    }),
+};
+
+export const anomalyCountQuerySpec = {
+  fetchSortPage: (args, ctx) => fetchComputedColumnSortPage(anomalyCountColumn, args, ctx),
+  enricher: {
+    fields: [ANOMALY_COUNT_FIELD],
+    fetch: (rows, args, ctx) => fetchAnomalyCounts(rows, args, ctx),
+  },
+} satisfies ColumnQuerySpec;
+
+// ── source rows ──────────────────────────────────────────────────────────────
 
 /**
  * Final anomaly records of the security jobs in the time range, one row per record with its
@@ -52,86 +83,31 @@ const buildAnomalyEntityRows = (
   ...buildEuidStages(),
 ];
 
-// ── what the column does ─────────────────────────────────────────────────────
+// ── values of given rows ─────────────────────────────────────────────────────
 
-export const anomalyCountQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(getAnomalySortPlan(args), args, ctx),
-  enricher: {
-    fields: [ANOMALY_COUNT_FIELD],
-    fetch: (rows, args, ctx) => fetchAnomalyCounts(rows, args, ctx),
-  },
-} satisfies ColumnQuerySpec;
-
-// ── sorts ────────────────────────────────────────────────────────────────────
-
-/** The plan of the sort (see split_sort.ts); a resolved row's anomalies include its aliases'. */
-const getAnomalySortPlan = ({ rowsMode }: QueryArgs): SplitSortPlan =>
-  buildEntityListSortPlan({
-    sortField: ANOMALY_COUNT_FIELD,
-    emptyValue: null,
-    buildSourceRows: (args) => [SET_UNMAPPED_NULLIFY, ...buildAnomalyEntityRows(args)],
-    buildSortQuery:
-      rowsMode === 'resolved' ? buildResolvedAnomalyCountSortQuery : buildAnomalyCountSortQuery,
-    aggregations: ANOMALY_AGGREGATIONS,
-    columns: [ANOMALY_COUNT_FIELD],
-    emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
-  });
-
-/** Every entity in view, sorted by its anomaly count; entities without anomalies sort last. */
-const buildAnomalyCountSortQuery = (args: QueryArgs): string[] =>
-  buildComputedColumnSortQuery(args, buildAnomalyCountsOfEntitiesInView(args));
-
-/** The same, with the anomalies of an alias counted for its resolved entity. */
-const buildResolvedAnomalyCountSortQuery = (args: QueryArgs): string[] =>
-  buildComputedColumnSortQuery(args, {
-    ...buildAnomalyCountsOfEntitiesInView(args),
-    resolvedEntityAggregations: ANOMALY_AGGREGATIONS,
-  });
-
-const buildAnomalyCountsOfEntitiesInView = (args: QueryArgs) => ({
-  settings: [SET_UNMAPPED_NULLIFY],
-  sourceRows: [...buildAnomalyEntityRows(args), ANOMALY_COUNT_STATS],
-  mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
-  sortField: ANOMALY_COUNT_FIELD,
-});
-
-// ── enrich ───────────────────────────────────────────────────────────────────
-
-/** The anomaly counts of the page's entities; a resolved row's anomalies include its aliases'. */
+/** The anomaly counts of the rows; a resolved row's anomalies include its aliases'. */
 const fetchAnomalyCounts = async (
   rows: readonly Row[],
   args: QueryArgs,
-  { runQuery }: RunContext
+  { runQuery }: SortPageContext
 ): Promise<EnrichedFields> => {
   // Without security jobs there is no anomaly index to read, and no anomaly.
   if (!getEntityIds(rows).length || !args.anomalyJobIds.length) return toAnomalyCounts(rows, []);
-  const query =
-    args.rowsMode === 'resolved'
-      ? buildResolvedPageAnomalyCountsQuery(args, await withEntityAliases(rows, args, runQuery))
-      : buildPageAnomalyCountsQuery(args, rows);
-  return toAnomalyCounts(rows, await runQuery(query));
+  const entities =
+    args.rowsMode === 'resolved' ? await withEntityAliases(rows, args, runQuery) : rows;
+  return toAnomalyCounts(
+    rows,
+    await runQuery([
+      SET_UNMAPPED_NULLIFY,
+      ...buildAnomalyEntityRows(args, buildIdentityPrefilter(entities)),
+      `| WHERE \`entity.id\` IN (${toList(getEntityIds(entities))})`,
+      ANOMALY_COUNT_STATS,
+      ...(args.rowsMode === 'resolved'
+        ? buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, ANOMALY_AGGREGATIONS)
+        : []),
+    ])
+  );
 };
-
-const buildPageAnomalyCountsQuery = (args: QueryArgs, entities: readonly Row[]): string[] => [
-  ...buildPageAnomalyRecordsSteps(args, entities),
-  ANOMALY_COUNT_STATS,
-];
-
-const buildResolvedPageAnomalyCountsQuery = (
-  args: QueryArgs,
-  entities: readonly Row[]
-): string[] => [
-  ...buildPageAnomalyRecordsSteps(args, entities),
-  ANOMALY_COUNT_STATS,
-  ...buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, ANOMALY_AGGREGATIONS),
-];
-
-/** The anomaly records of the given entities, as rows of `entity.id`. */
-const buildPageAnomalyRecordsSteps = (args: QueryArgs, entities: readonly Row[]): string[] => [
-  SET_UNMAPPED_NULLIFY,
-  ...buildAnomalyEntityRows(args, buildIdentityPrefilter(entities)),
-  `| WHERE \`entity.id\` IN (${toList(getEntityIds(entities))})`,
-];
 
 /** The anomaly count of each row; null without anomalies, as in the sort queries. */
 const toAnomalyCounts = (rows: readonly Row[], counts: Row[]): EnrichedFields => {

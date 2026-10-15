@@ -27,7 +27,7 @@ const getIds = (rows: Row[]) => rows.map((r) => r['entity.id']);
 
 /**
  * Answers the query of the resolved entities with aliases with `withAliases`, the check of the
- * search with `searched`, and the sort of the other entities with `others`.
+ * search with `searched`, and the query of a criticality level with the `others` of that level.
  */
 const createRunner = ({
   withAliases = [],
@@ -42,7 +42,8 @@ const createRunner = ({
     const query = steps.join('\n');
     if (query.includes('resolved_to IS NOT NULL')) return withAliases;
     if (query.includes('| KEEP `entity.id`')) return searched.map((id) => ({ 'entity.id': id }));
-    return others;
+    const level = query.match(/asset\.criticality == "([^"]+)"/)?.[1] ?? null;
+    return others.filter((other) => other['asset.criticality'] === level);
   });
 
 const fetchSorted = (args: QueryArgs, runQuery: ReturnType<typeof createRunner>) =>
@@ -79,17 +80,17 @@ describe('sorting resolved rows by a value over the aliases', () => {
       others: [row('host:e1', 'low_impact'), row('host:e2', 'high_impact'), row('host:e3', null)],
     });
 
-    // Criticality sorts by its label, so medium comes before low and high.
+    // Criticality sorts by its rank: high, medium, low, then unassigned.
     expect(getIds(await fetchSorted(ARGS, runQuery))).toEqual([
+      'host:e2',
       'host:g1',
       'host:e1',
       'host:g2',
-      'host:e2',
       'host:e3',
     ]);
   });
 
-  it('puts the rows without a value last in both directions, and breaks ties by entity id', async () => {
+  it('sorts unassigned criticality as the lowest, and breaks ties by entity id', async () => {
     const fetchIn = async (direction: 'asc' | 'desc') =>
       getIds(
         await fetchSorted(
@@ -101,7 +102,7 @@ describe('sorting resolved rows by a value over the aliases', () => {
         )
       );
 
-    expect(await fetchIn('asc')).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
+    expect(await fetchIn('asc')).toEqual(['host:c', 'host:z', 'host:a', 'host:b']);
     expect(await fetchIn('desc')).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
   });
 
@@ -112,8 +113,8 @@ describe('sorting resolved rows by a value over the aliases', () => {
     });
 
     expect(await fetchSorted(ARGS, runQuery)).toEqual([
-      row('host:e1', 'low_impact'),
       row('host:g1', 'extreme_impact'),
+      row('host:e1', 'low_impact'),
     ]);
   });
 
@@ -128,5 +129,27 @@ describe('sorting resolved rows by a value over the aliases', () => {
       'host:e1',
       'host:e2',
     ]);
+  });
+});
+
+describe('sorting resolved rows by risk score', () => {
+  it("merges the main entities' resolved scores with the others' own scores", async () => {
+    const score = (id: string, value: number): Row => ({
+      'entity.id': id,
+      'entity.risk.calculated_score_norm': value,
+    });
+    const runQuery = jest.fn(async (steps: readonly string[]): Promise<Row[]> =>
+      steps.join('\n').includes('resolution.risk.calculated_score_norm IS NOT NULL')
+        ? [score('host:g1', 90), score('host:g2', 40)]
+        : [score('host:e1', 70), score('host:e2', 40), score('host:e3', 10)]
+    );
+
+    const rows = await fetchSorted(
+      { ...ARGS, sort: { field: 'entity.risk.calculated_score_norm', direction: 'desc' }, pageSize: 3 },
+      runQuery
+    );
+
+    expect(getIds(rows)).toEqual(['host:g1', 'host:e1', 'host:e2', 'host:g2']);
+    expect(runQuery).toHaveBeenCalledTimes(2);
   });
 });

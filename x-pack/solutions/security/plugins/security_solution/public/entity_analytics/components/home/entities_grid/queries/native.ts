@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { RESOLVED_TO_FIELD, getEntityId, getEntityIds } from '../common';
+import { escapeStringValue } from '@kbn/esql-utils';
+import {
+  ENTITY_ID_FIELD,
+  RESOLUTION_RISK_SCORE_FIELD,
+  RESOLVED_TO_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  getEntityId,
+  getEntityIds,
+} from '../common';
 import type { QueryArgs, Row, SortDir, SortValue } from '../common';
 import {
   buildEntitiesInViewSteps,
@@ -20,8 +28,13 @@ import {
   fetchPerIdChunk,
   getEntityAlias,
   getMaxAliasGroups,
+  toList,
 } from './esql';
-import { buildResolvedEntityRowSteps } from './resolved_entities';
+import {
+  CRITICALITY_LEVELS,
+  buildResolvedEntityRowSteps,
+  getCriticalitySortRank,
+} from './resolved_entities';
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
 
 /** The entity fields whose value on a resolved row is taken over its main entity and aliases. */
@@ -39,8 +52,13 @@ export const nativeSortQuerySpec = {
       : fetchSortedByField(args, ctx),
 } satisfies ColumnQuerySpec;
 
-const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) =>
-  runQuery(buildSortedByFieldQuery(args));
+const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
+  if (args.sort.field === CRITICALITY_FIELD) return fetchSortedByCriticality(args, runQuery);
+  if (args.rowsMode === 'resolved' && args.sort.field === RISK_SCORE_NORM_FIELD) {
+    return fetchSortedByResolvedRiskScore(args, runQuery);
+  }
+  return runQuery(buildSortedByFieldQuery(args));
+};
 
 /**
  * The few resolved entities with aliases are read apart, with their value over the aliases. The
@@ -59,11 +77,84 @@ const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => 
   return getMergedPage(args, withAliases, others);
 };
 
-/** The entities sorted by their own value. */
-const buildSortedByFieldQuery = (args: QueryArgs): string[] => [
+/**
+ * The entities in view that pass `condition`, sorted by the stored `sortField`. The sort runs
+ * before the row fields, which compute a value on resolved rows: Lucene then stops after the
+ * limit instead of sorting every entity in view.
+ */
+const buildSortedByFieldQuery = (
+  args: QueryArgs,
+  sortField: string = args.sort.field,
+  condition?: string
+): string[] => [
   ...buildEntitiesInViewSteps(args),
+  ...(condition ? [`| WHERE ${condition}`] : []),
+  ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
   ...buildRowFieldsSteps(args),
-  ...buildSortSuffix(args.sort.field, args.sort.direction, args.pageSize + 1),
+];
+
+/**
+ * A resolved row's risk score is its resolved entity's, stored on main entities with aliases, or
+ * else its own. Each side sorts by its stored field and the two merge.
+ *
+ * Why: a sort by the score computed per row sorts every entity in view (~13.6s at 10M entities,
+ * ECH, Oct 2026).
+ */
+const fetchSortedByResolvedRiskScore = async (
+  args: QueryArgs,
+  runQuery: EsqlRunner
+): Promise<Row[]> => {
+  const [withResolvedScore, others] = await Promise.all([
+    runQuery(
+      buildSortedByFieldQuery(
+        args,
+        RESOLUTION_RISK_SCORE_FIELD,
+        `${RESOLUTION_RISK_SCORE_FIELD} IS NOT NULL`
+      )
+    ),
+    runQuery(
+      buildSortedByFieldQuery(args, RISK_SCORE_NORM_FIELD, `${RESOLUTION_RISK_SCORE_FIELD} IS NULL`)
+    ),
+  ]);
+  return getSortedPage(args, [...withResolvedScore, ...others]);
+};
+
+const CRITICALITY_FIELD = 'asset.criticality';
+
+/**
+ * Criticality sorts by its rank, from unassigned to extreme, not by its text: one query per level,
+ * in the order of the sort, until the rows are full.
+ *
+ * Why: a sort by a rank computed per entity sorts every entity in view (~60s at 10M entities, ECH,
+ * Oct 2026); a level is a filter and each query sorts by entity.id, so Lucene stops after the
+ * limit (~1.8s for the whole sort). There are at most five levels, whatever the data.
+ */
+const fetchSortedByCriticality = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
+  const limit = args.pageSize + 1;
+  // Unassigned (no known level) is the lowest.
+  const levels = [...CRITICALITY_LEVELS, null];
+  const rows: Row[] = [];
+  for (const level of args.sort.direction === 'desc' ? levels : levels.reverse()) {
+    rows.push(...(await runQuery(buildCriticalityLevelQuery(args, level, limit - rows.length))));
+    if (rows.length >= limit) break;
+  }
+  return rows;
+};
+
+const buildCriticalityLevelQuery = (
+  args: QueryArgs,
+  level: string | null,
+  limit: number
+): string[] => [
+  ...buildEntitiesInViewSteps(args),
+  level == null
+    ? `| WHERE ${CRITICALITY_FIELD} IS NULL OR NOT ${CRITICALITY_FIELD} IN (${toList(
+        CRITICALITY_LEVELS
+      )})`
+    : `| WHERE ${CRITICALITY_FIELD} == ${escapeStringValue(level)}`,
+  `| SORT ${ENTITY_ID_FIELD} ASC`,
+  `| LIMIT ${limit}`,
+  ...buildRowFieldsSteps(args),
 ];
 
 /** The resolved entities with aliases that pass the filters, with their values over the aliases. */
@@ -89,6 +180,7 @@ const buildResolvedEntityRowsOutput = (args: QueryArgs): string[] => [
 ];
 
 const getSortValue = (row: Row, field: string): SortValue => {
+  if (field === CRITICALITY_FIELD) return getCriticalitySortRank(row[field]);
   const value = row[field];
   return typeof value === 'string' || typeof value === 'number' ? value : null;
 };
@@ -138,12 +230,17 @@ const fetchResolvedEntitiesWithAliases = async (
  * sorted and cut to the limit and its extra row.
  */
 const getMergedPage = (
-  { sort, pageSize }: QueryArgs,
+  args: QueryArgs,
   withAliases: readonly Row[],
   others: readonly Row[]
 ): Row[] => {
   const withAliasesIds = new Set(getEntityIds(withAliases));
-  return [...withAliases, ...others.filter((row) => !withAliasesIds.has(getEntityId(row) ?? ''))]
-    .sort(compareRows(sort.field, sort.direction))
-    .slice(0, pageSize + 1);
+  return getSortedPage(args, [
+    ...withAliases,
+    ...others.filter((row) => !withAliasesIds.has(getEntityId(row) ?? '')),
+  ]);
 };
+
+/** The rows in the order of the sort, cut to the limit and its extra row. */
+const getSortedPage = ({ sort, pageSize }: QueryArgs, rows: Row[]): Row[] =>
+  rows.sort(compareRows(sort.field, sort.direction)).slice(0, pageSize + 1);

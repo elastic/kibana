@@ -16,17 +16,15 @@ flowchart TD
   NAT -->|no| NQ["One query on the entity index<br/>nativeSortQuerySpec (native.ts)"]
   NAT -->|yes| NM["Resolved entities with aliases<br/>+ the others, merged<br/>fetchSortedWithAliases (native.ts)"]
 
-  N -->|"Records"| GS{"Search?"}
-  GS -->|yes| GST{"≤ MAX_DIRECT_TARGETS<br/>matches?"}
-  GST -->|yes| GD["Matches, then their group sizes<br/>fetchSearchedTargetsPage (group_size.ts)"]
-  GST -->|no| GA
-  GS -->|no| GA["Groups with aliases + single entities<br/>fetchAliasGroupsPage (group_size.ts)"]
-  GA -->|"too many groups with aliases"| GQ["One query that groups every entity<br/>buildGroupSizeSortQuery (group_size.ts)"]
-
-  N -->|"Computed column<br/>(alerts, last alert,<br/>anomalies, risk score change)"| F{"Search?"}
-  F -->|yes| GEN["General query<br/>buildComputedColumnSortQuery<br/>(computed_column_sort.ts);<br/>alerts: buildAlertSortQuery (alerts.ts)"]
-  F -->|no| SP["Split sort: value rows + empty rows<br/>fetchSplitSortPage (split_sort.ts)"]
-  SP -->|"empty rows can't be built"| GEN
+  N -->|"Computed column (alerts, last alert,<br/>anomalies, risk score change, records)"| F{"Search?"}
+  F -->|no| V["Value rows, sorted<br/>buildValueRowsQuery (computed_column.ts)"]
+  V -->|"fewer than the limit"| E["+ empty rows: the entities in view<br/>but the value rows, by entity.id"]
+  V -->|"the limit, and empty rows sort first"| B["empty rows in batches by entity.id,<br/>dropping those with a value<br/>fetchEmptyRowsInBatches"]
+  F -->|yes| S{"≤ 9,999 matches?"}
+  S -->|yes| L["The matches, their values looked up,<br/>sorted here"]
+  S -->|no| SV{"≤ 9,999 value rows?"}
+  SV -->|yes| SVR["The value rows the search matches<br/>+ the matching empty rows<br/>fetchSearchedRowsByValues"]
+  SV -->|no| M["One merged query per column<br/>(computed_column_sort.ts; alerts: alerts.ts)"]
 ```
 
 On resolved rows, every plan adds the steps that give the rows of an alias to its resolved
@@ -116,49 +114,43 @@ there are resolved entities, since an entity that is a resolved entity is droppe
 streams are merged in the order of the sort. A search can't run after the
 join of the resolved entities, so its matches among the resolved entities are read separately.
 
-Sorting by alerts, last alert or anomalies needs no plan of its own: the plans of individual rows
-run as they are, with the rows of the aliases moved to their resolved entity before the merge
-with the entities in view.
+Sorting resolved rows by alerts, last alert or anomalies needs no plan of its own: the computed
+column plans run as they are, with the rows of an alias counted for its resolved entity
+(`rollsUpOverAliases`).
 
 ## The plans
 
-| Sort | Search? | Plan |
-|---|---|---|
-| Name, type, risk score, criticality, first seen, last seen | any | one query on the entity index (`native.ts`) |
-| Alerts, last alert, anomalies | no | split sort |
-| Risk score change | no | split sort for scored entities |
-| Alerts, last alert, anomalies, risk score change | yes | the general query: the source index merged with the entities in view (`computed_column_sort.ts`; alerts read both indices in one `FROM`, `alerts.ts`) |
-| Records | no | groups and single entities |
-| Records | yes | the matching entities, then their group sizes |
+**Native sorts** (`native.ts`): one query on the entity index, sorted and limited by Lucene. On
+resolved rows, a sort by criticality, first seen or last seen reads the resolved entities with
+aliases apart (with their values over the aliases) and merges them with the others.
 
-**Split sort** (alerts, last alert, anomalies; `buildEntityListSortPlan` in `split_sort.ts`).
-It reads value rows and empty rows separately:
-- Value rows: count the alerts (or anomalies) per entity, then add the entity fields.
-- Empty rows: a plain query on the entity index for the entities in view that are not in the
-  value rows.
+**Computed columns** (`computed_column.ts`): alerts, last alert, anomalies, risk score change and
+records. Each column says where its values come from (`buildSourceRows` and `aggregations`), the
+value of an entity without any (`emptyValue`), and how to read the values of given rows
+(`fetchValues`, its enricher). Reading every entity in view to sort them together is too slow on a
+large view, so the rows come in two parts:
+- Value rows: the source rows aggregated per entity, the entity docs joined, sorted.
+- Empty rows: every other entity in view. They all show the empty value, so they sort among
+  themselves by `entity.id`, natively on the entity index. The empty value sorts with the
+  values: 0 (alerts) and 1 (records) first ascending, null (last alert, anomalies, risk score
+  change) always last.
 
-The rows are the first part, then the second when the first is short. Entities with no alerts have
-0, so they come first when sorting ascending. A missing last alert or anomaly count has no
-value, so it always comes last.
+When the value rows are fewer than the limit, every entity with a value is known, so the empty
+rows are one query that leaves them out. When they fill the limit and the empty rows sort first,
+the empty rows come from batches of entities by `entity.id`, dropping those whose values show
+one: the more entities have a value, the more batches.
 
-**Split sort for scored entities** (risk score change). Only entities with a risk score can
-have a change.
-- Value rows: compare the old and current scores of the scored entities.
-- Empty rows: the entities without a score (a plain query), plus the scored entities that had
-  no old score.
+A search can't run after the join of the value rows (KQL), so it reads its matches, looks up
+their values, and sorts them here. A search with more matches reads every value row instead,
+keeps those the search matches, and adds the matching empty rows. Only when both are too many
+does it run one merged query of the column: the source index merged with the entities in view
+(`computed_column_sort.ts`; alerts read both indices in one `FROM`, as FORK can't run in a
+subquery).
 
-**Groups and single entities** (Records, `fetchAliasGroupsPage`). Most entities are alone in their
-group. So:
-- the groups with aliases are built from the alias entities, which are few;
-- the single entities are read in order from the entity index, up to the row limit;
-- the browser merges both, and then reads the entity fields of the page's groups.
-
-**Records with a search** (`fetchSearchedTargetsPage`). The search decides which rows show, but
-not their values: a row keeps the size of its whole group, so it can still be expanded.
-- Up to `MAX_DIRECT_TARGETS` matches: read the matching entities, then the size of just their
-  groups. This is fast for narrow searches.
-- More matches: use the groups and single entities plan, keeping only the groups whose main
-  entity matches the search.
+Records counts the alias docs of each resolved entity, plus the entity itself; an entity without
+aliases is a group of one (empty value 1). Risk score change reads the last score of each entity
+before the window, and subtracts it from the current score after the join; an entity without
+either has no change.
 
 ## When a plan can't be used
 
@@ -167,13 +159,12 @@ below is one less than what its query can return: the extra row tells that there
 
 | When | What happens |
 |---|---|
-| More than `MAX_VALUE_ROWS` entities have a value | the split sort can't list them in one query, so the general query runs |
-| More than `getMaxAliasGroups(pageSize)` groups have aliases | Records runs its single query, which groups every entity |
-| More than `MAX_DIRECT_TARGETS` entities match a Records search | Records uses the groups and single entities plan |
+| A search matches more than 9,999 entities, and more than 9,999 entities have a value | the column's merged query runs, which reads every searched entity |
+| The value rows fill the limit and empty rows sort first, and most entities have a value | the empty rows take several batches |
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
 | The resolved entities of a page have more than `ID_LIST_CHUNK_SIZE` aliases | the alert and anomaly cells stay empty and the grid shows an error toast: their aliases can't be listed in the query that totals them |
-| More than `getMaxAliasGroups` resolved entities with aliases pass the filters, when sorting by criticality, first seen, last seen, alerts, last alert or anomalies | the grid shows an error toast: a page from a partial list of resolved entities would be in the wrong order |
+| More than `getMaxAliasGroups` resolved entities with aliases pass the filters, when sorting by criticality, first seen or last seen | the grid shows an error toast: a page from a partial list of resolved entities would be in the wrong order |
 | More than `MAX_RESOLVED_ENTITY_FILTER_OVERRIDES` groups pass the filters on the resolved entity values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 
 ## Checking a change
@@ -184,6 +175,6 @@ means to. Query changes so far were also checked on a 10M-entity ECH, comparing 
 timings of the old and new queries.
 
 The reasons behind each limit and plan (the measurement, its date and cluster, and the options
-we rejected) are in comments next to the code they govern: the split sort,
-`MAX_DIRECT_TARGETS`, `ID_LIST_CHUNK_SIZE`, `fetchAliasGroupsPage`, `buildReferenceScoreDocs`,
+we rejected) are in comments next to the code they govern: `computed_column.ts`,
+`ID_LIST_CHUNK_SIZE`, `buildReferenceScoreDocs`,
 `buildLookback`, and the risk tile queries. Re-measure before changing them.
