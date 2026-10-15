@@ -18,6 +18,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import {
   hasChangePointCommand,
+  hasStartEndParams,
   getChangePointSeriesColumns,
   getChangePointOutputColumnNames,
   getChangePointByColumns,
@@ -27,19 +28,30 @@ import {
 import { resolveTimeRange } from './screen_context_utils';
 
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
+const EXAMPLE_CHANGE_POINT_QUERY =
+  'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket BY host';
+const TIME_RANGE_NOT_APPLIED_MESSAGE =
+  'The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, add WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.';
 
 const detectChangePointsSchema = z.object({
-  query: z.string().describe('ES|QL query containing a CHANGE_POINT command'),
+  query: z
+    .string()
+    .max(4096)
+    .describe('ES|QL query containing a CHANGE_POINT command and ?_tstart / ?_tend'),
   time_range: z
     .object({
       from: z
         .string()
+        .max(128)
         .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+      to: z
+        .string()
+        .max(128)
+        .describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
     })
     .optional()
     .describe(
-      '(Optional) Time range for ?_tstart / ?_tend named parameters. Falls back to screen context or last 24 hours.'
+      '(Optional) Values for ?_tstart / ?_tend. Applied only when the query references those parameters. Falls back to screen context or last 24 hours.'
     ),
   max_charts: z
     .number()
@@ -73,8 +85,8 @@ export const detectChangePointsTool = (): BuiltinToolDefinition<
 
 Call this tool only when the user explicitly requests change point analysis or asks to detect sudden shifts or abrupt trend breaks in a metric.
 
-The tool requires an ES|QL query that includes a \`CHANGE_POINT\` command, e.g.:
-  \`FROM logs-* | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket BY host\`
+The tool requires an ES|QL query that includes a \`CHANGE_POINT\` command and \`?_tstart\` / \`?_tend\`, e.g.:
+  \`${EXAMPLE_CHANGE_POINT_QUERY}\`
 
 The tool will:
 1. Execute the CHANGE_POINT query to find significant change points.
@@ -142,8 +154,14 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
       const { typeColumn, pvalueColumn } = outputColumns;
       const entityColumns = getChangePointByColumns(query) ?? [];
 
+      const usesTimeRangeParams = hasStartEndParams(query);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
-      const timeRangeParams = buildTimeRangeParams(timeRange) ?? [];
+      const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
+      const appliedTimeRange = usesTimeRangeParams ? { time_range: timeRange } : {};
+      const timeRangeNotApplied =
+        explicitTimeRange && !usesTimeRangeParams
+          ? [{ type: ToolResultType.other, data: { message: TIME_RANGE_NOT_APPLIED_MESSAGE } }]
+          : [];
 
       // Phase 1: Execute the CHANGE_POINT query
       let rows: Array<Record<string, unknown>>;
@@ -195,9 +213,12 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
             {
               type: ToolResultType.other,
               data: {
-                message: 'No change points detected for this query and time range.',
+                message: usesTimeRangeParams
+                  ? 'No change points detected for this query and time range.'
+                  : 'No change points detected for this query.',
               },
             },
+            ...timeRangeNotApplied,
           ],
         };
       }
@@ -227,6 +248,7 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
       );
 
       // Phase 3: Build one Lens visualization per entity group
+      const unsavedEntityLabels: string[] = [];
       const results = await Promise.all(
         entityGroups.map(async ({ representativeRow, groupRows, entityLabel }) => {
           const entityLineQuery = entityColumns.length
@@ -291,12 +313,13 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
                   visualization: lensConfig as Record<string, unknown>,
                   chart_type: SupportedChartType.XY,
                   esql: resolvedLineQuery,
-                  ...(timeRange && { time_range: timeRange }),
+                  ...appliedTimeRange,
                 },
                 description: `Change point: ${entityLabel}`,
               });
               attachmentId = att.id;
             } catch (err) {
+              unsavedEntityLabels.push(entityLabel);
               const message = err instanceof Error ? err.message : String(err);
               logger.warn(
                 `detect_change_points: could not persist attachment for "${entityLabel}": ${message}`
@@ -311,21 +334,37 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
               visualization: lensConfig,
               chart_type: SupportedChartType.XY,
               esql: resolvedLineQuery,
-              ...(timeRange && { time_range: timeRange }),
+              ...appliedTimeRange,
               ...(attachmentId && { attachment_id: attachmentId }),
             },
           };
         })
       );
 
+      const saveFailureNotice =
+        unsavedEntityLabels.length > 0
+          ? [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Charts were returned but not saved for ${unsavedEntityLabels.join(
+                    ', '
+                  )}.`,
+                },
+              },
+            ]
+          : [];
+
       if (totalGroupCount <= maxCharts) {
-        return { results };
+        return { results: [...results, ...saveFailureNotice, ...timeRangeNotApplied] };
       }
 
       const omitted = totalGroupCount - maxCharts;
       return {
         results: [
           ...results,
+          ...saveFailureNotice,
+          ...timeRangeNotApplied,
           {
             type: ToolResultType.other,
             data: {
@@ -378,7 +417,7 @@ function groupByEntity(
   >();
 
   for (const row of rows) {
-    const key = entityColumns.map((col) => String(row[col] ?? '')).join('::');
+    const key = JSON.stringify(entityColumns.map((col) => row[col] ?? null));
     const existing = groupMap.get(key);
     if (existing) {
       existing.groupRows.push(row);

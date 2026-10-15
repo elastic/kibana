@@ -25,7 +25,7 @@ Use this skill only when the user explicitly asks about change points, sudden sh
 
 ## Workflow
 
-1. **Build the query** — Use \`${platformCoreTools.generateEsql}\` to produce an ES|QL query ending with \`CHANGE_POINT <value> ON <time> [BY <entity>]\`. The query shape is documented in the \`${platformCoreTools.detectChangePoints}\` tool description.
+1. **Build the query** — Use \`${platformCoreTools.generateEsql}\` to produce an ES|QL query that filters \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` and ends with \`CHANGE_POINT <value> ON <time> [BY <entity>]\`. The query shape is documented in the \`${platformCoreTools.detectChangePoints}\` tool description.
 
 2. **Run the analysis** — Call \`${platformCoreTools.detectChangePoints}\` with the query and an appropriate \`time_range\`. Do not set \`save_charts\` unless the user asks to save.
 

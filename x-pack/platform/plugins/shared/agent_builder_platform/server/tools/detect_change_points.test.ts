@@ -21,6 +21,11 @@ const SIMPLE_CHANGE_POINT_QUERY =
 const BY_ENTITY_QUERY =
   'FROM logs-* | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket BY host';
 
+const BOUNDED_CHANGE_POINT_QUERY =
+  'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket';
+
+const EXPLICIT_TIME_RANGE = { from: 'now-24h', to: 'now' };
+
 const mockEsClient = {
   asCurrentUser: {} as any,
 };
@@ -334,6 +339,93 @@ describe('detectChangePointsTool', () => {
     expect(notice.type).toBe(ToolResultType.other);
     expect((notice.data as any).message).toMatch(/capped at 3/i);
     expect((notice.data as any).message).toMatch(/2 additional/i);
+  });
+
+  it('does not apply an explicit time range when the query has no ?_tstart / ?_tend', async () => {
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    mockExecuteEsql.mockResolvedValue({
+      columns,
+      values: [['2024-01-15T00:00:00Z', 1000, 'step_change', 0.001]],
+    });
+    (buildTimeRangeParams as jest.Mock).mockReturnValue([{ _tstart: 'start' }, { _tend: 'end' }]);
+
+    const result = await callTool({
+      query: SIMPLE_CHANGE_POINT_QUERY,
+      time_range: EXPLICIT_TIME_RANGE,
+      max_charts: 6,
+    });
+
+    expect(mockExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: SIMPLE_CHANGE_POINT_QUERY, params: [] })
+    );
+    expect((result.results[0].data as any).time_range).toBeUndefined();
+    const warning = result.results.find((entry) => entry.type === ToolResultType.other);
+    expect((warning?.data as any).message).toMatch(/time_range was not applied/i);
+  });
+
+  it('applies an explicit time range when the query references ?_tstart / ?_tend', async () => {
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    const timeParams = [
+      { _tstart: '2024-01-01T00:00:00.000Z' },
+      { _tend: '2024-01-02T00:00:00.000Z' },
+    ];
+    mockExecuteEsql.mockResolvedValue({
+      columns,
+      values: [['2024-01-15T00:00:00Z', 1000, 'step_change', 0.001]],
+    });
+    (buildTimeRangeParams as jest.Mock).mockReturnValue(timeParams);
+
+    const result = await callTool({
+      query: BOUNDED_CHANGE_POINT_QUERY,
+      time_range: EXPLICIT_TIME_RANGE,
+      max_charts: 6,
+    });
+
+    expect(mockExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: BOUNDED_CHANGE_POINT_QUERY, params: timeParams })
+    );
+    expect((result.results[0].data as any).time_range).toEqual(EXPLICIT_TIME_RANGE);
+    expect(result.results.some((entry) => entry.type === ToolResultType.other)).toBe(false);
+  });
+
+  it('keeps null and empty-string entity values in separate charts', async () => {
+    const columns = [col('host'), col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    mockExecuteEsql.mockResolvedValue({
+      columns,
+      values: [
+        [null, '2024-01-10T00:00:00Z', 1000, 'step_change', 0.001],
+        ['', '2024-01-15T00:00:00Z', 2000, 'step_change', 0.002],
+      ],
+    });
+
+    const result = await callTool({ query: BY_ENTITY_QUERY, max_charts: 6 });
+    const charts = result.results.filter((entry) => entry.type === ToolResultType.visualization);
+    expect(charts).toHaveLength(2);
+    const queries = charts.map(
+      (chart) => (chart.data as any).visualization.layers[0].data_source.query
+    );
+    expect(queries.some((query: string) => query.includes('IS NULL'))).toBe(true);
+    expect(queries.some((query: string) => query.includes('""'))).toBe(true);
+  });
+
+  it('reports charts that were returned but not saved', async () => {
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    mockExecuteEsql.mockResolvedValue({
+      columns,
+      values: [['2024-01-15T00:00:00Z', 1000, 'step_change', 0.001]],
+    });
+    const mockAdd = jest.fn().mockRejectedValue(new Error('save failed'));
+
+    const result = await callTool(
+      { query: SIMPLE_CHANGE_POINT_QUERY, max_charts: 6, save_charts: true },
+      createMockAttachments(mockAdd)
+    );
+
+    expect(result.results[0].type).toBe(ToolResultType.visualization);
+    expect((result.results[0].data as any).attachment_id).toBeUndefined();
+    expect(result.results[1].type).toBe(ToolResultType.other);
+    expect((result.results[1].data as any).message).toMatch(/not saved/i);
+    expect(mockLogger.warn).toHaveBeenCalled();
   });
 
   it('coerces epoch-number timestamps to ISO strings in annotation events', async () => {

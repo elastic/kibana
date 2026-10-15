@@ -59,10 +59,11 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
 
   // By-value annotation layers persist their data view under the
   // `xy-visualization-layer-` reference name (regular and ad hoc alike), matching
-  // Lens's own persistence logic so the XY runtime can resolve it. A manual-only
-  // layer carries no data view at all and emits no such reference; the runtime
-  // then falls back to the first index-pattern reference at load time (see
-  // x-pack/.../lens/public/visualizations/xy/persistence.ts).
+  // Lens's own persistence logic so the XY runtime can resolve it. A DSL manual
+  // layer carries no data view and emits no such reference; the runtime then falls
+  // back to the first index-pattern reference. An ES|QL manual layer gets a
+  // companion regular data view and a reference to it below.
+  // See x-pack/.../lens/public/visualizations/xy/persistence.ts.
   const annotationLayerIds = new Set(
     config.layers
       .map((layer, index) =>
