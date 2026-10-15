@@ -467,7 +467,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
-                    groupHash={groupHash}
+                    seriesId={episode ? episode.series_id ?? null : undefined}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />
                 </EuiPanel>

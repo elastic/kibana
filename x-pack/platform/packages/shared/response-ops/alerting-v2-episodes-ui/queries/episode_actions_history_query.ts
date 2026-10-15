@@ -19,16 +19,16 @@ export type BuildEpisodeActionsHistoryQueryOptions = Omit<
 };
 
 /**
- * Returns individual action records for an episode (both episode-level and group-level),
+ * Returns individual action records for an episode (both episode-level and series-level),
  * sorted newest-first, one keyset page at a time.
  */
 export const buildEpisodeActionsHistoryQuery = (
   spaceId: string,
   episodeId: string,
-  groupHash: string,
+  seriesId: string | null | undefined,
   { before, limit = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE }: BuildEpisodeActionsHistoryQueryOptions = {}
 ) =>
-  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, groupHash, {
+  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, seriesId, {
     before,
     limit,
   });

@@ -51,7 +51,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
   const queryClient = createTestQueryClient();
   const wrapper = createQueryClientWrapper(queryClient);
   const episodeId = 'ep-1';
-  const groupHash = 'hash-1';
+  const seriesId = 'series-1';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,12 +61,12 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     queryClient.clear();
   });
 
-  it('does not run when episodeId or groupHash is undefined', () => {
+  it('does not run when episodeId or seriesId is undefined', () => {
     const { result } = renderHook(
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId: undefined,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -79,6 +79,42 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('does not run while the series is still being resolved', () => {
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId: undefined,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('fetches only the episode-level actions when the episode has no series identity', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({ columns: ACTIONS_COLUMNS, values: [] });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId: null,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(1);
+    const { query } = runEsqlAsyncSearchMock.mock.calls[0][0].params;
+    expect(query).toContain(`alert_id == "${episodeId}"`);
+    expect(query).not.toContain('series_id');
+  });
+
   it('loads the first page and maps rows', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: ACTIONS_COLUMNS,
@@ -89,7 +125,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -102,7 +138,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeActionsHistoryQuery(DEFAULT_SPACE_ID, episodeId, groupHash, {
+          query: buildEpisodeActionsHistoryQuery(DEFAULT_SPACE_ID, episodeId, seriesId, {
             limit: 2,
           }).print('basic'),
           time_zone: 'UTC',
@@ -138,7 +174,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -166,7 +202,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -218,7 +254,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -242,7 +278,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
-          groupHash,
+          seriesId,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),

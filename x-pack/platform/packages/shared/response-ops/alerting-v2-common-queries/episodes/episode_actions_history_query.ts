@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ACTIONS_SERIES_ID_EVAL } from './series_id_eval';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
@@ -58,8 +59,10 @@ export interface BuildEpisodeActionsHistoryQueryOptions {
 }
 
 /**
- * Returns individual action records for an episode (both episode-level and group-level),
- * sorted newest-first, one keyset page at a time. Non-aggregating counterpart to
+ * Returns individual action records for an episode (both episode-level and series-level),
+ * sorted newest-first, one keyset page at a time. Series-level actions are matched by
+ * `seriesId` so another rule's snoozes on a shared `group_hash` don't show; without one,
+ * only the episode-level actions are returned. Non-aggregating counterpart to
  * buildEpisodeActionsQuery. `_id` is projected via `METADATA _id` so callers can dedup records
  * that straddle a page boundary (the `before` cursor is inclusive to avoid dropping same-timestamp
  * records split across pages).
@@ -67,18 +70,25 @@ export interface BuildEpisodeActionsHistoryQueryOptions {
 export const buildEpisodeActionsHistoryQuery = (
   spaceId: string,
   episodeId: string,
-  groupHash: string,
+  seriesId: string | null | undefined,
   { before, limit }: BuildEpisodeActionsHistoryQueryOptions
 ): TypedEsqlQuery<RawEpisodeActionHistoryEntry> => {
   // prettier-ignore
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])
     .where`space_id == ${spaceId}`
-    .where`alert_id == ${episodeId} OR (group_hash == ${groupHash} AND alert_id IS NULL)`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
   if (before) {
     query.where`@timestamp <= ${before}`;
+  }
+
+  if (seriesId) {
+    // The id is derived after the filters above so it is only computed for user actions.
+    query.pipe(ACTIONS_SERIES_ID_EVAL)
+      .where`alert_id == ${episodeId} OR (alert_id IS NULL AND series_id == ${seriesId})`;
+  } else {
+    query.where`alert_id == ${episodeId}`;
   }
 
   return asTypedEsqlQuery<RawEpisodeActionHistoryEntry>(
