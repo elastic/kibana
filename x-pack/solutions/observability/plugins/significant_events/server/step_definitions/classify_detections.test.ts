@@ -58,6 +58,7 @@ describe('classifyBatch', () => {
     expect(findLiveMembers).not.toHaveBeenCalled();
     expect(output).toMatchObject({
       rows: [],
+      row_count: 0,
       decisions: [],
       skipped_rule_uuids: [],
       skipped_count: 0,
@@ -103,6 +104,7 @@ describe('classifyBatch', () => {
       ['rule-C', 'needs_agent', 'not_live_member'],
     ]);
     expect(output.rows).toEqual([rows[1], rows[2]]);
+    expect(output.row_count).toBe(2);
     expect(output.skipped_rule_uuids).toEqual(['rule-A']);
     expect(output.skipped_count).toBe(1);
     expect(output.needs_agent_count).toBe(2);
@@ -121,6 +123,7 @@ describe('classifyBatch', () => {
     const output = await classifyBatch(batchParams({ rows, shadowMode: true, findLiveMembers }));
 
     expect(output.rows).toEqual(rows);
+    expect(output.row_count).toBe(1);
     expect(output.skipped_rule_uuids).toEqual([]);
     expect(output.shadow_mode).toBe(true);
     expect(output.skipped_count).toBe(1);

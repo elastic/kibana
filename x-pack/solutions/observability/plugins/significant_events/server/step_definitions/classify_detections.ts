@@ -67,6 +67,8 @@ const outputSchema = lazySchema(() =>
     decisions: z.array(decisionSchema).max(MAX_INPUT_ROWS),
     /** Rules whose detections were skipped; always empty in shadow mode. */
     skipped_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
+    /** Number of rows in `rows`; a numeric field so workflows can tell an empty batch from a missing output. */
+    row_count: z.number().int().min(0),
     /** Decisions made, regardless of shadow mode. */
     skipped_count: z.number().int().min(0),
     needs_agent_count: z.number().int().min(0),
@@ -177,10 +179,13 @@ export const classifyBatch = async ({
     ? []
     : [...new Set(decisions.filter(({ decision }) => decision === 'skip').map((d) => d.rule_uuid))];
 
+  const agentRows = (shadowMode ? rows : rows.filter((_, i) => !skippedIndexes.has(i))).map(
+    (row) => [...row]
+  );
+
   return {
-    rows: shadowMode
-      ? rows.map((row) => [...row])
-      : rows.filter((_, i) => !skippedIndexes.has(i)).map((row) => [...row]),
+    rows: agentRows,
+    row_count: agentRows.length,
     decisions,
     skipped_rule_uuids: skippedRuleUuids,
     skipped_count: skippedIndexes.size,
