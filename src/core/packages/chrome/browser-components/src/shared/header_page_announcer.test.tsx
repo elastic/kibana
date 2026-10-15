@@ -29,7 +29,9 @@ describe('HeaderPageAnnouncer', () => {
       </TestChromeProviders>
     );
 
-    expect(deps.notifications.screenReader.notify).toHaveBeenCalledWith('Home - Elastic');
+    expect(deps.notifications.screenReader.notify).toHaveBeenCalledWith('Home - Elastic', {
+      key: 'pageTitle',
+    });
   });
 
   it('announces the page title with custom branding', () => {
@@ -44,7 +46,9 @@ describe('HeaderPageAnnouncer', () => {
       </TestChromeProviders>
     );
 
-    expect(deps.notifications.screenReader.notify).toHaveBeenLastCalledWith('Dashboard - Kibana');
+    expect(deps.notifications.screenReader.notify).toHaveBeenLastCalledWith('Dashboard - Kibana', {
+      key: 'pageTitle',
+    });
   });
 
   it('announces the new title when breadcrumbs change, but not the same title again', () => {
@@ -70,8 +74,8 @@ describe('HeaderPageAnnouncer', () => {
     );
 
     expect(deps.notifications.screenReader.notify.mock.calls).toEqual([
-      ['A - Brand'],
-      ['B - Brand'],
+      ['A - Brand', { key: 'pageTitle' }],
+      ['B - Brand', { key: 'pageTitle' }],
     ]);
   });
 

@@ -80,16 +80,20 @@ export const useToastAnnouncements = ({
       if (!toasts.some(isNew)) {
         return;
       }
-      // Resolved when announced: by then mount point content has rendered, and toasts dismissed
-      // in the meantime are skipped
-      notifyScreenReader(() => {
-        const toast = latestIdToToasts.current[id]?.[0];
-        if (!toast) {
-          return '';
-        }
-        const content = getToastContent(id, toast, getMountedText);
-        return content && withToastType(toast.color, content);
-      });
+      // Resolved when the announcement batch closes: by then mount point content has rendered,
+      // and toasts dismissed in the meantime are skipped. Assertive, because the action that shows
+      // a toast often also moves focus, and a polite announcement would be lost in its readout.
+      notifyScreenReader(
+        () => {
+          const toast = latestIdToToasts.current[id]?.[0];
+          if (!toast) {
+            return '';
+          }
+          const content = getToastContent(id, toast, getMountedText);
+          return content && withToastType(toast.color, content);
+        },
+        { politeness: 'assertive' }
+      );
     });
 
     seenToastIds.current = new Set(

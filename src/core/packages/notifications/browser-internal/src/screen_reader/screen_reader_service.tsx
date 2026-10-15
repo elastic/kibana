@@ -12,8 +12,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { ScreenReaderStart } from '@kbn/core-notifications-browser';
-import type { Announcement, AnnouncementMessage } from './announcement_queue';
+import type { ScreenReaderNotifyOptions, ScreenReaderStart } from '@kbn/core-notifications-browser';
+import type { Announcement, AnnouncementMessage, QueuedMessage } from './announcement_queue';
 import { toAnnouncements } from './announcement_queue';
 import { ScreenReaderAnnouncer } from './screen_reader_announcer';
 
@@ -23,23 +23,23 @@ interface StartDeps {
 }
 
 /**
- * Internal contract, which also accepts messages resolved when they're announced.
+ * Internal contract, which also accepts messages that are resolved when their batch closes.
  * @internal
  */
 export interface InternalScreenReaderStart extends ScreenReaderStart {
-  notify(message: AnnouncementMessage): void;
+  notify(message: AnnouncementMessage, options?: ScreenReaderNotifyOptions): void;
 }
 
 /**
- * Owns the single live region that toasts, page changes and plugins announce through, so that
- * announcements are queued instead of interrupting each other.
+ * Owns the live regions that toasts, page changes and plugins announce through, so that
+ * announcements share one queue instead of interrupting each other.
  */
 export class ScreenReaderService {
   private subscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
   public start({ rendering, targetDomElement }: StartDeps): InternalScreenReaderStart {
-    const messages$ = new Subject<AnnouncementMessage>();
+    const messages$ = new Subject<QueuedMessage>();
     const announcement$ = new BehaviorSubject<Announcement | undefined>(undefined);
 
     this.subscription = toAnnouncements(messages$).subscribe(announcement$);
@@ -51,7 +51,8 @@ export class ScreenReaderService {
     );
 
     return {
-      notify: (message) => messages$.next(message),
+      notify: (message, { politeness = 'polite', key } = {}) =>
+        messages$.next({ message, politeness, key }),
     };
   }
 

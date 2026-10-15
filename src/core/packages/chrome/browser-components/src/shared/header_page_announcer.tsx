@@ -22,6 +22,8 @@ import { resolveChromeHeaderAnnouncement } from './resolve_chrome_header_announc
 // Classic and project chrome both append this brand. Revisit in https://github.com/elastic/kibana/issues/289752
 const DEFAULT_BRAND = 'Elastic';
 const TITLE_SEPARATOR = ' - ';
+// Only the latest page title is announced when several are waiting, e.g. after quick navigations
+const PAGE_TITLE_ANNOUNCEMENT_KEY = 'pageTitle';
 
 const PageAnnouncerView: FC<{
   routeTitle: string;
@@ -40,7 +42,7 @@ const PageAnnouncerView: FC<{
   useEffect(() => {
     if (routeTitle && routeTitle !== lastAnnouncedTitle.current) {
       lastAnnouncedTitle.current = routeTitle;
-      notifications.screenReader.notify(routeTitle);
+      notifications.screenReader.notify(routeTitle, { key: PAGE_TITLE_ANNOUNCEMENT_KEY });
     }
   }, [routeTitle, notifications]);
 
@@ -170,10 +172,10 @@ export const ChromeHeaderPageAnnouncer: FC = () => {
     previousLocationRef.current = location;
 
     if (locationChanged) {
-      setRouteTitle('');
       setShouldHandleTab(true);
     }
 
+    // Deferred, so that a fallback title isn't announced right before the destination page sets its own
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const frame = requestAnimationFrame(() => {
       timeout = setTimeout(() => setRouteTitle(announcement), 0);

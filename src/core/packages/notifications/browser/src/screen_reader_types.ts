@@ -8,6 +8,25 @@
  */
 
 /**
+ * Options for {@link ScreenReaderStart.notify}.
+ * @public
+ */
+export interface ScreenReaderNotifyOptions {
+  /**
+   * `polite` messages are read once the screen reader finishes what it's reading. `assertive`
+   * messages interrupt it: use them only for urgent messages, e.g. errors.
+   *
+   * @default 'polite'
+   */
+  politeness?: 'polite' | 'assertive';
+  /**
+   * Replaces a message with the same key that hasn't been read yet, so only the latest one is
+   * announced, e.g. when results are filtered several times in a row.
+   */
+  key?: string;
+}
+
+/**
  * Exposes public API of the screen reader announcer during the start phase.
  * @public
  */
@@ -19,16 +38,14 @@ export interface ScreenReaderStart {
    * e.g. results being filtered or a form being reset. Toasts are announced automatically.
    *
    * Messages share one queue with toast and page change announcements, so they don't
-   * interrupt each other. Messages sent close together are announced as one.
-   *
-   * Announcements are assertive: they interrupt what the screen reader is reading, so they're
-   * still heard when the same action moves focus. Only announce meaningful status changes,
-   * and not on every keystroke, e.g. wait until the user stops typing.
+   * interrupt each other. Messages sent close together are announced as one. Don't call it on
+   * every keystroke, e.g. wait until the user stops typing.
    *
    * VoiceOver doesn't read announcements while a modal (e.g. EuiModal, EuiFlyout) is open.
    * For feedback about content inside an open modal, e.g. form errors, show it inside the modal.
    *
    * @param message The localized text to announce.
+   * @param options See {@link ScreenReaderNotifyOptions}.
    */
-  notify(message: string): void;
+  notify(message: string, options?: ScreenReaderNotifyOptions): void;
 }

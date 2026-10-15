@@ -163,7 +163,12 @@ describe('ChromeHeader', () => {
       </TestChromeProviders>
     );
 
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('Dashboards - Elastic'));
-    expect(notify).not.toHaveBeenCalledWith(expect.stringContaining('Should not be announced'));
+    await waitFor(() =>
+      expect(notify).toHaveBeenCalledWith('Dashboards - Elastic', { key: 'pageTitle' })
+    );
+    expect(notify).not.toHaveBeenCalledWith(
+      expect.stringContaining('Should not be announced'),
+      expect.anything()
+    );
   });
 });

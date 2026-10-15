@@ -12,6 +12,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { ANNOUNCEMENT_SETTLE_MS, estimateReadingTimeMs } from './announcement_queue';
 import type { InternalScreenReaderStart } from './screen_reader_service';
 import { ScreenReaderService } from './screen_reader_service';
+import { ANNOUNCEMENT_CLEAR_MS } from './screen_reader_announcer';
 
 describe('ScreenReaderService', () => {
   let service: ScreenReaderService;
@@ -33,7 +34,10 @@ describe('ScreenReaderService', () => {
       jest.advanceTimersByTime(ms);
     });
 
-  const getLiveRegion = () => screen.getByTestId('screenReaderAnnouncer');
+  const getStatusRegion = () => screen.getByTestId('screenReaderStatus');
+  const getAlertsRegion = () => screen.getByTestId('screenReaderAlerts');
+  const getTexts = (region: HTMLElement) =>
+    [...region.querySelectorAll('p')].map(({ textContent }) => textContent);
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -48,32 +52,35 @@ describe('ScreenReaderService', () => {
     document.body.innerHTML = '';
   });
 
-  it('announces notified messages through an assertive live region in the target element', () => {
+  it('announces polite messages in a status region and assertive ones in an alert region', () => {
     const screenReader = startService();
 
-    screenReader.notify('Success: Rule exported');
+    screenReader.notify('Success: Rule exported', { politeness: 'assertive' });
     screenReader.notify('Detection rules - Elastic');
     advanceTimers(ANNOUNCEMENT_SETTLE_MS);
 
-    const liveRegion = getLiveRegion();
-    expect(targetDomElement.contains(liveRegion)).toBe(true);
-    expect(liveRegion.getAttribute('role')).toBe('alert');
-    expect(liveRegion.getAttribute('aria-live')).toBe('assertive');
-    expect([...liveRegion.querySelectorAll('p')].map((p) => p.textContent)).toEqual([
-      'Success: Rule exported',
-      'Detection rules - Elastic',
-    ]);
+    const statusRegion = getStatusRegion();
+    const alertsRegion = getAlertsRegion();
+    expect(targetDomElement.contains(statusRegion)).toBe(true);
+    expect(statusRegion.getAttribute('role')).toBe('status');
+    expect(statusRegion.getAttribute('aria-live')).toBe('polite');
+    expect(getTexts(statusRegion)).toEqual(['Detection rules - Elastic']);
+    expect(alertsRegion.getAttribute('role')).toBe('alert');
+    expect(alertsRegion.getAttribute('aria-live')).toBe('assertive');
+    expect(getTexts(alertsRegion)).toEqual(['Success: Rule exported']);
   });
 
-  it('keeps the latest announcement until the next one replaces it', () => {
+  it('keeps an announcement long enough for late readouts, then clears it', () => {
     const screenReader = startService();
 
-    screenReader.notify('Success: Space "Default" was saved');
+    screenReader.notify('Success: Space "Default" was saved', { politeness: 'assertive' });
     advanceTimers(ANNOUNCEMENT_SETTLE_MS);
-    // Screen readers may read the region seconds later, e.g. after describing a new page
-    advanceTimers(30_000);
+    // e.g. VoiceOver first describes the new page after a navigation
+    advanceTimers(ANNOUNCEMENT_CLEAR_MS - 1);
+    expect(getAlertsRegion().textContent).toBe('Success: Space "Default" was saved');
 
-    expect(getLiveRegion().textContent).toBe('Success: Space "Default" was saved');
+    advanceTimers(1);
+    expect(getAlertsRegion().textContent).toBe('');
   });
 
   it('inserts new nodes when the same message is announced again', () => {
@@ -81,12 +88,12 @@ describe('ScreenReaderService', () => {
 
     screenReader.notify('Saved');
     advanceTimers(ANNOUNCEMENT_SETTLE_MS);
-    const firstMessage = getLiveRegion().querySelector('p');
+    const firstMessage = getStatusRegion().querySelector('p');
 
     screenReader.notify('Saved');
-    advanceTimers(estimateReadingTimeMs(['Saved']));
+    advanceTimers(estimateReadingTimeMs([{ text: 'Saved', politeness: 'polite' }]));
 
-    const secondMessage = getLiveRegion().querySelector('p');
+    const secondMessage = getStatusRegion().querySelector('p');
     expect(secondMessage?.textContent).toBe('Saved');
     expect(secondMessage).not.toBe(firstMessage);
   });

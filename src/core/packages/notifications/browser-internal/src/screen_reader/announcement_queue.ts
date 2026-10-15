@@ -7,39 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import {
-  EMPTY,
-  concat,
-  concatMap,
+  Observable,
+  Subscription,
   debounceTime,
   exhaustMap,
-  ignoreElements,
-  of,
+  map,
   race,
   startWith,
   takeUntil,
   timer,
   toArray,
 } from 'rxjs';
+import type { ScreenReaderNotifyOptions } from '@kbn/core-notifications-browser';
+
+export type Politeness = NonNullable<ScreenReaderNotifyOptions['politeness']>;
 
 /**
- * A message to announce, or a function returning it when it's announced. Functions let callers
- * read content that renders later, and return an empty string to skip a stale message.
+ * A message to announce, or a function returning it. Functions are called when the message's batch
+ * closes, which lets callers read content that renders after they notify, and return an empty
+ * string to skip a message that's no longer relevant.
  */
 export type AnnouncementMessage = string | (() => string);
+
+export interface QueuedMessage {
+  message: AnnouncementMessage;
+  politeness: Politeness;
+  key?: string;
+}
+
+export interface ResolvedMessage {
+  text: string;
+  politeness: Politeness;
+  key?: string;
+}
 
 export interface Announcement {
   /** Unique per announcement, so that repeating the same messages is announced again. */
   id: number;
-  messages: string[];
+  messages: ResolvedMessage[];
 }
 
 /**
  * How long to wait after the latest message. Messages caused by the same action (e.g. a toast and a
  * page change) are announced together, and focus changes caused by that action (e.g. a closed flyout
- * returning focus) happen first, so the announcement interrupts their readout instead of the other
- * way around.
+ * returning focus) happen first, so an assertive announcement interrupts their readout instead of
+ * the other way around.
  */
 export const ANNOUNCEMENT_SETTLE_MS = 500;
 
@@ -47,55 +60,102 @@ export const ANNOUNCEMENT_SETTLE_MS = 500;
 export const ANNOUNCEMENT_MAX_BATCH_MS = 2000;
 
 const MIN_READING_TIME_MS = 1000;
+/** Longer messages may be cut off by the next announcement, rather than holding up all others. */
+export const MAX_READING_TIME_MS = 5000;
 /** Roughly 200 words per minute, a common default screen reader speech rate. */
 const READING_TIME_PER_CHARACTER_MS = 60;
 
 /**
- * Rough time screen readers need to read an announcement. Announcements are assertive and interrupt
- * whatever is being read, so the next announcement waits until the previous one is likely read.
+ * Rough time screen readers need to read an announcement. The next announcement waits for it, so
+ * that an assertive message doesn't cut off the previous one.
  */
-export const estimateReadingTimeMs = (messages: string[]): number =>
-  Math.max(MIN_READING_TIME_MS, messages.join(' ').length * READING_TIME_PER_CHARACTER_MS);
+export const estimateReadingTimeMs = (messages: ResolvedMessage[]): number =>
+  Math.min(
+    MAX_READING_TIME_MS,
+    Math.max(
+      MIN_READING_TIME_MS,
+      messages.map(({ text }) => text).join(' ').length * READING_TIME_PER_CHARACTER_MS
+    )
+  );
 
-const resolveMessages = (batch: AnnouncementMessage[]): string[] =>
-  [
-    ...new Set(
-      batch.map((message) => (typeof message === 'function' ? message() : message).trim())
-    ),
-  ].filter(Boolean);
+const resolveMessages = (batch: QueuedMessage[]): ResolvedMessage[] =>
+  batch
+    .map(({ message, politeness, key }) => ({
+      text: (typeof message === 'function' ? message() : message).trim(),
+      politeness,
+      key,
+    }))
+    .filter(({ text }) => text);
+
+/**
+ * Adds messages to the ones waiting to be announced. A message replaces a waiting message with the
+ * same key, and identical messages are announced once.
+ */
+const addMessages = (waiting: ResolvedMessage[], added: ResolvedMessage[]): ResolvedMessage[] =>
+  added.reduce(
+    (messages, message) => [
+      ...messages.filter(({ text, politeness, key }) =>
+        message.key !== undefined
+          ? key !== message.key
+          : text !== message.text || politeness !== message.politeness
+      ),
+      message,
+    ],
+    waiting
+  );
 
 /**
  * Turns messages for screen readers into announcements:
- * - messages that arrive close together are announced as one, once none arrived for
+ * - messages that arrive close together form a batch, which closes once none arrived for
  *   {@link ANNOUNCEMENT_SETTLE_MS}, or {@link ANNOUNCEMENT_MAX_BATCH_MS} after the first one;
- * - an announcement waits until the previous one is likely read.
+ * - a closed batch is announced right away, unless the previous announcement is still being read.
+ *   Batches that close meanwhile are merged into a single waiting announcement.
  *
  * `messages$` must be hot (e.g. a `Subject`), because batching subscribes to it more than once.
  */
-export const toAnnouncements = (
-  messages$: Observable<AnnouncementMessage>
-): Observable<Announcement> => {
-  let lastId = 0;
+export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observable<Announcement> =>
+  new Observable<Announcement>((subscriber) => {
+    const subscription = new Subscription();
+    let waiting: ResolvedMessage[] = [];
+    let isReading = false;
+    let lastId = 0;
 
-  return messages$.pipe(
-    exhaustMap((firstMessage) => {
-      const batch$ = messages$.pipe(startWith(firstMessage));
-      const batchEnd$ = race(
-        batch$.pipe(debounceTime(ANNOUNCEMENT_SETTLE_MS)),
-        timer(ANNOUNCEMENT_MAX_BATCH_MS)
-      );
-      return batch$.pipe(takeUntil(batchEnd$), toArray());
-    }),
-    // Messages are resolved here, so functions read content that has rendered by now
-    concatMap((batch) => {
-      const messages = resolveMessages(batch);
-      if (!messages.length) {
-        return EMPTY;
+    const announceWaiting = () => {
+      if (isReading || !waiting.length) {
+        return;
       }
-      return concat(
-        of({ id: ++lastId, messages }),
-        timer(estimateReadingTimeMs(messages)).pipe(ignoreElements())
+      const messages = waiting;
+      waiting = [];
+      isReading = true;
+      subscriber.next({ id: ++lastId, messages });
+      subscription.add(
+        timer(estimateReadingTimeMs(messages)).subscribe(() => {
+          isReading = false;
+          announceWaiting();
+        })
       );
-    })
-  );
-};
+    };
+
+    subscription.add(
+      messages$
+        .pipe(
+          exhaustMap((firstMessage) => {
+            const batch$ = messages$.pipe(startWith(firstMessage));
+            const batchEnd$ = race(
+              batch$.pipe(debounceTime(ANNOUNCEMENT_SETTLE_MS)),
+              timer(ANNOUNCEMENT_MAX_BATCH_MS)
+            );
+            return batch$.pipe(takeUntil(batchEnd$), toArray());
+          }),
+          // Resolved when the batch closes rather than when it's announced, so that waiting for the
+          // previous announcement doesn't skip toasts that expired in the meantime
+          map(resolveMessages)
+        )
+        .subscribe((messages) => {
+          waiting = addMessages(waiting, messages);
+          announceWaiting();
+        })
+    );
+
+    return subscription;
+  });

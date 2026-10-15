@@ -10,7 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { act, render, screen } from '@testing-library/react';
-import type { Toast } from '@kbn/core-notifications-browser';
+import type { ScreenReaderNotifyOptions, Toast } from '@kbn/core-notifications-browser';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import type { AnnouncementMessage } from '../screen_reader/announcement_queue';
 import { ToastsTelemetry } from './telemetry';
@@ -21,7 +21,7 @@ toastsTelemetry.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSe
 
 const renderToastList = () => {
   const toasts$ = new BehaviorSubject<Toast[]>([]);
-  const notifyScreenReader = jest.fn<void, [AnnouncementMessage]>();
+  const notifyScreenReader = jest.fn<void, [AnnouncementMessage, ScreenReaderNotifyOptions?]>();
 
   render(
     <GlobalToastList
@@ -43,7 +43,7 @@ const renderToastList = () => {
       typeof message === 'function' ? message() : message
     );
 
-  return { addToast, dismissToast, getAnnouncements };
+  return { addToast, dismissToast, getAnnouncements, notifyScreenReader };
 };
 
 describe('toast announcements', () => {
@@ -60,11 +60,14 @@ describe('toast announcements', () => {
     ['primary', 'Notification: Saved field. All good'],
     [undefined, 'Notification: Saved field. All good'],
   ] as const)('announces a new %s toast with its type, title and text', (color, expected) => {
-    const { addToast, getAnnouncements } = renderToastList();
+    const { addToast, getAnnouncements, notifyScreenReader } = renderToastList();
 
     addToast({ id: '1', title: 'Saved field', text: 'All good', color });
 
     expect(getAnnouncements()).toEqual([expected]);
+    expect(notifyScreenReader).toHaveBeenCalledWith(expect.any(Function), {
+      politeness: 'assertive',
+    });
   });
 
   it('announces the rendered text of mount point content', () => {

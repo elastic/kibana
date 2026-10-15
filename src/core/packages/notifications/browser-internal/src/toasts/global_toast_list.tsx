@@ -140,8 +140,8 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
         defaultMessage: 'Notification message list',
       })}
-      // Announced through the shared screen reader announcer instead, which announces them
-      // assertively and batches them with other announcements instead of interrupting them
+      // Announced through the shared screen reader announcer instead, which batches them with
+      // other announcements instead of interrupting them
       aria-live="off"
       data-test-subj="globalToastList"
       toasts={toasts.map(convertToEui)}

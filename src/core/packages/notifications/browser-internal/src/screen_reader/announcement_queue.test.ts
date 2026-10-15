@@ -9,20 +9,32 @@
 
 import type { Subscription } from 'rxjs';
 import { Subject } from 'rxjs';
-import type { AnnouncementMessage } from './announcement_queue';
+import type { AnnouncementMessage, QueuedMessage } from './announcement_queue';
 import {
   ANNOUNCEMENT_MAX_BATCH_MS,
   ANNOUNCEMENT_SETTLE_MS,
+  MAX_READING_TIME_MS,
   estimateReadingTimeMs,
   toAnnouncements,
 } from './announcement_queue';
 
+// Read for about 3s, long enough for two more batches to close meanwhile
+const LONG_MESSAGE = 'Success: Detection rule "High CPU usage" was created';
+
 describe('toAnnouncements', () => {
-  let messages$: Subject<AnnouncementMessage>;
+  let messages$: Subject<QueuedMessage>;
   let onAnnounce: jest.Mock;
   let subscription: Subscription;
 
-  const getAnnouncedMessages = () => onAnnounce.mock.calls.map(([{ messages }]) => messages);
+  const notify = (
+    message: AnnouncementMessage,
+    { politeness = 'polite', key }: Partial<Omit<QueuedMessage, 'message'>> = {}
+  ) => messages$.next({ message, politeness, key });
+
+  const getAnnouncedTexts = (): string[][] =>
+    onAnnounce.mock.calls.map(([{ messages }]) =>
+      messages.map(({ text }: { text: string }) => text)
+    );
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -37,67 +49,90 @@ describe('toAnnouncements', () => {
   });
 
   it('announces a message once no other message arrived for the settle time', () => {
-    messages$.next('Rule exported');
+    notify('Rule exported');
 
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS - 1);
     expect(onAnnounce).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(1);
-    expect(getAnnouncedMessages()).toEqual([['Rule exported']]);
+    expect(getAnnouncedTexts()).toEqual([['Rule exported']]);
   });
 
   it('announces messages that arrive close together as one announcement, in order', () => {
-    messages$.next('Success: Rule exported');
+    notify('Success: Rule exported', { politeness: 'assertive' });
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS - 100);
-    messages$.next('Detection rules - Elastic');
+    notify('Detection rules - Elastic');
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
 
-    expect(getAnnouncedMessages()).toEqual([
-      ['Success: Rule exported', 'Detection rules - Elastic'],
+    expect(onAnnounce.mock.calls[0][0].messages).toEqual([
+      { text: 'Success: Rule exported', politeness: 'assertive', key: undefined },
+      { text: 'Detection rules - Elastic', politeness: 'polite', key: undefined },
     ]);
   });
 
   it('stops batching after the maximum batch time while messages keep arriving', () => {
     for (let elapsed = 0; elapsed < ANNOUNCEMENT_MAX_BATCH_MS; elapsed += 250) {
-      messages$.next(`Message ${elapsed}`);
+      notify(`Message ${elapsed}`);
       jest.advanceTimersByTime(250);
     }
 
     expect(onAnnounce).toHaveBeenCalledTimes(1);
   });
 
-  it('does not interrupt the previous announcement while it is likely still being read', () => {
-    messages$.next('First');
+  it('merges messages that arrive while the previous announcement is read into one announcement', () => {
+    notify(LONG_MESSAGE);
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
-    messages$.next('Second');
+    notify('Second');
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS * 2);
+    notify('Third');
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
 
-    expect(getAnnouncedMessages()).toEqual([['First']]);
+    expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE]]);
 
-    jest.advanceTimersByTime(estimateReadingTimeMs(['First']));
-    expect(getAnnouncedMessages()).toEqual([['First'], ['Second']]);
+    jest.advanceTimersByTime(estimateReadingTimeMs([{ text: LONG_MESSAGE, politeness: 'polite' }]));
+    expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE], ['Second', 'Third']]);
   });
 
-  it('resolves function messages when announcing, and skips empty and repeated messages', () => {
-    let toastText = '';
-    messages$.next(() => toastText);
-    messages$.next(() => '');
-    messages$.next('Saved');
-    messages$.next('  Saved  ');
-    toastText = 'Rendered later';
+  it('caps how long an announcement holds up the next one', () => {
+    notify('x'.repeat(1000));
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
+    notify('Next');
+    jest.advanceTimersByTime(MAX_READING_TIME_MS);
 
+    expect(getAnnouncedTexts()[1]).toEqual(['Next']);
+  });
+
+  it('resolves function messages when their batch closes, and skips empty and repeated ones', () => {
+    notify('First');
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
 
-    expect(getAnnouncedMessages()).toEqual([['Rendered later', 'Saved']]);
-
-    messages$.next(() => '');
+    let toastText = '';
+    notify(() => toastText);
+    notify(() => '');
+    notify('Saved');
+    notify('  Saved  ');
+    toastText = 'Rendered later';
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
+    // e.g. the toast expired while the previous announcement was read
+    toastText = '';
     jest.runAllTimers();
 
-    expect(onAnnounce).toHaveBeenCalledTimes(1);
+    expect(getAnnouncedTexts()).toEqual([['First'], ['Rendered later', 'Saved']]);
   });
 
-  it('drops pending messages when unsubscribed', () => {
-    messages$.next('Saved');
+  it('replaces a waiting message with the same key', () => {
+    notify(LONG_MESSAGE);
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
+    notify('12 results', { key: 'results' });
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS * 2);
+    notify('10 results', { key: 'results' });
+    jest.runAllTimers();
+
+    expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE], ['10 results']]);
+  });
+
+  it('drops waiting messages when unsubscribed', () => {
+    notify('Saved');
     subscription.unsubscribe();
     jest.runAllTimers();
 

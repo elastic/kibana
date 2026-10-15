@@ -2,18 +2,19 @@
 
 **Applies to:** core `notifications.toasts`, core `notifications.screenReader`, `EuiLiveAnnouncer`, `EuiScreenReaderLive`
 
-Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without moving focus. Kibana announces them through **one shared, assertive live region** owned by core. That region:
+Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without moving focus. Kibana announces them through **one shared announcer** owned by core, with a polite and an assertive live region. It:
 
-- announces assertively, so messages are heard even when the same action moves focus (e.g. a closed flyout returning focus to its trigger), which screen readers would otherwise read instead;
 - reads messages that arrive close together (e.g. a toast and a page change) as one announcement;
-- waits until the previous announcement is likely read, so they don't interrupt each other.
+- waits until the previous announcement is likely read, so they don't interrupt each other;
+- announces **toasts assertively**, so they're heard even when the same action moves focus (e.g. a closed flyout returning focus to its trigger);
+- announces **page titles and `notify()` messages politely** by default, after whatever the screen reader is reading.
 
-Because announcements interrupt the screen reader, only announce meaningful status changes, and not on every keystroke.
+Don't announce on every keystroke, e.g. wait until the user stops typing.
 
 ## Canonical usage
 
 - **Feedback for an action** (saved, deleted, exported, failed) → use **`notifications.toasts`**. Toasts are announced automatically with their type, e.g. "Success: Rule exported". Don't add your own announcement for the same message.
-- **Visual change that isn't a toast** (results filtered, form reset, items reordered) → call **`notifications.screenReader.notify(message)`** with a localized message.
+- **Visual change that isn't a toast** (results filtered, form reset, items reordered) → call **`notifications.screenReader.notify(message)`** with a localized message. It's polite by default. Pass **`{ politeness: 'assertive' }`** only for urgent messages that must interrupt, e.g. errors. Pass a **`key`** when a newer message makes an older one obsolete, e.g. result counts, so only the latest is read.
 - **Feedback while a modal or flyout stays open** (e.g. a save error) → show it inside the dialog in an **`EuiCallOut`** with **`announceOnMount`**, not in a global toast. See *Feedback inside an open dialog* below.
 - Don't add your own **`EuiLiveAnnouncer`**, **`EuiScreenReaderLive`** or **`aria-live`** regions outside a modal for announcements: they compete with the shared region.
 
@@ -41,7 +42,9 @@ useEffect(() => {
     i18n.translate('myPlugin.results.filteredAnnouncement', {
       defaultMessage: '{count, plural, one {# result} other {# results}} found',
       values: { count },
-    })
+    }),
+    // Filtering again before this is read replaces it, so only the latest count is announced
+    { key: 'myPlugin.results' }
   );
 }, [count, notifications]);
 ```
