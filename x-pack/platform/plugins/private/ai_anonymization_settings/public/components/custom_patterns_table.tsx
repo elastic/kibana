@@ -132,7 +132,10 @@ export const CustomPatternsTable: React.FC<CustomPatternsTableProps> = ({
       render: (enabled: boolean, item: RegexAnonymizationRule) => (
         <EuiSwitch
           showLabel={false}
-          label=""
+          label={i18n.translate('xpack.aiAnonymizationSettings.customPatterns.table.enableRow', {
+            defaultMessage: 'Enable {name}',
+            values: { name: item.name },
+          })}
           checked={enabled}
           disabled={!isSavingEnabled}
           onChange={(e) => item.id && onToggle(item.id, e.target.checked)}

@@ -66,6 +66,13 @@ describe('BuiltInPatternsTable', () => {
     expect(mockTest).toHaveBeenCalledWith(expect.anything(), expect.anything(), { silent: true });
   });
 
+  // Without a name a screen reader announces every row's switch as just "switch".
+  it('names each row switch after its pattern so it can be told apart', () => {
+    renderTable();
+
+    expect(screen.getByRole('switch', { name: 'Enable Long pattern' })).toBeInTheDocument();
+  });
+
   it('shows each built-in rule’s regex in a Pattern column', () => {
     renderTable();
 
