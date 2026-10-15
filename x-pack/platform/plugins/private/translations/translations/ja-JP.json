@@ -3532,7 +3532,6 @@
     "esqlEditor.query.warningsTitle": "警告",
     "esqlEditor.queryStats.documentsProcessed": "{count}件のドキュメントが処理されました",
     "esqlEditor.starred.searchPlaceholder": "スター付きのクエリを検索",
-    "esqlEditor.suggestFix.acceptLabel": "AIの修正を保持する",
     "esqlEditor.suggestFix.error": "クエリのAI修正を生成できませんでした",
     "esqlEditor.suggestFix.rejectLabel": "AIの修正を元に戻す",
     "esqlEditor.visor.nlError": "ES|QLクエリを生成できませんでした",

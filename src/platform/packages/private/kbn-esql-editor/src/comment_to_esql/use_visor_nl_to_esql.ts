@@ -62,16 +62,6 @@ export const useVisorNlToEsql = ({
     [telemetryService]
   );
 
-  const acceptAction = useMemo(
-    () => ({
-      id: 'esql.visorReview.accept',
-      label: i18n.translate('esqlEditor.visor.review.acceptLabel', {
-        defaultMessage: 'Replace with generated query',
-      }),
-    }),
-    []
-  );
-
   const rejectAction = useMemo(
     () => ({
       id: 'esql.visorReview.reject',
@@ -85,13 +75,13 @@ export const useVisorNlToEsql = ({
   const {
     showReview,
     reject,
-    accept: acceptVisorReview,
+    accept: acceptReview,
+    cleanup: discardReview,
   } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
     contextKeyId: 'esqlVisorReviewActive',
-    acceptAction,
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
     onAfterAccept,
@@ -155,5 +145,5 @@ export const useVisorNlToEsql = ({
     [editorRef, editorModel, reject, showReview, onAfterInsert]
   );
 
-  return { showVisorReview, acceptVisorReview };
+  return { showVisorReview, acceptReview, discardReview };
 };

@@ -3517,7 +3517,6 @@
     "esqlEditor.query.warningsTitle": "Avertissements",
     "esqlEditor.queryStats.documentsProcessed": "{count} documents traités",
     "esqlEditor.starred.searchPlaceholder": "Rechercher dans les requêtes mises en favori",
-    "esqlEditor.suggestFix.acceptLabel": "Conserver la correction IA",
     "esqlEditor.suggestFix.error": "Impossible de générer une correction IA de la requête",
     "esqlEditor.suggestFix.rejectLabel": "Annuler la correction IA",
     "esqlEditor.visor.nlError": "Échec de la génération de la requête ES|QL",

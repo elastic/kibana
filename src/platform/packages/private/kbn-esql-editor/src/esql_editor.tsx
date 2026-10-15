@@ -98,7 +98,7 @@ import {
 } from './custom_editor_commands';
 import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
 import { useMemoizedCaches } from './hooks/use_memoized_caches';
-import { useQueryActions } from './hooks/use_query_actions';
+import { useQueryActions, type PendingReviewActions } from './hooks/use_query_actions';
 import { useQueryValidation } from './hooks/use_query_validation';
 import { useEditorConfig } from './hooks/use_editor_config';
 import { useTimePickerPopover } from './hooks/use_time_picker_popover';
@@ -109,7 +109,7 @@ const BREAKPOINT_WIDTH = 540;
 
 export interface ESQLEditorFocusApi {
   focus: () => void;
-  acceptPendingVisorReview: () => boolean;
+  acceptPendingReview: () => boolean;
 }
 
 export type ESQLEditorApi = RestorableStateProviderApi & ESQLEditorFocusApi;
@@ -155,12 +155,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const acceptPendingVisorReviewRef = useRef<() => boolean>(() => false);
+  // Forward-declared so the query actions can accept or discard whichever AI review
+  // (comment-to-ES|QL, Fix with AI, visor) is pending; populated below by those hooks.
+  const pendingReviewRef = useRef<PendingReviewActions>({
+    accept: () => false,
+    discard: () => {},
+  });
   useImperativeHandle(
     editorApiRef,
     () => ({
       focus: () => editorRef.current?.focus(),
-      acceptPendingVisorReview: () => acceptPendingVisorReviewRef.current(),
+      acceptPendingReview: () => pendingReviewRef.current.accept(),
     }),
     []
   );
@@ -364,7 +369,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onTextLangQuerySubmit,
     onQueryUpdate,
     telemetryService,
-    acceptPendingReviewRef: acceptPendingVisorReviewRef,
+    pendingReviewRef,
   });
 
   // Measure keystroke to React commit by waiting for the code state update.
@@ -630,16 +635,25 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const editorAiStyle = useEditorAiStyle();
 
+  // Accepting an AI review is the user's own run, so both flows below report it as manual.
+  const runAcceptedQuery = useCallback(
+    (acceptedQuery: string) => onUpdateAndSubmitQuery(acceptedQuery, QuerySource.MANUAL),
+    [onUpdateAndSubmitQuery]
+  );
+
   const {
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
     isGeneratingRef,
+    acceptReview: acceptCommentReview,
+    discardReview: discardCommentReview,
   } = useCommentToEsql({
     editorRef,
     editorModel,
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    onSubmit: runAcceptedQuery,
     clearGhostHintRef,
     telemetryService,
     onAfterInsert: expandToFitContent,
@@ -697,12 +711,13 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
-  useSuggestFix({
+  const { acceptReview: acceptFixReview, discardReview: discardFixReview } = useSuggestFix({
     editorRef,
     editorModel,
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    onSubmit: runAcceptedQuery,
     telemetryService,
     onAfterInsert: expandToFitContent,
   });
@@ -714,14 +729,27 @@ const ESQLEditorInternal = function ESQLEditor({
     [onUpdateAndSubmitQuery]
   );
 
-  const { showVisorReview, acceptVisorReview } = useVisorNlToEsql({
+  const {
+    showVisorReview,
+    acceptReview: acceptVisorReview,
+    discardReview: discardVisorReview,
+  } = useVisorNlToEsql({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
   });
-  acceptPendingVisorReviewRef.current = acceptVisorReview;
+
+  // The first review that reports it was pending wins; accepting submits the query itself.
+  pendingReviewRef.current = {
+    accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
+    discard: () => {
+      discardCommentReview();
+      discardFixReview();
+      discardVisorReview();
+    },
+  };
 
   useEffect(() => {
     onVisorNlResultReady?.(showVisorReview);

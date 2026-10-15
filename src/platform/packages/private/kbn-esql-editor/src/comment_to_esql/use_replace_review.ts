@@ -26,16 +26,17 @@ interface UseReplaceReviewParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   euiTheme: EuiThemeComputed;
   contextKeyId: string;
-  acceptAction: { id: string; label: string };
   rejectAction: { id: string; label: string };
   editSourceId: string;
-  onAfterAccept?: (state: ReviewState) => void;
+  onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
 
 /**
  * Shared review UI for inline diff-and-replace flows: decorates original changed
  * lines in orange and generated lines in green, then shows a Replace / Undo widget.
+ * Accepting is left to the editor's run action (Cmd/Ctrl+Enter), which is why only
+ * the undo keybinding is registered here.
  *
  * Returns:
  *  - showReview  — call after inserting the generated lines into the model
@@ -48,7 +49,6 @@ export const useReplaceReview = ({
   editorModel,
   euiTheme,
   contextKeyId,
-  acceptAction,
   rejectAction,
   editSourceId,
   onAfterAccept,
@@ -97,7 +97,7 @@ export const useReplaceReview = ({
       },
     ]);
 
-    onAfterAccept?.(state);
+    onAfterAccept?.(state, model.getValue());
     return true;
   }, [editorRef, editorModel, cleanup, editSourceId, onAfterAccept]);
 
@@ -186,19 +186,9 @@ export const useReplaceReview = ({
           precondition: contextKeyId,
           run: () => reject(),
         }),
-        editor.addAction({
-          id: acceptAction.id,
-          label: acceptAction.label,
-          // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-          precondition: contextKeyId,
-          run: () => {
-            accept();
-          },
-        }),
       ];
     },
-    [editorRef, euiTheme, contextKeyId, acceptAction, rejectAction, accept, reject]
+    [editorRef, euiTheme, contextKeyId, rejectAction, accept, reject]
   );
 
   return { showReview, cleanup, reject, accept };
