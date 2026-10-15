@@ -16,6 +16,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FIXED_OCCURRENCES_TIME_RANGE } from '../common/constants';
 import { useFetchQueryOccurrenceStats } from '../data/rules/use_fetch_query_occurrence_stats';
 import { getFormattedError } from '../common/errors';
 import { SparkPlot } from '../components/ui/spark_plot';
@@ -32,6 +33,7 @@ export function SignificantEventsColumn({ sourceId }: SignificantEventsColumnPro
   const { euiTheme } = useEuiTheme();
   const significantEventsFetchState = useFetchQueryOccurrenceStats({
     name: sourceId,
+    timeRange: FIXED_OCCURRENCES_TIME_RANGE,
   });
 
   if (significantEventsFetchState.isLoading) {

@@ -43,7 +43,12 @@ export const startNightshiftServices = ({
   )
     .pipe(
       map(({ available }) => available),
-      catchError(() => of(false)),
+      catchError((error) => {
+        context.logger
+          .get('nightshiftAvailability')
+          .error(`Failed to fetch Significant Events availability: ${error}`);
+        return of(false);
+      }),
       map(
         (isAvailable): AppUpdater =>
           (app) => ({

@@ -26,7 +26,7 @@ export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
 
 export const SIGNIFICANT_EVENTS_COLUMN_TOOLTIP = i18n.translate(
   'xpack.nightshift.sources.significantEventsColumnTooltip',
-  { defaultMessage: 'Number of results produced by created rules.' }
+  { defaultMessage: 'Number of results produced by created rules in the last 24 hours.' }
 );
 
 export const QUERIES_COLUMN_HEADER = i18n.translate('xpack.nightshift.sources.queriesColumnName', {

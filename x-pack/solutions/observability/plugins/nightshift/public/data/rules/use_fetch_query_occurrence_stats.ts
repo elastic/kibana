@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import { getQueryBucketParams } from './get_query_bucket_params';
+import { getQueryBucketParams, toTimeState } from './get_query_bucket_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
@@ -22,10 +23,17 @@ type SignificantEventsStatsFetchResult =
     };
 
 export const useFetchQueryOccurrenceStats = (
-  options: { name?: string; query?: string } | undefined = {},
+  options:
+    | {
+        name?: string;
+        query?: string;
+        /** Fixed occurrence window; defaults to the global time filter. */
+        timeRange?: TimeRange;
+      }
+    | undefined = {},
   deps: unknown[] = []
 ) => {
-  const { name, query } = options;
+  const { name, query, timeRange } = options;
   const {
     significantEvents: { significantEventsRepositoryClient },
     data,
@@ -37,7 +45,9 @@ export const useFetchQueryOccurrenceStats = (
   const fetchQueryOccurrenceStats = async ({
     signal,
   }: QueryFunctionContext): Promise<SignificantEventsStatsFetchResult> => {
-    const bucketParams = getQueryBucketParams(data.query.timefilter.timefilter, timeState);
+    const { timefilter } = data.query.timefilter;
+    const occurrenceWindow = timeRange ? toTimeState(timefilter, timeRange) : timeState;
+    const bucketParams = occurrenceWindow && getQueryBucketParams(timefilter, occurrenceWindow);
     if (!bucketParams) {
       return undefined;
     }
@@ -73,7 +83,13 @@ export const useFetchQueryOccurrenceStats = (
   };
 
   return useQuery<SignificantEventsStatsFetchResult, Error>({
-    queryKey: ['queryOccurrenceStats', name, timeState.start, timeState.end, query, ...deps],
+    queryKey: [
+      'queryOccurrenceStats',
+      name,
+      ...(timeRange ? [timeRange.from, timeRange.to] : [timeState.start, timeState.end]),
+      query,
+      ...deps,
+    ],
     queryFn: fetchQueryOccurrenceStats,
     onError: showFetchErrorToast,
   });

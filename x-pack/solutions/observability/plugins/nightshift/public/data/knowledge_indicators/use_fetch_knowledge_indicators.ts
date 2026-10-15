@@ -12,7 +12,11 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { useCallback, useMemo } from 'react';
-import { ONBOARDING_START_GRACE_MS, RUNNING_POLL_INTERVAL_MS } from '../../common/constants';
+import {
+  FIXED_OCCURRENCES_TIME_RANGE,
+  ONBOARDING_START_GRACE_MS,
+  RUNNING_POLL_INTERVAL_MS,
+} from '../../common/constants';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { useFetchFeatures } from './use_fetch_features';
 import { useFetchDiscoveryQueries } from '../rules/use_fetch_discovery_queries';
@@ -41,9 +45,6 @@ const isAwaitingRunStart = (
       !KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statuses[id]?.status)
   );
 
-// The KI page has no time picker, so its occurrence sparklines always cover the last day.
-const OCCURRENCES_TIME_RANGE = { from: 'now-24h', to: 'now' };
-
 export function useFetchKnowledgeIndicators() {
   const { data: sources } = useFetchSources();
   const { getOnboardingStatuses } = useOnboardingApi();
@@ -60,7 +61,7 @@ export function useFetchKnowledgeIndicators() {
     page: 1,
     perPage: QUERIES_MAX_PER_PAGE,
     status: ['active', 'draft'],
-    timeRange: OCCURRENCES_TIME_RANGE,
+    timeRange: FIXED_OCCURRENCES_TIME_RANGE,
   });
 
   const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {

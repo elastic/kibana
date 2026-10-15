@@ -17,3 +17,6 @@ export const RUNNING_POLL_INTERVAL_MS = 5 * 1000;
  * so the first status read usually still shows no run.
  */
 export const ONBOARDING_START_GRACE_MS = 60 * 1000;
+
+/** Occurrence window for pages without a time picker (Knowledge Indicators, Sources). */
+export const FIXED_OCCURRENCES_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
