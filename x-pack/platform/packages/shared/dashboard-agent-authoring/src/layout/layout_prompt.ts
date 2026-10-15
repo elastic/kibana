@@ -9,7 +9,7 @@ import type { LayoutRequest } from './types';
 
 const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section in that section's \`panels\`. Order panels by purpose only within their container.
 
-The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left corner. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
+The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left corner. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling.
 
 ## What you get
 
@@ -20,30 +20,23 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 ## How to lay out
 
-- Start from the \`previous\` grids. The user may have arranged them by hand, so without \`instructions\` change only the rows that hold an added, removed, moved or edited panel, and the rows below them that must move up or down. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels are affected too. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Apply the packing, positioning and reflow rules to those rows only; keep every other panel's grid as it is, even where it breaks those rules.
-- Size added and edited panels by *Grid sizes by chart type*, and place them by the positioning rules.
+- Start from the \`previous\` grids. The user may have arranged them by hand, so without \`instructions\` change only the rows that hold an added, removed, moved or edited panel, and the rows below them that must move up or down. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels are affected too. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
+- Every row you change follows the sizing and packing rules in full: leaving empty space is never a way to keep a panel unchanged.
+- Size added and edited panels by *Grid sizes by chart type*.
+- In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
 
 ## Grid sizes by chart type
 
 Use these sizes — **do not make metric or gauge panels full-width**:
 
-- **Metric** (\`chartType: metric\` or \`legacy_metric\`) → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
-  - 8 metrics in a row: each \`w: 6, h: 5\`
-  - 6 metrics in a row: each \`w: 8, h: 5\`
-  - 4 metrics in a row: each \`w: 12, h: 5\`
+- **Metric** (\`chartType: metric\` or \`legacy_metric\`) → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row: 8 metrics → each \`w: 6\`, 6 → \`w: 8\`, 4 → \`w: 12\`.
 - **Gauge** (\`gauge\`) → \`w: 12, h: 8\`. Fit up to 4 per row.
 - **XY (line / area / bar)** (\`xy\`) → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
-- **Heatmap** (\`heatmap\`) → \`w: 24, h: 10\`. Needs height for the color matrix.
-- **Tagcloud** (\`tag_cloud\`) → \`w: 24, h: 10\`.
+- **Heatmap, tag cloud, treemap, waffle, mosaic** (\`heatmap\`, \`tag_cloud\`, \`treemap\`, \`waffle\`, \`mosaic\`) → \`w: 24, h: 10\`.
 - **Pie** (\`pie\`) → \`w: 12, h: 10\`.
-- **Treemap / Waffle / Mosaic** (\`treemap\`, \`waffle\`, \`mosaic\`) → \`w: 24, h: 10\`.
-- **Markdown** (\`type: markdown\`) → \`w: 24–48, h: 4–9\`. Size based on \`content\` length and layout needs — not always full-width.
+- **Markdown** (\`type: markdown\`) → \`w: 24–48, h: 4–9\`, from the length of its \`content\`.
 - **Datatable** (\`data_table\`) → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
-- **Custom content** → \`w: 24–48\`, \`h\` from what its \`content\` actually contains — the most common sizing mistake is making these too short, which leaves the panel scrolling inside its own frame:
-  - a single KPI or status card, or one short row of them: \`h: 6–8\`
-  - a list, table or status board of rows: \`h: 10–16\`, sized for the number of rows the ES|QL query returns
-  - a multi-section layout, or anything with a drawn chart or diagram: \`h: 16–20\`
-  Size for the rows the query actually returns (respect its \`LIMIT\`) rather than padding for rows that might appear later — an over-tall panel leaves a large empty gap under its content, which reads as broken just like a scrollbar does. When genuinely between two sizes, take the larger.
+- **Custom content** → \`w: 24–48\`, \`h\` from what its \`content\` shows, for the rows its ES|QL query returns (respect its \`LIMIT\`): \`h: 6–8\` for a KPI or status card, or one short row of them; \`h: 10–16\` for a list, table or status board; \`h: 16–20\` for a multi-section layout or a drawn chart or diagram. Too short makes the panel scroll and too tall leaves an empty gap; between two sizes, take the larger.
 - **Vega and ML panels** → \`w: 24–48, h: 12–16\`.
 - **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep its \`previous\` \`h\` when it has one.
 
@@ -51,34 +44,16 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 ## Grid packing rules
 
-- **Automatic upward movement:** Kibana moves each panel upward at its current \`x\` until another panel or the top of its grid blocks it. A larger \`y\` does not preserve empty space above a panel or guarantee row alignment. Use sections, not blank rows, to separate semantic groups.
-- **Eliminate dead space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
-- **Align row heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate), they should generally have the exact same height (\`h\`). If they do not, you must fill the resulting empty vertical space before placing the next full-width panel. The same applies to columns: when panels stack in side-by-side columns (e.g., two panels on the left next to two on the right), the bottom edges of the columns must match before the next full-width row, so stretch the last panel of the shorter column. For example, a left column of \`h: 18\` + \`h: 13\` (31 rows) next to a right column of \`h: 15\` + \`h: 13\` (28 rows) leaves a 3-row gap: make the last right panel \`h: 16\`.
-- **Fill row widths:** The widths of every row add up to 48. The sizes by chart type are starting points: when they leave columns unused at the end of a row, widen the panels of that row to fill it. For example, 5 metrics → \`w: 8, 8, 8, 12, 12\`; a pie (\`w: 12\`) and a bar chart (\`w: 24\`) → \`w: 24\` each; a panel alone in its row → \`w: 48\`.
-
-## Positioning rules
-
-Always set \`x\` and \`y\` so panels tile with **no gaps**:
-
-1. **Fill rows left to right.** Start at \`x: 0\`. The next panel's \`x\` = previous panel's \`x + w\`. When a panel would exceed column 48, start a new row.
-2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
-3. **Same \`h\` per row** when possible, so rows align cleanly.
-4. Panels' \`x + w\` must never exceed 48.
-5. **When updating a dashboard**, inspect the \`previous\` grids. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
-6. **Markdown panels** are sized based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
-7. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
-
-## Reflow after layout changes
-
-- After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above, and do not keep old coordinates that leave gaps. Reflow each section separately.
-- Before answering, check the planned coordinates for avoidable gaps, overlaps, and grid bounds: in every container, list each row and check that its widths add up to 48.
+- **Fill rows left to right:** start at \`x: 0\`; the next panel's \`x\` is the previous panel's \`x + w\`, and \`x + w\` never exceeds 48. A new row starts at the previous row's \`y + max(h)\`. Kibana moves every panel up until another panel blocks it, so \`y\` only sets the order: use sections, not blank rows, to separate groups.
+- **Fill row widths:** the widths of every row add up to 48. The sizes by chart type are starting points: when they leave columns unused, widen the panels of that row. For example, 5 metrics → \`w: 8, 8, 8, 12, 12\`; a pie (\`w: 12\`) and a bar chart (\`w: 24\`) → \`w: 24\` each; a panel alone in its row → \`w: 48\`.
+- **Never leave a metric or gauge alone in a row:** group it with other metrics, or put it beside a neighbouring panel of its container at that panel's height, narrowing the neighbour. For example, a \`12×6\` metric beside a \`36×6\` markdown, or a \`12×10\` metric beside a \`36×10\` chart.
+- **Align row heights:** panels side by side have the same \`h\`. When panels stack in side-by-side columns, the columns end on the same row: stretch the last panel of the shorter column. For example, a left column of \`h: 18\` + \`h: 13\` next to a right column of \`h: 15\` + \`h: 13\` → make the last right panel \`h: 16\`. Small panels beside a taller one stack into a column of its height: two metrics beside a \`24×10\` chart become two \`24×5\` metrics at \`y: 0\` and \`y: 5\`, not two \`12×5\` metrics over an empty \`24×5\` gap.
 
 ## Section grid rules
 
-- Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
-- A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. Internal section panel heights do not increase the section's outer-grid height.
-- Top-level panels and sections share the outer grid and never share a row. Compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`. Moving a section up moves every top-level panel below it down by one row.
-- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the order of existing sections and of top-level panels between them.
+- Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same grid rules apply within each section.
+- A section occupies exactly one row (\`h: 1\`) in the outer grid, whatever the height of its panels. Top-level panels and sections never share a row. Compute outer \`y\` in order: top-level panels advance by \`y + h\`, sections by \`y + 1\`.
+- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order from \`previous\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A new section is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.
 
 ## Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 
