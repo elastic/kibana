@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
-  EuiDataGrid,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiLoadingSpinner,
-  EuiScreenReaderOnly,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridProps,
-  EuiDataGridSorting,
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
-import type { DestinationViewModel } from './types';
+import {
+  DESTINATION_AUTO_MODE_LABEL,
+  DESTINATION_SIGNAL_LABELS,
+  LOCAL_ELASTICSEARCH_LABEL,
+} from './destination_type_config';
+import { DestinationIndicesList } from './destination_indices_list';
+import type { DestinationIndexMode, DestinationViewModel } from './types';
 
 export type DestinationsGridStatus = 'loading' | 'ready' | 'unavailable';
 
@@ -36,35 +41,25 @@ const DESTINATION_ACTIONS_LABEL = i18n.translate(
   { defaultMessage: 'Destination actions' }
 );
 
-const DESTINATION_GRID_COLUMNS: EuiDataGridColumn[] = [
-  {
-    id: 'name',
-    displayAsText: i18n.translate('xpack.streams.destinations.table.nameColumnLabel', {
-      defaultMessage: 'Name',
-    }),
-    defaultSortDirection: 'asc',
-  },
-  {
-    id: 'type',
-    displayAsText: i18n.translate('xpack.streams.destinations.table.typeColumnLabel', {
-      defaultMessage: 'Type',
-    }),
-  },
-];
+const getModeLabel = (destination: DestinationViewModel): string => {
+  if (destination.mode === 'auto') {
+    return DESTINATION_AUTO_MODE_LABEL;
+  }
+  return destination.index ?? DESTINATION_AUTO_MODE_LABEL;
+};
 
 interface DestinationsGridProps {
   status: DestinationsGridStatus;
   destinations: DestinationViewModel[];
   hasActiveFilters: boolean;
-  visibleColumns: string[];
   pagination: { pageIndex: number; pageSize: number };
-  sortingColumns: EuiDataGridSorting['columns'];
-  onVisibleColumnsChange: (columns: string[]) => void;
+  sortingColumns: Array<{ id: string; direction: 'asc' | 'desc' }>;
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
-  onSortingChange: (columns: EuiDataGridSorting['columns']) => void;
+  onSortingChange: (columns: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
   onOpenDestination: (destinationId: string) => void;
   onShowOnCanvas: (destination: DestinationViewModel) => void;
   onRequestDelete: (destination: DestinationViewModel) => void;
+  onIndexClick: (indexName: string) => void;
 }
 
 export const getDestinationSortableValue = (
@@ -74,6 +69,8 @@ export const getDestinationSortableValue = (
   switch (columnId) {
     case 'type':
       return LOCAL_ELASTICSEARCH_LABEL;
+    case 'mode':
+      return getModeLabel(destination);
     case 'name':
     default:
       return destination.name;
@@ -84,65 +81,146 @@ export const DestinationsGrid = ({
   status,
   destinations,
   hasActiveFilters,
-  visibleColumns,
   pagination,
   sortingColumns,
-  onVisibleColumnsChange,
   onPaginationChange,
   onSortingChange,
   onOpenDestination,
   onShowOnCanvas,
   onRequestDelete,
+  onIndexClick,
 }: DestinationsGridProps) => {
-  const trailingControlColumns = useMemo<EuiDataGridControlColumn[]>(
+  const [expandedDestinationIds, setExpandedDestinationIds] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = useCallback((destinationId: string) => {
+    setExpandedDestinationIds((current) => {
+      const next = new Set(current);
+      if (next.has(destinationId)) {
+        next.delete(destinationId);
+      } else {
+        next.add(destinationId);
+      }
+      return next;
+    });
+  }, []);
+
+  const columns = useMemo<Array<EuiBasicTableColumn<DestinationViewModel>>>(
     () => [
       {
-        id: 'rowActions',
-        width: ROW_ACTIONS_COLUMN_WIDTH,
-        headerCellRender: () => (
-          <EuiScreenReaderOnly>
-            <span>{DESTINATION_ACTIONS_LABEL}</span>
-          </EuiScreenReaderOnly>
+        width: '40px',
+        isExpander: true,
+        name: (
+          <span className="euiScreenReaderOnly">
+            {i18n.translate('xpack.streams.destinations.table.expandColumnLabel', {
+              defaultMessage: 'Expand destination indices',
+            })}
+          </span>
         ),
-        rowCellRender: ({ rowIndex }) => {
-          const destination = destinations[rowIndex];
-          return destination ? (
-            <RowActionsMenu
-              entityName={destination.name}
-              tooltip={DESTINATION_ACTIONS_LABEL}
-              buttonTestSubj="streamsDestinationRowActionsButton"
-              deleteTestSubj="streamsDestinationDeleteAction"
-              onShowOnCanvas={() => onShowOnCanvas(destination)}
-              onDelete={() => onRequestDelete(destination)}
-            />
-          ) : null;
+        render: (destination: DestinationViewModel) => {
+          const isExpanded = expandedDestinationIds.has(destination.id);
+          const ariaLabel = isExpanded
+            ? i18n.translate('xpack.streams.destinations.table.collapseRowAriaLabel', {
+                defaultMessage: 'Collapse indices for {name}',
+                values: { name: destination.name },
+              })
+            : i18n.translate('xpack.streams.destinations.table.expandRowAriaLabel', {
+                defaultMessage: 'Expand indices for {name}',
+                values: { name: destination.name },
+              });
+          return (
+            <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                onClick={() => toggleExpanded(destination.id)}
+                aria-label={ariaLabel}
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                data-test-subj="streamsDestinationExpandButton"
+              />
+            </EuiToolTip>
+          );
         },
       },
+      {
+        field: 'name',
+        name: i18n.translate('xpack.streams.destinations.table.nameColumnLabel', {
+          defaultMessage: 'Name',
+        }),
+        sortable: true,
+        render: (_name: string, destination: DestinationViewModel) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiButtonEmpty
+              flush="left"
+              size="xs"
+              onClick={() => onOpenDestination(destination.id)}
+              data-test-subj="streamsDestinationNameLink"
+            >
+              {destination.name}
+            </EuiButtonEmpty>
+            <EuiBadge color="hollow">{DESTINATION_SIGNAL_LABELS[destination.signal]}</EuiBadge>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.streams.destinations.table.typeColumnLabel', {
+          defaultMessage: 'Type',
+        }),
+        sortable: true,
+        render: () => <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>,
+      },
+      {
+        field: 'mode',
+        name: i18n.translate('xpack.streams.destinations.table.modeColumnLabel', {
+          defaultMessage: 'Indices',
+        }),
+        sortable: true,
+        render: (_mode: DestinationIndexMode, destination: DestinationViewModel) =>
+          getModeLabel(destination),
+      },
+      {
+        width: `${ROW_ACTIONS_COLUMN_WIDTH}px`,
+        name: DESTINATION_ACTIONS_LABEL,
+        render: (destination: DestinationViewModel) => (
+          <RowActionsMenu
+            entityName={destination.name}
+            tooltip={DESTINATION_ACTIONS_LABEL}
+            buttonTestSubj="streamsDestinationRowActionsButton"
+            deleteTestSubj="streamsDestinationDeleteAction"
+            onShowOnCanvas={() => onShowOnCanvas(destination)}
+            onDelete={() => onRequestDelete(destination)}
+          />
+        ),
+      },
     ],
-    [destinations, onRequestDelete, onShowOnCanvas]
+    [expandedDestinationIds, onOpenDestination, onRequestDelete, onShowOnCanvas, toggleExpanded]
   );
-  const renderCellValue = useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
-    ({ rowIndex, columnId }) => {
-      const destination = destinations[rowIndex];
-      if (!destination) {
-        return null;
-      }
-      if (columnId === 'name') {
-        return (
-          <EuiButtonEmpty
-            flush="left"
-            size="xs"
-            onClick={() => onOpenDestination(destination.id)}
-            data-test-subj="streamsDestinationNameLink"
-          >
-            {destination.name}
-          </EuiButtonEmpty>
+
+  const itemIdToExpandedRowMap = useMemo(() => {
+    const expanded: Record<string, React.ReactNode> = {};
+    for (const destination of destinations) {
+      if (expandedDestinationIds.has(destination.id)) {
+        expanded[destination.id] = (
+          <DestinationIndicesList
+            destination={destination}
+            enabled={true}
+            onIndexClick={onIndexClick}
+          />
         );
       }
-      return <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>;
-    },
-    [destinations, onOpenDestination]
-  );
+    }
+    return expanded;
+  }, [destinations, expandedDestinationIds, onIndexClick]);
+
+  const sorting = useMemo<EuiTableSortingType<DestinationViewModel>>(() => {
+    const [sort] = sortingColumns;
+    return {
+      sort: sort
+        ? {
+            field: sort.id as keyof DestinationViewModel,
+            direction: sort.direction,
+          }
+        : undefined,
+    };
+  }, [sortingColumns]);
 
   if (status === 'loading') {
     return (
@@ -184,6 +262,8 @@ export const DestinationsGrid = ({
   }
 
   const isEmpty = destinations.length === 0;
+  const pageStart = pagination.pageIndex * pagination.pageSize;
+  const pageItems = destinations.slice(pageStart, pageStart + pagination.pageSize);
 
   return (
     <div
@@ -193,35 +273,30 @@ export const DestinationsGrid = ({
         min-block-size: 0;
       `}
     >
-      <EuiDataGrid
-        height={isEmpty ? 'auto' : undefined}
-        aria-label={i18n.translate('xpack.streams.destinations.tableCaption', {
+      <EuiBasicTable
+        tableCaption={i18n.translate('xpack.streams.destinations.tableCaption', {
           defaultMessage: 'Configured stream destinations',
         })}
-        columns={DESTINATION_GRID_COLUMNS}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns: onVisibleColumnsChange,
-          canDragAndDropColumns: false,
+        items={pageItems}
+        itemId="id"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        columns={columns}
+        sorting={sorting}
+        onChange={({ sort, page }: CriteriaWithPagination<DestinationViewModel>) => {
+          if (sort) {
+            onSortingChange([{ id: String(sort.field), direction: sort.direction }]);
+          }
+          if (page) {
+            onPaginationChange({ pageIndex: page.index, pageSize: page.size });
+          }
         }}
-        trailingControlColumns={trailingControlColumns}
-        rowCount={destinations.length}
-        renderCellValue={renderCellValue}
-        sorting={{ columns: sortingColumns, onSort: onSortingChange }}
-        data-test-subj="streamsDestinationsTable"
-        toolbarVisibility={{
-          showColumnSelector: true,
-          showDisplaySelector: false,
-          showSortSelector: false,
-          showFullScreenSelector: false,
-        }}
-        gridStyle={{ border: 'horizontal', header: 'shade', rowHover: 'highlight' }}
         pagination={{
-          ...pagination,
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
           pageSizeOptions: [10, 25, 50],
-          onChangeItemsPerPage: (pageSize) => onPaginationChange({ pageIndex: 0, pageSize }),
-          onChangePage: (pageIndex) => onPaginationChange({ ...pagination, pageIndex }),
+          totalItemCount: destinations.length,
         }}
+        data-test-subj="streamsDestinationsTable"
       />
       {isEmpty && (
         <div

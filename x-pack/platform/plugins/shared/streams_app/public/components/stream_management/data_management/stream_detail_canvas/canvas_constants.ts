@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { DATA_STREAMS_NODE_TYPE, DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 /**
  * Background dot grid spacing (px). Column/row gaps are multiples of this so
@@ -51,16 +51,19 @@ export const PAN_MARGIN = 500;
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
 export const DESTINATION_NODE_WIDTH = 184;
+export const DATA_STREAMS_NODE_WIDTH = 246;
 
 /**
  * Revisit whenever a card gains or loses a content row.
  */
 export const SOURCE_NODE_HEIGHT = 74;
 export const DESTINATION_NODE_HEIGHT = 78;
+export const DATA_STREAMS_NODE_HEIGHT = 110;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
   [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
+  [DATA_STREAMS_NODE_TYPE]: DATA_STREAMS_NODE_HEIGHT,
 };
 
 /**
@@ -68,7 +71,11 @@ export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
  * Flow has measured a node's real DOM size. Derived from the widest card so the
  * estimate never undershoots the real content.
  */
-export const NODE_WIDTH_ESTIMATE = Math.max(SOURCE_NODE_WIDTH, DESTINATION_NODE_WIDTH);
+export const NODE_WIDTH_ESTIMATE = Math.max(
+  SOURCE_NODE_WIDTH,
+  DESTINATION_NODE_WIDTH,
+  DATA_STREAMS_NODE_WIDTH
+);
 export const NODE_HEIGHT_ESTIMATE = 80;
 
 /** Minimap overview dimensions (px), matching the prototype. */

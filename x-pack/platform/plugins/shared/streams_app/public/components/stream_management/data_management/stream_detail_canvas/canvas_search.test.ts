@@ -7,11 +7,14 @@
 
 import { configuredDestinationNodeId, configuredSourceNodeId } from './build_unit_connection_edges';
 import { applyCanvasSearch, normalizeCanvasQuery, resolveCanvasSearch } from './canvas_search';
+import { DATA_STREAMS_NODE_ID } from './build_data_streams';
 import {
+  DATA_STREAMS_NODE_TYPE,
   DESTINATION_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasEdge,
   type ClassicCanvasGraph,
+  type DataStreamsNode,
   type DestinationNode,
   type SourceNode,
 } from './types';
@@ -23,18 +26,15 @@ const sourceNode = (sourceId: string, title: string, subtitle = 'Bulk'): SourceN
   data: { sourceId, title, subtitle },
 });
 
-const destinationNode = (destinationId: string, title: string): DestinationNode => ({
+const destinationNode = (
+  destinationId: string,
+  title: string,
+  signal?: DestinationNode['data']['signal']
+): DestinationNode => ({
   id: configuredDestinationNodeId(destinationId),
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { destinationId, title },
-});
-
-const placeholderNode = (nodeId: string): DestinationNode => ({
-  id: nodeId,
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  data: { unconfiguredNodeId: nodeId, title: 'New destination' },
+  data: { destinationId, title, signal },
 });
 
 const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
@@ -43,14 +43,13 @@ const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
   target: configuredDestinationNodeId(destinationId),
 });
 
-// nginx -> archive, nginx -> logs-nginx, otlp -> logs-nginx, plus an unconnected placeholder.
+// nginx -> archive, nginx -> logs-nginx, otlp -> logs-nginx.
 const graph: ClassicCanvasGraph = {
   nodes: [
     sourceNode('s1', 'Nginx', 'Logs'),
     sourceNode('s2', 'MOTLP endpoint', 'Managed input'),
-    destinationNode('d1', 'archive'),
-    destinationNode('d2', 'logs-nginx-default'),
-    placeholderNode('new-1'),
+    destinationNode('d1', 'archive', 'logs'),
+    destinationNode('d2', 'logs-nginx-default', 'logs'),
   ],
   edges: [edge('s1', 'd1'), edge('s1', 'd2'), edge('s2', 'd2')],
 };
@@ -101,6 +100,53 @@ describe('resolveCanvasSearch', () => {
       [configuredSourceNodeId('s2'), configuredDestinationNodeId('d2')].sort()
     );
   });
+
+  it('matches a Data streams hub and includes fanned-out classic destinations', () => {
+    const hub: DataStreamsNode = {
+      id: DATA_STREAMS_NODE_ID,
+      type: DATA_STREAMS_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        title: 'Data streams',
+        subtitle: 'Those not matched by unit destination patterns',
+        count: 1,
+        expanded: true,
+      },
+    };
+    const classicDestination: DestinationNode = {
+      id: 'destination-logs-nginx-default',
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: { streamName: 'logs-nginx-default', title: 'logs-nginx-default' },
+    };
+    const dataStreamsGraph: ClassicCanvasGraph = {
+      nodes: [hub, classicDestination],
+      edges: [
+        {
+          id: `${DATA_STREAMS_NODE_ID}->destination-logs-nginx-default`,
+          source: DATA_STREAMS_NODE_ID,
+          target: 'destination-logs-nginx-default',
+        },
+      ],
+    };
+
+    expect(nodeIdsOf(resolveCanvasSearch(dataStreamsGraph, 'nginx'))).toEqual(
+      [DATA_STREAMS_NODE_ID, 'destination-logs-nginx-default'].sort()
+    );
+    expect(nodeIdsOf(resolveCanvasSearch(dataStreamsGraph, 'unit destination'))).toEqual(
+      [DATA_STREAMS_NODE_ID, 'destination-logs-nginx-default'].sort()
+    );
+  });
+
+  it('matches destination signal badges', () => {
+    const metricsGraph: ClassicCanvasGraph = {
+      nodes: [destinationNode('d-metrics', 'prod', 'metrics')],
+      edges: [],
+    };
+    expect(nodeIdsOf(resolveCanvasSearch(metricsGraph, 'metrics'))).toEqual([
+      configuredDestinationNodeId('d-metrics'),
+    ]);
+  });
 });
 
 describe('applyCanvasSearch', () => {
@@ -110,7 +156,7 @@ describe('applyCanvasSearch', () => {
     expect(result.edges).toBe(graph.edges);
   });
 
-  it('hides nodes and edges outside the flow but keeps placeholders visible', () => {
+  it('hides nodes and edges outside the flow', () => {
     const flow = resolveCanvasSearch(graph, 'archive');
     const { nodes, edges } = applyCanvasSearch(graph.nodes, graph.edges, flow);
 
@@ -119,7 +165,6 @@ describe('applyCanvasSearch', () => {
       [configuredSourceNodeId('s2')]: true,
       [configuredDestinationNodeId('d1')]: false,
       [configuredDestinationNodeId('d2')]: true,
-      'new-1': false,
     });
     expect(Object.fromEntries(edges.map((item) => [item.id, item.hidden]))).toEqual({
       's1->d1': false,

@@ -39,18 +39,23 @@ interface CreateDestinationModalProps {
     | 'storageKind'
     | 'destinationName'
     | 'destinationNameError'
-    | 'elasticsearchIndex'
-    | 'elasticsearchIndexPatterns'
-    | 'indexError'
-    | 'indexPatternsError'
+    | 'elasticsearchAuto'
+    | 'elasticsearchLogsIndex'
+    | 'elasticsearchMetricsIndex'
+    | 'elasticsearchTracesIndex'
+    | 'staticIndexesError'
+    | 'logsIndexError'
+    | 'metricsIndexError'
+    | 'tracesIndexError'
+    | 'apiKeyError'
     | 'canCreateDestination'
     | 'persistenceError'
     | 'isCreatingDestination'
     | 'isCreateFailed'
     | 'setStorageKind'
     | 'setCreateDestinationName'
-    | 'setElasticsearchIndex'
-    | 'setElasticsearchIndexPatterns'
+    | 'setElasticsearchAuto'
+    | 'setElasticsearchIndexes'
     | 'validateCreationForm'
   >;
   onClose: () => void;
@@ -62,18 +67,23 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     storageKind,
     destinationName,
     destinationNameError,
-    elasticsearchIndex,
-    elasticsearchIndexPatterns,
-    indexError,
-    indexPatternsError,
+    elasticsearchAuto,
+    elasticsearchLogsIndex,
+    elasticsearchMetricsIndex,
+    elasticsearchTracesIndex,
+    staticIndexesError,
+    logsIndexError,
+    metricsIndexError,
+    tracesIndexError,
     canCreateDestination,
     persistenceError,
+    apiKeyError,
     isCreatingDestination,
     isCreateFailed,
     setStorageKind,
     setCreateDestinationName,
-    setElasticsearchIndex,
-    setElasticsearchIndexPatterns,
+    setElasticsearchAuto,
+    setElasticsearchIndexes,
     validateCreationForm,
   } = destinations;
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
@@ -121,14 +131,23 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        {persistenceError && (
+        {(apiKeyError || persistenceError) && (
           <>
             <KbnDangerCallout
               announceOnMount
-              title={i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
-                defaultMessage: 'Could not create the destination',
-              })}
-              text={persistenceError}
+              title={
+                apiKeyError
+                  ? i18n.translate(
+                      'xpack.streams.destinations.createDestinationApiKeyFailedTitle',
+                      {
+                        defaultMessage: 'Could not create an API key for this destination',
+                      }
+                    )
+                  : i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
+                      defaultMessage: 'Could not create the destination',
+                    })
+              }
+              text={apiKeyError ?? persistenceError}
             />
             <EuiSpacer size="s" />
           </>
@@ -189,13 +208,17 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                       {storageKind === definition.storageKind && (
                         <DestinationTypeFields
                           storageKind={storageKind}
-                          index={elasticsearchIndex}
-                          indexPatterns={elasticsearchIndexPatterns}
-                          indexError={indexError}
-                          indexPatternsError={indexPatternsError}
+                          auto={elasticsearchAuto}
+                          logsIndex={elasticsearchLogsIndex}
+                          metricsIndex={elasticsearchMetricsIndex}
+                          tracesIndex={elasticsearchTracesIndex}
+                          staticIndexesError={staticIndexesError}
+                          logsIndexError={logsIndexError}
+                          metricsIndexError={metricsIndexError}
+                          tracesIndexError={tracesIndexError}
                           disabled={isCreatingDestination}
-                          onIndexChange={setElasticsearchIndex}
-                          onIndexPatternsChange={setElasticsearchIndexPatterns}
+                          onAutoChange={setElasticsearchAuto}
+                          onIndexesChange={setElasticsearchIndexes}
                           onBlur={validateCreationForm}
                         />
                       )}

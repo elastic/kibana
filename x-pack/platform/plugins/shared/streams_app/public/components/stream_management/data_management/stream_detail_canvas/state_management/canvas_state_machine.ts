@@ -588,14 +588,12 @@ export const canvasStateMachine = setup({
         input: {
           unitDefinition,
           metadataBySourceId: {},
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
       destinationsRef: spawn('destinationsMachine', {
         input: {
           unitDefinition,
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
@@ -623,7 +621,7 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
-      destinationsMachine: createDestinationsMachineActor({ core }),
+      destinationsMachine: createDestinationsMachineActor({ core, apiKeyGenerationDeps }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -653,10 +651,14 @@ function createSourcesMachineActor({
   );
 }
 
-function createDestinationsMachineActor({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+function createDestinationsMachineActor({
+  core,
+  apiKeyGenerationDeps,
+}: Pick<CanvasStateServiceDeps, 'core' | 'apiKeyGenerationDeps'>) {
   return destinationsStateMachine.provide(
     createDestinationsMachineImplementations({
       toasts: core.notifications.toasts,
+      apiKeyGenerationDeps,
     })
   );
 }

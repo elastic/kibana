@@ -17,7 +17,7 @@ const PLAIN_STREAM = 'logs-canvas-plain';
 const PROCESSING_STREAM = 'logs-canvas-processing';
 
 test.describe(
-  'Stream canvas - classic source to destination nodes',
+  'Stream map - classic Data streams hub',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient, apiServices, logsSynthtraceEsClient }) => {
@@ -61,7 +61,8 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamsLayoutTab('canvas');
+      await pageObjects.streams.gotoStreamsLayoutTab('map');
+      await pageObjects.streams.expandCanvasDataStreams();
     });
 
     test.afterAll(async ({ kbnClient, apiServices }) => {
@@ -78,18 +79,25 @@ test.describe(
       });
     });
 
-    test('renders inferred source and destination nodes for classic streams', async ({
+    test('renders a Data streams hub that fans out unmatched classic streams', async ({
       pageObjects: { streams },
     }) => {
       await expect(streams.canvasTab).toBeVisible();
+      await expect(streams.canvasDataStreamsNode).toBeVisible();
+      await expect(streams.canvasDataStreamsCount).toBeVisible();
 
-      // The inferred source node is labeled from the stream name.
-      await expect(streams.getCanvasSourceNode(PLAIN_STREAM)).toBeVisible();
-
-      // Both seeded streams render as their own destination node.
+      // Classic streams are destination cards off the hub, not fake `_bulk` sources.
+      await expect(streams.getCanvasSourceNode(PLAIN_STREAM)).toHaveCount(0);
       await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
       await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
       await expect(streams.canvasEmptyState).toHaveCount(0);
+
+      await streams.clickCanvasNode(streams.canvasDataStreamsNode);
+      await expect(streams.canvasDataStreamsNode).toHaveAttribute('aria-expanded', 'false');
+      await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toHaveCount(0);
+
+      await streams.clickCanvasNode(streams.canvasDataStreamsNode);
+      await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
     });
 
     test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
@@ -166,9 +174,7 @@ test.describe(
       pageObjects: { streams },
     }) => {
       // Nodes carry a screen-reader label so Tab-focusing announces what they are.
-      await expect(
-        streams.getCanvasNodeByAriaLabel(`Source: ${PLAIN_STREAM}, async bulk ingest`)
-      ).toBeVisible();
+      await expect(page.locator('.react-flow__node[aria-label*="Data streams"]')).toBeVisible();
 
       // Escape closes an open context menu.
       await streams.openCanvasPaneContextMenu();

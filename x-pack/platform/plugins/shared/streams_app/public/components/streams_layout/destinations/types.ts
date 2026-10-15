@@ -17,24 +17,34 @@ export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 /** Unit destination types the UI can list and create. */
 export type DestinationType = 'elasticsearch';
 
+export type DestinationSignal = 'logs' | 'metrics' | 'traces';
+
+/** How an Elasticsearch destination chooses its indices. */
+export type DestinationIndexMode = 'static' | 'auto';
+
+export type StaticIndexValidationError =
+  | 'template'
+  | 'invalidName'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
 export interface DestinationViewModel {
   id: string;
   name: string;
   type: DestinationType;
-  /** Elasticsearch `config` entry `index`. */
-  index: string;
-  /**
-   * Elasticsearch `config` entry `index_patterns`.
-   * Static indexes that omit the entry surface the spec default of `[index]`.
-   */
-  indexPatterns: string[];
+  signal: DestinationSignal;
+  mode: DestinationIndexMode;
+  index?: string;
 }
 
 /** Per-type form state. Each destination type owns its own slice. */
 export interface ElasticsearchDestinationFormData {
-  index: string;
-  /** Raw index patterns, one per line or comma-separated. */
-  indexPatterns: string;
+  /** When true, omit per-signal indexes so ES composes names from document metadata. */
+  auto: boolean;
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
 }
 
 export interface DestinationCreationFormData {
@@ -45,11 +55,15 @@ export interface DestinationCreationFormData {
 
 export interface DestinationCreationFormErrors {
   destinationName?: DestinationNameValidationError;
-  index?: 'required';
-  indexPatterns?: 'required' | 'invalid';
+  staticIndexes?: 'required';
+  logsIndex?: StaticIndexValidationError;
+  metricsIndex?: StaticIndexValidationError;
+  tracesIndex?: StaticIndexValidationError;
 }
 
 export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
-  index: '',
-  indexPatterns: '',
+  auto: true,
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
 };

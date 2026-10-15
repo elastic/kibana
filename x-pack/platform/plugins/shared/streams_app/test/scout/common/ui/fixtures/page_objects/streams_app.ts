@@ -77,6 +77,8 @@ export class StreamsApp {
   public readonly canvasEmptyState;
   public readonly canvasSearch;
   public readonly canvasSearchNoMatches;
+  public readonly canvasDataStreamsNode;
+  public readonly canvasDataStreamsCount;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -148,6 +150,8 @@ export class StreamsApp {
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
     this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
+    this.canvasDataStreamsCount = this.page.testSubj.locator('streamsCanvasDataStreamsCount');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -211,10 +215,10 @@ export class StreamsApp {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
-  /** Opens the canvas with its search pre-filled from the URL. */
+  /** Opens the map with its search pre-filled from the URL. */
   async gotoCanvasSearch(query: string) {
-    await this.page.gotoApp('streams/new-experience/canvas', {
-      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    await this.page.gotoApp('streams/new-experience/map', {
+      params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
     });
   }
 
@@ -245,6 +249,15 @@ export class StreamsApp {
 
   getCanvasProcessingButton(streamName: string) {
     return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
+  }
+
+  async expandCanvasDataStreams() {
+    await expect(this.canvasDataStreamsNode).toBeVisible();
+    if ((await this.canvasDataStreamsNode.getAttribute('aria-expanded')) === 'true') {
+      return;
+    }
+    await this.clickCanvasNode(this.canvasDataStreamsNode);
+    await expect(this.canvasDataStreamsNode).toHaveAttribute('aria-expanded', 'true');
   }
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
