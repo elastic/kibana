@@ -13,8 +13,8 @@ import {
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import type { CaseUI } from '@kbn/cases-plugin/common';
 
-import type { AttackToAttach } from '../../../../cases/attachments/attack';
-import { MAX_ATTACKS_PER_ATTACH } from '../../../../cases/attachments/attack';
+import type { AttackToAttach } from '..';
+import { MAX_ATTACKS_PER_ATTACH } from '..';
 import { useAttackCaseAttachments } from './use_attack_case_attachments';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -109,7 +109,7 @@ describe('useAttackCaseAttachments', () => {
   it('builds an attack attachment followed by its alerts', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
-    expect(result.current?.()).toEqual([
+    expect(result.current?.getAttachments()).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
       expect.objectContaining({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -122,25 +122,39 @@ describe('useAttackCaseAttachments', () => {
   it('does not warn when every alert fits in the case', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
-    result.current?.({ totalAlerts: 0 } as CaseUI);
+    result.current?.onAttached({ totalAlerts: 0 } as CaseUI);
 
     expect(appToasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('warns when the case does not have room for every alert', () => {
+  it('warns once the attack is attached to a case without room for every alert', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
-    result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI);
+    result.current?.onAttached({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI);
 
+    expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
     expect(appToasts.addWarning).toHaveBeenCalledWith({
-      title: expect.stringContaining('Only 1 of the 2 alerts in this attack will be added'),
+      title: expect.stringContaining('Only 1 of the 2 alerts in this attack were added'),
     });
+  });
+
+  it('does not warn while building the attachments, even when they are truncated', () => {
+    const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+    // The case selector calls this on every render, with a placeholder case, just to find the
+    // cases that already hold these attachments.
+    result.current?.getAttachments({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI);
+    result.current?.getAttachments({ totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI);
+
+    expect(appToasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('attaches only the alerts that fit in the case', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
-    expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI)).toEqual([
+    expect(
+      result.current?.getAttachments({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI)
+    ).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
       expect.objectContaining({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -152,7 +166,7 @@ describe('useAttackCaseAttachments', () => {
   it('attaches the attack alone when the case is already full', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
-    expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI)).toEqual([
+    expect(result.current?.getAttachments({ totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI)).toEqual([
       expect.objectContaining({ type: SECURITY_ATTACK_ATTACHMENT_TYPE }),
     ]);
   });
@@ -166,7 +180,7 @@ describe('useAttackCaseAttachments', () => {
     it('pairs each attack with its own alert attachment', () => {
       const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
 
-      expect(result.current?.()).toEqual([
+      expect(result.current?.getAttachments()).toEqual([
         expect.objectContaining({
           type: SECURITY_ATTACK_ATTACHMENT_TYPE,
           attachmentId: 'attack-1',
@@ -196,7 +210,7 @@ describe('useAttackCaseAttachments', () => {
 
       const { result } = renderHook(() => useAttackCaseAttachments(sharingAttacks));
 
-      expect(result.current?.()).toEqual([
+      expect(result.current?.getAttachments()).toEqual([
         expect.objectContaining({ attachmentId: 'attack-1' }),
         expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
         expect.objectContaining({ attachmentId: 'attack-2' }),
@@ -207,7 +221,9 @@ describe('useAttackCaseAttachments', () => {
     it('keeps the earlier attacks whole when the alerts do not all fit', () => {
       const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
 
-      expect(result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI)).toEqual([
+      expect(
+        result.current?.getAttachments({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI)
+      ).toEqual([
         expect.objectContaining({ attachmentId: 'attack-1' }),
         expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
         expect.objectContaining({ attachmentId: 'attack-2' }),
@@ -217,10 +233,11 @@ describe('useAttackCaseAttachments', () => {
     it('warns about the alerts left off across the whole selection', () => {
       const { result } = renderHook(() => useAttackCaseAttachments(twoAttacks));
 
-      result.current?.({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI);
+      result.current?.onAttached({ totalAlerts: MAX_ALERTS_PER_CASE - 2 } as CaseUI);
 
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
       expect(appToasts.addWarning).toHaveBeenCalledWith({
-        title: expect.stringContaining('Only 2 of the 3 alerts in these 2 attacks will be added'),
+        title: expect.stringContaining('Only 2 of the 3 alerts in these 2 attacks were added'),
       });
     });
 
@@ -230,7 +247,7 @@ describe('useAttackCaseAttachments', () => {
       );
 
       const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
-      const attachments = result.current?.() ?? [];
+      const attachments = result.current?.getAttachments() ?? [];
 
       expect(
         attachments.filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
@@ -246,15 +263,38 @@ describe('useAttackCaseAttachments', () => {
       );
 
       const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
-      result.current?.();
+      result.current?.onAttached({ totalAlerts: 0 } as CaseUI);
 
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
       expect(appToasts.addWarning).toHaveBeenCalledWith({
         title: expect.stringContaining(
           `Only ${MAX_ATTACKS_PER_ATTACH} of the ${
             MAX_ATTACKS_PER_ATTACH + 1
-          } selected attacks will be added`
+          } selected attacks were added`
         ),
       });
+    });
+
+    it('raises both warnings when too many attacks and too many alerts are attached', () => {
+      const tooManyAttacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH + 1 }, (_, index) =>
+        attack({ id: `attack-${index}`, alertIds: [`alert-${index}`] })
+      );
+
+      const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
+      result.current?.onAttached({ totalAlerts: MAX_ALERTS_PER_CASE - 1 } as CaseUI);
+
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not warn while building attachments for too many attacks', () => {
+      const tooManyAttacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH + 1 }, (_, index) =>
+        attack({ id: `attack-${index}`, alertIds: [`alert-${index}`] })
+      );
+
+      const { result } = renderHook(() => useAttackCaseAttachments(tooManyAttacks));
+      result.current?.getAttachments();
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
     });
   });
 });

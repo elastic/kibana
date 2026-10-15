@@ -11,29 +11,27 @@ import type { CaseUI } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 
-import type { AttackToAttach } from '../../../../cases/attachments/attack';
-import {
-  buildAttacksAttachments,
-  MAX_ATTACKS_PER_ATTACH,
-} from '../../../../cases/attachments/attack';
+import type { AttackToAttach } from '..';
+import { buildAttacksAttachments, MAX_ATTACKS_PER_ATTACH } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ATTACK_ALERTS_TRUNCATED, ATTACKS_TRUNCATED } from './translations';
+import { ATTACK_ALERTS_TRUNCATED, ATTACKS_TRUNCATED } from '../translations';
+
+export interface AttackCaseAttachments {
+  /** Builds the attachments for a case; kept pure as the case selector calls it every render. */
+  getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
+  /** Warns about anything that did not fit, once the attachments have been posted to `theCase`. */
+  onAttached: (theCase: CaseUI) => void;
+}
 
 /**
- * Builds the `getAttachments` callback that attaches one or more attacks — and the alerts they
- * comprise — to the case the user picks, warning when not everything fits.
- *
- * Returns `undefined` when the attacks cannot be posted as `security.attack` attachments, either
- * because the attachment framework is off or because the caller has nothing attachable. Call
- * sites fall back to their markdown-comment payload in that case.
- *
- * @param attacksToAttach the attacks to attach, in the order they should be attached
+ * Builds attack attachments sized to the chosen case, or `undefined` when attacks cannot be
+ * attached so callers fall back to their markdown payload.
  */
 export const useAttackCaseAttachments = (
   attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>
-): ((theCase?: CaseUI) => CaseAttachmentsWithoutOwner) | undefined => {
+): AttackCaseAttachments | undefined => {
   const {
     services: { cases },
   } = useKibana();
@@ -47,21 +45,26 @@ export const useAttackCaseAttachments = (
     attacksToAttach != null &&
     attacksToAttach.length > 0;
 
-  const getAttachments = useCallback(
-    (theCase?: CaseUI) => {
-      if (attacksToAttach == null) {
-        return [];
-      }
-
-      const result = buildAttacksAttachments(
-        attacksToAttach.map((attack) => ({ ...attack, alertsIndex: alertsIndexPattern ?? '' })),
-        // A case holds at most MAX_ALERTS_PER_CASE alerts in total, so the attacks' alerts have to
-        // fit in whatever the chosen case has left. A case created from the flyout has none yet.
+  const build = useCallback(
+    (theCase?: CaseUI) =>
+      buildAttacksAttachments(
+        (attacksToAttach ?? []).map((attack) => ({
+          ...attack,
+          alertsIndex: alertsIndexPattern ?? '',
+        })),
+        // A case created from the flyout has no `totalAlerts` yet.
         { maxAlerts: MAX_ALERTS_PER_CASE - (theCase?.totalAlerts ?? 0) }
-      );
+      ),
+    [alertsIndexPattern, attacksToAttach]
+  );
 
-      // Raised as the attachments are posted, so they describe an attach that is actually
-      // happening — but the request may still fail, hence the prospective wording.
+  const getAttachments = useCallback((theCase?: CaseUI) => build(theCase).attachments, [build]);
+
+  // Rebuilding is pure, so it reports the same truncation the posted payload had.
+  const onAttached = useCallback(
+    (theCase: CaseUI) => {
+      const result = build(theCase);
+
       if (result.attacksTruncated) {
         addWarning({
           title: ATTACKS_TRUNCATED({
@@ -82,14 +85,12 @@ export const useAttackCaseAttachments = (
           }),
         });
       }
-
-      return result.attachments;
     },
-    [addWarning, alertsIndexPattern, attacksToAttach]
+    [addWarning, build]
   );
 
   return useMemo(
-    () => (canAttachAttacks ? getAttachments : undefined),
-    [canAttachAttacks, getAttachments]
+    () => (canAttachAttacks ? { getAttachments, onAttached } : undefined),
+    [canAttachAttacks, getAttachments, onAttached]
   );
 };

@@ -139,7 +139,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
 
       expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledTimes(2);
       mockUseBulkAttackWorkflowStatusItems.mock.calls.forEach(([props]) => {
-        expect(props.currentStatus).toBeUndefined();
+        expect(props?.currentStatus).toBeUndefined();
       });
     });
 

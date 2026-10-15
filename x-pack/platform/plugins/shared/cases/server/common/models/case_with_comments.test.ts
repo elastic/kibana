@@ -1400,6 +1400,23 @@ describe('CaseCommentModel', () => {
       expect(attachments).toHaveLength(2);
     });
 
+    it('looks up only the attack ids the request carries', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+          { id: 'comment-3', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+          { id: 'comment-4', ...unifiedAlertComment, attachmentId: 'alert-id-1' },
+        ],
+      });
+
+      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).toHaveBeenCalledWith({
+        caseId: theCase.id,
+        attackIds: ['attack-id-1', 'attack-id-2'],
+      });
+    });
+
     it('does not look up attached attacks when the request carries none', async () => {
       await model.bulkCreate({
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],

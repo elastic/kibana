@@ -14,6 +14,7 @@ import { buildAlertsKqlFilter } from '../../../../components/alerts_table/action
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_table/translations';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
+import { extractAttackTimestamps } from '../utils/extract_attack_timestamps';
 import { getAttacksTimeRange } from '../utils/get_attacks_time_range';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
@@ -54,7 +55,7 @@ export const useBulkAttackInvestigateInTimelineItems = ({
 
       investigateInTimeline({
         filters: alertIdFilters,
-        timeRange: getAttacksTimeRange(alertItems.map(({ ecs }) => ecs.timestamp)),
+        timeRange: getAttacksTimeRange(extractAttackTimestamps(alertItems)),
       });
       closePopover?.();
     },

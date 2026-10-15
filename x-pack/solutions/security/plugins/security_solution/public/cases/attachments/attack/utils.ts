@@ -13,12 +13,7 @@ import type { AttackToAttach } from '.';
 
 export type CaseAttachment = CaseUI['comments'][number];
 
-/**
- * Column ids for the attacks section of the case Attachments tab.
- *
- * Stable identifiers rather than field paths: the user's persisted column selection is keyed
- * off them, so renaming one silently discards a saved selection.
- */
+/** Column ids for the attacks grid; persisted selections key off them, so do not rename. */
 export const ATTACK_TAB_COLUMN_ID = {
   actions: 'actions',
   detectedOn: 'detectedOn',
@@ -33,13 +28,7 @@ export const ATTACK_TAB_COLUMN_ID = {
 
 export type AttackTabColumnId = (typeof ATTACK_TAB_COLUMN_ID)[keyof typeof ATTACK_TAB_COLUMN_ID];
 
-/**
- * The columns shown before the user picks their own, in render order.
- *
- * `actions` is absent because it is a leading control column, which the grid renders outside
- * the visible-column list; risk score, status and the attachment-provenance columns are
- * available from the column picker.
- */
+/** Default visible columns, in render order; `actions` is a control column so never listed. */
 export const DEFAULT_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
   ATTACK_TAB_COLUMN_ID.detectedOn,
   ATTACK_TAB_COLUMN_ID.title,
@@ -47,12 +36,7 @@ export const DEFAULT_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
   ATTACK_TAB_COLUMN_ID.summary,
 ];
 
-/**
- * The columns the column picker offers, in the order the grid declares them.
- *
- * `actions` is absent for the same reason it is absent from the defaults: the grid renders it as
- * a leading control column, outside the visible-column list the picker drives.
- */
+/** The columns the column picker offers, in the order the grid declares them. */
 export const PICKABLE_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
   ATTACK_TAB_COLUMN_ID.detectedOn,
   ATTACK_TAB_COLUMN_ID.title,
@@ -68,20 +52,13 @@ const PICKABLE_ATTACK_TAB_COLUMN_ID_SET: ReadonlySet<string> = new Set(
   PICKABLE_ATTACK_TAB_COLUMN_IDS
 );
 
-/**
- * localStorage key for the persisted column selection, namespaced to the case attachment so it
- * cannot collide with the same columns on the Attacks page or with the entities section.
- */
+/** localStorage key for the persisted column selection. */
 export const ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY =
   'securitySolution.attackDiscovery.cases.attachment.columns';
 
 /**
- * Narrows a column selection read back from localStorage to the ids this grid can still render,
- * falling back to the defaults when it holds nothing usable.
- *
- * The runtime shape checks are not redundant with the declared type: the value is whatever was
- * last written under the key, by any release, and a visible column the grid has no definition
- * for renders as a blank column the picker offers no way to take back off.
+ * Narrows a persisted column selection to ids the grid can render, falling back to the defaults.
+ * The runtime checks matter because an older release may have written anything under the key.
  */
 export const toVisibleAttackTabColumnIds = (
   persisted: readonly string[] | null | undefined
@@ -95,23 +72,14 @@ export const toVisibleAttackTabColumnIds = (
   return pickable.length > 0 ? pickable : [...DEFAULT_ATTACK_TAB_COLUMN_IDS];
 };
 
-/**
- * A `security.attack` attachment narrowed to the fields the attachments section renders: the
- * attack document id, the snapshot metadata, and who attached it when.
- */
+/** A `security.attack` attachment with its attack id and snapshot metadata narrowed. */
 export type AttackCaseAttachmentRow = CaseAttachment & {
   attachmentId: string;
   metadata: AttackAttachmentPayload['metadata'];
 };
 
-/**
- * Narrows to a `security.attack` attachment, rejecting alert attachments (which batch their
- * ids into an array) and attachments with no metadata. Metadata is required for
- * `security.attack`, but it is stored unindexed in `_source` and is not re-validated on read,
- * so the guard keeps the renderer honest.
- */
+/** Narrows to a `security.attack` attachment; metadata is checked as it is not validated on read. */
 export const isAttackAttachment = (comment: CaseAttachment): comment is AttackCaseAttachmentRow => {
-  // Cast to a loose shape so we can access fields that only exist on some union members.
   const candidate = comment as {
     type?: string;
     attachmentId?: string | string[]; // alerts batch as string[], attacks are always string
@@ -124,13 +92,7 @@ export const isAttackAttachment = (comment: CaseAttachment): comment is AttackCa
   );
 };
 
-/**
- * Case-insensitive match against the snapshotted attack title and summary, and against the
- * attack document id so a user pasting an id from elsewhere finds the row.
- *
- * Matches on the persisted metadata rather than the live attack so the section can filter
- * without waiting on the search request.
- */
+/** Case-insensitive match on the attack id and the snapshot title and summary. */
 export const matchesSearchTerm = (
   attachment: Pick<AttackAttachmentPayload, 'attachmentId' | 'metadata'>,
   searchTerm: string
@@ -142,13 +104,7 @@ export const matchesSearchTerm = (
   return searchableText.includes(searchTerm.toLowerCase());
 };
 
-/**
- * An attack's constituent detection alert ids, de-anonymised and deduplicated — distinct
- * anonymised ids can resolve to the same original alert.
- *
- * Empty for an attack the live query could not resolve: the ids live on the attack document, and
- * the attachment snapshot records only how many there were.
- */
+/** An attack's de-anonymised, deduplicated alert ids; empty when the live document is absent. */
 export const getAttackAlertIds = (attack: AttackDiscoveryAlert | undefined): string[] =>
   attack == null
     ? []
@@ -161,20 +117,7 @@ export const getAttackAlertIds = (attack: AttackDiscoveryAlert | undefined): str
         ),
       ];
 
-/**
- * Maps attacks onto the payload {@link buildAttacksAttachments} takes, dropping any the UI cannot
- * attach as a `security.attack`.
- *
- * An attack is attachable only when we know which index its document came from — the attachment
- * metadata requires it for status sync and for reopening the flyout — so one without an index is
- * left out rather than costing the rest of the selection the action. Call sites treat an empty
- * result as "nothing attachable" and fall back to their markdown-comment payload.
- *
- * The narrative fields and alert ids stay anonymised here; the payload builder de-anonymises,
- * truncates and dedupes them.
- *
- * @param attacks the attacks the user selected, in the order they should be attached
- */
+/** Maps attacks onto {@link buildAttacksAttachments} input, dropping any with no known index. */
 export const toAttacksToAttach = (
   attacks: ReadonlyArray<AttackDiscoveryAlert | undefined>
 ): Array<Omit<AttackToAttach, 'alertsIndex'>> =>

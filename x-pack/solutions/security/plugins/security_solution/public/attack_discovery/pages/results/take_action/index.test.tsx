@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -96,12 +97,12 @@ jest.mock('../use_attack_discovery_attachment', () => ({
   useAttackDiscoveryAttachment: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../../../detections/hooks/attacks/bulk_actions/use_attack_case_attachments', () => ({
+jest.mock('../../../../cases/attachments/attack/hooks/use_attack_case_attachments', () => ({
   useAttackCaseAttachments: jest.fn(() => undefined),
 }));
 
 const mockUseAttackCaseAttachments = jest.requireMock(
-  '../../../../detections/hooks/attacks/bulk_actions/use_attack_case_attachments'
+  '../../../../cases/attachments/attack/hooks/use_attack_case_attachments'
 ).useAttackCaseAttachments as jest.Mock;
 
 jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => ({
@@ -561,7 +562,7 @@ describe('TakeAction', () => {
 
     it('posts the attack attachment when a single persisted attack can be attached', async () => {
       const getAttachments = jest.fn(() => []);
-      mockUseAttackCaseAttachments.mockReturnValue(getAttachments);
+      mockUseAttackCaseAttachments.mockReturnValue({ getAttachments, onAttached: jest.fn() });
 
       render(
         <TestProviders>
@@ -576,11 +577,7 @@ describe('TakeAction', () => {
       fireEvent.click(screen.getByTestId('addToCase'));
 
       await waitFor(() => {
-        expect(mockOnAddToCase).toHaveBeenCalledWith({
-          alertIds: [],
-          markdownComments: [],
-          getAttachments,
-        });
+        expect(mockOnAddToCase).toHaveBeenCalledWith({ getAttachments });
       });
     });
 
@@ -638,7 +635,7 @@ describe('TakeAction', () => {
 
     it('posts the attack attachments when multiple persisted attacks are selected', async () => {
       const getAttachments = jest.fn(() => []);
-      mockUseAttackCaseAttachments.mockReturnValue(getAttachments);
+      mockUseAttackCaseAttachments.mockReturnValue({ getAttachments, onAttached: jest.fn() });
 
       render(
         <TestProviders>
@@ -656,11 +653,7 @@ describe('TakeAction', () => {
       fireEvent.click(screen.getByTestId('addToCase'));
 
       await waitFor(() => {
-        expect(mockOnAddToCase).toHaveBeenCalledWith({
-          alertIds: [],
-          markdownComments: [],
-          getAttachments,
-        });
+        expect(mockOnAddToCase).toHaveBeenCalledWith({ getAttachments });
       });
     });
 
@@ -694,11 +687,40 @@ describe('TakeAction', () => {
       );
 
       const { useAddToCase } = jest.requireMock('./use_add_to_case');
-      expect(useAddToCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          onSuccess: refetchFindAttackDiscoveries,
-        })
+      const { onSuccess } = useAddToCase.mock.lastCall[0];
+      onSuccess({ id: 'case-1' } as CaseUI, false);
+
+      expect(refetchFindAttackDiscoveries).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports what did not fit once the attacks are attached, not before', async () => {
+      const onAttached = jest.fn();
+      mockUseAttackCaseAttachments.mockReturnValue({
+        getAttachments: jest.fn(() => []),
+        onAttached,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            attackDiscoveries={[{ ...getMockAttackDiscoveryAlerts()[0], index: '.alerts-index' }]}
+          />
+        </TestProviders>
       );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+      await waitFor(() => expect(mockOnAddToCase).toHaveBeenCalled());
+      expect(onAttached).not.toHaveBeenCalled();
+
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      const { onSuccess } = useAddToCase.mock.lastCall[0];
+      const theCase = { id: 'case-1', totalAlerts: 3 } as CaseUI;
+      onSuccess(theCase, false);
+
+      expect(onAttached).toHaveBeenCalledTimes(1);
+      expect(onAttached).toHaveBeenCalledWith(theCase);
     });
   });
 

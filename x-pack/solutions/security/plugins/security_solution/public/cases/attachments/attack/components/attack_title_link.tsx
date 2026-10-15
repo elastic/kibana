@@ -15,18 +15,15 @@ import { TruncatableText } from '../../../../common/components/truncatable_text'
 import { useOpenAttackFlyout } from '../hooks/use_open_attack_flyout';
 
 export interface AttackTitleLinkProps {
-  /** The attack document `_id`, persisted as the attachment id. */
+  /** The attack document `_id`. */
   attackId: string;
   /** The index the attack lives in, from the live document or the attachment metadata. */
   indexName: string;
-  /** The attack's de-anonymised title. */
+  /** De-anonymised. */
   title: string;
 }
 
-/**
- * The title of a resolved attack, built like the alerts grid's rule cell: a truncated link that
- * opens the document it names.
- */
+/** A resolved attack's title as a truncated link, like the alerts grid's rule cell. */
 export const AttackTitleLink = ({ attackId, indexName, title }: AttackTitleLinkProps) => {
   const openAttackFlyout = useOpenAttackFlyout({ attackId, indexName, attackTitle: title });
 
