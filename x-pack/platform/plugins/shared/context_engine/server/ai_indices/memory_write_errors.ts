@@ -11,6 +11,7 @@ export type MemoryWriteErrorCode =
   | 'destination_not_writable'
   | 'memory_not_found'
   | 'duplicate_memory'
+  | 'revision_tie_window_exceeded'
   | 'not_a_memory'
   | 'memory_type_mismatch'
   | 'memory_deleted'

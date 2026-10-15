@@ -1,6 +1,10 @@
 requestBody:
   content:
     application/json:
+      schema:
+        properties:
+          expires_at:
+            format: date-time
       examples:
         createMemoryRequest:
           value:
@@ -42,11 +46,18 @@ responses:
         examples:
           conflict:
             value: { statusCode: 409, error: Conflict, message: The memory write conflicted. }
+  429:
+    content:
+      application/json:
+        examples:
+          throttled:
+            value: { statusCode: 429, error: Too Many Requests, message: Too many requests. }
 x-codeSamples:
   - lang: curl
     source: |
       curl -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories" \
-        -H "Authorization: ApiKey ${API_KEY}" -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+        -H "kbn-xsrf: true" -H "Content-Type: application/json" \
         -d '{
           "type": "memory.session_fact",
           "title": "Cast duration fields before comparison",

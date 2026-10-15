@@ -65,6 +65,7 @@ const handleMemoryWriteError = (
       error.code === 'memory_type_mismatch' ||
       error.code === 'memory_deleted' ||
       error.code === 'duplicate_memory' ||
+      error.code === 'revision_tie_window_exceeded' ||
       error.code === 'missing_concurrency_metadata'
     ) {
       return response.conflict({ body: { message: error.message } });
@@ -74,7 +75,11 @@ const handleMemoryWriteError = (
   if (isResponseError(error)) {
     const { statusCode, message } = error;
     if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
-      return response.customError({ statusCode, body: { message } });
+      const documentedStatus =
+        statusCode === 401
+          ? 403
+          : ([400, 403, 404, 409, 429] as const).find((status) => status === statusCode) ?? 400;
+      return response.customError({ statusCode: documentedStatus, body: { message } });
     }
   }
   logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
@@ -114,6 +119,7 @@ export const registerMemoryRoutes = ({
       path: AI_INDEX_MEMORIES_PATH,
       security: WRITE_SECURITY,
       access: 'public',
+      operationId: 'create-context-engine-memory',
       summary: 'Create a memory',
       description: `Creates a memory in a memory-enabled AI Index. ${DESCRIPTION_SUFFIX}`,
       options: {
@@ -138,6 +144,7 @@ export const registerMemoryRoutes = ({
               description: 'The AI Index was not found or Context Engine is turned off.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
+            429: { body: errorResponseSchema, description: 'Too many requests.' },
           },
         },
         options: {
@@ -160,10 +167,11 @@ export const registerMemoryRoutes = ({
     );
 
   router.versioned
-    .put({
+    .patch({
       path: AI_INDEX_MEMORY_BY_ID_PATH,
       security: WRITE_SECURITY,
       access: 'public',
+      operationId: 'revise-context-engine-memory',
       summary: 'Revise a memory',
       description: `Revises an existing memory without changing its type. ${DESCRIPTION_SUFFIX}`,
       options: {
@@ -188,6 +196,7 @@ export const registerMemoryRoutes = ({
               description: 'The AI Index or memory was not found.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
+            429: { body: errorResponseSchema, description: 'Too many requests.' },
           },
         },
         options: {
@@ -217,6 +226,7 @@ export const registerMemoryRoutes = ({
       path: AI_INDEX_MEMORY_BY_ID_PATH,
       security: WRITE_SECURITY,
       access: 'public',
+      operationId: 'delete-context-engine-memory',
       summary: 'Delete a memory',
       description: `Marks a memory as deleted while retaining its lifecycle tombstone. ${DESCRIPTION_SUFFIX}`,
       options: {
@@ -244,6 +254,7 @@ export const registerMemoryRoutes = ({
               description: 'The AI Index or memory was not found.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
+            429: { body: errorResponseSchema, description: 'Too many requests.' },
           },
         },
         options: {

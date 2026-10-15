@@ -6,3 +6,5 @@
  */
 
 export const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
+
+export type MemoryType = (typeof MEMORY_KI_TYPES)[number];

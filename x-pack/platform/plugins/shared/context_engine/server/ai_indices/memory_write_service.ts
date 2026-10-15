@@ -10,17 +10,16 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
-import type { MEMORY_KI_TYPES } from '../../common/memory';
+import type { MemoryType } from '../../common/memory';
+import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { MemoryAuditAction, memoryAuditEvent } from '../audit/audit_events';
 import type { AiIndexService } from './service';
-import { pickCurrentRevision, REVISION_TIE_WINDOW } from './ki_get';
+import { kiIdQuery, pickCurrentRevision, REVISION_TIE_WINDOW } from './ki_get';
 import type { MemoryReference, MemoryWriter, StoredMemoryDocument } from './memory_document';
 import { updateMemoryProvenance } from './memory_document';
 import { MemoryWriteError } from './memory_write_errors';
 
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
-
-export type MemoryType = (typeof MEMORY_KI_TYPES)[number];
 
 export interface MemoryContent {
   type: MemoryType;
@@ -65,6 +64,7 @@ export interface AiIndexMemoryWriteServiceApi {
 
 interface ExistingMemory {
   backingIndex: string;
+  documentId: string;
   seqNo?: number;
   primaryTerm?: number;
   document: StoredMemoryDocument;
@@ -93,7 +93,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
       await this.deps.esClient.index({
         index: aiIndex.dest.value,
-        id: aiIndex.dest.type === 'index' ? id : this.createDataStreamDocumentId('active'),
+        id: aiIndex.dest.type === 'index' ? id : this.createDataStreamDocumentId(),
         document,
         op_type: 'create',
         refresh: 'wait_for',
@@ -140,7 +140,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
       await this.deps.esClient.index({
         index: aiIndex.dest.type === 'index' ? existing.backingIndex : aiIndex.dest.value,
-        id: aiIndex.dest.type === 'index' ? request.id : this.createDataStreamDocumentId('active'),
+        id: aiIndex.dest.type === 'index' ? existing.documentId : this.createDataStreamDocumentId(),
         document,
         ...(aiIndex.dest.type === 'data_stream'
           ? { op_type: 'create' as const }
@@ -164,10 +164,14 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         return { id: request.id };
       }
 
-      const now = this.getWriteDate(aiIndex, existing.document).toISOString();
+      const currentDate = this.getCurrentDate();
+      const now = currentDate.toISOString();
       const document: StoredMemoryDocument = {
         ...existing.document,
-        '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existing.document['@timestamp'],
+        '@timestamp':
+          aiIndex.dest.type === 'data_stream'
+            ? this.getNextRevisionDate(existing.document).toISOString()
+            : existing.document['@timestamp'],
         updated_at: now,
         governance: {
           ...updateMemoryProvenance(existing.document.governance, request.writer, false),
@@ -190,7 +194,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
       await this.deps.esClient.index({
         index: aiIndex.dest.type === 'index' ? existing.backingIndex : aiIndex.dest.value,
-        id: aiIndex.dest.type === 'index' ? request.id : this.createDataStreamDocumentId('deleted'),
+        id: aiIndex.dest.type === 'index' ? existing.documentId : this.createDataStreamDocumentId(),
         ...(aiIndex.dest.type === 'index' && {
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
@@ -224,11 +228,11 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
   private async getWritableMemoryAiIndex(aiIndexId: string): Promise<AiIndexHttpItem> {
     const memoryEnabled = await this.deps.isMemoryEnabled();
-    const aiIndex = await this.deps.aiIndexService.get(aiIndexId, this.deps.spaceId);
-
     if (!memoryEnabled) {
       throw new MemoryWriteError('memory_disabled', 'Context Engine memory is not enabled.');
     }
+
+    const aiIndex = await this.deps.aiIndexService.get(aiIndexId, this.deps.spaceId);
     if (!aiIndex.memory_enabled) {
       throw new MemoryWriteError(
         'ai_index_memory_disabled',
@@ -254,14 +258,23 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       index: aiIndex.dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
+      allow_partial_search_results: false,
       ...(aiIndex.dest.type === 'data_stream'
         ? {
-            query: { term: { id } },
+            query: {
+              bool: {
+                filter: [kiIdQuery(id), buildAiIndexSpaceFilter(this.deps.spaceId)],
+              },
+            },
             sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
-            size: REVISION_TIE_WINDOW,
+            size: REVISION_TIE_WINDOW + 1,
           }
         : {
-            query: { ids: { values: [id] } },
+            query: {
+              bool: {
+                filter: [kiIdQuery(id), buildAiIndexSpaceFilter(this.deps.spaceId)],
+              },
+            },
             seq_no_primary_term: true,
             size: 2,
           }),
@@ -274,11 +287,22 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       );
     }
 
+    if (
+      aiIndex.dest.type === 'data_stream' &&
+      response.hits.hits.length > REVISION_TIE_WINDOW &&
+      response.hits.hits[REVISION_TIE_WINDOW].sort?.[0] === response.hits.hits[0].sort?.[0]
+    ) {
+      throw new MemoryWriteError(
+        'revision_tie_window_exceeded',
+        `Memory '${id}' has too many revisions at the same timestamp to select safely.`
+      );
+    }
+
     const hit =
       aiIndex.dest.type === 'data_stream'
-        ? pickCurrentRevision(response.hits.hits)
+        ? pickCurrentRevision(response.hits.hits.slice(0, REVISION_TIE_WINDOW))
         : response.hits.hits[0];
-    if (!hit?._source) {
+    if (!hit?._id || !hit._source) {
       throw new MemoryWriteError(
         'memory_not_found',
         `Memory '${id}' was not found in AI index '${aiIndexId}'.`
@@ -293,6 +317,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
 
     return {
       backingIndex: hit._index,
+      documentId: hit._id,
       seqNo: hit._seq_no,
       primaryTerm: hit._primary_term,
       document: hit._source,
@@ -310,15 +335,19 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     id: string;
     existingDocument?: StoredMemoryDocument;
   }): StoredMemoryDocument {
-    const currentDate = this.getWriteDate(aiIndex, existingDocument);
+    const currentDate = this.getCurrentDate();
     const now = currentDate.toISOString();
     const defaultExpiresAt = new Date(
       currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
     ).toISOString();
+    const { expires_at: _existingExpiresAt, ...existingFields } = existingDocument ?? {};
 
     return {
+      ...existingFields,
       '@timestamp':
-        aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
+        aiIndex.dest.type === 'data_stream' && existingDocument !== undefined
+          ? this.getNextRevisionDate(existingDocument).toISOString()
+          : existingDocument?.['@timestamp'] ?? now,
       id,
       type: request.type,
       title: request.title,
@@ -355,20 +384,11 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     return (this.deps.getCurrentDate ?? (() => new Date()))();
   }
 
-  private getWriteDate(aiIndex: AiIndexHttpItem, existingDocument?: StoredMemoryDocument): Date {
-    const currentDate = this.getCurrentDate();
-    if (aiIndex.dest.type !== 'data_stream' || existingDocument === undefined) {
-      return currentDate;
-    }
-
-    return new Date(
-      Math.max(currentDate.getTime(), Date.parse(existingDocument['@timestamp']) + 1)
-    );
+  private getNextRevisionDate(existingDocument: StoredMemoryDocument): Date {
+    return new Date(Date.parse(existingDocument['@timestamp']) + 1);
   }
 
-  private createDataStreamDocumentId(status: 'active' | 'deleted'): string {
-    // `_id` is the canonical same-timestamp tie-break; `~2` makes tombstones win races.
-    const statusOrder = status === 'deleted' ? '2' : '1';
-    return `~${statusOrder}-${(this.deps.generateRevisionId ?? randomUUID)()}`;
+  private createDataStreamDocumentId(): string {
+    return `memory-revision-${(this.deps.generateRevisionId ?? randomUUID)()}`;
   }
 }

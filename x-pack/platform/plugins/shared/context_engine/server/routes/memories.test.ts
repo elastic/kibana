@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/transport';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -23,6 +25,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
+    operationId: string;
     security: { authz: { requiredPrivileges: string[] } };
   };
   handler: RequestHandler;
@@ -60,7 +63,7 @@ describe('memory routes', () => {
       router: {
         versioned: {
           post: createRoute('POST'),
-          put: createRoute('PUT'),
+          patch: createRoute('PATCH'),
           delete: createRoute('DELETE'),
         },
       } as unknown as IRouter,
@@ -97,6 +100,22 @@ describe('memory routes', () => {
     description: 'duration_ms is a keyword.',
     content: 'Cast it before comparison.',
   };
+  const createEsConflict = () =>
+    new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: 'version conflict',
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: {
+        error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+      },
+      statusCode: 409,
+    });
 
   it('registers public write-protected resource routes', () => {
     expect(Object.values(routes)).toHaveLength(3);
@@ -104,6 +123,15 @@ describe('memory routes', () => {
       expect(config.access).toBe('public');
       expect(config.security.authz.requiredPrivileges).toEqual([apiPrivileges.writeContextEngine]);
     }
+    expect(routes[`POST:${AI_INDEX_MEMORIES_PATH}`].config.operationId).toBe(
+      'create-context-engine-memory'
+    );
+    expect(routes[`PATCH:${AI_INDEX_MEMORY_BY_ID_PATH}`].config.operationId).toBe(
+      'revise-context-engine-memory'
+    );
+    expect(routes[`DELETE:${AI_INDEX_MEMORY_BY_ID_PATH}`].config.operationId).toBe(
+      'delete-context-engine-memory'
+    );
   });
 
   it('creates with the current-user client, generated session, and API provenance', async () => {
@@ -130,7 +158,7 @@ describe('memory routes', () => {
     reviseMemory.mockResolvedValue({ id: 'memory-1', sessionId: 'session-1' });
 
     await call(
-      'PUT',
+      'PATCH',
       AI_INDEX_MEMORY_BY_ID_PATH,
       { aiIndexId: 'support', memoryId: 'memory-1' },
       { ...body, session_id: 'session-1' }
@@ -167,7 +195,7 @@ describe('memory routes', () => {
     );
 
     await call(
-      'PUT',
+      'PATCH',
       AI_INDEX_MEMORY_BY_ID_PATH,
       { aiIndexId: 'support', memoryId: 'memory-1' },
       body
@@ -178,11 +206,28 @@ describe('memory routes', () => {
     });
   });
 
+  it('passes an Elasticsearch version conflict through as HTTP 409', async () => {
+    reviseMemory.mockRejectedValue(createEsConflict());
+
+    await call(
+      'PATCH',
+      AI_INDEX_MEMORY_BY_ID_PATH,
+      { aiIndexId: 'support', memoryId: 'memory-1' },
+      body
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: { message: 'version_conflict_engine_exception' },
+    });
+  });
+
   it('bounds request strings and arrays', () => {
     const schema = routes[`POST:${AI_INDEX_MEMORIES_PATH}`].validate.request?.body;
     expect(() => schema?.validate({ ...body, content: 'x'.repeat(65537) })).toThrow();
     expect(() => schema?.validate({ ...body, tags: Array(101).fill('tag') })).toThrow();
     expect(() => schema?.validate({ ...body, expires_at: '2026-10-14' })).toThrow();
+    expect(() => schema?.validate({ ...body, expires_at: '2026-02-30T12:00:00Z' })).toThrow();
     expect(() => schema?.validate({ ...body, expires_at: '2026-10-14T12:00:00Z' })).not.toThrow();
   });
 });

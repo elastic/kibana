@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MEMORY_KI_TYPES } from '../memory';
+import type { MemoryType } from '../memory';
 
-export type MemoryType = (typeof MEMORY_KI_TYPES)[number];
+export type { MemoryType } from '../memory';
 
 export interface WriteMemoryRequest {
   type: MemoryType;

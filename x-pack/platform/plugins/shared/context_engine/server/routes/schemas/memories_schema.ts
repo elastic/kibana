@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { MEMORY_KI_TYPES } from '../../../common/memory';
@@ -33,7 +34,8 @@ const ISO_DATE_TIME_WITH_OFFSET_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const validateIsoDate = (value: string): string | undefined =>
-  !ISO_DATE_TIME_WITH_OFFSET_PATTERN.test(value) || Number.isNaN(Date.parse(value))
+  !ISO_DATE_TIME_WITH_OFFSET_PATTERN.test(value) ||
+  !moment.parseZone(value, moment.ISO_8601, true).isValid()
     ? 'Must be an ISO 8601 date-time with a UTC offset.'
     : undefined;
 

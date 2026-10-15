@@ -17,7 +17,12 @@ import { registerAiIndexRoutes } from './ai_indices';
 import { registerMemoryRoutes } from './memories';
 
 interface ExampleMediaType {
-  content: { 'application/json': { examples: Record<string, { value: unknown }> } };
+  content: {
+    'application/json': {
+      examples: Record<string, { value: unknown }>;
+      schema?: { properties?: Record<string, { format?: string }> };
+    };
+  };
 }
 
 interface CodeSample {
@@ -76,7 +81,7 @@ registerMemoryRoutes({
   router: {
     versioned: {
       post: captureMethod('POST'),
-      put: captureMethod('PUT'),
+      patch: captureMethod('PATCH'),
       delete: captureMethod('DELETE'),
     },
   } as unknown as IRouter,
@@ -108,6 +113,28 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
 describe('AI index route examples', () => {
   it('covers every route that links an example file', () => {
     expect(routesWithExamples).toHaveLength(10);
+  });
+
+  it('includes the API version header in every memory curl example', () => {
+    const memoryExamples = routesWithExamples.filter(({ route }) => route.includes('/memories'));
+    for (const { examples } of memoryExamples) {
+      for (const sample of examples['x-codeSamples'] ?? []) {
+        if (sample.lang === 'curl') {
+          expect(sample.source).toContain('elastic-api-version: 2023-10-31');
+        }
+      }
+    }
+  });
+
+  it('publishes memory expiry as an OpenAPI date-time', () => {
+    const writeExamples = routesWithExamples.filter(
+      ({ route }) => route.includes('/memories') && !route.startsWith('DELETE')
+    );
+    for (const { examples } of writeExamples) {
+      expect(
+        examples.requestBody?.content['application/json'].schema?.properties?.expires_at?.format
+      ).toBe('date-time');
+    }
   });
 
   describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {

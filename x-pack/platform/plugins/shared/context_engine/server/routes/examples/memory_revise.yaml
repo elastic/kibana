@@ -1,6 +1,10 @@
 requestBody:
   content:
     application/json:
+      schema:
+        properties:
+          expires_at:
+            format: date-time
       examples:
         reviseMemoryRequest:
           value:
@@ -42,11 +46,18 @@ responses:
         examples:
           conflict:
             value: { statusCode: 409, error: Conflict, message: The memory was already deleted. }
+  429:
+    content:
+      application/json:
+        examples:
+          throttled:
+            value: { statusCode: 429, error: Too Many Requests, message: Too many requests. }
 x-codeSamples:
   - lang: curl
     source: |
-      curl -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
-        -H "Authorization: ApiKey ${API_KEY}" -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+      curl -X PATCH "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+        -H "kbn-xsrf: true" -H "Content-Type: application/json" \
         -d '{
           "type": "memory.session_fact",
           "title": "Cast duration fields before comparison",

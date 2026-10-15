@@ -28,6 +28,16 @@ export interface MemoryGovernance {
   };
 }
 
+export interface MemoryPermissions {
+  kibana?: {
+    privileges?: Array<{
+      space?: string;
+      name?: string[];
+      count?: number;
+    }>;
+  };
+}
+
 export interface StoredMemoryDocument {
   '@timestamp': string;
   id: string;
@@ -41,6 +51,7 @@ export interface StoredMemoryDocument {
   references?: MemoryReference[];
   attributes?: Record<string, string | number | boolean | string[]>;
   governance?: MemoryGovernance;
+  permissions?: MemoryPermissions;
 }
 
 export const createMemoryWriter = ({
