@@ -13,7 +13,16 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
 import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
-import { LabelNode, TEST_SUBJ_EXPAND_BTN, TEST_SUBJ_HANDLE } from './label_node';
+import {
+  GraphDisplayOptionsContext,
+  DEFAULT_GRAPH_DISPLAY_OPTIONS,
+} from '../../graph/graph_display_options_context';
+import {
+  LabelNode,
+  TEST_SUBJ_EXPAND_BTN,
+  TEST_SUBJ_HANDLE,
+  TEST_SUBJ_ORIGIN_HIGHLIGHT,
+} from './label_node';
 
 describe('LabelNode', () => {
   const baseProps: NodeProps = {
@@ -51,6 +60,45 @@ describe('LabelNode', () => {
 
     expect(screen.getByText('Test Label')).toBeInTheDocument();
     expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
+  });
+
+  describe('origin highlight', () => {
+    test.each([
+      ['isOrigin', { isOrigin: true }],
+      ['isOriginAlert', { isOriginAlert: true }],
+    ])('renders the highlight ring when the node is %s', (_, originFlags) => {
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} data={{ ...baseProps.data, ...originFlags }} />
+        </ReactFlow>
+      );
+
+      expect(screen.getByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).toBeInTheDocument();
+    });
+
+    test('does not render the highlight ring for a non-origin node', () => {
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} />
+        </ReactFlow>
+      );
+
+      expect(screen.queryByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).not.toBeInTheDocument();
+    });
+
+    test('does not render the highlight ring when highlightOrigin is disabled', () => {
+      render(
+        <GraphDisplayOptionsContext.Provider
+          value={{ ...DEFAULT_GRAPH_DISPLAY_OPTIONS, highlightOrigin: false }}
+        >
+          <ReactFlow>
+            <LabelNode {...baseProps} data={{ ...baseProps.data, isOrigin: true }} />
+          </ReactFlow>
+        </GraphDisplayOptionsContext.Provider>
+      );
+
+      expect(screen.queryByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).not.toBeInTheDocument();
+    });
   });
 
   test('renders expand button on hover if interactive', async () => {

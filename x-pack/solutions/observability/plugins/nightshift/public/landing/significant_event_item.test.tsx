@@ -202,11 +202,11 @@ describe('SignificantEventItem', () => {
       expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
     });
 
-    it('marks a failed run with the failure label even though the run completed', () => {
+    it('marks a run recorded as failed as unavailable, since investigations no longer fail', () => {
       renderItem({ event: investigatedEvent, investigationRunStatus: 'failed' });
 
       expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-        'Investigation failed'
+        'Investigation unavailable'
       );
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     });

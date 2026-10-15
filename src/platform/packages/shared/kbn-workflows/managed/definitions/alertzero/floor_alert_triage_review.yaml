@@ -8,9 +8,8 @@ description: >
   leaves the tags alone.
 
   Started by the Worker with `workflow.executeAsync` after the batch has been
-  classified, tagged and noted, so the Worker never waits for a human. A
-  per-rule limit caps how many reviews wait at once; further ones are skipped and
-  the alerts stay open and tagged `az:false_positive`.
+  classified, tagged and noted, so the Worker never waits for a human. There is
+  no limit on how many reviews wait at once.
 enabled: true
 tags:
   - security
@@ -25,32 +24,9 @@ settings:
   # Manual autonomy, and a failed or unauthorized attempt re-parks within the same deadline, so
   # the Worker Investigation lifecycle contract puts the ceiling at 168 h. Keep this above it.
   timeout: "170h"
-  # `concurrency.max` reviews per rule wait for a decision at once. The engine counts pending,
-  # waiting and running executions of the group, and a review parked on its proposal is one of
-  # them. One more is SKIPPED at dispatch, before any step runs, and the Worker sees that on the
-  # execution record and says so in the Investigation.
-  #
-  # A slot is held until the proposal is decided or expires (up to 72 h at Manual autonomy), so a
-  # rule that fires faster than analysts decide fills its slots and then raises no further closure
-  # proposals until some are decided. The alerts of a skipped batch are not revisited later.
-  #
-  # The limit is a ceiling, not a guarantee. The engine counts first and then starts the run, so
-  # concurrent dispatches can overshoot it slightly, and it lets a run start when the count itself
-  # fails. Running reviews hold a slot too, including at supervised autonomy where nothing waits
-  # for a human.
-  #
-  # `drop`, not `queue` or `cancel-in-progress`. `queue` holds the review until an analyst decides
-  # the older ones, and expires it after 24h. `cancel-in-progress` cancels the oldest review while
-  # it is parked, which strands its proposal `pending` forever, because nothing withdraws it. Only
-  # the closure proposal is skipped: the classification, tags, notes and Investigation of the batch
-  # are already written by the Worker.
-  #
-  # The key is evaluated before inputs are validated, so it must read a plain input value. It is
-  # scoped to the space the Worker runs in, and a rule id belongs to one space.
-  concurrency:
-    key: "alert-triage-review-{{ inputs.rule_id }}"
-    strategy: drop
-    max: 10
+  # No concurrency limit: every batch with confident false positives raises its proposal. A noisy
+  # rule can therefore have many proposals waiting for a decision at once. Spotting noisy rules,
+  # for example from knowledge indicators, is handled separately and is not decided here.
 
 triggers:
   # Started by the Alert Triage Worker. Manual so it owns no schedule of its own.
@@ -67,8 +43,7 @@ triggers:
           minLength: 1
           maxLength: 512
           description: >-
-            Id of the detection rule that produced the batch. Keys the per-rule limit on
-            reviews waiting for a decision.
+            Id of the detection rule that produced the batch.
         rule_name:
           type: string
           maxLength: 1024

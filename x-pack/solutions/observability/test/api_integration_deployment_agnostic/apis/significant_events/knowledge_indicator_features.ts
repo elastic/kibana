@@ -14,7 +14,13 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { upsertFeature, listFeatures, bulkFeatures, deleteFeature } from './helpers/requests';
+import {
+  upsertFeature,
+  listFeatures,
+  bulkFeatures,
+  bulkFeaturesAcrossSources,
+  deleteFeature,
+} from './helpers/requests';
 import { createTestSource, deleteTestSource } from './helpers/test_source';
 
 const testFeature: BaseFeature = {
@@ -201,16 +207,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { id: idA, uuid: uuidA } = await upsertFeature(apiClient, sourceId, featureA);
         const { id: idB, uuid: uuidB } = await upsertFeature(apiClient, secondSourceId, featureB);
 
-        const response = await apiClient
-          .fetch('POST /internal/streams/features/_bulk', {
-            params: {
-              body: {
-                operations: [{ delete: { id: uuidA } }, { delete: { id: uuidB } }],
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const response = await bulkFeaturesAcrossSources(apiClient, [
+          { delete: { id: uuidA } },
+          { delete: { id: uuidB } },
+        ]);
 
         expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
 
@@ -231,16 +231,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { id: id1, uuid: uuid1 } = await upsertFeature(apiClient, sourceId, feature1);
         const { id: id2, uuid: uuid2 } = await upsertFeature(apiClient, sourceId, feature2);
 
-        const response = await apiClient
-          .fetch('POST /internal/streams/features/_bulk', {
-            params: {
-              body: {
-                operations: [{ delete: { id: uuid1 } }, { delete: { id: uuid2 } }],
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const response = await bulkFeaturesAcrossSources(apiClient, [
+          { delete: { id: uuid1 } },
+          { delete: { id: uuid2 } },
+        ]);
 
         expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
 
@@ -259,30 +253,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { uuid: uuid2 } = await upsertFeature(apiClient, sourceId, feature2);
 
         // Exclude both in one request
-        const excludeResponse = await apiClient
-          .fetch('POST /internal/streams/features/_bulk', {
-            params: {
-              body: {
-                operations: [{ exclude: { id: uuid1 } }, { exclude: { id: uuid2 } }],
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const excludeResponse = await bulkFeaturesAcrossSources(apiClient, [
+          { exclude: { id: uuid1 } },
+          { exclude: { id: uuid2 } },
+        ]);
 
         expect(excludeResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
 
         // Restore both in one request
-        const restoreResponse = await apiClient
-          .fetch('POST /internal/streams/features/_bulk', {
-            params: {
-              body: {
-                operations: [{ restore: { id: uuid1 } }, { restore: { id: uuid2 } }],
-              },
-            },
-          })
-          .expect(200)
-          .then((res) => res.body);
+        const restoreResponse = await bulkFeaturesAcrossSources(apiClient, [
+          { restore: { id: uuid1 } },
+          { restore: { id: uuid2 } },
+        ]);
 
         expect(restoreResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
 
