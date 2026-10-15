@@ -115,7 +115,7 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
-import { MINIMAP_RESERVE_PX } from '../styles/constants';
+import { MINIMAP_HIDE_BREAKPOINT_PX, MINIMAP_RESERVE_PX } from '../styles/constants';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
@@ -210,6 +210,12 @@ export const WorkflowYAMLEditor = ({
   // read-only graph view is GA. The setting is expected to gate the authoring graph view later.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
+  const [editorAreaWrapper, setEditorAreaWrapper] = useState<HTMLDivElement | null>(null);
+  const { width: editorAreaWidth } = useResizeObserver(editorAreaWrapper, 'width');
+  // Width is 0 until the first measurement; keep the minimap until then to avoid a flash.
+  const isMinimapVisible =
+    isVisualEditorEnabled &&
+    (editorAreaWidth === 0 || editorAreaWidth >= MINIMAP_HIDE_BREAKPOINT_PX);
 
   useEffect(() => {
     setStabilityBadgeThemeContext(euiThemeContext);
@@ -408,10 +414,10 @@ export const WorkflowYAMLEditor = ({
 
       setPositionStyles({
         top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-        right: isExecutionYaml || !isVisualEditorEnabled ? '0px' : `${MINIMAP_RESERVE_PX}px`,
+        right: isExecutionYaml || !isMinimapVisible ? '0px' : `${MINIMAP_RESERVE_PX}px`,
       });
     },
-    [isExecutionYaml, isVisualEditorEnabled]
+    [isExecutionYaml, isMinimapVisible]
   );
   const { onFixWithAi } = useFixWithAi({
     editorRef,
@@ -849,14 +855,14 @@ export const WorkflowYAMLEditor = ({
       // The step minimap is the primary scroll indicator — hide Monaco's scrollbar so it
       // doesn't visually compete. Programmatic scrolling (revealLineInCenter, etc.) is
       // unaffected; only the draggable track is removed.
-      ...(isVisualEditorEnabled && {
+      ...(isMinimapVisible && {
         scrollbar: {
           vertical: 'hidden' as const,
           verticalScrollbarSize: 0,
         },
       }),
     };
-  }, [isReadOnlyYaml, isVisualEditorEnabled]);
+  }, [isReadOnlyYaml, isMinimapVisible]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -944,9 +950,9 @@ export const WorkflowYAMLEditor = ({
           <StepActions onStepRun={onStepRun} />
         </div>
       )}
-      <div css={styles.editorAreaWrapper}>
+      <div css={styles.editorAreaWrapper} ref={setEditorAreaWrapper}>
         {/* Step minimap — experimental; hidden with the editor body in graph view. */}
-        {isVisualEditorEnabled && isActive ? (
+        {isMinimapVisible && isActive ? (
           <div
             css={styles.minimapContainer}
             ref={minimapContainerRef}
@@ -962,7 +968,7 @@ export const WorkflowYAMLEditor = ({
         <div
           css={[
             styles.editorContainer,
-            isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX }),
+            isMinimapVisible && css({ paddingRight: MINIMAP_RESERVE_PX }),
           ]}
           className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
         >
