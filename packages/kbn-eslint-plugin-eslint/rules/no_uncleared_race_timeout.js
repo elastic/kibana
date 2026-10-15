@@ -408,10 +408,10 @@ function assignedTimerTarget(ancestors) {
  * Promise constructors stored on the scope that declares the binding.
  *
  * @param {any} scope
- * @returns {Map<any, Map<string, any>>}
+ * @returns {Map<any, Map<string, Array<{ init: any, at: number }>>>}
  */
 function promiseInitsByScope(scope) {
-  /** @type {Map<any, Map<string, any>>} */
+  /** @type {Map<any, Map<string, Array<{ init: any, at: number }>>>} */
   const byScope = new Map();
 
   /**
@@ -428,7 +428,12 @@ function promiseInitsByScope(scope) {
       inits = new Map();
       byScope.set(bindingScope, inits);
     }
-    inits.set(identifier.name, init);
+    let versions = inits.get(identifier.name);
+    if (!versions) {
+      versions = [];
+      inits.set(identifier.name, versions);
+    }
+    versions.push({ init, at: nodeStart(identifier) });
   }
 
   walk(
@@ -457,19 +462,50 @@ function promiseInitsByScope(scope) {
 }
 
 /**
+ * @param {any} node
+ * @returns {number}
+ */
+function nodeStart(node) {
+  if (node && node.range) {
+    return node.range[0];
+  }
+  const start = node && node.loc && node.loc.start;
+  if (start) {
+    return start.line * 100000 + start.column;
+  }
+  return 0;
+}
+
+/**
+ * The promise constructor this identifier refers to at this point in the function.
+ * A later assignment to the same binding is not visible yet.
+ *
  * @param {any} identifier
- * @param {Map<any, Map<string, any>>} initsByScope
+ * @param {Map<any, Map<string, Array<{ init: any, at: number }>>>} initsByScope
  * @returns {any}
  */
 function lookupPromise(identifier, initsByScope) {
+  const useAt = nodeStart(identifier);
   /** @type {Set<any>} */
   const seen = new Set();
   let scope = enclosingScope(identifier);
   while (scope && !seen.has(scope)) {
     seen.add(scope);
-    const inits = initsByScope.get(scope);
-    if (inits && inits.has(identifier.name)) {
-      return inits.get(identifier.name);
+    const versions = initsByScope.get(scope) && initsByScope.get(scope).get(identifier.name);
+    if (versions) {
+      /** @type {{ init: any, at: number } | undefined} */
+      let chosen;
+      for (const version of versions) {
+        if (version.at <= useAt) {
+          chosen = version;
+        }
+      }
+      if (chosen) {
+        return chosen.init;
+      }
+    }
+    if (bindingNames(scope).has(identifier.name)) {
+      return;
     }
     const parent = enclosingScope(scope);
     if (parent === scope) {
@@ -481,13 +517,13 @@ function lookupPromise(identifier, initsByScope) {
 
 /**
  * @param {any} scope
- * @returns {{ ids: Set<string>, members: Set<string> }}
+ * @returns {{ ids: Array<{ key: string, node: any }>, members: Array<{ key: string, node: any }> }}
  */
-function clearedTimerKeys(scope) {
-  /** @type {Set<string>} */
-  const ids = new Set();
-  /** @type {Set<string>} */
-  const members = new Set();
+function clearedTimerSites(scope) {
+  /** @type {Array<{ key: string, node: any }>} */
+  const ids = [];
+  /** @type {Array<{ key: string, node: any }>} */
+  const members = [];
   walk(
     scope,
     (node) => {
@@ -499,11 +535,11 @@ function clearedTimerKeys(scope) {
         return;
       }
       if (argument.type === 'Identifier') {
-        ids.add(identifierKey(argument));
+        ids.push({ key: identifierKey(argument), node });
       }
       const key = memberKey(argument);
       if (key) {
-        members.add(key);
+        members.push({ key, node });
       }
     },
     true
@@ -512,21 +548,42 @@ function clearedTimerKeys(scope) {
 }
 
 /**
- * @param {{ identifier?: any, memberKey?: string } | null} target
- * @param {{ ids: Set<string>, members: Set<string> }} cleared
+ * @param {any} ancestor
+ * @param {any} node
  * @returns {boolean}
  */
-function isTimerCleared(target, cleared) {
+function containsNode(ancestor, node) {
+  let current = node;
+  while (current) {
+    if (current === ancestor) {
+      return true;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+/**
+ * A clearTimeout inside the deadline callback runs only after the timer fires,
+ * so it does not drop the closure when the other arm wins.
+ *
+ * @param {{ node: any, target: { identifier?: any, memberKey?: string } | null }} timer
+ * @param {{ ids: Array<{ key: string, node: any }>, members: Array<{ key: string, node: any }> }} cleared
+ * @returns {boolean}
+ */
+function isTimerCleared(timer, cleared) {
+  const target = timer.target;
   if (!target) {
     return false;
   }
-  if (target.memberKey) {
-    return cleared.members.has(target.memberKey);
-  }
-  if (target.identifier) {
-    return cleared.ids.has(identifierKey(target.identifier));
-  }
-  return false;
+  const callback = unwrap(timer.node.arguments && timer.node.arguments[0]);
+  /** @type {Array<{ key: string, node: any }>} */
+  const sites = target.memberKey
+    ? cleared.members.filter((site) => site.key === target.memberKey)
+    : target.identifier
+      ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
+      : [];
+  return sites.some((site) => !callback || !containsNode(callback, site.node));
 }
 
 /**
@@ -625,7 +682,7 @@ function deadlineTimers(executor) {
 
 /**
  * @param {any} race
- * @param {Map<any, Map<string, any>>} initsByScope
+ * @param {Map<any, Map<string, Array<{ init: any, at: number }>>>} initsByScope
  * @returns {any[]}
  */
 function raceExecutors(race, initsByScope) {
@@ -676,10 +733,10 @@ module.exports = {
             }
             const scope = enclosingScope(node);
             const inits = promiseInitsByScope(scope);
-            const cleared = clearedTimerKeys(scope);
+            const cleared = clearedTimerSites(scope);
             for (const executor of raceExecutors(node, inits)) {
               for (const timer of deadlineTimers(executor)) {
-                if (isTimerCleared(timer.target, cleared)) {
+                if (isTimerCleared(timer, cleared)) {
                   continue;
                 }
                 context.report({ node: timer.node, messageId: 'uncleared' });
