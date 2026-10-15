@@ -145,6 +145,16 @@ describe('bulk_delete', () => {
         clientArgs
       );
 
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          ids: ['mock-comment-1', 'mock-comment-2'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        }
+      );
+
       expect(
         clientArgs.services.userActionService.creator.bulkCreateAttachmentBulkDeletion
       ).toHaveBeenCalledWith(
@@ -855,7 +865,32 @@ describe('bulk_delete', () => {
         clientArgs.request,
         {
           caseId,
-          attachmentIds: ['file-attachment-1'],
+          ids: ['file-attachment-1'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('only emits the event for the file attachments confirmed deleted', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+      clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1', 'file-2'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          ids: ['file-attachment-2'],
           attachmentType: 'externalReference',
           owner: 'securitySolution',
         }
