@@ -20,6 +20,7 @@ interface Props {
   sort?: SortField;
   filters?: Filter[];
   reloadSubject: Subject<boolean>;
+  isInteractive?: boolean;
 }
 
 export function GroupSloView({
@@ -29,6 +30,7 @@ export function GroupSloView({
   kqlQuery = '',
   filters = [],
   reloadSubject,
+  isInteractive = true,
 }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });
@@ -50,6 +52,7 @@ export function GroupSloView({
       kqlQuery={combinedKqlQuery}
       filters={filters}
       lastRefreshTime={lastRefreshTime}
+      isInteractive={isInteractive}
     />
   );
 }
