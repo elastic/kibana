@@ -197449,7 +197449,7 @@ components:
               oneOf:
                 - properties:
                     kill_descendants:
-                      description: Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.
+                      description: Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
                       example: true
                       type: boolean
                     pid:
@@ -197469,7 +197469,7 @@ components:
                       minLength: 1
                       type: string
                     kill_descendants:
-                      description: Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.
+                      description: Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
                       example: true
                       type: boolean
                   required:
