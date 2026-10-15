@@ -14,6 +14,8 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -102,20 +104,37 @@ const workloadColumns: Array<EuiBasicTableColumn<WorkloadRow>> = [
       defaultMessage: 'Name',
     }),
     truncateText: true,
+    // The link already carries the base path and the space of the binding, which may not be the
+    // current one, so it goes in as is rather than through `basePath.prepend`.
+    render: (displayName: string, { href }: WorkloadRow) =>
+      href ? (
+        <EuiLink
+          href={href}
+          target="_blank"
+          external
+          data-test-subj="serviceAccountBoundWorkloadLink"
+        >
+          {displayName}
+        </EuiLink>
+      ) : (
+        displayName
+      ),
   },
   {
     field: 'workloadType',
     name: i18n.translate('xpack.security.management.serviceAccounts.delete.workloadTypeColumn', {
       defaultMessage: 'Type',
     }),
-    render: (workloadType: string) => <EuiBadge color="hollow">{workloadType}</EuiBadge>,
+    render: (workloadType: string, { typeName }: WorkloadRow) => (
+      <EuiBadge color="hollow">{typeName ?? workloadType}</EuiBadge>
+    ),
   },
 ];
 
 /**
- * Deletes one service account after checking whether workloads are bound to it. Shows nothing
- * until that check answers, then asks the user to confirm, listing the bound workloads and warning
- * that they stop running when there are any.
+ * Deletes one service account after checking whether workloads are bound to it. Shows a loading
+ * state until that check answers, then asks the user to confirm, listing the bound workloads and
+ * warning that they stop running when there are any.
  */
 export const DeleteServiceAccountModal = ({
   serviceAccount: { id, name },
@@ -189,10 +208,6 @@ export const DeleteServiceAccountModal = ({
     if (isMounted()) onDeleted({ status: 'deleted', warnings });
   };
 
-  if (state.status === 'loading') {
-    return null;
-  }
-
   const title = i18n.translate('xpack.security.management.serviceAccounts.delete.confirmTitle', {
     defaultMessage: 'Delete "{name}"?',
     values: { name },
@@ -204,6 +219,42 @@ export const DeleteServiceAccountModal = ({
   const cancel = () => {
     if (!isDeleting) onClose();
   };
+
+  // Looking up the bound workloads can take a while, since each workload type resolves its own,
+  // so the modal opens right away and can be cancelled while it waits.
+  if (state.status === 'loading') {
+    return (
+      <EuiModal
+        aria-labelledby={titleId}
+        onClose={cancel}
+        initialFocus="[data-test-subj=serviceAccountDeleteLoadingCancel]"
+        data-test-subj="serviceAccountDeleteLoadingModal"
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner
+                size="l"
+                aria-label={i18n.translate(
+                  'xpack.security.management.serviceAccounts.delete.loadingWorkloads',
+                  { defaultMessage: 'Checking for bound workloads' }
+                )}
+                data-test-subj="serviceAccountDeleteLoading"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={cancel} data-test-subj="serviceAccountDeleteLoadingCancel">
+            {cancelButtonText}
+          </EuiButtonEmpty>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
 
   if (state.status === 'confirm') {
     return (

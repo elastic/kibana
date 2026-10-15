@@ -28,8 +28,27 @@ export function getFallbackKibanaUrl({ http }: CoreSetup) {
     .slice(0, -1)}`;
 }
 
-export async function getFallbackESUrl(esLegacyConfigService: EsLegacyConfigService) {
+/**
+ * Returns the configured Elasticsearch hosts without the credentials they may contain.
+ */
+export async function getFallbackESUrl(
+  esLegacyConfigService: EsLegacyConfigService
+): Promise<string[]> {
   const config = await esLegacyConfigService.readConfig();
 
-  return config.hosts;
+  return config.hosts.map(removeCredentials).filter((host): host is string => host !== undefined);
+}
+
+function removeCredentials(host: string): string | undefined {
+  if (!URL.canParse(host)) {
+    return undefined;
+  }
+  const url = new URL(host);
+  if (!url.username && !url.password) {
+    return host;
+  }
+  url.username = '';
+  url.password = '';
+  // URL serializes an empty path as "/", which would change the commands built from this value.
+  return host.endsWith('/') ? url.href : url.href.replace(/\/$/, '');
 }

@@ -96,6 +96,9 @@ const toParameter = (parameter: Node): Node => {
     in: location,
     required,
     description,
+    ...(parameter['x-ms-skip-url-encoding'] === undefined
+      ? {}
+      : { 'x-ms-skip-url-encoding': parameter['x-ms-skip-url-encoding'] }),
     schema: toSchema(parameter),
     ...(serialization && (location === 'query' || serialization.style === undefined)
       ? { style: serialization.style, explode: serialization.explode }

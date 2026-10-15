@@ -29,6 +29,10 @@ export const servers: ScoutServerConfig = {
       // Exercise the managed plugin API through the Workflows example's HTTP endpoints.
       `--plugin-path=${resolve(REPO_ROOT, 'examples/developer_examples')}`,
       `--plugin-path=${resolve(REPO_ROOT, 'examples/workflows_extensions_example')}`,
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'x-pack/platform/test/task_manager/plugins/service_accounts'
+      )}`,
     ],
   },
 };
