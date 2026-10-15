@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 
 interface CleanupStaleEventsResponse {
   scanned: number;

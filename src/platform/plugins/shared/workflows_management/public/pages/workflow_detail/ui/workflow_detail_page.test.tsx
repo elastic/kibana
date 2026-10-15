@@ -462,6 +462,22 @@ describe('WorkflowDetailPage', () => {
       expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
     });
 
+    it('mounts the execution flyout for a draft run before the workflow is saved', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({}, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('execution-123');
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
+    });
+
     it('opens the list flyout on Executions click and closes it on the next click', () => {
       const updateUrlState = jest.fn();
       mockUseWorkflowUrlState.mockReturnValue({

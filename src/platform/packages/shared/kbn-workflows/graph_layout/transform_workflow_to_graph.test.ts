@@ -9,6 +9,7 @@
 
 import { computeTopologyFingerprint } from './compute_topology_fingerprint';
 import { transformWorkflowToGraph } from './transform_workflow_to_graph';
+import type { StructureSequence } from './types';
 import type { WorkflowYaml } from '../spec/schema';
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
@@ -562,12 +563,9 @@ describe('transformWorkflowToGraph', () => {
     );
     // merge node connects to its first inner step
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'atomic', target: 'm1' }));
-    // the merge node has exactly one out-edge (to the first inner step)
-    const mergeOutEdges = r.edges.filter((e) => e.source === 'atomic');
-    expect(mergeOutEdges).toHaveLength(1);
-    // flow continues from the body's leaves, not from the merge step itself
+    // the merge node itself (not m2) is the exit point for the next step
     const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
-    expect(sourcesIntoAfter).toEqual(['m2']);
+    expect(sourcesIntoAfter).toEqual(['atomic']);
   });
 
   it('emits bypass lane nodes for empty if branches (one per branch)', () => {
@@ -1220,5 +1218,345 @@ describe('transformWorkflowToGraph — fallback lane', () => {
     // affects laneNodes, it does not remove the node from bypassLaneNodes).
     // This assertion just documents the expected top-level plumbing.
     expect(r.bypassLaneNodes.some((n) => n.id === bypassId)).toBe(true);
+  });
+});
+
+describe('transformWorkflowToGraph — structure', () => {
+  const transform = (steps: unknown) =>
+    transformWorkflowToGraph(minimal({ steps: steps as WorkflowYaml['steps'] }));
+
+  const step = (id: string, extra: Record<string, unknown> = {}) => ({
+    kind: 'step',
+    id,
+    lanes: [],
+    ...extra,
+  });
+
+  it('is empty for an undefined workflow', () => {
+    expect(transformWorkflowToGraph(undefined).structure).toEqual({ triggers: [], items: [] });
+  });
+
+  it('lists triggers and plain steps in declaration order', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [
+          { type: 'manual', enabled: true },
+          { type: 'scheduled', enabled: true, with: { every: '1h' } },
+        ] as unknown as WorkflowYaml['triggers'],
+        steps: [
+          { name: 'first', type: 'http' },
+          { name: 'second', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.structure).toEqual({
+      triggers: ['manual', 'scheduled'],
+      items: [step('first'), step('second')],
+    });
+  });
+
+  it('models an if/else as a fork followed by its join', () => {
+    const r = transform([
+      {
+        name: 'gate',
+        type: 'if',
+        condition: 'x',
+        steps: [{ name: 't1', type: 'http' }],
+        else: [{ name: 'e1', type: 'http' }],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'gate',
+        branches: [
+          { head: 't1', items: [step('t1')], label: 'true' },
+          { head: 'e1', items: [step('e1')], label: 'false' },
+        ],
+        lanes: [],
+      },
+      step('gate-join'),
+      step('after'),
+    ]);
+  });
+
+  it('gives a missing else branch the bypass lane as its head', () => {
+    const r = transform([
+      { name: 'gate', type: 'if', condition: 'x', steps: [{ name: 't1', type: 'http' }] },
+    ]);
+    const [bypass] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'gate',
+        branches: [
+          { head: 't1', items: [step('t1')], label: 'true' },
+          { head: bypass.id, items: [], label: 'false' },
+        ],
+        lanes: [],
+      },
+      step('gate-join'),
+    ]);
+  });
+
+  it('gives an if with two empty branches a bypass lane for each', () => {
+    const r = transform([{ name: 'gate', type: 'if', condition: 'x', steps: [], else: [] }]);
+    const [thenLane, elseLane] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'gate',
+        branches: [
+          { head: thenLane.id, items: [], label: 'true' },
+          { head: elseLane.id, items: [], label: 'false' },
+        ],
+        lanes: [],
+      },
+      step('gate-join'),
+    ]);
+  });
+
+  it('keeps an empty switch case as a labelled bypass lane, in declaration order', () => {
+    const r = transform([
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: 'v',
+        cases: [
+          { match: 'a', steps: [{ name: 'on_a', type: 'http' }] },
+          { match: 'b', steps: [] },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    const [emptyCase, defaultLane] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'sw',
+        branches: [
+          { head: 'on-a', items: [step('on-a')], label: 'a' },
+          { head: emptyCase.id, items: [], label: 'b' },
+          { head: defaultLane.id, items: [], label: 'default' },
+        ],
+        lanes: [],
+      },
+      step('sw-join'),
+      step('after'),
+    ]);
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        target: emptyCase.id,
+        label: 'b',
+        branchType: 'switch',
+      })
+    );
+    expect(r.edges.filter((e) => e.target === 'sw-join').map((e) => e.source)).toEqual(
+      expect.arrayContaining(['on-a', emptyCase.id, defaultLane.id])
+    );
+    expect(r.edges.filter((e) => e.target === 'after').map((e) => e.source)).toEqual(['sw-join']);
+  });
+
+  it('keeps an empty parallel branch as a lane when another branch has steps', () => {
+    const r = transform([
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'a', steps: [{ name: 'a1', type: 'http' }] },
+          { name: 'b', steps: [] },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    const [bypass] = r.bypassLaneNodes;
+    expect(r.structure?.items[0]).toEqual({
+      kind: 'fork',
+      id: 'par',
+      branches: [
+        { head: 'a1', items: [step('a1')], label: 'a' },
+        { head: bypass.id, items: [], label: 'b' },
+      ],
+      lanes: [],
+    });
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({ source: 'par', target: bypass.id, label: 'b', branchIndex: 1 })
+    );
+    expect(r.edges.filter((e) => e.target === 'par-join').map((e) => e.source)).toEqual(
+      expect.arrayContaining(['a1', bypass.id])
+    );
+    expect(r.edges.filter((e) => e.target === 'after').map((e) => e.source)).toEqual(['par-join']);
+  });
+
+  it('gives a parallel whose branches are all empty a bypass lane for each', () => {
+    const r = transform([
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'a', steps: [] },
+          { name: 'b', steps: [] },
+        ],
+      },
+    ]);
+    const [laneA, laneB] = r.bypassLaneNodes;
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'fork',
+        id: 'par',
+        branches: [
+          { head: laneA.id, items: [], label: 'a' },
+          { head: laneB.id, items: [], label: 'b' },
+        ],
+        lanes: [],
+      },
+      step('par-join'),
+    ]);
+  });
+
+  it('models a foreach as a container holding its own body', () => {
+    const r = transform([
+      {
+        name: 'loop',
+        type: 'foreach',
+        foreach: 'items',
+        steps: [
+          { name: 'i1', type: 'http' },
+          {
+            name: 'inner_gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'i2', type: 'http' }],
+            else: [{ name: 'i3', type: 'http' }],
+          },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      {
+        kind: 'container',
+        id: 'loop',
+        body: [
+          step('i1'),
+          {
+            kind: 'fork',
+            id: 'inner-gate',
+            branches: [
+              { head: 'i2', items: [step('i2')], label: 'true' },
+              { head: 'i3', items: [step('i3')], label: 'false' },
+            ],
+            lanes: [],
+          },
+          step('inner-gate-join'),
+        ],
+        lanes: [],
+      },
+      step('after'),
+    ]);
+  });
+
+  it('lists a fallback lane on its owner and records whether it rejoins', () => {
+    const lane = (extra: Record<string, unknown>) =>
+      transform([
+        {
+          name: 'risky',
+          type: 'http',
+          'on-failure': {
+            fallback: [
+              { name: 'f1', type: 'http' },
+              { name: 'f2', type: 'http' },
+            ],
+            ...extra,
+          },
+        },
+        { name: 'after', type: 'http' },
+      ]).structure?.items[0];
+
+    expect(lane({})).toEqual(
+      step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: false }] })
+    );
+    expect(lane({ continue: true })).toEqual(
+      step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: true }] })
+    );
+  });
+
+  it('keeps a merge step body attached to the step instead of in the sequence', () => {
+    const r = transform([
+      {
+        name: 'combine',
+        type: 'merge',
+        steps: [
+          { name: 'm1', type: 'http' },
+          { name: 'm2', type: 'http' },
+        ],
+      },
+      { name: 'after', type: 'http' },
+    ]);
+    expect(r.structure?.items).toEqual([
+      step('combine', { attached: [step('m1'), step('m2')] }),
+      step('after'),
+    ]);
+  });
+
+  it('places every node exactly once', () => {
+    const r = transform([
+      { name: 'a', type: 'http' },
+      {
+        name: 'gate',
+        type: 'if',
+        condition: 'x',
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              {
+                name: 'sw',
+                type: 'switch',
+                expression: 'v',
+                cases: [
+                  { match: 'a', steps: [{ name: 'on_a', type: 'http' }] },
+                  { match: 'b', steps: [] },
+                ],
+              },
+            ],
+          },
+        ],
+        'on-failure': { fallback: [{ name: 'recover', type: 'http' }], continue: true },
+      },
+      { name: 'last', type: 'http' },
+    ]);
+
+    const ids: string[] = [];
+    const collect = (items: StructureSequence): void => {
+      for (const item of items) {
+        ids.push(item.id);
+        if (item.kind === 'fork') {
+          for (const branch of item.branches) {
+            if (branch.items.length === 0) ids.push(branch.head);
+            collect(branch.items);
+          }
+        }
+        if (item.kind === 'container') collect(item.body);
+        if (item.kind === 'step' && item.attached) collect(item.attached);
+        for (const lane of item.lanes) collect(lane.items);
+      }
+    };
+    collect(r.structure?.items ?? []);
+
+    const expected = [
+      ...r.nodes.filter((n) => n.type !== 'trigger').map((n) => n.id),
+      ...r.bypassLaneNodes.map((n) => n.id),
+      ...r.foreachGroups.flatMap((g) => [
+        ...g.innerNodes.map((n) => n.id),
+        ...g.bypassLaneNodes.map((n) => n.id),
+      ]),
+    ];
+    expect([...ids].sort()).toEqual([...expected].sort());
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

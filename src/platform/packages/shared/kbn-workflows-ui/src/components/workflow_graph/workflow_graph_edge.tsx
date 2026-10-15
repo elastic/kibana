@@ -22,6 +22,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
+import { EDGE_LABEL_MAX_CHARS } from './edge_label_metrics';
 import { INSERT_LAYOUT_MS } from './use_insert_layout_animation';
 
 const drawInStroke = keyframes({
@@ -57,8 +58,6 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   readonly drawIn?: boolean;
 }
 
-const LABEL_TRUNCATE = 24;
-
 function displayEdgeLabel(label: string): string {
   if (label === 'true') {
     return i18n.translate('workflowsUi.graph.trueBranchLabel', { defaultMessage: 'true' });
@@ -74,6 +73,15 @@ function displayEdgeLabel(label: string): string {
   }
   return label;
 }
+
+// Branch labels are annotations on the graph and must paint above the container
+// frames they sit inside — a foreach/while body is a 50%-opaque panel that would
+// otherwise veil them. `.react-flow__edgelabel-renderer` ships no z-index, and it
+// is a sibling of `.react-flow__nodes` (which also has none), so labels tie with
+// nodes at level 0 and lose on DOM order.
+// Must exceed the deepest node z-index, which in `zIndexMode: 'basic'` with
+// `elevateNodesOnSelect={false}` equals the container nesting depth.
+const EDGE_LABEL_Z_INDEX = 10;
 
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
@@ -129,7 +137,9 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   const rawLabel = edgeData?.label;
   const fullLabel = rawLabel !== undefined ? displayEdgeLabel(rawLabel) : '';
   const truncated =
-    fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
+    fullLabel.length > EDGE_LABEL_MAX_CHARS
+      ? `${fullLabel.slice(0, EDGE_LABEL_MAX_CHARS - 1)}…`
+      : fullLabel;
   const showLabel = Boolean(fullLabel);
   const isBranchEdge = edgeData?.branchType != null;
 
@@ -175,6 +185,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
           <div
             style={{
               position: 'absolute',
+              zIndex: EDGE_LABEL_Z_INDEX,
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
             }}

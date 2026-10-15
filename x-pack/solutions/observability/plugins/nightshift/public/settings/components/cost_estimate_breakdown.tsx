@@ -8,12 +8,14 @@
 import React from 'react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiText,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -96,6 +98,12 @@ const CostValue = ({
   </EuiFlexGroup>
 );
 
+interface CostTableRow {
+  group: CostBudgetGroup;
+  today: BudgetGroupCost;
+  month: BudgetGroupCost;
+}
+
 export const CostData = ({
   data,
   isRefreshing,
@@ -118,6 +126,46 @@ export const CostData = ({
     defaultMessage: '{today} today · {month} this month (recorded calls)',
     values: { today: todayText, month: monthText },
   });
+  const items = COST_BUDGET_GROUPS.flatMap<CostTableRow>((group) => {
+    const today = data.today.groups.find((item) => item.group === group);
+    const month = data.month.groups.find((item) => item.group === group);
+    return today && month ? [{ group, today, month }] : [];
+  });
+  const columns: Array<EuiBasicTableColumn<CostTableRow>> = [
+    {
+      field: 'group',
+      name: i18n.translate('xpack.nightshift.settings.costEstimate.groupColumnTitle', {
+        defaultMessage: 'Group',
+      }),
+      render: (group: CostBudgetGroup) => GROUP_LABELS[group],
+    },
+    {
+      field: 'today',
+      name: i18n.translate('xpack.nightshift.settings.costEstimate.todayColumnTitle', {
+        defaultMessage: 'Today',
+      }),
+      render: (today: BudgetGroupCost) => (
+        <CostValue
+          period={data.today}
+          group={today}
+          testSubj={`nightshiftCostGroupToday-${today.group}`}
+        />
+      ),
+    },
+    {
+      field: 'month',
+      name: i18n.translate('xpack.nightshift.settings.costEstimate.thisMonthColumnTitle', {
+        defaultMessage: 'This month',
+      }),
+      render: (month: BudgetGroupCost) => (
+        <CostValue
+          period={data.month}
+          group={month}
+          testSubj={`nightshiftCostGroupMonth-${month.group}`}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
@@ -176,68 +224,20 @@ export const CostData = ({
       </EuiFlexGroup>
 
       <EuiSpacer />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.groupColumnTitle', {
-                defaultMessage: 'Group',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.todayColumnTitle', {
-                defaultMessage: 'Today',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.thisMonthColumnTitle', {
-                defaultMessage: 'This month',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {COST_BUDGET_GROUPS.map((groupName) => {
-        const todayGroup = data.today.groups.find((group) => group.group === groupName);
-        const monthGroup = data.month.groups.find((group) => group.group === groupName);
-        if (!todayGroup || !monthGroup) {
-          return null;
-        }
-        return (
-          <EuiFlexGroup
-            key={groupName}
-            alignItems="center"
-            data-test-subj={`nightshiftCostGroup-${groupName}`}
-          >
-            <EuiFlexItem>
-              <EuiText size="s">{GROUP_LABELS[groupName]}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CostValue
-                period={data.today}
-                group={todayGroup}
-                testSubj={`nightshiftCostGroupToday-${groupName}`}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CostValue
-                period={data.month}
-                group={monthGroup}
-                testSubj={`nightshiftCostGroupMonth-${groupName}`}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      })}
+      <EuiBasicTable
+        items={items}
+        columns={columns}
+        rowHeader="group"
+        tableCaption={i18n.translate(
+          'xpack.nightshift.settings.costEstimate.breakdownTableCaption',
+          {
+            defaultMessage: 'Inference cost estimate by activity group',
+          }
+        )}
+        rowProps={({ group }: CostTableRow) => ({
+          'data-test-subj': `nightshiftCostGroup-${group}`,
+        })}
+      />
     </>
   );
 };

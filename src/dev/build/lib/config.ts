@@ -21,7 +21,7 @@ import {
 import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { VersionInfo } from './version_info';
 import { getVersionInfo } from './version_info';
-import type { PlatformName, PlatformArchitecture } from './platform';
+import type { PlatformName, PlatformArchitecture, Variant } from './platform';
 import { ALL_PLATFORMS, SERVERLESS_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
 import type { BuildOptions } from '../build_distributables';
 
@@ -206,9 +206,9 @@ export class Config {
     return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
   }
 
-  getPlatform(name: PlatformName, arch: PlatformArchitecture) {
+  getPlatform(name: PlatformName, arch: PlatformArchitecture, variant?: Variant) {
     const selected = ALL_PLATFORMS.find((p) => {
-      return name === p.getName() && arch === p.getArchitecture();
+      return name === p.getName() && arch === p.getArchitecture() && variant === p.getVariant();
     });
 
     if (!selected) {

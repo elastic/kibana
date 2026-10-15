@@ -5,107 +5,131 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
-import type { AgentExecution, ExecutionStart } from '@kbn/agent-builder-server';
+import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { isTerminalStatus } from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-/** Ceiling on agent executions one lookup reads. */
-export const MAX_IN_PROGRESS_EXECUTIONS = 1000;
+/** Workflow executions read at the same time. */
+const WORKFLOW_EXECUTION_READ_CONCURRENCY = 5;
 
-/**
- * A running agent execution whose node has not reported liveness for this long is treated as
- * dead. Agent Builder writes a heartbeat every 10s and its followers time out after 60s; this is
- * deliberately looser so a slow node does not flip an investigation out of progress. Agent
- * Builder exports no constant for it.
- */
-export const STALE_AGENT_HEARTBEAT_MS = 5 * 60 * 1000;
+export type InProgressCandidate = Pick<ConversationWithoutRoundsWithPermissions, 'id' | 'metadata'>;
 
 export interface InProgressResolverDeps {
-  getAgentExecutions: () => ExecutionStart;
+  getWorkflowsManagement: () => WorkflowsServerPluginSetup['management'] | undefined;
+  getProposals: () => ProposalsPluginStart | undefined;
   logger: Logger;
-  now?: () => number;
 }
 
 /**
- * Whether an investigation is being worked on: Agent Builder has a scheduled or running execution
- * for its conversation. Nothing is stored; every read asks again.
+ * Whether investigations are being worked on: open, with no proposal awaiting a decision, and with
+ * at least one of their `workflow_execution_ids` not in a terminal status. Nothing is stored;
+ * every read asks again, and only for the investigations being read, because a workflow execution
+ * does not name the investigation it works on.
  *
- * Agent executions are read without an access check (Agent Builder scopes them to the space
- * only), so only conversation ids leave this module, and callers intersect them with
- * access-checked conversation reads. A failed lookup is logged and counts as not in progress:
+ * Executions and proposals are read without the caller's Workflows or proposals privileges, so
+ * only the ids of the investigations in progress leave this module. An execution that cannot be
+ * read counts as finished, and any other failed lookup is logged and counts as not in progress:
  * reads must not fail on it.
  */
 export class InProgressResolver {
-  private readonly now: () => number;
+  constructor(private readonly deps: InProgressResolverDeps) {}
 
-  constructor(private readonly deps: InProgressResolverDeps) {
-    this.now = deps.now ?? Date.now;
-  }
+  /** The ids of the given investigations that are in progress. */
+  async findInProgressIds(
+    request: KibanaRequest,
+    spaceId: string,
+    conversations: InProgressCandidate[]
+  ): Promise<Set<string>> {
+    const workflowsManagement = this.deps.getWorkflowsManagement();
+    const candidates = conversations
+      .filter(({ metadata }) => metadata?.status !== 'closed')
+      .map(({ id, metadata }) => ({ id, executionIds: toWorkflowExecutionIds(metadata) }))
+      .filter(({ executionIds }) => executionIds.length > 0);
+    if (!workflowsManagement || candidates.length === 0) {
+      return new Set();
+    }
 
-  /** Conversation ids in progress in the space. */
-  async findInProgressIds(request: KibanaRequest, spaceId: string): Promise<Set<string>> {
-    return this.findAgentRunConversationIds(request, spaceId);
+    try {
+      const pendingProposals = await this.countPendingProposals(
+        candidates.map(({ id }) => id),
+        spaceId
+      );
+      const waitingOnWorkers = candidates.filter(({ id }) => !pendingProposals.get(id));
+      const running = await this.findRunningExecutionIds(
+        workflowsManagement,
+        request,
+        spaceId,
+        waitingOnWorkers.flatMap(({ executionIds }) => executionIds)
+      );
+      return new Set(
+        waitingOnWorkers
+          .filter(({ executionIds }) => executionIds.some((id) => running.has(id)))
+          .map(({ id }) => id)
+      );
+    } catch (error) {
+      this.deps.logger.warn(`Could not resolve investigations in progress: ${errorMessage(error)}`);
+      return new Set();
+    }
   }
 
   /** Whether one investigation is in progress. */
   async isInProgress(
     request: KibanaRequest,
     spaceId: string,
-    conversationId: string
+    conversation: InProgressCandidate
   ): Promise<boolean> {
-    const ids = await this.findAgentRunConversationIds(request, spaceId);
-    return ids.has(conversationId);
+    const ids = await this.findInProgressIds(request, spaceId, [conversation]);
+    return ids.has(conversation.id);
   }
 
-  /**
-   * On a fresh cluster the agent execution index may not exist yet or have no shard allocated;
-   * Agent Builder then throws (for example `no_shard_available_action_exception`). That, like any
-   * other failure here, is logged and reads as no agent runs, so it cannot fail the request.
-   */
-  private async findAgentRunConversationIds(
-    request: KibanaRequest,
+  /** Same definition as `pending_proposal_count`, but without the caller's proposals privilege. */
+  private async countPendingProposals(
+    conversationIds: string[],
     spaceId: string
-  ): Promise<Set<string>> {
-    let executions: AgentExecution[];
-    try {
-      executions = await this.deps.getAgentExecutions().findExecutions(request, {
-        spaceId,
-        filter: { status: [ExecutionStatus.scheduled, ExecutionStatus.running] },
-        size: MAX_IN_PROGRESS_EXECUTIONS,
-      });
-    } catch (error) {
-      this.deps.logger.warn(`Could not read agent executions: ${errorMessage(error)}`);
-      return new Set();
+  ): Promise<Map<string, number>> {
+    const proposals = this.deps.getProposals();
+    if (!proposals) {
+      return new Map();
     }
-
-    const ids = new Set<string>();
-    for (const execution of executions) {
-      if (execution.executionMode !== AgentExecutionMode.conversation) {
-        continue;
-      }
-      if (this.isStale(execution)) {
-        continue;
-      }
-      ids.add(execution.agentParams.conversationId);
-    }
-    return ids;
+    return proposals.getProposalsService().countPendingByConversationIds(conversationIds, spaceId);
   }
 
-  /**
-   * A running execution is stale when its last liveness signal is older than
-   * {@link STALE_AGENT_HEARTBEAT_MS}. Agent Builder writes a heartbeat when it creates the
-   * execution and every 10s while it runs; an execution without one (written before Agent
-   * Builder recorded heartbeats) falls back to its creation time, so it cannot read as in
-   * progress forever. Scheduled executions are waiting for a node and are not judged here.
-   */
-  private isStale(execution: AgentExecution): boolean {
-    if (execution.status !== ExecutionStatus.running) {
-      return false;
-    }
-    const lastSignalAt = Date.parse(execution.lastHeartbeat ?? execution['@timestamp']);
-    return Number.isFinite(lastSignalAt) && this.now() - lastSignalAt > STALE_AGENT_HEARTBEAT_MS;
+  private async findRunningExecutionIds(
+    workflowsManagement: WorkflowsServerPluginSetup['management'],
+    request: KibanaRequest,
+    spaceId: string,
+    executionIds: string[]
+  ): Promise<Set<string>> {
+    const limit = pLimit(WORKFLOW_EXECUTION_READ_CONCURRENCY);
+    const running = await Promise.all(
+      [...new Set(executionIds)].map((id) =>
+        limit(async () => {
+          try {
+            const execution = await workflowsManagement.getWorkflowExecution(id, spaceId, {
+              request,
+              omitStepExecutions: true,
+            });
+            return execution && !isTerminalStatus(execution.status) ? id : undefined;
+          } catch (error) {
+            this.deps.logger.debug(
+              `Could not read workflow execution "${id}": ${errorMessage(error)}`
+            );
+            return undefined;
+          }
+        })
+      )
+    );
+    return new Set(running.filter((id): id is string => id !== undefined));
   }
 }
+
+const toWorkflowExecutionIds = (metadata: InProgressCandidate['metadata']): string[] => {
+  const ids = metadata?.workflow_execution_ids;
+  return Array.isArray(ids) ? ids.filter((id) => id.length > 0) : [];
+};
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
