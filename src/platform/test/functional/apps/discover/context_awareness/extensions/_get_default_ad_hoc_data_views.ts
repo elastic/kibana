@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        expect(await testSubjects.exists('kbnNoDataPage')).to.be(true);
+        expect(await testSubjects.waitForExists('kbnNoDataPage')).to.be(true);
       });
     });
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -68,8 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       await dataGrid.clickFieldActionInFlyout('@timestamp', 'addExistsFilterButton');
 
-      const hasExistsFilter = await filterBar.hasFilter('@timestamp', 'exists', true, false, false);
-      expect(hasExistsFilter).to.be(true);
+      await filterBar.expectFilter('@timestamp', 'exists', true, false, false);
     });
   });
 }

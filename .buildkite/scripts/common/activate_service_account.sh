@@ -22,6 +22,7 @@ USAGE="Usage:
   $0 --logout-gcloud                             Also remove this job's credentials"
 
 main() {
+  local email
   case "${1:-}" in
     --unset-impersonation)
       clear_gcloud_auth_config
@@ -31,13 +32,15 @@ main() {
       ;;
     --auto-refresh)
       [[ -n "${2:-}" ]] || fail "$USAGE"
-      activate_with_auto_refresh "$(resolve_service_account "$2")"
+      email="$(resolve_service_account "$2")" || exit 1
+      activate_with_auto_refresh "$email"
       ;;
     "")
       fail "$USAGE"
       ;;
     *)
-      activate_with_shared_token "$(resolve_service_account "$1")"
+      email="$(resolve_service_account "$1")" || exit 1
+      activate_with_shared_token "$email"
       ;;
   esac
 }
@@ -172,7 +175,8 @@ resolve_service_account() {
       echo "kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
       ;;
     *)
-      echo "$bucket@$GCLOUD_EMAIL_POSTFIX"
+      echo "No service account is configured for '${bucket}'." >&2
+      return 1
       ;;
   esac
 }

@@ -404,7 +404,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
+        await find.byCssSelector('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -593,7 +593,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isDimensionEditorOpen() {
-      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+      return await testSubjects.exists('lns-indexPattern-dimensionContainerClose');
     },
 
     // closes the dimension editor flyout
@@ -728,7 +728,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
@@ -787,6 +788,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
+
     async save(
       title: string,
       saveAsNew?: boolean,
@@ -825,7 +827,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      // NameInput sits in the Appearance block at the bottom of the flyout and
+      // remounts when the column label commits (DebouncedInput key). Wait for it
+      // to exist, then type+assert in one retry so a remount cannot leave the
+      // wait looking at a detached node.
+      await retry.waitFor('name-input to exist', async () => testSubjects.exists('name-input'));
+      await retry.try(async () => {
+        await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+        expect(
+          await testSubjects.getAttribute('name-input', 'value', {
+            findTimeout: 2000,
+            tryTimeout: 5000,
+          })
+        ).to.eql(label);
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -847,7 +862,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lnsVisualOptionsButton');
     },
     async openVisualOptions() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsVisualOptionsPopover_title')) {
         return;
       }
       await retry.try(async () => {
@@ -856,7 +871,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
     async openTextOptions() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title')) {
         return;
       }
       await retry.try(async () => {
@@ -940,7 +955,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
@@ -1037,6 +1052,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
       const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
       return paginationItems.length;
+    },
+
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
@@ -1636,9 +1666,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
+        if (await testSubjects.waitForExists('lnsLayerRemoveModal')) {
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
@@ -1763,7 +1792,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async goToListingPageViaBreadcrumbs() {
       await retry.try(async () => {
         await testSubjects.click('breadcrumb first');
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
+        if (await testSubjects.waitForExists('appLeaveConfirmModal', { timeout: 2000 })) {
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }

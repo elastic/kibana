@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const { dashboard, header, discover, timePicker } = getPageObjects([
+  const { common, dashboard, header, discover, timePicker } = getPageObjects([
+    'common',
     'dashboard',
     'header',
     'discover',
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchName = 'my search';
 
       before(async () => {
-        await header.clickDiscover(true);
+        await common.navigateToApp('discover');
         await discover.clickNewSearchButton();
         await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
         await header.waitUntilLoadingHasFinished();

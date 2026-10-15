@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParsedQuery, parse, stringify } from 'query-string';
+import type { ParsedQuery } from 'query-string';
+import queryString from 'query-string';
 import { transform } from 'lodash';
 
 /**
@@ -55,7 +56,7 @@ export const encodeQuery = (
  * @param value
  */
 export const addQueryParam = (params: string, key: string, value?: string) => {
-  const queryParams = parse(params);
+  const queryParams = queryString.parse(params);
 
   if (value !== undefined) {
     queryParams[key] = value;
@@ -63,7 +64,7 @@ export const addQueryParam = (params: string, key: string, value?: string) => {
     delete queryParams[key];
   }
 
-  return stringify(encodeQuery(queryParams, undefined, false), {
+  return queryString.stringify(encodeQuery(queryParams, undefined, false), {
     sort: false,
     encode: false,
   });

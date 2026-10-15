@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { ScoutTestTrack } from './test_tracks';
+import type { ScoutTestTrack } from './test_tracks.ts';
 
 let mockKibanaDir: string;
 
@@ -18,7 +18,7 @@ const mockUploadSteps = jest.fn();
 const mockUploadArtifacts = jest.fn();
 const mockSetMetadata = jest.fn();
 
-jest.mock('../buildkite', () => ({
+jest.mock('../buildkite/index.ts', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     uploadSteps: mockUploadSteps,
     uploadArtifacts: mockUploadArtifacts,
@@ -26,22 +26,22 @@ jest.mock('../buildkite', () => ({
   })),
 }));
 
-jest.mock('../agent_images', () => ({
+jest.mock('../agent_images.ts', () => ({
   expandAgentQueue: (queueName: string) => ({ queue: queueName }),
 }));
 
-jest.mock('../pr_labels', () => ({
+jest.mock('../pr_labels.ts', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-jest.mock('../utils', () => ({
+jest.mock('../utils.ts', () => ({
   getKibanaDir: () => mockKibanaDir,
 }));
 
 const mockDefinitionsAll = jest.fn();
 const mockDefinitionsLoadFromPath = jest.fn();
 
-jest.mock('./test_tracks', () => ({
+jest.mock('./test_tracks.ts', () => ({
   scoutTestTrack: {
     definitions: {
       all: () => mockDefinitionsAll(),
@@ -50,7 +50,7 @@ jest.mock('./test_tracks', () => ({
   },
 }));
 
-jest.mock('./paths', () => ({
+jest.mock('./paths.ts', () => ({
   get SCOUT_OUTPUT_ROOT() {
     return path.join(mockKibanaDir, '.scout');
   },
@@ -59,7 +59,7 @@ jest.mock('./paths', () => ({
   },
 }));
 
-import { scoutTestDistributionStrategies } from './test_distribution_strategies';
+import { scoutTestDistributionStrategies } from './test_distribution_strategies.ts';
 
 const createMockTrackDefinition = (tracks: ScoutTestTrack[]) => ({ tracks });
 

@@ -32,7 +32,10 @@ export const AnalyticsFilters: React.FC = () => {
   const { history } = useValues(KibanaLogic);
 
   // Parse out existing filters from URL query string
-  const { start, end, tag } = queryString.parse(history.location.search);
+  const { start, end, tag } = queryString.parse(history.location.search) as Record<
+    string,
+    string | string[] | null
+  >;
   const [startDate, setStartDate] = useState(
     start ? moment(start, SERVER_DATE_FORMAT) : moment(DEFAULT_START_DATE)
   );
