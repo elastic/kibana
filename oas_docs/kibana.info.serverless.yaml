@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Kibana Serverless APIs
+  title: Kibana Serverless API
   description: |
     The Kibana REST APIs for Elastic serverless enable you to manage resources
     such as connectors, data views, and saved objects. The API calls are

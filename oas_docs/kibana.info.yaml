@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Kibana APIs
+  title: Kibana API
   description: |
     The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
     The API calls are stateless.

@@ -34,7 +34,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  title: Kibana APIs
+  title: Kibana API
   version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
