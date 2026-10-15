@@ -23,13 +23,15 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
 import { useShowManagedWorkflowsSetting, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import * as settingsI18n from '../settings_translations';
+import * as settingsI18n from '../../pages/watches/settings_translations';
 
 interface ViewExecutionsLinkProps {
   workerId: string;
   workerName: string;
   /** The Worker's managed workflow, on the Workflows app's Executions tab. */
   executionsHref: string;
+  /** Button text. Defaults to "View executions". */
+  label?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
   workerId,
   workerName,
   executionsHref,
+  label = settingsI18n.VIEW_EXECUTIONS,
 }) => {
   const {
     services: { application },
@@ -66,7 +69,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
     <EuiToolTip content={reason}>
       <span aria-disabled={true} tabIndex={0}>
         <EuiButtonEmpty {...linkProps} isDisabled>
-          {settingsI18n.VIEW_EXECUTIONS}
+          {label}
         </EuiButtonEmpty>
       </span>
     </EuiToolTip>
@@ -84,7 +87,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
         target="_blank"
         rel="noopener noreferrer"
       >
-        {settingsI18n.VIEW_EXECUTIONS}
+        {label}
       </EuiButtonEmpty>
     );
   }
@@ -104,7 +107,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
       aria-labelledby={popoverTitleId}
       button={
         <EuiButtonEmpty {...linkProps} onClick={() => setIsPopoverOpen(true)}>
-          {settingsI18n.VIEW_EXECUTIONS}
+          {label}
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
