@@ -9,7 +9,9 @@
 
 // Keeps the `pull_request/` entries of `FRAGMENTS` in step with the YAML files on disk, so that a
 // fragment added or deleted elsewhere does not need a manual edit to `fragments.ts`. Only plain,
-// unported `yamlFragment(...)` entries are added or removed; ported entries are left alone.
+// unported `yamlFragment(...)` entries are added or removed; ported entries are left alone. The
+// snapshots of removed entries are pruned too, because Jest fails on an obsolete snapshot unless
+// it runs with `-u`, which would also rewrite the snapshots of surviving fragments.
 
 import fs from 'fs';
 import path from 'path';
@@ -36,7 +38,10 @@ const nameOf = (line: string): string => {
   return name;
 };
 
-export const syncFragmentRegistry = (source: string, onDisk: readonly string[]): string => {
+export const syncFragmentRegistry = (
+  source: string,
+  onDisk: readonly string[]
+): { source: string; removed: string[] } => {
   const lines = source.split('\n');
   const start = lines.indexOf(ARRAY_START) + 1;
   const end = lines.indexOf('];', start);
@@ -45,9 +50,12 @@ export const syncFragmentRegistry = (source: string, onDisk: readonly string[]):
   }
 
   const onDiskNames = new Set(onDisk);
+  const removed: string[] = [];
   const kept = lines.slice(start, end).filter((line) => {
     const [, plainName] = PLAIN_ENTRY.exec(line) ?? [];
-    return !(plainName?.startsWith(PREFIX) && !onDiskNames.has(plainName));
+    if (!plainName?.startsWith(PREFIX) || onDiskNames.has(plainName)) return true;
+    removed.push(plainName);
+    return false;
   });
   const registered = new Set(kept.map(nameOf));
   const added = onDisk
@@ -55,5 +63,19 @@ export const syncFragmentRegistry = (source: string, onDisk: readonly string[]):
     .map((name) => `  yamlFragment('${name}'),`);
   const entries = [...kept, ...added].sort((a, b) => (nameOf(a) < nameOf(b) ? -1 : 1));
 
-  return [...lines.slice(0, start), ...entries, ...lines.slice(end)].join('\n');
+  return {
+    source: [...lines.slice(0, start), ...entries, ...lines.slice(end)].join('\n'),
+    removed,
+  };
+};
+
+// Drops the snapshot entries of the named fragments and leaves every other entry byte-for-byte as
+// Jest wrote it. Entries are separated by a blank line and each starts with `exports[`.
+export const pruneFragmentSnapshots = (snapshot: string, removed: readonly string[]): string => {
+  const keys = new Set(removed.map((name) => `exports[\`pull_request fragments ${name} 1\`] = \``));
+
+  return snapshot
+    .split(/\n\n(?=exports\[`)/)
+    .filter((entry) => !keys.has(entry.split('\n', 1)[0]))
+    .join('\n\n');
 };

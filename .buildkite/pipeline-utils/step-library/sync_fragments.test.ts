@@ -10,7 +10,11 @@
 import fs from 'fs';
 import path from 'path';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
-import { listPullRequestYamlNames, syncFragmentRegistry } from './sync_fragments.ts';
+import {
+  listPullRequestYamlNames,
+  pruneFragmentSnapshots,
+  syncFragmentRegistry,
+} from './sync_fragments.ts';
 
 const source = (entries: string[]) =>
   [
@@ -33,15 +37,16 @@ describe('syncFragmentRegistry', () => {
 
     expect(
       syncFragmentRegistry(before, ['pull_request/a', 'pull_request/m', 'pull_request/z'])
-    ).toBe(
-      source([
+    ).toEqual({
+      source: source([
         "  yamlFragment('fips/verify_fips_enabled'),",
         "  yamlFragment('pull_request/a'),",
         "  yamlFragment('pull_request/m'),",
         "  { ...yamlFragment('pull_request/ported'), steps: ported },",
         "  yamlFragment('pull_request/z'),",
-      ])
-    );
+      ]),
+      removed: ['pull_request/gone'],
+    });
   });
 
   it('refuses an entry it cannot read', () => {
@@ -52,6 +57,44 @@ describe('syncFragmentRegistry', () => {
     const file = path.join(getKibanaDir(), '.buildkite/pipeline-utils/step-library/fragments.ts');
     const current = fs.readFileSync(file, 'utf8');
 
-    expect(syncFragmentRegistry(current, listPullRequestYamlNames(getKibanaDir()))).toBe(current);
+    expect(syncFragmentRegistry(current, listPullRequestYamlNames(getKibanaDir()))).toEqual({
+      source: current,
+      removed: [],
+    });
+  });
+});
+
+describe('pruneFragmentSnapshots', () => {
+  const entry = (name: string) =>
+    `exports[\`pull_request fragments ${name} 1\`] = \`\n{\n  "a": 1,\n}\n\`;\n`;
+  const file = (...names: string[]) =>
+    ['// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing\n', ...names.map(entry)].join(
+      '\n'
+    );
+
+  it('drops only the named entries and keeps the rest byte-for-byte', () => {
+    expect(
+      pruneFragmentSnapshots(file('pull_request/a', 'pull_request/b', 'pull_request/c'), [
+        'pull_request/b',
+      ])
+    ).toBe(file('pull_request/a', 'pull_request/c'));
+  });
+
+  it('is a no-op when nothing was removed', () => {
+    expect(pruneFragmentSnapshots(file('pull_request/a'), [])).toBe(file('pull_request/a'));
+  });
+
+  it('matches the committed snapshot file for a real fragment', () => {
+    const snapshot = fs.readFileSync(
+      path.join(
+        getKibanaDir(),
+        '.buildkite/pipeline-utils/step-library/__snapshots__/fragments.test.ts.snap'
+      ),
+      'utf8'
+    );
+    const pruned = pruneFragmentSnapshots(snapshot, ['pull_request/storybooks']);
+
+    expect(pruned).not.toContain('pull_request fragments pull_request/storybooks 1');
+    expect(pruned).toContain('pull_request fragments pull_request/renovate 1');
   });
 });

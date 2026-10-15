@@ -11,14 +11,23 @@ import fs from 'fs';
 import path from 'path';
 import {
   listPullRequestYamlNames,
+  pruneFragmentSnapshots,
   syncFragmentRegistry,
 } from '../../../pipeline-utils/step-library/sync_fragments.ts';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
 
 const root = getKibanaDir();
-const file = path.join(root, '.buildkite/pipeline-utils/step-library/fragments.ts');
+const stepLibrary = path.join(root, '.buildkite/pipeline-utils/step-library');
+const registryFile = path.join(stepLibrary, 'fragments.ts');
+const snapshotFile = path.join(stepLibrary, '__snapshots__/fragments.test.ts.snap');
 
+const { source, removed } = syncFragmentRegistry(
+  fs.readFileSync(registryFile, 'utf8'),
+  listPullRequestYamlNames(root)
+);
+
+fs.writeFileSync(registryFile, source);
 fs.writeFileSync(
-  file,
-  syncFragmentRegistry(fs.readFileSync(file, 'utf8'), listPullRequestYamlNames(root))
+  snapshotFile,
+  pruneFragmentSnapshots(fs.readFileSync(snapshotFile, 'utf8'), removed)
 );
