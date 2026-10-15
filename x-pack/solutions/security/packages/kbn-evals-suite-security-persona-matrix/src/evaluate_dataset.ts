@@ -25,6 +25,11 @@ import type {
   PersonaMatrixExampleInput,
 } from './datasets/persona_matrix_prompts';
 import type { PersonaMatrixChatClient } from './chat_client';
+import {
+  capJudgePayload,
+  getJudgePayloadCapOptionsFromEnv,
+  withJudgePayloadCap,
+} from './judge_payload_cap';
 
 /**
  * Dataset-level expected output the framework evaluators read via `expected`.
@@ -275,6 +280,7 @@ export function createEvaluatePersonaMatrixDataset({
     dataset: EvaluationDataset<PersonaMatrixExample>;
   }): Promise<void> {
     const wrappedExamples = dataset.examples.map(toDatasetExample);
+    const judgeCapOptions = getJudgePayloadCapOptionsFromEnv();
 
     const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
       traceEsClient,
@@ -295,12 +301,16 @@ export function createEvaluatePersonaMatrixDataset({
       expectedToolCalledEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
-      evaluators.criteria([
-        'Relevance: The response directly addresses the user security question.',
-        'Clarity: The response is well-structured and easy to follow.',
-        'Accuracy: Security concepts and recommendations are technically correct.',
-        'Completeness: The response covers the key aspects of the question.',
-      ]),
+      withJudgePayloadCap(
+        evaluators.criteria([
+          'Relevance: The response directly addresses the user security question.',
+          'Clarity: The response is well-structured and easy to follow.',
+          'Accuracy: Security concepts and recommendations are technically correct.',
+          'Completeness: The response covers the key aspects of the question.',
+        ]),
+        log,
+        judgeCapOptions
+      ),
       inputTokens,
       outputTokens,
       toolCalls,
@@ -336,12 +346,27 @@ export function createEvaluatePersonaMatrixDataset({
           // result and correctnessAnalysis() is invoked exactly once per
           // example (was: once here + once again as a registered evaluator).
           const expected = example.output as PersonaMatrixDatasetExpected;
+          // The judges read a size-capped copy; `taskOutput` itself (the golden transcript) stays
+          // verbatim, and anything trimmed is reported on the returned output.
+          const { output: judgeOutput, report: judgePayloadTrim } = capJudgePayload(
+            taskOutput,
+            judgeCapOptions
+          );
+          if (judgePayloadTrim.trimmed.length) {
+            log.info(
+              `[persona-matrix][judge-cap] ${example.id ?? question}: judge payload ${
+                judgePayloadTrim.charsBefore
+              } -> ${judgePayloadTrim.charsAfter} chars, trimmed ${
+                judgePayloadTrim.trimmed.length
+              } tool result(s)`
+            );
+          }
           const [correctnessResult, groundednessResult] = await Promise.all([
             withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
               evaluators.correctnessAnalysis().evaluate({
                 input,
                 expected,
-                output: taskOutput,
+                output: judgeOutput,
                 metadata: example.metadata,
               })
             ),
@@ -349,7 +374,7 @@ export function createEvaluatePersonaMatrixDataset({
               evaluators.groundednessAnalysis().evaluate({
                 input,
                 expected,
-                output: taskOutput,
+                output: judgeOutput,
                 metadata: example.metadata,
               })
             ),
@@ -359,6 +384,7 @@ export function createEvaluatePersonaMatrixDataset({
             ...(taskOutput as object),
             correctnessAnalysis: correctnessResult?.metadata,
             groundednessAnalysis: groundednessResult?.metadata,
+            ...(judgePayloadTrim.trimmed.length ? { judgePayloadTrim } : {}),
           } as TaskOutput;
         },
       },

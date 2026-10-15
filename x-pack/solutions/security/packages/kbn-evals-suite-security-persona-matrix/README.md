@@ -29,6 +29,17 @@ designed for multi-model comparison and persona-driven reporting.
 
 - **Chrysalis alerts** — seeds 3 sample alerts before evaluation, cleaned up after
 
+## Judge payload cap (opt-in)
+
+With reasoning models, a single tool result can embed megabytes (for example a search over the conversation store), which pushes the LLM judges' request past the judge model's input limit and aborts the run before scoring. Two env variables cap what the **judges** read; both are off by default so default runs score exactly what the agent produced.
+
+| Variable | Effect |
+| --- | --- |
+| `PERSONA_MATRIX_JUDGE_RESULT_CAP` | Max chars kept per tool result. Larger results are replaced by a stub that states the original size, followed by the first N chars. |
+| `PERSONA_MATRIX_JUDGE_PAYLOAD_BUDGET` | Max chars for the whole judge payload. After the per-result cap, the largest remaining results are trimmed first until the budget holds. |
+
+Only the judge-facing copy is trimmed. Tool ids, params, the final answer, errors and the trace id are untouched, and the stored transcript stays verbatim. Every trim is logged and recorded as `judgePayloadTrim` on the example output (and on the criteria evaluator's metadata), so a trimmed score is distinguishable from an untrimmed one. Scores from runs with a cap set are not strictly comparable with uncapped runs.
+
 ## Seed profiles (`SEED_PROFILE`)
 
 - **`minimal` (default)** - 3 sample alerts + 1 rule. Fast and cheap to seed; prompts match the published matrix runs, but the environment does NOT reproduce the published-benchmark dataset. Scores are not directly comparable.
