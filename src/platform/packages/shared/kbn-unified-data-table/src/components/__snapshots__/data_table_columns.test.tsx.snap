@@ -144,7 +144,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -951,7 +951,7 @@ Array [
       columnName="extension"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -1165,7 +1165,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -2552,7 +2552,7 @@ Array [
       columnName="extension"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -2765,7 +2765,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
