@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-/**
- * Width cap for the waterfall transaction and span flyouts (`size="fill"`). EUI resolves the width
- * to the smaller of this and 90% of the viewport, which tracks the stepped 80/70/60% widths these
- * flyouts used before within ~85px.
- */
-export const WATERFALL_FLYOUT_MAX_WIDTH = 'calc(50vw + 300px)';
-
 export const DATE_LABEL = i18n.translate('xpack.apm.transactionDetails.transFlyout.dateLabel', {
   defaultMessage: 'Date',
 });

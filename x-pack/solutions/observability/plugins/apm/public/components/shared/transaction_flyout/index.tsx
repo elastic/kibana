@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import type { SpanLinksCount } from '../span_links';
-import { WATERFALL_FLYOUT_MAX_WIDTH } from '../waterfall_item_flyout/constants';
 import { TRANSACTION_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { useTransactionFlyoutFooterMenu } from './footer/use_transaction_flyout_footer_menu';
 import { useDroppedSpansCallout } from './use_dropped_spans_callout';
@@ -75,8 +74,7 @@ export function TransactionFlyout({
         data-test-subj="transactionFlyout"
         onClose={onClose}
         ownFocus
-        size="fill"
-        maxWidth={WATERFALL_FLYOUT_MAX_WIDTH}
+        size="m"
         tabs={tabs.map(({ tab }) => tab)}
         defaultSelectedTabId={flyoutDetailTab}
         tabBarProps={{ 'data-test-subj': 'transactionFlyoutTabs' }}
