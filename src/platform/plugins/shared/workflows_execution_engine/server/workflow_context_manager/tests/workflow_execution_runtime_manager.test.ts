@@ -1207,7 +1207,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       [ExecutionStatus.FAILED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
       [ExecutionStatus.CANCELLED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled],
     ])(
-      'should report execution lineage ids and the execution chain for a %s child execution after the context is rebuilt',
+      'should report the execution chain, and no flat lineage ids, for a %s child execution after the context is rebuilt',
       async (status, eventType) => {
         const analytics = analyticsServiceMock.createAnalyticsServiceStart();
         const childWorkflowExecution = {
@@ -1229,7 +1229,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
             parentWorkflowExecutionId: 'parent-execution-id',
             parentWorkflowId: 'parent-workflow-id',
             parentWorkflowInvocation: 'sync',
-            rootWorkflowExecutionId: 'root-execution-id',
           },
           status,
           triggeredBy: 'workflow-step',
@@ -1238,7 +1237,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue(
           childWorkflowExecution
         );
-        // The rebuilt context has the render shape, without the raw parent* / root* / chain keys.
+        // The rebuilt context has the render shape, without the raw parent* and chain keys.
         buildWorkflowContextMock.mockReturnValue({
           execution: {} as WorkflowExecutionContext,
           parent: {
@@ -1277,10 +1276,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
                 workflowId: 'parent-workflow-id',
               },
             ],
-            parentWorkflowExecutionId: 'parent-execution-id',
-            rootWorkflowExecutionId: 'root-execution-id',
+            compositionDepth: 2,
           })
         );
+        const [[, eventData]] = (analytics.reportEvent as jest.Mock).mock.calls;
+        expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
+        expect(eventData).not.toHaveProperty('rootWorkflowExecutionId');
       }
     );
   });

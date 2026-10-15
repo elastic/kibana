@@ -81,6 +81,19 @@ describe('WorkflowExecutionTelemetryClient', () => {
     };
   };
 
+  /** Flat lineage ids that executionChain replaced; no event reports them. */
+  const NEVER_REPORTED_LINEAGE_FIELDS = ['parentWorkflowExecutionId', 'rootWorkflowExecutionId'];
+  /** Every composition and lineage field; a top-level execution reports none of them. */
+  const ALL_LINEAGE_FIELDS = [
+    'compositionDepth',
+    'executionChain',
+    'parentWorkflowId',
+    'parentWorkflowInvocation',
+    ...NEVER_REPORTED_LINEAGE_FIELDS,
+  ];
+  const reportedFieldsAmong = (eventData: object, fields: readonly string[]): string[] =>
+    Object.keys(eventData).filter((key) => fields.includes(key));
+
   describe('reportWorkflowExecutionCompleted', () => {
     it('should report workflow execution completed event with all metadata', () => {
       const workflowExecution = createMockWorkflowExecution({
@@ -385,7 +398,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
     });
 
-    it('should report its own id as rootWorkflowExecutionId, without a parent, for top-level executions', () => {
+    it('should report no lineage fields for top-level executions', () => {
       const workflowExecution = createMockWorkflowExecution({ triggeredBy: 'manual' });
 
       client.reportWorkflowExecutionCompleted({
@@ -394,12 +407,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
-      expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
-      expect(eventData).not.toHaveProperty('executionChain');
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
     });
 
-    it('should include parentWorkflowExecutionId, rootWorkflowExecutionId and executionChain for sub-workflow executions', () => {
+    it('should include executionChain, and no flat lineage ids, for sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'workflow-step',
         context: {
@@ -411,7 +422,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
           parentWorkflowInvocation: 'sync',
-          rootWorkflowExecutionId: 'root-exec-id',
         },
       });
 
@@ -426,12 +436,12 @@ describe('WorkflowExecutionTelemetryClient', () => {
           { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
           { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
         ],
-        parentWorkflowExecutionId: 'parent-exec-id',
-        rootWorkflowExecutionId: 'root-exec-id',
+        parentWorkflowId: 'parent-wf-id',
       });
+      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
 
-    it('should omit rootWorkflowExecutionId for a sub-workflow execution without root lineage', () => {
+    it('should omit executionChain for a sub-workflow execution without a stored chain', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'workflow-step',
         context: {
@@ -447,7 +457,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(eventData).not.toHaveProperty('rootWorkflowExecutionId');
+      expect(eventData).toMatchObject({ compositionDepth: 2, parentWorkflowId: 'parent-wf-id' });
+      expect(
+        reportedFieldsAmong(eventData, ['executionChain', ...NEVER_REPORTED_LINEAGE_FIELDS])
+      ).toEqual([]);
     });
 
     it('should normalize event-driven trigger id to triggerType event and eventTriggerId', () => {
@@ -661,7 +674,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
     });
 
-    it('should report its own id as rootWorkflowExecutionId for failed top-level executions', () => {
+    it('should report no lineage fields for failed top-level executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.FAILED,
         triggeredBy: 'scheduled',
@@ -677,12 +690,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
-      expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
-      expect(eventData).not.toHaveProperty('executionChain');
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
     });
 
-    it('should include execution lineage ids and the execution chain for failed sub-workflow executions', () => {
+    it('should include executionChain, and no flat lineage ids, for failed sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.FAILED,
         triggeredBy: 'workflow-step',
@@ -694,7 +705,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
           parentDepth: 1,
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
-          rootWorkflowExecutionId: 'root-exec-id',
         },
         error: {
           message: 'Child failed',
@@ -713,9 +723,9 @@ describe('WorkflowExecutionTelemetryClient', () => {
           { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
           { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
         ],
-        parentWorkflowExecutionId: 'parent-exec-id',
-        rootWorkflowExecutionId: 'root-exec-id',
+        parentWorkflowId: 'parent-wf-id',
       });
+      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
 
     it('should include token usage totals when failed execution usage is present', () => {
@@ -827,7 +837,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
     });
 
-    it('should omit execution lineage ids from event-driven suppression telemetry', () => {
+    it('should omit executionChain and the flat lineage ids from event-driven suppression telemetry', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'cases.updated',
         status: ExecutionStatus.SKIPPED,
@@ -837,7 +847,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
             { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' },
           ],
           parentWorkflowExecutionId: 'parent-exec-id',
-          rootWorkflowExecutionId: 'root-exec-id',
         },
       });
 
@@ -847,13 +856,9 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(Object.keys(eventData)).toEqual(
-        expect.not.arrayContaining([
-          'executionChain',
-          'parentWorkflowExecutionId',
-          'rootWorkflowExecutionId',
-        ])
-      );
+      expect(
+        reportedFieldsAmong(eventData, ['executionChain', ...NEVER_REPORTED_LINEAGE_FIELDS])
+      ).toEqual([]);
     });
 
     it('should include managed workflow execution fields when present', () => {
@@ -954,7 +959,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
     });
 
-    it('should report its own id as rootWorkflowExecutionId for cancelled top-level executions', () => {
+    it('should report no lineage fields for cancelled top-level executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.CANCELLED,
         triggeredBy: 'manual',
@@ -968,12 +973,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(eventData).toMatchObject({ rootWorkflowExecutionId: 'test-execution-id' });
-      expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
-      expect(eventData).not.toHaveProperty('executionChain');
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
     });
 
-    it('should include execution lineage ids and the execution chain for cancelled sub-workflow executions', () => {
+    it('should include executionChain, and no flat lineage ids, for cancelled sub-workflow executions', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.CANCELLED,
         triggeredBy: 'workflow-step',
@@ -984,7 +987,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
           parentDepth: 0,
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
-          rootWorkflowExecutionId: 'parent-exec-id',
         },
         cancellationReason: 'Parent cancelled',
         cancelledAt: '2024-01-01T00:00:30.000Z',
@@ -1000,9 +1002,10 @@ describe('WorkflowExecutionTelemetryClient', () => {
         executionChain: [
           { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
         ],
-        parentWorkflowExecutionId: 'parent-exec-id',
-        rootWorkflowExecutionId: 'parent-exec-id',
+        compositionDepth: 1,
+        parentWorkflowId: 'parent-wf-id',
       });
+      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
   });
 

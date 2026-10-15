@@ -590,7 +590,7 @@ describe('buildWorkflowContext', () => {
     });
   });
 
-  describe('root lineage and execution chain', () => {
+  describe('execution chain', () => {
     const childExecution: EsWorkflowExecution = {
       ...baseExecution,
       context: {
@@ -601,35 +601,22 @@ describe('buildWorkflowContext', () => {
         parentWorkflowExecutionId: 'parent-exec-1',
         parentWorkflowId: 'parent-workflow-id',
         parentDepth: 1,
-        rootWorkflowExecutionId: 'root-exec-1',
       },
     };
 
-    it('should not add a root object for a top-level execution', () => {
-      const context = buildWorkflowRenderContext(baseExecution, undefined, dependencies);
-
-      expect(context).not.toHaveProperty('root');
-    });
-
-    it('should not add a root object for a child execution with stored root lineage', () => {
-      const context = buildWorkflowRenderContext(childExecution, undefined, dependencies);
-
-      expect(context).not.toHaveProperty('root');
-    });
-
-    it('should keep the stored root execution id and chain out of the Liquid render context', () => {
+    it('should keep the stored chain out of the Liquid render context', () => {
       const rendered = JSON.stringify(
         buildWorkflowRenderContext(childExecution, undefined, dependencies)
       );
 
       expect({
         chain: rendered.includes('executionChain'),
-        root: rendered.includes('root-exec-1'),
-        rootWorkflow: rendered.includes('root-workflow-id'),
-      }).toEqual({ chain: false, root: false, rootWorkflow: false });
+        firstHopExecution: rendered.includes('root-exec-1'),
+        firstHopWorkflow: rendered.includes('root-workflow-id'),
+      }).toEqual({ chain: false, firstHopExecution: false, firstHopWorkflow: false });
     });
 
-    it('should still expose the parent for a child execution with stored root lineage', () => {
+    it('should still expose only the direct parent for a child execution with a stored chain', () => {
       const context = buildWorkflowRenderContext(childExecution, undefined, dependencies);
 
       expect(context.parent).toEqual({

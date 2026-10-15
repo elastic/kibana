@@ -7,56 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  hasExecutionChain,
-  hasParentWorkflowExecution,
-  hasRootWorkflowExecutionId,
-  toExecutionChainHop,
-} from './workflow_lineage_guards';
-
-describe('hasParentWorkflowExecution', () => {
-  it('returns true when the context carries a string parentWorkflowExecutionId', () => {
-    expect(hasParentWorkflowExecution({ parentWorkflowExecutionId: 'parent-exec-1' })).toBe(true);
-  });
-
-  it('returns false when parentWorkflowExecutionId is missing', () => {
-    expect(hasParentWorkflowExecution({ parentWorkflowId: 'parent-workflow-id' })).toBe(false);
-  });
-
-  it('returns false when parentWorkflowExecutionId is an empty string', () => {
-    expect(hasParentWorkflowExecution({ parentWorkflowExecutionId: '' })).toBe(false);
-  });
-
-  it('returns false when parentWorkflowExecutionId is not a string', () => {
-    expect(hasParentWorkflowExecution({ parentWorkflowExecutionId: 42 })).toBe(false);
-  });
-
-  it('returns false for an undefined context', () => {
-    expect(hasParentWorkflowExecution(undefined)).toBe(false);
-  });
-});
-
-describe('hasRootWorkflowExecutionId', () => {
-  it('returns true when the context carries a string rootWorkflowExecutionId', () => {
-    expect(hasRootWorkflowExecutionId({ rootWorkflowExecutionId: 'root-exec-1' })).toBe(true);
-  });
-
-  it('returns false when rootWorkflowExecutionId is missing', () => {
-    expect(hasRootWorkflowExecutionId({ parentWorkflowExecutionId: 'parent-exec-1' })).toBe(false);
-  });
-
-  it('returns false when rootWorkflowExecutionId is an empty string', () => {
-    expect(hasRootWorkflowExecutionId({ rootWorkflowExecutionId: '' })).toBe(false);
-  });
-
-  it('returns false when rootWorkflowExecutionId is not a string', () => {
-    expect(hasRootWorkflowExecutionId({ rootWorkflowExecutionId: 7 })).toBe(false);
-  });
-
-  it('returns false for an undefined context', () => {
-    expect(hasRootWorkflowExecutionId(undefined)).toBe(false);
-  });
-});
+import { hasExecutionChain, toExecutionChainHop } from './workflow_lineage_guards';
 
 const HOP = {
   executionId: 'root-exec-1',
@@ -75,7 +26,7 @@ describe('hasExecutionChain', () => {
 
   it.each([
     ['an undefined context', undefined],
-    ['a missing chain', { rootWorkflowExecutionId: 'root-exec-1' }],
+    ['a missing chain', { parentWorkflowExecutionId: 'parent-exec-1' }],
     ['an empty chain', { executionChain: [] }],
     ['a chain that is not an array', { executionChain: HOP }],
     ['a null hop', { executionChain: [HOP, null] }],

@@ -61,8 +61,6 @@ const baseWorkflowExecutionSchema: RootSchema<{
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
-  parentWorkflowExecutionId?: string;
-  rootWorkflowExecutionId?: string;
   executionChain?: Array<{
     executionId: string;
     invocation: 'sync' | 'async';
@@ -187,22 +185,6 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
-  parentWorkflowExecutionId: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'The execution ID of the parent workflow execution that invoked this sub-workflow. Only present for sub-workflow executions.',
-      optional: true,
-    },
-  },
-  rootWorkflowExecutionId: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'The execution ID of the top-level workflow execution at the root of this chain. A top-level execution reports its own workflowExecutionId. Omitted only for a sub-workflow execution whose chain records no root (it started before root lineage was recorded), so a missing value means the root is unknown.',
-      optional: true,
-    },
-  },
   executionChain: {
     type: 'array',
     items: {
@@ -227,7 +209,7 @@ const baseWorkflowExecutionSchema: RootSchema<{
     },
     _meta: {
       description:
-        'Every ancestor of a sub-workflow execution, root first and direct parent last. The first hop matches rootWorkflowExecutionId and the last matches the parent fields. Omitted for a top-level execution, and for a sub-workflow execution whose chain started before the chain was recorded. Its length is the composition depth.',
+        'Every ancestor of a sub-workflow execution, root first and direct parent last. The last hop matches parentWorkflowId and parentWorkflowInvocation. Omitted for a top-level execution, and for a sub-workflow execution whose chain started before the chain was recorded. Its length is the composition depth.',
       optional: true,
     },
   },
@@ -292,8 +274,6 @@ const {
   compositionDepth: _compositionDepth,
   parentWorkflowId: _parentWorkflowId,
   parentWorkflowInvocation: _parentWorkflowInvocation,
-  parentWorkflowExecutionId: _parentWorkflowExecutionId,
-  rootWorkflowExecutionId: _rootWorkflowExecutionId,
   executionChain: _executionChain,
   ...eventDrivenExecutionSuppressedBaseSchema
 } = baseWorkflowExecutionSchema;

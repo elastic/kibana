@@ -20,7 +20,20 @@ import {
 } from './types';
 import { WorkflowExecutionTelemetryClient } from '../../workflow_execution_telemetry_client';
 
-const LINEAGE_FIELDS = ['parentWorkflowExecutionId', 'rootWorkflowExecutionId'] as const;
+/** Flat lineage ids that executionChain replaced; no event schema declares them. */
+const REMOVED_LINEAGE_FIELDS = ['parentWorkflowExecutionId', 'rootWorkflowExecutionId'] as const;
+
+/** Every composition and lineage field; a top-level execution reports none of them. */
+const ALL_LINEAGE_FIELDS: readonly string[] = [
+  'compositionDepth',
+  'executionChain',
+  'parentWorkflowId',
+  'parentWorkflowInvocation',
+  ...REMOVED_LINEAGE_FIELDS,
+];
+
+const reportedFieldsAmong = (eventData: object, fields: readonly string[]): string[] =>
+  Object.keys(eventData).filter((key) => fields.includes(key));
 
 const EXECUTION_CHAIN = [
   { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' },
@@ -41,7 +54,6 @@ const createChildWorkflowExecution = (status: ExecutionStatus): EsWorkflowExecut
     parentWorkflowExecutionId: 'parent-exec-id',
     parentWorkflowId: 'parent-wf-id',
     parentWorkflowInvocation: 'sync',
-    rootWorkflowExecutionId: 'root-exec-id',
   },
   createdAt: '2024-01-01T00:00:00.000Z',
   createdBy: 'user',
@@ -76,15 +88,12 @@ describe('workflowExecutionEventSchemas', () => {
   describe('execution lineage fields', () => {
     it.each(
       TERMINAL_EVENT_TYPES.flatMap((eventType) =>
-        LINEAGE_FIELDS.map((field) => [eventType, field] as const)
+        REMOVED_LINEAGE_FIELDS.map((field) => [eventType, field] as const)
       )
-    )('%s declares %s as an optional, described keyword', (eventType, field) => {
+    )('%s does not declare %s', (eventType, field) => {
       const schema: Record<string, unknown> = workflowExecutionEventSchemas[eventType];
 
-      expect(schema[field]).toEqual({
-        _meta: { description: expect.stringMatching(/\S/), optional: true },
-        type: 'keyword',
-      });
+      expect(schema).not.toHaveProperty(field);
     });
 
     it.each(TERMINAL_EVENT_TYPES)(
@@ -104,7 +113,7 @@ describe('workflowExecutionEventSchemas', () => {
       }
     );
 
-    it.each([...LINEAGE_FIELDS, 'executionChain'])(
+    it.each([...REMOVED_LINEAGE_FIELDS, 'executionChain'])(
       'the event-driven suppressed event does not declare %s',
       (field) => {
         const schema = workflowExecutionEventSchemas[
@@ -131,7 +140,7 @@ describe('workflowExecutionEventSchemas', () => {
     });
 
     it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
-      'accepts the %s event of a child execution carrying lineage ids and its execution chain',
+      'accepts the %s event of a child execution carrying its execution chain',
       (finalStatus) => {
         const client = new WorkflowExecutionTelemetryClient(analytics, logger);
         const reportEventSpy = jest.spyOn(analytics, 'reportEvent');
@@ -148,9 +157,12 @@ describe('workflowExecutionEventSchemas', () => {
           expect.objectContaining({
             compositionDepth: 2,
             executionChain: EXECUTION_CHAIN,
-            rootWorkflowExecutionId: 'root-exec-id',
+            parentWorkflowId: 'parent-wf-id',
+            parentWorkflowInvocation: 'sync',
           })
         );
+        const [[, eventData]] = reportEventSpy.mock.calls;
+        expect(reportedFieldsAmong(eventData, REMOVED_LINEAGE_FIELDS)).toEqual([]);
       }
     );
 
@@ -163,8 +175,29 @@ describe('workflowExecutionEventSchemas', () => {
       ).toThrow(/excess key 'spaceId' found/);
     });
 
+    it.each(
+      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED].flatMap(
+        (finalStatus) => REMOVED_LINEAGE_FIELDS.map((field) => [finalStatus, field] as const)
+      )
+    )('rejects the %s event of a child execution that also carries %s', (finalStatus, field) => {
+      const client = new WorkflowExecutionTelemetryClient(analytics, logger);
+      const reportEventSpy = jest.spyOn(analytics, 'reportEvent');
+
+      client.reportWorkflowExecutionTerminated({
+        finalStatus,
+        stepExecutions: [],
+        workflowExecution: createChildWorkflowExecution(finalStatus),
+      });
+      const [[eventType, eventData]] = reportEventSpy.mock.calls;
+
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(() =>
+        analytics.reportEvent(eventType, { ...eventData, [field]: 'some-exec-id' })
+      ).toThrow(`excess key '${field}' found`);
+    });
+
     it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
-      'accepts the %s event of a top-level execution carrying its own id as the root',
+      'accepts the %s event of a top-level execution carrying no lineage fields',
       (finalStatus) => {
         const client = new WorkflowExecutionTelemetryClient(analytics, logger);
         const reportEventSpy = jest.spyOn(analytics, 'reportEvent');
@@ -183,9 +216,10 @@ describe('workflowExecutionEventSchemas', () => {
         expect(logger.error).not.toHaveBeenCalled();
         expect(reportEventSpy).toHaveBeenCalledWith(
           expect.any(String),
-          expect.objectContaining({ rootWorkflowExecutionId: 'top-exec-id' })
+          expect.objectContaining({ workflowExecutionId: 'top-exec-id' })
         );
-        expect(reportEventSpy.mock.calls[0][1]).not.toHaveProperty('executionChain');
+        const [[, eventData]] = reportEventSpy.mock.calls;
+        expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
       }
     );
 
@@ -199,7 +233,7 @@ describe('workflowExecutionEventSchemas', () => {
     });
 
     it.each([
-      ...LINEAGE_FIELDS.map((field) => [field, 'some-exec-id'] as const),
+      ...REMOVED_LINEAGE_FIELDS.map((field) => [field, 'some-exec-id'] as const),
       ['executionChain', EXECUTION_CHAIN] as const,
     ])('rejects a suppressed event carrying %s', (field, value) => {
       expect(() =>

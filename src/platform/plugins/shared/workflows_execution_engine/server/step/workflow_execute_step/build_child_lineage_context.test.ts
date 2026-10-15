@@ -24,18 +24,18 @@ describe('buildChildLineageContext', () => {
       {
         executionChain: [{ executionId: 'other-exec', invocation: 'async', workflowId: 'other' }],
         parentWorkflowExecutionId: 'other-parent-exec',
-        rootWorkflowExecutionId: 'other-exec',
+        parentWorkflowId: 'other',
       },
     ],
   ])(
-    'makes a top-level parent (triggered by %s) the root and the only hop, ignoring any stored lineage',
+    "makes a top-level parent (triggered by %s) the chain's only hop, ignoring any stored lineage",
     (triggeredBy, context) => {
       expect(
         buildChildLineageContext({
           invocation: 'sync',
           parent: { context, id: 'top-exec-1', triggeredBy, workflowId: 'top-workflow-id' },
         })
-      ).toEqual({ executionChain: [ROOT_HOP], rootWorkflowExecutionId: 'top-exec-1' });
+      ).toEqual({ executionChain: [ROOT_HOP] });
     }
   );
 
@@ -51,7 +51,7 @@ describe('buildChildLineageContext', () => {
     }
   );
 
-  it("copies the parent's root and appends the parent to its chain when the parent is itself a child", () => {
+  it('appends the parent to its stored chain when the parent is itself a child', () => {
     expect(
       buildChildLineageContext({
         invocation: 'async',
@@ -60,7 +60,6 @@ describe('buildChildLineageContext', () => {
             executionChain: [ROOT_HOP],
             parentWorkflowExecutionId: 'top-exec-1',
             parentWorkflowId: 'top-workflow-id',
-            rootWorkflowExecutionId: 'top-exec-1',
           },
           id: 'child-exec-1',
           triggeredBy: 'workflow-step',
@@ -72,7 +71,6 @@ describe('buildChildLineageContext', () => {
         ROOT_HOP,
         { executionId: 'child-exec-1', invocation: 'async', workflowId: 'child-workflow-id' },
       ],
-      rootWorkflowExecutionId: 'top-exec-1',
     });
   });
 
@@ -83,7 +81,6 @@ describe('buildChildLineageContext', () => {
         parent: {
           context: {
             executionChain: [{ ...ROOT_HOP, extra: 'not reported' }],
-            rootWorkflowExecutionId: 'top-exec-1',
           },
           id: 'child-exec-1',
           triggeredBy: 'workflow-step',
@@ -101,17 +98,13 @@ describe('buildChildLineageContext', () => {
       'no stored lineage',
       { parentWorkflowExecutionId: 'unknown-exec', parentWorkflowId: 'unknown' },
     ],
-    [
-      'a root that is not a string',
-      { parentWorkflowExecutionId: 'unknown-exec', rootWorkflowExecutionId: 7 },
-    ],
     ['an empty chain', { executionChain: [] }],
     ['a chain that is not an array', { executionChain: 'top-exec-1' }],
     [
       'a chain with a malformed hop',
       { executionChain: [{ executionId: 'top-exec-1', invocation: 'later', workflowId: 'w' }] },
     ],
-  ])('returns no lineage keys when the parent is a child with %s', (_label, context) => {
+  ])('writes nothing when the parent is a child with %s', (_label, context) => {
     expect(
       buildChildLineageContext({
         invocation: 'sync',
@@ -125,17 +118,17 @@ describe('buildChildLineageContext', () => {
     ).toEqual({});
   });
 
-  it("keeps the parent's root but writes no chain when the parent has a root and no chain", () => {
+  it('a child parent with no chain writes nothing', () => {
     expect(
       buildChildLineageContext({
         invocation: 'sync',
         parent: {
-          context: { rootWorkflowExecutionId: 'top-exec-1' },
+          context: undefined,
           id: 'child-exec-1',
           triggeredBy: 'workflow-step',
           workflowId: 'child-workflow-id',
         },
       })
-    ).toEqual({ rootWorkflowExecutionId: 'top-exec-1' });
+    ).toEqual({});
   });
 });

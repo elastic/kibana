@@ -7,20 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** True when the context carries a non-empty `parentWorkflowExecutionId` string. */
-export const hasParentWorkflowExecution = (
-  context: Record<string, unknown> | undefined
-): context is Record<string, unknown> & { parentWorkflowExecutionId: string } =>
-  typeof context?.parentWorkflowExecutionId === 'string' &&
-  context.parentWorkflowExecutionId.length > 0;
-
-/** True when the context carries the root execution id of its sub-workflow chain as a non-empty string. */
-export const hasRootWorkflowExecutionId = (
-  context: Record<string, unknown> | undefined
-): context is Record<string, unknown> & { rootWorkflowExecutionId: string } =>
-  typeof context?.rootWorkflowExecutionId === 'string' &&
-  context.rootWorkflowExecutionId.length > 0;
-
 /** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
 export interface ExecutionChainHop {
   readonly executionId: string;

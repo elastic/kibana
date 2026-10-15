@@ -67,12 +67,12 @@ const createMockStepExecution = (
   ...overrides,
 });
 
-/** Minimal fixture: extractCompositionContext only reads id, triggeredBy and context. */
+/** Minimal fixture: extractCompositionContext only reads triggeredBy and context. */
 function compositionFixture(
   triggeredBy: string,
   context: Record<string, unknown>
 ): EsWorkflowExecution {
-  return { context, id: 'own-exec-id', triggeredBy } as unknown as EsWorkflowExecution;
+  return { triggeredBy, context } as unknown as EsWorkflowExecution;
 }
 
 describe('extractExecutionMetadata', () => {
@@ -427,10 +427,8 @@ describe('extractQueueDelayMs', () => {
 });
 
 describe('extractCompositionContext', () => {
-  it('returns only its own id as rootWorkflowExecutionId when not triggered by workflow-step', () => {
-    expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({
-      rootWorkflowExecutionId: 'own-exec-id',
-    });
+  it('returns empty object when not triggered by workflow-step', () => {
+    expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({});
   });
 
   it('returns compositionDepth, parentWorkflowId, and parentWorkflowInvocation when set', () => {
@@ -493,82 +491,18 @@ describe('extractCompositionContext', () => {
     ).toEqual({ compositionDepth: 1 });
   });
 
-  it('returns parentWorkflowExecutionId when set', () => {
+  it('returns empty object for a top-level execution even when the context carries lineage keys', () => {
     expect(
       extractCompositionContext(
-        compositionFixture('workflow-step', {
-          parentDepth: 0,
-          parentWorkflowExecutionId: 'parent-exec-id',
-        })
-      )
-    ).toEqual({ compositionDepth: 1, parentWorkflowExecutionId: 'parent-exec-id' });
-  });
-
-  it('returns rootWorkflowExecutionId when the root lineage is set', () => {
-    expect(
-      extractCompositionContext(
-        compositionFixture('workflow-step', {
-          parentDepth: 1,
-          parentWorkflowExecutionId: 'parent-exec-id',
-          rootWorkflowExecutionId: 'root-exec-id',
-        })
-      )
-    ).toEqual({
-      compositionDepth: 2,
-      parentWorkflowExecutionId: 'parent-exec-id',
-      rootWorkflowExecutionId: 'root-exec-id',
-    });
-  });
-
-  it('omits rootWorkflowExecutionId, never using its own id, for a child without root lineage (pre-upgrade chain)', () => {
-    expect(
-      extractCompositionContext(
-        compositionFixture('workflow-step', {
-          parentDepth: 2,
+        compositionFixture('manual', {
+          executionChain: [
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
           parentWorkflowExecutionId: 'parent-exec-id',
           parentWorkflowId: 'parent-wf-id',
         })
       )
-    ).toEqual({
-      compositionDepth: 3,
-      parentWorkflowExecutionId: 'parent-exec-id',
-      parentWorkflowId: 'parent-wf-id',
-    });
-  });
-
-  it('omits parentWorkflowExecutionId and rootWorkflowExecutionId when not strings', () => {
-    expect(
-      extractCompositionContext(
-        compositionFixture('workflow-step', {
-          parentDepth: 0,
-          parentWorkflowExecutionId: 123,
-          rootWorkflowExecutionId: 456,
-        })
-      )
-    ).toEqual({ compositionDepth: 1 });
-  });
-
-  it('omits parentWorkflowExecutionId and rootWorkflowExecutionId when empty strings', () => {
-    expect(
-      extractCompositionContext(
-        compositionFixture('workflow-step', {
-          parentDepth: 0,
-          parentWorkflowExecutionId: '',
-          rootWorkflowExecutionId: '',
-        })
-      )
-    ).toEqual({ compositionDepth: 1 });
-  });
-
-  it('returns only its own id for a top-level execution even when the context carries lineage keys', () => {
-    expect(
-      extractCompositionContext(
-        compositionFixture('manual', {
-          parentWorkflowExecutionId: 'parent-exec-id',
-          rootWorkflowExecutionId: 'root-exec-id',
-        })
-      )
-    ).toEqual({ rootWorkflowExecutionId: 'own-exec-id' });
+    ).toEqual({});
   });
 
   describe('executionChain', () => {
@@ -584,46 +518,49 @@ describe('extractCompositionContext', () => {
       parentWorkflowExecutionId: 'parent-exec-id',
       parentWorkflowId: 'parent-wf-id',
       parentWorkflowInvocation: 'async',
-      rootWorkflowExecutionId: 'root-exec-id',
     };
 
-    it('returns the stored chain, root first and direct parent last, next to the other lineage fields', () => {
+    it('returns the stored chain, root first and direct parent last, next to the composition fields', () => {
       expect(
         extractCompositionContext(compositionFixture('workflow-step', grandchildContext))
       ).toEqual({
         compositionDepth: 2,
         executionChain: [ROOT_HOP, PARENT_HOP],
-        parentWorkflowExecutionId: 'parent-exec-id',
         parentWorkflowId: 'parent-wf-id',
         parentWorkflowInvocation: 'async',
-        rootWorkflowExecutionId: 'root-exec-id',
       });
     });
 
-    it('agrees with the root and parent fields at its two ends, and its length is the depth', () => {
-      const {
-        compositionDepth,
-        executionChain = [],
-        parentWorkflowExecutionId,
-        parentWorkflowId,
-        parentWorkflowInvocation,
-        rootWorkflowExecutionId,
-      } = extractCompositionContext(compositionFixture('workflow-step', grandchildContext));
-      const lastHop = executionChain[executionChain.length - 1];
+    it('ends with the stored parent keys as its last hop, and its length is the depth', () => {
+      const { compositionDepth, executionChain = [] } = extractCompositionContext(
+        compositionFixture('workflow-step', grandchildContext)
+      );
+      const { parentWorkflowExecutionId, parentWorkflowId, parentWorkflowInvocation } =
+        grandchildContext;
 
       expect({
         depth: executionChain.length,
-        first: executionChain[0]?.executionId,
-        last: lastHop,
+        last: executionChain[executionChain.length - 1],
       }).toEqual({
         depth: compositionDepth,
-        first: rootWorkflowExecutionId,
         last: {
           executionId: parentWorkflowExecutionId,
           invocation: parentWorkflowInvocation,
           workflowId: parentWorkflowId,
         },
       });
+    });
+
+    it('never returns rootWorkflowExecutionId or parentWorkflowExecutionId', () => {
+      const result = extractCompositionContext(
+        compositionFixture('workflow-step', {
+          ...grandchildContext,
+          rootWorkflowExecutionId: 'root-exec-id',
+        })
+      );
+
+      expect(result).not.toHaveProperty('rootWorkflowExecutionId');
+      expect(result).not.toHaveProperty('parentWorkflowExecutionId');
     });
 
     it("copies only each hop's own fields", () => {
@@ -650,9 +587,9 @@ describe('extractCompositionContext', () => {
     });
 
     it('never returns a chain for a top-level execution, even when its context carries one', () => {
-      expect(extractCompositionContext(compositionFixture('manual', grandchildContext))).toEqual({
-        rootWorkflowExecutionId: 'own-exec-id',
-      });
+      expect(extractCompositionContext(compositionFixture('manual', grandchildContext))).toEqual(
+        {}
+      );
     });
   });
 });

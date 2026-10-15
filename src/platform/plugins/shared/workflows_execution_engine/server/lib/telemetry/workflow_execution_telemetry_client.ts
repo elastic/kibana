@@ -186,12 +186,6 @@ function buildBaseExecutionTelemetryFields(
     ...(executionMetadata.parentWorkflowInvocation && {
       parentWorkflowInvocation: executionMetadata.parentWorkflowInvocation,
     }),
-    ...(executionMetadata.parentWorkflowExecutionId && {
-      parentWorkflowExecutionId: executionMetadata.parentWorkflowExecutionId,
-    }),
-    ...(executionMetadata.rootWorkflowExecutionId && {
-      rootWorkflowExecutionId: executionMetadata.rootWorkflowExecutionId,
-    }),
     ...(executionMetadata.executionChain && {
       executionChain: executionMetadata.executionChain,
     }),
