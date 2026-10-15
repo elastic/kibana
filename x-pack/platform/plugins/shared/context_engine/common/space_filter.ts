@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { MEMORY_SCOPE_ID_FIELD } from './memory';
 
 export const AI_INDEX_PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const SPACE_FIELD = `${AI_INDEX_PRIVILEGES_PATH}.space`;
@@ -44,5 +45,28 @@ export const buildAiIndexSpaceFilter = (spaceId: string): QueryDslQueryContainer
       },
     ],
     minimum_should_match: 1,
+  },
+});
+
+/** Docs with no `scope_id`, or one in `scopeIds`. Same shape as the space filter for FORK pushdown. */
+export const buildAiIndexScopeFilter = (scopeIds: string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { bool: { must_not: { exists: { field: MEMORY_SCOPE_ID_FIELD } } } },
+      ...(scopeIds.length > 0 ? [{ terms: { [MEMORY_SCOPE_ID_FIELD]: scopeIds } }] : []),
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const buildAiIndexReadFilter = ({
+  spaceId,
+  scopeIds,
+}: {
+  spaceId: string;
+  scopeIds: string[];
+}): QueryDslQueryContainer => ({
+  bool: {
+    filter: [buildAiIndexSpaceFilter(spaceId), buildAiIndexScopeFilter(scopeIds)],
   },
 });

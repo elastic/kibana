@@ -22,9 +22,11 @@ import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createMemoryWriter,
+  isMemoryInScope,
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
+import { resolveMemoryUserScopeId } from '../memory_user_scope';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -58,9 +60,9 @@ export const createForgetTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Mark a memory as deleted in a memory-enabled Context Engine AI index so it is no longer
-    recalled. Provide the id returned by the remember tool. The memory remains stored as a
-    lifecycle tombstone.
+    Mark one of the current user's memories as deleted in a memory-enabled Context Engine AI
+    index so it is no longer recalled. Provide the id returned by the remember tool. The memory
+    remains stored as a lifecycle tombstone.
   `,
   schema: forgetSchema,
   handler: async (params, context) => {
@@ -81,6 +83,8 @@ export const createForgetTool = ({
         getAiIndexService,
         getCoreStart,
       });
+
+      const userScopeId = await resolveMemoryUserScopeId({ request, getSecurityStart });
 
       const currentUserClient = esClient.asCurrentUser;
       const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
@@ -118,6 +122,9 @@ export const createForgetTool = ({
           `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
         );
       }
+      if (!isMemoryInScope(existingHit._source, userScopeId)) {
+        throw new Error(`Memory '${params.id}' belongs to another user and cannot be forgotten.`);
+      }
 
       if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
         return {
@@ -133,6 +140,7 @@ export const createForgetTool = ({
       const now = new Date().toISOString();
       const agent = getAgentFromRunContext(runContext);
       const writer = createMemoryWriter({
+        userScopeId,
         toolId: contextEngineMemoryTools.forget,
         runId: runContext.runId,
         agentId: agent?.agentId,
@@ -157,7 +165,8 @@ export const createForgetTool = ({
         throw new Error(`Memory '${params.id}' is missing concurrency metadata.`);
       }
 
-      await currentUserClient.index({
+      // Written as kibana_system: users hold a read-only DLS grant on memory indices.
+      await esClient.asInternalUser.index({
         index: aiIndex.dest.type === 'index' ? existingHit._index : aiIndex.dest.value,
         ...(aiIndex.dest.type === 'index' && {
           id: params.id,

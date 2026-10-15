@@ -13,6 +13,7 @@ import pRetry from 'p-retry';
 import {
   AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
   AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  AI_MEMORY_INDEX_PREFIX as MEMORY_PREFIX,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDICES,
 } from '../../common/constants';
@@ -578,7 +579,10 @@ export class AiIndexService {
   }
 
   private async assertValidIndexDest(value: string, managed: boolean): Promise<void> {
-    const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
+    const prefixes = [
+      ...this.allowedDestPrefixes(INDEX_PREFIX, managed),
+      ...(managed ? [MEMORY_PREFIX] : []),
+    ];
     this.assertDestValueFormat(value, prefixes);
 
     const { indices, dataStreams } = await this.resolveDest(value);

@@ -17,7 +17,7 @@ import type {
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { validateQueryAiIndicesRequest } from '../../common/validation';
 import { applyLimit } from './apply_limit';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
@@ -26,17 +26,20 @@ import { applyKiLifecycle } from './ki_lifecycle';
 export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   esClient: ElasticsearchClient;
   spaceId: string;
+  /** Scope ids the caller may read; memories scoped to anyone else are filtered out. */
+  scopeIds: string[];
   /** Registered AI index dests; a query reading one gets the lifecycle pipeline applied. */
   aiIndexDests?: AiIndexDest[];
 }
 
 /**
- * Runs caller-supplied ES|QL with server-owned lifecycle filters, space filter and row cap.
+ * Runs caller-supplied ES|QL with server-owned lifecycle filters, space and scope filters, and row cap.
  * `allow_partial_results` may silently drop failed shards.
  */
 export const queryAiIndices = async ({
   esClient,
   spaceId,
+  scopeIds,
   query,
   params,
   limit,
@@ -58,7 +61,7 @@ export const queryAiIndices = async ({
           applyKiLifecycle(query, aiIndexDests),
           limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT
         ),
-        filter: buildAiIndexSpaceFilter(spaceId),
+        filter: buildAiIndexReadFilter({ spaceId, scopeIds }),
         drop_null_columns: true,
         allow_partial_results: true,
         ...(namedParams.length > 0 ? { params: namedParams } : {}),

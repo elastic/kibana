@@ -65,6 +65,9 @@ export const AI_INDEX_DEST_PREFIX = 'ai-index-';
 export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
+/** Elastic-managed memory AI indices; `scope_id` is mapped and DLS enforces user scope. */
+export const AI_MEMORY_INDEX_PREFIX = '.ai-memory-';
+
 /**
  * Storage type used for AI indexes created from the UI. The `data_stream` type still exists
  * and is supported by the API/server for solutions and expert users; only the UI is defaulted.

@@ -14,6 +14,7 @@ import {
   apiPrivileges,
   uiPrivileges,
 } from '../common/features';
+import { MEMORY_AI_INDEX_READ_KI_TYPE } from '../common/memory';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -30,6 +31,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       all: {
         app: [CONTEXT_ENGINE_APP_ID],
         api: [apiPrivileges.readContextEngine, apiPrivileges.writeContextEngine],
+        aiIndex: { read: [MEMORY_AI_INDEX_READ_KI_TYPE] },
         catalogue: [],
         savedObject: {
           all: [],
@@ -40,6 +42,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       read: {
         app: [CONTEXT_ENGINE_APP_ID],
         api: [apiPrivileges.readContextEngine],
+        aiIndex: { read: [MEMORY_AI_INDEX_READ_KI_TYPE] },
         catalogue: [],
         savedObject: {
           all: [],

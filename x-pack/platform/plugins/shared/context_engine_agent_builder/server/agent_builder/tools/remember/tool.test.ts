@@ -11,6 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { kiFieldsSchema } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createRememberTool } from './tool';
@@ -25,6 +26,8 @@ describe('remember tool', () => {
   const get = jest.fn();
   const search = jest.fn();
   const index = jest.fn();
+  const getCurrentUser = jest.fn();
+  const security = { authc: { getCurrentUser } } as unknown as SecurityPluginStart;
 
   const createTool = () =>
     createRememberTool({
@@ -36,7 +39,7 @@ describe('remember tool', () => {
           .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
         return coreStart;
       },
-      getSecurityStart: async () => undefined,
+      getSecurityStart: async () => security,
       generateId: () => 'logical-memory-id',
       generateSessionId: () => 'generated-session-id',
       getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),
@@ -52,7 +55,8 @@ describe('remember tool', () => {
       spaceId: 'space-1',
       esClient: {
         ...context.esClient,
-        asCurrentUser: { search, index },
+        asCurrentUser: { search },
+        asInternalUser: { index },
       },
       runContext: {
         runId: 'run-1',
@@ -91,10 +95,11 @@ describe('remember tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     assertContextEngineWriteAccessMock.mockResolvedValue();
+    getCurrentUser.mockReturnValue({ profile_uid: 'u_alice' });
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
-      dest: { type: 'index', value: 'ai-index-idx-support' },
+      dest: { type: 'index', value: '.ai-memory-elastic' },
     });
     index.mockResolvedValue({ _id: 'generated-memory-id' });
     search.mockResolvedValue({ hits: { hits: [] } });
@@ -185,11 +190,69 @@ describe('remember tool', () => {
     });
   });
 
+  it('rejects a caller without a user profile', async () => {
+    getCurrentUser.mockReturnValue({ username: 'alice' });
+
+    const result = await run(params, 'conversation-1');
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: 'Failed to store memory: Cannot store user memory without a user profile.',
+          },
+        },
+      ],
+    });
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it("does not revise another user's memory", async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: '.ai-memory-elastic',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+              attributes: {},
+              scope_id: ['user://u_bob'],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1' }, 'conversation-1');
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              "Failed to store memory: Memory 'memory-1' belongs to another user and cannot be revised.",
+          },
+        },
+      ],
+    });
+  });
+
   it('rejects an AI index that does not have memory enabled', async () => {
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: false,
-      dest: { type: 'index', value: 'ai-index-idx-support' },
+      dest: { type: 'index', value: '.ai-memory-elastic' },
     });
 
     const result = await run(params, 'conversation-1');
@@ -213,7 +276,7 @@ describe('remember tool', () => {
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(get).toHaveBeenCalledWith('support', 'space-1');
     expect(index).toHaveBeenCalledWith({
-      index: 'ai-index-idx-support',
+      index: '.ai-memory-elastic',
       id: 'logical-memory-id',
       document: expect.objectContaining({
         '@timestamp': expect.any(String),
@@ -234,15 +297,29 @@ describe('remember tool', () => {
         attributes: {
           'memory.session_id': 'conversation-1',
         },
+        scope_id: ['user://u_alice'],
+        permissions: {
+          kibana: {
+            privileges: [{ space: 'space-1', name: ['ai_index:memory/read'], count: 1 }],
+          },
+        },
         governance: {
           provenance: {
             created_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              uri: 'user://u_alice',
+              metadata: {
+                tool_id: 'platform.context_engine.remember',
+                run_id: 'run-1',
+                agent_id: 'agent-1',
+              },
             },
             updated_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              uri: 'user://u_alice',
+              metadata: {
+                tool_id: 'platform.context_engine.remember',
+                run_id: 'run-1',
+                agent_id: 'agent-1',
+              },
             },
           },
         },
@@ -301,7 +378,7 @@ describe('remember tool', () => {
       hits: {
         hits: [
           {
-            _index: 'ai-index-idx-support',
+            _index: '.ai-memory-elastic',
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               type: 'index_metadata',
@@ -337,7 +414,7 @@ describe('remember tool', () => {
       hits: {
         hits: [
           {
-            _index: 'ai-index-idx-support',
+            _index: '.ai-memory-elastic',
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               type: 'memory.session',
@@ -373,7 +450,7 @@ describe('remember tool', () => {
       hits: {
         hits: [
           {
-            _index: 'ai-index-idx-support',
+            _index: '.ai-memory-elastic',
             _seq_no: 7,
             _primary_term: 2,
             _source: {
@@ -412,7 +489,7 @@ describe('remember tool', () => {
       hits: {
         hits: [
           {
-            _index: '.ds-ai-index-ds-support-000001',
+            _index: '.ds-.ai-memory-support-ds-000001',
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
@@ -458,14 +535,14 @@ describe('remember tool', () => {
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+      dest: { type: 'data_stream', value: '.ai-memory-support-ds' },
     });
 
     const result = await run({ ...params, id: 'memory-1' }, 'conversation-1');
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'ai-index-ds-support',
+        index: '.ai-memory-support-ds',
         query: { term: { id: 'memory-1' } },
         sort: [{ '@timestamp': 'desc' }],
         size: 1,
@@ -473,7 +550,7 @@ describe('remember tool', () => {
     );
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'ai-index-ds-support',
+        index: '.ai-memory-support-ds',
         op_type: 'create',
         document: expect.objectContaining({
           '@timestamp': expect.any(String),
@@ -497,8 +574,12 @@ describe('remember tool', () => {
                 metadata: { run_id: 'run-0', agent_id: 'agent-1' },
               },
               updated_by: {
-                uri: 'tool://platform.context_engine.remember',
-                metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+                uri: 'user://u_alice',
+                metadata: {
+                  tool_id: 'platform.context_engine.remember',
+                  run_id: 'run-1',
+                  agent_id: 'agent-1',
+                },
               },
             },
           },
@@ -522,7 +603,7 @@ describe('remember tool', () => {
       hits: {
         hits: [
           {
-            _index: 'ai-index-idx-support',
+            _index: '.ai-memory-elastic',
             _seq_no: 7,
             _primary_term: 2,
             _source: {
@@ -534,6 +615,10 @@ describe('remember tool', () => {
               content: 'Old content',
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {},
+              scope_id: ['user://u_alice', 'user://u_bob'],
+              permissions: {
+                kibana: { privileges: [{ space: 'space-0', name: [], count: 0 }] },
+              },
             },
           },
         ],
@@ -550,7 +635,7 @@ describe('remember tool', () => {
     );
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'ai-index-idx-support',
+        index: '.ai-memory-elastic',
         id: 'memory-1',
         if_seq_no: 7,
         if_primary_term: 2,
@@ -560,6 +645,10 @@ describe('remember tool', () => {
           attributes: expect.objectContaining({
             'memory.session_id': 'conversation-1',
           }),
+          scope_id: ['user://u_alice', 'user://u_bob'],
+          permissions: {
+            kibana: { privileges: [{ space: 'space-0', name: [], count: 0 }] },
+          },
         }),
       })
     );
@@ -570,14 +659,14 @@ describe('remember tool', () => {
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+      dest: { type: 'data_stream', value: '.ai-memory-support-ds' },
     });
 
     await run(params, 'conversation-1');
 
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'ai-index-ds-support',
+        index: '.ai-memory-support-ds',
         op_type: 'create',
         document: expect.objectContaining({ id: 'logical-memory-id' }),
       })
