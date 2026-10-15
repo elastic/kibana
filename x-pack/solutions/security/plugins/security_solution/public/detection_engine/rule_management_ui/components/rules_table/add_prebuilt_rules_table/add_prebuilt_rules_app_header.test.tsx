@@ -184,13 +184,15 @@ describe('AddPrebuiltRulesAppHeader', () => {
       expect(await screen.findByTestId('installAndEnableSelectedRulesButton')).toBeDisabled();
     });
 
-    it('disables the selected rules actions while a rule is installing', async () => {
+    it('disables the selected rules actions and shows them as loading while a rule is installing', async () => {
       mockContext({ selectedRules, isAnyRuleInstalling: true });
       renderHeader();
       await openAppMenuOverflow();
 
       expect(await screen.findByTestId('installSelectedRulesButton')).toBeDisabled();
       expect(await screen.findByTestId('installAndEnableSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('installSelectedRulesButton-loading')).toBeInTheDocument();
+      expect(screen.getByTestId('installAndEnableSelectedRulesButton-loading')).toBeInTheDocument();
     });
   });
 });

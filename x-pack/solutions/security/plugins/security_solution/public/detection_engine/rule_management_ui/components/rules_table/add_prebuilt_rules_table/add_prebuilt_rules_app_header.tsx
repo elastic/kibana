@@ -61,6 +61,7 @@ export const AddPrebuiltRulesAppHeader = React.memo(() => {
                 overflow: true,
                 run: () => installSelectedRules(true),
                 disableButton: isInstallDisabled,
+                isLoading: isAnyRuleInstalling,
                 testId: 'installAndEnableSelectedRulesButton',
               },
             ]
