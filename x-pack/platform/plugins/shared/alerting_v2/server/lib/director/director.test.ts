@@ -94,7 +94,8 @@ describe('DirectorService', () => {
 
       expect(result).toEqual({
         alertEvents: [],
-        stats: { newEpisodeIds: [], suppressedNoDataEventCount: 0 },
+        stats: { newEpisodeIds: [] },
+        previousAlertStateByGroupHash: new Map(),
       });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
@@ -1121,238 +1122,34 @@ describe('DirectorService', () => {
       });
     });
   });
+  describe('previous alert state', () => {
+    it('returns the persisted state it loaded, keyed by group_hash, alongside a 1:1 batch', async () => {
+      // The director never drops events; write policy lives downstream in
+      // SuppressRedundantNoDataEventsStep, which needs this state.
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'no_data',
+        alert: undefined,
+      });
+      const previous = {
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'no_data' as const,
+        last_episode_id: 'held-episode',
+        last_episode_status: alertEpisodeStatus.active,
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+      };
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([previous]));
 
-  describe('no_data idle suppression', () => {
-    // `keep_last` holds the episode status on a `no_data` event. The executor
-    // re-synthesizes a `no_data` event for an absent group on every run, so
-    // without suppression a held group would write one identical event per run.
-    const keepLastRule = createRuleResponse({ no_data: { strategy: 'keep_last' } });
-
-    // Persisted state of a group already held in no-data: the last event was
-    // the `no_data` transition marker and the episode is held `active`.
-    const heldState = (
-      overrides: Partial<LatestAlertEventStateInput> = {}
-    ): LatestAlertEventStateInput => ({
-      last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-      last_status: 'no_data',
-      last_episode_id: 'held-episode',
-      last_episode_status: alertEpisodeStatus.active,
-      last_episode_status_count: null,
-      group_hash: 'hash-1',
-      ...overrides,
-    });
-
-    const noDataEvent = createAlertEvent({
-      group_hash: 'hash-1',
-      status: 'no_data',
-      alert: undefined,
-    });
-
-    const run = (
-      alertEvents: Parameters<DirectorService['run']>[0]['alertEvents'],
-      ruleOverride = keepLastRule
-    ) =>
-      directorService.run({
+      const result = await directorService.run({
         spaceId: 'default',
-        rule: ruleOverride,
+        rule: createRuleResponse({ no_data: { strategy: 'keep_last' } }),
         executionContext: testExecutionContext,
-        alertEvents,
+        alertEvents: [alertEvent],
       });
 
-    it('writes the transition marker when a group first enters no_data', async () => {
-      // Previous raw status is `breached`: this `no_data` is the transition.
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([heldState({ last_status: 'breached' })])
-      );
-
-      const result = await run([noDataEvent]);
-
       expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].status).toBe('no_data');
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'held-episode',
-        status: alertEpisodeStatus.active,
-      });
-      expect(result.stats).toEqual({ newEpisodeIds: [], suppressedNoDataEventCount: 0 });
-    });
-
-    it('drops a no_data continuation when the previous event was no_data and nothing changed', async () => {
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
-
-      const result = await run([noDataEvent]);
-
-      expect(result.alertEvents).toEqual([]);
-      expect(result.stats).toEqual({ newEpisodeIds: [], suppressedNoDataEventCount: 1 });
-    });
-
-    it('writes nothing across repeated executions while the group stays absent', async () => {
-      // The persisted state never advances while the group is held, so every
-      // subsequent run sees the same marker and must drop its event.
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
-
-      for (let execution = 0; execution < 5; execution++) {
-        const result = await run([noDataEvent]);
-
-        expect(result.alertEvents).toEqual([]);
-        expect(result.stats.suppressedNoDataEventCount).toBe(1);
-      }
-    });
-
-    it('resumes writing when data returns breaching', async () => {
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
-
-      const result = await run([
-        createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
-      ]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'held-episode',
-        status: alertEpisodeStatus.active,
-      });
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('resumes writing when data returns recovered', async () => {
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
-
-      const result = await run([
-        createAlertEvent({ group_hash: 'hash-1', status: 'recovered', alert: undefined }),
-      ]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].alert).toMatchObject({
-        id: 'held-episode',
-        status: alertEpisodeStatus.recovering,
-      });
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('writes the no_data event when the strategy outcome changes (policy switched to resolve)', async () => {
-      // The strategy keeps running every tick; only its output is compared.
-      // A rule edited from keep_last to resolve while the group is absent
-      // therefore resolves on the next run instead of being dropped.
-      const resolveRule = createRuleResponse({ no_data: { strategy: 'resolve' } });
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
-
-      const result = await run([noDataEvent], resolveRule);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'held-episode',
-        status: alertEpisodeStatus.inactive,
-      });
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('writes the no_data event when the resolved status_count differs from the persisted one', async () => {
-      // A keep_last hold emits no status_count; a persisted count of 2 is a
-      // change and must be recorded. Pins that the comparison covers the
-      // whole lifecycle state, not just the status.
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          heldState({
-            last_episode_status: alertEpisodeStatus.pending,
-            last_episode_status_count: 2,
-          }),
-        ])
-      );
-
-      const result = await run([noDataEvent]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'held-episode',
-        status: alertEpisodeStatus.pending,
-      });
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('writes the transition marker for a user-locked group entering no_data', async () => {
-      // The activate lock bypasses the strategy and forces `active`; the
-      // suppression rule runs after it and must still let the marker through.
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          heldState({
-            last_status: 'recovered',
-            last_lifecycle_action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-          }),
-        ])
-      );
-
-      const result = await run([noDataEvent]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'held-episode',
-        status: alertEpisodeStatus.active,
-      });
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('drops a no_data continuation for a user-locked group', async () => {
-      // Same unbounded-write loop as keep_last, different path. The rule is
-      // applied to the final event, so the lock path is covered too.
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          heldState({ last_lifecycle_action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE }),
-        ])
-      );
-
-      const result = await run([noDataEvent]);
-
-      expect(result.alertEvents).toEqual([]);
-      expect(result.stats.suppressedNoDataEventCount).toBe(1);
-    });
-
-    it('drops only the held group in a mixed batch', async () => {
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          heldState(),
-          heldState({
-            group_hash: 'hash-2',
-            last_status: 'breached',
-            last_episode_id: 'episode-2',
-          }),
-        ])
-      );
-
-      const result = await run([
-        noDataEvent,
-        createAlertEvent({ group_hash: 'hash-2', status: 'breached', alert: undefined }),
-      ]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].group_hash).toBe('hash-2');
-      expect(result.alertEvents[0].alert).toEqual({
-        id: 'episode-2',
-        status: alertEpisodeStatus.active,
-      });
-      expect(result.stats).toEqual({ newEpisodeIds: [], suppressedNoDataEventCount: 1 });
-    });
-
-    it('never drops a breached continuation, even when the lifecycle state is unchanged', async () => {
-      // Guardrail from the issue: a group that is still legitimately breaching
-      // keeps emitting an event on every execution.
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([heldState({ last_status: 'breached' })])
-      );
-
-      const result = await run([
-        createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
-      ]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
-    });
-
-    it('never drops a no_data event for a group with no persisted state', async () => {
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
-
-      const result = await run([noDataEvent]);
-
-      expect(result.alertEvents).toHaveLength(1);
-      expect(result.stats.suppressedNoDataEventCount).toBe(0);
+      expect(result.previousAlertStateByGroupHash.get('hash-1')).toMatchObject(previous);
     });
   });
 });
