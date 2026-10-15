@@ -119,6 +119,8 @@ describe('palette panel', () => {
         changePaletteIn(instance, 'negative');
       });
 
+      jest.advanceTimersByTime(250);
+
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
         name: 'negative',
