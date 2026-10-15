@@ -373,12 +373,27 @@ print_if_dry_run() {
   fi
 }
 
-# Push login for image steps that run in both publish and PR pipelines
+# Push login for image steps. Publish pipelines already logged in with the publish credential in setup_job_env.sh
 docker_login_push() {
+  is_publish_pipeline || docker_login_kibana_ci_pr
+}
+
+# Tags a locally built image as $target_image and pushes it with the push login
+retag_and_push_image() {
+  local built_image="$1"
+  local target_image="$2"
+  docker tag "$built_image" "$target_image"
+  docker_login_push
+  docker_with_retry push "$target_image"
+}
+
+# Trusted docker.elastic.co/kibana-ci repository on publish pipelines, its -pr counterpart elsewhere
+kibana_ci_image_repository() {
+  local name="$1"
   if is_publish_pipeline; then
-    docker_login_kibana_ci_publish
+    echo "docker.elastic.co/kibana-ci/$name"
   else
-    docker_login_kibanamachine
+    echo "docker.elastic.co/kibana-ci/$name-pr"
   fi
 }
 
@@ -411,6 +426,15 @@ docker_login_kibana_ci_publish() {
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 
+# Push access to docker.elastic.co/kibana-ci/*-pr repositories only, readable only by PR image pipelines
+docker_login_kibana_ci_pr() {
+  is_docker_available || return 0
+  local username password
+  username="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/pr/container-registry)"
+  password="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/pr/container-registry)"
+  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
+}
+
 # Pull-only access to the docker.elastic.co repositories Kibana CI consumes
 docker_login_kibana_ci_read() {
   is_docker_available || return 0
@@ -420,7 +444,7 @@ docker_login_kibana_ci_read() {
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 
-# Shared read/write kibanamachine credential, needed only to push to docker.elastic.co/kibana-ci/*
+# Shared read/write kibanamachine credential, left only for the quality gate image until it gets its own tier
 docker_login_kibanamachine() {
   is_docker_available || return 0
   local username password
