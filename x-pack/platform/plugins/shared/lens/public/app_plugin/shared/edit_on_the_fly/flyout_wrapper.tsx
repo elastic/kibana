@@ -50,16 +50,6 @@ const inlineFlyoutDndOverflowFix = css`
   .euiFlyout[data-test-subj='customizeLens'] [data-test-subj='euiFlyoutContent'] {
     overflow: visible !important;
   }
-
-  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflow {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    mask-image: none !important;
-    -webkit-mask-image: none !important;
-    transform: none !important;
-    padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
-    margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
-  }
 `;
 
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
