@@ -297,12 +297,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                   defaultMessage: 'CloudFormation cannot report back to this Kibana',
                 })}
                 data-test-subj="awsIdentityFederationSetup-callbackUnavailable"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
-                  defaultMessage="The stack creates the federated identity by reporting its Role ARN back to Kibana over HTTPS. Set a public HTTPS URL for Kibana (server.publicBaseUrl), then reload this page."
-                />
-              </KbnWarningCallout>
+                text={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
+                      defaultMessage="The stack creates the federated identity by reporting its Role ARN back to Kibana over HTTPS. Set a public HTTPS URL for Kibana (server.publicBaseUrl), then reload this page."
+                    />
+                  </p>
+                }
+              />
               <EuiSpacer size="m" />
             </>
           )}
