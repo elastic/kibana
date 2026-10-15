@@ -26,7 +26,6 @@ export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 export const RISK_SCORE_NORM_FIELD = 'entity.risk.calculated_score_norm';
 export const RISK_LEVEL_FIELD = 'entity.risk.calculated_level';
 export const CRITICALITY_FIELD = 'asset.criticality';
-/** The group's risk score and level, which the main entity of a group with aliases holds. */
 export const RESOLUTION_RISK_SCORE_FIELD =
   'entity.relationships.resolution.risk.calculated_score_norm';
 export const RESOLUTION_RISK_LEVEL_FIELD = 'entity.relationships.resolution.risk.calculated_level';
@@ -112,14 +111,6 @@ export const EMPTY_ENTITY_FILTERS: EntityFilters = {
 };
 export type SortValue = string | number | null;
 
-/** Entity docs hold only own values, so resolved entities that pass differently are added or removed. */
-export interface ResolvedEntityFilterOverrides {
-  /** Resolved entities that pass, though their main entity does not. */
-  include: readonly string[];
-  /** Resolved entities that do not pass, though their main entity does. */
-  exclude: readonly string[];
-}
-
 export interface QueryArgs {
   namespace: string;
   timeRange: TimeRange;
@@ -132,8 +123,6 @@ export interface QueryArgs {
   searchExpression?: string;
   /** URL entity filters and tile id lists, applied to entity docs. */
   entityExpression?: string;
-  /** Group values (criticality, sources, watchlists) aren't on the doc, so filters on them need these. */
-  resolvedEntityFilterOverrides?: ResolvedEntityFilterOverrides;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
   keepFields?: readonly string[];
   /** Installed security ML jobs; the anomaly columns count only their records. */

@@ -31,7 +31,6 @@ export const AdditionalControls = ({
   onResetColumns,
 }: {
   total: number;
-  /** The rows the table shows, when fewer than `total`. */
   shown?: number;
   title: string;
   columns: string[];

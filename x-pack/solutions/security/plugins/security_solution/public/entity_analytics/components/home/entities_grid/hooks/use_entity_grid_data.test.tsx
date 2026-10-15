@@ -157,9 +157,10 @@ describe('useEntityGridData', () => {
         }),
         expect.any(Function)
       );
-      const overrides = { include: ['e9'], exclude: [] };
       expect(mockFetchSortPage).toHaveBeenCalledWith(
-        expect.objectContaining({ resolvedEntityFilterOverrides: overrides }),
+        expect.objectContaining({
+          entityExpression: `(${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9")`,
+        }),
         expect.anything()
       );
       expect(mockRunQuery.mock.calls[0][0].join('\n')).toContain('entity.id IN ("e9")');

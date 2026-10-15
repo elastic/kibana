@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   useEuiFontSize,
   useEuiTheme,
@@ -26,104 +26,80 @@ const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
   { defaultMessage: 'entity records' }
 );
 
-interface UseEntityGridToolbarOptions {
+interface EntityGridToolbarTotalProps {
   total: number;
-  /** The rows the grid shows, when the view has more. */
   shown?: number;
   isIndividualRows: boolean;
   visibleColumns: string[];
   onAddColumn: (columnId: string) => void;
   onRemoveColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  updatedAt: number | null;
-  /** The toolbar shows only with a group selector. */
-  groupSelectorComponent?: React.ReactNode;
 }
 
-export const useEntityGridToolbarVisibility = ({
-  total,
-  shown,
+const EntityGridToolbarTotal: React.FC<EntityGridToolbarTotalProps> = ({
   isIndividualRows,
   visibleColumns,
-  onAddColumn,
-  onRemoveColumn,
-  onResetColumns,
-  updatedAt,
-  groupSelectorComponent,
-}: UseEntityGridToolbarOptions): EuiDataGridToolBarVisibilityOptions | false => {
+  ...controls
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { fontSize: toolbarFontSize, lineHeight: toolbarLineHeight } = useEuiFontSize('xs');
-  const showToolbar = groupSelectorComponent !== undefined;
-
-  return useMemo(
-    () =>
-      showToolbar
-        ? {
-            showColumnSelector: true,
-            showSortSelector: false,
-            showDisplaySelector: true,
-            showKeyboardShortcuts: true,
-            additionalControls: {
-              left: {
-                prepend: (
-                  <div
-                    css={css`
-                      .entityAnalyticsDataTableTotal {
-                        font-weight: ${euiTheme.font.weight.semiBold};
-                        font-size: ${toolbarFontSize};
-                        line-height: ${toolbarLineHeight};
-                        border-inline-end: ${euiTheme.border.thin};
-                        padding-inline-end: ${euiTheme.size.m};
-                        margin-inline-end: ${euiTheme.size.xs};
-                      }
-                    `}
-                  >
-                    <AdditionalControls
-                      total={total}
-                      shown={shown}
-                      title={
-                        isIndividualRows ? INDIVIDUAL_ROWS_TOTAL_TITLE : RESOLVED_ROWS_TOTAL_TITLE
-                      }
-                      columns={visibleColumns}
-                      onAddColumn={onAddColumn}
-                      onRemoveColumn={onRemoveColumn}
-                      onResetColumns={onResetColumns}
-                    />
-                  </div>
-                ),
-              },
-              right: (
-                <div
-                  css={css`
-                    display: flex;
-                    align-items: center;
-                    gap: ${euiTheme.size.m};
-                  `}
-                >
-                  {updatedAt != null ? <LastUpdated updatedAt={updatedAt} /> : null}
-                  {groupSelectorComponent}
-                </div>
-              ),
-            },
-          }
-        : false,
-    [
-      showToolbar,
-      total,
-      shown,
-      isIndividualRows,
-      visibleColumns,
-      onAddColumn,
-      onRemoveColumn,
-      onResetColumns,
-      updatedAt,
-      euiTheme.font.weight.semiBold,
-      toolbarFontSize,
-      toolbarLineHeight,
-      euiTheme.border.thin,
-      euiTheme.size.m,
-      euiTheme.size.xs,
-      groupSelectorComponent,
-    ]
+  const { fontSize, lineHeight } = useEuiFontSize('xs');
+  return (
+    <div
+      css={css`
+        .entityAnalyticsDataTableTotal {
+          font-weight: ${euiTheme.font.weight.semiBold};
+          font-size: ${fontSize};
+          line-height: ${lineHeight};
+          border-inline-end: ${euiTheme.border.thin};
+          padding-inline-end: ${euiTheme.size.m};
+          margin-inline-end: ${euiTheme.size.xs};
+        }
+      `}
+    >
+      <AdditionalControls
+        {...controls}
+        title={isIndividualRows ? INDIVIDUAL_ROWS_TOTAL_TITLE : RESOLVED_ROWS_TOTAL_TITLE}
+        columns={visibleColumns}
+      />
+    </div>
   );
 };
+
+const EntityGridToolbarRight: React.FC<{
+  updatedAt: number | null;
+  controls: React.ReactNode;
+}> = ({ updatedAt, controls }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.m};
+      `}
+    >
+      {updatedAt != null && <LastUpdated updatedAt={updatedAt} />}
+      {controls}
+    </div>
+  );
+};
+
+interface EntityGridToolbarOptions extends EntityGridToolbarTotalProps {
+  updatedAt: number | null;
+  controls: React.ReactNode;
+}
+
+export const getEntityGridToolbarVisibility = ({
+  updatedAt,
+  controls,
+  ...totalProps
+}: EntityGridToolbarOptions): EuiDataGridToolBarVisibilityOptions => ({
+  showColumnSelector: true,
+  showSortSelector: false,
+  showDisplaySelector: true,
+  showKeyboardShortcuts: true,
+  additionalControls: {
+    left: { prepend: <EntityGridToolbarTotal {...totalProps} /> },
+    right: <EntityGridToolbarRight updatedAt={updatedAt} controls={controls} />,
+  },
+});

@@ -15,7 +15,7 @@ import {
   getEntityIds,
   getString,
 } from '../common';
-import type { ResolvedEntityFilterOverrides, QueryArgs, Row } from '../common';
+import type { QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
   ID_LIST_CHUNK_SIZE,
@@ -161,6 +161,14 @@ export const buildRollUpOverAliasesSteps = (
     : [];
 
 /** Overrides go in as id lists under the 1MB cap; the largest space has ~4k resolved entities (Oct 2026). */
+/** Entity docs hold only own values, so resolved entities that pass differently are added or removed. */
+export interface ResolvedEntityFilterOverrides {
+  /** Resolved entities that pass, though their main entity does not. */
+  include: readonly string[];
+  /** Resolved entities that do not pass, though their main entity does. */
+  exclude: readonly string[];
+}
+
 const MAX_RESOLVED_ENTITY_FILTER_OVERRIDES = 4_000;
 
 /** Only filters on group-valued columns can pass a resolved entity differently from its main entity. */

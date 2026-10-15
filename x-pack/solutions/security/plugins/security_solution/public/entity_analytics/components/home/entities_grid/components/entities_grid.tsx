@@ -32,7 +32,7 @@ import { RowActionsCell } from './cells/row_actions_cell';
 import type { RowActions } from './cells/row_actions_cell';
 import { EXPANDER_COLUMN, getGroupRecordsOptions } from './entities_expanded_row';
 import { EntityGridCustomBody } from './entities_grid_custom_body';
-import { useEntityGridToolbarVisibility } from './entities_grid_toolbar';
+import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
 import { DataViewContext } from '../../entities_table';
@@ -102,8 +102,8 @@ export interface EntitiesGridProps {
   entityExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
-  /** When provided, shows the full toolbar with controls. */
-  groupSelectorComponent?: React.ReactNode;
+  /** Without them the grid has no toolbar, as inside a group. */
+  toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
@@ -119,7 +119,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   entityExpression,
   cellHandlers,
   rowActions,
-  groupSelectorComponent,
+  toolbarControls,
   onFullScreenChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -204,6 +204,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     () => ({
       columns: [{ id: sortField, direction: sortDirection }],
       onSort: (cols: Array<{ id: string; direction: SortDir }>) => {
+        // EUI passes every sorted column; the one the user just picked isn't the current sort.
         const col = cols.find((c) => c.id !== sortField) ?? cols[0];
         if (!col) return;
         onSortChange(col.id, col.direction);
@@ -236,17 +237,34 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
-  const toolbarVisibility = useEntityGridToolbarVisibility({
-    total,
-    shown: isAtLoadLimit ? rows.length : undefined,
-    isIndividualRows,
-    visibleColumns,
-    onAddColumn,
-    onRemoveColumn,
-    onResetColumns,
-    updatedAt,
-    groupSelectorComponent,
-  });
+  const shown = isAtLoadLimit ? rows.length : undefined;
+  const toolbarVisibility = useMemo(
+    () =>
+      toolbarControls
+        ? getEntityGridToolbarVisibility({
+            total,
+            shown,
+            isIndividualRows,
+            visibleColumns,
+            onAddColumn,
+            onRemoveColumn,
+            onResetColumns,
+            updatedAt,
+            controls: toolbarControls,
+          })
+        : false,
+    [
+      total,
+      shown,
+      isIndividualRows,
+      visibleColumns,
+      onAddColumn,
+      onRemoveColumn,
+      onResetColumns,
+      updatedAt,
+      toolbarControls,
+    ]
+  );
 
   const cellContext = useMemo(
     (): EntityGridCellContext => ({ watchlistNames, euiTheme, cellHandlers }),
@@ -267,7 +285,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       rowActions,
       isFetching,
       cellPadding,
-      total,
       onRowsInViewChange,
     }),
     [
@@ -282,7 +299,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       rowActions,
       isFetching,
       cellPadding,
-      total,
       onRowsInViewChange,
     ]
   );

@@ -85,31 +85,31 @@ export const buildAlertEntityFilter = (entities: readonly Row[]): AlertEntityFil
   };
 };
 
-/** `guard` keeps out entity docs when the FROM also reads them; `filter` keeps given entities' alerts. */
-interface AlertBranchOptions {
+interface UnstampedAlertBranchOptions {
   filter?: AlertEntityFilter;
   guard?: string;
 }
 
 const ALERT_KEEP_COLUMNS = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
-const buildBranchWhere = (guard: string | undefined, conditions: readonly string[]): string =>
-  `WHERE ${[...(guard ? [`(${guard})`] : []), ...conditions].join(' AND ')}`;
-
 /** Stamped alerts copy `kibana.alert.entity.id`, which can be multi-value. */
-export const buildStampedAlertBranch = ({ filter, guard }: AlertBranchOptions = {}): string[] => [
-  buildBranchWhere(guard, ['`kibana.alert.entity.id` IS NOT NULL']),
+export const buildStampedAlertBranch = (filter?: AlertEntityFilter): string[] => [
+  'WHERE `kibana.alert.entity.id` IS NOT NULL',
   ...(filter?.entityIds.length ? [`| WHERE ${buildStampedIdsCondition(filter.entityIds)}`] : []),
   '| EVAL _ea_entity_id = `kibana.alert.entity.id`',
   `| KEEP ${ALERT_KEEP_COLUMNS}`,
 ];
 
-export const buildUnstampedAlertBranch = ({ filter, guard }: AlertBranchOptions = {}): string[] => {
+export const buildUnstampedAlertBranch = ({
+  filter,
+  guard,
+}: UnstampedAlertBranchOptions = {}): string[] => {
   const { entityIds = [], unstampedIdentityClause, unstampedIdentityPrefilter } = filter ?? {};
   const where =
     entityIds.length && unstampedIdentityClause == null
       ? 'WHERE false'
-      : buildBranchWhere(guard, [
+      : `WHERE ${[
+          ...(guard ? [`(${guard})`] : []),
           '`kibana.alert.entity.id` IS NULL',
           ...(unstampedIdentityClause != null
             ? [
@@ -117,7 +117,7 @@ export const buildUnstampedAlertBranch = ({ filter, guard }: AlertBranchOptions 
                 `(${unstampedIdentityClause})`,
               ]
             : []),
-        ]);
+        ].join(' AND ')}`;
   return [
     where,
     ...buildPerTypeEuidEvals(),
@@ -144,4 +144,4 @@ export const buildAlertForkSteps = (branches: ReadonlyArray<readonly string[]>):
 
 /** FORK keeps the costly EUID evals off stamped alerts, which already carry their entity id. */
 export const buildAlertEuidPipeline = (filter?: AlertEntityFilter): string[] =>
-  buildAlertForkSteps([buildStampedAlertBranch({ filter }), buildUnstampedAlertBranch({ filter })]);
+  buildAlertForkSteps([buildStampedAlertBranch(filter), buildUnstampedAlertBranch({ filter })]);

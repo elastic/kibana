@@ -13,7 +13,11 @@ import type { QueryArgs, Row, SortDir } from '../../common';
 import { QUERY_SPECS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
-import { fetchResolvedEntityFilterOverrides, withResolvedEntityValues } from '../resolved_entities';
+import {
+  applyResolvedEntityFilterOverrides,
+  fetchResolvedEntityFilterOverrides,
+  withResolvedEntityValues,
+} from '../resolved_entities';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
@@ -251,10 +255,12 @@ describe('entities grid on Elasticsearch', () => {
       // The grid reads the groups the filters on the group values add or remove first.
       return {
         ...args,
-        resolvedEntityFilterOverrides: await fetchResolvedEntityFilterOverrides(
-          args,
-          cluster.runQuery
-        ),
+        entityExpression:
+          args.entityExpression &&
+          applyResolvedEntityFilterOverrides(
+            args.entityExpression,
+            await fetchResolvedEntityFilterOverrides(args, cluster.runQuery)
+          ),
       };
     };
 

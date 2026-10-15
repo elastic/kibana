@@ -15,6 +15,7 @@ import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
 import {
+  applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
   needsResolvedEntityFilterOverrides,
 } from '../queries/resolved_entities';
@@ -220,9 +221,15 @@ export const useEntityGridData = (
   // Every query of the view waits for the overrides of its filters.
   const isReady =
     !needsResolvedEntityFilterOverrides(options) || resolvedEntityFilterOverrides.data != null;
+  // The filters judge resolved entities by their group's values, so the overrides join the filter.
   const viewOptions = {
     ...options,
-    resolvedEntityFilterOverrides: resolvedEntityFilterOverrides.data,
+    entityExpression:
+      options.entityExpression &&
+      applyResolvedEntityFilterOverrides(
+        options.entityExpression,
+        resolvedEntityFilterOverrides.data
+      ),
   };
   const rowsQuery = useRowsQuery(context, viewOptions, isReady);
   const countQuery = useCountQuery(context, viewOptions, isReady);

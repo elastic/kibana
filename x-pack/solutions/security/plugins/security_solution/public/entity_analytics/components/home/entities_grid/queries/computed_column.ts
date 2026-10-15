@@ -27,7 +27,7 @@ import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
 
 /** Each column writes its own queries, since each needs a different trick to be fast. */
 export interface ComputedColumn {
-  /** What an entity with no data shows, per field; 0 and 1 sort first ascending, null last. */
+  /** What an entity with no data shows, per field */
   emptyValues: Readonly<Record<string, number | null>>;
   /** Every entity in view, sorted; reads them all, so it's the slow last resort. */
   buildSortAllQuery: (args: QueryArgs) => readonly string[];
@@ -57,7 +57,6 @@ const VALUES_CHUNK_SIZE = 500;
 const getEmptyValue = (column: ComputedColumn, { sort }: QueryArgs): number | null =>
   column.emptyValues[sort.field] ?? null;
 
-/** An empty 0 or 1 sorts first ascending; an empty null always sorts last. */
 const isEmptyFirst = (column: ComputedColumn, args: QueryArgs): boolean =>
   getEmptyValue(column, args) != null && args.sort.direction === 'asc';
 
@@ -91,7 +90,6 @@ const fetchValuesInChunks = async (
   return new Map(values.flatMap((chunkValues) => [...chunkValues]));
 };
 
-/** Too many entities have a value to exclude by id, so scan in batches and drop those with one. */
 const fetchEmptyRowsInBatches = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -101,11 +99,13 @@ const fetchEmptyRowsInBatches = async (
   const emptyValue = getEmptyValue(column, args);
   const emptyRows: Row[] = [];
   let afterId: string | null = null;
+
   while (emptyRows.length < limit) {
     const batch = await ctx.runQuery(
       buildEmptyRowsQuery(column, args, [], EMPTY_ROWS_BATCH_SIZE, afterId)
     );
     if (!batch.length) break;
+
     const values = await fetchValuesInChunks(column, batch, args, ctx);
     emptyRows.push(
       ...batch.filter((row) => {
@@ -116,10 +116,10 @@ const fetchEmptyRowsInBatches = async (
     if (batch.length < EMPTY_ROWS_BATCH_SIZE) break;
     afterId = getEntityId(batch[batch.length - 1]) ?? null;
   }
+
   return emptyRows.slice(0, limit);
 };
 
-/** Entities without a value sort last, so they're read only when fewer than a page have one. */
 const fetchPageEmptyLast = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -128,13 +128,13 @@ const fetchPageEmptyLast = async (
   const limit = args.pageSize + 1;
   const withValue = await ctx.runQuery(column.buildSortWithValueQuery(args, limit));
   if (withValue.length >= limit) return withValue;
+
   const empty = await ctx.runQuery(
     buildEmptyRowsQuery(column, args, getEntityIds(withValue), limit)
   );
   return [...withValue, ...empty].slice(0, limit);
 };
 
-/** Empty rows first: excluded by id when every value is known, else found in batches. */
 const fetchPageEmptyFirst = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -142,6 +142,7 @@ const fetchPageEmptyFirst = async (
 ): Promise<Row[]> => {
   const limit = args.pageSize + 1;
   const withValue = await ctx.runQuery(column.buildSortWithValueQuery(args, limit));
+
   const empty =
     withValue.length < limit
       ? await ctx.runQuery(buildEmptyRowsQuery(column, args, getEntityIds(withValue), limit))
@@ -149,7 +150,6 @@ const fetchPageEmptyFirst = async (
   return [...empty, ...withValue].slice(0, limit);
 };
 
-/** Too many matches to look up: search among the few entities with a value, else the slow query. */
 const fetchSearchedPageByValues = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -159,16 +159,20 @@ const fetchSearchedPageByValues = async (
     column.buildSortWithValueQuery({ ...args, searchExpression: undefined }, MAX_ROWS + 1)
   );
   if (withValue.length > MAX_ROWS) return ctx.runQuery(column.buildSortAllQuery(args));
+
   const valueIds = getEntityIds(withValue);
   const emptyRowsQuery = buildEmptyRowsQuery(column, args, valueIds, args.pageSize + 1);
+
   // The ids of the entities with a value must fit in one query.
   if (emptyRowsQuery.join('\n').length > ESQL_MAX_QUERY_LENGTH) {
     return ctx.runQuery(column.buildSortAllQuery(args));
   }
+
   const [searched, empty] = await Promise.all([
     fetchPerIdChunk(ctx.runQuery, valueIds, (chunk) => buildSearchedTargetsQuery(args, chunk)),
     ctx.runQuery(emptyRowsQuery),
   ]);
+
   const searchedIds = new Set(getEntityIds(searched));
   return getSortedPage(args, [
     ...withValue.filter((row) => searchedIds.has(getEntityId(row) ?? '')),
@@ -176,7 +180,6 @@ const fetchSearchedPageByValues = async (
   ]);
 };
 
-/** KQL can't run after the join, so a few matches are looked up and sorted here. */
 const fetchSearchedPage = async (
   column: ComputedColumn,
   args: QueryArgs,
@@ -188,6 +191,7 @@ const fetchSearchedPage = async (
     ...buildRowFieldsSteps(args),
   ]);
   if (matches.length > MAX_ROWS) return fetchSearchedPageByValues(column, args, ctx);
+
   const values = await fetchValuesInChunks(column, matches, args, ctx);
   return getSortedPage(
     args,
@@ -195,19 +199,19 @@ const fetchSearchedPage = async (
   );
 };
 
-/** Sorting all entities at once is too slow (15–22s at 10M), so pick a plan: search? empty rows first? */
 export const fetchComputedColumnSortPage = (
   column: ComputedColumn,
   args: QueryArgs,
   ctx: SortPageContext
 ): Promise<Row[]> => {
+  // searchExpression is KQL and can't go after STATS or LOOKUP JOIN
   if (args.searchExpression) return fetchSearchedPage(column, args, ctx);
+
   return isEmptyFirst(column, args)
     ? fetchPageEmptyFirst(column, args, ctx)
     : fetchPageEmptyLast(column, args, ctx);
 };
 
-/** Join before filtering: the view's filters are on entity fields, which the source lacks. */
 export const buildSortWithValueSteps = (
   args: QueryArgs,
   field: string,

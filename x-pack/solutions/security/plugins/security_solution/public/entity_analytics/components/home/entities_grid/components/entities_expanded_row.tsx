@@ -21,7 +21,13 @@ import { escapeStringValue } from '@kbn/esql-utils';
 import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
 import { useEntityGridView } from './entities_grid_view_context';
-import { gridRowCellsCss, gridRowCss } from './entities_grid_styles';
+import {
+  ROW_HEIGHT_PX,
+  getCellPaddingBlock,
+  getColumnWidth,
+  gridRowCellsCss,
+  gridRowCss,
+} from './entities_grid_styles';
 import { useEntityGridData } from '../hooks/use_entity_grid_data';
 import type { UseEntityGridDataOptions } from '../hooks/use_entity_grid_context';
 import {
@@ -73,18 +79,6 @@ interface ExpandedEntityRowProps {
   watchlistNames: Map<string, string>;
   handlers?: CellHandlers;
 }
-
-/** EUI grid row heights for the compact (s), normal (m) and expanded (l) densities. */
-export const ROW_HEIGHT_PX: Record<EuiDataGridStyleCellPaddings, number> = { s: 25, m: 37, l: 41 };
-
-export const getCellPaddingBlock = (
-  euiTheme: EuiThemeComputed,
-  cellPadding: EuiDataGridStyleCellPaddings
-): string => {
-  if (cellPadding === 's') return euiTheme.size.xs;
-  if (cellPadding === 'l') return euiTheme.size.s;
-  return '6px';
-};
 
 const placeholderCellCss = css`
   flex-shrink: 0;
@@ -151,13 +145,11 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
     <div role="row" className="euiDataGridRow" css={[gridRowCss, rowCss]}>
       <div css={[gridRowCellsCss, fullHeightCss]}>
         {visCols.map((col) => {
-          const colDef = columnsById.get(col.id);
-          if (!colDef) {
-            const width = 'width' in col && typeof col.width === 'number' ? col.width : 36;
-            return <div key={col.id} css={placeholderCellCss} style={{ width }} />;
+          const w = getColumnWidth(col);
+          if (!columnsById.has(col.id)) {
+            return <div key={col.id} css={placeholderCellCss} style={{ width: w }} />;
           }
 
-          const w = colDef.initialWidth ?? 150;
           const value = child[col.id];
           const cell = renderEntityCell(
             col.id,

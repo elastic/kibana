@@ -15,13 +15,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import type {
-  ResolvedEntityFilterOverrides,
-  QueryArgs,
-  RowsMode,
-  SortDir,
-  TimeRange,
-} from '../common';
+import type { QueryArgs, RowsMode, SortDir, TimeRange } from '../common';
 
 /** `page`: the grid rows. `children`: the records of expanded groups. */
 export type EntityGridKeyScope = 'page' | 'children';
@@ -36,8 +30,6 @@ export interface UseEntityGridDataOptions {
   searchExpression?: string;
   /** Entity doc predicates: the URL entity filters and the entity ids of a tile. */
   entityExpression?: string;
-  /** What the resolved entities need to pass `entityExpression`; the data hook reads them. */
-  resolvedEntityFilterOverrides?: ResolvedEntityFilterOverrides;
   /** The window the alert, anomaly and risk columns look back over. */
   timeRange: TimeRange;
   /** One row per group (`resolved`) or per entity record (`individual`). */
@@ -94,21 +86,13 @@ export const getReadyContext = (context: GridContext): ReadyGridContext | null =
 /** What every query of a view depends on. */
 export const getViewKey = (
   { spaceId, concreteEntityIndexName }: GridContext,
-  {
-    sortField,
-    searchExpression,
-    entityExpression,
-    resolvedEntityFilterOverrides,
-    timeRange,
-    rowsMode,
-  }: UseEntityGridDataOptions
+  { sortField, searchExpression, entityExpression, timeRange, rowsMode }: UseEntityGridDataOptions
 ) => ({
   spaceId,
   concreteEntityIndexName,
   sortField,
   searchExpression,
   entityExpression,
-  resolvedEntityFilterOverrides,
   timeRange,
   rowsMode,
 });
@@ -125,7 +109,6 @@ export const buildQueryArgs = (
   concreteEntityIndexName,
   searchExpression: options.searchExpression,
   entityExpression: options.entityExpression,
-  resolvedEntityFilterOverrides: options.resolvedEntityFilterOverrides,
   keepFields: options.keepFields,
   anomalyJobIds,
 });

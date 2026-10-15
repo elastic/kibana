@@ -946,7 +946,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
-                groupSelectorComponent={tableControls}
+                toolbarControls={tableControls}
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSortChange={setSort}

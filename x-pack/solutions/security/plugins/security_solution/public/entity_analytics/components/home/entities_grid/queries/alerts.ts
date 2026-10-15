@@ -103,7 +103,7 @@ const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
     `| WHERE (${isAlert} AND ${buildOpenAlertsCondition(args.timeRange)}) OR (${isEntityInView})`,
     // 2. Each row to its entity: alerts by EUID, entity docs as themselves, marked in view.
     ...buildAlertForkSteps([
-      buildStampedAlertBranch({ guard: isAlert }),
+      buildStampedAlertBranch(),
       buildUnstampedAlertBranch({ guard: isAlert }),
       entityDocsBranch,
     ]),

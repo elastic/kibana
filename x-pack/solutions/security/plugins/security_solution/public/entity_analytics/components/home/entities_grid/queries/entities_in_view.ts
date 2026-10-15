@@ -9,15 +9,9 @@ import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
 import { ENTITY_TYPE_FILTER, buildRowRiskScoreSteps, getEntityAlias, toList } from './esql';
 import type { EntityAggregation } from './esql';
-import { applyResolvedEntityFilterOverrides } from './resolved_entities';
 
-export const buildEntityFilterConditions = ({
-  entityExpression,
-  resolvedEntityFilterOverrides,
-}: QueryArgs): string[] =>
-  entityExpression
-    ? [applyResolvedEntityFilterOverrides(entityExpression, resolvedEntityFilterOverrides)]
-    : [];
+export const buildEntityFilterConditions = ({ entityExpression }: QueryArgs): string[] =>
+  entityExpression ? [entityExpression] : [];
 
 /** The grid's rows; on resolved rows only main entities, as their aliases count for them. */
 export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [

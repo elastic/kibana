@@ -22,7 +22,6 @@ export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   rowActions?: RowActions;
   isFetching: boolean;
   cellPadding: EuiDataGridStyleCellPaddings;
-  total: number;
   /** The body reports the rows it renders, so only those are enriched. */
   onRowsInViewChange: (firstRow: number, lastRow: number) => void;
 }

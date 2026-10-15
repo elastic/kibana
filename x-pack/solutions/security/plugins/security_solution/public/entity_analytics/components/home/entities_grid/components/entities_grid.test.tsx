@@ -119,7 +119,7 @@ describe('EntitiesGrid', () => {
   it('says in the toolbar how many rows it shows when the view has more', () => {
     mockGridData({ isAtLoadLimit: true, total: 3789 });
 
-    renderGrid({ groupSelectorComponent: <div /> });
+    renderGrid({ toolbarControls: <div /> });
 
     expect(screen.getByText('Showing 2 of 3,789 resolved entities')).toBeInTheDocument();
   });

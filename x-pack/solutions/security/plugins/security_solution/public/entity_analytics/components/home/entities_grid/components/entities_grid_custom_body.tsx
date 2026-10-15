@@ -32,8 +32,14 @@ import type { Row } from '../common';
 import { useResetEntityGridFilters } from '../hooks/use_reset_entity_grid_filters';
 import { RenderEntityGridCell } from './entities_cell_renderer';
 import type { EntityGridCellContext } from './entities_cell_renderer';
-import { ExpandedEntityGroup, ROW_HEIGHT_PX, getCellPaddingBlock } from './entities_expanded_row';
-import { gridRowCellsCss, gridRowCss } from './entities_grid_styles';
+import { ExpandedEntityGroup } from './entities_expanded_row';
+import {
+  ROW_HEIGHT_PX,
+  getCellPaddingBlock,
+  getColumnWidth,
+  gridRowCellsCss,
+  gridRowCss,
+} from './entities_grid_styles';
 import { useEntityGridView } from './entities_grid_view_context';
 
 const EMPTY_GRID_MESSAGE = i18n.translate(
@@ -92,11 +98,6 @@ const noCellProps = () => {};
 type CellValueComponent = ComponentType<
   EuiDataGridCellValueElementProps & Partial<EntityGridCellContext>
 >;
-
-const getColumnWidth = (col: EuiDataGridCustomBodyProps['visibleColumns'][number]): number =>
-  'width' in col && typeof col.width === 'number'
-    ? col.width
-    : ('initialWidth' in col && col.initialWidth) || 150;
 
 /** Memoized, with plain cells instead of EUI's: its focus handling made rows too costly to scroll. */
 const EntityGridRow = memo(
