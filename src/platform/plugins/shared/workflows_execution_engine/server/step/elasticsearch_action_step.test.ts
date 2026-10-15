@@ -18,8 +18,6 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-import { STACK_MONITOR_INTERVAL_MS } from '../workflow_execution_loop/run_stack_monitor/constants';
-
 // Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
 // output normalization is driven by the actual connector contracts.
 jest.mock('@kbn/workflows', () => ({
@@ -315,7 +313,7 @@ describe('ElasticsearchActionStepImpl', () => {
   });
 
   describe('transport options', () => {
-    it('should pass the step timeout with a margin and the abort signal together with headers', async () => {
+    it('should pass the request timeout and abort signal together with headers', async () => {
       const stepWith = {
         method: 'GET',
         path: '/my-index/_search',
@@ -333,8 +331,7 @@ describe('ElasticsearchActionStepImpl', () => {
         step,
         mockStepExecutionRuntime,
         mockWorkflowRuntime,
-        mockWorkflowLogger,
-        120_000
+        mockWorkflowLogger
       );
 
       await (esStep as any)._run(stepWith);
@@ -342,7 +339,7 @@ describe('ElasticsearchActionStepImpl', () => {
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'GET', path: '/my-index/_search', body: undefined },
         expect.objectContaining({
-          requestTimeout: 120_000 + 2 * STACK_MONITOR_INTERVAL_MS,
+          requestTimeout: 300_000,
           signal: mockStepExecutionRuntime.abortController.signal,
           headers: { 'X-Custom-Header': 'value' },
         })

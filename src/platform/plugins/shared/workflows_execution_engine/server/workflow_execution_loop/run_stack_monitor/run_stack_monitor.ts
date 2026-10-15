@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { STACK_MONITOR_INTERVAL_MS } from './constants';
 import { processNodeStackMonitoring } from './process_node_stack_monitoring';
 import { abortableTimeout, TimeoutAbortedError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -78,7 +77,7 @@ export async function runStackMonitor(
     }
 
     try {
-      await abortableTimeout(STACK_MONITOR_INTERVAL_MS, monitorAbortController.signal);
+      await abortableTimeout(500, monitorAbortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
         // Monitoring was aborted, exit early

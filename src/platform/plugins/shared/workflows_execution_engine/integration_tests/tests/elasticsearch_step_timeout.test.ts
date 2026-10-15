@@ -10,10 +10,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { ExecutionStatus } from '@kbn/workflows';
-import { STACK_MONITOR_INTERVAL_MS } from '../../server/workflow_execution_loop/run_stack_monitor/constants';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
-
-const MARGIN_MS = 2 * STACK_MONITOR_INTERVAL_MS;
 
 describe('elasticsearch step timeout', () => {
   const getTransportRequest = (fixture: WorkflowRunFixture) =>
@@ -25,7 +22,7 @@ describe('elasticsearch step timeout', () => {
   const getExecution = (fixture: WorkflowRunFixture) =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
-  it('sends the step timeout as the request timeout and keeps the client default otherwise', async () => {
+  it('lifts the client request timeout and passes the step abort signal', async () => {
     const fixture = new WorkflowRunFixture();
     const transportRequest = getTransportRequest(fixture);
     transportRequest.mockResolvedValue({ hits: { hits: [] } });
@@ -33,78 +30,17 @@ describe('elasticsearch step timeout', () => {
     await fixture.runWorkflow({
       workflowYaml: `
 steps:
-  - name: withTimeout
+  - name: search
     type: elasticsearch.search
     timeout: 5m
     with:
       index: my-index
-  - name: withoutTimeout
-    type: elasticsearch.search
-    with:
-      index: my-index
-`,
-    });
-
-    expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
-    const [[, withTimeoutOptions], [, withoutTimeoutOptions]] = transportRequest.mock.calls;
-    expect(withTimeoutOptions).toEqual(
-      expect.objectContaining({
-        requestTimeout: 300_000 + MARGIN_MS,
-        signal: expect.any(AbortSignal),
-      })
-    );
-    expect(withoutTimeoutOptions).not.toHaveProperty('requestTimeout');
-  });
-
-  it('sends the rendered value of a templated step timeout', async () => {
-    const fixture = new WorkflowRunFixture();
-    const transportRequest = getTransportRequest(fixture);
-    transportRequest.mockResolvedValue({ hits: { hits: [] } });
-
-    await fixture.runWorkflow({
-      workflowYaml: `
-inputs:
-  stepTimeout:
-    type: string
-steps:
-  - name: query
-    type: elasticsearch.esql.query
-    timeout: "{{ inputs.stepTimeout }}"
-    with:
-      query: FROM my-index | LIMIT 1
-`,
-      inputs: { stepTimeout: '90s' },
-    });
-
-    expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
-    expect(transportRequest.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ requestTimeout: 90_000 + MARGIN_MS })
-    );
-  });
-
-  it('finds the step timeout when the step also has a condition and a retry', async () => {
-    const fixture = new WorkflowRunFixture();
-    const transportRequest = getTransportRequest(fixture);
-    transportRequest.mockResolvedValue({ hits: { hits: [] } });
-
-    await fixture.runWorkflow({
-      workflowYaml: `
-steps:
-  - name: wrapped
-    type: elasticsearch.search
-    if: "\${{ 1 == 1 }}"
-    timeout: 3m
-    on-failure:
-      retry:
-        max-attempts: 1
-    with:
-      index: my-index
 `,
     });
 
     expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(transportRequest.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ requestTimeout: 180_000 + MARGIN_MS })
+      expect.objectContaining({ requestTimeout: 300_000, signal: expect.any(AbortSignal) })
     );
   });
 

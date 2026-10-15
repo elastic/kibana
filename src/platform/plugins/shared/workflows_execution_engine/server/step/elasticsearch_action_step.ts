@@ -20,7 +20,12 @@ import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-import { STACK_MONITOR_INTERVAL_MS } from '../workflow_execution_loop/run_stack_monitor/constants';
+
+/**
+ * Lifts Kibana's `elasticsearch.requestTimeout` cap (30s by default). The step `timeout` and
+ * workflow cancellation abort sooner through the step's abort signal.
+ */
+const ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS = 300_000;
 
 /**
  * Whether the connector for `stepType` defaults to HEAD, which the ES transport resolves to a
@@ -34,8 +39,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     private node: ElasticsearchGraphNode,
     contextManager: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger,
-    private stepTimeoutMs?: number
+    private workflowLogger: IWorkflowEventLogger
   ) {
     const step = {
       name: node.stepId,
@@ -202,12 +206,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     const maxResponseBytes = this.getMaxResponseBytes();
     const transportOptions = {
       signal: this.stepExecutionRuntime.abortController.signal,
+      requestTimeout: ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS,
       ...(maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {}),
-      // Lifts Kibana's `elasticsearch.requestTimeout` cap. The step monitor enforces the deadline
-      // through `signal`; the margin keeps the client from timing out before the monitor does.
-      ...(this.stepTimeoutMs
-        ? { requestTimeout: this.stepTimeoutMs + 2 * STACK_MONITOR_INTERVAL_MS }
-        : {}),
     };
 
     // Support both raw API format and connector-driven syntax
