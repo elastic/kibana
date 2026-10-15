@@ -57,6 +57,7 @@ export const registerValidateRoute = ({
   router,
   evaluatorRegistry,
   getSpaceId,
+  getEvalsReadableSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -124,6 +125,8 @@ export const registerValidateRoute = ({
           evalsContext: await context.evals,
           spaceId,
           traceId,
+          getEvalsReadableSpaceIds:
+            getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
         });
         const traceAccessor = createTraceAccessor({
           traceId,

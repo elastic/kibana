@@ -91,7 +91,7 @@ Traces are space aware. Every span started while an in-tool experiment runs a ta
 
 The trace routes (`/internal/evals/tracing/projects`, `.../traces`, `/internal/evals/traces/{traceId}`, trace evidence, evaluator validation and instrumentation probes, and `_test`) read only `traces-*-<spaceId>` and filter on `data_stream.namespace`. Evidence that comes from log events (the `otel-genai-events` and Claude Code profiles) follows the same rules on `logs-*-<spaceId>`; logs from external apps land in the default namespace, so they show up in the default space.
 
-When a score visible in the space references the trace (task, evaluator or online score `trace_id`), the read also covers the spaces that score belongs to, plus the default space. That covers scores shared with several spaces, and CLI suite runs, whose Kibana calls land in the default space but whose scores are written to the `--space-ids` you pass. Score ingestion only accepts spaces the caller can manage evals in, so a score can't widen a read to other spaces, except for the default space.
+When a score visible in the space references the trace (task, evaluator or online score `trace_id`), the read also covers every other space the caller has `read_evals` in. That covers experiments run in one space that assign their scores to others, and CLI suite runs, whose Kibana calls land in the default space but whose scores are written to the `--space-ids` you pass. Score ingestion takes trace ids as given, so a score never grants access by itself: a trace written in a space the caller can't read evals in stays hidden, even when a score points at it. Viewing CLI traces from a `--space-ids` space therefore also needs `read_evals` in the default space.
 
 Things to know:
 

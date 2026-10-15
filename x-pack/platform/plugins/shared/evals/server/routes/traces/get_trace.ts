@@ -23,7 +23,12 @@ import { resolveTraceReadSpaces } from './resolve_trace_read_spaces';
 import { MAX_SPANS_PER_TRACE_SEARCH, computeTraceDurationMs, shapeTraceSpan } from './trace_spans';
 import type { TraceSpanSource } from './trace_spans';
 
-export const registerGetTraceRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerGetTraceRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_TRACE_URL,
@@ -53,6 +58,8 @@ export const registerGetTraceRoute = ({ router, logger, getSpaceId }: RouteDepen
             evalsContext: await context.evals,
             spaceId,
             traceId,
+            getEvalsReadableSpaceIds:
+              getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
           });
 
           const searchResponse = await esClient.search<TraceSpanSource>({

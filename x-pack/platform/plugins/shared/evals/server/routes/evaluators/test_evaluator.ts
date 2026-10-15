@@ -32,6 +32,7 @@ export const registerTestEvaluatorRoute = ({
   evaluatorRegistry,
   getInferenceStart,
   getSpaceId,
+  getEvalsReadableSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -99,7 +100,13 @@ export const registerTestEvaluatorRoute = ({
                 traceReader: coreContext.elasticsearch.client.asCurrentUser,
                 spaceId,
                 resolveTraceReadSpaces: (traceId) =>
-                  resolveTraceReadSpaces({ evalsContext, spaceId, traceId }),
+                  resolveTraceReadSpaces({
+                    evalsContext,
+                    spaceId,
+                    traceId,
+                    getEvalsReadableSpaceIds:
+                      getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+                  }),
               })
           );
           const testResult: TestEvaluatorResponse['result'] = {

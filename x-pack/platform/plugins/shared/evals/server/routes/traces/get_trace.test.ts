@@ -19,13 +19,17 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetTraceRoute } from './get_trace';
 
 describe('GET /internal/evals/traces/{traceId}', () => {
-  const setup = ({ spaceId }: { spaceId?: string } = {}) => {
+  const setup = ({
+    spaceId,
+    readableSpaceIds = [],
+  }: { spaceId?: string; readableSpaceIds?: string[] } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerGetTraceRoute({
       router,
       logger,
       ...(spaceId ? { getSpaceId: async (_request: KibanaRequest) => spaceId } : {}),
+      getEvalsReadableSpaceIds: async (_request: KibanaRequest) => readableSpaceIds,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
@@ -93,13 +97,13 @@ describe('GET /internal/evals/traces/{traceId}', () => {
     expectTraceRead(esClient, ['marketing']);
   });
 
-  it('also reads the spaces of a score that references the trace, plus the default space', async () => {
+  it('also reads the spaces the caller can read evals in when a score references the trace', async () => {
     const { handler, context, esClient, evaluationScoreService } = setup({
-      spaceId: 'marketing',
+      spaceId: 'sales',
+      readableSpaceIds: ['sales', 'marketing'],
     });
     evaluationScoreService.search.mockResolvedValueOnce({
       hits: { total: { value: 1 }, hits: [] },
-      aggregations: { space_ids: { buckets: [{ key: 'marketing' }, { key: 'sales' }] } },
     });
     esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
@@ -109,7 +113,7 @@ describe('GET /internal/evals/traces/{traceId}', () => {
       expect.objectContaining({
         query: {
           bool: {
-            filter: [buildSpaceFilter('marketing')],
+            filter: [buildSpaceFilter('sales')],
             should: [
               { term: { 'task.trace_id': 'trace-xyz' } },
               { term: { 'evaluator.trace_id': 'trace-xyz' } },
@@ -119,20 +123,20 @@ describe('GET /internal/evals/traces/{traceId}', () => {
         },
       })
     );
-    expectTraceRead(esClient, ['marketing', 'sales', 'default']);
+    expectTraceRead(esClient, ['sales', 'marketing']);
   });
 
-  it('also reads the default space when an online score references the trace', async () => {
-    const { handler, context, esClient, onlineScoreService } = setup({ spaceId: 'marketing' });
-    onlineScoreService.search.mockResolvedValueOnce({
-      hits: { total: { value: 2 }, hits: [] },
-      aggregations: { space_ids: { buckets: [{ key: 'marketing' }] } },
+  it('does not reach the default space through a score when the caller cannot read evals there', async () => {
+    const { handler, context, esClient, onlineScoreService } = setup({
+      spaceId: 'sales',
+      readableSpaceIds: ['sales'],
     });
+    onlineScoreService.search.mockResolvedValueOnce({ hits: { total: { value: 1 }, hits: [] } });
     esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
     await handler(context, makeRequest('trace-xyz'), kibanaResponseFactory);
 
-    expectTraceRead(esClient, ['marketing', 'default']);
+    expectTraceRead(esClient, ['sales']);
   });
 
   it('converts duration from nanoseconds to milliseconds', async () => {

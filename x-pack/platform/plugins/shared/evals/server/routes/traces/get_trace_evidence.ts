@@ -84,6 +84,7 @@ export const registerGetTraceEvidenceRoute = ({
   router,
   logger,
   getSpaceId,
+  getEvalsReadableSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -119,6 +120,8 @@ export const registerGetTraceEvidenceRoute = ({
             evalsContext: await context.evals,
             spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
             traceId,
+            getEvalsReadableSpaceIds:
+              getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
           });
           const traceAccessor = createTraceAccessor({
             traceId,

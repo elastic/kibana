@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildSpaceFilter } from '@kbn/evals-common';
 import type { EvalsRouteHandlerContext } from '../../types';
-
-/** Upper bound on the spaces one trace's scores are shared with. */
-const MAX_SCORE_SPACES = 100;
-
-const SCORE_SPACES_AGGS = {
-  space_ids: { terms: { field: 'space_ids', size: MAX_SCORE_SPACES } },
-} as const;
 
 /**
  * Decides which spaces' traces and logs a read of one trace id may cover.
  *
  * A trace is written to the space of the Kibana request that produced it, which is not
  * always the space its scores belong to: a CLI run scores into `--space-ids` while its
- * Kibana calls go to the default space, and a score can be shared with several spaces. So
- * when a score visible in `spaceId` references the trace, the read also covers the spaces
- * those scores belong to, plus the default space.
+ * Kibana calls go to the default space, and an experiment run in one space can assign its
+ * scores to others. So when a score visible in `spaceId` references the trace, the read also
+ * covers every other space the caller can read evals in.
  *
- * Score ingestion only accepts spaces the caller can manage evals in, so a score can't
- * widen a read to a space its writer had no access to. The default space is the exception,
- * kept so CLI traces stay readable from the spaces their scores were written to.
+ * Score ingestion takes trace ids as given, so a score only marks the trace as part of what
+ * `spaceId` shows. Access to the space a trace was written in still comes from the caller's
+ * own privileges there.
  *
  * @returns the spaces to read from, always including `spaceId`.
  */
@@ -36,11 +27,18 @@ export const resolveTraceReadSpaces = async ({
   evalsContext: { evaluationScoreService, onlineScoreService },
   spaceId,
   traceId,
+  getEvalsReadableSpaceIds,
 }: {
   evalsContext: Pick<EvalsRouteHandlerContext, 'evaluationScoreService' | 'onlineScoreService'>;
   spaceId: string;
   traceId: string;
+  /** Spaces the caller can read evals in. Without it, reads stay in `spaceId`. */
+  getEvalsReadableSpaceIds?: () => Promise<string[]>;
 }): Promise<string[]> => {
+  if (!getEvalsReadableSpaceIds) {
+    return [spaceId];
+  }
+
   const [scores, onlineScores] = await Promise.all([
     evaluationScoreService.search({
       size: 0,
@@ -55,7 +53,6 @@ export const resolveTraceReadSpaces = async ({
           minimum_should_match: 1,
         },
       },
-      aggs: SCORE_SPACES_AGGS,
     }),
     onlineScoreService.search({
       size: 0,
@@ -63,7 +60,6 @@ export const resolveTraceReadSpaces = async ({
       query: {
         bool: { filter: [{ term: { trace_id: traceId } }, { term: { space_ids: spaceId } }] },
       },
-      aggs: SCORE_SPACES_AGGS,
     }),
   ]);
 
@@ -72,25 +68,8 @@ export const resolveTraceReadSpaces = async ({
     return [spaceId];
   }
 
-  return Array.from(
-    new Set([
-      spaceId,
-      ...getScoreSpaceIds(scores.aggregations),
-      ...getScoreSpaceIds(onlineScores.aggregations),
-      DEFAULT_SPACE_ID,
-    ])
-  );
+  return Array.from(new Set([spaceId, ...(await getEvalsReadableSpaceIds())]));
 };
 
 const countHits = (total: number | { value: number } | undefined): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
-
-const getScoreSpaceIds = (
-  aggregations: Record<string, AggregationsAggregate> | undefined
-): string[] => {
-  const spaceIdsAggregation = aggregations?.space_ids as
-    | { buckets?: Array<{ key: string | number }> }
-    | undefined;
-  const buckets = Array.isArray(spaceIdsAggregation?.buckets) ? spaceIdsAggregation.buckets : [];
-  return buckets.map(({ key }) => String(key));
-};

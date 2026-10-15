@@ -25,7 +25,11 @@ import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_err
 import type { RouteDependencies } from '../register_routes';
 import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 
-export const registerResolveInstrumentationRoute = ({ router, getSpaceId }: RouteDependencies) => {
+export const registerResolveInstrumentationRoute = ({
+  router,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_RESOLVE_INSTRUMENTATION_URL,
@@ -58,6 +62,8 @@ export const registerResolveInstrumentationRoute = ({ router, getSpaceId }: Rout
           evalsContext: await context.evals,
           spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
           traceId,
+          getEvalsReadableSpaceIds:
+            getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
         });
         const traceAccessor = createTraceAccessor({
           traceId,

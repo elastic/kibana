@@ -66,9 +66,14 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
   const [name, setName] = React.useState('');
   const activeSpaceId = useActiveSpaceId(services.spaces);
   const [indexPatternOverride, setIndexPattern] = React.useState<string>();
-  // Until the user edits it, sample the traces Agent Builder writes for the active space.
+  // Until the user edits it, sample the traces Agent Builder writes for the active space. With
+  // Spaces, an unresolved active space must not fall back to the default space's traces.
+  const isActiveSpaceUnresolved = Boolean(services.spaces) && activeSpaceId === undefined;
   const indexPattern =
-    indexPatternOverride ?? buildAgentBuilderSpaceTracesIndex(activeSpaceId ?? DEFAULT_SPACE_ID);
+    indexPatternOverride ??
+    (isActiveSpaceUnresolved
+      ? ''
+      : buildAgentBuilderSpaceTracesIndex(activeSpaceId ?? DEFAULT_SPACE_ID));
   const [extraEsqlWhere, setExtraEsqlWhere] = React.useState('');
   const [windowMinutes, setWindowMinutes] = React.useState(60);
   const [lagMinutes, setLagMinutes] = React.useState(15);
@@ -111,7 +116,9 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
   const isConnectorMissing = hasLlmEvaluator && !selectedConnectorId;
   const isNameMissing = name.trim().length === 0;
   const areEvaluatorsMissing = selectedEvaluators.length === 0;
-  const isFormValid = !isNameMissing && !areEvaluatorsMissing && !isConnectorMissing;
+  const isIndexPatternMissing = indexPattern.trim().length === 0;
+  const isFormValid =
+    !isNameMissing && !areEvaluatorsMissing && !isConnectorMissing && !isIndexPatternMissing;
   const isSubmitting = createOnlineEvalWorkflow.isLoading;
   const workflowHref =
     createdWorkflow && services.http
@@ -581,7 +588,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
             <EuiSpacer size="xs" />
             {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.validationHint', {
               defaultMessage:
-                'Requires a name and at least one evaluator (with a connector for LLM evaluators).',
+                'Requires a name, an index pattern and at least one evaluator (with a connector for LLM evaluators).',
             })}
           </EuiText>
         )}
