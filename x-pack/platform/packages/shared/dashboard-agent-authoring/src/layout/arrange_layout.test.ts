@@ -14,7 +14,7 @@ import type {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { arrangeDashboardLayout } from './arrange_layout';
-import type { ArrangeDashboardLayout, LayoutArrangement } from './types';
+import type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';
 
 const createLensPanel = (id: string, y = 0, chartType = 'metric'): AttachmentPanel => ({
   type: LENS_EMBEDDABLE_TYPE,
@@ -185,6 +185,25 @@ describe('arrangeDashboardLayout', () => {
         ],
       })
     );
+  });
+
+  it('sets relayout to position for new sections only', async () => {
+    const arrangeLayout = jest.fn(async () => ({
+      ...completeArrangement,
+      sections: [...completeArrangement.sections, { id: 'section-b', y: 19 }],
+    }));
+    const dashboardWithNewSection: DashboardAttachmentData = {
+      ...dashboardWithNewPanel,
+      panels: [...dashboardWithNewPanel.panels, createSection('section-b', 20)],
+    };
+
+    await arrange(arrangeLayout, { dashboardData: dashboardWithNewSection });
+
+    const [[{ sections }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+    expect(sections.map(({ id, relayout }) => ({ id, relayout }))).toEqual([
+      { id: 'section-a', relayout: undefined },
+      { id: 'section-b', relayout: 'position' },
+    ]);
   });
 
   it.each<[string, LayoutArrangement, string]>([

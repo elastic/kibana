@@ -161,6 +161,7 @@ export const arrangeDashboardLayout = async ({
       id: section.id,
       title: section.title,
       y: section.grid.y,
+      ...(originalSectionIds.includes(section.id) ? {} : { relayout: 'position' as const }),
       panels: toLayoutPanels(section.panels, section.id),
     })),
   };

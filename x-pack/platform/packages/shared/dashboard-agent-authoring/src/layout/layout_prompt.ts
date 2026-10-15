@@ -18,6 +18,8 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
    - \`all\`: new, or moved with a new chart type or preferred height. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
    - \`position\`: moved to another section or the top level. Place it and keep its size.
    - \`size\`: chart type or \`preferredHeight\` changed. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
+
+   A section with \`relayout: position\` is new: its \`y\` is a temporary row at the bottom. Place it among the other sections by purpose, e.g. key metrics before trends. Sections without \`relayout\` keep their order.
 3. No gaps and no overlaps.
 4. Sizes by chart type. These decide \`w\` and \`h\` for every panel with \`relayout: all\` or \`relayout: size\`.
 
@@ -55,7 +57,7 @@ Panels are listed in reading order (by \`y\`, then \`x\`). When a panel moves, g
 ## Sections
 
 - Each section has its own grid: the coordinates of its panels are relative to the section and start at \`y: 0\`.
-- In the top-level grid, a section takes exactly one row. Top-level panels advance \`y\` by their \`h\`, sections by 1. Put top-level panels above sections.`;
+- In the top-level grid, a section takes exactly one row. Top-level panels advance \`y\` by their \`h\`, sections by 1. Place top-level panels with \`relayout: all\` or \`relayout: position\` above the first section. Top-level panels without \`relayout\` keep their place, even between sections.`;
 
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({

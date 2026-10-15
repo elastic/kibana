@@ -36,6 +36,8 @@ export interface LayoutSection {
   id: string;
   title: string;
   y: number;
+  /** `position` for a section added in this call, whose `y` is temporary; omitted otherwise. */
+  relayout?: Extract<Relayout, 'position'>;
   /** Panels of the section, with coordinates relative to the section. */
   panels: LayoutPanel[];
 }
