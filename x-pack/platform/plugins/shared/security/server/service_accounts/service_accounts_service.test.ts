@@ -13,6 +13,7 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
@@ -35,10 +36,12 @@ describe('ServiceAccountsService', () => {
     );
     const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
     encryptedSavedObjects.getClient.mockReturnValue(encryptedClient);
+    // Validate against the same offering the test starts, since the default differs between them.
+    const serverless = !('isServerless' in overrides && overrides.isServerless === false);
 
     return {
       config: createConfig(
-        ConfigSchema.validate(config, { serverless: true }),
+        ConfigSchema.validate(config, { serverless }),
         loggingSystemMock.createLogger(),
         { isTLSEnabled: false }
       ),
@@ -59,6 +62,7 @@ describe('ServiceAccountsService', () => {
       canEncrypt: true,
       getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
       getSpaceId: jest.fn().mockReturnValue('default'),
+      workloadTypes: securityServiceMock.createDelegateHandle().serviceAccounts,
       ...overrides,
     };
   };
@@ -76,8 +80,14 @@ describe('ServiceAccountsService', () => {
       expect(service.start(startParams({ serviceAccounts: { enabled: false } }))).toBeNull();
     });
 
-    it('returns null when the feature is not configured at all', () => {
+    it('returns null on serverless when the feature is not configured at all', () => {
       expect(service.start(startParams({}))).toBeNull();
+    });
+
+    it('starts outside serverless when the feature is not configured at all', () => {
+      expect(service.start(startParams({}, { isServerless: false }))?.backend).toBeInstanceOf(
+        EsServiceAccounts
+      );
     });
 
     it('selects the UIAM backend on serverless', () => {

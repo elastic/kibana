@@ -19,8 +19,10 @@ jest.mock('./use_is_self_managed', () => ({
 }));
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
+import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useIsSelfManaged } from './use_is_self_managed';
 
+const mockUseAwsServiceMatrix = useAwsServiceMatrix as jest.Mock;
 const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
@@ -703,6 +705,46 @@ describe('OnboardingFlowProvider', () => {
       });
 
       expect(setPersisted).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ECF-only services on self-managed', () => {
+    const matrixEntry = (id: string, ecfOnly?: boolean) => ({
+      id,
+      name: id,
+      showInUI: true,
+      dataFormat: 'otel',
+      deploymentMethods: [],
+      ...(ecfOnly ? { ecfOnly } : {}),
+    });
+
+    beforeEach(() => {
+      mockUseAwsServiceMatrix.mockReturnValue({
+        matrix: [matrixEntry('waf_otel', true), matrixEntry('ec2_otel')],
+        isError: false,
+        refetch: jest.fn(),
+      });
+    });
+
+    afterEach(() => {
+      mockUseAwsServiceMatrix.mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() });
+    });
+
+    it('are not offered, while the other services are', () => {
+      mockUseIsSelfManaged.mockReturnValue(true);
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.awsServicesMap?.get('waf_otel')?.showInUI).toBe(false);
+      expect(result.current.awsServicesMap?.get('ec2_otel')?.showInUI).toBe(true);
+    });
+
+    it('are offered on cloud', () => {
+      mockUseIsSelfManaged.mockReturnValue(false);
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.awsServicesMap?.get('waf_otel')?.showInUI).toBe(true);
     });
   });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useState } from 'react';
 import {
   Comparators,
@@ -14,6 +15,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useToggleAutomation, type Automation } from '../hooks/use_automations';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
@@ -141,6 +143,11 @@ export const AutomationsTable = ({
           compressed
           checked={isEnabled}
           disabled={!canManage || toggleAutomation.isLoading}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_AUTOMATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+            detail: isEnabled ? 'pause' : 'enable',
+          })}
           onChange={(event) =>
             toggleAutomation.mutate({
               id: automation.id,

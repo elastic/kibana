@@ -13,6 +13,7 @@ import {
   clearImpactDetailsRenderer,
   registerImpactDetailsRenderer,
 } from '../components/impact/impact_details_renderer';
+import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import { EscalationOverviewSlot } from './slots';
 
 const impactAttachment: VersionedAttachment = {
@@ -42,6 +43,7 @@ const renderSlot = ({
   render(
     <EscalationOverviewSlot
       conversation={buildConversation(attachments)}
+      groupedAttachments={createFlyoutGroupedAttachmentsRegistry()}
       renderLinkedInvestigations={
         withLinkedInvestigations ? () => <div>Linked investigations</div> : undefined
       }

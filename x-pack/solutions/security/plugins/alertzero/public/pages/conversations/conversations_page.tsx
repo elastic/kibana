@@ -137,8 +137,17 @@ const ConversationsPageContent: React.FC = () => {
     ? 'declining'
     : undefined;
 
-  const { selectedConversationId, selectConversation, clearSelectedConversation } =
-    useConversationsUrlParams();
+  const {
+    selectedConversationId,
+    selectedProposalId,
+    selectConversation,
+    clearSelectedConversation,
+  } = useConversationsUrlParams();
+  const currentProposalId =
+    selectedProposalId &&
+    proposalsById.get(selectedProposalId)?.conversationId === selectedConversationId
+      ? selectedProposalId
+      : undefined;
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
@@ -180,7 +189,7 @@ const ConversationsPageContent: React.FC = () => {
     (proposalId: Investigation['id']) => {
       const conversationId = proposalsById.get(proposalId)?.conversationId;
       if (conversationId) {
-        selectConversation(conversationId);
+        selectConversation(conversationId, proposalId);
       }
     },
     [proposalsById, selectConversation]
@@ -476,7 +485,7 @@ const ConversationsPageContent: React.FC = () => {
               <QueueSection
                 section={section}
                 entityFilter={effectiveEntityFilter}
-                selectedConversationId={selectedConversationId}
+                selectedProposalId={currentProposalId}
                 onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
