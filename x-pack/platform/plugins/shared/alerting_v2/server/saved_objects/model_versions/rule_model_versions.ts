@@ -230,4 +230,32 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV8,
     },
   },
+  '11': {
+    /*
+     * Indexes the already-existing `metadata.template.id` so the rule library can
+     * count the rules created from each template and the rules list can filter on
+     * it. The attribute shape is unchanged, so v10's schemas still apply and
+     * existing rules need no backfill.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              template: {
+                properties: {
+                  id: { type: 'keyword', ignore_above: 256 },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
 };
