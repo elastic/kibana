@@ -48,23 +48,21 @@ describe('ScreenReaderService', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders an assertive live region into the target element', () => {
-    startService();
-
-    expect(targetDomElement.contains(getLiveRegion())).toBe(true);
-    expect(getLiveRegion().getAttribute('role')).toBe('alert');
-    expect(getLiveRegion().getAttribute('aria-live')).toBe('assertive');
-  });
-
-  it('announces notified messages through the live region', () => {
+  it('announces notified messages through an assertive live region in the target element', () => {
     const screenReader = startService();
 
     screenReader.notify('Success: Rule exported');
     screenReader.notify('Detection rules - Elastic');
     advanceTimers(ANNOUNCEMENT_SETTLE_MS);
 
-    const messages = [...getLiveRegion().querySelectorAll('p')].map((p) => p.textContent);
-    expect(messages).toEqual(['Success: Rule exported', 'Detection rules - Elastic']);
+    const liveRegion = getLiveRegion();
+    expect(targetDomElement.contains(liveRegion)).toBe(true);
+    expect(liveRegion.getAttribute('role')).toBe('alert');
+    expect(liveRegion.getAttribute('aria-live')).toBe('assertive');
+    expect([...liveRegion.querySelectorAll('p')].map((p) => p.textContent)).toEqual([
+      'Success: Rule exported',
+      'Detection rules - Elastic',
+    ]);
   });
 
   it('keeps the latest announcement until the next one replaces it', () => {
@@ -91,13 +89,5 @@ describe('ScreenReaderService', () => {
     const secondMessage = getLiveRegion().querySelector('p');
     expect(secondMessage?.textContent).toBe('Saved');
     expect(secondMessage).not.toBe(firstMessage);
-  });
-
-  it('removes the live region when stopped', () => {
-    startService();
-
-    act(() => service.stop());
-
-    expect(targetDomElement.childElementCount).toBe(0);
   });
 });

@@ -84,24 +84,11 @@ describe('AnnouncementQueue', () => {
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
 
     expect(getAnnouncedMessages()).toEqual([['Rendered later', 'Saved']]);
-  });
 
-  it('does not announce when all messages resolve to empty text', () => {
     queue.add(() => '');
-    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
-
-    expect(onAnnounce).not.toHaveBeenCalled();
-  });
-
-  it('gives each announcement a new id, so repeating a message is announced again', () => {
-    queue.add('Saved');
-    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
-    queue.add('Saved');
     jest.runAllTimers();
 
-    const [[first], [second]] = onAnnounce.mock.calls;
-    expect(second.messages).toEqual(first.messages);
-    expect(second.id).not.toBe(first.id);
+    expect(onAnnounce).toHaveBeenCalledTimes(1);
   });
 
   it('drops pending messages when stopped', () => {

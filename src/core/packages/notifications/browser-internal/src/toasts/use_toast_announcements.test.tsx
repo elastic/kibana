@@ -53,23 +53,16 @@ describe('toast announcements', () => {
     expect(screen.getByTestId('globalToastList').getAttribute('aria-live')).toBe('off');
   });
 
-  it('announces a new toast with its type, title and text', () => {
-    const { addToast, getAnnouncements } = renderToastList();
-
-    addToast({ id: '1', title: 'Saved field', text: 'All good', color: 'success' });
-
-    expect(getAnnouncements()).toEqual(['Success: Saved field. All good']);
-  });
-
   it.each([
-    ['warning', 'Warning: Careful'],
-    ['danger', 'Error: Careful'],
-    ['primary', 'Notification: Careful'],
-    [undefined, 'Notification: Careful'],
-  ] as const)('prefixes a %s toast announcement with its type', (color, expected) => {
+    ['success', 'Success: Saved field. All good'],
+    ['warning', 'Warning: Saved field. All good'],
+    ['danger', 'Error: Saved field. All good'],
+    ['primary', 'Notification: Saved field. All good'],
+    [undefined, 'Notification: Saved field. All good'],
+  ] as const)('announces a new %s toast with its type, title and text', (color, expected) => {
     const { addToast, getAnnouncements } = renderToastList();
 
-    addToast({ id: '1', title: 'Careful', color });
+    addToast({ id: '1', title: 'Saved field', text: 'All good', color });
 
     expect(getAnnouncements()).toEqual([expected]);
   });
