@@ -4393,9 +4393,9 @@ importers:
       canvg:
         specifier: 4.0.3
         version: 4.0.3
-      cbor:
-        specifier: 10.0.12
-        version: 10.0.12
+      cbor2:
+        specifier: 2.4.0
+        version: 2.4.0
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -10926,6 +10926,10 @@ packages:
     peerDependencies:
       postcss-selector-parser: ^7.1.1
 
+  '@cto.af/wtf8@0.0.6':
+    resolution: {integrity: sha512-xp/zbWLXuh2WBxi9tIc+Jep7BAwLu8ETTI8xN68ks10bxOBMISs/jcu9DBEkOeGXLaTKUbA0Y2Ficx/jmmPABg==}
+    engines: {node: '>=20'}
+
   '@cypress/grep@5.1.0':
     resolution: {integrity: sha512-n/8m5g2AuZf4thHhuo+rp7Fgkfm06k0uM9NlP0GrfWE5vaIJJ+8U10SOtjVj9bapjYI7l9RZiT87XSBU3wBFOA==}
     peerDependencies:
@@ -16966,9 +16970,9 @@ packages:
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
-  cbor@10.0.12:
-    resolution: {integrity: sha512-exQDevYd7ZQLP4moMQcZkKCVZsXLAtUSflObr3xTh4xzFIv/xBCdvCd6L259kQOUP2kcTC0jvC6PpZIf/WmRXA==}
-    engines: {node: '>=20'}
+  cbor2@2.4.0:
+    resolution: {integrity: sha512-s6+CPoEI6tgwasK2cWMTXt5sy8Yxo4vgRmKgkJSCdKDL/0bHU3aYJoYeHRX7/oywKYA3bxcpqEYkXkrdHe0+0Q==}
+    engines: {node: '>=22'}
 
   ccount@1.1.0:
     resolution: {integrity: sha512-vlNK021QdI7PNeiUh/lKkC/mNHHfV0m/Ad5JoI0TYtlBnJAslM/JIkm/tGC88bkLIwO6OQ5uV6ztS6kVAtCDlg==}
@@ -21946,10 +21950,6 @@ packages:
   nodemailer@10.0.10:
     resolution: {integrity: sha512-He9XskOFms62SyAKkLu8CcGcYHAo+BSHSsORI8s4PJH8qZgZY4L4lDfvyN0twvmbpyG+eGrxpyBlskj9d9rJ8A==}
     engines: {node: '>=20.0.0'}
-
-  nofilter@3.1.0:
-    resolution: {integrity: sha512-l2NNj07e9afPnhAhvgVrCD/oy2Ai1yfLpuo3EpiO1jFTsB4sFz6oIfAfSZyQzVpkZQ9xS8ZS5g1jCBgq4Hwo0g==}
-    engines: {node: '>=12.19'}
 
   nopt@4.0.3:
     resolution: {integrity: sha512-CvaGwVMztSMJLOeXPrez7fyfObdZqNUK1cPAEzLHrTybIua9pMdmmPR5YwtfNftIOMv3DPUhFaxsZMNTQO20Kg==}
@@ -27571,6 +27571,8 @@ snapshots:
   '@csstools/selector-specificity@6.0.0(postcss-selector-parser@7.1.6)':
     dependencies:
       postcss-selector-parser: 7.1.6
+
+  '@cto.af/wtf8@0.0.6': {}
 
   '@cypress/grep@5.1.0(@babel/core@7.29.7(supports-color@10.2.2))(cypress@15.12.0)(supports-color@10.2.2)':
     dependencies:
@@ -34553,9 +34555,9 @@ snapshots:
 
   caseless@0.12.0: {}
 
-  cbor@10.0.12:
+  cbor2@2.4.0:
     dependencies:
-      nofilter: 3.1.0
+      '@cto.af/wtf8': 0.0.6
 
   ccount@1.1.0: {}
 
@@ -40718,8 +40720,6 @@ snapshots:
       vm-browserify: 1.1.2
 
   nodemailer@10.0.10: {}
-
-  nofilter@3.1.0: {}
 
   nopt@4.0.3:
     dependencies:

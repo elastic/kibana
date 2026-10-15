@@ -1369,8 +1369,8 @@
       "enabled": true
     },
     {
-      "groupName": "cbor",
-      "matchDepNames": ["cbor"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

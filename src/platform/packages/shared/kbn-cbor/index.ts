@@ -7,15 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { encodeOne, decodeFirstSync } from 'cbor';
+import { encode as encodeCbor, decode as decodeCbor, TypeEncoderMap } from 'cbor2';
+
+// cbor2 picks encoders by exact constructor, so without this a Buffer falls through to
+// Buffer#toJSON() and is encoded as `{ type: 'Buffer', data: [...] }` instead of a byte string.
+const types = new TypeEncoderMap();
+types.registerEncoder(Buffer, (buffer: Buffer) => [
+  NaN,
+  new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength),
+]);
 
 export class KbnCbor {
   static encode(data: unknown): Buffer {
-    return encodeOne(data);
+    const encoded = encodeCbor(data, { types });
+    return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
   }
 
+  // Decoding a Buffer yields Buffer byte strings, matching what callers got from borc.
   static decode(input: Buffer | Uint8Array): unknown {
-    return decodeFirstSync(input);
+    return decodeCbor(
+      Buffer.isBuffer(input) ? input : Buffer.from(input.buffer, input.byteOffset, input.byteLength)
+    );
   }
 }
 
