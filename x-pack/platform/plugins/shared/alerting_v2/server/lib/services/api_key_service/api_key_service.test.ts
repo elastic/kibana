@@ -194,6 +194,21 @@ describe('ApiKeyService', () => {
       );
     });
 
+    it('rejects a raw Cloud API key with a bad request', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_raw-cloud-secret' },
+      });
+      const security = createMockSecurityService({ authenticationType: 'api_key', uiam: true });
+      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+
+      await expect(service.create('My Policy')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Cannot use a Cloud API key'),
+      });
+      expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
+    });
+
     it('throws when authorization header has no credentials', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
       const security = createMockSecurityService({ authenticationType: 'api_key' });

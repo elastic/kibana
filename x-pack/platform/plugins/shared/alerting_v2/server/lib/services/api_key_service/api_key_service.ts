@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
@@ -125,6 +126,13 @@ export class ApiKeyService implements ApiKeyServiceContract {
     if (!authorizationHeader?.credentials) {
       throw new Error(
         `Failed to extract API key from authorization header for action policy: ${name}`
+      );
+    }
+
+    if (isUiamCredential(authorizationHeader)) {
+      throw Boom.badRequest(
+        `Cannot use a Cloud API key to create or update action policy "${name}". ` +
+          'Authenticate with a user session or a project-scoped Elasticsearch API key instead.'
       );
     }
 
