@@ -84,7 +84,7 @@ export const memoryWriteBodySchema = schema.object({
       maxLength: MAX_KI_ID_LENGTH,
       meta: {
         description:
-          'An opaque caller-chosen correlation ID. Reuse an ID returned by an earlier write to continue that session, or omit it to generate a new ID for this write.',
+          'An opaque caller-chosen correlation ID, not an authorization boundary. Reuse an ID returned by an earlier write to continue that session, or omit it to generate a new ID for this write.',
       },
     })
   ),

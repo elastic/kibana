@@ -95,7 +95,7 @@ export const createForgetTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data: result,
+            data: { id: result.id },
           },
         ],
       };

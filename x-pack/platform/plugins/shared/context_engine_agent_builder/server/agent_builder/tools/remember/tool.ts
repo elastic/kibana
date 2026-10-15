@@ -26,8 +26,7 @@ import {
   createConversationReferences,
   createMemoryWriter,
 } from '@kbn/context-engine-plugin/server';
-import type { CoreStart } from '@kbn/core/server';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import dedent from 'dedent';

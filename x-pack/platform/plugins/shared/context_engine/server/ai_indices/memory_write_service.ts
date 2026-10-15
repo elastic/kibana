@@ -109,16 +109,16 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const existing = await this.getExistingMemory(aiIndex, request.aiIndexId, request.id);
 
-      if (existing.document.type !== request.type) {
-        throw new MemoryWriteError(
-          'memory_type_mismatch',
-          `Memory '${request.id}' has type '${existing.document.type}' and cannot be revised as '${request.type}'.`
-        );
-      }
       if (existing.document.governance?.lifecycle?.status === 'deleted') {
         throw new MemoryWriteError(
           'memory_deleted',
           `Memory '${request.id}' was deleted and cannot be revised.`
+        );
+      }
+      if (existing.document.type !== request.type) {
+        throw new MemoryWriteError(
+          'memory_type_mismatch',
+          `Memory '${request.id}' has type '${existing.document.type}' and cannot be revised as '${request.type}'.`
         );
       }
 

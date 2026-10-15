@@ -41,7 +41,7 @@ const WRITE_SECURITY: RouteSecurity = {
 };
 
 const DESCRIPTION_SUFFIX =
-  'The request uses the current user’s Elasticsearch privileges and the space from the request URL. Returns 404 when Context Engine is turned off in the space.';
+  "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.";
 const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while writing the memory.';
 
 const writer = {
@@ -99,6 +99,8 @@ const handleMemoryWriteError = (
   if (isResponseError(error)) {
     const { statusCode } = error;
     if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
+      // Kibana already authenticated the request, so an Elasticsearch 401 represents a downstream
+      // authorization failure rather than a prompt for the client to authenticate with Kibana.
       const documentedStatus =
         statusCode === 401
           ? 403
@@ -148,7 +150,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'create-context-engine-memory',
       summary: 'Create a memory',
-      description: `Creates a memory in a memory-enabled AI Index. ${DESCRIPTION_SUFFIX}`,
+      description: `Creates a memory in a memory-enabled AI Index. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -200,7 +202,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'revise-context-engine-memory',
       summary: 'Revise a memory',
-      description: `Revises an existing memory without changing its type. ${DESCRIPTION_SUFFIX}`,
+      description: `Writes a revision that replaces the memory's title, description, and content; the required type must match the existing memory. Omitted tags are preserved, while omitted expiry resets to 90 days after this write. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },

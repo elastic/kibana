@@ -14,9 +14,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   AI_INDEX_MEMORIES_PATH,
   AI_INDEX_MEMORY_BY_ID_PATH,
+  MAX_AI_INDEX_ID_LENGTH,
   MEMORY_API_PROVENANCE_SOURCE,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import type { AiIndexMemoryWriteServiceApi } from '../ai_indices/memory_write_service';
 import { MemoryWriteError } from '../ai_indices/memory_write_errors';
 import { registerMemoryRoutes } from './memories';
@@ -29,7 +31,7 @@ interface RegisteredRoute {
     security: { authz: { requiredPrivileges: string[] } };
   };
   handler: RequestHandler;
-  validate: { request?: { body?: Type<unknown> } };
+  validate: { request?: { body?: Type<unknown>; params?: Type<unknown> } };
 }
 
 describe('memory routes', () => {
@@ -43,6 +45,7 @@ describe('memory routes', () => {
     forgetMemory,
   };
   const getAiIndexMemoryWriteService = jest.fn(() => service);
+  const contextEngineEnabled = jest.fn();
   const currentUserClient = {};
   const response = httpServerMock.createResponseFactory();
 
@@ -75,6 +78,7 @@ describe('memory routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    contextEngineEnabled.mockResolvedValue(true);
   });
 
   const call = (
@@ -86,7 +90,7 @@ describe('memory routes', () => {
     routes[`${method}:${path}`].handler(
       {
         core: Promise.resolve({
-          uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+          uiSettings: { client: { get: contextEngineEnabled } },
           elasticsearch: { client: { asCurrentUser: currentUserClient } },
         }),
       } as never,
@@ -283,6 +287,34 @@ describe('memory routes', () => {
     });
   });
 
+  it.each([
+    [401, 403, 'Elasticsearch denied the memory write.'],
+    [429, 429, 'Elasticsearch is temporarily unable to process the memory write.'],
+  ])(
+    'maps Elasticsearch %i to HTTP %i without exposing details',
+    async (esStatus, status, message) => {
+      createMemory.mockRejectedValue(
+        createEsError(esStatus, 'security_exception', 'secret-index-name')
+      );
+
+      await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: status,
+        body: { message },
+      });
+    }
+  );
+
+  it('returns 404 before calling the service when Context Engine is disabled', async () => {
+    contextEngineEnabled.mockResolvedValue(false);
+
+    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
+
+    expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Not Found' } });
+    expect(getAiIndexMemoryWriteService).not.toHaveBeenCalled();
+  });
+
   it('bounds request strings and arrays', () => {
     const schema = routes[`POST:${AI_INDEX_MEMORIES_PATH}`].validate.request?.body;
     expect(() => schema?.validate({ ...body, content: 'x'.repeat(65537) })).toThrow();
@@ -290,5 +322,21 @@ describe('memory routes', () => {
     expect(() => schema?.validate({ ...body, expires_at: '2026-10-14' })).toThrow();
     expect(() => schema?.validate({ ...body, expires_at: '2026-02-30T12:00:00Z' })).toThrow();
     expect(() => schema?.validate({ ...body, expires_at: '2026-10-14T12:00:00Z' })).not.toThrow();
+  });
+
+  it('bounds path parameters', () => {
+    const schema = routes[`PATCH:${AI_INDEX_MEMORY_BY_ID_PATH}`].validate.request?.params;
+    expect(() =>
+      schema?.validate({
+        aiIndexId: 'x'.repeat(MAX_AI_INDEX_ID_LENGTH + 1),
+        memoryId: 'memory-1',
+      })
+    ).toThrow();
+    expect(() =>
+      schema?.validate({
+        aiIndexId: 'support',
+        memoryId: 'x'.repeat(MAX_KI_ID_LENGTH + 1),
+      })
+    ).toThrow();
   });
 });

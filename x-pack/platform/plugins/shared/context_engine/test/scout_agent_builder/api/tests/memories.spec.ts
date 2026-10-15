@@ -6,7 +6,7 @@
  */
 
 import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
@@ -28,13 +28,21 @@ const AI_INDEX_BODY = {
   sources: [],
   traces: [],
 };
+const NO_DESTINATION_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { contextEngine: ['all'] }, spaces: ['*'] }],
+};
 
 apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
+  let noDestinationWriteCredentials: RoleApiCredentials;
   let previousMemoryEnabled: boolean | undefined;
 
   apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, requestAuth }) => {
     credentials = await requestAuth.getApiKey('admin');
+    noDestinationWriteCredentials = await requestAuth.getApiKeyForCustomRole(
+      NO_DESTINATION_WRITE_ROLE
+    );
     const headers = { ...credentials.apiKeyHeader, ...testData.API_HEADERS };
     const globalSettingsResponse = await apiClient.get('/internal/kibana/global_settings', {
       headers,
@@ -147,6 +155,19 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
     expect(deleteResponse).toHaveStatusCode(200);
     expect(deleteResponse.body).toStrictEqual({ id });
 
+    const reviseDeletedResponse = await apiClient.patch(itemPath, {
+      headers,
+      responseType: 'json',
+      body: {
+        type: 'memory.session_fact',
+        title: 'Cannot revise deleted memory',
+        description: 'The tombstone must remain current.',
+        content: 'This revision must be rejected.',
+        session_id: sessionId,
+      },
+    });
+    expect(reviseDeletedResponse).toHaveStatusCode(409);
+
     const stored = await esClient.get({ index: DEST, id });
     expect(stored._source).toMatchObject({
       id,
@@ -160,6 +181,29 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       },
     });
   });
+
+  apiTest(
+    'enforces destination index privileges without leaking its name',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MEMORIES_PATH, {
+        headers: {
+          ...noDestinationWriteCredentials.apiKeyHeader,
+          ...testData.API_HEADERS,
+        },
+        responseType: 'json',
+        body: {
+          type: 'memory.session_fact',
+          title: 'Unauthorized memory',
+          description: 'The caller cannot write to the destination.',
+          content: 'This content must not be stored.',
+        },
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body).toMatchObject({ message: 'Elasticsearch denied the memory write.' });
+      expect(JSON.stringify(response.body)).not.toContain(DEST);
+    }
+  );
 
   apiTest(
     'shares public memories but protects and preserves space-scoped memories',
