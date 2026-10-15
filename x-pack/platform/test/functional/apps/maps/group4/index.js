@@ -60,7 +60,6 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    loadTestFile(require.resolve('./mvt_joins'));
     loadTestFile(require.resolve('./mapbox_styles'));
     loadTestFile(require.resolve('./mvt_geotile_grid'));
     loadTestFile(require.resolve('./layer_errors'));

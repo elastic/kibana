@@ -414,6 +414,13 @@ export class MapsPage {
     await this.waitForMapPanAndZoom(origView);
   }
 
+  /** Clicks the global "Fit to data" button and waits for the map to pan/zoom to the new extent. */
+  async clickFitToData() {
+    const origView = await this.getView();
+    await this.page.testSubj.click('fitToData');
+    await this.waitForMapPanAndZoom(origView);
+  }
+
   /** Returns the visible text of the layer's TOC details section (legend content). */
   async getLayerTOCDetails(layerName: string) {
     const escapedName = layerName.replace(/\s+/g, '_');
