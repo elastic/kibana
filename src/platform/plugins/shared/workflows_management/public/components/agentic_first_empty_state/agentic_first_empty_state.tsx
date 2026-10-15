@@ -126,7 +126,7 @@ export function AgenticFirstEmptyState({
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="sortRight"
