@@ -370,8 +370,8 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             />
           ) : (
             <EuiEmptyPrompt
-              iconType="inspect"
               title={<h2>{translations.emptyTitle}</h2>}
+              titleSize="xs"
               body={<p>{translations.emptyDescription}</p>}
             />
           )
