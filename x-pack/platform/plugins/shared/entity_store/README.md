@@ -137,7 +137,7 @@ Consumers implement their maintenance logic in `run` (and optionally in `setup`)
 
 ## Entity definition registry
 
-The Entity Store keeps an in-memory **entity definition registry**: the set of entity types (their fields, identity and source index patterns) known to this Kibana instance. Other plugins can add their own definitions through the setup contract. The registry is not yet read by the store's own extraction code. Registering a definition has no side effects in the entity store: it creates no templates, mappings, engines or tasks, and the store's own routes keep validating against the four types it owns.
+The Entity Store keeps an in-memory **entity definition registry**: the set of entity types (their identity and, optionally, extraction config) known to this Kibana instance. Other plugins can add their own definitions through the setup contract. The registry is not yet read by the store's own extraction code. Registering a definition has no side effects in the entity store: it creates no templates, mappings, engines or tasks, and the store's own routes keep validating against the four types it owns.
 
 ### Registering a definition
 
@@ -149,9 +149,17 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
     type: 'k8s.pod',
     name: 'Kubernetes pod',
     identityField: { singleField: 'kubernetes.pod.uid' },
-    indexPatterns: ['logs-*', 'metrics-*'],
-    fields: [],
     managedBy: { kind: 'plugin', id: 'myPlugin' },
+    // Optional; see "Definition shape".
+    extraction: {
+      fields: [
+        {
+          source: 'kubernetes.pod.name',
+          destination: 'kubernetes.pod.name',
+          retention: { operation: 'prefer_newest_value' },
+        },
+      ],
+    },
   });
   if (!result.ok) {
     // result.reason explains the rejection; it has already been logged.
@@ -163,6 +171,17 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 - Code registration is only possible during setup. It closes when the Entity Store starts, so later calls are logged and ignored. Definitions managed by integrations or users will arrive through storage later, not through this call.
 - A rejected definition (invalid schema, missing or non-plugin `managedBy`, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
 - Registered definitions are deep-frozen in place (the registry holds the object you pass, not a copy), so neither the registry nor the caller can modify them afterwards. Unknown keys, including `id`, are rejected.
+
+### Definition shape
+
+A definition is an identity core plus an optional `extraction` block:
+
+- Core: `type`, `name`, `managedBy` and `identityField`. This is sufficient for the id compiler, so a definition with only the core is valid; when `extraction` is present, document/search paths also replay its field evaluations, overrides and post-aggregation gate.
+- `extraction`: the config the store's extraction engine, templates and CRUD API read (`fields`, `fieldEvaluations`, `postAggFilter`, `whenConditionTrueSetFieldsPreAgg`, `whenConditionTrueSetFieldsAfterStats`, `entityTypeFallback`, `creatableFromSingleDocument`, `priorityExtractionGate`, `nonPrioritySampling`). Its presence does not make the store extract the type: the store only materialises its four built-ins.
+- There is no `indexPatterns` key. Source indices for extraction are API configuration (global state and per-engine overrides), not part of a definition.
+- Unknown keys are rejected, at the top level and inside `extraction`.
+
+`@kbn/entity-store/common` exports the types `EntityDefinitionWithoutId` (a definition as registered), `ExtractionBlock` and `ExtractedEntityDefinition` (a definition with the block required), and the block's zod schema `extractionBlockSchema`. `EntityDefinitionOfAnyType` remains as a deprecated alias of `EntityDefinitionWithoutId`.
 
 ### Type names
 
@@ -179,6 +198,19 @@ Every registered definition has a `managedBy` field saying who manages it:
 - `{ kind: 'user', id? }`: created through the API or UI; `id` is the Kibana user profile uid when known.
 
 Only `plugin` can be registered today. The four built-ins are managed by the `entityStore` plugin (`{ kind: 'plugin', id: 'entityStore' }`). `managedBy` is returned on every definition read from the registry, so readers can tell who manages it.
+
+### Compiling entity ids for a registered definition
+
+Every function of the `euid` helper (`@kbn/entity-store/common/euid_helpers`) outside `experimental` takes a definition as its first argument, so it works for any registered type. `getBuiltInEntityDefinition`, exported beside `euid`, resolves one of the Entity Store's four built-ins by type name. A plugin that registered `k8s.pod` reads the definition back and passes it in:
+
+```ts
+const definitions = entityStore.getEntityDefinitionsClientForSpace(spaceId);
+const definition = await definitions.get('k8s.pod');
+if (!definition) {
+  return; // not registered in this Kibana
+}
+const esql = euid.esql.getEuidEvaluation(definition, 'entity.id');
+```
 
 ### Reading definitions
 
