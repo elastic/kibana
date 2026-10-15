@@ -76,6 +76,43 @@ describe('toExpression', () => {
     expect(findExpressionFunction(expression, 'mathColumn').arguments.expression).toEqual(['42']);
   });
 
+  it.each([
+    {
+      description: 'the form-based default label',
+      column: { params: { value: '42' } },
+      expectedName: 'Static value: 42',
+    },
+    {
+      description: 'a custom label',
+      column: { params: { value: '42' }, label: 'Budget', customLabel: true },
+      expectedName: 'Budget',
+    },
+    {
+      description: 'the generic label for an invalid value',
+      column: { params: { value: 'abc' } },
+      expectedName: 'Static value',
+    },
+  ])('names static threshold columns with $description', ({ column, expectedName }) => {
+    const state: TextBasedPrivateState = {
+      ...baseState,
+      layers: {
+        a: {
+          ...baseState.layers.a,
+          columns: [
+            {
+              columnId: 'threshold',
+              fieldName: column.params.value,
+              operationType: 'static_value',
+              ...column,
+            },
+          ],
+        },
+      },
+    };
+    const staticFunction = toExpression(state, 'a')?.chain[1];
+    expect(staticFunction?.arguments.name).toEqual([expectedName]);
+  });
+
   it('appends static thresholds after mapping query columns', () => {
     const state: TextBasedPrivateState = {
       ...baseState,

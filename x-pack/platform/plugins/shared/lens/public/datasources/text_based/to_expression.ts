@@ -11,7 +11,7 @@ import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import type { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from '@kbn/lens-common';
 import type { OriginalColumn } from '@kbn/lens-common';
-import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE, ofNameStaticValue, staticValueLabelDefault } from '@kbn/lens-common';
 import { isStaticValueColumn, isValidStaticValue } from './utils';
 
 function getExpressionForLayer(
@@ -35,7 +35,13 @@ function getExpressionForLayer(
       function: isValid ? 'mathColumn' : 'mapColumn',
       arguments: {
         id: [column.columnId],
-        name: [column.customLabel ? column.label ?? column.fieldName : column.fieldName],
+        name: [
+          !isValid
+            ? staticValueLabelDefault
+            : column.customLabel && column.label
+            ? column.label
+            : ofNameStaticValue(value),
+        ],
         expression: [isValid ? value : String(DEFAULT_STATIC_VALUE)],
       },
     };
