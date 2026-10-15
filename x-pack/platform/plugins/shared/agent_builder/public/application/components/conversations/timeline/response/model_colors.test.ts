@@ -5,47 +5,37 @@
  * 2.0.
  */
 
-import { assignModelColors } from './model_colors';
+import { getModelColor } from './model_colors';
 
-const palette = ['#c0', '#c1', '#c2', '#c3', '#c4', '#c5', '#c6', '#c7', '#c8', '#c9'];
+const palette = ['#c0', '#c1', '#c2', '#c3', '#c4'];
 
-describe('assignModelColors', () => {
-  it('gives the same colour to a model whatever the order of the keys', () => {
-    const a = assignModelColors(['claude-opus', 'gemini-flash'], palette);
-    const b = assignModelColors(['gemini-flash', 'claude-opus'], palette);
-
-    expect(a).toEqual(b);
+describe('getModelColor', () => {
+  it('gives a model the same colour every time', () => {
+    expect(getModelColor('claude-opus', palette)).toBe(getModelColor('claude-opus', palette));
   });
 
-  it('gives a model the same colour across responses', () => {
-    const first = assignModelColors(['claude-opus', 'gemini-flash'], palette);
-    const second = assignModelColors(['claude-opus', 'gemini-flash'], palette);
+  it('depends only on the model, not on the other models of the response', () => {
+    const alone = getModelColor('gemini-flash', palette);
+    const models = ['claude-opus', 'gemini-flash', 'gpt-5'];
 
-    expect(second['claude-opus']).toBe(first['claude-opus']);
+    expect(models.map((key) => getModelColor(key, palette))[1]).toBe(alone);
   });
 
-  it('gives different colours to the keys of a response while the palette has colours left', () => {
-    const keys = Array.from({ length: palette.length }, (_, i) => `model-${i}`);
-
-    const colors = assignModelColors(keys, palette);
-
-    expect(new Set(Object.values(colors)).size).toBe(palette.length);
+  it('always returns a colour of the palette', () => {
+    for (const key of ['a', 'claude-opus', 'anthropic-claude-4.5-haiku', '.google-gemini-flash']) {
+      expect(palette).toContain(getModelColor(key, palette));
+    }
   });
 
-  it('reuses colours when there are more keys than colours', () => {
-    const keys = Array.from({ length: palette.length + 3 }, (_, i) => `model-${i}`);
+  it('spreads the models over the palette', () => {
+    const keys = Array.from({ length: 40 }, (_, i) => `model-${i}`);
 
-    const colors = assignModelColors(keys, palette);
+    const used = new Set(keys.map((key) => getModelColor(key, palette)));
 
-    expect(Object.keys(colors)).toHaveLength(keys.length);
-    expect(Object.values(colors).every((color) => palette.includes(color))).toBe(true);
-  });
-
-  it('ignores duplicated keys', () => {
-    expect(assignModelColors(['a', 'a'], palette)).toEqual(assignModelColors(['a'], palette));
+    expect(used.size).toBe(palette.length);
   });
 
   it('returns no colour for an empty palette', () => {
-    expect(assignModelColors(['a'], [])).toEqual({});
+    expect(getModelColor('a', [])).toBeUndefined();
   });
 });

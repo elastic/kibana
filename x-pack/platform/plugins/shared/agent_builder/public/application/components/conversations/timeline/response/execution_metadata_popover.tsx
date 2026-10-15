@@ -26,7 +26,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { ExecutionJsonFlyout } from './execution_json_flyout';
 import { ExecutionMetadataByModel } from './execution_metadata_by_model';
 
-const POPOVER_WIDTH = 420;
+const MIN_WIDTH = 260;
+const BREAKDOWN_WIDTH = 420;
 
 type MetadataTab = 'total' | 'byModel';
 
@@ -149,9 +150,16 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
-          css={css`
-            width: ${POPOVER_WIDTH}px;
-          `}
+          css={
+            hasBreakdown
+              ? css`
+                  width: ${BREAKDOWN_WIDTH}px;
+                  max-width: calc(100vw - 4rem);
+                `
+              : css`
+                  min-width: ${MIN_WIDTH}px;
+                `
+          }
         >
           {hasBreakdown && (
             <EuiFlexItem grow={false}>

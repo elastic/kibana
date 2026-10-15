@@ -9,11 +9,15 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiHealth,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiText,
+  EuiTextColor,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   euiPaletteColorBlind,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import numeral from '@elastic/numeral';
@@ -21,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { assignModelColors } from './model_colors';
+import { getModelColor } from './model_colors';
 
 const labels = {
   tableCaption: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tableCaption', {
@@ -86,9 +90,19 @@ const CachedTokens: React.FC<{ value?: number }> = ({ value }) =>
     <>{formatCompactNumber(value)}</>
   );
 
-const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <EuiText size="s">{children}</EuiText>
-);
+const useCellPaddingStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return css({ paddingBlock: euiTheme.size.xxs });
+};
+
+const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  const paddingStyles = useCellPaddingStyles();
+  return (
+    <EuiText size="s" css={paddingStyles}>
+      {children}
+    </EuiText>
+  );
+};
 
 const wrappingHeaderStyles = css({ whiteSpace: 'normal' });
 const rightAlignedHeaderStyles = css({ whiteSpace: 'normal', textAlign: 'right' });
@@ -102,25 +116,45 @@ const HeaderCell: React.FC<React.PropsWithChildren<{ isRightAligned?: boolean }>
   </EuiText>
 );
 
+const truncatedTextStyles = css({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = ({
+  label,
+  tooltip,
+  color,
+}) => {
+  const paddingStyles = useCellPaddingStyles();
+  return (
+    <EuiToolTip content={tooltip} display="block">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={paddingStyles}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="dot" color={color} aria-hidden="true" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" css={truncatedTextStyles}>
+            {label}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
+};
+
 const columns: Array<EuiBasicTableColumn<ModelRow>> = [
   {
     field: 'label',
     name: <HeaderCell>{labels.model}</HeaderCell>,
     width: '36%',
-    render: (label: string, { color, fullName }: ModelRow) => {
-      const name = color ? (
-        <EuiHealth color={color} textSize="s">
-          {label}
-        </EuiHealth>
+    render: (label: string, { color, fullName }: ModelRow) =>
+      color ? (
+        <ModelName label={label} tooltip={fullName ?? label} color={color} />
       ) : (
         <Cell>{label}</Cell>
-      );
-      return fullName && fullName !== label ? (
-        <EuiToolTip content={fullName}>{name}</EuiToolTip>
-      ) : (
-        name
-      );
-    },
+      ),
   },
   {
     field: 'llmCalls',
@@ -140,8 +174,10 @@ const columns: Array<EuiBasicTableColumn<ModelRow>> = [
     align: RIGHT_ALIGNMENT,
     render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
       <Cell>
-        <strong>{formatCompactNumber(inputTokens)}</strong> (
-        <CachedTokens value={cachedInputTokens} />)
+        <strong>{formatCompactNumber(inputTokens)}</strong>{' '}
+        <EuiTextColor color="subdued">
+          (<CachedTokens value={cachedInputTokens} />)
+        </EuiTextColor>
       </Cell>
     ),
   },
@@ -186,7 +222,6 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
       connector_id: string;
       model?: string;
     }) => model ?? connectorId;
-    const colors = assignModelColors(connectors.map(getKey), MODEL_PALETTE);
 
     return [
       {
@@ -205,7 +240,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
             ? removeCreatorPrefix(aiConnector.name, aiConnector.metadata?.display?.model_creator)
             : getKey(connector),
           fullName: aiConnector?.name,
-          color: colors[getKey(connector)],
+          color: getModelColor(getKey(connector), MODEL_PALETTE),
           llmCalls: connector.llm_calls,
           inputTokens: connector.input_tokens,
           cachedInputTokens: connector.cached_input_tokens,

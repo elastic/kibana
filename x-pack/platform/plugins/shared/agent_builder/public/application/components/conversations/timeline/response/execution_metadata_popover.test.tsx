@@ -230,6 +230,21 @@ describe('ExecutionMetadataPopover', () => {
       expect(await screen.findByText('Anthropic Claude Haiku 4.5')).toBeInTheDocument();
     });
 
+    it('shows the name in a tooltip too when it was not shortened', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [{ id: 'main-connector', name: 'My Anthropic connector' }],
+      });
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      await user.hover(screen.getByText('My Anthropic connector'));
+
+      expect(await screen.findAllByText('My Anthropic connector')).toHaveLength(2);
+    });
+
     it('shows a dash for a model that does not report cached tokens', async () => {
       render(
         <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />

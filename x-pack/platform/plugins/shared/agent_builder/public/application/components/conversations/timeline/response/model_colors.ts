@@ -16,27 +16,9 @@ const hashString = (value: string): number => {
 };
 
 /**
- * Gives each key a colour of the palette. The colour comes from a hash of the key, so a model has
- * the same colour in every response. Keys landing on the same colour are moved to the next free
- * one, as long as the palette has colours left.
+ * Picks the colour of a model from a hash of its key, so a model has the same colour in every
+ * response. Two models of a response can share a colour: the palette is small, and avoiding it would
+ * make a colour depend on the other models of the response.
  */
-export const assignModelColors = (
-  keys: readonly string[],
-  palette: readonly string[]
-): Record<string, string> => {
-  if (palette.length === 0) {
-    return {};
-  }
-
-  const usedIndexes = new Set<number>();
-  const colors: Record<string, string> = {};
-  for (const key of [...new Set(keys)].sort()) {
-    let index = hashString(key) % palette.length;
-    while (usedIndexes.has(index) && usedIndexes.size < palette.length) {
-      index = (index + 1) % palette.length;
-    }
-    usedIndexes.add(index);
-    colors[key] = palette[index];
-  }
-  return colors;
-};
+export const getModelColor = (key: string, palette: readonly string[]): string | undefined =>
+  palette.length === 0 ? undefined : palette[hashString(key) % palette.length];
