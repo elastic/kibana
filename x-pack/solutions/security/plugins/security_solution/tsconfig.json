@@ -311,7 +311,6 @@
     "@kbn/evals-plugin",
     "@kbn/shared-ux-column-presets",
     "@kbn/core-overlays-browser",
-    "@kbn/flyout-template",
     "@kbn/workflows-management-plugin",
     "@kbn/core-application-browser-mocks",
     "@kbn/date-range-picker",
