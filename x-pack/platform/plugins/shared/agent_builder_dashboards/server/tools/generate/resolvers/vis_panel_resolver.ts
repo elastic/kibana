@@ -38,6 +38,25 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
 };
 
 /**
+ * Panel-level settings that live beside the visualization config but are not part of
+ * the generated chart schema, so they would be dropped when an edit replaces `config`.
+ */
+const PANEL_LEVEL_CONFIG_KEYS = ['drilldowns', 'hide_title', 'hide_border', 'time_range'] as const;
+
+/** Pick the panel-level settings off an existing panel so edits can carry them over. */
+const getPanelLevelSettings = (
+  existingPanel: AttachmentPanel | undefined
+): Record<string, unknown> => {
+  const config = (existingPanel?.config ?? {}) as Record<string, unknown>;
+  return Object.fromEntries(
+    PANEL_LEVEL_CONFIG_KEYS.filter((key) => config[key] !== undefined).map((key) => [
+      key,
+      config[key],
+    ])
+  );
+};
+
+/**
  * Resolves Lens and Vega panel requests for dashboard authoring's
  * `ResolvePanelContent` seam (see `panel_resolver.ts`).
  *
@@ -71,6 +90,8 @@ export const createVisPanelResolver = ({
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
+      const panelLevelSettings = getPanelLevelSettings(existingPanel);
+
       if (renderer === 'vega') {
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
@@ -96,7 +117,7 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec, ...(title ? { title } : {}) },
+            config: { ...panelLevelSettings, spec, ...(title ? { title } : {}) },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };
@@ -123,7 +144,7 @@ export const createVisPanelResolver = ({
         type: 'success',
         panelContent: {
           type: LENS_EMBEDDABLE_TYPE,
-          config: result.validatedConfig,
+          config: { ...panelLevelSettings, ...result.validatedConfig },
         },
         ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };
