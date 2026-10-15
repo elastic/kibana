@@ -6,13 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface OverviewTabProps {
@@ -26,8 +27,28 @@ export interface OverviewTabProps {
    * what appears while it is empty or loading.
    */
   proposedActionsContent?: React.ReactNode;
+  /**
+   * Sections a host renders from investigation data this package cannot fetch. Each one renders
+   * only when supplied, so an investigation without that data simply lacks the section.
+   */
+  sections?: OverviewSections;
   /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
   proposedActionsCount?: React.ReactNode;
+}
+
+/** Host-rendered overview sections, in the order the tab shows them. */
+export interface OverviewSections {
+  /** What the investigation is about. Shown above the subject attachments. */
+  subjects?: React.ReactNode;
+  /**
+   * Replaces the impact read from the conversation's `investigation_impact` attachment, for a
+   * host that reads fresher impact itself. Absent, the tab renders the attachment.
+   */
+  impact?: React.ReactNode;
+  /** The conclusion, as markdown. */
+  conclusion?: string;
+  /** How the investigation got there: hypotheses and their evidence. */
+  trace?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
@@ -37,9 +58,18 @@ export const OverviewTab = memo<OverviewTabProps>(
     groupedAttachments,
     proposedActionsContent,
     proposedActionsCount,
+    sections = {},
   }) => {
+    const { subjects, impact, conclusion, trace } = sections;
+
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
+        {subjects && (
+          <EuiFlexItem data-test-subj="investigationOverviewSubjects">
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.subjects}>{subjects}</DetailsBlock>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <WhatsHappenedBlock
             summary={investigation.summary}
@@ -48,7 +78,21 @@ export const OverviewTab = memo<OverviewTabProps>(
           />
         </EuiFlexItem>
 
-        <ImpactSection attachments={attachments} />
+        {impact ? (
+          <EuiFlexItem data-test-subj="investigationOverviewImpact">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{impact}</DetailsBlock>
+          </EuiFlexItem>
+        ) : (
+          <ImpactSection attachments={attachments} />
+        )}
+
+        {conclusion && (
+          <EuiFlexItem data-test-subj="investigationOverviewConclusion">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
+              <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
 
         {proposedActionsContent && (
           <EuiFlexItem>
@@ -58,6 +102,12 @@ export const OverviewTab = memo<OverviewTabProps>(
             >
               {proposedActionsContent}
             </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {trace && (
+          <EuiFlexItem data-test-subj="investigationOverviewTrace">
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.trace}>{trace}</DetailsBlock>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

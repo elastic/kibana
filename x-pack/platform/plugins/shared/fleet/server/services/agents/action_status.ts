@@ -24,7 +24,10 @@ import {
 } from '../../../common';
 import { appContextService } from '..';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
-import { hasVersionSuffix } from '../../../common/services/version_specific_policies_utils';
+import {
+  hasVersionSuffix,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Return current bulk actions.
@@ -194,6 +197,9 @@ export function getPage(options: ActionStatusOptions) {
 
   return options.page * options.perPage;
 }
+
+// `index.max_result_window` default: `from + size` cannot go beyond it.
+const MAX_RESULT_WINDOW = 10000;
 
 export function getPerPage(options: ActionStatusOptions) {
   if (options.page === undefined || options.perPage === undefined) {
@@ -394,20 +400,37 @@ async function getPolicyChangeActions(
       ],
     },
   };
-  const agentPoliciesRes = await esClient.search({
-    index: AGENT_POLICY_INDEX,
-    ignore_unavailable: true,
-    size: getPerPage(options),
-    query: await addNamespaceFilteringToQuery(query, namespace),
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
-        },
-      },
-    ],
-    _source: ['revision_idx', '@timestamp', 'policy_id'],
-  });
+  const limit = getPerPage(options);
+  const namespacedQuery = await addNamespaceFilteringToQuery(query, namespace);
+  // Version specific and sentinel docs (`<id>#9.4`, `<id>#sentinel`) are skipped below, and cannot be
+  // excluded in the query without an expensive query, so keep reading pages until the limit of base
+  // policy docs is reached. Otherwise they would crowd the base policy changes out of the limit.
+  const basePolicyHits: Array<{ _source?: unknown }> = [];
+  for (let from = 0; basePolicyHits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
+    const agentPoliciesRes = await esClient.search({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      from,
+      size: limit,
+      query: namespacedQuery,
+      // Tiebreakers keep the order stable between pages when documents share a timestamp, as
+      // they do when a policy is deployed with its `#sentinel` copy.
+      sort: [
+        { '@timestamp': { order: 'desc' } },
+        { policy_id: { order: 'asc' } },
+        { revision_idx: { order: 'asc' } },
+      ],
+      _source: ['revision_idx', '@timestamp', 'policy_id'],
+    });
+    const hits = agentPoliciesRes.hits.hits;
+    basePolicyHits.push(
+      ...hits.filter((hit) => !hasVersionSuffix((hit._source as any)?.policy_id))
+    );
+    if (hits.length < limit) {
+      break;
+    }
+    from += limit;
+  }
 
   interface AgentPolicyRevision {
     policyId: string;
@@ -417,13 +440,10 @@ async function getPolicyChangeActions(
     agentsOnAtLeastThisRevision: number;
   }
 
-  const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
-    (acc, curr) => {
+  const agentPolicies: { [key: string]: AgentPolicyRevision } = basePolicyHits
+    .slice(0, limit)
+    .reduce((acc, curr) => {
       const hit = curr._source! as any;
-      if (hasVersionSuffix(hit.policy_id)) {
-        // skip version specific policy actions
-        return acc;
-      }
       acc[`${hit.policy_id}:${hit.revision_idx}`] = {
         policyId: hit.policy_id,
         revision: hit.revision_idx,
@@ -432,9 +452,12 @@ async function getPolicyChangeActions(
         agentsOnAtLeastThisRevision: 0,
       };
       return acc;
-    },
-    {} as { [key: string]: AgentPolicyRevision }
-  );
+    }, {} as { [key: string]: AgentPolicyRevision });
+
+  const basePolicyIds = [...new Set(Object.values(agentPolicies).map((p) => p.policyId))];
+  if (basePolicyIds.length === 0) {
+    return [];
+  }
 
   let agentsPerPolicyRevisionRes;
   let agentPolicyUpdateActions: ActionStatus[];
@@ -445,19 +468,44 @@ async function getPolicyChangeActions(
       size: 0,
       // ignore unenrolled agents
       query: {
-        bool: { must_not: [{ exists: { field: 'unenrolled_at' } }] },
+        bool: {
+          filter: [buildPolicyBaseIdsWithFallbackEsFilter(basePolicyIds)],
+          must_not: [{ exists: { field: 'unenrolled_at' } }],
+        },
       },
+      // Agents on `<id>#sentinel` or a version specific policy count for the base policy `<id>`
       aggs: {
         policies: {
           terms: {
-            field: 'policy_id',
-            size: 10,
+            field: 'policy_base_id',
+            size: basePolicyIds.length,
           },
           aggs: {
             agents_per_rev: {
               terms: {
                 field: 'policy_revision_idx',
                 size: 10,
+              },
+            },
+          },
+        },
+        // Agents enrolled by an older fleet-server do not have `policy_base_id` yet, only the plain
+        // policy id is matched for them.
+        legacy_policies: {
+          filter: { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+          aggs: {
+            policies: {
+              terms: {
+                field: 'policy_id',
+                size: basePolicyIds.length,
+              },
+              aggs: {
+                agents_per_rev: {
+                  terms: {
+                    field: 'policy_revision_idx',
+                    size: 10,
+                  },
+                },
               },
             },
           },
@@ -505,28 +553,30 @@ async function getPolicyChangeActions(
     }>;
   }
 
-  const agentsPerPolicyRevisionMap: { [key: string]: AgentsPerPolicyRev } = (
-    agentsPerPolicyRevisionRes.aggregations!.policies as any
-  ).buckets.reduce(
+  const agentsPerPolicyRevisionMap: { [key: string]: AgentsPerPolicyRev } = [
+    ...((agentsPerPolicyRevisionRes.aggregations!.policies as any)?.buckets ?? []),
+    ...((agentsPerPolicyRevisionRes.aggregations!.legacy_policies as any)?.policies?.buckets ?? []),
+  ].reduce(
     (
       acc: { [key: string]: AgentsPerPolicyRev },
       policyBucket: { key: string; doc_count: number; agents_per_rev: any }
     ) => {
       const policyId = policyBucket.key;
-      const policyAgentCount = policyBucket.doc_count;
       if (!acc[policyId])
         acc[policyId] = {
           total: 0,
           agentsPerRev: [],
         };
-      acc[policyId].total = policyAgentCount;
-      acc[policyId].agentsPerRev = policyBucket.agents_per_rev.buckets.map(
-        (agentsPerRev: { key: string; doc_count: number }) => {
-          return {
-            revision: agentsPerRev.key,
-            agents: agentsPerRev.doc_count,
-          };
-        }
+      acc[policyId].total += policyBucket.doc_count;
+      acc[policyId].agentsPerRev.push(
+        ...policyBucket.agents_per_rev.buckets.map(
+          (agentsPerRev: { key: string; doc_count: number }) => {
+            return {
+              revision: agentsPerRev.key,
+              agents: agentsPerRev.doc_count,
+            };
+          }
+        )
       );
       return acc;
     },

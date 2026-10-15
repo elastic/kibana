@@ -34,7 +34,9 @@
     "@kbn/licensing-types",
     "@kbn/license-api-guard-plugin",
     "@kbn/esql-language",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics"
   ],
   "exclude": [
     "target/**/*",

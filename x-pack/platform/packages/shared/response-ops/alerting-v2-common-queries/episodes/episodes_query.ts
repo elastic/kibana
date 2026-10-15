@@ -49,6 +49,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_tags',
   'episode_data',
   'severity',
+  'source',
 ] as const;
 
 export interface EpisodesFilterState {

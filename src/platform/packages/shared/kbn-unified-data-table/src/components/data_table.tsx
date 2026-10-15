@@ -70,6 +70,7 @@ import {
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import type {
   UnifiedDataTableSettings,
@@ -81,6 +82,8 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
+  UnifiedDataTableOpenInNewTab,
+  UnifiedDataTableQueryContext,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -216,6 +219,16 @@ interface InternalUnifiedDataTableProps {
    */
   onFilter?: DocViewFilterFn;
   /**
+   * Opens a query in a new Discover tab. When provided (currently Discover only), it is
+   * passed to actions that continue the analysis elsewhere, such as "Find similar values".
+   */
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+  /**
+   * The query and filters the rows were fetched with. Passed to actions that continue the analysis
+   * elsewhere, such as "Find similar values", so they use this table's context rather than the global one.
+   */
+  queryContext?: UnifiedDataTableQueryContext;
+  /**
    * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
   onResize?: (colSettings: { columnId: string; width: number | undefined }) => void;
@@ -259,6 +272,12 @@ interface InternalUnifiedDataTableProps {
    * Determines whether the keyboard shortcuts button should be displayed
    */
   showKeyboardShortcuts?: boolean;
+  /**
+   * Determines whether the toolbar Sort control should be displayed.
+   * Defaults to `isSortEnabled` and cannot enable sorting when it is disabled.
+   * Column-header sorting still follows `isSortEnabled`.
+   */
+  showSortSelector?: boolean;
   /**
    * Manage user sorting control
    */
@@ -349,6 +368,7 @@ interface InternalUnifiedDataTableProps {
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
+    uiActions?: UiActionsStart;
     storage: Storage;
     data: DataPublicPluginStart;
   };
@@ -577,6 +597,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       loadingState,
       onFilter,
+      onOpenInNewTab,
+      queryContext,
       onResize,
       onSetColumns,
       onSort,
@@ -586,6 +608,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       settings,
       showTimeCol,
       showKeyboardShortcuts = true,
+      showSortSelector = true,
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
@@ -651,8 +674,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     ref
   ) => {
     const styles = useMemoCss(componentStyles);
-    const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
-      services;
+    const {
+      fieldFormats,
+      toastNotifications,
+      dataViewFieldEditor,
+      uiSettings,
+      storage,
+      data,
+      uiActions,
+    } = services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
@@ -742,11 +772,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
-        canPrependTimeFieldColumn(activeColumns, timeFieldName, dataSource, showTimeCol),
-      [timeFieldName, showTimeCol, dataSource]
+        canPrependTimeFieldColumn(activeColumns, dataView, dataSource, showTimeCol),
+      [dataView, showTimeCol, dataSource]
     );
 
     const visibleColumns = useMemo(() => {
@@ -919,6 +948,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         setExpanded: setExpandedDoc,
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
+        onOpenInNewTab,
+        queryContext,
         hideFilteringOnComputedColumns,
         dataView,
         selectedDocsState,
@@ -938,6 +969,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows,
         expandedDoc,
         onFilter,
+        onOpenInNewTab,
+        queryContext,
         hideFilteringOnComputedColumns,
         setExpandedDoc,
         selectedDocsState,
@@ -1188,6 +1221,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           services: {
             uiSettings,
             toastNotifications,
+            uiActions,
           },
           hasEditDataViewPermission: () =>
             Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
@@ -1229,6 +1263,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        uiActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
       ]
@@ -1475,7 +1510,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showSortSelector: isSortEnabled && showSortSelector && !isJsonSourceMode,
         showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
@@ -1485,6 +1520,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         isJsonSourceMode,
         isSortEnabled,
+        showSortSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

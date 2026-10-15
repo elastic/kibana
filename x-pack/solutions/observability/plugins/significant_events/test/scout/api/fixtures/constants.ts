@@ -8,6 +8,7 @@
 import {
   NIGHTSHIFT_FEATURE_ID,
   NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+  NIGHTSHIFT_SOURCE_VIEW_PREFIX,
 } from '@kbn/nightshift-shared';
 import type { KibanaRole, ScoutTestConfig } from '@kbn/scout-oblt';
 
@@ -44,6 +45,8 @@ function getAdminElasticsearchPrivileges(isServerless: boolean): KibanaRole['ela
       { names: ['.streams*'], privileges: ['all'] },
       { names: ['.kibana_streams*'], privileges: ['all'] },
       { names: ['.significant_events*'], privileges: ['all'] },
+      // Tests create Nightshift sources, which are ES|QL views: `manage` creates and deletes them.
+      { names: [`${NIGHTSHIFT_SOURCE_VIEW_PREFIX}*`], privileges: ['read', 'manage'] },
     ],
   };
 }
