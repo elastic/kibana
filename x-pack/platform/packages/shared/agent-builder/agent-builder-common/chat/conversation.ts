@@ -658,21 +658,52 @@ export interface ConversationRoundOrigin {
   type: ConversationOriginType;
 }
 
-export interface RoundModelUsageStats {
+/**
+ * LLM usage of a single connector within a round.
+ */
+export interface ConnectorModelUsageStats {
   /**
-   * Id of the connector used for this round
+   * Id of the connector
    */
   connector_id: string;
   /**
-   * Number of LLM calls which were done during this round.
+   * Number of LLM calls done through this connector.
    */
   llm_calls: number;
   /**
-   * Total number of input tokens sent this round.
+   * Total number of input tokens sent to this connector.
    */
   input_tokens: number;
   /**
-   * Total number of output tokens received this round.
+   * Total number of output tokens received from this connector.
+   */
+  output_tokens: number;
+  /**
+   * Number of input tokens served from cache, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
+   * Model identifier for this connector, if available.
+   */
+  model?: string;
+}
+
+export interface RoundModelUsageStats {
+  /**
+   * Id of the main connector used for this round
+   */
+  connector_id: string;
+  /**
+   * Number of LLM calls which were done during this round, across all connectors.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round, across all connectors.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round, across all connectors.
    */
   output_tokens: number;
   /**
@@ -681,13 +712,19 @@ export interface RoundModelUsageStats {
    */
   cached_input_tokens?: number;
   /**
-   * Model identifier from the provider response, if available.
+   * Model identifier of the main connector from the provider response, if available.
    */
   model?: string;
   /**
    * Total input tokens (including cached) of the agent's last LLM call this round.
    */
   last_call_input_tokens?: number;
+  /**
+   * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
+   * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.
+   * Absent on rounds persisted before the breakdown existed.
+   */
+  connectors?: ConnectorModelUsageStats[];
 }
 
 /**
@@ -708,7 +745,8 @@ export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
   usage.input_tokens === 0 &&
   usage.output_tokens === 0 &&
   usage.cached_input_tokens === undefined &&
-  usage.model === undefined;
+  usage.model === undefined &&
+  usage.connectors === undefined;
 
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
