@@ -27,8 +27,8 @@ export const NewItemIndicator = ({ isHighlighted }: NewItemIndicatorProps) => {
     right: 1px;
     pointer-events: none;
     stroke: ${isHighlighted
-      ? euiTheme.components.buttons.backgroundPrimary
-      : euiTheme.components.buttons.backgroundText};
+      ? euiTheme.components.buttons.backgroundText
+      : euiTheme.colors.body};
     stroke-width: 2px;
     paint-order: stroke;
   `;
