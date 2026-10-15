@@ -34,6 +34,7 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   platform: 'linux',
   tags: [],
   monitorsAssigned: null,
+  complete: false,
   ...overrides,
 });
 

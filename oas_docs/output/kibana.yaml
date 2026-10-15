@@ -1021,7 +1021,14 @@ paths:
 
         List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents
-      parameters: []
+      parameters:
+        - description: When true, hidden agents (such as built-in system agents) are included in the response.
+          in: query
+          name: include_hidden
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -1045,6 +1052,7 @@ paths:
                         permissions:
                           update_access_control: false
                           update_agent: false
+                          update_approvals: false
                         type: chat
                       - access_control:
                           access_mode: private
@@ -1071,6 +1079,7 @@ paths:
                         permissions:
                           update_access_control: true
                           update_agent: true
+                          update_approvals: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1167,6 +1176,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available; added in 9.6.0
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1599,6 +1633,7 @@ paths:
                     permissions:
                       update_access_control: true
                       update_agent: true
+                      update_approvals: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1702,6 +1737,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available; added in 9.6.0
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -21397,7 +21457,9 @@ paths:
                         - full_name
                         - username
                     customFields:
-                      description: Custom fields configuration details.
+                      deprecated: true
+                      description: |
+                        Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                       items:
                         type: object
                         properties:
@@ -21606,7 +21668,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -21816,7 +21880,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -29599,7 +29665,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -29613,7 +29679,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -29670,6 +29736,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -29705,6 +29776,32 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -29717,6 +29814,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -48204,6 +48302,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48538,6 +48649,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48765,6 +48889,19 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          maxLength: 128
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      stackArn:
+                        description: CloudFormation stack ARN pasted by the user post-launch.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
                       stackName:
                         description: CloudFormation stack name (128-char AWS limit).
                         maxLength: 128
@@ -48918,6 +49055,19 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
                               type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
@@ -49179,6 +49329,19 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
                                 type: string
                               stackName:
                                 description: CloudFormation stack name (128-char AWS limit).
@@ -133504,7 +133667,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -148712,11 +148875,23 @@ components:
         maxLength: 30000
         type: string
       description: |
-        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+        Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.
+      example:
+        escalated_as_boolean: 'true'
+        priority_as_keyword: high
+        ticket_number_as_integer: '4287'
       maxProperties: 500
       title: Case extended fields
       type: object
       x-state: Technical preview; added in 9.5.0
+    Cases_case_extended_fields_labels:
+      additionalProperties:
+        type: string
+      description: |
+        A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
+      example:
+        priority_as_keyword: Priority
+      type: object
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -148847,7 +149022,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -148881,6 +149057,15 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -149023,7 +149208,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -149064,6 +149250,8 @@ components:
             The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
           type: object
           x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -149537,8 +149725,9 @@ components:
             - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
             - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
         customFields:
+          deprecated: true
           description: |
-            Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+            Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
           items:
             type: object
             properties:
@@ -150389,7 +150578,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -150636,6 +150827,9 @@ components:
       title: Template write request
       type: object
     Cases_templates:
+      deprecated: true
+      description: |
+        Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
       items:
         type: object
         properties:
@@ -150787,7 +150981,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -150872,8 +151068,9 @@ components:
                   - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
                   - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
               customFields:
+                deprecated: true
                 description: |
-                  Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+                  Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
                 items:
                   type: object
                   properties:
@@ -150920,6 +151117,24 @@ components:
                 $ref: '#/components/schemas/Cases_case_status'
               tags:
                 $ref: '#/components/schemas/Cases_case_tags'
+              template:
+                description: |
+                  The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
+                nullable: true
+                type: object
+                properties:
+                  id:
+                    description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+                    type: string
+                  version:
+                    description: |
+                      The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
+                    minimum: 1
+                    type: integer
+                required:
+                  - id
+                  - version
+                x-state: Technical preview
               title:
                 $ref: '#/components/schemas/Cases_case_title'
               version:
@@ -151376,7 +151591,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_383___schema0:
+    Kibana_HTTP_APIs__zod_v4_56___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -151405,7 +151620,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
                       - type: object
                         properties:
                           destination:
@@ -162016,7 +162231,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162031,7 +162246,7 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
                             discriminator:
@@ -162043,31 +162258,23 @@ components:
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -162083,9 +162290,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
@@ -162097,14 +162304,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162116,7 +162323,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162131,25 +162338,20 @@ components:
                             type: array
                           type:
                             default: default
-                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
                           view_mode:
-                            anyOf:
-                              - enum:
-                                  - documents
-                                type: string
-                              - enum:
-                                  - patterns
-                                type: string
-                              - enum:
-                                  - aggregated
-                                type: string
                             default: documents
-                            description: Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).
+                            description: 'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).'
+                            enum:
+                              - documents
+                              - patterns
+                              - aggregated
+                            type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162158,7 +162360,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162173,36 +162375,28 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -162211,9 +162405,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           row_height:
                             anyOf:
@@ -162223,14 +162417,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162242,7 +162436,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162257,12 +162451,12 @@ components:
                             type: array
                           type:
                             default: default
-                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162270,7 +162464,7 @@ components:
                         description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162285,7 +162479,7 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           counter_aggregation:
                             description: Aggregation applied to counter metric fields.
@@ -162298,22 +162492,17 @@ components:
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           dimensions:
                             description: Fields used to group metrics in the metrics grid.
                             items:
@@ -162322,14 +162511,11 @@ components:
                             maxItems: 5
                             type: array
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           gauge_aggregation:
                             description: Aggregation applied to gauge metric fields.
                             enum:
@@ -162337,6 +162523,18 @@ components:
                               - sum
                               - min
                               - max
+                            type: string
+                          grid_sort_direction:
+                            description: Direction of the metrics grid order. If omitted, defaults to ascending.
+                            enum:
+                              - asc
+                              - desc
+                            type: string
+                          grid_sort_field:
+                            description: Criterion used to order metrics in the metrics grid. `recency` orders by the metrics the viewing user explored most recently in their own browser. If omitted, metrics are ordered alphabetically.
+                            enum:
+                              - alphabetically
+                              - recency
                             type: string
                           header_row_height:
                             anyOf:
@@ -162346,9 +162544,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           histogram_percentile:
                             description: Percentile displayed for histogram metric fields.
@@ -162367,14 +162565,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162390,7 +162588,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162409,7 +162607,7 @@ components:
                               - metrics
                             type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162500,34 +162698,26 @@ components:
                             description: Optional width of the column in pixels.
                             minimum: 0
                             type: number
-                      description: Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.
+                      description: Per-column settings keyed by field name, such as width. When set, merges with the source configuration for the referenced session or inline tab.
                       type: object
                     default_rendered_nodes:
-                      description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The number of nodes each JSON cell renders by default in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       maximum: 200
                       minimum: 10
                       type: number
                     density:
-                      anyOf:
-                        - enum:
-                            - compact
-                          type: string
-                        - enum:
-                            - expanded
-                          type: string
-                        - enum:
-                            - normal
-                          type: string
-                      description: 'Discover display option: controls table row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The table row spacing. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
+                      enum:
+                        - compact
+                        - expanded
+                        - normal
+                      type: string
                     documents_display_mode:
-                      anyOf:
-                        - enum:
-                            - table
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                      description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                      enum:
+                        - table
+                        - json
+                      type: string
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -162536,9 +162726,9 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Discover display option: controls table header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The table header row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                     hide_nulls:
-                      description: 'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: When `true`, fields with null values are hidden in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       type: boolean
                     row_height:
                       anyOf:
@@ -162548,14 +162738,14 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Discover display option: controls table data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".'
+                      description: The table data row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.
                     rows_per_page:
-                      description: Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".
+                      description: The number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.
                       maximum: 10000
                       minimum: 1
                       type: number
                     sample_size:
-                      description: 'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".'
+                      description: The number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.
                       maximum: 10000
                       minimum: 10
                       type: number
@@ -162566,7 +162756,7 @@ components:
                         type: object
                         properties:
                           direction:
-                            description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                            description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                             enum:
                               - asc
                               - desc
@@ -162580,7 +162770,7 @@ components:
                       maxItems: 100
                       type: array
                     wrap_lines:
-                      description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       type: boolean
                 ref_id:
                   type: string
@@ -169088,6 +169278,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -169161,6 +169352,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -169214,6 +169484,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
@@ -171419,6 +171717,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -171492,6 +171791,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: true
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -171545,6 +171923,34 @@ components:
           additionalProperties: true
           type: object
           properties:
+            oauth2:
+              additionalProperties: true
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: true
@@ -177157,6 +177563,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -177230,6 +177637,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -177283,6 +177769,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
@@ -185126,7 +185640,7 @@ components:
       properties:
         fill:
           default: solid
-          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          description: 'Area fill type: solid or gradient.'
           enum:
             - solid
             - gradient

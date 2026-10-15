@@ -41,6 +41,10 @@ const createAddContextMock = () => {
     ));
 };
 
+jest.mock('../../../data_views_service/create_esql_ad_hoc_data_view', () => ({
+  createEsqlAdHocDataView: jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('@kbn/esql-utils', () => {
   return {
     getESQLResults: jest.fn().mockResolvedValue({
@@ -72,7 +76,6 @@ jest.mock('@kbn/esql-utils', () => {
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
     formatESQLColumns: jest.fn().mockReturnValue([
       {
         name: '@timestamp',

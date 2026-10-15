@@ -109,4 +109,37 @@ describe('getEsqlToolType convertFromPersistence', () => {
       params: persistedConfig.params,
     });
   });
+
+  it('preserves include_frozen through a persistence round trip', () => {
+    const config: EsqlToolConfig = {
+      query: 'FROM logs-*',
+      params: {},
+      include_frozen: true,
+    };
+
+    const toolType = getEsqlToolType();
+    const persisted = toolType.convertToPersistence!(config, {} as any);
+    const converted = toolType.convertFromPersistence!(persisted, {} as any);
+
+    expect(converted).toEqual<EsqlToolConfig>(config);
+  });
+});
+
+describe('getEsqlToolType configuration schemas', () => {
+  const { createSchema, updateSchema } = getEsqlToolType();
+
+  it('accepts include_frozen on create and update', () => {
+    expect(
+      createSchema.validate({ query: 'FROM logs-*', params: {}, include_frozen: true })
+    ).toMatchObject({ include_frozen: true });
+    expect(updateSchema.validate({ include_frozen: false })).toMatchObject({
+      include_frozen: false,
+    });
+  });
+
+  it('rejects a non-boolean include_frozen', () => {
+    expect(() =>
+      createSchema.validate({ query: 'FROM logs-*', params: {}, include_frozen: 'yes' })
+    ).toThrow();
+  });
 });

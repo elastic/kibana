@@ -8,6 +8,7 @@
 import { escapeStringValue } from '@kbn/esql-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
@@ -29,6 +30,12 @@ import type { EsqlRunner } from './types';
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
 export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
 export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
+
+/**
+ * Alert and anomaly indices don't map every EUID source field (for example `user.entity.id`);
+ * with this setting an unmapped field reads as null instead of failing the query.
+ */
+export const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 // ── ML anomalies ─────────────────────────────────────────────────────────────
 // One definition of an entity anomaly, shared by the anomalies tile and column.
@@ -59,7 +66,11 @@ export const toList = (items: readonly string[]) => items.map(escapeStringValue)
 
 /** Raw identity fields that EUIDs are built from. */
 const IDENTITY_SOURCE_FIELDS = [
-  ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
+  ...new Set(
+    ALLOWED_ENTITY_TYPES.flatMap(
+      (t) => getEuidSourceFields(getBuiltInEntityDefinition(t)).identitySourceFields
+    )
+  ),
 ];
 
 const getStringValues = (value: unknown): string[] =>
