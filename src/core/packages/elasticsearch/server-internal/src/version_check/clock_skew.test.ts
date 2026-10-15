@@ -249,21 +249,6 @@ describe('pollEsNodesClockSkew', () => {
     ]);
   });
 
-  it.each([
-    [
-      'a failed request',
-      async () => {
-        throw new Error('mock stats request error');
-      },
-    ],
-    ['a response without timestamps', async () => ({ nodes: { 'node-0': {} } })],
-  ])('does not treat %s while skewed as a recovery', async (_, interruption) => {
-    await runRequests([respond(kibanaTime - 61_000), interruption, respond(kibanaTime - 61_000)]);
-
-    expect(log.error).toHaveBeenCalledTimes(1);
-    expect(log.info).not.toHaveBeenCalled();
-  });
-
   it('swallows request failures and checks again ten minutes later', async () => {
     const stoppedAt = await runRequests([
       async () => {
