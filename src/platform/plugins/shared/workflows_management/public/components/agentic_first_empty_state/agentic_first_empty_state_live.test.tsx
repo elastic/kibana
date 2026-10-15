@@ -87,6 +87,10 @@ describe('AgenticFirstEmptyStateLive', () => {
     await waitFor(() => expect(mockGetAgentBuilderAccess).toHaveBeenCalled());
     expect(screen.queryByTestId('agenticFirstExploreLibraryLink')).not.toBeInTheDocument();
     expect(screen.getByTestId('agenticFirstStartManuallyButton')).toBeInTheDocument();
+    expect(screen.getByTestId('agenticFirstExampleWorkflowsLink')).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows'
+    );
   });
 
   it('replaces the chat input with the connect-LLM panel when no connector exists', async () => {

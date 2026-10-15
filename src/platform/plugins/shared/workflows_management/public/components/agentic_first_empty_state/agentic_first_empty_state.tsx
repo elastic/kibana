@@ -28,14 +28,19 @@ export interface AgenticFirstEmptyStateProps {
   templates?: Template[];
   /** The prompt area, e.g. Agent Builder's chat input. Omitted when AI chat is unavailable. */
   agentInput?: React.ReactNode;
+  /** Shows a link to the example workflows on GitHub, for when the library is off. */
+  showExampleWorkflowsLink?: boolean;
   onStartManually?: () => void;
   onExploreLibrary?: () => void;
   onSelectTemplate?: (template: Template) => void;
 }
 
+const EXAMPLE_WORKFLOWS_URL = 'https://github.com/elastic/workflows';
+
 export function AgenticFirstEmptyState({
   templates,
   agentInput,
+  showExampleWorkflowsLink = false,
   onStartManually,
   onExploreLibrary,
   onSelectTemplate,
@@ -121,7 +126,7 @@ export function AgenticFirstEmptyState({
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="sortRight"
@@ -134,6 +139,21 @@ export function AgenticFirstEmptyState({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {showExampleWorkflowsLink && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={EXAMPLE_WORKFLOWS_URL}
+                target="_blank"
+                iconType="external"
+                iconSide="right"
+                data-test-subj="agenticFirstExampleWorkflowsLink"
+              >
+                {i18n.translate('workflows.agenticFirst.exampleWorkflows', {
+                  defaultMessage: 'Example workflows',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </div>
     </div>

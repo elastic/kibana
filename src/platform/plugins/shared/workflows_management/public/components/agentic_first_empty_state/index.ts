@@ -8,10 +8,6 @@
  */
 
 export {
-  AgenticFirstEmptyState,
-  type AgenticFirstEmptyStateProps,
-} from './agentic_first_empty_state';
-export {
   AgenticFirstEmptyStateLive,
   type AgenticFirstEmptyStateLiveProps,
 } from './agentic_first_empty_state_live';

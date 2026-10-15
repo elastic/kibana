@@ -65,7 +65,7 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
   return libraryEnabled ? (
     <LiveInner {...stateProps} agentInput={agentInput} />
   ) : (
-    <AgenticFirstEmptyState {...stateProps} agentInput={agentInput} />
+    <AgenticFirstEmptyState {...stateProps} agentInput={agentInput} showExampleWorkflowsLink />
   );
 }
 

@@ -105,9 +105,7 @@ jest.mock('../../../components', () => {
       </button>
     </div>
   );
-  // `WorkflowList` renders the `Live` variant; keep both exported so the mock
-  // stays valid if the component swaps back.
-  return { AgenticFirstEmptyState: EmptyState, AgenticFirstEmptyStateLive: EmptyState };
+  return { AgenticFirstEmptyStateLive: EmptyState };
 });
 
 jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
