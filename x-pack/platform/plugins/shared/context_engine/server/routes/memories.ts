@@ -22,6 +22,7 @@ import type {
   WriteMemoryResponse,
 } from '../../common/http_api/memories';
 import { apiPrivileges } from '../../common/features';
+import { DEFAULT_MEMORY_EXPIRATION_DAYS } from '../../common/memory';
 import type { GetAiIndexMemoryWriteServiceParams } from '../types';
 import type { AiIndexMemoryWriteServiceApi } from '../ai_indices/memory_write_service';
 import { MemoryWriteError, type MemoryWriteErrorCode } from '../ai_indices/memory_write_errors';
@@ -55,6 +56,7 @@ const elasticsearchErrorMessages = {
   404: 'The AI Index destination was not found.',
   409: 'The memory write conflicted with another operation.',
   429: 'Elasticsearch is temporarily unable to process the memory write.',
+  503: 'Elasticsearch is temporarily unavailable.',
 } as const;
 
 const memoryWriteStatusCodes: Record<MemoryWriteErrorCode, 400 | 404 | 409 | 500> = {
@@ -98,6 +100,12 @@ const handleMemoryWriteError = (
   }
   if (isResponseError(error)) {
     const { statusCode } = error;
+    if (statusCode === 503) {
+      return response.customError({
+        statusCode,
+        body: { message: elasticsearchErrorMessages[statusCode] },
+      });
+    }
     if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
       // Kibana already authenticated the request, so an Elasticsearch 401 represents a downstream
       // authorization failure rather than a prompt for the client to authenticate with Kibana.
@@ -149,7 +157,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'create-context-engine-memory',
       summary: 'Create a memory',
-      description: `Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. ${DESCRIPTION_SUFFIX}`,
+      description: `Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. New memories expire after ${DEFAULT_MEMORY_EXPIRATION_DAYS} days unless another expiry is supplied. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -173,6 +181,7 @@ export const registerMemoryRoutes = ({
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },
+            503: { body: errorResponseSchema, description: 'Elasticsearch is unavailable.' },
           },
         },
         options: {
@@ -228,6 +237,7 @@ export const registerMemoryRoutes = ({
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },
+            503: { body: errorResponseSchema, description: 'Elasticsearch is unavailable.' },
           },
         },
         options: {
@@ -288,6 +298,7 @@ export const registerMemoryRoutes = ({
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },
+            503: { body: errorResponseSchema, description: 'Elasticsearch is unavailable.' },
           },
         },
         options: {

@@ -292,7 +292,7 @@ describe('memory routes', () => {
     });
   });
 
-  it('does not expose Elasticsearch details from a 5xx response', async () => {
+  it('preserves a retryable Elasticsearch 503 without exposing details', async () => {
     createMemory.mockRejectedValue(
       createEsError(503, 'unavailable_shards_exception', 'secret-index-name is unavailable')
     );
@@ -300,8 +300,8 @@ describe('memory routes', () => {
     await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
 
     expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: { message: 'An unexpected error occurred while writing the memory.' },
+      statusCode: 503,
+      body: { message: 'Elasticsearch is temporarily unavailable.' },
     });
   });
 

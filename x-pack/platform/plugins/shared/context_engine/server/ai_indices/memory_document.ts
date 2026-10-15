@@ -89,7 +89,7 @@ export const createConversationReferences = (
 export const updateMemoryProvenance = (
   governance: MemoryGovernance | undefined,
   writer: MemoryWriter,
-  recordCreation: boolean
+  { recordCreation }: { recordCreation: boolean }
 ): MemoryGovernance => ({
   ...governance,
   provenance: {

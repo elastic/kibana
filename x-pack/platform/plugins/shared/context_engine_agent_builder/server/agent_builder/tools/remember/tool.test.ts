@@ -104,6 +104,25 @@ describe('remember tool', () => {
     expect(assertContextEngineWriteAccessMock).not.toHaveBeenCalled();
   });
 
+  it('returns authorization failures without calling the service', async () => {
+    assertContextEngineWriteAccessMock.mockRejectedValue(
+      new Error('Insufficient privileges to update Context Engine AI indices.')
+    );
+
+    await expect(run(params, 'conversation-1')).resolves.toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              'Failed to store memory: Insufficient privileges to update Context Engine AI indices.',
+          },
+        },
+      ],
+    });
+    expect(createMemory).not.toHaveBeenCalled();
+  });
+
   it('adapts conversation metadata to a create request', async () => {
     const result = await run(
       { ...params, sessionId: 'ignored', expires_at: null },

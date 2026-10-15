@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { MEMORY_KI_TYPES } from '../../../common/memory';
+import { DEFAULT_MEMORY_EXPIRATION_DAYS, MEMORY_KI_TYPES } from '../../../common/memory';
 import {
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
@@ -33,6 +33,7 @@ const memoryTypeSchema = schema.oneOf(
 const ISO_DATE_TIME_WITH_OFFSET_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
+// The regex requires an explicit offset; strict Moment parsing additionally rejects invalid dates.
 const validateIsoDate = (value: string): string | undefined =>
   !ISO_DATE_TIME_WITH_OFFSET_PATTERN.test(value) ||
   !moment.parseZone(value, moment.ISO_8601, true).isValid()
@@ -72,8 +73,7 @@ export const memoryWriteBodySchema = schema.object({
         maxLength: 64,
         validate: validateIsoDate,
         meta: {
-          description:
-            'ISO 8601 expiry timestamp. On create, omit to expire after 90 days. On revision, omit to preserve the existing expiry. Pass null for a non-expiring memory.',
+          description: `ISO 8601 expiry timestamp. On create, omit to expire after ${DEFAULT_MEMORY_EXPIRATION_DAYS} days. On revision, omit to preserve the existing expiry. Pass null for a non-expiring memory.`,
         },
       })
     )

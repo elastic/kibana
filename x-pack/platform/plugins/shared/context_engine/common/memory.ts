@@ -6,6 +6,7 @@
  */
 
 export const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
+export const DEFAULT_MEMORY_EXPIRATION_DAYS = 90;
 
 export type MemoryType = (typeof MEMORY_KI_TYPES)[number];
 

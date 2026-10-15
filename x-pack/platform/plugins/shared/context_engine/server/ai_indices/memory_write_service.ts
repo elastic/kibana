@@ -11,8 +11,9 @@ import type { AuditLogger } from '@kbn/core-security-server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import type { MemoryType } from '../../common/memory';
-import { isMemoryType } from '../../common/memory';
+import { DEFAULT_MEMORY_EXPIRATION_DAYS, isMemoryType } from '../../common/memory';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import { MemoryAuditAction, memoryAuditEvent } from '../audit/audit_events';
 import type { AiIndexService } from './service';
 import { kiIdQuery, pickCurrentRevision, REVISION_TIE_WINDOW } from './ki_get';
@@ -20,7 +21,8 @@ import type { MemoryReference, MemoryWriter, StoredMemoryDocument } from './memo
 import { updateMemoryProvenance } from './memory_document';
 import { MemoryWriteError } from './memory_write_errors';
 
-const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
+const DEFAULT_MEMORY_EXPIRATION_MS = DEFAULT_MEMORY_EXPIRATION_DAYS * 24 * 60 * 60 * 1000;
+const DELETED_LIFECYCLE_STATUS: KiLifecycleStatus = 'deleted';
 
 export interface MemoryContent {
   type: MemoryType;
@@ -111,7 +113,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const existing = await this.getExistingMemory(aiIndex, request.aiIndexId, request.id);
 
-      if (existing.document.governance?.lifecycle?.status === 'deleted') {
+      if (existing.document.governance?.lifecycle?.status === DELETED_LIFECYCLE_STATUS) {
         throw new MemoryWriteError(
           'memory_deleted',
           `Memory '${request.id}' was deleted and cannot be revised.`
@@ -123,6 +125,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
           `Memory '${request.id}' has type '${existing.document.type}' and cannot be revised as '${request.type}'.`
         );
       }
+      this.assertIndexConcurrencyMetadata(aiIndex, existing, request.id);
 
       const sessionId =
         request.sessionId ??
@@ -134,16 +137,6 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         id: request.id,
         existingDocument: existing.document,
       });
-
-      if (
-        aiIndex.dest.type === 'index' &&
-        (existing.seqNo === undefined || existing.primaryTerm === undefined)
-      ) {
-        throw new MemoryWriteError(
-          'missing_concurrency_metadata',
-          `Memory '${request.id}' is missing concurrency metadata.`
-        );
-      }
 
       await this.deps.esClient.index({
         index: aiIndex.dest.type === 'index' ? existing.backingIndex : aiIndex.dest.value,
@@ -167,9 +160,10 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const existing = await this.getExistingMemory(aiIndex, request.aiIndexId, request.id);
 
-      if (existing.document.governance?.lifecycle?.status === 'deleted') {
+      if (existing.document.governance?.lifecycle?.status === DELETED_LIFECYCLE_STATUS) {
         return { id: request.id };
       }
+      this.assertIndexConcurrencyMetadata(aiIndex, existing, request.id);
 
       const currentDate = this.getCurrentDate();
       const now = currentDate.toISOString();
@@ -181,23 +175,15 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
             : existing.document['@timestamp'],
         updated_at: now,
         governance: {
-          ...updateMemoryProvenance(existing.document.governance, request.writer, false),
+          ...updateMemoryProvenance(existing.document.governance, request.writer, {
+            recordCreation: false,
+          }),
           lifecycle: {
             ...existing.document.governance?.lifecycle,
-            status: 'deleted',
+            status: DELETED_LIFECYCLE_STATUS,
           },
         },
       };
-
-      if (
-        aiIndex.dest.type === 'index' &&
-        (existing.seqNo === undefined || existing.primaryTerm === undefined)
-      ) {
-        throw new MemoryWriteError(
-          'missing_concurrency_metadata',
-          `Memory '${request.id}' is missing concurrency metadata.`
-        );
-      }
 
       await this.deps.esClient.index({
         index: aiIndex.dest.type === 'index' ? existing.backingIndex : aiIndex.dest.value,
@@ -261,6 +247,11 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     aiIndexId: string,
     id: string
   ): Promise<ExistingMemory> {
+    const query = {
+      bool: {
+        filter: [kiIdQuery(id), buildAiIndexSpaceFilter(this.deps.spaceId)],
+      },
+    };
     const response = await this.deps.esClient.search<StoredMemoryDocument>({
       index: aiIndex.dest.value,
       ignore_unavailable: true,
@@ -268,20 +259,12 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       allow_partial_search_results: false,
       ...(aiIndex.dest.type === 'data_stream'
         ? {
-            query: {
-              bool: {
-                filter: [kiIdQuery(id), buildAiIndexSpaceFilter(this.deps.spaceId)],
-              },
-            },
+            query,
             sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
             size: REVISION_TIE_WINDOW + 1,
           }
         : {
-            query: {
-              bool: {
-                filter: [kiIdQuery(id), buildAiIndexSpaceFilter(this.deps.spaceId)],
-              },
-            },
+            query,
             seq_no_primary_term: true,
             size: 2,
           }),
@@ -349,6 +332,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     ).toISOString();
     const { expires_at: _existingExpiresAt, ...existingFields } = existingDocument ?? {};
     const expiresAt = this.resolveExpiresAt(request.expiresAt, existingDocument, defaultExpiresAt);
+    const tags = request.tags ?? existingDocument?.tags;
 
     return {
       ...existingFields,
@@ -361,11 +345,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       title: request.title,
       description: request.description,
       content: request.content,
-      ...(request.tags !== undefined
-        ? { tags: request.tags }
-        : existingDocument?.tags !== undefined
-        ? { tags: existingDocument.tags }
-        : {}),
+      ...(tags !== undefined && { tags }),
       ...(expiresAt !== undefined && { expires_at: expiresAt }),
       updated_at: now,
       references: request.references ?? existingDocument?.references,
@@ -373,16 +353,30 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         ...existingDocument?.attributes,
         'memory.session_id': request.sessionId,
       },
-      governance: updateMemoryProvenance(
-        existingDocument?.governance,
-        request.writer,
-        existingDocument === undefined
-      ),
+      governance: updateMemoryProvenance(existingDocument?.governance, request.writer, {
+        recordCreation: existingDocument === undefined,
+      }),
     };
   }
 
   private getCurrentDate(): Date {
     return (this.deps.getCurrentDate ?? (() => new Date()))();
+  }
+
+  private assertIndexConcurrencyMetadata(
+    aiIndex: AiIndexHttpItem,
+    existing: ExistingMemory,
+    memoryId: string
+  ): void {
+    if (
+      aiIndex.dest.type === 'index' &&
+      (existing.seqNo === undefined || existing.primaryTerm === undefined)
+    ) {
+      throw new MemoryWriteError(
+        'missing_concurrency_metadata',
+        `Memory '${memoryId}' is missing concurrency metadata.`
+      );
+    }
   }
 
   private getExistingSessionId(existingDocument: StoredMemoryDocument): string | undefined {

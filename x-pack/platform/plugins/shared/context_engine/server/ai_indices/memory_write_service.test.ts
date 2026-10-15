@@ -344,6 +344,40 @@ describe('AiIndexMemoryWriteService', () => {
     expect(index.mock.calls[0][0].document).not.toHaveProperty('expires_at');
   });
 
+  it('allows expired memories to be revised or forgotten', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'physical-memory-id',
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              ...existingDocument,
+              expires_at: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        ],
+      },
+    });
+
+    await service.reviseMemory({ ...request, id: 'memory-1' });
+    await service.forgetMemory({
+      aiIndexId: 'support',
+      id: 'memory-1',
+      writer,
+    });
+
+    expect(index).toHaveBeenCalledTimes(2);
+    expect(index.mock.calls[0][0].document).toMatchObject({
+      expires_at: '2020-01-01T00:00:00.000Z',
+    });
+    expect(index.mock.calls[1][0].document).toMatchObject({
+      governance: { lifecycle: { status: 'deleted' } },
+    });
+  });
+
   it('generates a session when a revision omits it and the memory has none', async () => {
     search.mockResolvedValue({
       hits: {

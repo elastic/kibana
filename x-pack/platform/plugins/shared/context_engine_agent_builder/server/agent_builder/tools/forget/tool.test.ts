@@ -94,6 +94,25 @@ describe('forget tool', () => {
     });
   });
 
+  it('returns authorization failures without calling the service', async () => {
+    assertContextEngineWriteAccessMock.mockRejectedValue(
+      new Error('Insufficient privileges to update Context Engine AI indices.')
+    );
+
+    await expect(run()).resolves.toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              'Failed to forget memory: Insufficient privileges to update Context Engine AI indices.',
+          },
+        },
+      ],
+    });
+    expect(forgetMemory).not.toHaveBeenCalled();
+  });
+
   it('preserves the existing error result message', async () => {
     forgetMemory.mockRejectedValue(new Error("AI index 'support' does not have memory enabled."));
 

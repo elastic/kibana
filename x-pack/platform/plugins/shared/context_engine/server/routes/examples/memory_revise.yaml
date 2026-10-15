@@ -52,6 +52,12 @@ responses:
         examples:
           throttled:
             value: { statusCode: 429, error: Too Many Requests, message: Elasticsearch is temporarily unable to process the memory write. }
+  503:
+    content:
+      application/json:
+        examples:
+          unavailable:
+            value: { statusCode: 503, error: Service Unavailable, message: Elasticsearch is temporarily unavailable. }
 x-codeSamples:
   - lang: curl
     source: |

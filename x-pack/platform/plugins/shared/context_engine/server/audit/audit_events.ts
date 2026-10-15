@@ -71,15 +71,15 @@ export interface MemoryAuditEventParams {
 }
 
 const memoryActionVerbs: Record<MemoryAuditAction, [string, string]> = {
-  context_engine_memory_create: ['create', 'created'],
-  context_engine_memory_revise: ['revise', 'revised'],
-  context_engine_memory_delete: ['delete', 'deleted'],
+  [MemoryAuditAction.CREATE]: ['create', 'created'],
+  [MemoryAuditAction.REVISE]: ['revise', 'revised'],
+  [MemoryAuditAction.DELETE]: ['delete', 'deleted'],
 };
 
 const memoryEventTypes: Record<MemoryAuditAction, string> = {
-  context_engine_memory_create: 'creation',
-  context_engine_memory_revise: 'change',
-  context_engine_memory_delete: 'deletion',
+  [MemoryAuditAction.CREATE]: 'creation',
+  [MemoryAuditAction.REVISE]: 'change',
+  [MemoryAuditAction.DELETE]: 'deletion',
 };
 
 /** Audits a caller-scoped memory mutation. */

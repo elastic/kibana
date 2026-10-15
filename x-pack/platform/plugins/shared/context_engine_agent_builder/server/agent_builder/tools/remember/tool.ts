@@ -12,7 +12,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
+import {
+  DEFAULT_MEMORY_EXPIRATION_DAYS,
+  MEMORY_KI_TYPES,
+} from '@kbn/context-engine-plugin/common/memory';
 import {
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
@@ -78,7 +81,7 @@ const rememberSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. On create, omit for the default 90-day expiry. On revision, omit to preserve the existing expiry. Set to null to make the memory non-expiring.'
+      `ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. On create, omit for the default ${DEFAULT_MEMORY_EXPIRATION_DAYS}-day expiry. On revision, omit to preserve the existing expiry. Set to null to make the memory non-expiring.`
     ),
 });
 
@@ -118,9 +121,9 @@ export const createRememberTool = ({
     deliberately revising that memory. This tool handles session metadata, the conversation
     reference, and provenance server-side. For MCP calls, omit sessionId unless continuing with the
     sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
-    the current conversation ID. New memory expires after 90 days by default. Revisions preserve
-    expiry when expires_at is omitted; provide it to choose another time, or null to make the
-    memory non-expiring.
+    the current conversation ID. New memory expires after ${DEFAULT_MEMORY_EXPIRATION_DAYS} days
+    by default. Revisions preserve expiry when expires_at is omitted; provide it to choose another
+    time, or null to make the memory non-expiring.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
