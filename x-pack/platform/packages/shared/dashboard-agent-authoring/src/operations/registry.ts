@@ -72,7 +72,6 @@ export const prepareOperationExecution = async ({
     logger,
     failures,
     panelAuthoringNotes,
-    editedPanelIds: new Set(),
     resolvedPanelCreationRequests,
     sectionIdsByKey: new Map(),
     resolvePanelContent,

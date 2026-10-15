@@ -25,18 +25,42 @@ import {
   type Relayout,
 } from './types';
 
+const countLines = (content: string): number =>
+  content.split('\n').filter((line) => line.trim() !== '').length;
+
 /** The text size of a markdown panel, which its height depends on. */
-const describeMarkdownText = (content: string): string => {
-  const lineCount = content.split('\n').filter((line) => line.trim() !== '').length;
-  return `Markdown text of ${content.length} characters in ${lineCount} lines.`;
-};
+const describeMarkdownText = (content: string): string =>
+  `Markdown text of ${content.length} characters in ${countLines(content)} lines.`;
+
+/**
+ * What the size of a panel depends on: its chart type, or the rough text size of a markdown panel,
+ * so that small text edits keep the height.
+ */
+const getSizeSignature = ({ type, config }: AttachmentPanel): string =>
+  type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string'
+    ? `${type}:${countLines(config.content)}:${Math.round(config.content.length / 200)}`
+    : `${type}:${typeof config.type === 'string' ? config.type : ''}`;
+
+interface PlacedPanel {
+  panel: AttachmentPanel;
+  /** The section id, or null for a top-level panel. */
+  containerId: string | null;
+}
+
+const getPlacedPanels = (widgets: DashboardAttachmentData['panels']): PlacedPanel[] =>
+  widgets.flatMap((widget) =>
+    isSection(widget)
+      ? widget.panels.map((panel): PlacedPanel => ({ panel, containerId: widget.id }))
+      : [{ panel: widget, containerId: null }]
+  );
+
+const getSectionIds = (widgets: DashboardAttachmentData['panels']): string[] =>
+  widgets.filter(isSection).map(({ id }) => id);
 
 interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
   originalPanels: DashboardAttachmentData['panels'];
   dashboardData: DashboardAttachmentData;
-  /** Existing panels whose content was edited in this call. */
-  editedPanelIds: ReadonlySet<string>;
   panelAuthoringNotes: readonly PanelAuthoringNote[];
   /** The user's own arrangement or size request. */
   instructions?: string;
@@ -47,13 +71,15 @@ interface ArrangeLayoutParams {
 
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
- * panels changed or the user asked for a layout change. When the call fails, the dashboard keeps
- * its current layout, and a failure is reported if the user asked for a layout change.
+ * user asked for a layout change or a change since `originalPanels` affects the layout: a panel or
+ * section was added or removed, a panel moved to another container, or its chart type or markdown
+ * text size changed. Other edits, such as colors or queries, keep the layout without a model call.
+ * When the call fails, the dashboard keeps its current layout, and a failure is reported if the user
+ * asked for a layout change.
  */
 export const arrangeDashboardLayout = async ({
   originalPanels,
   dashboardData,
-  editedPanelIds,
   panelAuthoringNotes,
   instructions,
   arrangeLayout,
@@ -76,20 +102,9 @@ export const arrangeDashboardLayout = async ({
     reportUnappliedRequest('the dashboard has no panels');
     return dashboardData;
   }
-  if (
-    instructions === undefined &&
-    JSON.stringify(originalPanels) === JSON.stringify(dashboardData.panels)
-  ) {
-    return dashboardData;
-  }
 
-  // The section id of each original panel, or null for a top-level panel.
-  const originalContainerByPanelId = new Map<string, string | null>(
-    originalPanels.flatMap((widget) =>
-      isSection(widget)
-        ? widget.panels.map(({ id }): [string, string | null] => [id, widget.id])
-        : [[widget.id, null]]
-    )
+  const originalPanelsById = new Map(
+    getPlacedPanels(originalPanels).map((placedPanel) => [placedPanel.panel.id, placedPanel])
   );
   const authoringNotesByPanelId = new Map(
     panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
@@ -101,23 +116,36 @@ export const arrangeDashboardLayout = async ({
       ? describeMarkdownText(config.content)
       : undefined);
 
-  const getRelayout = (id: string, containerId: string | null): Relayout | undefined => {
-    const originalContainerId = originalContainerByPanelId.get(id);
-    if (originalContainerId === undefined) {
+  const getRelayout = ({ panel, containerId }: PlacedPanel): Relayout | undefined => {
+    const original = originalPanelsById.get(panel.id);
+    if (!original) {
       return 'all';
     }
-    const isMoved = originalContainerId !== containerId;
-    const isEdited = editedPanelIds.has(id);
+    const isMoved = original.containerId !== containerId;
+    const isResized = getSizeSignature(original.panel) !== getSizeSignature(panel);
     if (isMoved) {
-      return isEdited ? 'all' : 'position';
+      return isResized ? 'all' : 'position';
     }
-    return isEdited ? 'size' : undefined;
+    return isResized ? 'size' : undefined;
   };
+
+  const placedPanels = getPlacedPanels(dashboardData.panels);
+  const panelIds = new Set(placedPanels.map(({ panel }) => panel.id));
+  const sectionIds = getSectionIds(dashboardData.panels);
+  const originalSectionIds = getSectionIds(originalPanels);
+  const hasLayoutChange =
+    placedPanels.some((placedPanel) => getRelayout(placedPanel) !== undefined) ||
+    [...originalPanelsById.keys()].some((id) => !panelIds.has(id)) ||
+    sectionIds.length !== originalSectionIds.length ||
+    sectionIds.some((id) => !originalSectionIds.includes(id));
+  if (instructions === undefined && !hasLayoutChange) {
+    return dashboardData;
+  }
 
   const toLayoutPanel = (panel: AttachmentPanel, containerId: string | null): LayoutPanel => {
     const { id, type, config, grid } = panel;
     const authoringNote = getAuthoringNote(panel);
-    const relayout = getRelayout(id, containerId);
+    const relayout = getRelayout({ panel, containerId });
     return {
       id,
       type,

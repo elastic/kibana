@@ -16,10 +16,10 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { arrangeDashboardLayout } from './arrange_layout';
 import type { ArrangeDashboardLayout, LayoutArrangement } from './types';
 
-const createLensPanel = (id: string, y = 0): AttachmentPanel => ({
+const createLensPanel = (id: string, y = 0, chartType = 'metric'): AttachmentPanel => ({
   type: LENS_EMBEDDABLE_TYPE,
   id,
-  config: { type: 'metric', title: `Panel ${id}` },
+  config: { type: chartType, title: `Panel ${id}` },
   grid: { x: 0, y, w: 24, h: 9 },
 });
 
@@ -73,7 +73,6 @@ describe('arrangeDashboardLayout', () => {
     arrangeDashboardLayout({
       originalPanels: originalDashboardData.panels,
       dashboardData,
-      editedPanelIds: new Set(['existing']),
       panelAuthoringNotes: [{ panelId: 'new-panel', authoringNote: 'Shows total requests.' }],
       instructions,
       arrangeLayout,
@@ -81,13 +80,20 @@ describe('arrangeDashboardLayout', () => {
       logger,
     });
 
-  it('skips the layout call when the panels did not change and there is no layout request', async () => {
+  it('skips the layout call when no change affects the layout and there is no layout request', async () => {
     const arrangeLayout = jest.fn();
+    const dashboardWithRetitledPanel: DashboardAttachmentData = {
+      ...originalDashboardData,
+      panels: [
+        { ...createLensPanel('existing'), config: { type: 'metric', title: 'Renamed' } },
+        originalDashboardData.panels[1],
+      ],
+    };
 
-    const result = await arrange(arrangeLayout, { dashboardData: originalDashboardData });
+    const result = await arrange(arrangeLayout, { dashboardData: dashboardWithRetitledPanel });
 
     expect(arrangeLayout).not.toHaveBeenCalled();
-    expect(result).toBe(originalDashboardData);
+    expect(result).toBe(dashboardWithRetitledPanel);
   });
 
   it('calls the layout for unchanged panels when there is a layout request', async () => {
@@ -117,7 +123,13 @@ describe('arrangeDashboardLayout', () => {
 
     expect(arrangeLayout).toHaveBeenCalledWith({
       panels: [
-        expect.objectContaining({ id: 'existing', relayout: 'size' }),
+        {
+          id: 'existing',
+          type: LENS_EMBEDDABLE_TYPE,
+          chartType: 'metric',
+          title: 'Panel existing',
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
         expect.objectContaining({
           id: 'new-panel',
           chartType: 'metric',
@@ -147,14 +159,14 @@ describe('arrangeDashboardLayout', () => {
     expect(reportFailure).not.toHaveBeenCalled();
   });
 
-  it('sets relayout to position for moved panels, and to all for moved and edited ones', async () => {
+  it('sets relayout to position for moved panels, and to all for moved ones with a new chart type', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
     const dashboardWithMovedPanels: DashboardAttachmentData = {
       ...originalDashboardData,
       panels: [
         createLensPanel('inner'),
         createLensPanel('new-panel', 9),
-        createSection('section-a', 18, [createLensPanel('existing')]),
+        createSection('section-a', 18, [createLensPanel('existing', 0, 'xy')]),
       ],
     };
 

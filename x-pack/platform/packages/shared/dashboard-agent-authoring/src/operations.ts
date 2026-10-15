@@ -55,8 +55,6 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
-  /** Existing panels whose content was edited and kept. */
-  editedPanelIds: ReadonlySet<string>;
 }> => {
   const originalDashboardData = structuredClone(
     dashboardData ?? {
@@ -89,12 +87,7 @@ export const executeDashboardOperations = async ({
   }
 
   if (!validator) {
-    return {
-      dashboardData: nextDashboardData,
-      failures,
-      panelAuthoringNotes,
-      editedPanelIds: context.editedPanelIds,
-    };
+    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
   }
 
   const validationResult = discardInvalidChanges({
@@ -103,11 +96,11 @@ export const executeDashboardOperations = async ({
     validator,
   });
 
-  const isKept = (panelId: string) => !validationResult.discardedPanelIds.has(panelId);
   return {
     dashboardData: validationResult.dashboardData,
     failures: [...failures, ...validationResult.failures],
-    panelAuthoringNotes: panelAuthoringNotes.filter(({ panelId }) => isKept(panelId)),
-    editedPanelIds: new Set([...context.editedPanelIds].filter(isKept)),
+    panelAuthoringNotes: panelAuthoringNotes.filter(
+      ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
+    ),
   };
 };

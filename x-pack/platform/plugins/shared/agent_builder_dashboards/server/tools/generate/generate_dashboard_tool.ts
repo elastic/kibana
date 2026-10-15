@@ -165,7 +165,6 @@ Panel positions and sizes are set automatically after the operations run. Set \`
           dashboardData: validatedDashboardData,
           failures,
           panelAuthoringNotes,
-          editedPanelIds,
         } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
@@ -187,7 +186,6 @@ Panel positions and sizes are set automatically after the operations run. Set \`
         const generatedDashboardData = await arrangeDashboardLayout({
           originalPanels: latestVersion?.data.panels ?? [],
           dashboardData: validatedDashboardData,
-          editedPanelIds,
           panelAuthoringNotes,
           instructions: layout,
           arrangeLayout: createLayoutArranger({ modelProvider }),

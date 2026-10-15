@@ -25,9 +25,10 @@ export interface LayoutPanel {
 }
 
 /**
- * `all` for a panel added in this call, or moved and edited; `position` for a panel moved to
- * another container, which keeps its size but not its temporary position; `size` for a panel
- * whose content was edited, which keeps its position.
+ * `all` for a panel added in this call, or moved with a new chart type or markdown text size;
+ * `position` for a panel moved to another container, which keeps its size but not its temporary
+ * position; `size` for a panel whose chart type or markdown text size changed, which keeps its
+ * position.
  */
 export type Relayout = 'all' | 'position' | 'size';
 

@@ -205,7 +205,6 @@ export const editPanelsOperation = defineOperation({
       }
 
       nextDashboardData = updateResult.dashboardData;
-      context.editedPanelIds.add(panelId);
       if (authoringNote) {
         context.panelAuthoringNotes.push({ panelId, authoringNote });
       }

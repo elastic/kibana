@@ -15,9 +15,9 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 1. The user's request in \`instructions\`, when given. It may override the sizes below.
 2. Stability: a panel without \`relayout\` keeps its position and size unless something changed around it (a panel with \`relayout\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged it by hand. A panel with \`relayout\` changes only what it names:
-   - \`all\`: new, or moved and edited. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
+   - \`all\`: new, or moved with a new chart type or text size. Its \`grid\` is a temporary placeholder: place it, and take \`w\` and \`h\` from *Sizes by chart type*, not from \`grid\`.
    - \`position\`: moved to another section or the top level. Place it and keep its size.
-   - \`size\`: content edited. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
+   - \`size\`: chart type or markdown text size changed. Keep its position, and take \`w\` and \`h\` from *Sizes by chart type*, not from its old \`grid\`.
 3. No gaps and no overlaps.
 4. Sizes by chart type. These decide \`w\` and \`h\` for every panel with \`relayout: all\` or \`relayout: size\`.
 
