@@ -389,6 +389,7 @@ export class NightshiftInvestigationsClient {
     connector_id,
     context = {},
     notificationDestinations,
+    external_conversation_id: externalConversationId,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
@@ -485,6 +486,9 @@ export class NightshiftInvestigationsClient {
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
       subjects: newSubjects,
+      ...(externalConversationId
+        ? { origin_external_conversation_id: externalConversationId }
+        : {}),
       ...(parsedNotificationDestinations?.length
         ? { notificationDestinations: parsedNotificationDestinations }
         : {}),
@@ -506,7 +510,12 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!isFollowUp) {
-      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
+      await this.createAcceptedInvestigation({
+        conversations,
+        investigationId,
+        executionId,
+        externalConversationId,
+      });
     }
 
     this.logger.info(
@@ -531,15 +540,19 @@ export class NightshiftInvestigationsClient {
     conversations,
     investigationId,
     executionId,
+    externalConversationId,
   }: {
     conversations: ConversationPublicClient;
     investigationId: string;
     executionId: string;
+    externalConversationId?: string;
   }): Promise<void> {
     try {
       const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
+        externalConversationId,
+        logger: this.logger,
       });
       if (!workflowExecutionIds.includes(executionId)) {
         await conversations.patchMetadata(investigationId, {
@@ -706,6 +719,8 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      externalConversationId: asString(inputs?.origin_external_conversation_id),
+      logger: this.logger,
     });
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);

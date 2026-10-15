@@ -67,6 +67,13 @@ const inputSchema = z.object({
     .describe(
       'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
     ),
+  external_conversation_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      'The external thread the investigation is about, such as the Slack Relay thread id. A later message in that thread continues the investigation. An empty value is ignored.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -103,6 +110,7 @@ export const triggerInvestigationStepDefinition = (
         source_ids: input.source_ids,
         context: input.context,
         notificationDestinations: input.notificationDestinations,
+        external_conversation_id: input.external_conversation_id || undefined,
       });
       return { output: result };
     },

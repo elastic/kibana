@@ -8,6 +8,7 @@
 import {
   agentBuilderDefaultAgentId,
   createConversationAlreadyExistsError,
+  createConversationOriginConflictError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationWriteSource } from '@kbn/agent-builder-common';
@@ -44,13 +45,18 @@ export const createConversationPublicClient = ({
     search: client.search.bind(client),
     addEvents: ({ conversationId, events }) =>
       client.addCustomEvents({ id: conversationId, events }, { source }),
-    create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
+    create: async ({ agentId, id, title, accessControl, templateId, metadata, origin }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       await agentRegistry.get(effectiveAgentId, { access: 'use' });
 
       if (id && (await client.exists(id))) {
         throw createConversationAlreadyExistsError({ conversationId: id });
+      }
+
+      const originHolderId = origin ? await client.findIdByOrigin(origin) : undefined;
+      if (originHolderId) {
+        throw createConversationOriginConflictError({ conversationId: originHolderId });
       }
 
       const now = new Date().toISOString();
@@ -70,6 +76,9 @@ export const createConversationPublicClient = ({
             : undefined,
           template_id: templateId,
           metadata,
+          ...(origin
+            ? { origin: { external_conversation_id: origin.external_conversation_id } }
+            : {}),
           rounds: [],
         },
         { source }

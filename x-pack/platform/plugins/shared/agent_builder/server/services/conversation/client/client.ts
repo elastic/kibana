@@ -46,7 +46,6 @@ import {
   isAgentNotFoundError,
   isAgentUnavailableError,
   isAttachmentEvent,
-  isConversationNotFoundError,
   isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
 import type {
@@ -139,6 +138,9 @@ type ConversationWriteEmission =
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
+  /** The id of the conversation in this space with the given origin, without an access check. */
+  findIdByOrigin(origin: ConversationOrigin): Promise<string | undefined>;
+  /** The conversation with the given origin; throws when the caller cannot converse in it. */
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
@@ -674,12 +676,12 @@ class ConversationClientImpl implements ConversationClient {
     return document !== undefined;
   }
 
-  async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
+  async findIdByOrigin(origin: ConversationOrigin): Promise<string | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
-      seq_no_primary_term: true,
+      _source: false,
       query: {
         bool: {
           filter: [
@@ -690,33 +692,25 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0];
+    return response.hits.hits[0]?._id;
+  }
 
-    if (!hit) {
+  async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
+    const conversationId = await this.findIdByOrigin(origin);
+
+    if (!conversationId) {
       return undefined;
     }
 
-    if (!isConversationDocument(hit)) {
-      throw createInternalError('Conversation origin search returned an incomplete hit');
-    }
+    // The thread is bound to this conversation, so a caller who cannot converse in it gets an
+    // error rather than a second conversation for the same thread.
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    try {
-      const document = await this.getDocumentWithAccess({
-        conversationId: hit._id,
-        access: 'converse',
-      });
-
-      return toConversationResponseFromDocument({
-        document,
-        user: this.getUser(),
-        resolveTemplate: getTemplate,
-      });
-    } catch (error) {
-      if (isConversationNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
-    }
+    return toConversationResponseFromDocument({
+      document,
+      user: this.getUser(),
+      resolveTemplate: getTemplate,
+    });
   }
 
   async create(

@@ -1379,6 +1379,53 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    describe('a conversation resolved by origin', () => {
+      const origin = {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'thread-1',
+      };
+      const boundConversation = createEmptyConversation({
+        id: 'investigation-1',
+        agent_id: 'investigation-agent',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        origin: { external_conversation_id: 'thread-1' },
+      });
+
+      it("runs on the conversation's stored agent instead of the requested one", async () => {
+        conversationClient.getByOrigin.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('investigation-agent');
+        expect(agentParams).toMatchObject({
+          agentId: 'investigation-agent',
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
+      it('keeps the requested agent when the request names the conversation', async () => {
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: 'investigation-1', origin });
+
+        const [{ agentId }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
+      });
+
+      it('keeps the requested agent when no conversation has the origin', async () => {
+        conversationClient.getByOrigin.mockResolvedValueOnce(undefined);
+
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({ agentId: 'agent-1', conversationOperation: 'CREATE' });
+      });
+    });
+
     it('writes nothing to an existing conversation it does not store, and records the run as such', async () => {
       await converse({ storeConversation: false });
 

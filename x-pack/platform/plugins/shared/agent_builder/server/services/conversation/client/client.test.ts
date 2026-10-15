@@ -1398,7 +1398,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          seq_no_primary_term: true,
+          _source: false,
           query: {
             bool: {
               filter: [
@@ -1414,6 +1414,41 @@ describe('ConversationClient', () => {
           },
         })
       );
+    });
+
+    it('returns undefined when no conversation has the origin', async () => {
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
+
+      const result = await client.getByOrigin({ external_conversation_id: 'thread-1' });
+
+      expect(result).toBeUndefined();
+      expect(mockRawEsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('throws instead of returning undefined when the caller cannot converse in it', async () => {
+      const document = createConversationDocument({
+        userId: 'other-user-id',
+        username: 'other-user',
+      });
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [document] } });
+      mockGetDocumentResponseOnce(document);
+
+      await expect(client.getByOrigin({ external_conversation_id: 'thread-1' })).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+  });
+
+  describe('findIdByOrigin', () => {
+    it('returns the id of the conversation with the origin, without an access check', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'conversation-2', _index: TEST_CONVERSATION_INDEX }] },
+      });
+
+      const result = await client.findIdByOrigin({ external_conversation_id: 'thread-1' });
+
+      expect(result).toBe('conversation-2');
+      expect(mockRawEsClient.get).not.toHaveBeenCalled();
     });
   });
 

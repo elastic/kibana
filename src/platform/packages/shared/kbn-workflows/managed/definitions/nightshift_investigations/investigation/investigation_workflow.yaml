@@ -91,6 +91,13 @@ triggers:
           description: >
             The investigation (Agent Builder conversation) to run in. The start API always sets
             it; a run without it starts a new investigation whose id is the workflow execution ID.
+        origin_external_conversation_id:
+          type: string
+          maxLength: 500
+          description: >
+            The external conversation the investigation is about, as its source identifies it.
+            A new investigation's conversation is created with it as its origin, so a later
+            message in that external conversation continues the investigation.
       required:
         - message
       additionalProperties: false

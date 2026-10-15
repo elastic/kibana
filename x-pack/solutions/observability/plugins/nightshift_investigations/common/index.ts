@@ -70,6 +70,12 @@ export interface StartInvestigationRequest {
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
+  /**
+   * The external thread the investigation is about, such as the Relay's id for a Slack thread.
+   * A new investigation's conversation is created with it as its origin, so a later mention in
+   * that thread continues the investigation.
+   */
+  external_conversation_id?: string;
 }
 
 export interface StartInvestigationResponse {

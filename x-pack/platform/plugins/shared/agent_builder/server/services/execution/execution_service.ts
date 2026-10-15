@@ -159,6 +159,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
 
+    // A conversation found by the request's origin (an external thread) continues on its own agent.
+    const resolvedByOrigin =
+      conversation?.operation === 'UPDATE' &&
+      conversationParams?.origin !== undefined &&
+      !conversationParams.conversationId;
+    const runAgentId = resolvedByOrigin ? conversation.agent_id : agentId;
+
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
@@ -167,7 +174,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       execution = await executionClient.create({
         executionMode: mode,
         executionId,
-        agentId,
+        agentId: runAgentId,
         spaceId,
         owner: {
           id: owner.id,
@@ -178,6 +185,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           conversationParams && conversation
             ? {
                 ...conversationParams,
+                agentId: runAgentId,
                 // The conversation is resolved, and created when it was new, before the run is
                 // dispatched — so the run reads it rather than resolving it again.
                 conversationId: conversation.id,
@@ -282,7 +290,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const result = useScheduledTask
       ? await this.executeWithScheduledTask({
           executionId,
-          agentId,
+          agentId: runAgentId,
           request,
           requestImmediateClaim,
         })

@@ -17,6 +17,7 @@ import type {
   ConversationListResult,
   MetadataFieldValue,
   ConversationAddEventInput,
+  ConversationOrigin,
 } from '@kbn/agent-builder-common';
 
 /** Request for adding events to a conversation. */
@@ -45,6 +46,12 @@ export interface ConversationCreatePublicRequest {
    * Initial metadata values. Requires `templateId`.
    */
   metadata?: Record<string, MetadataFieldValue>;
+  /**
+   * The external thread this conversation continues, for example a Slack thread. A converse
+   * request with the same origin and no conversation id continues this conversation. Rejected
+   * with a conflict when another conversation in the space already has it.
+   */
+  origin?: ConversationOrigin;
 }
 
 /**

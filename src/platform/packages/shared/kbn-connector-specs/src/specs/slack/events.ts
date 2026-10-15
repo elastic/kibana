@@ -60,6 +60,9 @@ const SlackMessageEventSchema = lazySchema(() =>
       .describe('Message text, when Slack includes it.'),
     subtype: optionalSlackId('Slack message subtype, such as bot_message, when present.'),
     botId: optionalSlackId('Bot id when the message was sent by a bot.'),
+    externalConversationId: optionalSlackId(
+      'Opaque thread id assigned by the Relay, when the event was forwarded by it.'
+    ),
   })
 );
 
@@ -437,8 +440,17 @@ const parseSlackCallback = (
   }
 
   const eventId = readBoundedString(envelope.event_id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH);
+  const relay = nestedRecord(envelope, 'relay');
+  const externalConversationId =
+    relay && parsed.eventId === SLACK_MESSAGE_EVENT_ID
+      ? readId(nestedRecord(relay, 'origin')?.external_conversation_id)
+      : undefined;
   return {
     ...parsed,
+    payload:
+      externalConversationId === undefined
+        ? parsed.payload
+        : { ...parsed.payload, externalConversationId },
     correlationKey: eventId ?? uuidv4(),
   };
 };

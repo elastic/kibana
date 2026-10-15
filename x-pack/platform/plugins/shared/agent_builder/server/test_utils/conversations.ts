@@ -61,6 +61,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
   return {
     get: jest.fn(),
     exists: jest.fn(),
+    findIdByOrigin: jest.fn(),
     getByOrigin: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),

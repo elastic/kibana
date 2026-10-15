@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import {
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
+  isConversationOriginConflictError,
 } from '@kbn/agent-builder-common';
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
@@ -96,12 +98,61 @@ export const findInvestigationConversation = async (
  * The conversation is created without a title, so Agent Builder stores its placeholder and
  * generates the title from the investigation's first round.
  */
-export const getOrCreateInvestigationConversation = async ({
+/**
+ * Creates the investigation's conversation with the external thread as its origin, so a later
+ * message in that thread continues it. When another conversation already has that thread, the
+ * investigation is created without it.
+ */
+const createInvestigationConversation = async ({
   conversations,
   id,
+  externalConversationId,
+  logger,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  externalConversationId?: string;
+  logger?: Logger;
+}) => {
+  const request = {
+    id,
+    agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+    templateId: INVESTIGATION_TEMPLATE_ID,
+    accessControl: { access_mode: ConversationAccessControlMode.Public },
+  };
+
+  if (!externalConversationId) {
+    return conversations.create(request);
+  }
+
+  try {
+    return await conversations.create({
+      ...request,
+      origin: { external_conversation_id: externalConversationId },
+    });
+  } catch (error) {
+    if (!isConversationOriginConflictError(error)) {
+      throw error;
+    }
+
+    logger?.warn(
+      `Conversation "${error.meta.conversationId}" already continues the thread of investigation "${id}"; creating the investigation without it`
+    );
+    return conversations.create(request);
+  }
+};
+
+export const getOrCreateInvestigationConversation = async ({
+  conversations,
+  id,
+  externalConversationId,
+  logger,
+}: {
+  conversations: ConversationPublicClient;
+  id: string;
+  /** The external thread a new conversation continues; ignored when the conversation exists. */
+  externalConversationId?: string;
+  logger?: Logger;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -109,11 +160,11 @@ export const getOrCreateInvestigationConversation = async ({
   }
 
   try {
-    const created = await conversations.create({
+    const created = await createInvestigationConversation({
+      conversations,
       id,
-      agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-      templateId: INVESTIGATION_TEMPLATE_ID,
-      accessControl: { access_mode: ConversationAccessControlMode.Public },
+      externalConversationId,
+      logger,
     });
     return toInvestigationConversation(created, true);
   } catch (error) {

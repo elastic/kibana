@@ -385,13 +385,21 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('trigger_investigation step', () => {
-      it('investigates a manual subject keyed by the message', () => {
+      it('investigates a manual subject keyed by the message, bound to its Relay thread', () => {
         const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
         expect(yaml.steps[0].with).toMatchObject({
           subject_type: 'manual',
           subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
           title: 'Test automation',
+          external_conversation_id: '{{ event.externalConversationId }}',
         });
+      });
+
+      it('does not bind an alert investigation to a thread', () => {
+        const automation = baseAutomation();
+        automation.trigger.rows = [{ kind: 'alert' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with).not.toHaveProperty('external_conversation_id');
       });
 
       it('puts the slack message in the prompt after the prompt template', () => {

@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
+  createConversationOriginConflictError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -984,6 +985,44 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     );
   });
 
+  it('creates the conversation of a new investigation with its external thread as origin', async () => {
+    await expect(
+      makeClient().start({
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: { alerts: [makeAlert('alert-1')] },
+        external_conversation_id: 'relay-thread-1',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(runInputs()).toMatchObject({ origin_external_conversation_id: 'relay-thread-1' });
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inv-new',
+        origin: { external_conversation_id: 'relay-thread-1' },
+      })
+    );
+  });
+
+  it('creates the conversation without the thread when another conversation continues it', async () => {
+    conversations.create.mockRejectedValueOnce(
+      createConversationOriginConflictError({ conversationId: 'conv-plain' })
+    );
+
+    await expect(
+      makeClient().start({
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: { alerts: [makeAlert('alert-1')] },
+        external_conversation_id: 'relay-thread-1',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(conversations.create).toHaveBeenCalledTimes(2);
+    expect(conversations.create.mock.calls[1][0]).not.toHaveProperty('origin');
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('conv-plain'));
+  });
+
   it('does not record the run again when the workflow created the conversation first', async () => {
     withConversations(makeConversation({ id: 'inv-new', workflowExecutionIds: ['exec-1'] }));
 
@@ -1278,6 +1317,25 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
       workflow_execution_ids: ['exec-1'],
     });
+  });
+
+  it("creates the conversation with the run's external thread as origin", async () => {
+    withExecution({
+      inputs: {
+        investigation_id: 'inv-1',
+        subjects,
+        origin_external_conversation_id: 'relay-thread-1',
+      },
+    });
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inv-1',
+        origin: { external_conversation_id: 'relay-thread-1' },
+      })
+    );
   });
 
   it('appends the run to the runs an investigation already records, once', async () => {

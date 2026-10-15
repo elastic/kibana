@@ -9,6 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   isConversationAlreadyExistsError,
+  isConversationOriginConflictError,
   ConversationAccessControlMode,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -154,6 +155,37 @@ describe('createConversationPublicClient', () => {
       await publicClient.create({});
 
       expect(internalClient.exists).not.toHaveBeenCalled();
+    });
+
+    it('stores the origin when no other conversation has it', async () => {
+      internalClient.findIdByOrigin.mockResolvedValue(undefined);
+
+      await publicClient.create({ id: 'conv-1', origin: { external_conversation_id: 'thread-1' } });
+
+      expect(internalClient.findIdByOrigin).toHaveBeenCalledWith({
+        external_conversation_id: 'thread-1',
+      });
+      expect(internalClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ origin: { external_conversation_id: 'thread-1' } }),
+        { source: 'server_api' }
+      );
+    });
+
+    it('throws conversationOriginConflict when another conversation has the origin', async () => {
+      internalClient.findIdByOrigin.mockResolvedValue('conv-2');
+
+      const err = await publicClient
+        .create({ id: 'conv-1', origin: { external_conversation_id: 'thread-1' } })
+        .catch((e: unknown) => e);
+
+      expect(isConversationOriginConflictError(err)).toBe(true);
+      expect(internalClient.create).not.toHaveBeenCalled();
+    });
+
+    it('skips the origin check when no origin is provided', async () => {
+      await publicClient.create({});
+
+      expect(internalClient.findIdByOrigin).not.toHaveBeenCalled();
     });
   });
 

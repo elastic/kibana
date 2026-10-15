@@ -132,6 +132,40 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ notificationDestinations }));
   });
 
+  it('forwards the external thread id to the client', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({
+        subject_type: 'manual',
+        subject_id: 'connector-1:C1:1700000000.000100',
+        external_conversation_id: 'relay-thread-1',
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ external_conversation_id: 'relay-thread-1' })
+    );
+  });
+
+  it('ignores an empty external thread id, as rendered without the Relay', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({
+        subject_type: 'manual',
+        subject_id: 'connector-1:C1:1700000000.000100',
+        external_conversation_id: '',
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ external_conversation_id: undefined })
+    );
+  });
+
   it('rejects a destination without a connector or channel', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);

@@ -25,6 +25,7 @@ export enum AgentBuilderErrorCode {
   conversationNotFound = 'conversationNotFound',
   conversationWriteConflict = 'conversationWriteConflict',
   conversationAlreadyExists = 'conversationAlreadyExists',
+  conversationOriginConflict = 'conversationOriginConflict',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -361,6 +362,35 @@ export const createConversationAlreadyExistsError = ({
   return new AgentBuilderError(
     AgentBuilderErrorCode.conversationAlreadyExists,
     `Conversation ${conversationId} already exists`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when another conversation already has the given external origin.
+ */
+export type AgentBuilderConversationOriginConflictError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationOriginConflict>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationOriginConflictError}
+ */
+export const isConversationOriginConflictError = (
+  err: unknown
+): err is AgentBuilderConversationOriginConflictError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationOriginConflict;
+};
+
+export const createConversationOriginConflictError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderConversationOriginConflictError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationOriginConflict,
+    `Conversation ${conversationId} already has this origin`,
     { ...meta, conversationId, statusCode: 409 }
   );
 };

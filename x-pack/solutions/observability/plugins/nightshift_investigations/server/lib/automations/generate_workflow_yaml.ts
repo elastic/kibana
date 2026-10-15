@@ -180,7 +180,14 @@ function buildInvestigationStep(
     type: 'nightshift.triggerInvestigation',
     with: {
       ...(kind === 'slack'
-        ? { subject_type: 'manual', subject_id: SLACK_SUBJECT_ID, title: automation.name }
+        ? {
+            subject_type: 'manual',
+            subject_id: SLACK_SUBJECT_ID,
+            title: automation.name,
+            // The Relay's id for the message's thread, so a mention in that thread continues the
+            // investigation. Empty without the Relay, which the step ignores.
+            external_conversation_id: '{{ event.externalConversationId }}',
+          }
         : {
             subject_type: 'alert',
             subject_id: hasAlertRows ? '{{ trigger.alert.uuid }}' : automationId,
