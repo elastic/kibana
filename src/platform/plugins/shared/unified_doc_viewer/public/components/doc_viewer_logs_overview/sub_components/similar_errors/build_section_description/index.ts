@@ -19,6 +19,7 @@ export interface BuildSectionDescriptionParams {
   culprit?: FieldInfo;
   message?: FieldInfo;
   type?: FieldInfo;
+  level?: FieldInfo;
   groupingName?: FieldInfo;
 }
 
@@ -27,9 +28,17 @@ export function buildSectionDescription({
   culprit,
   message,
   type,
+  level,
   groupingName,
 }: BuildSectionDescriptionParams): string | undefined {
-  const fields: (FieldInfo | undefined)[] = [serviceName, culprit, message, type, groupingName];
+  const fields: (FieldInfo | undefined)[] = [
+    serviceName,
+    culprit,
+    message,
+    type,
+    level,
+    groupingName,
+  ];
   const fieldsWithValues = fields.filter((field) => field?.value).map((field) => field?.field);
 
   if (fieldsWithValues.length === 0) {

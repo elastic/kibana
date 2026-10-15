@@ -43,6 +43,7 @@ import {
   useOverviewActivityStats,
 } from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { BrowserCompleteAgentOverviewCallout } from '../../common/components/browser_complete_agent_overview_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { LastRefreshed } from '../../common/components/last_refreshed';
@@ -168,6 +169,7 @@ export const OverviewPage: React.FC = () => {
       }
     >
       <DisabledCallout total={absoluteTotal} />
+      <BrowserCompleteAgentOverviewCallout />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>

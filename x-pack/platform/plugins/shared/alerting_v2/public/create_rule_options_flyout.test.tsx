@@ -85,6 +85,20 @@ jest.mock('./hooks/use_create_action_policy_disabled_reason', () => ({
   useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  ...jest.requireActual('@kbn/core-di-browser'),
+  useService: () => ({}),
+}));
+
+jest.mock('./application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    actionPolicyLocators: {
+      getRedirectUrl: ({ actionPolicyId }: { actionPolicyId: string }) =>
+        `/app/observability/alerting/action-policies/edit/${actionPolicyId}`,
+    },
+  }),
+}));
+
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
 const pendingResolvers: Array<(services: AlertingV2KibanaServices) => void> = [];
@@ -173,6 +187,9 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(
         (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
       ).toBe(disabledReason);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).getActionPolicyEditHref!('ap-1')
+      ).toBe('/app/observability/alerting/action-policies/edit/ap-1');
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {

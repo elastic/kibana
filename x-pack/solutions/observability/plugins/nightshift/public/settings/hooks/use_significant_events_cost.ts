@@ -10,7 +10,7 @@ import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { CostResponse } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 import { useRunQuotas } from './use_significant_events_run_quotas';
 
 export const NIGHTSHIFT_COST_QUERY_KEY = ['nightshiftCost'] as const;

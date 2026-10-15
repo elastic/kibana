@@ -38,6 +38,7 @@ const capabilities = (): PolicyChangeCapabilities => ({
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  linuxRansomwareProtection: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -173,8 +174,8 @@ const createOversizedWindowsAdvancedResidualResult = () => {
 
   const returnedNormalized = createNormalizedPolicy(returned);
   const residual = diffPolicyConfig(
-    normalize(assessment.proposedConfig),
-    returnedNormalized.normalizedConfig
+    assessment.proposed,
+    normalize(returnedNormalized.normalizedConfig)
   );
   const identity = {
     id: normalized.snapshot.identity.id,
@@ -283,19 +284,17 @@ describe('presentApplyPolicyChangeResult', () => {
     expect(presented).not.toHaveProperty('requested_changes_value_truncated');
     expect(presented).not.toHaveProperty('residual_value_truncated');
   });
-  it('drops an oversized schema-backed windows.advanced residual that misses the guarded envelope', () => {
+  it('trims an oversized schema-backed windows.advanced residual to fit the guarded envelope', () => {
     const { assessment, residual, result } = createOversizedWindowsAdvancedResidualResult();
-    const residualEntry = residual[0];
-    if (residualEntry === undefined) {
-      throw new Error('expected a windows.advanced residual row from the schema-backed return');
+    if (residual.length === 0) {
+      throw new Error('expected windows.advanced residual rows from the schema-backed return');
     }
-    expect(residual).toHaveLength(1);
-    expect(residualEntry.path).toBe('windows.advanced');
+    expect(residual.every((entry) => entry.path.startsWith('windows.advanced.'))).toBe(true);
 
     const presentedWithoutResidual = presentApplyPolicyChangeResult({ ...result, residual: [] });
     const fullCandidate = {
       ...presentedWithoutResidual,
-      residual: [presentResidualWithNulls(residualEntry)],
+      residual: residual.map(presentResidualWithNulls),
     };
     const fullCandidateTokens = estimateGuardedEnvelopeTokens(fullCandidate);
     expect(fitsGuardedEnvelope(fullCandidate, APPLY_POLICY_CHANGE_MAX_RESULT_TOKENS)).toBe(false);
@@ -321,7 +320,8 @@ describe('presentApplyPolicyChangeResult', () => {
       version: result.after.version,
     });
     expect(presented.enrollment).toEqual(ENROLLMENT);
-    expect(presented.residual).toEqual([]);
+    expect(presented.residual.length).toBeGreaterThan(0);
+    expect(presented.residual.length).toBeLessThan(residual.length);
     expect(presented.residual_value_truncated).toBe(true);
     expect(presented.residual_value_total).toBe(residual.length);
     expect(presented.requestedChanges).toEqual([]);

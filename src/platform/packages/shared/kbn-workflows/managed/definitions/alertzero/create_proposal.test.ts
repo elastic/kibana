@@ -167,6 +167,18 @@ describe('AlertZero create proposal bridge', () => {
     });
   });
 
+  describe('proposalId', () => {
+    it('accepts it as an optional input and forwards it to the gate', () => {
+      expect(propertiesOf(bridge)).toHaveProperty('proposalId');
+      expect(forwardedInputs().proposalId).toBe('${{ inputs.proposalId }}');
+    });
+
+    it('does not require it, so every existing caller is unaffected', () => {
+      const required = bridge.triggers.find(({ type }) => type === 'manual')?.inputs?.required;
+      expect(required).not.toContain('proposalId');
+    });
+  });
+
   describe('output parity with the gate', () => {
     // Callers read `steps.<step>.output.decision` and friends off this workflow.
     // Dropping one leaves those expressions undefined, which is falsy rather

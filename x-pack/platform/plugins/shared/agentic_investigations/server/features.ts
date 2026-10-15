@@ -81,8 +81,8 @@ export const registerFeatures = ({
     privileges: {
       all: {
         app: [],
-        // Reading investigations comes with both base privileges. Writes use the
-        // investigations sub-feature below, which `includeIn: 'all'` joins here.
+        // Reading investigations (the query API) comes with both base privileges. Writes use
+        // the investigations sub-feature below, which `includeIn: 'all'` joins here.
         api: [INVESTIGATIONS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
         ui: [],

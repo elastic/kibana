@@ -26,7 +26,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ProposedActionButton } from '@kbn/agentic-investigations-common';
+import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
 import { useCurrentUserProfile } from '../../../user_profiles';
 import { decisionErrorMessage } from './decision_errors';
 import {
@@ -137,7 +137,8 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   // Deduplicated because the pages are offset windows over a list a decision can move rows
-  // within: a proposal decided between two fetches shifts everything after it up.
+  // within: a proposal decided between two fetches shifts everything after it up. The API
+  // returns them newest first, so a retry sits above the failed attempt it replaced.
   const proposals = [
     ...new Map(
       (data?.pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])
@@ -154,16 +155,20 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {proposals.map((proposal) => (
-        <ProposedActionRow
-          key={proposal.id}
-          proposal={proposal}
-          currentActorName={currentActorName}
-          onDecisionError={onDecisionError}
-          approve={approve}
-          dismiss={dismiss}
-        />
-      ))}
+      <EuiFlexItem>
+        <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
+          {proposals.map((proposal) => (
+            <ProposedActionRow
+              key={proposal.id}
+              proposal={proposal}
+              currentActorName={currentActorName}
+              onDecisionError={onDecisionError}
+              approve={approve}
+              dismiss={dismiss}
+            />
+          ))}
+        </ProposedActionsList>
+      </EuiFlexItem>
       {hasNextPage && (
         <EuiFlexItem>
           <EuiButtonEmpty
