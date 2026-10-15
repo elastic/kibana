@@ -53,10 +53,6 @@ function WorkflowGraphSettingsNodeInner(node: NodeProps<Node<WorkflowGraphSettin
           select();
         }
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        select();
-      }}
       data-test-subj={`workflowGraphSettingsNode-${kind}`}
       css={[
         {

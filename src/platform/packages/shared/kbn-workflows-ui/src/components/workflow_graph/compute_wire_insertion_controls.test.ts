@@ -306,4 +306,181 @@ describe('computeWireInsertionControls', () => {
     // No duplicate terminal for a (already has a wire).
     expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':a:'))).toBe(false);
   });
+
+  it('treats branchIndex 0 on a merge step as a branch edge, not a merge body edge', () => {
+    const mergeStepNodes: Node[] = [
+      {
+        id: 'm',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'merge', label: 'm' },
+      },
+      {
+        id: 'child',
+        type: 'step',
+        position: { x: 0, y: 200 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'child' },
+      },
+    ];
+    const mergeStepInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        [
+          'm',
+          {
+            branches: new Map([
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'm', isTerminal: false },
+              ],
+              [
+                'branch:0',
+                {
+                  slot: { kind: 'branch' as const, index: 0 },
+                  ownerStepName: 'm',
+                  isTerminal: false,
+                },
+              ],
+            ]),
+          },
+        ],
+      ]),
+      topLevelStepNodeIds: ['m', 'child'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: mergeStepNodes,
+      edges: [{ id: 'm-child', source: 'm', target: 'child', data: { branchIndex: 0 } }],
+      insertionPoints: mergeStepInsertion,
+      direction: 'TB',
+    });
+    const fork = controls.find((c) => c.id === 'terminal:fork:m-child');
+    expect(fork?.insertContext).toEqual({
+      mode: 'branch',
+      stepName: 'm',
+      branch: { kind: 'branch', index: 0 },
+      position: 'start',
+    });
+  });
+
+  it('LR: places the fork-head + past the chip with a non-empty stub', () => {
+    const lrNodes: Node[] = [
+      {
+        id: 'gate',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'if', label: 'gate' },
+      },
+      {
+        id: 'thenStep',
+        type: 'step',
+        position: { x: 400, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'then' },
+      },
+    ];
+    const lrInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        [
+          'gate',
+          {
+            branches: new Map([
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'gate', isTerminal: false },
+              ],
+            ]),
+          },
+        ],
+      ]),
+      topLevelStepNodeIds: ['gate', 'thenStep'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: lrNodes,
+      edges: [
+        {
+          id: 'gate-then',
+          source: 'gate',
+          target: 'thenStep',
+          sourceHandle: 'then',
+          data: { branchType: 'then', label: 'true' },
+        },
+      ],
+      insertionPoints: lrInsertion,
+      direction: 'LR',
+    });
+    const ctrl = controls.find((c) => c.id === 'terminal:fork:gate-then');
+    // gate exit x = 200; chip centre = 200 + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET.
+    const chipX = 200 + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
+    // 'true' chip: 4 chars * 6.6 + 2 * 12 padding + 2 * 1 border = 52.4 wide.
+    const chipHalfWidth = 52.4 / 2;
+    expect(ctrl!.segmentStart.x).toBeCloseTo(chipX + chipHalfWidth);
+    // "+" centre = chip edge + 14px clearance + button half (11).
+    expect(ctrl!.centre.x).toBeCloseTo(chipX + chipHalfWidth + 14 + 11);
+    expect(ctrl!.centre.y).toBe(24);
+    expect(ctrl!.segmentStart.y).toBe(24);
+    expect(ctrl!.segmentEnd).toEqual(ctrl!.centre);
+  });
+
+  it('LR: centres the fork-head + in the free space when the gap is too tight for full clearance', () => {
+    const tightNodes: Node[] = [
+      {
+        id: 'gate',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'if', label: 'gate' },
+      },
+      {
+        id: 'thenStep',
+        type: 'step',
+        // Same 101px gate-to-head gap the layout reserves.
+        position: { x: 301, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'then' },
+      },
+    ];
+    const tightInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        [
+          'gate',
+          {
+            branches: new Map([
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'gate', isTerminal: false },
+              ],
+            ]),
+          },
+        ],
+      ]),
+      topLevelStepNodeIds: ['gate', 'thenStep'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: tightNodes,
+      edges: [
+        {
+          id: 'gate-then',
+          source: 'gate',
+          target: 'thenStep',
+          sourceHandle: 'then',
+          data: { branchType: 'then', label: 'false' },
+        },
+      ],
+      insertionPoints: tightInsertion,
+      direction: 'LR',
+    });
+    const ctrl = controls.find((c) => c.id === 'terminal:fork:gate-then');
+    const half = 22 / 2;
+    expect(ctrl!.centre.x + half).toBeLessThanOrEqual(301);
+    expect(ctrl!.centre.x - half).toBeGreaterThanOrEqual(ctrl!.segmentStart.x);
+    expect(ctrl!.centre.x).toBeCloseTo((ctrl!.segmentStart.x + 301) / 2);
+  });
 });

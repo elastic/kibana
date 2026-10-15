@@ -269,25 +269,44 @@ const handleNoChildren = (helpers: AlignHelpers, currNode: string): void => {
   }
 };
 
+/**
+ * Post-order DFS over predecessors, started from the sinks, so every node is
+ * emitted after all of its predecessors. Iterative: recursion depth would grow
+ * with the longest path. Throws on a cycle, including components with no sink.
+ */
 const topsort = (g: graphlib.Graph): string[] => {
-  const visited: Record<string, boolean> = {};
-  const stack: Record<string, boolean> = {};
+  const visited = new Set<string>();
+  const onStack = new Set<string>();
   const results: string[] = [];
 
-  const visit = (node: string): void => {
-    if (Object.hasOwn(stack, node)) {
-      throw new Error('CycleException');
-    }
-    if (!Object.hasOwn(visited, node)) {
-      stack[node] = true;
-      visited[node] = true;
-      g.predecessors(node)?.forEach((preNode) => visit(preNode.toString()));
-      delete stack[node];
-      results.push(node);
+  const visit = (root: string): void => {
+    if (visited.has(root)) return;
+    visited.add(root);
+    onStack.add(root);
+    const frames = [{ node: root, preds: g.predecessors(root) ?? [], next: 0 }];
+    while (frames.length > 0) {
+      const frame = frames[frames.length - 1];
+      if (frame.next === frame.preds.length) {
+        frames.pop();
+        onStack.delete(frame.node);
+        results.push(frame.node);
+        continue;
+      }
+      const pred = frame.preds[frame.next++];
+      if (onStack.has(pred)) {
+        throw new Error(`Layout graph contains a cycle at node "${pred}"`);
+      }
+      if (visited.has(pred)) continue;
+      visited.add(pred);
+      onStack.add(pred);
+      frames.push({ node: pred, preds: g.predecessors(pred) ?? [], next: 0 });
     }
   };
 
-  g.sinks().forEach((node) => visit(node.toString()));
+  g.sinks().forEach(visit);
+  // A component whose nodes all have outgoing edges has no sink, so the pass
+  // above never reaches it; visiting the rest surfaces its cycle.
+  g.nodes().forEach(visit);
   return results;
 };
 

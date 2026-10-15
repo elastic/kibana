@@ -11,6 +11,7 @@ import type { Edge, Node } from '@xyflow/react';
 import type { EdgeBranchType, LayoutDirection } from '@kbn/workflows';
 import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './compute_edge_path';
 import type { InsertionPoints, NodePortTargets } from './compute_insertion_points';
+import { edgeLabelCrossSpan } from './edge_label_metrics';
 import { stepSupportsErrorHandling } from './step_supports_error_handling';
 import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_context';
 /**
@@ -315,7 +316,7 @@ export function computeWireInsertionControls(args: {
       // branch, preventing a spurious branch-tail terminal on top of the body card.
       const isMergeBodyEdge =
         !edgeData?.branchType &&
-        !edgeData?.branchIndex &&
+        edgeData?.branchIndex === undefined &&
         stepTypeOf(byId.get(edge.source)) === 'merge';
       const handleKey = isMergeBodyEdge
         ? 'then'
@@ -350,28 +351,39 @@ export function computeWireInsertionControls(args: {
         // Fork branch head "+" sits below the chip label. It connects a real
         // fork node to a real branch head, so it's a mid-wire control
         // (hover-only), not a dangling terminal — kind: 'wire'.
-        // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
+        // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET past the source exit.
         const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
+        // Chip half-extent along the main axis: its height in TB, its label-dependent width in LR
+        // (`edgeLabelCrossSpan(..., 'TB')` is the chip width — the chip is horizontal in both).
+        const chipHalfExtent =
+          direction === 'LR'
+            ? edgeLabelCrossSpan(edgeData?.label ?? '', 'TB') / 2
+            : FORK_CHIP_HALF_HEIGHT;
         // "+" centre must clear the chip AND the button itself with visible breathing room:
-        // chip half-height + button half-height + clearance gap = FORK_HEAD_PLUS_OFFSET − chipOffset.
-        const CHIP_PLUS_GAP =
-          FORK_CHIP_HALF_HEIGHT + WIRE_CONTROL_CLEARANCE + WIRE_CONTROL_SIZE / 2;
+        // chip half-extent + clearance gap + button half-size (TB: FORK_HEAD_PLUS_OFFSET − chipOffset).
+        const chipToPlus = chipHalfExtent + WIRE_CONTROL_CLEARANCE + WIRE_CONTROL_SIZE / 2;
         const chipX = direction === 'LR' ? start.x + chipOffset : end.x;
         const chipY = direction === 'LR' ? end.y : start.y + chipOffset;
-        const plusX = chipX;
-        const plusY = direction === 'LR' ? chipY : chipY + CHIP_PLUS_GAP;
-        const plusPos = { x: plusX, y: plusY };
+        // LR: when the gap to the branch head is too tight for the full clearance (the layout
+        // reserves FORK_HEAD_MIN_GAP, sized for the TB chip height), centre the + in the free space.
+        const plusPos =
+          direction === 'LR'
+            ? { x: Math.min(chipX + chipToPlus, (chipX + chipHalfExtent + end.x) / 2), y: chipY }
+            : { x: chipX, y: chipY + chipToPlus };
         // Use position:'start' so clicking this "+" prepends to the branch.
         const headContext: WorkflowGraphInsertionContext =
           insertContext.mode === 'branch' ? { ...insertContext, position: 'start' } : insertContext;
-        // Arrow stub starts at chip bottom (chipY + chip half-height incl 1px border), not chip centre,
+        // Arrow stub starts at the chip's far edge (incl 1px border), not its centre,
         // so the dashed line doesn't overlap the chip label.
-        const chipBottomY = direction === 'LR' ? chipY : chipY + FORK_CHIP_HALF_HEIGHT;
+        const stubStart =
+          direction === 'LR'
+            ? { x: chipX + chipHalfExtent, y: chipY }
+            : { x: chipX, y: chipY + chipHalfExtent };
         controls.push({
           id: `terminal:fork:${edge.id}`,
           kind: 'wire',
           centre: plusPos,
-          segmentStart: { x: chipX, y: chipBottomY },
+          segmentStart: stubStart,
           segmentEnd: plusPos,
           insertContext: headContext,
           fallbackStepName: fallbackStepNameFor(ports, sourceNode),

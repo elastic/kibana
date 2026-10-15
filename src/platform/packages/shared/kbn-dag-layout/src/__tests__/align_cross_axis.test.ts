@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { graphlib } from '@dagrejs/dagre';
 import type { DagPositionedNode } from '../types';
-import { separatePositionedOverlapsInPlace } from '../align_cross_axis';
+import { alignDagreCrossAxisInPlace, separatePositionedOverlapsInPlace } from '../align_cross_axis';
 
 // Helper: build a minimal DagPositionedNode at a given cross-axis position (x for TB layout).
 const pinNode = (id: string, x: number, w = 100, pinned = false): DagPositionedNode => ({
@@ -221,5 +222,30 @@ describe('separatePositionedOverlapsInPlace — nested container sweep membershi
     expect(bodyA.x + bodyA.width).toBeLessThanOrEqual(innerGroup.x + innerGroup.width + 0.001);
     expect(bodyB.x).toBeGreaterThanOrEqual(innerGroup.x - 0.001);
     expect(bodyB.x + bodyB.width).toBeLessThanOrEqual(innerGroup.x + innerGroup.width + 0.001);
+  });
+});
+
+describe('alignDagreCrossAxisInPlace — topological sort', () => {
+  it('handles a chain far longer than the call stack depth', () => {
+    // Built directly on a graphlib graph: dagre's own ranking recurses and would
+    // overflow first if the chain went through applyDagre.
+    const count = 50000;
+    const g = new graphlib.Graph();
+    for (let i = 0; i < count; i++) {
+      g.setNode(`n${i}`, { x: 0, y: i * 100, width: 100, height: 50 });
+    }
+    for (let i = 0; i < count - 1; i++) {
+      g.setEdge(`n${i}`, `n${i + 1}`, {});
+    }
+    expect(() => alignDagreCrossAxisInPlace(g, 'x', 50)).not.toThrow();
+  });
+
+  it('throws a descriptive error naming a node on the cycle', () => {
+    const g = new graphlib.Graph();
+    for (const id of ['a', 'b', 'c']) g.setNode(id, { x: 0, y: 0, width: 100, height: 50 });
+    g.setEdge('a', 'b', {});
+    g.setEdge('b', 'c', {});
+    g.setEdge('c', 'b', {});
+    expect(() => alignDagreCrossAxisInPlace(g, 'x', 50)).toThrow(/cycle.*"[bc]"/i);
   });
 });

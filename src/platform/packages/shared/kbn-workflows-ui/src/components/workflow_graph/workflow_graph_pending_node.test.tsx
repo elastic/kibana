@@ -16,6 +16,19 @@ import { PENDING_NODE_HEIGHT, PENDING_NODE_WIDTH } from './pending_insert';
 import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
 import { WorkflowGraphPendingNode } from './workflow_graph_pending_node';
 
+// EUI's jest build returns a constant id from `useGeneratedHtmlId`; hand every
+// mounted instance its own id (stable across re-renders) so that a hard-coded
+// marker id, or one that is not referenced consistently, becomes observable.
+let mockGeneratedIdCounter = 0;
+jest.mock('@elastic/eui', () => {
+  const { useState } = jest.requireActual('react');
+  const useGeneratedHtmlId = ({ prefix = '' }: { prefix?: string } = {}): string => {
+    const [id] = useState(() => `${prefix}_${++mockGeneratedIdCounter}`);
+    return id;
+  };
+  return { ...jest.requireActual('@elastic/eui'), useGeneratedHtmlId };
+});
+
 const mockGetViewport = jest.fn(() => ({ x: 0, y: 0, zoom: 1 }));
 
 jest.mock('@xyflow/react', () => ({
@@ -106,6 +119,27 @@ describe('WorkflowGraphPendingNode', () => {
     expect(screen.getByTestId('workflowGraphPendingNodeEdge')).toBeInTheDocument();
     expect(screen.getByTestId('workflowGraphPendingPort-step')).toBeInTheDocument();
     expect(screen.getByTestId('workflowGraphPendingPort-error')).toBeInTheDocument();
+  });
+
+  it('gives each pending connector its own arrow marker id so two canvases never collide', () => {
+    const pending = { phase: 'choosing', context: { mode: 'step', sourceNodeId: 'a' } } as const;
+    renderPending(pending);
+    renderPending(pending);
+
+    const edgeSvgs = screen.getAllByTestId('workflowGraphPendingNodeEdge');
+    expect(edgeSvgs).toHaveLength(2);
+
+    const markerIds = edgeSvgs.map((svg) => svg.querySelector('marker')?.id);
+    expect(markerIds[0]).toBeTruthy();
+    expect(markerIds[1]).toBeTruthy();
+    expect(markerIds[0]).not.toBe(markerIds[1]);
+
+    edgeSvgs.forEach((svg, index) => {
+      expect(svg.querySelector('path[marker-end]')).toHaveAttribute(
+        'marker-end',
+        `url(#${markerIds[index]})`
+      );
+    });
   });
 
   it('does not render a connector edge for error-path pending inserts (known deviation #4)', () => {

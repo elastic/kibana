@@ -201,12 +201,23 @@ describe('WorkflowGraphNode', () => {
     expect(onStepSelect).toHaveBeenCalledWith('node-1');
   });
 
-  it('calls onStepSelect with the node id when the card is clicked', () => {
+  it('lets a card click bubble to the React Flow node wrapper instead of selecting itself', () => {
     const onStepSelect = jest.fn();
-    renderNode({}, false, { onStepSelect });
+    const onWrapperClick = jest.fn();
+    render(
+      <div role="presentation" onClick={onWrapperClick}>
+        <WorkflowGraphActionsContext.Provider value={{ onStepSelect }}>
+          <WorkflowGraphNode {...makeNodeProps()} />
+        </WorkflowGraphActionsContext.Provider>
+      </div>
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /Test Step/ }));
-    expect(onStepSelect).toHaveBeenCalledWith('node-1');
+
+    // Selection is driven by React Flow's onNodeClick, so the card must neither
+    // swallow the click nor select on its own (that would double-select).
+    expect(onWrapperClick).toHaveBeenCalledTimes(1);
+    expect(onStepSelect).not.toHaveBeenCalled();
   });
 
   it('calls onStepSelect with the node id when Space is pressed', () => {
@@ -403,6 +414,39 @@ describe('WorkflowGraphNode — edit mode', () => {
     });
     expect(screen.queryByTestId('workflowGraphNodeMenuPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowGraphNodeContextMenuAnchor')).not.toBeInTheDocument();
+  });
+
+  it('does not bubble clicks from the action cluster to the node wrapper', () => {
+    const onWrapperClick = jest.fn();
+    render(
+      <div role="presentation" onClick={onWrapperClick}>
+        <WorkflowGraphActionsContext.Provider value={{ edit: makeEdit() }}>
+          <WorkflowGraphNode {...makeNodeProps()} />
+        </WorkflowGraphActionsContext.Provider>
+      </div>
+    );
+
+    fireEvent.click(screen.getByTestId('workflowGraphNodeMenuButton'));
+
+    expect(onWrapperClick).not.toHaveBeenCalled();
+  });
+
+  it('does not bubble clicks from the run button to the node wrapper', () => {
+    const onWrapperClick = jest.fn();
+    const onStepRun = jest.fn();
+    render(
+      <div role="presentation" onClick={onWrapperClick}>
+        <WorkflowGraphActionsContext.Provider value={{ canRunSteps: true, onStepRun }}>
+          <WorkflowGraphNode {...makeNodeProps()} />
+        </WorkflowGraphActionsContext.Provider>
+      </div>
+    );
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: /Test Step/ }));
+    fireEvent.click(screen.getByTestId('workflowGraphNodeRunStep'));
+
+    expect(onStepRun).toHaveBeenCalledTimes(1);
+    expect(onWrapperClick).not.toHaveBeenCalled();
   });
 
   it('anchors the ⋯ menu to the button, not a cursor position', () => {

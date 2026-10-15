@@ -264,6 +264,13 @@ describe('dagLayout — compound groups', () => {
       ['deep-a', 'deep-b', 'inner-group', 'outer-group'].sort()
     );
   });
+
+  it('throws for a compound group that is neither a root node nor nested in another group', () => {
+    const groups: DagCompoundGroup[] = [
+      { id: 'orphan', innerNodes: [node('inner')], innerEdges: [] },
+    ];
+    expect(() => dagLayout([node('a')], [], groups)).toThrow(/orphan/);
+  });
 });
 
 // ─── Compact mode ─────────────────────────────────────────────────────────────
@@ -517,6 +524,33 @@ describe('dagLayout — cycle detection', () => {
       { id: 'groupB', innerNodes: [groupA], innerEdges: [] },
     ];
     expect(() => dagLayout([groupA, groupB], [], groups)).toThrow(/cycle/i);
+  });
+
+  it('throws a descriptive error naming a node when the node graph has a cycle reachable from a sink', () => {
+    const nodes = [node('a'), node('b'), node('c'), node('d')];
+    const edges = [
+      edge('ab', 'a', 'b'),
+      edge('bc', 'b', 'c'),
+      edge('cb', 'c', 'b'),
+      edge('cd', 'c', 'd'),
+    ];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[bc]"/i);
+  });
+
+  it('throws a descriptive error for a pure-cycle component with no sinks', () => {
+    const nodes = [node('a'), node('b')];
+    const edges = [edge('ab', 'a', 'b'), edge('ba', 'b', 'a')];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[ab]"/i);
+  });
+
+  it('throws for a pure-cycle component alongside an acyclic component', () => {
+    const nodes = [node('x'), node('y'), node('a'), node('b')];
+    const edges = [edge('xy', 'x', 'y'), edge('ab', 'a', 'b'), edge('ba', 'b', 'a')];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[ab]"/i);
+  });
+
+  it('returns an empty layout for an empty graph', () => {
+    expect(dagLayout([], [])).toEqual({ nodes: [], edges: [], reservedLanePlacements: [] });
   });
 });
 

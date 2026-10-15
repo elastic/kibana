@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  euiFocusRing,
   EuiIcon,
   EuiPopover,
   EuiToolTip,
@@ -42,7 +43,8 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
   const { label, stepType, stepExecution, hasBodySteps } = node.data;
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const actions = useWorkflowGraphActions();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuClusterRef = useRef<HTMLDivElement | null>(null);
@@ -104,6 +106,30 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
   const borderRadius = euiTheme.border.radius.small;
   const iconType = getStepIconType(stepType);
 
+  const cardLabel = execStatus
+    ? i18n.translate('workflowsUi.foreachGroupNode.ariaLabelWithStatus', {
+        defaultMessage: '{stepType} step: {label}, status: {status}',
+        values: { stepType, label: displayLabel, status: execStatus },
+      })
+    : i18n.translate('workflowsUi.foreachGroupNode.ariaLabel', {
+        defaultMessage: '{stepType} step: {label}',
+        values: { stepType, label: displayLabel },
+      });
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Keys pressed on inner controls (menu, add-first-step) are theirs.
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      actions.onStepSelect?.(node.id);
+      return;
+    }
+    if (actions.edit && (e.key === 'Delete' || e.key === 'Backspace')) {
+      e.preventDefault();
+      actions.edit.onDeleteNode(node.id);
+    }
+  };
+
   const menuLabel = i18n.translate('workflowsUi.foreachGroupNode.stepActions', {
     defaultMessage: 'Step actions',
   });
@@ -127,6 +153,10 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={cardLabel}
+        onKeyDown={handleKeyDown}
         css={[
           {
             width: '100%',
@@ -136,6 +166,8 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
             borderRadius,
             position: 'relative',
             transition: 'border-color 120ms ease',
+            '&:focus': { outline: 'none' },
+            '&:focus-visible': euiFocusRing(euiThemeContext),
           },
           nodeShadow,
         ]}

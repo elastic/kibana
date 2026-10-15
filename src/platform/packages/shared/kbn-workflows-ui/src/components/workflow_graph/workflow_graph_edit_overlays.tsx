@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ViewportPortal } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';
@@ -89,6 +90,9 @@ export function WorkflowGraphEditOverlays({
   const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
   const isHorizontal = direction === 'LR';
+  // Unique per mount: SVG `url(#id)` resolves document-wide, so a fixed id would
+  // let a second canvas on the page pick up this canvas's marker.
+  const terminalArrowId = useGeneratedHtmlId({ prefix: 'workflowGraphTerminalArrow' });
 
   const triggerIds = useMemo(
     () => nodes.filter((n) => n.type === 'trigger').map((n) => n.id),
@@ -139,7 +143,7 @@ export function WorkflowGraphEditOverlays({
         >
           <defs>
             <marker
-              id="workflowGraphTerminalArrow"
+              id={terminalArrowId}
               markerWidth="6"
               markerHeight="6"
               refX="6"
@@ -166,7 +170,7 @@ export function WorkflowGraphEditOverlays({
                 stroke={stubStroke}
                 strokeWidth={1}
                 strokeDasharray="4 3"
-                markerEnd="url(#workflowGraphTerminalArrow)"
+                markerEnd={`url(#${terminalArrowId})`}
               />
             );
           })}

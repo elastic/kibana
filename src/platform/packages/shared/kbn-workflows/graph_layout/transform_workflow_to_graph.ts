@@ -25,7 +25,12 @@ import type {
   StructureLane,
   StructureSequence,
 } from './types';
-import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE, FOREACH_GROUP_EMPTY_HEIGHT } from './types';
+import {
+  CONTAINER_STEP_TYPES,
+  DEFAULT_NODE_STYLE,
+  FOREACH_GROUP_EMPTY_HEIGHT,
+  isStep,
+} from './types';
 import { visitStepChildSlots } from './walk_step_tree';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
@@ -33,7 +38,11 @@ const TRIGGER_LABEL: Record<string, string> = {
   manual: 'Manual',
   alert: 'Alert',
   scheduled: 'Scheduled',
+  document: 'Document',
 };
+
+/** Keeps only well-formed steps, like `visitStepChildSlots` does for the fingerprint. */
+const toSteps = (value: unknown): Step[] => (Array.isArray(value) ? value.filter(isStep) : []);
 
 function getTriggerLabel(triggerType: string): string {
   return TRIGGER_LABEL[triggerType] ?? triggerType;
@@ -130,7 +139,9 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     fallbackLanes,
     forkNodeToJoinId,
     items,
-  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
+  } = transformInternal(workflow.triggers ?? [], toSteps(workflow.steps), ids, {
+    fallbackDepth: 0,
+  });
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -343,8 +354,8 @@ function transformInternal(
 
     if (step.type === 'if') {
       const ifStep = step as IfStep;
-      const thenSteps = (ifStep.steps as Step[]) ?? [];
-      const elseSteps: Step[] = Array.isArray(ifStep.else) ? (ifStep.else as Step[]) : [];
+      const thenSteps = toSteps(ifStep.steps);
+      const elseSteps = toSteps(ifStep.else);
 
       const hasThen = thenSteps.length > 0;
       const hasElse = elseSteps.length > 0;
@@ -450,13 +461,12 @@ function transformInternal(
       exitIds = [joinId];
     } else if (step.type === 'parallel') {
       const parallelStep = step as ParallelStep;
-      const branches = Array.isArray(parallelStep.branches)
-        ? (parallelStep.branches as Array<{ name?: string; steps: Step[] }>)
-        : [];
+      const branches = Array.isArray(parallelStep.branches) ? parallelStep.branches : [];
       const branchExits: string[] = [];
       const parallelBranches: StructureBranch[] = [];
       branches.forEach((branch, idx) => {
-        if (!Array.isArray(branch.steps) || branch.steps.length === 0) {
+        const branchSteps = toSteps(branch.steps);
+        if (branchSteps.length === 0) {
           // An empty branch keeps its lane, like an `if` without `else`.
           const bypassId = emitBypassBranch(
             id,
@@ -476,7 +486,7 @@ function transformInternal(
           branchExits.push(bypassId);
           return;
         }
-        const inner = transformInternal([], branch.steps, ids, ctx);
+        const inner = transformInternal([], branchSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
@@ -510,19 +520,18 @@ function transformInternal(
       }
     } else if (step.type === 'switch') {
       const switchStep = step as SwitchStep;
-      const cases = Array.isArray(switchStep.cases)
-        ? (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>)
-        : [];
+      const cases = Array.isArray(switchStep.cases) ? switchStep.cases : [];
       const branchExits: string[] = [];
       const switchBranches: StructureBranch[] = [];
 
-      const defaultSteps = switchStep.default as Step[] | undefined;
-      const hasDefault = Array.isArray(defaultSteps) && defaultSteps.length > 0;
+      const defaultSteps = toSteps(switchStep.default);
+      const hasDefault = defaultSteps.length > 0;
 
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
         const matchLabel = String(caseItem.match ?? '');
-        if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
+        const caseSteps = toSteps(caseItem.steps);
+        if (caseSteps.length === 0) {
           // An empty case keeps its labelled lane instead of falling through the gate,
           // so the branch stays visible while the author is still filling it in.
           const bypassId = emitBypassBranch(id, `${step.name}-case-${idx}-bypass`, `case-${idx}`, {
@@ -534,7 +543,7 @@ function transformInternal(
           branchExits.push(bypassId);
           return;
         }
-        const inner = transformInternal([], caseItem.steps as Step[], ids, ctx);
+        const inner = transformInternal([], caseSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
@@ -560,7 +569,7 @@ function transformInternal(
 
       // Rule 2 — `default` branch, labeled 'default'.
       if (hasDefault) {
-        const inner = transformInternal([], defaultSteps as Step[], ids, ctx);
+        const inner = transformInternal([], defaultSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
@@ -605,7 +614,7 @@ function transformInternal(
       }
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
-      const childSteps = (mergeStep.steps as Step[]) ?? [];
+      const childSteps = toSteps(mergeStep.steps);
       const inner = transformInternal([], childSteps, ids, ctx);
       attached = inner.items;
       Object.assign(nodeRefs, inner.nodeRefs);

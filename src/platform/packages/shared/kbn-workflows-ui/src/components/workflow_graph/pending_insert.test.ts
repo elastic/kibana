@@ -38,6 +38,14 @@ const layoutNodes = (ids: Array<{ id: string; x: number; y: number; type?: strin
     data: {},
   }));
 
+describe('pending node footprint', () => {
+  it('matches the laid-out step node footprint (DEFAULT_NODE_STYLE)', () => {
+    const { nodes } = transformWorkflowToGraph(wf([{ name: 'a', type: 'console' }]));
+    const stepNode = nodes.find(({ id }) => id === 'a');
+    expect(stepNode?.style).toEqual({ width: PENDING_NODE_WIDTH, height: PENDING_NODE_HEIGHT });
+  });
+});
+
 describe('computePendingInsertOrigin', () => {
   it('places the card after the source node (insert-after model)', () => {
     const workflow = wf([

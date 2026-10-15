@@ -35,6 +35,59 @@ const shiftCross = (n: DagPositionedNode, delta: number, isLR: boolean): DagPosi
 const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
   aStart < bEnd && bStart < aEnd;
 
+// ── lane validation ──────────────────────────────────────────────────────────
+
+/**
+ * Rejects lane sets the cascade cannot place: a node in two lanes, an owner
+ * inside its own lane, lanes owning each other in a cycle, or a lane owned by a
+ * spine node at a non-zero depth (only depth-0 lanes are levelled from the spine).
+ */
+const validateLanes = (nodes: readonly DagNode[], lanes: readonly DagReservedLane[]): void => {
+  if (lanes.length === 0) return;
+
+  const laneByNodeId = new Map<string, DagReservedLane>();
+  for (const lane of lanes) {
+    for (const nid of lane.nodeIds) {
+      if (laneByNodeId.has(nid)) {
+        throw new Error(`reservedLane invariant: node "${nid}" appears in two lanes`);
+      }
+      laneByNodeId.set(nid, lane);
+    }
+  }
+
+  const nodeIds = new Set(nodes.map((n) => n.id));
+  for (const lane of lanes) {
+    const { ownerId, depth } = lane;
+    const ownerLane = laneByNodeId.get(ownerId);
+    if (ownerLane === lane) {
+      throw new Error(`reservedLane invariant: owner "${ownerId}" is inside its own lane`);
+    }
+    if (!ownerLane && nodeIds.has(ownerId) && depth !== 0) {
+      throw new Error(
+        `reservedLane invariant: lane owned by spine node "${ownerId}" has depth ${depth}, expected 0`
+      );
+    }
+  }
+
+  // Each lane has one owner, hence at most one parent lane, so following the
+  // parent chain from every lane finds any ownership cycle.
+  const settled = new Set<DagReservedLane>();
+  for (const start of lanes) {
+    const chain = new Set<DagReservedLane>();
+    let current: DagReservedLane | undefined = start;
+    while (current && !settled.has(current)) {
+      if (chain.has(current)) {
+        throw new Error(
+          `reservedLane invariant: ownership cycle through owner "${current.ownerId}"`
+        );
+      }
+      chain.add(current);
+      current = laneByNodeId.get(current.ownerId);
+    }
+    for (const lane of chain) settled.add(lane);
+  }
+};
+
 // ── main export ──────────────────────────────────────────────────────────────
 
 /**
@@ -70,6 +123,8 @@ export function layoutGraphWithLanes(
   lanePlacements: DagReservedLanePlacement[];
 } {
   const isLR = direction === 'LR';
+
+  validateLanes(nodes, lanes);
 
   // ── 1. Partition nodes ───────────────────────────────────────────────────
 

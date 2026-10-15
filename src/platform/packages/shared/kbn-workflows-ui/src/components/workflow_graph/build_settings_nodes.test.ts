@@ -8,8 +8,11 @@
  */
 
 import type { Node } from '@xyflow/react';
+import { transformWorkflowToGraph } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import {
   buildWorkflowSettingsNodes,
+  SETTINGS_CARD_HEIGHT,
   SETTINGS_COMPACT_HEIGHT,
   SETTINGS_COMPACT_WIDTH,
   SETTINGS_GROUP_HEADER_HEIGHT,
@@ -18,6 +21,14 @@ import {
   SETTINGS_TO_FLOW_GAP,
 } from './build_settings_nodes';
 import { PENDING_NODE_HEIGHT, PENDING_NODE_WIDTH } from './pending_insert';
+
+const workflowYaml = {
+  version: '1',
+  name: 'wf',
+  enabled: true,
+  triggers: [{ type: 'manual' }],
+  steps: [],
+} as unknown as WorkflowYaml;
 
 const topInset = SETTINGS_GROUP_PAD + SETTINGS_GROUP_HEADER_HEIGHT + SETTINGS_GROUP_PAD;
 
@@ -55,13 +66,13 @@ describe('buildWorkflowSettingsNodes', () => {
     expect(cards.every((n) => n.type === 'settings')).toBe(true);
     expect(cards.every((n) => n.parentId === SETTINGS_GROUP_NODE_ID)).toBe(true);
     expect(cards.every((n) => n.width === PENDING_NODE_WIDTH)).toBe(true);
-    expect(cards.every((n) => n.height === PENDING_NODE_HEIGHT)).toBe(true);
+    expect(cards.every((n) => n.height === SETTINGS_CARD_HEIGHT)).toBe(true);
 
     const rowWidth = 3 * PENDING_NODE_WIDTH + 2 * SETTINGS_GROUP_PAD;
     const expectedGroupY =
       200 -
       SETTINGS_TO_FLOW_GAP -
-      PENDING_NODE_HEIGHT -
+      SETTINGS_CARD_HEIGHT -
       SETTINGS_GROUP_PAD -
       (topInset - SETTINGS_GROUP_PAD);
     const bandMidX = PENDING_NODE_WIDTH / 2;
@@ -69,7 +80,7 @@ describe('buildWorkflowSettingsNodes', () => {
     expect(nodes[0].position.x).toBeCloseTo(expectedGroupX);
     expect(nodes[0].position.y).toBe(expectedGroupY);
     expect(nodes[0].width).toBe(rowWidth + SETTINGS_GROUP_PAD * 2);
-    expect(nodes[0].height).toBe(topInset + PENDING_NODE_HEIGHT + SETTINGS_GROUP_PAD);
+    expect(nodes[0].height).toBe(topInset + SETTINGS_CARD_HEIGHT + SETTINGS_GROUP_PAD);
 
     // Children sit below the header band; gaps match outer pad.
     expect(cards[0].position).toEqual({ x: SETTINGS_GROUP_PAD, y: topInset });
@@ -91,11 +102,11 @@ describe('buildWorkflowSettingsNodes', () => {
     expect(cards.every((n) => n.position.x === SETTINGS_GROUP_PAD)).toBe(true);
     expect(cards[0].position.y).toBe(topInset);
     expect(cards[1].position.y - cards[0].position.y).toBe(
-      PENDING_NODE_HEIGHT + SETTINGS_GROUP_PAD
+      SETTINGS_CARD_HEIGHT + SETTINGS_GROUP_PAD
     );
     expect(nodes[0].width).toBe(PENDING_NODE_WIDTH + SETTINGS_GROUP_PAD * 2);
     expect(nodes[0].height).toBe(
-      topInset + 3 * PENDING_NODE_HEIGHT + 2 * SETTINGS_GROUP_PAD + SETTINGS_GROUP_PAD
+      topInset + 3 * SETTINGS_CARD_HEIGHT + 2 * SETTINGS_GROUP_PAD + SETTINGS_GROUP_PAD
     );
   });
 
@@ -127,8 +138,22 @@ describe('buildWorkflowSettingsNodes', () => {
     const cards = nodes.filter((n) => n.type === 'settings');
     expect(cards.every((n) => n.position.x === SETTINGS_GROUP_PAD)).toBe(true);
     expect(cards[1].position.y - cards[0].position.y).toBe(
-      PENDING_NODE_HEIGHT + SETTINGS_GROUP_PAD
+      SETTINGS_CARD_HEIGHT + SETTINGS_GROUP_PAD
     );
+  });
+
+  it('sizes anchors without a measured height as the laid-out step footprint', () => {
+    const { nodes: laidOut } = transformWorkflowToGraph(workflowYaml);
+    const style = laidOut.find(({ type }) => type === 'trigger')?.style;
+    const input = { workflowName: 'Demo', constantsCount: 0, outputsCount: 0 };
+    const measured = buildWorkflowSettingsNodes(
+      [{ ...triggerAt(0, 200), width: style?.width, height: style?.height }],
+      'LR',
+      input
+    );
+    const { width, height, ...unmeasured } = triggerAt(0, 200);
+    const fallback = buildWorkflowSettingsNodes([unmeasured], 'LR', input);
+    expect(fallback[0].position).toEqual(measured[0].position);
   });
 
   it('returns empty when the layout has no nodes', () => {

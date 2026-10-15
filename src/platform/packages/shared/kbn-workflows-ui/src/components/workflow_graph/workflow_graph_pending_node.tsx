@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiShadow, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Position, useReactFlow, useStore, ViewportPortal } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import React, { useMemo } from 'react';
@@ -57,6 +57,9 @@ export function WorkflowGraphPendingNode({
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const { renderStepIcon } = useWorkflowGraphActions();
   const { getViewport } = useReactFlow();
+  // Unique per mount: SVG `url(#id)` resolves document-wide, so a fixed id would
+  // let a second canvas on the page pick up this canvas's marker.
+  const arrowId = useGeneratedHtmlId({ prefix: 'workflowGraphPendingNodeArrow' });
   const viewportWidth = useStore((s) => s.width);
   const viewportHeight = useStore((s) => s.height);
 
@@ -170,7 +173,7 @@ export function WorkflowGraphPendingNode({
         >
           <defs>
             <marker
-              id="workflowGraphPendingNodeArrow"
+              id={arrowId}
               markerWidth="6"
               markerHeight="6"
               refX="6"
@@ -186,7 +189,7 @@ export function WorkflowGraphPendingNode({
             fill="none"
             stroke={edgeStroke}
             strokeWidth={1}
-            markerEnd="url(#workflowGraphPendingNodeArrow)"
+            markerEnd={`url(#${arrowId})`}
           />
         </svg>
       )}

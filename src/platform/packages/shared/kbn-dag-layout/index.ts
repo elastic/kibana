@@ -21,4 +21,5 @@ export type {
 export { dagLayout } from './src/dag_layout';
 export { resolveShiftedEdgePoints } from './src/apply_dagre';
 export { STRAIGHT_X_THRESHOLD } from './src/constants';
+export type { CrossAxis } from './src/align_cross_axis';
 export { separatePositionedOverlapsInPlace } from './src/align_cross_axis';

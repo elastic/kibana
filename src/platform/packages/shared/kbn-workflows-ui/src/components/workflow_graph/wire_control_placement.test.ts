@@ -10,8 +10,8 @@
 /**
  * Invariant: every wire-control button must:
  *   R1 – not overlap a step or trigger node card.
- *   R2 – for fork-head terminals, sit at least WIRE_CONTROL_CLEARANCE below the
- *        chip bottom (segmentStart.y).
+ *   R2 – for fork-head terminals, sit at least WIRE_CONTROL_CLEARANCE past the
+ *        chip edge on the main axis (segmentStart.y in TB, segmentStart.x in LR).
  *   R3 – for branch-tail terminals, sit at least WIRE_CONTROL_CLEARANCE above the
  *        merge bus (target entry − MERGE_BUS_TRUNK).
  *
@@ -21,7 +21,7 @@
 
 import type { Edge, Node } from '@xyflow/react';
 import { transformWorkflowToGraph } from '@kbn/workflows';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { LayoutDirection, WorkflowYaml } from '@kbn/workflows';
 import { MERGE_BUS_TRUNK } from './compute_edge_path';
 import { computeInsertionPoints } from './compute_insertion_points';
 import {
@@ -127,9 +127,9 @@ const toReactFlowEdges = (transformed: ReturnType<typeof transformWorkflowToGrap
   })) as unknown as Edge[];
 };
 
-const runLayout = (yaml: WorkflowYaml) => {
+const runLayout = (yaml: WorkflowYaml, direction: LayoutDirection = 'TB') => {
   const transformed = transformWorkflowToGraph(yaml);
-  const layout = computeWorkflowLayout(transformed, { direction: 'TB' });
+  const layout = computeWorkflowLayout(transformed, { direction });
   const rfNodes = toReactFlowNodes(transformed, layout);
   const rfEdges = toReactFlowEdges(transformed);
   const insertionPoints = computeInsertionPoints(yaml, transformed);
@@ -137,7 +137,7 @@ const runLayout = (yaml: WorkflowYaml) => {
     nodes: rfNodes,
     edges: rfEdges,
     insertionPoints,
-    direction: 'TB',
+    direction,
     forkNodeToJoinId: transformed.forkNodeToJoinId,
   });
   return { layout, rfNodes, rfEdges, transformed, insertionPoints, controls };
@@ -176,7 +176,9 @@ interface R3Violation {
 const checkPlacements = (
   controls: ReturnType<typeof computeWireInsertionControls>,
   nodes: Node[],
-  edges: Edge[]
+  edges: Edge[],
+  direction: LayoutDirection = 'TB',
+  chipClearance: number = WIRE_CONTROL_CLEARANCE
 ): { r1: R1Violation[]; r2: R2Violation[]; r3: R3Violation[] } => {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const edgeById = new Map(edges.map((e) => [e.id, e]));
@@ -205,11 +207,11 @@ const checkPlacements = (
       }
     }
 
-    // R2: fork-head chip clearance.
+    // R2: fork-head chip clearance along the main axis.
     if (ctrl.id.startsWith('terminal:fork:')) {
-      const chipBottom = ctrl.segmentStart.y;
-      const btnTop = btn.t;
-      if (btnTop < chipBottom + WIRE_CONTROL_CLEARANCE) {
+      const chipBottom = direction === 'LR' ? ctrl.segmentStart.x : ctrl.segmentStart.y;
+      const btnTop = direction === 'LR' ? btn.l : btn.t;
+      if (btnTop < chipBottom + chipClearance) {
         r2.push({ ctrlId: ctrl.id, chipBottom, btnTop });
       }
     }
@@ -402,5 +404,51 @@ describe('wire control placement — R1/R2/R3 invariants', () => {
       const { r3 } = checkPlacements(controls, rfNodes, rfEdges);
       expect(r3).toHaveLength(0);
     });
+  });
+});
+
+describe('wire control placement — LR fork-head invariants', () => {
+  const ifElse = minimal({
+    steps: [
+      {
+        name: 'gate',
+        type: 'if',
+        condition: 'true',
+        steps: [{ name: 'then-step', type: 'http' }],
+        else: [{ name: 'else-step', type: 'http' }],
+      },
+    ] as unknown as WorkflowYaml['steps'],
+  });
+  const parallel = minimal({
+    steps: [
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'a', steps: [{ name: 'step-a', type: 'http' }] },
+          { name: 'b', steps: [{ name: 'step-b', type: 'http' }] },
+        ],
+      },
+    ] as unknown as WorkflowYaml['steps'],
+  });
+
+  it.each([
+    ['if/else', ifElse],
+    ['parallel', parallel],
+  ])('%s: fork-head + stays off the chip and the card, with a non-empty stub', (_name, wf) => {
+    const { rfNodes, rfEdges, controls } = runLayout(wf, 'LR');
+    const forkControls = controls.filter(({ id }) => id.startsWith('terminal:fork:'));
+    expect(forkControls.length).toBeGreaterThan(0);
+
+    // The layout only reserves `FORK_HEAD_MIN_GAP` (sized for the TB chip height) between a
+    // fork and its branch heads, so in LR the wide chip leaves less than the full clearance:
+    // the + is centred in the free space instead. Require it to stay off the chip and the card.
+    const { r1, r2 } = checkPlacements(controls, rfNodes, rfEdges, 'LR', 0);
+    expect(r1).toHaveLength(0);
+    expect(r2).toHaveLength(0);
+    for (const { segmentStart, segmentEnd, centre } of forkControls) {
+      expect(segmentEnd.x - segmentStart.x).toBeGreaterThan(0);
+      expect(segmentStart.y).toBe(centre.y);
+    }
   });
 });

@@ -24,6 +24,9 @@ export const SETTINGS_GROUP_HEADER_HEIGHT = 20;
 /** Gap from the settings group to the trigger row (tighter than WORKFLOW_RANK_SEP). */
 export const SETTINGS_TO_FLOW_GAP = 100;
 
+/** Height of a full-size settings card (independent of the laid-out step footprint). */
+export const SETTINGS_CARD_HEIGHT = 56;
+
 /** Compact card size for Option B "Compact" layout. */
 export const SETTINGS_COMPACT_WIDTH = 168;
 export const SETTINGS_COMPACT_HEIGHT = 40;
@@ -132,7 +135,7 @@ export function buildWorkflowSettingsNodes(
   const isCompact = cardLayout === 'compact';
   const arrangeInRow = cardLayout !== 'vertical';
   const width = isCompact ? SETTINGS_COMPACT_WIDTH : PENDING_NODE_WIDTH;
-  const height = isCompact ? SETTINGS_COMPACT_HEIGHT : PENDING_NODE_HEIGHT;
+  const height = isCompact ? SETTINGS_COMPACT_HEIGHT : SETTINGS_CARD_HEIGHT;
   const gap = SETTINGS_GROUP_PAD;
   const pad = SETTINGS_GROUP_PAD;
   const span = specs.length * (arrangeInRow ? width : height) + (specs.length - 1) * gap;

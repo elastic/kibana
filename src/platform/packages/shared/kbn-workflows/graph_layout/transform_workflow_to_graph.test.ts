@@ -48,6 +48,79 @@ describe('transformWorkflowToGraph', () => {
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'first', target: 'second' }));
   });
 
+  it('labels a document trigger node as Document', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        triggers: [{ type: 'document', enabled: true }] as unknown as WorkflowYaml['triggers'],
+        steps: [{ name: 'first', type: 'http' }] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.nodes.find((n) => n.id === 'document')?.data).toMatchObject({ label: 'Document' });
+  });
+
+  it('skips malformed child entries instead of throwing', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x > 1',
+            steps: [{ type: 'http' }, 'oops', null, { name: 'valid-then', type: 'http' }],
+            else: [
+              { name: 'bad', type: 42 },
+              { name: 'valid-else', type: 'http' },
+            ],
+          },
+          {
+            name: 'fan',
+            type: 'parallel',
+            branches: [
+              { name: 'b', steps: [{ type: 'http' }, { name: 'valid-par', type: 'http' }] },
+            ],
+          },
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: 'x',
+            cases: [{ match: 1, steps: [{ name: 'valid-case', type: 'http' }, 7] }],
+            default: [{ name: 'valid-default', type: 'http' }, {}],
+          },
+          {
+            name: 'mrg',
+            type: 'merge',
+            steps: [{ type: 'http' }, { name: 'valid-merge', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const stepIds = r.nodes.filter((n) => n.type === 'step').map((n) => n.id);
+    expect(stepIds).toEqual(
+      expect.arrayContaining([
+        'gate',
+        'valid-then',
+        'valid-else',
+        'valid-par',
+        'valid-case',
+        'valid-default',
+        'valid-merge',
+      ])
+    );
+    expect(stepIds).toHaveLength(10);
+  });
+
+  it('does not throw for a step name longer than the slug input limit', () => {
+    const longName = 'x'.repeat(2000);
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: longName, type: 'if', condition: 'x', steps: [{ name: 'inner', type: 'http' }] },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.nodes.find((n) => n.id === 'x'.repeat(1000))).toBeDefined();
+  });
+
   it('labels if-branch edges as true / false', () => {
     const r = transformWorkflowToGraph(
       minimal({

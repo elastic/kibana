@@ -58,7 +58,12 @@ import {
   type WorkflowSettingsNodesInput,
 } from './build_settings_nodes';
 import { computeInsertionPoints } from './compute_insertion_points';
-import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
+import {
+  computePendingErrorBranchPlacement,
+  PENDING_NODE_HEIGHT,
+  PENDING_NODE_WIDTH,
+  type PendingInsertVisual,
+} from './pending_insert';
 import { resolveAppendInsertTarget } from './resolve_append_insert_target';
 import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
@@ -101,13 +106,29 @@ interface GraphErrorBoundaryState {
 }
 
 class GraphErrorBoundary extends Component<
-  { children: ReactNode; onError?: (msg: string) => void },
+  {
+    children: ReactNode;
+    /** Clears a caught error when any entry changes identity (e.g. the workflow was edited). */
+    resetKeys: readonly unknown[];
+    onError?: (msg: string) => void;
+  },
   GraphErrorBoundaryState
 > {
   state: GraphErrorBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): GraphErrorBoundaryState {
     return { error };
+  }
+
+  componentDidUpdate(prevProps: { resetKeys: readonly unknown[] }) {
+    const { resetKeys } = this.props;
+    if (
+      this.state.error &&
+      (resetKeys.length !== prevProps.resetKeys.length ||
+        resetKeys.some((key, index) => !Object.is(key, prevProps.resetKeys[index])))
+    ) {
+      this.setState({ error: null });
+    }
   }
 
   componentDidCatch(error: Error) {
@@ -194,8 +215,8 @@ const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined => {
   let maxX = -Infinity;
   let maxY = -Infinity;
   for (const n of topLevel) {
-    const w = typeof n.width === 'number' ? n.width : 300;
-    const h = typeof n.height === 'number' ? n.height : 56;
+    const w = typeof n.width === 'number' ? n.width : PENDING_NODE_WIDTH;
+    const h = typeof n.height === 'number' ? n.height : PENDING_NODE_HEIGHT;
     if (n.position.x < minX) minX = n.position.x;
     if (n.position.y < minY) minY = n.position.y;
     if (n.position.x + w > maxX) maxX = n.position.x + w;
@@ -753,6 +774,12 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const measuredHeight = useStore((s) => s.height);
   const nodesInitialized = useNodesInitialized();
   const hasCenteredInitialViewRef = useRef(false);
+  const readySignalledRef = useRef(false);
+  const signalReady = useCallback(() => {
+    if (readySignalledRef.current) return;
+    readySignalledRef.current = true;
+    onReady?.();
+  }, [onReady]);
   const [instanceReady, setInstanceReady] = useState(false);
   /**
    * When true, keep applying the home frame through panel-close / canvas resize
@@ -836,7 +863,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // viewport positioning internally before firing onInit. Just signal ready.
       if (fitViewProp) {
         hasCenteredInitialViewRef.current = true;
-        onReady?.();
+        signalReady();
         return;
       }
 
@@ -847,13 +874,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // only reliable signal.)
       if (defaultViewport) {
         hasCenteredInitialViewRef.current = true;
-        onReady?.();
+        signalReady();
         return;
       }
 
       setInstanceReady(true);
     },
-    [defaultViewport, fitViewProp, onReady]
+    [defaultViewport, fitViewProp, signalReady]
   );
 
   // Tracks whether we've ever seen an empty canvas this mount. Used so page-load
@@ -897,17 +924,15 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     hadWorkflowStructureRef.current = true;
     hasCenteredInitialViewRef.current = true;
     applyCenteredViewport(instance, 0);
-    onReady?.();
+    signalReady();
   }, [
     instanceReady,
     measuredWidth,
     measuredHeight,
     nodes.length,
-    nodes,
     selectedNodePanelInset,
     applyCenteredViewport,
-    onReady,
-    hasWorkflowStructure,
+    signalReady,
   ]);
 
   // Re-center briefly after first structure so a late canvas resize (config panel
@@ -957,7 +982,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     hasCenteredInitialViewRef.current = true;
     hadWorkflowStructureRef.current = hasWorkflowStructure;
     applyHomeViewport(instance, 0);
-    onReady?.();
+    signalReady();
   }, [
     instanceReady,
     measuredWidth,
@@ -965,7 +990,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     nodesInitialized,
     nodes.length,
     applyHomeViewport,
-    onReady,
+    signalReady,
     hasWorkflowStructure,
   ]);
 
@@ -1129,7 +1154,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             transition: 'opacity 200ms ease',
           }}
         >
-          <GraphErrorBoundary onError={onLayoutFailed}>
+          <GraphErrorBoundary resetKeys={[workflow, transformed]} onError={onLayoutFailed}>
             <ReactFlow
               nodes={animatedNodes}
               edges={animatedEdges}

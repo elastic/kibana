@@ -15,7 +15,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ERROR_PORT_ALONG } from './port_geometry';
 import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
-import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
+import type {
+  WorkflowGraphActions,
+  WorkflowGraphEditActions,
+} from './workflow_graph_actions_context';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 
 // Stub @xyflow/react's Handle as a spy — records calls so handle ids can be
@@ -250,6 +253,82 @@ describe('WorkflowGraphForeachGroupNode', () => {
       fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuButton'));
       fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuDelete'));
       expect(editActions.onDeleteNode).toHaveBeenCalledWith('group-1');
+    });
+  });
+
+  describe('keyboard access', () => {
+    const makeEdit = (): WorkflowGraphEditActions => ({
+      onInsert: jest.fn(),
+      onEditStep: jest.fn(),
+      onDeleteNode: jest.fn(),
+    });
+
+    const renderWithActions = (
+      actions: WorkflowGraphActions,
+      data: Partial<ForeachGroupNodeData> = {}
+    ) =>
+      render(
+        <WorkflowGraphActionsContext.Provider value={actions}>
+          <WorkflowGraphForeachGroupNode {...makeNodeProps(data)} />
+        </WorkflowGraphActionsContext.Provider>
+      );
+
+    const getCard = () => screen.getByRole('button', { name: /foreach step: Per Extension/ });
+
+    it('exposes a focusable button named after the step type and label', () => {
+      renderGroup();
+      expect(getCard()).toHaveAttribute('tabindex', '0');
+    });
+
+    it('includes the execution status in the accessible name', () => {
+      renderGroup({ stepExecution: makeExecution(ExecutionStatus.FAILED) });
+      expect(
+        screen.getByRole('button', { name: /foreach step: Per Extension, status: failed/ })
+      ).toBeInTheDocument();
+    });
+
+    it('selects the node on Enter and Space', () => {
+      const onStepSelect = jest.fn();
+      renderWithActions({ onStepSelect });
+
+      fireEvent.keyDown(getCard(), { key: 'Enter' });
+      fireEvent.keyDown(getCard(), { key: ' ' });
+
+      expect(onStepSelect).toHaveBeenCalledTimes(2);
+      expect(onStepSelect).toHaveBeenCalledWith('group-1');
+    });
+
+    it('does not select on other keys', () => {
+      const onStepSelect = jest.fn();
+      renderWithActions({ onStepSelect });
+
+      fireEvent.keyDown(getCard(), { key: 'Escape' });
+
+      expect(onStepSelect).not.toHaveBeenCalled();
+    });
+
+    it('deletes on Delete and Backspace in edit mode', () => {
+      const edit = makeEdit();
+      renderWithActions({ edit });
+
+      fireEvent.keyDown(getCard(), { key: 'Delete' });
+      fireEvent.keyDown(getCard(), { key: 'Backspace' });
+
+      expect(edit.onDeleteNode).toHaveBeenCalledTimes(2);
+      expect(edit.onDeleteNode).toHaveBeenCalledWith('group-1');
+    });
+
+    it('ignores keys pressed on the inner controls', () => {
+      const edit = makeEdit();
+      const onStepSelect = jest.fn();
+      renderWithActions({ edit, onStepSelect }, { hasBodySteps: false } as any);
+
+      const addFirstStep = screen.getByTestId('workflowGraphForeachGroupAddFirstStep');
+      fireEvent.keyDown(addFirstStep, { key: 'Enter' });
+      fireEvent.keyDown(addFirstStep, { key: 'Backspace' });
+
+      expect(onStepSelect).not.toHaveBeenCalled();
+      expect(edit.onDeleteNode).not.toHaveBeenCalled();
     });
   });
 });

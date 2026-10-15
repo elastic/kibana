@@ -26,10 +26,13 @@ const mockNodes = [
   { id: 'step1', type: 'step', position: { x: 0, y: 150 }, width: 200, height: 64, data: {} },
 ];
 const EXPECTED_CENTER_X = 100;
+// When set, `useWorkflowLayout` returns this array instead of `mockNodes`, so a
+// test can hand the canvas a new `nodes` identity (a re-layout) on re-render.
+let mockLayoutNodesOverride: typeof mockNodes | undefined;
 
 jest.mock('./use_workflow_layout', () => ({
   useWorkflowLayout: () => ({
-    nodes: mockNodes,
+    nodes: mockLayoutNodesOverride ?? mockNodes,
     edges: [],
     transformed: { nodeRefs: {}, edges: [], nodes: [] },
   }),
@@ -61,7 +64,11 @@ jest.mock('@xyflow/react', () => ({
   MiniMap: () => null,
   Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   Handle: () => null,
-  useReactFlow: () => ({ zoomIn: jest.fn(), zoomOut: jest.fn() }),
+  useReactFlow: () => ({
+    zoomIn: jest.fn(),
+    zoomOut: jest.fn(),
+    getViewport: () => ({ x: 0, y: 0, zoom: 1 }),
+  }),
   useStore: (selector: (s: { width: number; height: number }) => unknown) =>
     selector({ width: mockStoreWidth, height: mockStoreHeight }),
   useNodesInitialized: () => mockNodesInitialized,
@@ -118,6 +125,7 @@ describe('WorkflowGraphCanvas initial centering', () => {
     mockNodesInitialized = false;
     mockCapturedOnInit = undefined;
     mockCapturedReactFlowProps = undefined;
+    mockLayoutNodesOverride = undefined;
     // Prior tests may splice this empty on failure — always restore a baseline.
     if (mockNodes.length === 0) {
       mockNodes.push(
@@ -249,6 +257,35 @@ describe('WorkflowGraphCanvas initial centering', () => {
       32,
       expect.objectContaining({ zoom: 1, duration: 0 })
     );
+  });
+
+  it('signals ready once even when the layout keeps changing after the first structure', async () => {
+    const onReady = jest.fn();
+    const saved = mockNodes.splice(0, mockNodes.length);
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={emptyWorkflow}
+        onReady={onReady}
+      />
+    );
+    act(() => mockCapturedOnInit!(instance));
+    expect(onReady).not.toHaveBeenCalled();
+
+    mockNodes.push(...saved);
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} onReady={onReady} />);
+    await flushHomeViewportRaf();
+
+    // Each re-layout hands the canvas a new `nodes` array while the first-structure
+    // centering window is still open.
+    mockLayoutNodesOverride = mockNodes.map((n) => ({ ...n }));
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} onReady={onReady} />);
+    mockLayoutNodesOverride = mockNodes.map((n) => ({ ...n }));
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} onReady={onReady} />);
+
+    expect(onReady).toHaveBeenCalledTimes(1);
   });
 
   it('centers after nodes initialize when the canvas started empty', async () => {
@@ -605,5 +642,117 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
     );
     expect(screen.queryByTestId('customEmptyState')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowGraphPendingNode')).toBeInTheDocument();
+  });
+});
+
+describe('WorkflowGraphCanvas node click routing', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+    mockCapturedReactFlowProps = undefined;
+    mockLayoutNodesOverride = undefined;
+  });
+
+  const clickNode = (node: { id: string; type?: string; data: Record<string, unknown> }) => {
+    const onNodeClick = mockCapturedReactFlowProps?.onNodeClick;
+    if (typeof onNodeClick !== 'function') throw new Error('onNodeClick was not wired');
+    act(() => onNodeClick({}, node));
+  };
+
+  it('selects a step once and reports its type', () => {
+    const onStepSelect = jest.fn();
+    const onNodeClick = jest.fn();
+    const onSettingsNodeSelect = jest.fn();
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        onStepSelect={onStepSelect}
+        onNodeClick={onNodeClick}
+        onSettingsNodeSelect={onSettingsNodeSelect}
+      />
+    );
+
+    clickNode({ id: 'step1', type: 'step', data: { stepType: 'http' } });
+
+    expect(onStepSelect).toHaveBeenCalledTimes(1);
+    expect(onStepSelect).toHaveBeenCalledWith('step1');
+    expect(onNodeClick).toHaveBeenCalledWith('step1', 'http');
+    expect(onSettingsNodeSelect).not.toHaveBeenCalled();
+  });
+
+  it('routes a settings node click to onSettingsNodeSelect without selecting a step', () => {
+    const onStepSelect = jest.fn();
+    const onNodeClick = jest.fn();
+    const onSettingsNodeSelect = jest.fn();
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        onStepSelect={onStepSelect}
+        onNodeClick={onNodeClick}
+        onSettingsNodeSelect={onSettingsNodeSelect}
+      />
+    );
+
+    clickNode({ id: 'settings:outputs', type: 'settings', data: { kind: 'outputs' } });
+
+    expect(onSettingsNodeSelect).toHaveBeenCalledTimes(1);
+    expect(onSettingsNodeSelect).toHaveBeenCalledWith('outputs');
+    expect(onStepSelect).not.toHaveBeenCalled();
+    expect(onNodeClick).not.toHaveBeenCalled();
+  });
+});
+
+describe('WorkflowGraphCanvas render error boundary', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+    mockCapturedReactFlowProps = undefined;
+    mockLayoutNodesOverride = undefined;
+  });
+
+  const Exploding = ({ shouldThrow }: { shouldThrow: boolean }) => {
+    if (shouldThrow) throw new Error('boom');
+    return <div data-test-subj="healthyToolbar" />;
+  };
+
+  it('shows the error callout when a graph child throws and recovers once the workflow changes', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const onLayoutFailed = jest.fn();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        onLayoutFailed={onLayoutFailed}
+        toolbar={<Exploding shouldThrow />}
+      />
+    );
+    expect(screen.getByText('Workflow graph could not be displayed')).toBeInTheDocument();
+    expect(onLayoutFailed).toHaveBeenCalledWith('boom');
+
+    // Same workflow identity: the boundary must not retry on unrelated re-renders.
+    rerender(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        onLayoutFailed={onLayoutFailed}
+        toolbar={<Exploding shouldThrow={false} />}
+      />
+    );
+    expect(screen.getByText('Workflow graph could not be displayed')).toBeInTheDocument();
+
+    rerender(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={{ ...structuredWorkflow, name: 'fixed' }}
+        onLayoutFailed={onLayoutFailed}
+        toolbar={<Exploding shouldThrow={false} />}
+      />
+    );
+
+    expect(screen.queryByText('Workflow graph could not be displayed')).not.toBeInTheDocument();
+    expect(screen.getByTestId('healthyToolbar')).toBeInTheDocument();
+    consoleError.mockRestore();
   });
 });

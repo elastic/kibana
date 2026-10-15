@@ -874,10 +874,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             edit.onDeleteNode(node.id);
           }
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onStepSelect?.(node.id);
-        }}
         onContextMenu={(e) => {
           if (!editMode) return;
           e.preventDefault();

@@ -102,7 +102,8 @@ function layoutCompoundGroup(
  * @returns Positioned nodes and edges with absolute coordinates.
  * In compact mode (`options.compact === true`), inner nodes of compound groups
  * are excluded from the returned `nodes` array.
- * @throws If the input graph contains a cycle.
+ * @throws If the compound group nesting or the node graph contains a cycle, a lane
+ * set is malformed, or a compound group is not placed in the root graph or another group.
  */
 export function dagLayout(
   nodes: readonly DagNode[],
@@ -263,6 +264,20 @@ export function dagLayout(
   // Index outer nodes by id once so lookups below are O(1) instead of O(n).
   const outerNodeById = new Map(outerLayout.nodes.map((n) => [n.id, n]));
 
+  // Each nested group's placement inside its parent group, indexed once. A group
+  // that is neither a root node nor placed inside another group has no position.
+  const parentPlacementByGroupId = new Map<
+    string,
+    { parentGroupId: string; placement: DagPositionedNode }
+  >();
+  for (const [parentGroupId, inner] of groupInnerById) {
+    for (const placement of inner.layoutedInnerNodes) {
+      if (groupIds.has(placement.id) && !parentPlacementByGroupId.has(placement.id)) {
+        parentPlacementByGroupId.set(placement.id, { parentGroupId, placement });
+      }
+    }
+  }
+
   // Memoize absolute positions to avoid O(M²) re-computation for nested groups.
   const absPositionCache = new Map<string, { x: number; y: number }>();
   const getGroupAbsolutePosition = (groupId: string): { x: number; y: number } => {
@@ -274,19 +289,17 @@ export function dagLayout(
       absPositionCache.set(groupId, pos);
       return pos;
     }
-    for (const [parentGroupId, inner] of groupInnerById) {
-      const childInParent = inner.layoutedInnerNodes.find((n) => n.id === groupId);
-      if (childInParent) {
-        const parentAbs = getGroupAbsolutePosition(parentGroupId);
-        const pos = {
-          x: parentAbs.x + childInParent.x,
-          y: parentAbs.y + childInParent.y,
-        };
-        absPositionCache.set(groupId, pos);
-        return pos;
-      }
+    const parentPlacement = parentPlacementByGroupId.get(groupId);
+    if (!parentPlacement) {
+      throw new Error(
+        `Compound group "${groupId}" is neither a root node nor inside another group`
+      );
     }
-    return { x: 0, y: 0 };
+    const { parentGroupId, placement } = parentPlacement;
+    const parentAbs = getGroupAbsolutePosition(parentGroupId);
+    const pos = { x: parentAbs.x + placement.x, y: parentAbs.y + placement.y };
+    absPositionCache.set(groupId, pos);
+    return pos;
   };
 
   // Translate inner node positions from group-relative to absolute.

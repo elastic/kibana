@@ -199,6 +199,30 @@ function CompactToolsMenu({
     defaultMessage: 'Tools',
   });
 
+  const itemCss: CSSObject = {
+    width: '100%',
+    textAlign: 'left',
+    border: 0,
+    background: 'transparent',
+    padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
+    borderRadius: 6,
+    cursor: 'pointer',
+    display: 'flex',
+    gap: euiTheme.size.s,
+    alignItems: 'center',
+    '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
+    '&:focus-visible': {
+      outline: `2px solid ${euiTheme.colors.primary}`,
+      outlineOffset: 2,
+    },
+  };
+  // Anchors share the button look but must not pick up link colour / underline.
+  const linkCss: CSSObject = {
+    color: 'inherit',
+    textDecoration: 'none',
+    '&:hover': { textDecoration: 'none' },
+  };
+
   return (
     <EuiPopover
       isOpen={isOpen}
@@ -223,36 +247,34 @@ function CompactToolsMenu({
         {toolsSlot}
         {toolsMenuItems?.length ? (
           <div css={{ marginTop: toolsSlot ? euiTheme.size.s : 0 }}>
-            {toolsMenuItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => {
-                  item.onClick?.();
-                  close();
-                }}
-                css={{
-                  width: '100%',
-                  textAlign: 'left',
-                  border: 0,
-                  background: 'transparent',
-                  padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  gap: euiTheme.size.s,
-                  alignItems: 'center',
-                  '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
-                  '&:focus-visible': {
-                    outline: `2px solid ${euiTheme.colors.primary}`,
-                    outlineOffset: 2,
-                  },
-                }}
-              >
-                <EuiIcon type={item.iconType} aria-hidden />
-                <span>{item.label}</span>
-              </button>
-            ))}
+            {toolsMenuItems.map((item) => {
+              const content = (
+                <>
+                  <EuiIcon type={item.iconType} aria-hidden />
+                  <span>{item.label}</span>
+                </>
+              );
+              const handleActivate = () => {
+                item.onClick?.();
+                close();
+              };
+              return item.href ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target={item.target}
+                  rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
+                  onClick={handleActivate}
+                  css={[itemCss, linkCss]}
+                >
+                  {content}
+                </a>
+              ) : (
+                <button key={item.label} type="button" onClick={handleActivate} css={itemCss}>
+                  {content}
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </div>
@@ -355,6 +377,17 @@ export function WorkflowDetailBottomBar({
     }
   }, [disableAutoCollapse]);
 
+  // Focus moving between the pill, the bar and its popovers must not collapse
+  // it: only a blur that lands outside the bar arms the deferred collapse.
+  const handleExpandedBlur = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && event.currentTarget.contains(next)) return;
+      handleExpandedMouseLeave();
+    },
+    [handleExpandedMouseLeave]
+  );
+
   const handlePillMouseEnter = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
     setIsExpanded(true);
@@ -378,12 +411,62 @@ export function WorkflowDetailBottomBar({
   return (
     <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
+        {/* Collapsed pill — hover to expand. Precedes the bar in DOM order so Tab from
+            the focused pill continues into the bar it just revealed. */}
+        <div
+          role="button"
+          tabIndex={isExpanded ? -1 : 0}
+          aria-label={pillLabel}
+          css={[
+            {
+              position: 'absolute',
+              left: '50%',
+              bottom: 0,
+              transform: 'translateX(-50%)',
+              pointerEvents: isExpanded ? 'none' : 'auto',
+              opacity: isExpanded ? 0 : 1,
+              transition: 'opacity 200ms ease',
+              width: 64,
+              height: 24,
+              background: euiTheme.colors.primary,
+              borderRadius: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            },
+            floatingShadow,
+          ]}
+          onMouseEnter={handlePillMouseEnter}
+          onFocus={handlePillMouseEnter}
+          onBlur={handleExpandedMouseLeave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handlePillMouseEnter();
+            }
+          }}
+        >
+          <EuiIcon
+            type="boxesVertical"
+            size="s"
+            color={euiTheme.colors.emptyShade}
+            css={{ transform: 'rotate(90deg)' }}
+            aria-hidden
+          />
+        </div>
+
         <div
           css={[
             {
               pointerEvents: isExpanded ? 'auto' : 'none',
               opacity: isExpanded ? 1 : 0,
-              transition: 'opacity 200ms ease',
+              // Hidden once faded out so the collapsed controls leave the tab
+              // order and the accessibility tree.
+              visibility: isExpanded ? 'visible' : 'hidden',
+              transition: isExpanded
+                ? 'opacity 200ms ease'
+                : 'opacity 200ms ease, visibility 0s linear 200ms',
               background: euiTheme.colors.backgroundBasePlain,
               borderRadius: WORKFLOWS_SURFACE_RADIUS,
               paddingBlock: euiTheme.size.s,
@@ -398,6 +481,9 @@ export function WorkflowDetailBottomBar({
           ]}
           onMouseEnter={handleExpandedMouseEnter}
           onMouseLeave={handleExpandedMouseLeave}
+          onFocus={handleExpandedMouseEnter}
+          onBlur={handleExpandedBlur}
+          data-test-subj="workflowDetailBottomBarContent"
         >
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
             {/* Left section — Actions menu + documentation in both editor views. */}
@@ -446,50 +532,6 @@ export function WorkflowDetailBottomBar({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </div>
-
-        {/* Collapsed pill — hover to expand */}
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label={pillLabel}
-          css={[
-            {
-              position: 'absolute',
-              left: '50%',
-              bottom: 0,
-              transform: 'translateX(-50%)',
-              pointerEvents: isExpanded ? 'none' : 'auto',
-              opacity: isExpanded ? 0 : 1,
-              transition: 'opacity 200ms ease',
-              width: 64,
-              height: 24,
-              background: euiTheme.colors.primary,
-              borderRadius: 30,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            },
-            floatingShadow,
-          ]}
-          onMouseEnter={handlePillMouseEnter}
-          onFocus={handlePillMouseEnter}
-          onBlur={handleExpandedMouseLeave}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handlePillMouseEnter();
-            }
-          }}
-        >
-          <EuiIcon
-            type="boxesVertical"
-            size="s"
-            color={euiTheme.colors.emptyShade}
-            css={{ transform: 'rotate(90deg)' }}
-            aria-hidden
-          />
         </div>
       </div>
     </WorkflowBottomBarContext.Provider>
