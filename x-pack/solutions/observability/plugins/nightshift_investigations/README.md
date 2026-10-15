@@ -37,10 +37,10 @@ xpack.security.serviceAccounts.enabled: true
 xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 ```
 
-Until a space is set up, the Nightshift app shows a setup step in place of its pages:
-- Users with Nightshift manage and configure privileges get an **Enable service account** button.
-- Other users are told to ask an administrator.
-- If service accounts are turned off, the setup step says which setting to change.
+Until a space is set up, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step, below the intro video:
+- Users with `manage_security` get an **Enable Elastic Nightshift** button.
+- Other users see the button disabled and are told to ask an administrator with `manage_security`.
+- If service accounts are turned off, the step says which setting to change.
 
 The button calls:
 
