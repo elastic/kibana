@@ -84,6 +84,7 @@ describe('validateConfig', () => {
           startColumn: 1,
           endColumn: 6,
           message: "SyntaxError: mismatched input 'WHERE' expecting {'row', 'from', 'show'}",
+          code: 'syntaxError',
           severity: 8,
         },
       ];
@@ -143,6 +144,7 @@ describe('validateConfig', () => {
           startColumn: 17,
           endColumn: 28,
           message: "SyntaxError: mismatched input 'BAD_COMMAND'",
+          code: 'syntaxError',
           severity: 8,
         },
         {
@@ -172,7 +174,7 @@ describe('validateConfig', () => {
         params: {},
       };
 
-      const unknownErrors = [{ severity: 8 }];
+      const unknownErrors = [{ severity: 8 }] as any;
       mockValidateQuery.mockResolvedValue({ errors: unknownErrors, warnings: [] });
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
