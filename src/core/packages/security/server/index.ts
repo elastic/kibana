@@ -86,6 +86,7 @@ export {
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,
+  resolveUiamClientAuthentication,
 } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export {
@@ -96,4 +97,4 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType } from './src/uiam';
+export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';
