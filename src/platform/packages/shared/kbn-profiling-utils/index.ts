@@ -41,6 +41,7 @@ export {
   profilingSchemaRt,
   DEFAULT_PROFILING_SCHEMA,
   PROFILING_EVENTS_INDEX_BY_SCHEMA,
+  PROFILING_STACKTRACES_INDEX_BY_SCHEMA,
 } from './common/profiling_schema';
 
 export type {
