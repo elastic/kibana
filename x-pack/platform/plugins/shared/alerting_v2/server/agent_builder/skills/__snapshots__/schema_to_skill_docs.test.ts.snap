@@ -344,7 +344,7 @@ exports[
 
 Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.
 
-When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`action-policy-management\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`action-policy-authoring\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
 
 ## Notifications Require Alert Kind
 
@@ -353,9 +353,9 @@ Action policies only process Alerts (\`kind: alert\`). Events (\`kind: signal\`)
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
 1. **Explain the difference**: Events (\`kind: signal\`) rules are observation-only and do not trigger notifications. Alerts (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.
-2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`action-policy-management\` skill for notification setup.
+2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`action-policy-authoring\` skill for notification setup.
 3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing Events (\`kind: signal\`) rule cannot be converted. Offer to create a new Alerts (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.
-4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
+4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-authoring\` skill for notification setup."
 `;
 
 exports[
@@ -671,7 +671,7 @@ exports[
 Use this path when the user wants notifications for **one specific rule**.
 
 Action policies only process alerts. If the rule is \`kind: signal\`, do not
-proceed: ask the user (or the rule-management skill) to convert or recreate the
+proceed: ask the user (or the rule-authoring skill) to convert or recreate the
 rule as \`kind: alert\` first.
 
 ## Scoping a policy to one rule

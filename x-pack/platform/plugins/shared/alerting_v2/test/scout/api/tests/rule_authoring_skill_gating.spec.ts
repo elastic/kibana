@@ -14,9 +14,9 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
-const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
-const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
-const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
+const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
+const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
+const ALERTING_V2_SKILL_IDS = [RULE_AUTHORING_SKILL_ID, ACTION_POLICY_AUTHORING_SKILL_ID];
 // Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
 const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 const RESTRICTED_SOLUTION_SPACES = [
@@ -31,8 +31,8 @@ const OBSERVABILITY_SOLUTION_SPACE = {
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
 /*
- * Alerting V2 Agent Builder skills (`rule-management` and
- * `action-policy-management`) are gated on `alerting:v2:enabled` and on
+ * Alerting V2 Agent Builder skills (`rule-authoring` and
+ * `action-policy-authoring`) are gated on `alerting:v2:enabled` and on
  * Observability or Classic spaces. They are listed even when
  * `agentBuilder:experimentalFeatures` and `alerting:v2:experimentalFeatures`
  * are off.

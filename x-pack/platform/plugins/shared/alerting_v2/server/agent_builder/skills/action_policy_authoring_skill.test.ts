@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_AUTHORING_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createAlertingV2Availability } from './alerting_v2_availability';
-import { createActionPolicyManagementSkill } from './action_policy_management_skill';
+import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 
 const createDeps = (): ManageActionPolicyToolDeps & {
   availability: ReturnType<typeof createAlertingV2Availability>;
@@ -28,33 +28,33 @@ const createDeps = (): ManageActionPolicyToolDeps & {
   }),
 });
 
-describe('createActionPolicyManagementSkill', () => {
+describe('createActionPolicyAuthoringSkill', () => {
   it('generates schema docs without throwing', () => {
-    expect(() => createActionPolicyManagementSkill(createDeps())).not.toThrow();
+    expect(() => createActionPolicyAuthoringSkill(createDeps())).not.toThrow();
   });
 
-  it('registers the skill under the stable action-policy-management id and name', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+  it('registers the skill under the stable action-policy-authoring id and name', () => {
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
-    expect(skill.id).toBe(ACTION_POLICY_MANAGEMENT_SKILL_ID);
-    expect(skill.name).toBe(ACTION_POLICY_MANAGEMENT_SKILL_ID);
+    expect(skill.id).toBe(ACTION_POLICY_AUTHORING_SKILL_ID);
+    expect(skill.name).toBe(ACTION_POLICY_AUTHORING_SKILL_ID);
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
   it('is not gated behind agent builder experimental features', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.experimental).not.toBe(true);
   });
 
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
   it('stays available when Alerting V2 experimental features are disabled', async () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };
 
     await expect(
@@ -66,7 +66,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('exposes only the manage action policy inline tool', async () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
@@ -76,7 +76,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('includes action policy discovery and default notification setup instructions', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Discovery');
     expect(skill.content).toContain('space-scoped saved object');
@@ -91,7 +91,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('inlines the action policy operations schema in skill content and defers concepts to When to Load References', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Operations Schema Reference');
     expect(skill.content).toContain('When to Load References');
@@ -101,7 +101,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('exposes the generated workflow dispatch payload schema as referenced content', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
     const payloadRef = skill.referencedContent?.find(
       (entry) => entry.name === 'workflow-dispatch-payload'
     );
@@ -116,7 +116,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('exposes schema-generated matcher, grouping, and throttle references', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
     const byName = Object.fromEntries(
       (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
     );
@@ -150,7 +150,7 @@ describe('createActionPolicyManagementSkill', () => {
   });
 
   it('defers throttle strategy details to referenced content instead of teaching a two-strategy model', () => {
-    const skill = createActionPolicyManagementSkill(createDeps());
+    const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('action-policy-throttle-strategies.md');
     expect(skill.content).toContain('action-policy-throttle-grouping-compatibility.md');

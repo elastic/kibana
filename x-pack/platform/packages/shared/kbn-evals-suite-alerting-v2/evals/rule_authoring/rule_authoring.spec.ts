@@ -21,13 +21,13 @@ import {
   DETECTION_RULE_EDIT_SKILL_ID,
   INDEX_DISCOVERY_TOOL_IDS,
   INDEX_MAPPING_TOOL_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
   RUNBOOK_ARTIFACT_TYPE,
 } from '../../src/constants';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - routing',
+  'Alerting V2 rule-authoring skill - routing',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate('skill routing', async ({ evaluateDataset }) => {
@@ -35,7 +35,7 @@ evaluate.describe(
         dataset: {
           name: 'alerting-v2: skill routing',
           description:
-            'Verifies that Observability / ops alerting requests route to the rule-management ' +
+            'Verifies that Observability / ops alerting requests route to the rule-authoring ' +
             'skill and Security / SIEM detection requests route to detection-rule-edit.',
           examples: [
             {
@@ -49,7 +49,7 @@ evaluate.describe(
                   'The assistant treats this as an Observability / ops alerting request (e.g. host CPU threshold) rather than a Security/SIEM detection-rule request.',
                   'The response progresses toward an Alerting V2 alert rule (clarifying details or composing) and does not create or propose a Security detection rule.',
                 ],
-                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
               },
             },
@@ -65,7 +65,7 @@ evaluate.describe(
                   'The response progresses toward a Security detection rule and does not compose an Alerting V2 rule via manage_rule.',
                 ],
                 expectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [RULE_AUTHORING_SKILL_ID],
               },
             },
           ],
@@ -76,7 +76,7 @@ evaluate.describe(
 );
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - composition',
+  'Alerting V2 rule-authoring skill - composition',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate(
@@ -86,7 +86,7 @@ evaluate.describe(
           dataset: {
             name: 'alerting-v2: rule composition',
             description:
-              'Exercises rule composition via the Alerting V2 rule-management skill across ' +
+              'Exercises rule composition via the Alerting V2 rule-authoring skill across ' +
               'multiple scenarios: the "Create with AI Agent" UI entry point, a fully-specified ' +
               'single-turn request, and a vague natural-language request that requires index ' +
               'discovery. All target data-forge-seeded indices so ES|QL validation is real.',
@@ -107,7 +107,7 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
@@ -146,7 +146,7 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch (the index and fields exist), and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
@@ -184,7 +184,7 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
@@ -220,7 +220,7 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
@@ -247,7 +247,7 @@ evaluate.describe(
 );
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - recovery strategy updates',
+  'Alerting V2 rule-authoring skill - recovery strategy updates',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate('recovery strategy updates', async ({ evaluateDataset, hostMetricsIndex }) => {
@@ -297,7 +297,7 @@ evaluate.describe(
 );
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - no-data strategy updates',
+  'Alerting V2 rule-authoring skill - no-data strategy updates',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate('no-data strategy updates', async ({ evaluateDataset, hostMetricsIndex }) => {
@@ -348,7 +348,7 @@ evaluate.describe(
 );
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - runbooks',
+  'Alerting V2 rule-authoring skill - runbooks',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate('runbook composition', async ({ evaluateDataset, hostMetricsIndex }) => {
@@ -356,7 +356,7 @@ evaluate.describe(
         dataset: {
           name: 'alerting-v2: runbook composition',
           description:
-            'Exercises runbook attachment via the rule-management skill. Covers single-turn ' +
+            'Exercises runbook attachment via the rule-authoring skill. Covers single-turn ' +
             'rule creation with an inline runbook request, and multi-turn addition of a ' +
             'runbook to an already-composed rule.',
           examples: [
@@ -375,7 +375,7 @@ evaluate.describe(
                   'The runbook content is meaningful and actionable — not a placeholder or stub — and is relevant to the high-CPU scenario the user described.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
-                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                 expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
@@ -414,7 +414,7 @@ evaluate.describe(
                   'The runbook content is relevant to the high-CPU scenario and includes actionable triage or mitigation steps.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
-                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                 expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
