@@ -169,7 +169,7 @@ tags:
         }'
       ```
 
-      All examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). To use your own data, replace the index pattern and field references.
+      Most examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples require a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
 
       ### Discover session structure
 
@@ -191,6 +191,8 @@ tags:
       | `data_view_spec` | A data view defined inline, with an `index_pattern` and an optional `time_field`. |
 
       Tabs based on data views also support `query`, `filters`, and `view_mode` (`documents`, `patterns`, or `aggregated`).
+
+      Each tab also has a `type`. `default` tabs support data views and ES|QL. `metrics` tabs support only ES|QL and also store metrics grid settings, such as `dimensions` and aggregations. If omitted, `type` defaults to `default`.
 
       - **ES|QL tab**:
 
@@ -31602,8 +31604,8 @@ paths:
         content:
           application/json:
             examples:
-              classic:
-                summary: Classic tab with an inline data view
+              data_view:
+                summary: Data view tab with an inline data view
                 value:
                   tabs:
                     - column_order:
@@ -31620,8 +31622,8 @@ paths:
                         expression: 'response: 200'
                         language: kql
                   title: Sample web logs
-              classic_reference:
-                summary: Classic tab with the existing sample web logs data view
+              data_view_reference:
+                summary: Data view tab with the sample web logs data view
                 value:
                   tabs:
                     - column_order:
@@ -31657,24 +31659,24 @@ paths:
                   tags: []
                   title: Requests by extension
               metrics:
-                summary: Metrics tab using sample time series logs
+                summary: Metrics tab on a time series data stream (replace `metrics-*` with your own)
                 value:
                   tabs:
                     - counter_aggregation: max
                       data_source:
-                        query: TS kibana_sample_data_logstsdb
+                        query: TS metrics-*
                         type: esql
                       dimensions:
-                        - event.dataset
+                        - host.name
                       gauge_aggregation: avg
                       grid_sort_direction: asc
                       grid_sort_field: alphabetically
                       histogram_percentile: p95
                       id: metrics
                       label: Metrics
-                      search_term: bytes
+                      search_term: cpu
                       type: metrics
-                  title: Sample web logs metrics
+                  title: Host metrics
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
       responses:
