@@ -22,17 +22,17 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  TanStackDataGrid,
+  type RowVirtualizer,
+  type UseRowVirtualizer,
+} from '@kbn/tanstack-data-table';
 import useObservable from 'react-use/lib/useObservable';
 import type { Row } from '@tanstack/react-table';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
-import {
-  TanStackDataGrid,
-  type RowVirtualizer,
-  type UseRowVirtualizer,
-} from '../../../../../../components/discover_grid/tanstack_data_grid';
 import type { DiscoverGridImplementation } from '../../../../../../components/discover_grid/discover_grid_implementation';
 
 interface ESQLDataCascadeLeafCellProps

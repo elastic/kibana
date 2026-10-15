@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TanStackDataGrid, type TanStackDataGridProps } from './tanstack_data_grid';
-export type { RowVirtualizer, UseRowVirtualizer } from './tanstack_grid_body';
+export { TanStackDataGrid, type TanStackDataGridProps } from './src/tanstack_data_grid';
+export type { RowVirtualizer, UseRowVirtualizer } from './src/tanstack_grid_body';

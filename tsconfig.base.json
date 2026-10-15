@@ -2701,6 +2701,8 @@
       "@kbn/synthtrace/*": ["./src/platform/packages/shared/kbn-synthtrace/*"],
       "@kbn/synthtrace-client": ["./src/platform/packages/shared/kbn-synthtrace-client"],
       "@kbn/synthtrace-client/*": ["./src/platform/packages/shared/kbn-synthtrace-client/*"],
+      "@kbn/tanstack-data-table": ["./src/platform/packages/shared/kbn-tanstack-data-table"],
+      "@kbn/tanstack-data-table/*": ["./src/platform/packages/shared/kbn-tanstack-data-table/*"],
       "@kbn/task-manager-dependencies-plugin": ["./x-pack/platform/plugins/private/task_manager_dependencies"],
       "@kbn/task-manager-dependencies-plugin/*": ["./x-pack/platform/plugins/private/task_manager_dependencies/*"],
       "@kbn/task-manager-fixture-plugin": ["./x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture"],

@@ -14,7 +14,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { servicesMock } from '../__mocks__/services';
 import { TanStackDataGrid, type TanStackDataGridProps } from './tanstack_data_grid';
 
 jest.mock('@tanstack/react-virtual', () => ({
@@ -42,7 +42,7 @@ const renderGrid = (props: Partial<TanStackDataGridProps> = {}) =>
         columns={['message']}
         dataView={dataViewMock}
         showTimeCol={false}
-        services={discoverServiceMock}
+        services={servicesMock}
         loadingState={DataLoadingState.loaded}
         {...props}
       />

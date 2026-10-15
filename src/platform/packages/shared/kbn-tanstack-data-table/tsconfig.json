@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "*.ts",
+    "**/*.tsx",
+    "src/**/*",
+    "__mocks__/**/*.ts"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/cell-actions",
+    "@kbn/core",
+    "@kbn/data-grid-in-table-search",
+    "@kbn/data-source",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
+    "@kbn/es-query",
+    "@kbn/field-formats-plugin",
+    "@kbn/field-utils",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer",
+    "@kbn/utility-types"
+  ]
+}

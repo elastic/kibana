@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/tanstack-data-table",
+  "owner": [
+    "@elastic/kibana-discover"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "TanStack Table-based data grid for Discover and other document tables"
+}

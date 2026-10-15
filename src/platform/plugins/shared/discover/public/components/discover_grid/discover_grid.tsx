@@ -15,6 +15,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { TanStackDataGrid } from '@kbn/tanstack-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -24,7 +25,6 @@ import {
   LazyCascadedDocumentsLayout,
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
-import { TanStackDataGrid } from './tanstack_data_grid';
 import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {

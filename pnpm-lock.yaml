@@ -3769,6 +3769,9 @@ importers:
       '@kbn/synthetics-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/synthetics
+      '@kbn/tanstack-data-table':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-tanstack-data-table
       '@kbn/task-manager-dependencies-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
@@ -8314,6 +8317,8 @@ importers:
   src/platform/packages/shared/kbn-synthtrace: {}
 
   src/platform/packages/shared/kbn-synthtrace-client: {}
+
+  src/platform/packages/shared/kbn-tanstack-data-table: {}
 
   src/platform/packages/shared/kbn-telemetry: {}
 

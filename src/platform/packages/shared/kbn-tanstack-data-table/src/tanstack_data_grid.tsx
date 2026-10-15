@@ -149,8 +149,6 @@ import {
   type UseRowVirtualizer,
   useGridBodyRowVirtualizer,
 } from './tanstack_grid_body';
-import type { useDiscoverServices } from '../../../hooks/use_discover_services';
-
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
     isControl?: boolean;
@@ -366,7 +364,7 @@ const formatFieldValueForText = ({
   field,
 }: {
   value: unknown;
-  fieldFormats: ReturnType<typeof useDiscoverServices>['fieldFormats'];
+  fieldFormats: UnifiedDataTableProps['services']['fieldFormats'];
   dataView: DataView;
   field?: ReturnType<DataView['getFieldByName']>;
 }): string => {
@@ -816,7 +814,7 @@ const SummaryCellContent = React.memo(
     dataView: DataView;
     maxEntries: number;
     shouldShowFieldHandler: (fieldName: string) => boolean;
-    fieldFormats: ReturnType<typeof useDiscoverServices>['fieldFormats'];
+    fieldFormats: UnifiedDataTableProps['services']['fieldFormats'];
     dataSource: DataSource | undefined;
     isCompressed: boolean;
   }) => {

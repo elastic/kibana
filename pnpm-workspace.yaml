@@ -917,6 +917,7 @@ packages:
   - 'src/platform/packages/shared/kbn-swc-register'
   - 'src/platform/packages/shared/kbn-synthtrace'
   - 'src/platform/packages/shared/kbn-synthtrace-client'
+  - 'src/platform/packages/shared/kbn-tanstack-data-table'
   - 'src/platform/packages/shared/kbn-telemetry'
   - 'src/platform/packages/shared/kbn-telemetry-config'
   - 'src/platform/packages/shared/kbn-test'

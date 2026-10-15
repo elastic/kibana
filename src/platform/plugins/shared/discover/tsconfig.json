@@ -69,6 +69,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
+    "@kbn/tanstack-data-table",
     "@kbn/no-data-page-plugin",
     "@kbn/global-search-plugin",
     "@kbn/resizable-layout",
