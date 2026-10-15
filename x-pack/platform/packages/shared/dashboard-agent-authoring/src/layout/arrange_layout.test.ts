@@ -147,6 +147,34 @@ describe('arrangeDashboardLayout', () => {
     expect(reportFailure).not.toHaveBeenCalled();
   });
 
+  it('flags panels that moved to another container, but not new panels', async () => {
+    const arrangeLayout = jest.fn(async () => completeArrangement);
+    const dashboardWithMovedPanels: DashboardAttachmentData = {
+      ...originalDashboardData,
+      panels: [
+        createLensPanel('inner'),
+        createLensPanel('new-panel', 9),
+        createSection('section-a', 18, [createLensPanel('existing')]),
+      ],
+    };
+
+    await arrange(arrangeLayout, { dashboardData: dashboardWithMovedPanels });
+
+    expect(arrangeLayout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        panels: [
+          expect.objectContaining({ id: 'inner', moved: true }),
+          expect.not.objectContaining({ moved: true }),
+        ],
+        sections: [
+          expect.objectContaining({
+            panels: [expect.objectContaining({ id: 'existing', moved: true })],
+          }),
+        ],
+      })
+    );
+  });
+
   it.each<[string, LayoutArrangement, string]>([
     [
       'misses a panel',
