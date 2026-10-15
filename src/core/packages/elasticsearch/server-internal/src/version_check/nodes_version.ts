@@ -59,7 +59,7 @@ export type NodesVersionEvent =
   | { readonly type: 'compatibilityChanged'; readonly compatibility: NodesVersionCompatibility }
   | { readonly type: 'compatibilityUnchanged' };
 
-export const initialState: NodesVersionState = {
+const initialState: NodesVersionState = {
   controlState: 'STARTUP',
   compatibility: undefined,
   failures: 0,
@@ -104,7 +104,7 @@ const nextControlState = (
   return result.ok ? 'NORMAL' : 'FAILING';
 };
 
-export const model = (
+const model = (
   config: NodesVersionConfig,
   state: NodesVersionState,
   result: NodesVersionResult
