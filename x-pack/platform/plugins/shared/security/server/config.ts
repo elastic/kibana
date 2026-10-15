@@ -323,8 +323,10 @@ export const ConfigSchema = schema.object({
   }),
 
   serviceAccounts: schema.object({
-    // Demo/deploy default: AlertZero AccessBoundary and managed Workers require this.
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
     requestLifetime: schema.duration({
       defaultValue: '10m',
       validate(value) {

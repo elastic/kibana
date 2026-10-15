@@ -33,14 +33,18 @@ import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useAlertBasedTiles,
   useAlertBasedTilesDelta,
+  useAlertBasedTilesSeries,
   useEntitiesWithAnomaliesCount,
   useEntitiesWithAnomaliesDelta,
+  useEntitiesWithAnomaliesSeries,
   useNewEntityCount,
   useNewEntityDelta,
+  useNewEntitySeries,
   useNewlyHighCriticalCount,
   useNewlyHighCriticalDelta,
   useRiskMoversCount,
   useRiskMoversDelta,
+  useRiskTilesSeries,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
@@ -214,6 +218,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedDelta,
     isDeltaLoading,
     isHistoryMissing: alertBasedHistoryMissing,
+    reachesBack: alertBasedReachesBack,
   } = useAlertBasedTilesDelta({
     ...deltaOptions,
     severeAlertsCount: alertsCount,
@@ -223,22 +228,57 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     delta: anomaliesDelta,
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
+    reachesBack: anomaliesReachesBack,
   } = useEntitiesWithAnomaliesDelta({ ...deltaOptions, count: anomaliesCount });
   const {
     delta: newEntityDelta,
     isDeltaLoading: newEntityDeltaLoading,
     isHistoryMissing: newEntityHistoryMissing,
+    reachesBack: newEntityReachesBack,
   } = useNewEntityDelta({ ...deltaOptions, count: newEntityCount });
   const {
     delta: riskMoversDelta,
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
+    reachesBack: riskMoversReachesBack,
   } = useRiskMoversDelta({ ...deltaOptions, count: riskMoversCount });
   const {
     delta: newlyHCDelta,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
+    reachesBack: newlyHCReachesBack,
   } = useNewlyHighCriticalDelta({ ...deltaOptions, count: newlyHCCount });
+
+  // The sparklines follow the deltas: they start once the counts and the deltas have settled, and
+  // only for a tile whose history reaches back twice the range, so they never delay them.
+  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+    ...deltaOptions,
+    isReady: areCountsLoaded && !isDeltaLoading,
+    reachesBack: alertBasedReachesBack,
+    severeAlertsCount: alertsCount,
+    watchlistedCount,
+  });
+  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
+    ...deltaOptions,
+    isReady: areCountsLoaded && !anomaliesDeltaLoading,
+    reachesBack: anomaliesReachesBack,
+    count: anomaliesCount,
+  });
+  const { trend: newEntityTrend } = useNewEntitySeries({
+    ...deltaOptions,
+    isReady: areCountsLoaded && !newEntityDeltaLoading,
+    reachesBack: newEntityReachesBack,
+    count: newEntityCount,
+  });
+  // The two risk tiles read the same risk score history, so one query serves both sparklines.
+  const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
+    ...deltaOptions,
+    isReady: areCountsLoaded && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
+    riskMoversReachesBack,
+    newlyHighCriticalReachesBack: newlyHCReachesBack,
+    riskMoversCount,
+    newlyHighCriticalCount: newlyHCCount,
+  });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
     setActiveFilter((prev) =>
@@ -324,11 +364,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: alertsDelta,
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
+        trend: alertsTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
+            defaultMessage:
+              'Entities with at least one high or critical alert in the last {timeRange}',
             values: { timeRange },
           }
         ),
@@ -352,6 +394,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: anomaliesDelta,
         isDeltaLoading: anomaliesDeltaLoading,
         isDeltaUnavailable: anomaliesHistoryMissing,
+        trend: anomaliesTrend,
         isLoading: anomaliesLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -380,6 +423,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: riskMoversDelta,
         isDeltaLoading: riskMoversDeltaLoading,
         isDeltaUnavailable: riskMoversHistoryMissing,
+        trend: riskMoversTrend,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -421,6 +465,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: newlyHCDelta,
         isDeltaLoading: newlyHCDeltaLoading,
         isDeltaUnavailable: newlyHCHistoryMissing,
+        trend: newlyHCTrend,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -466,6 +511,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: watchlistedDelta,
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
+        trend: watchlistedTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -491,6 +537,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         delta: newEntityDelta,
         isDeltaLoading: newEntityDeltaLoading,
         isDeltaUnavailable: newEntityHistoryMissing,
+        trend: newEntityTrend,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -512,29 +559,35 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [
       alertsCount,
       alertsDelta,
+      alertsTrend,
       alertBasedLoading,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
       anomaliesDelta,
+      anomaliesTrend,
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
       riskMoversCount,
       riskMoversDelta,
+      riskMoversTrend,
       riskMoversDeltaLoading,
       riskMoversHistoryMissing,
       riskMoversLoading,
       newlyHCCount,
       newlyHCDelta,
+      newlyHCTrend,
       newlyHCDeltaLoading,
       newlyHCHistoryMissing,
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
       watchlistedDelta,
+      watchlistedTrend,
       newEntityCount,
       newEntityDelta,
+      newEntityTrend,
       newEntityDeltaLoading,
       newEntityHistoryMissing,
       newEntityLoading,

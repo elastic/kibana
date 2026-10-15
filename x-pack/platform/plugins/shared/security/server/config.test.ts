@@ -1740,11 +1740,11 @@ describe('config schema', () => {
       expect(
         ConfigSchema.validate(
           {
-            serviceAccounts: { enabled: true },
+            serviceAccounts: { enabled: false },
           },
           { serverless: false }
         ).serviceAccounts
-      ).toMatchObject({ enabled: true });
+      ).toMatchObject({ enabled: false });
     });
 
     it('should be enabled by default outside of the serverless context', () => {

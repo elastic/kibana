@@ -75,6 +75,15 @@ describe('getTermsConversionFailure', () => {
     );
   });
 
+  it('prefers unsupported nesting over other bucket when both apply', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true }),
+        context({ hasUnsupportedDateHistogramNesting: true })
+      )
+    ).toBe('terms_date_histogram_not_supported');
+  });
+
   it('allows conversion when other bucket is unset', () => {
     const column = createTermsColumn();
     delete column.params.otherBucket;
@@ -105,6 +114,18 @@ describe('getTermsConversionFailure', () => {
           orderBy: { type: 'rare', maxDocCount: 3 },
         }),
         context({ hasUnsupportedDateHistogramNesting: true })
+      )
+    ).toBe('terms_date_histogram_not_supported');
+  });
+
+  it('returns other bucket before accuracy mode when nesting is supported', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({
+          accuracyMode: true,
+          otherBucket: true,
+        }),
+        context()
       )
     ).toBe('terms_other_bucket_not_supported');
   });

@@ -18,6 +18,7 @@ import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension, SourceActionResult } from '../types/episode_data_source';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import type { ClassicAlertActionContext } from './utils/map_alert';
+import { getErrorMessage } from '../actions/helpers';
 
 const getActionContext = (episode: {
   source_action_context?: unknown;
@@ -71,7 +72,7 @@ const updateWorkflowStatus = async (
       succeeded += groups[i].ids.length;
     } else {
       failed += groups[i].ids.length;
-      errors.push(result.reason?.message ?? 'Unknown error');
+      errors.push(getErrorMessage(result.reason));
     }
   }
 
@@ -97,7 +98,7 @@ const updateWorkflowTags = async (
   const remove = [...allCurrentTags].filter((t) => !tags.includes(t));
 
   if (add.length === 0 && remove.length === 0) {
-    return { succeeded: episodes.length, failed: 0 };
+    return { succeeded: 0, failed: 0, unchanged: episodes.length };
   }
 
   const results = await Promise.allSettled(
@@ -114,7 +115,7 @@ const updateWorkflowTags = async (
       succeeded += groups[idx].ids.length;
     } else {
       failed += groups[idx].ids.length;
-      errors.push(result.reason?.message ?? 'Unknown error');
+      errors.push(getErrorMessage(result.reason));
     }
   }
 
@@ -146,7 +147,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
         await bulkUntrackAlerts({ http, indices, alertUuids });
         return { succeeded: alertUuids.length, failed: 0 };
       } catch (e) {
-        return { succeeded: 0, failed: alertUuids.length, errors: [e?.message ?? 'Unknown error'] };
+        return { succeeded: 0, failed: alertUuids.length, errors: [getErrorMessage(e)] };
       }
     },
   },
@@ -173,7 +174,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
           succeeded = eps.length;
         } catch (e) {
           failed = eps.length;
-          errors.push(e?.message ?? 'Unknown error');
+          errors.push(getErrorMessage(e));
         }
       } else {
         const episodesByRuleId = new Map<string, AlertEpisode[]>();
@@ -198,7 +199,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
                 succeeded++;
               } catch (e) {
                 failed++;
-                errors.push(e?.message ?? 'Unknown error');
+                errors.push(getErrorMessage(e));
               }
             }
           })
@@ -237,7 +238,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
         } catch (e) {
           unmuteFailed = true;
           failed += epsToUnmute.length;
-          errors.push(e?.message ?? 'Unknown error');
+          errors.push(getErrorMessage(e));
         }
       }
 
@@ -260,7 +261,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
             if (!skipCount) succeeded++;
           } else {
             if (!skipCount) failed++;
-            errors.push(r.reason?.message ?? 'Unknown error');
+            errors.push(getErrorMessage(r.reason));
           }
         }
       }

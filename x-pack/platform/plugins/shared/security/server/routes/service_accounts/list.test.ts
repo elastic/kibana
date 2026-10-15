@@ -68,6 +68,7 @@ describe('List service accounts route', () => {
     )!;
 
     return {
+      logger: mockRouteDefinitionParams.logger,
       routeConfig: routeConfig as RouteConfig<any, any, any, 'get'>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
       serviceAccounts: serviceAccountsMock as jest.MockedObjectDeep<ServiceAccountsServiceStart>,
@@ -88,7 +89,7 @@ describe('List service accounts route', () => {
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
         reason:
-          'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
+          'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
       });
     });
   });
@@ -118,7 +119,9 @@ describe('List service accounts route', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual({ serviceAccounts: [serviceAccount] });
+    expect(response.payload).toEqual({
+      serviceAccounts: [{ ...serviceAccount, workloadCount: 0 }],
+    });
     expect(serviceAccounts.backend.list).toHaveBeenCalledTimes(1);
     expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {
       limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
@@ -142,12 +145,66 @@ describe('List service accounts route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
-      serviceAccounts: [serviceAccount],
+      serviceAccounts: [{ ...serviceAccount, workloadCount: 0 }],
       nextPage: 'next-page',
     });
     expect(serviceAccounts.backend.list).toHaveBeenCalledWith(expect.anything(), {
       limit: 10,
       after: 'cursor',
+    });
+  });
+
+  describe('workload counts', () => {
+    const otherAccount = { ...serviceAccount, id: 'other-service-account-id', name: 'other' };
+
+    it('reports how many workloads are bound to each account on the page', async () => {
+      const { routeHandler, serviceAccounts } = setup();
+      serviceAccounts.backend.list.mockResolvedValue({
+        serviceAccounts: [serviceAccount, otherAccount],
+        nextPage: 'next-page',
+      });
+      serviceAccounts.management.countBoundWorkloads.mockResolvedValue(
+        new Map([[serviceAccount.id, 3]])
+      );
+
+      const response = await callRoute(routeHandler);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        serviceAccounts: [
+          { ...serviceAccount, workloadCount: 3 },
+          { ...otherAccount, workloadCount: 0 },
+        ],
+        nextPage: 'next-page',
+      });
+      expect(serviceAccounts.management.countBoundWorkloads).toHaveBeenCalledWith([
+        serviceAccount.id,
+        otherAccount.id,
+      ]);
+    });
+
+    it('returns the accounts without counts when counting fails', async () => {
+      const { routeHandler, serviceAccounts, logger } = setup();
+      serviceAccounts.backend.list.mockResolvedValue({ serviceAccounts: [serviceAccount] });
+      serviceAccounts.management.countBoundWorkloads.mockRejectedValue(new Error('search failed'));
+
+      const response = await callRoute(routeHandler);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ serviceAccounts: [serviceAccount] });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Unable to count the workloads bound to 1 service account(s): search failed'
+      );
+    });
+
+    it('does not count when listing fails', async () => {
+      const { routeHandler, serviceAccounts } = setup();
+      serviceAccounts.backend.list.mockRejectedValue(Boom.forbidden('missing manage_security'));
+
+      const response = await callRoute(routeHandler);
+
+      expect(response.status).toBe(403);
+      expect(serviceAccounts.management.countBoundWorkloads).not.toHaveBeenCalled();
     });
   });
 
