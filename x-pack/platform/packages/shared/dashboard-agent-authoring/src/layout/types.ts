@@ -20,17 +20,16 @@ export interface LayoutPanel {
   /** What the panel shows when it was authored in this call, or the text size of a markdown panel. */
   authoringNote?: string;
   grid: { x: number; y: number; w: number; h: number };
-  /** Added in this call. */
-  isNew: boolean;
-  /** Content edited in this call, so its size may no longer fit. */
-  contentChanged: boolean;
+  /** Added in this call; omitted otherwise. */
+  isNew?: true;
+  /** Content edited in this call, so its size may no longer fit; omitted otherwise. */
+  contentChanged?: true;
 }
 
 export interface LayoutSection {
   id: string;
   title: string;
   y: number;
-  isNew: boolean;
   /** Panels of the section, with coordinates relative to the section. */
   panels: LayoutPanel[];
 }

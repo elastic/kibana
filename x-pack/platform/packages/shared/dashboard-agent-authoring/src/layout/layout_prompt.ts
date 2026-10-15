@@ -14,7 +14,7 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 ## Priorities
 
 1. The user's request in \`instructions\`, when given. It may override the sizes below.
-2. Stability: existing panels keep their position and size unless something changed around them (\`isNew\`, \`contentChanged\`, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged them by hand.
+2. Stability: existing panels keep their position and size unless something changed around them (a panel with \`isNew\` or \`contentChanged\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged them by hand.
 3. No gaps and no overlaps.
 4. Sizes by chart type.
 
@@ -57,5 +57,5 @@ Panels are listed in reading order (by \`y\`, then \`x\`). When a panel moves, g
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({
   system: LAYOUT_SYSTEM_PROMPT,
-  user: `Lay out this dashboard:\n\n${JSON.stringify(request, null, 2)}`,
+  user: `Lay out this dashboard:\n\n${JSON.stringify(request)}`,
 });

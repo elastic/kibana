@@ -117,14 +117,13 @@ describe('arrangeDashboardLayout', () => {
 
     expect(arrangeLayout).toHaveBeenCalledWith({
       panels: [
-        expect.objectContaining({ id: 'existing', isNew: false, contentChanged: true }),
+        expect.objectContaining({ id: 'existing', contentChanged: true }),
         expect.objectContaining({
           id: 'new-panel',
           chartType: 'metric',
           title: 'Panel new-panel',
           authoringNote: 'Shows total requests.',
           isNew: true,
-          contentChanged: false,
         }),
       ],
       sections: [
@@ -132,8 +131,7 @@ describe('arrangeDashboardLayout', () => {
           id: 'section-a',
           title: 'Section section-a',
           y: 9,
-          isNew: false,
-          panels: [expect.objectContaining({ id: 'inner', isNew: false })],
+          panels: [expect.objectContaining({ id: 'inner' })],
         },
       ],
     });

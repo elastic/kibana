@@ -84,7 +84,6 @@ export const arrangeDashboardLayout = async ({
   }
 
   const originalPanelIds = new Set(indexPanelsById(originalPanels).keys());
-  const originalSectionIds = new Set(originalPanels.filter(isSection).map(({ id }) => id));
   const authoringNotesByPanelId = new Map(
     panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
   );
@@ -105,8 +104,8 @@ export const arrangeDashboardLayout = async ({
       ...(typeof config.title === 'string' ? { title: config.title } : {}),
       ...(authoringNote ? { authoringNote } : {}),
       grid,
-      isNew: !originalPanelIds.has(id),
-      contentChanged: editedPanelIds.has(id),
+      ...(originalPanelIds.has(id) ? {} : { isNew: true }),
+      ...(editedPanelIds.has(id) ? { contentChanged: true } : {}),
     };
   };
 
@@ -122,7 +121,6 @@ export const arrangeDashboardLayout = async ({
       id: section.id,
       title: section.title,
       y: section.grid.y,
-      isNew: !originalSectionIds.has(section.id),
       panels: toLayoutPanels(section.panels),
     })),
   };
