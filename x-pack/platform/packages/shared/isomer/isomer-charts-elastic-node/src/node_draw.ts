@@ -45,6 +45,7 @@ interface Environment {
   window: JSDOM['window'];
   canvases: Map<HTMLCanvasElement, Canvas>;
   flushFrames: () => void;
+  releaseCanvases: () => void;
 }
 
 let installed: Environment | undefined;
@@ -71,6 +72,12 @@ const chartAncestor = (element: Element): HTMLElement | null => {
     }
   }
   return null;
+};
+
+// Skia's pixels sit outside V8's heap, so garbage collection alone frees them too late.
+const shrink = (canvas: Canvas): void => {
+  canvas.width = 1;
+  canvas.height = 1;
 };
 
 /** One jsdom window for the process, installed as globals before React DOM or Elastic Charts load. */
@@ -103,6 +110,9 @@ const install = (pixelRatio: number): Environment => {
     const height = this.height || 1;
     let canvas = canvases.get(this);
     if (!canvas || canvas.width !== width || canvas.height !== height) {
+      if (canvas) {
+        shrink(canvas);
+      }
       canvas = createCanvas(width, height);
       canvases.set(this, canvas);
     }
@@ -186,6 +196,12 @@ const install = (pixelRatio: number): Environment => {
           callback(window.performance.now());
         }
       }
+    },
+    releaseCanvases: () => {
+      for (const canvas of canvases.values()) {
+        shrink(canvas);
+      }
+      canvases.clear();
     },
   };
   return installed;
@@ -287,6 +303,7 @@ export const createStaticDraw = async ({
     } finally {
       root.unmount();
       container.remove();
+      environment.releaseCanvases();
     }
   };
   return draw;
