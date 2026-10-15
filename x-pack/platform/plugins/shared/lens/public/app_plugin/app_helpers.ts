@@ -39,10 +39,11 @@ export function isSaveAndReturn(incomingState: EmbeddableEditorState | undefined
  * Returns where a chart opened in the Lens app is being created, for creation telemetry.
  */
 export function getTelemetrySource(
-  incomingState: EmbeddableEditorState | undefined
+  incomingState: EmbeddableEditorState | undefined,
+  isCopy = false
 ): LensTelemetrySource | undefined {
-  // if there's a embeddableId, it's an edit not a create
-  if (!incomingState || incomingState.embeddableId) {
+  // if there's a embeddableId, it's an edit not a create, unless it is saved as a new copy
+  if (!incomingState || (incomingState.embeddableId && !isCopy)) {
     return undefined;
   }
   const { originatingApp } = incomingState;

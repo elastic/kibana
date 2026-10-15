@@ -446,7 +446,8 @@ describe('SaveModalContainer', () => {
 
   const renderAndSave = async (
     props: Partial<React.ComponentProps<typeof SaveModalContainer>>,
-    waitForSave: jest.Mock
+    waitForSave: jest.Mock,
+    { saveAsNewCopy = false }: { saveAsNewCopy?: boolean } = {}
   ) => {
     renderWithProviders(
       <SaveModalContainer
@@ -458,6 +459,9 @@ describe('SaveModalContainer', () => {
       />
     );
     await userEvent.type(await screen.findByTestId('savedObjectTitle'), 'my chart');
+    if (saveAsNewCopy) {
+      await userEvent.click(screen.getByTestId('saveAsNewCheckbox'));
+    }
     await userEvent.click(screen.getByLabelText('None'));
     await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
     await waitFor(() => expect(waitForSave).toHaveBeenCalled());
@@ -474,6 +478,36 @@ describe('SaveModalContainer', () => {
     const onSave = jest.fn();
     await renderAndSave({ onSave }, onSave);
     expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', undefined);
+  });
+
+  it('should not track a creation when an existing chart is saved', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave
+    );
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
+  });
+
+  it('should track a creation when an existing chart is saved as a new copy', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave,
+      { saveAsNewCopy: true }
+    );
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'chat');
   });
 
   it('should not track a creation when the Lens app handles the save', async () => {

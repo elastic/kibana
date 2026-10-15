@@ -91,6 +91,19 @@ describe('App helpers', () => {
       ).toBeUndefined();
     });
 
+    it('returns dashboards when an existing dashboard panel is saved as a new copy', () => {
+      expect(
+        getTelemetrySource(
+          {
+            originatingApp: 'dashboards',
+            originatingPath: '#/view/123',
+            embeddableId: 'panel-1',
+          },
+          true
+        )
+      ).toBe('dashboards');
+    });
+
     it('returns undefined for untracked app', () => {
       expect(
         getTelemetrySource({ originatingApp: 'securitySolutionUI', originatingPath: '/dashboards' })

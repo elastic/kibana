@@ -1056,6 +1056,20 @@ describe('Lens App', () => {
         expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
       });
 
+      it('tracks a creation when an existing doc is saved as a new copy', async () => {
+        const doc = getLensDocumentMock();
+        props.incomingState = { originatingApp: 'visualize' };
+        await save({
+          savedObjectId: doc.savedObjectId,
+          newCopyOnSave: true,
+          preloadedState: { persistedDoc: doc },
+          prevSavedObjectId: 'prevId',
+          comesFromDashboard: false,
+        });
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'library');
+      });
+
       it('does not track a creation when the save fails', async () => {
         services.attributeService.saveToLibrary = jest
           .fn()

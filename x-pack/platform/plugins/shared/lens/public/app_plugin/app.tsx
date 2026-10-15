@@ -367,10 +367,10 @@ export function App({
           options
         );
         // Track creation events for new visualizations
-        if (!initialInput?.ref_id) {
+        if (!initialInput?.ref_id || saveProps.newCopyOnSave) {
           trackCreateUiCounterEvents(
             isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl',
-            getTelemetrySource(incomingState)
+            getTelemetrySource(incomingState, saveProps.newCopyOnSave)
           );
         }
         if (newState) {

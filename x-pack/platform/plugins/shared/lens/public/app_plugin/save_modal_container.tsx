@@ -176,7 +176,7 @@ export function SaveModalContainer({
         saveProps,
         options
       );
-      if (!initialInput?.ref_id) {
+      if (!initialInput?.ref_id || saveProps.newCopyOnSave) {
         trackCreateUiCounterEvents(
           isTextBasedAttributes(lastKnownDoc) ? 'esql' : 'dsl',
           telemetrySource
