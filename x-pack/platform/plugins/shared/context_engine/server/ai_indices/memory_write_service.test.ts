@@ -178,6 +178,12 @@ describe('AiIndexMemoryWriteService', () => {
     expect(index.mock.calls[0][0].document).not.toHaveProperty('expires_at');
   });
 
+  it('accepts an expiry in the past', async () => {
+    await service.createMemory({ ...request, expiresAt: '2020-01-01T00:00:00Z' });
+
+    expect(index.mock.calls[0][0].document.expires_at).toBe('2020-01-01T00:00:00.000Z');
+  });
+
   it.each([
     [
       'global Memory is disabled',

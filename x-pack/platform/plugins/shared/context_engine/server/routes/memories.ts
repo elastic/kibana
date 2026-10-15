@@ -43,7 +43,7 @@ const WRITE_SECURITY: RouteSecurity = {
 };
 
 const DESCRIPTION_SUFFIX =
-  "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.";
+  "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space or Memory is disabled.";
 const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while processing the memory request.';
 
 const writer = {
@@ -187,7 +187,8 @@ export const registerMemoryRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'The AI Index was not found or Context Engine is turned off.',
+              description:
+                'The AI Index was not found, Context Engine is turned off, or Memory is disabled.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },
@@ -244,7 +245,8 @@ export const registerMemoryRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'The AI Index or memory was not found.',
+              description:
+                'The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },
@@ -282,7 +284,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'delete-context-engine-memory',
       summary: 'Delete a memory',
-      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. ${DESCRIPTION_SUFFIX}`,
+      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. Concurrent operations on the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -305,7 +307,8 @@ export const registerMemoryRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'The AI Index or memory was not found.',
+              description:
+                'The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.',
             },
             409: { body: errorResponseSchema, description: 'The memory write conflicted.' },
             429: { body: errorResponseSchema, description: 'Too many requests.' },

@@ -25316,7 +25316,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. New memories expire after 90 days unless another expiry is supplied. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. New memories expire after 90 days unless another expiry is supplied. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: create-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25497,7 +25497,7 @@ paths:
                 required:
                   - message
                 type: object
-          description: The AI Index was not found or Context Engine is turned off.
+          description: The AI Index was not found, Context Engine is turned off, or Memory is disabled.
         '409':
           content:
             application/json:
@@ -25602,7 +25602,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. Concurrent operations on the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: delete-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25723,7 +25723,7 @@ paths:
                 required:
                   - message
                 type: object
-          description: The AI Index or memory was not found.
+          description: The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.
         '409':
           content:
             application/json:
@@ -25820,7 +25820,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Writes a partial revision using the caller's destination read and write privileges. Supply at least one memory field. Omitted fields are preserved, and a supplied type must match the existing memory. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Writes a partial revision using the caller's destination read and write privileges. Supply at least one memory field. Omitted fields are preserved, and a supplied type must match the existing memory. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: revise-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25998,7 +25998,7 @@ paths:
                 required:
                   - message
                 type: object
-          description: The AI Index or memory was not found.
+          description: The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.
         '409':
           content:
             application/json:
