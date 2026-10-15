@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import type { BehaviorSubject } from 'rxjs';
+import { render, screen, waitFor } from '@testing-library/react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { buildMockDashboardApi } from '../mocks';
@@ -63,52 +62,6 @@ describe('Dashboard Renderer', () => {
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();
       expect(await screen.queryByTestId('controls-group-wrapper')).not.toBeInTheDocument();
-    });
-  });
-
-  it('tags the embedder parent with the maximized layout class', async () => {
-    let expandedPanelId$: BehaviorSubject<string | undefined> | undefined;
-    (loadDashboardApi as jest.Mock).mockImplementationOnce(async ({ getCreationOptions }) => {
-      const { useControlsIntegration } = await (getCreationOptions?.() ?? Promise.resolve({}));
-      const built = buildMockDashboardApi({
-        overrides: {
-          pinned_panels: [
-            {
-              type: 'options_list_control',
-            },
-          ] as DashboardPinnedPanelsState,
-        },
-      });
-      expandedPanelId$ = built.api.expandedPanelId$ as BehaviorSubject<string | undefined>;
-      return { useControlsIntegration, ...built };
-    });
-
-    render(
-      <div data-test-subj="embedder">
-        <DashboardRenderer
-          getCreationOptions={() => Promise.resolve({ useControlsIntegration: false })}
-        />
-      </div>
-    );
-
-    await screen.findByTestId('dshDashboardViewport');
-    const embedder = screen.getByTestId('embedder');
-    expect(embedder).not.toHaveClass('dshDashboardViewportWrapper');
-
-    act(() => {
-      expandedPanelId$!.next('panel-1');
-    });
-
-    await waitFor(() => {
-      expect(embedder).toHaveClass('dshDashboardViewportWrapper');
-    });
-
-    act(() => {
-      expandedPanelId$!.next(undefined);
-    });
-
-    await waitFor(() => {
-      expect(embedder).not.toHaveClass('dshDashboardViewportWrapper');
     });
   });
 

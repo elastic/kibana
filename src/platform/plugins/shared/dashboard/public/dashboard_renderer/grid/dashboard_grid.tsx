@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -200,40 +200,6 @@ export const DashboardGrid = () => {
       }
     });
   }, [layout]);
-
-  // Expanded panels use height: 100%. That percentage does not resolve when Dashboard is
-  // embedded, because the ancestors only have a flex used height. Pin the grid to the
-  // viewport's pixel height so the maximized panel fills it.
-  useLayoutEffect(() => {
-    const layoutElement = layoutRef.current;
-    if (!expandedPanelId || !layoutElement) {
-      return;
-    }
-
-    const viewport = layoutElement.closest('.dshDashboardViewport');
-    const grid = layoutElement.querySelector<HTMLElement>('.kbnGrid');
-    if (!(viewport instanceof HTMLElement) || !grid) {
-      return;
-    }
-
-    const applyHeight = () => {
-      const top = Math.max(viewport.getBoundingClientRect().top, 0);
-      const height = Math.round(window.innerHeight - top);
-      if (height > 0) {
-        grid.style.height = `${height}px`;
-      }
-    };
-
-    applyHeight();
-    const observer = new ResizeObserver(applyHeight);
-    observer.observe(viewport);
-    window.addEventListener('resize', applyHeight);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', applyHeight);
-      grid.style.height = '';
-    };
-  }, [expandedPanelId]);
 
   return (
     <div
