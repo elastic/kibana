@@ -102,6 +102,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
+  docker_login_kibanamachine
   docker_with_retry push "$KIBANA_IMAGE-arm64"
   docker_with_retry push "$KIBANA_IMAGE-amd64"
 

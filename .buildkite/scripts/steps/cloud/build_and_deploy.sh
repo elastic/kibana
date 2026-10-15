@@ -79,6 +79,7 @@ set -e
 if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
   echo "Distribution already exists, skipping build"
 else
+  docker_login_kibanamachine
   node scripts/build \
     --skip-initialize \
     --skip-generic-folders \

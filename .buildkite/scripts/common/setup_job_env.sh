@@ -29,14 +29,21 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-artifacts-snapshot | \
+    kibana-artifacts-staging | \
+    kibana-elasticsearch-serverless-promote | \
+    kibana-elasticsearch-snapshot-build | \
+    kibana-elasticsearch-snapshot-promote | \
+    kibana-package-registry-verify-and-promote | \
+    kibana-uiam-cosmos-db-emulator-verify-and-promote | \
+    kibana-uiam-verify-and-promote)
+      retry 5 15 docker_login_kibanamachine
+      ;;
+    *)
+      retry 5 15 docker_login_kibana_ci_read
+      ;;
+  esac
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build

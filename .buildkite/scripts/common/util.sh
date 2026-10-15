@@ -373,6 +373,28 @@ print_if_dry_run() {
   fi
 }
 
+# Pull-only access to the docker.elastic.co repositories Kibana CI consumes
+docker_login_kibana_ci_read() {
+  is_docker_available || return 0
+  local username password
+  username="$(vault_get kibana-ci-read username)"
+  password="$(vault_get kibana-ci-read password)"
+  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
+}
+
+# Shared read/write kibanamachine credential, needed only to push to docker.elastic.co/kibana-ci/*
+docker_login_kibanamachine() {
+  is_docker_available || return 0
+  local username password
+  username="$(vault_get container-registry username)"
+  password="$(vault_get container-registry password)"
+  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
+}
+
+is_docker_available() {
+  (command -v docker && docker version) &> /dev/null
+}
+
 docker_with_retry () {
   cmd=$1
   shift

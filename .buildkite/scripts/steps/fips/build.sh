@@ -12,6 +12,7 @@ download_tmp_artifact "kibana-default.tar.zst" ./target "${KIBANA_BUILD_ID:-$BUI
 mv ./target/kibana-default.tar.zst ./target/kibana-$FULL_VERSION-linux-x86_64.tar.zst
 
 echo "--- Build FIPS image"
+docker_login_kibanamachine
 node scripts/build \
     --skip-initialize \
     --skip-generic-folders \
