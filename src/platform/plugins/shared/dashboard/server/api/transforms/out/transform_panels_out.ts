@@ -9,11 +9,8 @@
 
 import { flow, groupBy } from 'lodash';
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type {
-  PanelTypeMigrationContext,
-  PanelTypeMigrationResult,
-} from '@kbn/embeddable-plugin/server';
+import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PanelTypeMigrationResult } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { ZodError } from '@kbn/zod';
@@ -42,7 +39,7 @@ export async function transformPanelsOut(
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
-  migrationContext?: PanelTypeMigrationContext
+  savedObjectsClient?: SavedObjectsClientContract
 ): Promise<{ panels: DashboardState['panels']; warnings: Warnings }> {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
@@ -95,8 +92,8 @@ export async function transformPanelsOut(
     }
   });
 
-  const migratedPanels = migrationContext
-    ? await applyPanelTypeMigrations(transformedPanels, migrationContext, warnings)
+  const migratedPanels = savedObjectsClient
+    ? await applyPanelTypeMigrations(transformedPanels, savedObjectsClient, warnings)
     : transformedPanels;
 
   migratedPanels.forEach(({ panel, sectionId, storedConfig, panelReferences, migratedFrom }) => {
@@ -204,7 +201,7 @@ function validatePanelConfig(
  */
 async function applyPanelTypeMigrations(
   transformedPanels: TransformedPanel[],
-  migrationContext: PanelTypeMigrationContext,
+  savedObjectsClient: SavedObjectsClientContract,
   warnings: Warnings
 ): Promise<TransformedPanel[]> {
   const results = new Map<TransformedPanel, PanelTypeMigrationResult>();
@@ -219,7 +216,7 @@ async function applyPanelTypeMigrations(
         try {
           groupResults = await migration.migrateOut(
             group.map(({ panel }) => ({ id: panel.id ?? '', config: panel.config })),
-            migrationContext
+            savedObjectsClient
           );
         } catch (err) {
           const error = err instanceof Error ? err : new Error(String(err));

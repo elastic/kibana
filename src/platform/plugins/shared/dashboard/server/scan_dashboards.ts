@@ -56,7 +56,7 @@ export async function scanDashboards(
           so.references,
           true, // temporary fix to return old Lens SO panel format,
           strictValidationSchema,
-          { savedObjectsClient }
+          savedObjectsClient
         );
 
         return {

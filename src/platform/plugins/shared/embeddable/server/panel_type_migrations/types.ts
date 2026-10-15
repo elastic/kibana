@@ -9,10 +9,6 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-export interface PanelTypeMigrationContext {
-  savedObjectsClient: SavedObjectsClientContract;
-}
-
 export interface PanelTypeMigrationPanel {
   id: string;
   config: Record<string, unknown>;
@@ -41,6 +37,6 @@ export interface PanelTypeMigration {
    */
   migrateOut: (
     panels: readonly PanelTypeMigrationPanel[],
-    context: PanelTypeMigrationContext
+    savedObjectsClient: SavedObjectsClientContract
   ) => Promise<readonly PanelTypeMigrationResult[]>;
 }

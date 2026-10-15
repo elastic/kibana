@@ -20,7 +20,7 @@ const getSavedVis = (type: string): SerializedVis => ({
 });
 
 describe('legacy_vis panel type migration', () => {
-  const context = { savedObjectsClient: savedObjectsClientMock.create() };
+  const savedObjectsClient = savedObjectsClientMock.create();
   const migrate = jest.fn();
   const registry = getLegacyPanelMigrationRegistry();
   registry.registerLegacyPanelMigration('vega', { to: 'vega', migrate });
@@ -48,7 +48,7 @@ describe('legacy_vis panel type migration', () => {
             },
           },
         ],
-        context
+        savedObjectsClient
       )
     ).toEqual([{ panelId: 'panel-1', type: 'vega', config: { spec: 'migrated' } }]);
     expect(migrate).toHaveBeenCalledWith({
@@ -65,7 +65,7 @@ describe('legacy_vis panel type migration', () => {
     expect(
       await migrateOut(
         [{ id: 'panel-1', config: { savedObjectId: 'vis-id', savedVis: getSavedVis('vega') } }],
-        context
+        savedObjectsClient
       )
     ).toEqual([]);
     expect(migrate).not.toHaveBeenCalled();
@@ -79,14 +79,17 @@ describe('legacy_vis panel type migration', () => {
           { id: 'by-reference', config: { savedObjectId: 'vis-id' } },
           { id: 'other-type', config: { savedVis: getSavedVis('pie') } },
         ],
-        context
+        savedObjectsClient
       )
     ).toEqual([{ panelId: 'by-value', type: 'vega', config: { spec: 'migrated' } }]);
   });
 
   test('leaves a panel unchanged when its vis type has no handler', async () => {
     expect(
-      await migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('pie') } }], context)
+      await migrateOut(
+        [{ id: 'panel-1', config: { savedVis: getSavedVis('pie') } }],
+        savedObjectsClient
+      )
     ).toEqual([]);
   });
 
@@ -94,7 +97,10 @@ describe('legacy_vis panel type migration', () => {
     migrate.mockReturnValue(undefined);
 
     expect(
-      await migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }], context)
+      await migrateOut(
+        [{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }],
+        savedObjectsClient
+      )
     ).toEqual([]);
   });
 
@@ -105,7 +111,10 @@ describe('legacy_vis panel type migration', () => {
     });
 
     expect(
-      await migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }], context)
+      await migrateOut(
+        [{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }],
+        savedObjectsClient
+      )
     ).toEqual([{ panelId: 'panel-1', error }]);
   });
 });

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { PanelTypeMigrationContext } from '@kbn/embeddable-plugin/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -27,7 +29,7 @@ export async function transformDashboardOut(
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  migrationContext?: PanelTypeMigrationContext
+  savedObjectsClient?: SavedObjectsClientContract
 ): Promise<{
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -56,7 +58,7 @@ export async function transformDashboardOut(
     sections,
     references,
     isDashboardAppRequest,
-    migrationContext
+    savedObjectsClient
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(

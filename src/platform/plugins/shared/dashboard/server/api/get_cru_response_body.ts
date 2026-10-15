@@ -40,7 +40,7 @@ export async function getDashboardCRUResponseBody(
       savedObject.references,
       isDashboardAppRequest,
       strictValidationSchema,
-      operation === 'read' && savedObjectsClient ? { savedObjectsClient } : undefined
+      operation === 'read' ? savedObjectsClient : undefined
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {

@@ -247,7 +247,7 @@ describe('transformPanelsOut', () => {
   });
 
   describe('panel type migrations', () => {
-    const migrationContext = { savedObjectsClient: savedObjectsClientMock.create() };
+    const savedObjectsClient = savedObjectsClientMock.create();
     const passThroughSchema = { parse: (config: unknown) => config };
     const panelsJSON = JSON.stringify([
       {
@@ -276,7 +276,7 @@ describe('transformPanelsOut', () => {
           : undefined
       );
 
-      expect(await transformPanelsOut(panelsJSON, [], [], false, migrationContext)).toEqual({
+      expect(await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient)).toEqual({
         panels: [
           {
             config: { migrated: true },
@@ -328,7 +328,7 @@ describe('transformPanelsOut', () => {
         [],
         [],
         false,
-        migrationContext
+        savedObjectsClient
       );
 
       expect(migrateOut).toHaveBeenCalledTimes(1);
@@ -337,14 +337,14 @@ describe('transformPanelsOut', () => {
           { id: 'panel-a', config: { a: 1 } },
           { id: 'panel-b', config: { b: 2 } },
         ],
-        migrationContext
+        savedObjectsClient
       );
     });
 
     it('keeps a panel unchanged when the migration omits it', async () => {
       mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut: async () => [] });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, migrationContext);
+      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
       expect(result.panels).toEqual([
         expect.objectContaining({ type: 'source', config: { foo: 'bar' } }),
       ]);
@@ -357,7 +357,7 @@ describe('transformPanelsOut', () => {
         migrateOut: async () => [{ panelId: 'panel-1', error: new Error('nope') }],
       });
 
-      expect(await transformPanelsOut(panelsJSON, [], [], false, migrationContext))
+      expect(await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient))
         .toMatchInlineSnapshot(`
         Object {
           "panels": Array [],
@@ -384,7 +384,7 @@ describe('transformPanelsOut', () => {
         },
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, migrationContext);
+      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
@@ -413,7 +413,7 @@ describe('transformPanelsOut', () => {
         ],
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, migrationContext);
+      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
@@ -431,7 +431,7 @@ describe('transformPanelsOut', () => {
         migrateOut: async () => [{ panelId: 'panel-1', type: 'unregistered', config: {} }],
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, migrationContext);
+      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
