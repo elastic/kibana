@@ -87,7 +87,10 @@ test.describe('Maps - visualize create menu', { tag: '@local-stateful-classic' }
 
     await visualize.goto();
     await listingTable.searchForItemTitle('myTestMap');
-    await page.testSubj.locator('inspect-action').click();
+    // The table is already "loaded" before the search applies, so wait for the filter to narrow to one row.
+    const inspectAction = page.testSubj.locator('inspect-action');
+    await expect(inspectAction).toHaveCount(1);
+    await inspectAction.click();
     await page.testSubj.fill('nameInput', 'AnotherTestMap');
     await page.testSubj.fill('descriptionInput', 'new description');
     await page.testSubj.click('saveButton');
