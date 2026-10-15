@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Os from 'os';
 import Path from 'path';
 import Pw from '@parcel/watcher';
+import execa from 'execa';
 import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getShardPaths } from './get_shard_paths';
 
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
 // `oxlint.config.mjs` with `warn` rules off. Oxlint's `--fix` also fixes warnings and `--quiet`
 // only hides them, so `--fix` runs against this config to fix errors only, as ESLint did.
 const FIX_CONFIG = 'oxlint.fix.config.mjs';
+
+// JS plugin rules run on a single JS thread per oxlint process, so a full-repo run splits the
+// repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
+// multi-threaded shards are faster than one single-threaded shard per core.
+const THREADS_PER_SHARD = 4;
 
 interface LintOptions {
   fix: boolean;
@@ -39,7 +48,7 @@ run(
       await watchAndLintFiles({ procRunner, log, addCleanupTask, options });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options });
+      await lintFiles({ procRunner, options, sharded: options.paths.length === 0 });
       log.success('Linting files completed');
     }
   },
@@ -61,12 +70,16 @@ run(
 async function lintFiles({
   procRunner,
   options: { fix, quiet, paths },
+  sharded = false,
 }: {
   procRunner: ProcRunner;
   options: LintOptions;
+  sharded?: boolean;
 }) {
-  const runOxlint = (args: string[]) =>
-    procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
+  const runOxlint = sharded
+    ? (args: string[]) => runOxlintShards(args)
+    : (args: string[]) =>
+        procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
 
   if (fix) {
     // The errors-only config reports exactly what `--quiet` shows, so with `--quiet` one run is
@@ -78,6 +91,39 @@ async function lintFiles({
   }
 
   await runOxlint([...(quiet ? ['--quiet'] : []), '--config', 'oxlint.config.mjs', ...paths]);
+}
+
+/** Lints the whole repo with one oxlint process per shard, printing each shard's output whole. */
+async function runOxlintShards(args: string[]) {
+  const { stdout } = await execa(
+    'git',
+    ['ls-files', '--cached', '--others', '--exclude-standard'],
+    {
+      cwd: REPO_ROOT,
+    }
+  );
+  const files = stdout.split('\n').filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)));
+  const shardCount = Math.max(1, Math.round(Os.availableParallelism() / THREADS_PER_SHARD));
+
+  const results = await Promise.all(
+    getShardPaths(files, shardCount).map((shardPaths) =>
+      execa('oxlint', [...args, `--threads=${THREADS_PER_SHARD}`, ...shardPaths], {
+        cwd: REPO_ROOT,
+        preferLocal: true,
+        reject: false,
+        all: true,
+      })
+    )
+  );
+
+  for (const { all } of results) {
+    if (all) {
+      process.stdout.write(`${all}\n`);
+    }
+  }
+  if (results.some(({ exitCode }) => exitCode !== 0)) {
+    throw createFailError('oxlint found errors');
+  }
 }
 
 async function watchAndLintFiles({
