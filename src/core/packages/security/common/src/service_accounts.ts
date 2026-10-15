@@ -94,8 +94,8 @@ export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkl
   expectedServiceAccountId?: string;
   /**
    * The id of this run of the workload in the calling plugin's own records, such as a workflow
-   * execution id. Recorded on the audit events of the run, so they can be traced back to it. Held
-   * to the same length limit as a workload ID.
+   * execution id. Recorded on the run's `service_account_assume` audit events; the other events of
+   * the run share their `trace.id`. Held to the same length limit as a workload ID.
    */
   executionId?: string;
 }
