@@ -43,6 +43,18 @@ interface EventFacts
 }
 
 /**
+ * For a live event, the versions of its current episode (after its last closed version), so a
+ * reopened event does not inherit rule history from the episode it closed. A closed event keeps its
+ * full history, since it can only be unchanged against what it already stored.
+ */
+const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
+  const latest = history.at(-1);
+  if (!isLiveStatus(latest?.status)) return history;
+  const lastClosedIndex = history.map((version) => !isLiveStatus(version.status)).lastIndexOf(true);
+  return history.slice(lastClosedIndex + 1);
+};
+
+/**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
  * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
@@ -58,14 +70,15 @@ export const shouldSkipAsNoOp = ({
   const { latest, priorDocs } = candidate;
   if (latest === undefined) return false;
 
-  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latest]);
+  const history = episodeHistory([...priorDocs, latest]);
+  const knownRuleUuids = extractRuleUuidsFromEvents(history);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
     latest.status === candidate.status &&
     latest.severity === severity &&
     !addsRule &&
-    !changesMemberVerdict([...priorDocs, latest], candidate.input.signals)
+    !changesMemberVerdict(history, candidate.input.signals)
   );
 };
 

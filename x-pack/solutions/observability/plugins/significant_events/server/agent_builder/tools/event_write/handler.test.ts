@@ -56,6 +56,35 @@ const makeStoredEvent = (
     ...overrides,
   } as SignificantEvent);
 
+type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
+
+/** A detection signal for one rule; pass only the fields a test asserts on. */
+const makeDetectionSignal = ({
+  ruleUuid,
+  verdict = 'confirms',
+  description = `Signal for ${ruleUuid}`,
+  changePointType = 'spike',
+  sourceId = 'logs.checkout',
+}: {
+  ruleUuid: string;
+  verdict?: DetectionSignal['verdict'];
+  description?: string;
+  changePointType?: 'spike' | 'dip';
+  sourceId?: string;
+}): DetectionSignal => ({
+  type: 'detection',
+  source_id: sourceId,
+  description,
+  verdict,
+  evidence: { esql_query: `FROM ${sourceId}`, result: 'found' },
+  metadata: {
+    detection_id: `det-${ruleUuid}`,
+    rule_uuid: ruleUuid,
+    change_point_type: changePointType,
+    p_value: 0.01,
+  },
+});
+
 type SearchClientMethods =
   | 'findLatestPaginated'
   | 'findLatestByCurrentStatePaginated'
@@ -241,30 +270,18 @@ describe('eventsWriteHandler', () => {
     });
 
     it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
-      const ruleOne: SignalEntry = {
-        type: 'detection',
-        source_id: 'logs.checkout',
+      const ruleOne: SignalEntry = makeDetectionSignal({
+        ruleUuid: 'rule-1',
+        verdict: 'confirms',
         description: 'Rule one detected an issue',
+        changePointType: 'spike',
+      });
+      const ruleTwo: SignalEntry = makeDetectionSignal({
+        ruleUuid: 'rule-2',
         verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-1',
-          rule_uuid: 'rule-1',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
-      const ruleTwo: SignalEntry = {
-        type: 'detection',
-        source_id: 'logs.checkout',
         description: 'Rule two detected an issue',
-        verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-2',
-          rule_uuid: 'rule-2',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
+        changePointType: 'spike',
+      });
       const stored = makeStoredEvent('checkout-stable', {
         signals: [ruleOne],
       });
@@ -289,18 +306,12 @@ describe('eventsWriteHandler', () => {
     });
 
     it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
-      const ruleOne: SignalEntry = {
-        type: 'detection',
-        source_id: 'logs.checkout',
-        description: 'Rule one detected an issue',
+      const ruleOne: SignalEntry = makeDetectionSignal({
+        ruleUuid: 'rule-1',
         verdict: 'confirms',
-        metadata: {
-          detection_id: 'det-rule-1',
-          rule_uuid: 'rule-1',
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      };
+        description: 'Rule one detected an issue',
+        changePointType: 'spike',
+      });
       // ruleOne is a confirms signal without an impact; the proposed 'high' stands, so match the
       // stored fixture to it and the no-op path, not an escalation write, is what's under test.
       const latest = makeStoredEvent('checkout-stable', { severity: 'high' });
@@ -403,20 +414,10 @@ describe('eventsWriteBulkHandler', () => {
 });
 
 describe('eventsWriteBulkHandler — dedup mode', () => {
-  const makeDetectionSignal = (ruleUuid = 'rule-abc'): SignalEntry => ({
-    type: 'detection',
-    source_id: 'logs.checkout',
-    description: 'High Latency',
-    verdict: 'confirms',
-    metadata: {
-      detection_id: `det-${ruleUuid}`,
-      rule_uuid: ruleUuid,
-      rule_name: ruleUuid,
-      change_point_type: 'spike',
-      p_value: 0.01,
-    },
-  });
-  const dedupInput: EventsWriteInput = { ...baseInput, signals: [makeDetectionSignal()] };
+  const dedupInput: EventsWriteInput = {
+    ...baseInput,
+    signals: [makeDetectionSignal({ ruleUuid: 'rule-abc', description: 'High Latency' })],
+  };
 
   it('skips the write and returns the existing event_id when an active duplicate is found', async () => {
     const eventClient = makeEventSearchClient({
@@ -556,22 +557,12 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
 describe('eventsWriteBulkHandler — lifecycle resolution', () => {
   it('does not reopen a closed event from a stale confirmation of its closed episode', async () => {
-    const detection = (ruleUuid: string, verdict: 'confirms' | 'refutes'): SignalEntry => ({
-      type: 'detection' as const,
-      source_id: 'logs.checkout',
-      description: `${ruleUuid} ${verdict}`,
-      verdict,
-      evidence: { esql_query: 'FROM logs.checkout', result: 'found' as const },
-      metadata: {
-        detection_id: `det-${ruleUuid}`,
-        rule_uuid: ruleUuid,
-        change_point_type: 'spike',
-        p_value: 0.01,
-      },
-    });
     const closed = makeStoredEvent('checkout-closed', {
       status: 'inactive',
-      signals: [detection('rule-a', 'confirms'), detection('rule-b', 'confirms')],
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
     });
 
     const results = await eventsWriteBulkHandler({
@@ -583,7 +574,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           ...baseInput,
           status: undefined,
           event_id: 'checkout-closed',
-          signals: [detection('rule-a', 'refutes')],
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
         },
       ],
     });
@@ -598,22 +589,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
   });
 
   it('drops the closed episode signals when a closed event reopens', async () => {
-    const detection = (ruleUuid: string, verdict: 'confirms' | 'refutes'): SignalEntry => ({
-      type: 'detection' as const,
-      source_id: 'logs.checkout',
-      description: `${ruleUuid} ${verdict}`,
-      verdict,
-      evidence: { esql_query: 'FROM logs.checkout', result: 'found' as const },
-      metadata: {
-        detection_id: `det-${ruleUuid}`,
-        rule_uuid: ruleUuid,
-        change_point_type: 'spike',
-        p_value: 0.01,
-      },
-    });
     const closed = makeStoredEvent('checkout-reopened', {
       status: 'inactive',
-      signals: [detection('rule-a', 'confirms'), detection('rule-b', 'confirms')],
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
     });
 
     const results = await eventsWriteBulkHandler({
@@ -625,7 +606,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           ...baseInput,
           status: undefined,
           event_id: 'checkout-reopened',
-          signals: [detection('rule-c', 'confirms')],
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-c', verdict: 'confirms' })],
         },
       ],
     });
@@ -634,6 +615,38 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     const [written] = writtenDocs();
     expect(written.status).toBe('active');
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
+  });
+
+  it('does not skip a continuation that re-submits a rule from the closed episode of a reopened event', async () => {
+    const eventId = 'checkout-reopened-again';
+    const closed = makeStoredEvent(eventId, {
+      status: 'inactive',
+      severity: 'low',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a' })],
+    });
+    const reopened = makeStoredEvent(eventId, {
+      status: 'active',
+      severity: 'high',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-c' })],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed, reopened] }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          event_id: eventId,
+          severity: 'high',
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a' })],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'active' });
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
   describe('a continuation onto a recovering event', () => {
@@ -652,19 +665,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
             event_id: eventId,
             severity: 'high',
             signals: [
-              {
-                type: 'detection',
-                source_id: 'logs.checkout',
-                description: 'A new rule joined',
+              makeDetectionSignal({
+                ruleUuid: 'rule-new-member',
                 verdict: 'confirms',
-                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-                metadata: {
-                  detection_id: 'det-rule-new-member',
-                  rule_uuid: 'rule-new-member',
-                  change_point_type: 'spike',
-                  p_value: 0.01,
-                },
-              },
+                description: 'A new rule joined',
+                changePointType: 'spike',
+              }),
             ],
           },
         ],
@@ -684,19 +690,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
             event_id: eventId,
             severity: 'high',
             signals: [
-              {
-                type: 'detection',
-                source_id: 'logs.checkout',
-                description: 'A new rule joined, healthy',
+              makeDetectionSignal({
+                ruleUuid: 'rule-healthy-member',
                 verdict: 'refutes',
-                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-                metadata: {
-                  detection_id: 'det-rule-healthy-member',
-                  rule_uuid: 'rule-healthy-member',
-                  change_point_type: 'dip',
-                  p_value: 0.01,
-                },
-              },
+                description: 'A new rule joined, healthy',
+                changePointType: 'dip',
+              }),
             ],
           },
         ],
@@ -736,19 +735,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           event_id: 'checkout-closed',
           status: undefined,
           signals: [
-            {
-              type: 'detection',
-              source_id: 'logs.checkout',
-              description: 'Healthy again',
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
               verdict: 'refutes',
-              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-              metadata: {
-                detection_id: 'det-rule-1',
-                rule_uuid: 'rule-1',
-                change_point_type: 'dip',
-                p_value: 0.01,
-              },
-            },
+              description: 'Healthy again',
+              changePointType: 'dip',
+            }),
           ],
         },
       ],
@@ -772,19 +764,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
             ...baseInput,
             status: undefined,
             signals: [
-              {
-                type: 'detection',
-                source_id: 'logs.checkout',
-                description: 'Healthy',
+              makeDetectionSignal({
+                ruleUuid: 'rule-1',
                 verdict: 'refutes',
-                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-                metadata: {
-                  detection_id: 'det-rule-1',
-                  rule_uuid: 'rule-1',
-                  change_point_type: 'dip',
-                  p_value: 0.01,
-                },
-              },
+                description: 'Healthy',
+                changePointType: 'dip',
+              }),
             ],
           },
         ],
@@ -802,19 +787,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           event_id: 'missing-event',
           status: undefined,
           signals: [
-            {
-              type: 'detection',
-              source_id: 'logs.checkout',
-              description: 'Healthy',
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
               verdict: 'refutes',
-              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-              metadata: {
-                detection_id: 'det-rule-1',
-                rule_uuid: 'rule-1',
-                change_point_type: 'dip',
-                p_value: 0.01,
-              },
-            },
+              description: 'Healthy',
+              changePointType: 'dip',
+            }),
           ],
         },
       ],
@@ -836,19 +814,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           ...baseInput,
           status: undefined,
           signals: [
-            {
-              type: 'detection',
-              source_id: 'logs.checkout',
-              description: 'Confirmed',
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
               verdict: 'confirms',
-              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-              metadata: {
-                detection_id: 'det-rule-1',
-                rule_uuid: 'rule-1',
-                change_point_type: 'spike',
-                p_value: 0.01,
-              },
-            },
+              description: 'Confirmed',
+              changePointType: 'spike',
+            }),
           ],
         },
       ],
@@ -916,19 +887,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
       status: 'active',
       severity: 'high',
       signals: [
-        {
-          type: 'detection',
-          source_id: 'logs.checkout',
-          description: 'Was breaching',
+        makeDetectionSignal({
+          ruleUuid: 'rule-flip',
           verdict: 'confirms',
-          evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-          metadata: {
-            detection_id: 'det-rule-flip',
-            rule_uuid: 'rule-flip',
-            change_point_type: 'spike',
-            p_value: 0.01,
-          },
-        },
+          description: 'Was breaching',
+          changePointType: 'spike',
+        }),
       ],
     });
     const eventClient = makeEventSearchClient({
@@ -944,19 +908,12 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           status: 'active',
           severity: 'high',
           signals: [
-            {
-              type: 'detection',
-              source_id: 'logs.checkout',
-              description: 'Now healthy',
+            makeDetectionSignal({
+              ruleUuid: 'rule-flip',
               verdict: 'refutes',
-              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
-              metadata: {
-                detection_id: 'det-rule-flip',
-                rule_uuid: 'rule-flip',
-                change_point_type: 'spike',
-                p_value: 0.01,
-              },
-            },
+              description: 'Now healthy',
+              changePointType: 'spike',
+            }),
           ],
         },
       ],
@@ -967,18 +924,11 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
 });
 
 describe('eventsWriteBulkHandler — agent-proposed severity', () => {
-  const failingSignal = (ruleUuid: string): SignalEntry => ({
-    type: 'detection',
-    source_id: 'logs.checkout',
-    description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
-    verdict: 'confirms',
-    metadata: {
-      detection_id: `det-${ruleUuid}`,
-      rule_uuid: ruleUuid,
-      change_point_type: 'spike',
-      p_value: 0.01,
-    },
-  });
+  const failingSignal = (ruleUuid: string): SignalEntry =>
+    makeDetectionSignal({
+      ruleUuid,
+      description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
+    });
 
   const write = (input: Partial<EventsWriteInput>) =>
     eventsWriteBulkHandler({
@@ -1022,25 +972,10 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     started_at: '2026-01-01T00:00:00.000Z',
     completed_at: '2026-01-01T01:00:00.000Z',
   };
-  const makeDetectionSignal = (
-    ruleUuid: string,
-    verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
-  ): Extract<SignalEntry, { type: 'detection' }> => ({
-    type: 'detection',
-    source_id: 'logs.checkout',
-    description: `Signal for ${ruleUuid}`,
-    verdict,
-    metadata: {
-      detection_id: `detection-${ruleUuid}`,
-      rule_uuid: ruleUuid,
-      change_point_type: 'spike',
-      p_value: 0.01,
-    },
-  });
   const makeInvestigatedEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
     makeStoredEvent('investigated-event', {
       severity: 'medium',
-      signals: [makeDetectionSignal('rule-1')],
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
       investigations: [completedInvestigation],
       ...overrides,
     });
@@ -1059,7 +994,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
           ...baseInput,
           event_id: stored.event_id,
           severity: 'critical',
-          signals: [makeDetectionSignal('rule-1')],
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
         },
       ],
     });
@@ -1082,7 +1017,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
           ...baseInput,
           event_id: stored.event_id,
           severity: 'critical',
-          signals: [makeDetectionSignal('rule-2', 'inconclusive')],
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-2', verdict: 'inconclusive' })],
         },
       ],
     });
@@ -1096,7 +1031,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
-    const newConfirmedRule = makeDetectionSignal('rule-2');
+    const newConfirmedRule = makeDetectionSignal({ ruleUuid: 'rule-2' });
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
@@ -1131,22 +1066,6 @@ describe('eventsWriteBulkHandler — signal-less chat create', () => {
 });
 
 describe('eventsWriteBulkHandler — narrative hijack guard', () => {
-  type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
-
-  const makeDetectionSignal = (ruleUuid: string): DetectionSignal => ({
-    type: 'detection',
-    source_id: 'logs.app',
-    description: `Signal for ${ruleUuid}`,
-    verdict: 'confirms',
-    metadata: {
-      detection_id: `det-${ruleUuid}`,
-      rule_uuid: ruleUuid,
-      rule_name: ruleUuid,
-      change_point_type: 'spike',
-      p_value: 0.01,
-    },
-  });
-
   const makeCausal = (featureId: string): CausalFeature => ({
     feature_id: featureId,
     type: 'entity',
@@ -1166,7 +1085,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     // A tier the evidence supports, so validation leaves it as proposed.
     severity: 'medium',
     event_id: eventId,
-    signals: [makeDetectionSignal('rule-eis-auth')],
+    signals: [makeDetectionSignal({ ruleUuid: 'rule-eis-auth', sourceId: 'logs.app' })],
     causal_features: [],
     blast_radius: [],
     ...overrides,
@@ -1181,7 +1100,9 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     } = {}
   ): SignificantEvent =>
     makeStoredEvent(eventId, {
-      signals: ruleUuids.map((uuid) => makeDetectionSignal(uuid)),
+      signals: ruleUuids.map((uuid) =>
+        makeDetectionSignal({ ruleUuid: uuid, sourceId: 'logs.app' })
+      ),
       causal_features: topologyOverrides.causal_features ?? [],
       blast_radius: topologyOverrides.blast_radius ?? [],
     });
@@ -1202,7 +1123,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
       eventSearchClient: eventClient,
       inputs: [
         makeSnapshotInput(eventId, {
-          signals: [makeDetectionSignal('rule-eis-auth')], // same rule — no new rules
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-eis-auth', sourceId: 'logs.app' })], // same rule — no new rules
           title: 'Agentless CEL state registry — cleanup remove 404 not_found', // attempted hijack
           symptom_hypothesis: 'CEL filebeat registry-remove 404s.', // attempted hijack
         }),
