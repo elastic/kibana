@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/esql-language'
   - '@kbn/cps'
+  - '@kbn/discover-session-constants'
 tags:
   - shared-common
   - package

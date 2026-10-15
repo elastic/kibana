@@ -22,7 +22,7 @@ import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 import { InvestigationStatusBadge } from '../investigation/investigation_status_badge';
 import { toInvestigationStatus } from '../common/investigation_progress_status';
-import { getStatusColor } from '../event/significant_event_status';
+import { getStatusColor, isNeedsActionStatus } from '../event/significant_event_status';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
@@ -187,7 +187,7 @@ export function SignificantEventItem({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {onCloseClick && event.status === 'active' && (
+              {onCloseClick && isNeedsActionStatus(event.status) && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate('xpack.nightshift.event.closeEventTooltip', {

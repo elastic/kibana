@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiToolTip,
   logicalCSS,
+  useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
@@ -197,6 +198,7 @@ const AlertsListPageContent = () => {
     : ALERT_ACTIONS_PRIVILEGE.read;
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
+  const largeMediaQuery = useEuiMinBreakpoint('m');
   const timefilter = services.data.query.timefilter.timefilter;
 
   useBreadcrumbs('episodes_list');
@@ -608,6 +610,11 @@ const AlertsListPageContent = () => {
         flex-grow: 1;
         ${logicalCSS('min-height')}: 0;
         min-width: 0;
+        ${largeMediaQuery} {
+          block-size: calc(
+            var(--kbn-application--content-height, 100vh) - ${euiTheme.size.base} * 2
+          );
+        }
       `}
     >
       <AppHeader
@@ -624,6 +631,7 @@ const AlertsListPageContent = () => {
         css={css`
           flex: 1;
           min-width: 0;
+          ${logicalCSS('min-height')}: 0;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -660,11 +668,19 @@ const AlertsListPageContent = () => {
             ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            responsive={false}
+            css={css`
+              ${logicalCSS('min-height')}: 0;
+            `}
+          >
             <EuiFlexItem
               grow
               css={css`
                 min-width: 0;
+                ${logicalCSS('min-height')}: 0;
               `}
             >
               <CellActionsProvider

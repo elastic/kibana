@@ -1905,7 +1905,10 @@ groups:
         description: |
           The maximum timeout, in milliseconds, for search requests. To deactivate the timeout and allow queries to run to completion, set to `0`.
         datatype: int
-        default: 600000
+        default: 1200000
+        note: |
+          :applies_to: stack: ga 9.0-9.5
+          In these versions, this setting defaults to `600000` (10 minutes).
         applies_to:
           stack: ga
           ech: ga
