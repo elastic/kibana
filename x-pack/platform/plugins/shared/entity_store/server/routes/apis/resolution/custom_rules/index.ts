@@ -37,7 +37,7 @@ import {
   type CustomResolutionRulesClient,
 } from '../../../../domain/resolution/rules';
 
-export const CUSTOM_RULES_ROUTE_MIDDLEWARES = [enterpriseLicenseMiddleware] as const;
+const CUSTOM_RULES_ROUTE_MIDDLEWARES = [enterpriseLicenseMiddleware] as const;
 
 const routeConfig = (authz: AuthzEnabled) =>
   ({ access: 'internal', security: { authz }, enableQueryVersion: true } as const);
