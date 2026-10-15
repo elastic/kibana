@@ -531,7 +531,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
-| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time reset scheduled automatically after upgrade — see "Backfill generations" below. Manual fallback: POST /reset. |
+| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by the one-time `cases.analyticsV2.incrementalIdBackfill` task (9.6 only) — see "Incremental id backfill (9.6)" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
 
@@ -599,26 +599,47 @@ Safety properties (all covered by tests):
 
 When a fix lands for a write path that changed case SOs without bumping
 `attributes.updated_at`, docs written before the fix stay stale: the
-incremental cursor never revisits those cases. `CASES_BACKFILL_GENERATION`
-(`reconciliation/index.ts`) repairs them once per release that bumps it.
+incremental cursor never revisits those cases. Bumping
+`CASES_BACKFILL_GENERATION` (`reconciliation/index.ts`) repairs them with one
+full reset after upgrade. Prefer a targeted one-time task (like the
+incremental id backfill below) when the affected docs can be found directly;
+a full reset walks every case, activity, and attachment doc.
 
 The reconciliation task persists the last generation it satisfied as
-`cases_backfill_generation` in its state. On a tick where the persisted value
-is behind the constant and a cases cursor exists, the tick schedules the
-`cases.analyticsV2.fullReset` task (same reasoning as the templates coupling
-above) and stamps the new generation. If the cursor is unset, the tick's own
-walk is already full, so it stamps the generation without scheduling a reset.
-Every reset seeds the current generation into the reconciliation state, so a
-reset never triggers another one, and `POST /reset` also satisfies a pending
-generation.
+`cases_backfill_generation` in its state; a missing value counts as the
+baseline `0`. On a tick where the persisted value is behind the constant and a
+cases cursor exists, the tick schedules the `cases.analyticsV2.fullReset` task
+(same reasoning as the templates coupling above) and stamps the new
+generation. If the cursor is unset, the tick's own walk is already full, so it
+stamps the generation without scheduling a reset. Every reset seeds the
+current generation into the reconciliation state, so a reset never triggers
+another one, and `POST /reset` also satisfies a pending generation.
 
-Expect one `/state.active_reset` entry shortly after upgrading to a release
-that bumps the generation. The reset task upserts docs in place; it does not
+After upgrading to a release that bumps the generation, expect one
+`/state.active_reset` entry. The reset task upserts docs in place; it does not
 drop indices or data views (only the `POST /reset` route does that).
 
 | Generation | Repairs |
 | ---------- | ------- |
-| 1 | `case.incremental_id` missing for cases numbered after their analytics doc was written |
+| 0 | Baseline, nothing pending |
+
+### Incremental id backfill (9.6)
+
+Before 9.6, the incremental-id task numbered cases with a raw SO update that
+didn't bump `attributes.updated_at`, so a case whose `.cases` doc was written
+before it was numbered never received `case.incremental_id`. 9.6 fixes that
+going forward (the incremental-id task mirrors newly numbered cases) and ships
+a one-time repair for docs written before the fix:
+`cases.analyticsV2.incrementalIdBackfill` (`incremental_id_backfill/`).
+
+The task searches `.cases` for docs without `case.incremental_id`, re-reads
+those cases, and re-emits the ones that now have a number. Cases that are
+still unnumbered are skipped; the incremental-id task mirrors them when it
+numbers them. It is scheduled on every Kibana start (removed first, so a run
+that failed on a previous start doesn't block it). After the first successful
+run, later runs cost one empty search.
+
+Scheduled for removal in 9.7.
 
 ## Activity surface
 
@@ -766,6 +787,10 @@ cases_analytics_v2/
 │   ├── attachments_doc_builder.ts        pure transform: legacy + unified attachment SO → unified analytics doc
 │   ├── retry.ts                          bounded jittered exponential backoff
 │   └── retry.test.ts
+│
+├── incremental_id_backfill/   one-time 9.6 repair of case.incremental_id in .cases (remove in 9.7)
+│   ├── index.ts             one-shot task registration + per-start scheduling
+│   └── runner.ts            search .cases for missing ids → bulkGet → re-emit numbered cases
 │
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling

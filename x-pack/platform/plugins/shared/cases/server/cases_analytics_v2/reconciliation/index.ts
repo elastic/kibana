@@ -41,12 +41,14 @@ export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
  * Bump to make the next reconciliation tick schedule one full reset. Needed
  * after fixing a write path that changed case SOs without bumping
  * `attributes.updated_at`: the incremental cursor never revisits those cases,
- * so docs written before the fix stay stale until a full walk.
+ * so docs written before the fix stay stale until a full walk. Prefer a
+ * targeted one-time repair (see `../incremental_id_backfill`) when the
+ * affected docs can be found directly.
  *
- *  1. Incremental ids applied by the incremental-id task were never mirrored
- *     to `.cases`.
+ * `0` is the baseline (no pending backfill); a missing persisted value counts
+ * as `0`.
  */
-export const CASES_BACKFILL_GENERATION = 1;
+export const CASES_BACKFILL_GENERATION = 0;
 
 interface RegisterReconciliationTaskArgs {
   taskManager: TaskManagerSetupContract;

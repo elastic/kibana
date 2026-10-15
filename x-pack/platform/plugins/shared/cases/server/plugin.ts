@@ -155,6 +155,7 @@ export class CasePlugin
       // backfill within budget. See the config schema.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
+      incrementalIdEnabled: this.caseConfig.incrementalId.enabled,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 

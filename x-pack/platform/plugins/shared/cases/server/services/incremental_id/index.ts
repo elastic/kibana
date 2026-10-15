@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
@@ -221,7 +222,13 @@ export class CasesIncrementalIdService {
             namespaces: [namespace],
           }))
         );
-      this.analyticsV2Writer.bulkUpsertCases(savedObjects.filter((so) => so.error == null));
+      // Awaited so per-item 429s are retried: reconciliation can't see this
+      // write, so a dropped doc would never get its id.
+      await this.analyticsV2Writer.bulkUpsertCasesAwait(
+        savedObjects.filter(
+          (so): so is SavedObject<CasePersistedAttributes> => !isSavedObjectErrorResult(so)
+        )
+      );
     } catch (error) {
       this.logger.error(
         `Unable to mirror ${cases.length} incremental ids to cases analytics: ${error}`

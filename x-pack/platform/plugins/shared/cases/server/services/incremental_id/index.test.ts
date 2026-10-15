@@ -367,7 +367,7 @@ describe('CasesIncrementalIdService', () => {
         deleteCase: jest.fn(),
         bulkUpsertCases: jest.fn(),
         bulkDeleteCases: jest.fn(),
-        bulkUpsertCasesAwait: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
       };
       service = new CasesIncrementalIdService(savedObjectsClient, mockLogger, writer);
       service.getOrCreateCaseIdIncrementerSo = jest
@@ -401,7 +401,7 @@ describe('CasesIncrementalIdService', () => {
         { type: CASE_SAVED_OBJECT, id: 'case-1', namespaces: ['default'] },
         { type: CASE_SAVED_OBJECT, id: 'case-2', namespaces: ['second-life'] },
       ]);
-      expect(writer.bulkUpsertCases).toHaveBeenCalledWith(freshCases);
+      expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith(freshCases);
     });
 
     it('does not upsert cases that could not be re-read (e.g. deleted mid-run)', async () => {
@@ -427,7 +427,7 @@ describe('CasesIncrementalIdService', () => {
       // @ts-expect-error: case SO types are not correct
       await service.incrementCaseIds(cases);
 
-      expect(writer.bulkUpsertCases).toHaveBeenCalledWith([freshCase]);
+      expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith([freshCase]);
     });
 
     it('does not mirror a case whose id was rolled back because the service stopped', async () => {
@@ -456,7 +456,7 @@ describe('CasesIncrementalIdService', () => {
       await service.incrementCaseIds(cases);
 
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
-      expect(writer.bulkUpsertCases).not.toHaveBeenCalled();
+      expect(writer.bulkUpsertCasesAwait).not.toHaveBeenCalled();
     });
 
     it('does not re-read cases when no analytics writer is provided', async () => {
@@ -479,8 +479,20 @@ describe('CasesIncrementalIdService', () => {
       // @ts-expect-error: case SO types are not correct
       await expect(service.incrementCaseIds(cases)).resolves.toBe(2);
 
-      expect(writer.bulkUpsertCases).not.toHaveBeenCalled();
+      expect(writer.bulkUpsertCasesAwait).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('es down'));
+    });
+
+    it('logs and still reports the processed count when the analytics write fails', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [{ type: CASE_SAVED_OBJECT, id: 'case-1', attributes: {}, references: [] }],
+      });
+      writer.bulkUpsertCasesAwait.mockRejectedValue(new Error('bulk failed'));
+
+      // @ts-expect-error: case SO types are not correct
+      await expect(service.incrementCaseIds(cases)).resolves.toBe(2);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('bulk failed'));
     });
   });
 });

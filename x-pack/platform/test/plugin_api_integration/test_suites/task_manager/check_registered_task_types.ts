@@ -184,6 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
         'cases.analyticsV2.fullReset',
+        'cases.analyticsV2.incrementalIdBackfill',
         'cases.analyticsV2.reconciliation',
         'cases_incremental_id_assignment',
         'cases_templates_v2_migration',

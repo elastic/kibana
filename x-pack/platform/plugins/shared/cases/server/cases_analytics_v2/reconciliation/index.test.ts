@@ -297,7 +297,6 @@ describe('registerReconciliationTask run()', () => {
       cases_last_run_at: 'CASES_NEW',
       activity_last_run_at: 'ACTIVITY_NEW',
       attachments_last_run_at: 'ATTACHMENTS_NEW',
-      cases_backfill_generation: CASES_BACKFILL_GENERATION,
     });
     expect(taskRunError).toBeUndefined();
   });
@@ -395,7 +394,6 @@ describe('registerReconciliationTask run()', () => {
       cases_last_run_at: 'CASES_NEW',
       activity_last_run_at: '2026-05-02T00:00:00.000Z',
       attachments_last_run_at: 'ATTACHMENTS_NEW',
-      cases_backfill_generation: CASES_BACKFILL_GENERATION,
     });
     // Failure surfaced as taskRunError, naming the failing surface.
     expect(taskRunError).toBeDefined();
@@ -411,9 +409,20 @@ describe('registerReconciliationTask run()', () => {
       activity_last_run_at: '2026-05-02T00:00:00.000Z',
       attachments_last_run_at: '2026-05-03T00:00:00.000Z',
     };
+    const behind = CASES_BACKFILL_GENERATION - 1;
 
-    it('schedules a full reset once when an existing cursor predates the current generation', async () => {
+    it('treats a missing persisted generation as the baseline and schedules no reset', async () => {
       const { run, scheduleFullReset } = setupRun({ state: cursors });
+
+      await run();
+
+      expect(scheduleFullReset).not.toHaveBeenCalled();
+    });
+
+    it('schedules a full reset once when an existing cursor is behind the current generation', async () => {
+      const { run, scheduleFullReset } = setupRun({
+        state: { ...cursors, cases_backfill_generation: behind },
+      });
 
       const { state } = await run();
 
@@ -437,7 +446,7 @@ describe('registerReconciliationTask run()', () => {
     });
 
     it('stamps the generation without a reset when there is no cases cursor (the tick already walks every case)', async () => {
-      const { run, scheduleFullReset } = setupRun({ state: {} });
+      const { run, scheduleFullReset } = setupRun({ state: { cases_backfill_generation: behind } });
 
       const { state } = await run();
 
@@ -450,13 +459,13 @@ describe('registerReconciliationTask run()', () => {
 
     it('leaves the generation unchanged and keeps reconciling when scheduling the reset fails', async () => {
       const { run } = setupRun({
-        state: cursors,
+        state: { ...cursors, cases_backfill_generation: behind },
         scheduleFullReset: jest.fn().mockRejectedValue(new Error('tm unavailable')),
       });
 
       const { state, taskRunError } = await run();
 
-      expect(state.cases_backfill_generation).toBeUndefined();
+      expect(state.cases_backfill_generation).toBe(behind);
       expect(state.cases_last_run_at).toBe('CASES_NEW');
       expect(taskRunError).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('tm unavailable'));
@@ -465,12 +474,15 @@ describe('registerReconciliationTask run()', () => {
     it('does not schedule a reset on an already-aborted tick', async () => {
       const controller = new AbortController();
       controller.abort();
-      const { run, scheduleFullReset } = setupRun({ signal: controller.signal, state: cursors });
+      const { run, scheduleFullReset } = setupRun({
+        signal: controller.signal,
+        state: { ...cursors, cases_backfill_generation: behind },
+      });
 
       const { state } = await run();
 
       expect(scheduleFullReset).not.toHaveBeenCalled();
-      expect(state.cases_backfill_generation).toBeUndefined();
+      expect(state.cases_backfill_generation).toBe(behind);
     });
   });
 });

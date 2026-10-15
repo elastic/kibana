@@ -23,6 +23,10 @@ import { ensureActivityIndex } from './ensure_indices/activity';
 import { ensureAttachmentsIndex } from './ensure_indices/attachments';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
 import { registerResetTask, scheduleResetTask, RESET_TASK_ID } from './reconciliation/reset_task';
+import {
+  registerIncrementalIdBackfillTask,
+  scheduleIncrementalIdBackfillTask,
+} from './incremental_id_backfill';
 import { registerCasesAnalyticsV2Routes } from './routes';
 import {
   CasesAnalyticsV2Writer,
@@ -72,6 +76,12 @@ interface CasesAnalyticsV2ServiceDeps {
    * periodic ticks always use 0 (no throttle).
    */
   resetPageDelayMs: number;
+  /**
+   * Resolved value of `xpack.cases.incrementalId.enabled`. Without it no case
+   * is ever numbered, so the incremental id backfill would re-read every case
+   * on each start and repair nothing.
+   */
+  incrementalIdEnabled: boolean;
 }
 
 /**
@@ -145,6 +155,7 @@ export class CasesAnalyticsV2Service {
   private readonly enableAdminRoutes: boolean;
   private readonly resetTaskTimeoutMinutes: number;
   private readonly resetPageDelayMs: number;
+  private readonly incrementalIdEnabled: boolean;
   /**
    * Active writer. Starts as `V2_NOOP_WRITER` so calls before `start()`
    * (or when v2 is disabled) silently no-op. Replaced with a real
@@ -233,6 +244,7 @@ export class CasesAnalyticsV2Service {
     this.enableAdminRoutes = deps.enableAdminRoutes;
     this.resetTaskTimeoutMinutes = deps.resetTaskTimeoutMinutes;
     this.resetPageDelayMs = deps.resetPageDelayMs;
+    this.incrementalIdEnabled = deps.incrementalIdEnabled;
   }
 
   /**
@@ -310,6 +322,32 @@ export class CasesAnalyticsV2Service {
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
           taskManager: this.taskManager,
+        };
+      },
+    });
+
+    // Registered even when incremental ids are disabled (only scheduling is
+    // gated) so a task left over from an earlier start isn't reported by Task
+    // Manager as an unrecognized type.
+    registerIncrementalIdBackfillTask({
+      taskManager: deps.taskManager,
+      logger: this.logger,
+      getRunnerDeps: async () => {
+        if (
+          this.internalSavedObjectsClient == null ||
+          this.esClient == null ||
+          this.writer === V2_NOOP_WRITER
+        ) {
+          // Throwing lets Task Manager retry instead of "repairing" through
+          // the noop writer.
+          throw new Error(
+            'cases-analyticsV2: incremental id backfill fired before service start completed'
+          );
+        }
+        return {
+          esClient: this.esClient,
+          savedObjectsClient: this.internalSavedObjectsClient,
+          writer: this.writerProxy,
         };
       },
     });
@@ -453,6 +491,13 @@ export class CasesAnalyticsV2Service {
       logger: this.logger,
       intervalMinutes: this.reconciliationIntervalMinutes,
     });
+
+    if (this.incrementalIdEnabled) {
+      await scheduleIncrementalIdBackfillTask({
+        taskManager: deps.taskManager,
+        logger: this.logger,
+      });
+    }
   }
 
   /**
