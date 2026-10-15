@@ -10,7 +10,7 @@ import { esql } from '@elastic/esql';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
-import type { DecodedSeriesId } from '@kbn/alerting-v2-utils';
+import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
@@ -209,7 +209,10 @@ export const loadLastSeriesAlertEventOrThrow = async ({
   }
 
   const events = await loadLatestAlertEventsBySeries({ queryService, spaceId, series: [series] });
-  const [event] = events.values();
+  // The owner and hash filter can also match events of another series (the same rule id with
+  // an external source), which ES|QL groups apart, so the requested series is picked by its id.
+  const requestedSeriesId = encodeSeriesId(series);
+  const event = requestedSeriesId ? events.get(requestedSeriesId) : undefined;
 
   return event ?? throwSeriesNotFound(seriesId);
 };

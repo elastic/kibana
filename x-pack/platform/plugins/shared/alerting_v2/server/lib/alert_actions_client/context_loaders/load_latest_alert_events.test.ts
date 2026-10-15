@@ -241,6 +241,48 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
     expect(record).toMatchObject({ group_hash: GROUP_HASH, episode_id: 'ep-1' });
   });
 
+  it('picks the requested series when the filter also matched events of another series', async () => {
+    const { queryService, mockEsClient } = setup();
+    // The same rule id and hash with an external source is grouped apart by ES|QL; it comes first.
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      getSeriesEventESQLResponse([
+        { group_hash: GROUP_HASH, rule_id: 'rule-a', source: 'scout-test', episode_id: 'other' },
+        { group_hash: GROUP_HASH, rule_id: 'rule-a', source: 'internal', episode_id: 'requested' },
+      ])
+    );
+    const series = ruleSeries('rule-a');
+
+    const record = await loadLastSeriesAlertEventOrThrow({
+      queryService,
+      spaceId: SPACE_ID,
+      seriesId: seriesIdOf(series),
+      series,
+    });
+
+    expect(record).toMatchObject({ episode_id: 'requested', source: 'internal' });
+  });
+
+  it('throws `ALERT_EVENT_NOT_FOUND` when only another series matched the filter', async () => {
+    const { queryService, mockEsClient } = setup();
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      getSeriesEventESQLResponse([
+        { group_hash: GROUP_HASH, rule_id: 'rule-a', source: 'scout-test', episode_id: 'other' },
+      ])
+    );
+    const series = ruleSeries('rule-a');
+    const seriesId = seriesIdOf(series);
+
+    await expect(
+      loadLastSeriesAlertEventOrThrow({ queryService, spaceId: SPACE_ID, seriesId, series })
+    ).rejects.toMatchObject({
+      output: { statusCode: 404 },
+      data: {
+        code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+        details: { series_id: seriesId },
+      },
+    });
+  });
+
   it('throws `Boom.notFound` with `ALERT_EVENT_NOT_FOUND` and only the series_id detail', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
