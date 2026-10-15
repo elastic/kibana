@@ -61,17 +61,21 @@ export const AgentPolicyActionMenu = memo<{
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
+    // The list page only has a summary of the package policies, other pages have them all
     const isFleetServerPolicy = useMemo(
       () =>
         agentPolicy.package_policies?.some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-        ) ?? false,
+        ) ??
+        agentPolicy.package_policies_summary?.has_fleet_server ??
+        false,
       [agentPolicy]
     );
 
     const hasManagedPackagePolicy =
-      'package_policies' in agentPolicy &&
-      agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
+      agentPolicy.package_policies?.some((packagePolicy) => packagePolicy.is_managed) ??
+      agentPolicy.package_policies_summary?.has_managed ??
+      false;
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -150,6 +154,7 @@ export const AgentPolicyActionMenu = memo<{
               key="deletePolicy"
               agentPolicy={agentPolicy}
               packagePolicies={agentPolicy.package_policies}
+              packagePoliciesSummary={agentPolicy.package_policies_summary}
             >
               {(deleteAgentPolicyPrompt) => (
                 <EuiContextMenuItem

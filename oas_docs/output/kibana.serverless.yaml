@@ -37461,6 +37461,12 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: get a summary of the package policies of each agent policy, without populating the package policies themselves
+          in: query
+          name: withPackagePoliciesSummary
+          required: false
+          schema:
+            type: boolean
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -143821,6 +143827,27 @@ components:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_response'
               maxItems: 10000
               type: array
+        package_policies_summary:
+          additionalProperties: false
+          description: This field is present only when retrieving a list of agent policies with the `?withPackagePoliciesSummary=true` parameter
+          type: object
+          properties:
+            count:
+              type: number
+            has_fleet_server:
+              type: boolean
+            has_managed:
+              type: boolean
+            has_root_integrations:
+              type: boolean
+            has_shared:
+              type: boolean
+          required:
+            - count
+            - has_fleet_server
+            - has_managed
+            - has_root_integrations
+            - has_shared
         required_versions:
           items:
             additionalProperties: false

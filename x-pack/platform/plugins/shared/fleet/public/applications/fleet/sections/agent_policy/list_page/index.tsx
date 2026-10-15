@@ -24,7 +24,6 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
-import { getRootIntegrations } from '../../../../../../common/services';
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
@@ -106,7 +105,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }),
     showAgentless,
     withAgentCount: true, // Explicitly fetch agent count
-    full: true,
+    withPackagePoliciesSummary: true, // Avoid loading every package policy of every listed policy
   });
 
   // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
@@ -210,7 +209,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
                 />
               </span>
             </EuiFlexItem>
-            {getRootIntegrations(agentPolicy.package_policies || []).length > 0 &&
+            {agentPolicy.package_policies_summary?.has_root_integrations &&
               (agentPolicy.unprivileged_agents || 0) > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -229,13 +228,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'package_policies',
+        field: 'package_policies_summary',
         name: i18n.translate('xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle', {
           defaultMessage: 'Integrations',
         }),
         dataType: 'number',
-        render: (packagePolicies: AgentPolicy['package_policies']) =>
-          packagePolicies ? packagePolicies.length : 0,
+        render: (packagePoliciesSummary: AgentPolicy['package_policies_summary']) =>
+          packagePoliciesSummary?.count ?? 0,
       },
       {
         field: 'actions',

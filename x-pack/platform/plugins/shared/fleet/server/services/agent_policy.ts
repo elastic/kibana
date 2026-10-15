@@ -938,6 +938,7 @@ class AgentPolicyService {
       fields?: string[];
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
+      withPackagePoliciesSummary?: boolean;
       spaceId?: string;
       showAgentless?: boolean;
     }
@@ -956,6 +957,7 @@ class AgentPolicyService {
       sortOrder = 'desc',
       kuery,
       withPackagePolicies = false,
+      withPackagePoliciesSummary = false,
       fields,
       spaceId,
       showAgentless = true,
@@ -1015,6 +1017,16 @@ class AgentPolicyService {
       agentPolicy.agents = 0;
       return agentPolicy;
     });
+
+    if (withPackagePoliciesSummary && !withPackagePolicies) {
+      const summaries = await packagePolicyService.getSummaryForAgentPolicies(
+        soClient,
+        agentPolicies.map(({ id }) => id)
+      );
+      for (const agentPolicy of agentPolicies) {
+        agentPolicy.package_policies_summary = summaries.get(agentPolicy.id);
+      }
+    }
 
     if (options.withAgentCount || withPackagePolicies) {
       await pMap(

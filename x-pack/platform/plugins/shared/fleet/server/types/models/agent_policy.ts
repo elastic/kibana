@@ -496,6 +496,23 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
         }),
       ])
     ),
+    package_policies_summary: schema.maybe(
+      schema.object(
+        {
+          count: schema.number(),
+          has_fleet_server: schema.boolean(),
+          has_managed: schema.boolean(),
+          has_root_integrations: schema.boolean(),
+          has_shared: schema.boolean(),
+        },
+        {
+          meta: {
+            description:
+              'This field is present only when retrieving a list of agent policies with the `?withPackagePoliciesSummary=true` parameter',
+          },
+        }
+      )
+    ),
   },
   { meta: { id: 'agent_policy_response' } }
 );

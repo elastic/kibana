@@ -222,18 +222,20 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
   const {
     full: withPackagePolicies = false,
+    withPackagePoliciesSummary = false,
     noAgentCount,
     withAgentCount,
     format,
     ...restOfQuery
   } = request.query;
-  if (!authzFleetReadAgentPolicies && withPackagePolicies) {
+  if (!authzFleetReadAgentPolicies && (withPackagePolicies || withPackagePoliciesSummary)) {
     throw new FleetUnauthorizedError(
-      'full query parameter require agent policies read permissions'
+      'full and withPackagePoliciesSummary query parameters require agent policies read permissions'
     );
   }
   const agentPoliciesResponse = await agentPolicyService.list(soClient, {
     withPackagePolicies,
+    withPackagePoliciesSummary,
     esClient,
     ...restOfQuery,
   });

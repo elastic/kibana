@@ -76,6 +76,14 @@ export const GetAgentPoliciesRequestSchema = {
           meta: { description: 'get full policies with package policies populated' },
         })
       ),
+      withPackagePoliciesSummary: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'get a summary of the package policies of each agent policy, without populating the package policies themselves',
+          },
+        })
+      ),
       format: schema.maybe(
         schema.oneOf(
           [schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)],
