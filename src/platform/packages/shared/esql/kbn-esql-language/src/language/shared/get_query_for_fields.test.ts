@@ -57,4 +57,50 @@ describe('getQueryForFields', () => {
   it('should not treat a comma inside an incomplete function call as an EVAL separator', () => {
     assert('FROM index | EVAL result = ROUND(field, ', 'FROM index');
   });
+
+  describe('STATS ... BY groupings', () => {
+    const assertAtCursor = (fullQuery: string, cursorOffset: number, expected: string) => {
+      const innerText = fullQuery.slice(0, cursorOffset);
+      const { root } = parseAutocompleteQuery(innerText, cursorOffset);
+
+      const result = getQueryForFields(innerText, root, { fullText: fullQuery, cursorOffset });
+      const printedResult = BasicPrettyPrinter.print(result);
+
+      expect(printedResult).toEqual(expected);
+      expect(printedResult).not.toContain(EDITOR_MARKER);
+    };
+
+    it('exposes a BY-clause assignment as a field when the cursor is in the aggregation', () => {
+      const fullQuery = 'FROM index | STATS AVG() BY abc = foo';
+      assertAtCursor(fullQuery, 'FROM index | STATS AVG('.length, 'FROM index | EVAL abc = foo');
+    });
+
+    it('names a bare expression grouping by its source text', () => {
+      const fullQuery = 'FROM index | STATS COUNT() BY BUCKET(@timestamp, 1 day)';
+      assertAtCursor(
+        fullQuery,
+        'FROM index | STATS COUNT('.length,
+        'FROM index | EVAL `BUCKET(@timestamp, 1 day)` = BUCKET(@timestamp, 1 day)'
+      );
+    });
+
+    it('ignores bare column groupings, which define no new column', () => {
+      const fullQuery = 'FROM index | STATS AVG() BY foo, bar = baz';
+      assertAtCursor(fullQuery, 'FROM index | STATS AVG('.length, 'FROM index | EVAL bar = baz');
+    });
+
+    it('recovers a BY clause swallowed by an empty per-aggregation WHERE', () => {
+      const fullQuery = 'FROM index | STATS COUNT() WHERE  BY abc = foo';
+      assertAtCursor(
+        fullQuery,
+        'FROM index | STATS COUNT() WHERE '.length,
+        'FROM index | EVAL abc = foo'
+      );
+    });
+
+    it('does not expose BY-clause columns within the BY clause itself', () => {
+      const fullQuery = 'FROM index | STATS COUNT() BY abc = foo, def = ';
+      assertAtCursor(fullQuery, fullQuery.length, 'FROM index');
+    });
+  });
 });

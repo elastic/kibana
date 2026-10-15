@@ -130,8 +130,8 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  const suggest = async (query: string, context = mockContext) => {
-    const cursorPosition = query.length;
+  const suggest = async (query: string, context = mockContext, offset?: number) => {
+    const cursorPosition = offset ?? query.length;
     const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');

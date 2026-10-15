@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLAstAllCommands, ESQLAstQueryExpression } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -18,6 +18,21 @@ import type {
   UnmappedFieldsStrategy,
 } from './types';
 import type { ESQLMessage } from '../definitions/types';
+
+/**
+ * Parameters passed to {@link ICommandMethods.columnsInScope} to reshape the query used for
+ * computing the columns available at the cursor.
+ */
+export interface ColumnsInScopeParams {
+  /** The query parsed up to the relevant position. */
+  root: ESQLAstQueryExpression;
+  /** The text `root` was parsed from (the query up to the cursor during autocomplete). */
+  queryString: string;
+  /** The full editor text; equals `queryString` outside of autocomplete. */
+  fullText: string;
+  /** The cursor offset within `fullText`, when known (only during autocomplete). */
+  cursorOffset?: number;
+}
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -85,6 +100,15 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * @returns A summary object containing details about the command.
    */
   summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
+
+  /**
+   * Reshapes the query used to compute the columns in scope at the cursor, for autocomplete,
+   * hover, and signature help. By default the columns produced up to the previous command are in
+   * scope; commands that define columns usable within themselves — EVAL (`EVAL a = 1, b = a`),
+   * FORK branches, and STATS/INLINE STATS groupings (`STATS AVG(x) BY a = y`) — override this to
+   * expose those columns too. Return `undefined` to fall back to the default.
+   */
+  columnsInScope?: (params: ColumnsInScopeParams) => ESQLAstQueryExpression | undefined;
 }
 
 export interface ICommandMetadata {

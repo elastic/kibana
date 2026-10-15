@@ -77,6 +77,11 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const pos = getPosition(command, innerText);
 
+  // Columns defined in the BY clause are in scope for the aggregation expressions and the
+  // per-aggregation WHERE clause (but not within the BY clause itself). The autocomplete pipeline
+  // exposes them through the command's `columnsInScope`, so `context`/`callbacks` already carry
+  // them at those positions — no per-command overlay is needed here.
+
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
   const getFunctionsToIgnore = buildStatsFunctionsToIgnore(command, foundFunction);

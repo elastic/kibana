@@ -12,6 +12,7 @@ import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
+import { columnsInScope } from './columns_in_scope';
 import type { ICommandContext } from '../types';
 import { Commands } from '../../definitions/keywords';
 
@@ -20,6 +21,7 @@ const forkCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   columnsAfter,
   summary,
+  columnsInScope,
 };
 
 export const forkCommand = {

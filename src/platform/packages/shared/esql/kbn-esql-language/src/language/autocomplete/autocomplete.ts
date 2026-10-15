@@ -61,7 +61,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(innerText, astForFields),
+    getQueryForFields(innerText, astForFields, { fullText, cursorOffset: offset }),
     innerText,
     resourceRetriever
   );
