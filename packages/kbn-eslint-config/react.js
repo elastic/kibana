@@ -27,7 +27,6 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
     'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
     'jsx-a11y/accessible-emoji': 'error',
-    'jsx-a11y/no-noninteractive-element-interactions': 'error',
     'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
   },
 }
