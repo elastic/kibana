@@ -18,6 +18,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import { STACK_MONITOR_INTERVAL_MS } from '../workflow_execution_loop/run_stack_monitor/constants';
 
 // Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
 // output normalization is driven by the actual connector contracts.
@@ -63,6 +64,7 @@ describe('ElasticsearchActionStepImpl', () => {
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
+      abortController: new AbortController(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -306,6 +308,42 @@ describe('ElasticsearchActionStepImpl', () => {
         { method: 'GET', path: '/my-index/_search', body: { query: { match_all: {} } } },
         expect.objectContaining({
           maxResponseSize: expect.any(Number),
+          headers: { 'X-Custom-Header': 'value' },
+        })
+      );
+    });
+  });
+
+  describe('transport options', () => {
+    it('should pass the step timeout with a margin and the abort signal together with headers', async () => {
+      const stepWith = {
+        method: 'GET',
+        path: '/my-index/_search',
+        headers: { 'X-Custom-Header': 'value' },
+      };
+      const step = {
+        id: 'raw_step',
+        type: 'elasticsearch.request',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger,
+        120_000
+      );
+
+      await (esStep as any)._run(stepWith);
+
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        { method: 'GET', path: '/my-index/_search', body: undefined },
+        expect.objectContaining({
+          requestTimeout: 120_000 + 2 * STACK_MONITOR_INTERVAL_MS,
+          signal: mockStepExecutionRuntime.abortController.signal,
           headers: { 'X-Custom-Header': 'value' },
         })
       );

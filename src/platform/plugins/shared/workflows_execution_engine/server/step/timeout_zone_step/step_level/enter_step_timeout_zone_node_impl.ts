@@ -8,10 +8,13 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
+import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { parseDuration, renderDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowRuntimeGraph } from '../../../workflow_context_manager/workflow_runtime_graph';
 import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
 export const RESOLVED_TIMEOUT_STATE_KEY = 'resolvedTimeout' as const;
@@ -23,6 +26,37 @@ export const getResolvedStepTimeout = (
 ): string => {
   const value = state?.[RESOLVED_TIMEOUT_STATE_KEY];
   return typeof value === 'string' && value.length > 0 ? value : fallback;
+};
+
+/** Returns the step's own timeout in milliseconds, or undefined when the step has none. */
+export const getOwnStepTimeoutMs = (
+  stepExecutionRuntime: StepExecutionRuntime,
+  workflowGraph: WorkflowRuntimeGraph,
+  stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+): number | undefined => {
+  const { node } = stepExecutionRuntime;
+  let scopeStack = stepExecutionRuntime.scopeStack;
+
+  while (!scopeStack.isEmpty()) {
+    const { nodeId, stepId } = scopeStack.getCurrentScope();
+    if (stepId !== node.stepId) {
+      return undefined;
+    }
+    scopeStack = scopeStack.exitScope();
+
+    const scopeNode = workflowGraph.getNode(nodeId);
+    if (scopeNode && isEnterStepTimeoutZone(scopeNode)) {
+      const zoneRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId,
+        stackFrames: scopeStack.stackFrames,
+      });
+      return parseDuration(
+        getResolvedStepTimeout(zoneRuntime.stepExecution?.state, scopeNode.timeout)
+      );
+    }
+  }
+
+  return undefined;
 };
 
 export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {

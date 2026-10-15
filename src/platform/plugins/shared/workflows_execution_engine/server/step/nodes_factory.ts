@@ -87,6 +87,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { getOwnStepTimeoutMs } from './timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step/wait_for_approval_step';
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
@@ -132,7 +133,12 @@ export class NodesFactory {
         node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        stepExecutionRuntime.stepLogger
+        stepExecutionRuntime.stepLogger,
+        getOwnStepTimeoutMs(
+          stepExecutionRuntime,
+          this.workflowGraph,
+          this.stepExecutionRuntimeFactory
+        )
       );
     }
 
