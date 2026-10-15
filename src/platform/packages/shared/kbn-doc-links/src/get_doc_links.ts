@@ -1175,6 +1175,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
       featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
       externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
+      selfHostedInference: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models#connect-a-local-llm`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless

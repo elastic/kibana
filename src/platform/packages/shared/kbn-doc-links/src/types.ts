@@ -758,6 +758,7 @@ export interface DocLinks {
     readonly inferenceAPIDocumentation: string;
     readonly featureSettings: string;
     readonly externalInference: string;
+    readonly selfHostedInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;

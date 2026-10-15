@@ -39098,7 +39098,6 @@
     "xpack.searchInferenceEndpoints.endpoints.soReadError": "Falha ao ler as configurações de inferência: {message}",
     "xpack.searchInferenceEndpoints.endpointStats.endpointsLabel": "Endpoints:",
     "xpack.searchInferenceEndpoints.endpointStats.modelsLabel": "Modelos:",
-    "xpack.searchInferenceEndpoints.externalInference.emptyDescription": "Adicione endpoints de modelos dos seus provedores de modelos favoritos para usá-los em buscas com inteligência artificial.",
     "xpack.searchInferenceEndpoints.externalInference.emptyTitle": "Conecte-se a provedores de modelos externos",
     "xpack.searchInferenceEndpoints.externalInferenceTitle": "Inferência externa",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "Nenhuma opção",
