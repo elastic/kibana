@@ -15,16 +15,7 @@ import { monitorMigrations } from '../migrations/monitors';
 
 export const LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE = {
   type: legacySyntheticsMonitorTypeSingle,
-  attributesToEncrypt: new Set([
-    'secrets',
-    /* adding secretKeys to the list of attributes to encrypt ensures
-     * that secrets are never stored on the resulting saved object,
-     * even in the presence of developer error.
-     *
-     * In practice, all secrets should be stored as a single JSON
-     * payload on the `secrets` key. This ensures performant decryption. */
-    ...secretKeys,
-  ]),
+  attributesToEncrypt: new Set(['secrets']),
   attributesToIncludeInAAD,
 };
 

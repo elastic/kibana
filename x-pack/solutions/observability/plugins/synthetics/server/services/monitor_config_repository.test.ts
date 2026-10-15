@@ -26,6 +26,7 @@ import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 jest.mock('../synthetics_service/utils', () => ({
   formatSecrets: jest.fn((data) => ({ ...data, formattedSecrets: true })),
   normalizeSecrets: jest.fn((data) => ({ ...data, normalizedSecrets: true })),
+  assertSecretsEncapsulated: jest.fn(),
 }));
 
 // Mock the AMP span
