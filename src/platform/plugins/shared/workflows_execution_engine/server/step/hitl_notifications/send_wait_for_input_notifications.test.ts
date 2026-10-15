@@ -241,7 +241,7 @@ describe('sendWaitForInputNotifications', () => {
           'connector-id': 'teams-1',
           'team-id': 'team-1',
           'channel-id': 'channel-1',
-          message: 'Respond: {{context.hitl.externalFormLink}}',
+          message: 'Respond:\n{{context.hitl.externalFormLink}}',
         },
       },
       stepMessage: 'Please provide input',
@@ -253,8 +253,11 @@ describe('sendWaitForInputNotifications', () => {
       abortController: new AbortController(),
     });
 
-    expect(execute.mock.calls[0][0].input.subActionParams.content).toBe(
-      'Respond: https://kibana.example/form'
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        contentType: 'text',
+        content: 'Respond:\nhttps://kibana.example/form',
+      })
     );
   });
 

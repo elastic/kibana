@@ -346,7 +346,12 @@ export async function sendWaitForInputNotifications({
     const result = await connectorExecutor.execute({
       connectorType: 'microsoft-teams',
       connectorNameOrId: teamsConnectorId,
-      input: buildTeamsSendChannelMessageInput(renderedTeamId, renderedChannelId, content),
+      input: buildTeamsSendChannelMessageInput(
+        renderedTeamId,
+        renderedChannelId,
+        content,
+        renderedComment != null ? 'text' : 'html'
+      ),
       abortController,
     });
     assertConnectorSucceeded(result);

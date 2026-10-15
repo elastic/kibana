@@ -139,7 +139,8 @@ export function teamsHtmlLink(label: string, url: string): string {
 export function buildTeamsSendChannelMessageInput(
   teamId: string,
   channelId: string,
-  content: string
+  content: string,
+  contentType: 'text' | 'html' = 'html'
 ) {
   return {
     subAction: 'sendChannelMessage' as const,
@@ -147,7 +148,7 @@ export function buildTeamsSendChannelMessageInput(
       teamId,
       channelId,
       content,
-      contentType: 'html' as const,
+      contentType,
     },
   };
 }
