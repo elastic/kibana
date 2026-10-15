@@ -18,6 +18,7 @@
  *   --es      Elasticsearch base URL (default: http://localhost:9200)
  *   --kibana  Kibana base URL (default: http://localhost:5601)
  *   --space   Kibana space id (default: default)
+ *   --apiKey  Base64 API key; sent as `ApiKey` auth (default: $API_KEY, else basic auth via ES_USERNAME/ES_PASSWORD)
  *   --run     After indexing, trigger one Worker run per rule immediately (no curl needed)
  *   --clean   Delete all previously indexed eval alerts instead of creating new ones
  */
@@ -42,7 +43,10 @@ const RUN = args.includes('--run');
 const INDEX = `.alerts-security.alerts-${SPACE}`;
 const ES_USERNAME = process.env.ES_USERNAME ?? 'elastic';
 const ES_PASSWORD = process.env.ES_PASSWORD ?? 'changeme';
-const AUTH = `${ES_USERNAME}:${ES_PASSWORD}`;
+const API_KEY = flag('--apiKey', process.env.API_KEY);
+const AUTH_HEADER = API_KEY
+  ? `ApiKey ${API_KEY}`
+  : 'Basic ' + Buffer.from(`${ES_USERNAME}:${ES_PASSWORD}`).toString('base64');
 
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
@@ -59,7 +63,7 @@ async function esRequest(method, path, body) {
     method,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+      Authorization: AUTH_HEADER,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -489,7 +493,7 @@ async function indexAlerts() {
             'Content-Type': 'application/json',
             'kbn-xsrf': 'true',
             'elastic-api-version': '2023-10-31',
-            Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+            Authorization: AUTH_HEADER,
           },
           body: JSON.stringify(body),
         }
@@ -501,7 +505,7 @@ async function indexAlerts() {
     }
     console.log(`\n  Poll for result:`);
     console.log(
-      `  curl -u elastic:changeme '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
+      `  curl -H 'Authorization: ${AUTH_HEADER}' '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
   } else {
     // Write payloads to temp files — avoids multiline -d quoting issues on paste.
