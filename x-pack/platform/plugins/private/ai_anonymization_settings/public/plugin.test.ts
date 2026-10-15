@@ -81,7 +81,7 @@ describe('AiAnonymizationSettingsPlugin', () => {
     }
   );
 
-  it('follows license changes while Kibana runs', () => {
+  it('re-evaluates the entry on every license emission', () => {
     const { plugin, app } = setupPlugin();
     const license$ = startWith(plugin, { show: true, save: true });
     expect(app.enable).toHaveBeenCalledTimes(1);
