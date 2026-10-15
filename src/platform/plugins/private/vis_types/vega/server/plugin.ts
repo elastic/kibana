@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -23,21 +23,33 @@ import type {
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
+import {
+  LEGACY_VEGA_PANEL_MIGRATION_DEFAULT,
+  LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG,
+} from './legacy_vega_panel_migration/constants';
+import { migrateLegacyVegaPanel } from './legacy_vega_panel_migration/migrate';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly logger: Logger;
+  private standaloneEmbeddableEnabled = false;
+  private legacyVegaPanelMigrationEnabled = LEGACY_VEGA_PANEL_MIGRATION_DEFAULT;
+  private legacyVegaPanelMigrationSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    { embeddable, visualizations }: VisTypeVegaPluginSetupDependencies
+  ) {
     core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
         const standaloneEmbeddableEnabled = await firstValueFrom(
           featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
         );
+        this.standaloneEmbeddableEnabled = standaloneEmbeddableEnabled;
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
           getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
@@ -46,10 +58,32 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
         });
       })
       .catch(() => {});
+
+    // The vega vis type and the standalone panel type are both named 'vega'.
+    visualizations.registerLegacyPanelMigration(VEGA_EMBEDDABLE_TYPE, {
+      to: VEGA_EMBEDDABLE_TYPE,
+      migrate: (args) =>
+        this.standaloneEmbeddableEnabled && this.legacyVegaPanelMigrationEnabled
+          ? migrateLegacyVegaPanel(args)
+          : undefined,
+    });
     return {};
   }
 
   public start(core: CoreStart) {
+    this.legacyVegaPanelMigrationSubscription = core.featureFlags
+      .getBooleanValue$(
+        LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG,
+        LEGACY_VEGA_PANEL_MIGRATION_DEFAULT
+      )
+      .pipe(distinctUntilChanged())
+      .subscribe((enabled) => {
+        this.legacyVegaPanelMigrationEnabled = enabled;
+      });
     return {};
+  }
+
+  public stop() {
+    this.legacyVegaPanelMigrationSubscription?.unsubscribe();
   }
 }
