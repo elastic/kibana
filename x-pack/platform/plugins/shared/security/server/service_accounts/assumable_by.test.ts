@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TrustedPlatformServiceAccountName, UiamProjectType } from '@kbn/core-security-server';
+import type { UiamProjectType } from '@kbn/core-security-server';
 
 import { buildAssumableBy } from './assumable_by';
 
@@ -27,6 +27,26 @@ describe('buildAssumableBy', () => {
     ]);
   });
 
+  it('appends platform service accounts after the project entry', () => {
+    expect(
+      buildAssumableBy({
+        organizationId: 'organization-id',
+        projectId: 'project-id',
+        projectType: 'observability',
+        platformServiceAccountIds: ['relay-service', 'sandbox-api'],
+      })
+    ).toEqual([
+      {
+        type: 'project-service-account',
+        organization_id: 'organization-id',
+        project_type: 'observability',
+        project_id: 'project-id',
+      },
+      { type: 'platform-service-account', service_account_id: 'relay-service' },
+      { type: 'platform-service-account', service_account_id: 'sandbox-api' },
+    ]);
+  });
+
   it.each<UiamProjectType>(['elasticsearch', 'observability', 'security', 'vectordb'])(
     'passes through the `%s` project type verbatim',
     (projectType) => {
@@ -39,67 +59,4 @@ describe('buildAssumableBy', () => {
       expect(entry).toMatchObject({ project_type: projectType });
     }
   );
-
-  it('adds the Relay platform service account from the server-owned id', () => {
-    expect(
-      buildAssumableBy(
-        {
-          organizationId: 'organization-id',
-          projectId: 'project-id',
-          projectType: 'security',
-        },
-        ['relay']
-      )
-    ).toEqual([
-      {
-        type: 'project-service-account',
-        organization_id: 'organization-id',
-        project_type: 'security',
-        project_id: 'project-id',
-      },
-      { type: 'platform-service-account', service_account_id: 'relay-service' },
-    ]);
-  });
-
-  it('adds the Relay assumer once when the name is repeated', () => {
-    const assumableBy = buildAssumableBy(
-      {
-        organizationId: 'organization-id',
-        projectId: 'project-id',
-        projectType: 'observability',
-      },
-      ['relay', 'relay']
-    );
-
-    expect(assumableBy.filter((entry) => entry.type === 'platform-service-account')).toEqual([
-      { type: 'platform-service-account', service_account_id: 'relay-service' },
-    ]);
-  });
-
-  it('rejects an assumer the server does not know and does not echo the name', () => {
-    const attacker = 'attacker-principal';
-    expect(() =>
-      buildAssumableBy(
-        {
-          organizationId: 'organization-id',
-          projectId: 'project-id',
-          projectType: 'security',
-        },
-        [attacker] as unknown as readonly TrustedPlatformServiceAccountName[]
-      )
-    ).toThrow(/unknown platform service account assumer/);
-
-    try {
-      buildAssumableBy(
-        {
-          organizationId: 'organization-id',
-          projectId: 'project-id',
-          projectType: 'security',
-        },
-        [attacker] as unknown as readonly TrustedPlatformServiceAccountName[]
-      );
-    } catch (error) {
-      expect(String(error)).not.toContain(attacker);
-    }
-  });
 });

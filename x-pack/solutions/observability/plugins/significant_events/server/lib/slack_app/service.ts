@@ -370,7 +370,7 @@ export class SlackAppService {
     const { id: serviceAccountId } = await serviceAccounts.create(request, {
       name: `${RELAY_SERVICE_ACCOUNT_NAME_PREFIX}-${randomUUID()}`, // Add an uuid as name could collide even after a deletion
       roles: RELAY_SERVICE_ACCOUNT_ROLES,
-      trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
+      platformAssumers: RELAY_PLATFORM_ASSUMERS,
     });
 
     return {

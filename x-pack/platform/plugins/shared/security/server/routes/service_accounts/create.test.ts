@@ -392,9 +392,10 @@ describe('Create service account route', () => {
       ]);
     });
 
-    it('rejects `trustedPlatformAssumers`, which only trusted server code may set', () => {
-      expect(issuesFor({ ...requestBody, trustedPlatformAssumers: ['relay'] })).toEqual([
-        expect.objectContaining({ code: 'unrecognized_keys', keys: ['trustedPlatformAssumers'] }),
+    // Platform assumers come from server-side callers only, never from a browser.
+    it('rejects `platformAssumers`, which only the server contract accepts', () => {
+      expect(issuesFor({ ...requestBody, platformAssumers: ['relay'] })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['platformAssumers'] }),
       ]);
     });
 

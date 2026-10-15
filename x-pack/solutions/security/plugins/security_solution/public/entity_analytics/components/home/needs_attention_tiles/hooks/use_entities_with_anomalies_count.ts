@@ -23,6 +23,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -96,7 +97,7 @@ export const useEntitiesWithAnomaliesCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }
@@ -117,6 +118,9 @@ export const useEntitiesWithAnomaliesCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
   };
 };

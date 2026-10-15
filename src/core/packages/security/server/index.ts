@@ -19,9 +19,8 @@ export type {
   CreateServiceAccountServerParams,
   DeleteServiceAccountOptions,
   DeleteServiceAccountResult,
-  TrustedPlatformServiceAccountName,
+  ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
-export { TRUSTED_PLATFORM_SERVICE_ACCOUNTS } from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
   ServiceAccountWorkloadDetails,

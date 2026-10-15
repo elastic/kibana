@@ -16,6 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { VisorMode } from '@kbn/esql-editor';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   type ProfileStateRegistry,
@@ -41,7 +42,11 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
   profileState: TabState['profileState'] | undefined;
+  visorMode?: VisorMode;
 };
+
+const isVisorMode = (value: unknown): value is VisorMode =>
+  typeof value === 'string' && Object.values<string>(VisorMode).includes(value);
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
   Pick<RecentlyClosedTabState, 'closedAt'>;
@@ -86,7 +91,7 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<
       TabStateInLocalStorage,
-      'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
+      'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState' | 'visorMode'
     >
   ) => void;
   loadLocally: (props: {
@@ -210,6 +215,7 @@ export const createTabsStorageManager = ({
       appState: tabState.appState,
       globalState: tabState.globalState,
       profileState: getLocallyPersistedProfileState(tabState.profileState),
+      visorMode: tabState.uiState.visor?.visorMode,
     };
   };
 
@@ -273,6 +279,11 @@ export const createTabsStorageManager = ({
       ? extractEsqlVariables(controlGroupState)
       : defaultTabState.esqlVariables;
 
+    // Anything other than a known mode is dropped so the visor falls back to its default.
+    const visorMode = isVisorMode(tabStateInStorage.visorMode)
+      ? tabStateInStorage.visorMode
+      : undefined;
+
     const tabState: TabState = {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
@@ -288,6 +299,9 @@ export const createTabsStorageManager = ({
       globalState: globalState || {},
       profileState: profileState || defaultTabState.profileState,
       esqlVariables,
+      uiState: visorMode
+        ? { ...defaultTabState.uiState, visor: { visorMode } }
+        : defaultTabState.uiState,
     };
 
     // migration from the older format where visContext was stored in internalState
@@ -415,6 +429,7 @@ export const createTabsStorageManager = ({
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
             profileState: getLocallyPersistedProfileState(tabStatePartial.profileState),
+            visorMode: tabStatePartial.visorMode,
           };
         }
         return tab;

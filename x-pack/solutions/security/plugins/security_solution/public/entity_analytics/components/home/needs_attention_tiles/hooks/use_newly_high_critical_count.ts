@@ -22,6 +22,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
@@ -84,7 +85,7 @@ export const useNewlyHighCriticalCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }
@@ -105,6 +106,8 @@ export const useNewlyHighCriticalCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
     error: filteredError ?? indexError,
   };

@@ -424,7 +424,7 @@ describe('SlackAppService', () => {
           /^nightshift-relay-agent-builder-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
         ),
         roles: ['_nightshift_agent'],
-        trustedPlatformAssumers: ['relay'],
+        platformAssumers: ['relay'],
       });
       expect(startInstall).toHaveBeenCalledWith({
         uiam_service_account_id: 'sa-1',

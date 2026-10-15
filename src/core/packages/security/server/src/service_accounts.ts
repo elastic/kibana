@@ -20,24 +20,27 @@ import type {
 } from '@kbn/core-security-common';
 
 /**
- * Platform assumers Kibana may place on a service account. The security plugin
- * resolves each name to an id; callers cannot supply a raw principal.
+ * A platform service, outside Kibana, that can also assume a service account a plugin creates.
+ * The security plugin maps each name to that service's identity, so a caller never names a
+ * principal directly. Adding a name here needs a matching entry in the security plugin.
  *
  * @public
  */
-export const TRUSTED_PLATFORM_SERVICE_ACCOUNTS = ['relay'] as const;
-
-/** @public */
-export type TrustedPlatformServiceAccountName = (typeof TRUSTED_PLATFORM_SERVICE_ACCOUNTS)[number];
+export type ServiceAccountPlatformAssumer = 'relay' | 'sandbox';
 
 /**
- * Server-side create parameters. `trustedPlatformAssumers` is not part of the
- * HTTP body: that schema stays `{ name }` and rejects anything else.
+ * Create parameters for server-side callers. Only the server contract accepts
+ * `platformAssumers`. The HTTP route and the browser contract take {@link CreateServiceAccountParams}.
  *
  * @public
  */
 export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
-  trustedPlatformAssumers?: readonly TrustedPlatformServiceAccountName[];
+  /**
+   * Platform services that may exchange the account for a token, in addition to this Kibana
+   * project. Only supported when service accounts are backed by UIAM. Elasticsearch service
+   * accounts reject a create that names any.
+   */
+  platformAssumers?: readonly ServiceAccountPlatformAssumer[];
 }
 
 /** @public */
@@ -80,8 +83,8 @@ export interface CoreServiceAccountsService {
    * bound to the provided request.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name, plus any named platform assumers. Assumer ids are resolved
-   * in the security plugin and are not accepted from an HTTP body.
+   * @param params The name and roles for the new service account, and any platform services that
+   * may also assume it.
    */
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
@@ -137,7 +140,9 @@ export interface CoreServiceAccountsService {
    * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
    * Rejects when the workload has no binding (a 404), its account differs from
-   * expectedServiceAccountId (a 403), or bindings are unavailable.
+   * expectedServiceAccountId (a 403), `executionId` is empty or longer than a workload ID, or
+   * bindings are unavailable. On the Elasticsearch backend it also rejects when Kibana refuses the
+   * account's stored credential (a 403), or when that credential is missing (a 404).
    */
   withScopedRequestForWorkload<T>(
     params: ServiceAccountWorkloadRequestParams,

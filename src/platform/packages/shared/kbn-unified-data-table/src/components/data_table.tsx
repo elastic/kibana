@@ -273,6 +273,12 @@ interface InternalUnifiedDataTableProps {
    */
   showKeyboardShortcuts?: boolean;
   /**
+   * Determines whether the toolbar Sort control should be displayed.
+   * Defaults to `isSortEnabled` and cannot enable sorting when it is disabled.
+   * Column-header sorting still follows `isSortEnabled`.
+   */
+  showSortSelector?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -387,14 +393,8 @@ interface InternalUnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * @deprecated Use only `rowAdditionalLeadingControls` instead
-   * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
-   */
-  externalControlColumns?: EuiDataGridControlColumn[];
-  /**
-   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
-   * We recommend to rather position all controls in the beginning of rows and use `rowAdditionalLeadingControls` for that
-   * as number of columns can be dynamically changed and we don't want the controls to become hidden due to horizontal scroll.
+   * Trailing EuiDataGrid control columns for non-per-row uses, such as header-only actions
+   * and custom row-renderer columns that `rowAdditionalLeadingControls` cannot express.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
   /**
@@ -602,6 +602,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       settings,
       showTimeCol,
       showKeyboardShortcuts = true,
+      showSortSelector = true,
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
@@ -625,8 +626,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCustomGridBody,
       renderCustomToolbar,
       showSummaryColumnToggle = false,
-      externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
-      trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+      trailingControlColumns,
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
@@ -765,11 +765,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
-        canPrependTimeFieldColumn(activeColumns, timeFieldName, dataSource, showTimeCol),
-      [timeFieldName, showTimeCol, dataSource]
+        canPrependTimeFieldColumn(activeColumns, dataView, dataSource, showTimeCol),
+      [dataView, showTimeCol, dataSource]
     );
 
     const visibleColumns = useMemo(() => {
@@ -1304,7 +1303,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       const actionsColumn = getActionsColumn({
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
-        externalControlColumns,
         visibleRowLeadingControls,
       });
       if (actionsColumn) {
@@ -1316,7 +1314,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       canSetExpandedDoc,
       controlColumnIds,
       displayedRows,
-      externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
       visibleRowLeadingControls,
@@ -1504,7 +1501,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showSortSelector: isSortEnabled && showSortSelector && !isJsonSourceMode,
         showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
@@ -1514,6 +1511,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         isJsonSourceMode,
         isSortEnabled,
+        showSortSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

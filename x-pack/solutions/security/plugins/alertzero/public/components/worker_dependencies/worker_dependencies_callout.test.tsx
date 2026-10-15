@@ -107,39 +107,45 @@ describe('WorkerDependenciesCallout', () => {
     const { contextSetting, renderCallouts } = setup({ contextEnabled: false });
     const hunt = worker(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID);
     const first = renderCallouts([hunt], 'onboarding');
-    expect(screen.getByTestId('alertZeroWorkerDependency-contextEngine')).toHaveTextContent(
-      'cannot write coverage records'
+    const onboardingRow = screen.getByTestId('alertZeroWorkerDependency-contextEngine');
+    expect(onboardingRow).toHaveTextContent(
+      "Context Engine is off, so Continuous Threat Hunt can't write coverage records for Rule Coverage."
     );
     expect(screen.queryByText('Worker setup needs attention')).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Open Advanced Settings/ })).toBeNull();
     first.unmount();
 
     renderCallouts([hunt]);
     const callout = screen.getByTestId(`alertZeroWorkerDependencies-settings-${hunt.id}`);
     expect(within(callout).getByText('Worker setup needs attention')).toBeInTheDocument();
-    expect(callout).toHaveTextContent('cannot write coverage records');
-    expect(within(callout).getByRole('link', { name: /^Open Advanced Settings/ })).toHaveAttribute(
-      'href',
-      '/s/analyst/app/management/kibana/settings?query=Context%20Engine'
-    );
+    expect(callout).toHaveTextContent("can't write coverage records");
     expect(
       within(screen.getByTestId('alertZeroDependencyDescription-contextEngine')).queryByRole('link')
     ).toBeNull();
+    // One-click enable replaces the settings link; the link only returns if enabling fails.
     const actions = screen.getByTestId('alertZeroDependencyActions-contextEngine');
     expect(
       within(actions).getByRole('button', { name: 'Enable Context Engine' })
-    ).toBeInTheDocument();
-    expect(
-      within(actions).getByRole('link', { name: /^Open Advanced Settings/ })
-    ).toBeInTheDocument();
+    ).toHaveTextContent('Enable');
+    expect(within(actions).queryByRole('link')).toBeNull();
 
     act(() => contextSetting.next(true));
     expect(screen.queryByTestId(`alertZeroWorkerDependencies-settings-${hunt.id}`)).toBeNull();
   });
 
   it.each([
-    [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID, 'cannot process coverage records'],
-    [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID, 'cannot hand findings'],
-    [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID, 'cannot read or update'],
+    [
+      SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      "so Rule Coverage can't process coverage records",
+    ],
+    [
+      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      "so Attack Discovery findings won't reach Endpoint Analysis",
+    ],
+    [
+      SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+      "so Endpoint Analysis can't read or update",
+    ],
   ])('explains the Context Engine impact for %s', (workerId, impact) => {
     const { renderCallouts } = setup({ contextEnabled: false });
     renderCallouts([worker(workerId)]);
@@ -209,7 +215,14 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID)]);
     fireEvent.click(screen.getByRole('button', { name: 'Enable Context Engine' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not enable Context Engine');
-    expect(screen.getByTestId('alertZeroWorkerDependency-contextEngine')).toBeInTheDocument();
+    const row = screen.getByTestId('alertZeroWorkerDependency-contextEngine');
+    expect(row).toBeInTheDocument();
+    // The settings link comes back as a fallback next to the retry-able Enable button.
+    expect(within(row).getByRole('link', { name: /^Open Advanced Settings/ })).toHaveAttribute(
+      'href',
+      '/s/analyst/app/management/kibana/settings?query=Context%20Engine'
+    );
+    expect(within(row).getByRole('button', { name: 'Enable Context Engine' })).toBeInTheDocument();
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Could not enable Context Engine',
     });
@@ -273,19 +286,22 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).toHaveTextContent(
-        'Could not verify'
+        'could not be verified'
       );
     });
     const disabled = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
-    expect(within(disabled).getByRole('link', { name: /^Open workflow/ })).toHaveAttribute(
-      'href',
-      `/s/analyst/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
+    expect(disabled).toHaveTextContent(
+      'Ingest threat feeds workflow is off, so Continuous Threat Hunt may have no reports to investigate.'
     );
     expect(
-      within(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).getByRole('link', {
-        name: /^Open Workflows/,
-      })
-    ).toHaveAttribute('href', '/s/analyst/app/workflows');
+      within(disabled).getByRole('button', { name: 'Enable Ingest threat feeds' })
+    ).toBeInTheDocument();
+    const unverified = screen.getByTestId('alertZeroWorkerDependency-threatEnrich');
+    expect(within(unverified).getByRole('link', { name: /^Open Workflows/ })).toHaveAttribute(
+      'href',
+      '/s/analyst/app/workflows'
+    );
+    expect(within(unverified).queryByRole('button', { name: /^Enable/ })).toBeNull();
   });
 
   it('enables each disabled global threat workflow with an enablement-only update', async () => {
@@ -342,7 +358,16 @@ describe('WorkerDependenciesCallout', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Could not enable Ingest threat feeds'
     );
-    expect(screen.getByTestId('alertZeroWorkerDependency-threatIngest')).toBeInTheDocument();
+    const item = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
+    expect(item).toBeInTheDocument();
+    // The per-workflow link returns as a fallback beside the retry-able Enable button.
+    expect(within(item).getByRole('link', { name: /^Open workflow/ })).toHaveAttribute(
+      'href',
+      `/s/analyst/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
+    );
+    expect(
+      within(item).getByRole('button', { name: 'Enable Ingest threat feeds' })
+    ).toBeInTheDocument();
     expect(core.http.post).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Could not enable Ingest threat feeds',
@@ -371,7 +396,7 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-        'Could not verify'
+        'could not be verified'
       );
     });
     expect(screen.getByTestId('alertZeroWorkerDependency-contextEngine')).toBeInTheDocument();
@@ -379,7 +404,7 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-        'No Elastic Defend integration policy'
+        "Elastic Defend is not set up, so Endpoint Analysis can't investigate hosts."
       );
     });
     expect(core.http.get).toHaveBeenCalledWith('/api/fleet/package_policies', {
@@ -402,7 +427,7 @@ describe('WorkerDependenciesCallout', () => {
 
     await act(async () => resolvePolicies({ total: 0 }));
     expect(await screen.findByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-      'No Elastic Defend integration policy'
+      "can't investigate hosts"
     );
   });
 
@@ -413,7 +438,7 @@ describe('WorkerDependenciesCallout', () => {
     const onboarding = renderCallouts([endpoint], 'onboarding');
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-      'Could not verify'
+      'could not be verified'
     );
     expect(screen.queryByText('Could not verify worker setup')).toBeNull();
     onboarding.unmount();
@@ -448,11 +473,11 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-threatIngest')).toHaveTextContent(
-        'Could not verify'
+        'could not be verified'
       );
     });
     expect(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).toHaveTextContent(
-      'Could not verify'
+      'could not be verified'
     );
     fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
     await waitFor(() => {
@@ -466,7 +491,9 @@ describe('WorkerDependenciesCallout', () => {
     core.http.post.mockResolvedValue([{ id: ALERT_ANALYSIS_WORKFLOW_ID, enabled: false }]);
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
     const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
-    expect(item).toHaveTextContent('workflow is missing or disabled');
+    expect(item).toHaveTextContent(
+      "Alert Analysis workflow is missing or disabled, so Alert Triage can't analyze alerts."
+    );
     expect(within(item).getByRole('link')).toHaveAttribute(
       'href',
       '/s/analyst/app/security/rules/alert_analysis_workflow'
@@ -483,7 +510,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)], 'onboarding');
 
     const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
-    expect(item).toHaveTextContent('Alert analysis is off for this space');
+    expect(item).toHaveTextContent("Alert analysis is off, so Alert Triage can't analyze alerts.");
     expect(screen.queryByText('Worker setup needs attention')).toBeNull();
     expect(core.http.get).toHaveBeenCalledWith('/internal/kibana/settings');
 
@@ -503,7 +530,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'Alert analysis is off for this space'
+      'Alert analysis is off'
     );
   });
 
@@ -533,7 +560,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'Could not verify'
+      'could not be verified'
     );
   });
 
@@ -545,7 +572,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'Could not verify'
+      'could not be verified'
     );
     fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
     await waitFor(() =>
@@ -560,7 +587,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'Could not verify'
+      'could not be verified'
     );
   });
 
@@ -569,23 +596,25 @@ describe('WorkerDependenciesCallout', () => {
     core.featureFlags.useBooleanValue.mockReturnValue(false);
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)]);
     const item = screen.getByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows');
-    expect(item).toHaveTextContent('Ask an administrator');
+    expect(item).toHaveTextContent(
+      'Attack Discovery workflows are unavailable for this deployment. Ask an administrator to enable them.'
+    );
     expect(within(item).queryByRole('link')).toBeNull();
+    expect(within(item).queryByRole('button')).toBeNull();
   });
 
   it('links Attack Discovery to its setting and clears the callout when enabled', () => {
     const { core, discoverySetting, renderCallouts } = setup({ discoveryEnabled: false });
+    Object.assign(core.application.capabilities, {
+      advancedSettings: { show: true, save: false },
+    });
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)]);
     const item = screen.getByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows');
-    const link = within(item).getByRole('link', { name: /^Open Advanced Settings/ });
-    expect(link).toHaveAttribute(
+    // A plain href: Kibana's global link redirect handles in-app navigation.
+    expect(within(item).getByRole('link', { name: /^Open Advanced Settings/ })).toHaveAttribute(
       'href',
       '/s/analyst/app/management/kibana/settings?query=Attack%20Discovery%20Workflows'
     );
-    fireEvent.click(link);
-    expect(core.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/kibana/settings?query=Attack%20Discovery%20Workflows',
-    });
     act(() => discoverySetting.next(true));
     expect(screen.queryByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows')).toBeNull();
   });

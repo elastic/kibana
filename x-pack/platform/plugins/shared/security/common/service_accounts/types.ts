@@ -55,6 +55,11 @@ export interface ServiceAccountDirectoryEntry {
    * own, and absent on Elasticsearch until Elasticsearch stores one too.
    */
   createdBy?: ServiceAccountDirectoryCreator;
+  /**
+   * How many workloads are bound to the account, across every space. Only the list reports it,
+   * and it's absent when the count failed. The count isn't verified, so it's for display only.
+   */
+  workloadCount?: number;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
   // offer is on the credential Kibana stored, which dates Kibana's record rather than the
   // account. It arrives with the same followup that brings the Elasticsearch creator.

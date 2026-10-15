@@ -137,14 +137,13 @@ export type {
   CreateServiceAccountServerParams,
   DeleteServiceAccountResult,
   ServiceAccountBoundWorkload,
-  TrustedPlatformServiceAccountName,
+  ServiceAccountPlatformAssumer,
   AuditEvent,
   AuditHttp,
   AuditKibana,
   AuditRequest,
   AuditLogger,
 } from '@kbn/core-security-server';
-export { TRUSTED_PLATFORM_SERVICE_ACCOUNTS } from '@kbn/core-security-server';
 export type {
   User,
   UserRealm,
@@ -385,6 +384,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,

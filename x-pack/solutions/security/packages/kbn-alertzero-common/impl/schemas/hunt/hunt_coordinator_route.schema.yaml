@@ -346,6 +346,18 @@ paths:
                         enum: [2]
                   tier2_skipped_reason:
                     type: string
+                  unavailable_model_tiers:
+                    type: array
+                    description: >-
+                      Model tiers that had no usable model on this run, in tier
+                      order. Absent when every tier resolved. A missing
+                      balanced or frontier model is what makes Tier 2 report
+                      no_inference; a missing efficient model quietly degrades
+                      dataset matching and recommendations without skipping
+                      anything.
+                    items:
+                      type: string
+                      enum: [efficient, balanced, frontier]
                   message:
                     type: string
                   next_step:

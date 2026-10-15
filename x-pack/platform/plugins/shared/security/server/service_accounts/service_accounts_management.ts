@@ -58,6 +58,15 @@ export interface ServiceAccountsManagementApi {
     serviceAccountId: string
   ): Promise<ServiceAccountBoundWorkload[]>;
 
+  /**
+   * Counts the workloads bound to each account, across plugins and spaces. An account with no
+   * bindings is left out. The counts aren't verified, so they are for display only.
+   *
+   * There is no privilege check here. The caller must already have checked `manage_security`, as
+   * the list route does when it lists the accounts.
+   */
+  countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>>;
+
   /** Deletes the account, unless workloads are still bound to it and `force` is not set. */
   delete(
     request: KibanaRequest,
@@ -125,6 +134,10 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.audit = audit;
     this.workloadTypes = workloadTypes;
+  }
+
+  async countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>> {
+    return await this.store.countByServiceAccountIds(serviceAccountIds);
   }
 
   async listWorkloads(

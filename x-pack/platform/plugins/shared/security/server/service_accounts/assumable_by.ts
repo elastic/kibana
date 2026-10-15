@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  TRUSTED_PLATFORM_SERVICE_ACCOUNTS,
-  type TrustedPlatformServiceAccountName,
-  type UiamProjectType,
-} from '@kbn/core-security-server';
+import type { UiamProjectType } from '@kbn/core-security-server';
 
 import type { ServiceAccountAssumableBy } from '../uiam';
 
@@ -17,54 +13,31 @@ export interface BuildAssumableByParams {
   organizationId: string;
   projectId: string;
   projectType: UiamProjectType;
+  /** Ids of platform service accounts that may assume the account as well as the project. */
+  platformServiceAccountIds?: readonly string[];
 }
 
 /**
- * Relay's platform service account. Matches relay-service
- * `uiam.serviceAccountId` (SPIFFE `spiffe://relay-service.elastic.co`).
- * Not caller-supplied.
+ * Builds the set of principals allowed to exchange a service account's credentials for an access
+ * token. The current Kibana project always comes first, so this Kibana can still read, exchange,
+ * and revoke the account. Any platform service accounts follow it.
  */
-const RELAY_PLATFORM_SERVICE_ACCOUNT_ID = 'relay-service';
-
-const TRUSTED_PLATFORM_SERVICE_ACCOUNT_IDS: Record<TrustedPlatformServiceAccountName, string> = {
-  relay: RELAY_PLATFORM_SERVICE_ACCOUNT_ID,
-};
-
-const isTrustedPlatformAssumer = (name: string): name is TrustedPlatformServiceAccountName =>
-  (TRUSTED_PLATFORM_SERVICE_ACCOUNTS as readonly string[]).includes(name);
-
-/**
- * Builds the principals allowed to exchange a service account's credentials.
- * The project entry is derived from this Kibana project. Named platform assumers
- * are resolved here; unknown names are rejected and never forwarded.
- */
-export const buildAssumableBy = (
-  { organizationId, projectId, projectType }: BuildAssumableByParams,
-  trustedPlatformAssumers: readonly string[] = []
-): ServiceAccountAssumableBy[] => {
-  const assumableBy: ServiceAccountAssumableBy[] = [
-    {
-      type: 'project-service-account',
-      organization_id: organizationId,
-      project_type: projectType,
-      project_id: projectId,
-    },
-  ];
-  const seenPlatformIds = new Set<string>();
-
-  for (const name of trustedPlatformAssumers) {
-    if (!isTrustedPlatformAssumer(name)) {
-      throw new Error(
-        'Refusing an unknown platform service account assumer. Assumers are chosen by Kibana, not by the request.'
-      );
-    }
-    const serviceAccountId = TRUSTED_PLATFORM_SERVICE_ACCOUNT_IDS[name];
-    if (seenPlatformIds.has(serviceAccountId)) {
-      continue;
-    }
-    seenPlatformIds.add(serviceAccountId);
-    assumableBy.push({ type: 'platform-service-account', service_account_id: serviceAccountId });
-  }
-
-  return assumableBy;
-};
+export const buildAssumableBy = ({
+  organizationId,
+  projectId,
+  projectType,
+  platformServiceAccountIds = [],
+}: BuildAssumableByParams): ServiceAccountAssumableBy[] => [
+  {
+    type: 'project-service-account',
+    organization_id: organizationId,
+    project_type: projectType,
+    project_id: projectId,
+  },
+  ...platformServiceAccountIds.map(
+    (serviceAccountId): ServiceAccountAssumableBy => ({
+      type: 'platform-service-account',
+      service_account_id: serviceAccountId,
+    })
+  ),
+];
