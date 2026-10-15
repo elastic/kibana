@@ -14,12 +14,12 @@ import type { CasesClientArgs } from '..';
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
   updatedCase: Case,
-  attachmentIds: string[],
+  ids: string[],
   attachmentType: string
 ): void {
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId: updatedCase.id,
-    attachmentIds,
+    ids,
     attachmentType,
     owner: updatedCase.owner as Owner,
   });
@@ -58,7 +58,7 @@ export function emitAttachmentsDeletedEvents(
 
     clientArgs.casesEventBus?.emitAttachmentsDeleted(clientArgs.request, {
       caseId,
-      attachmentIds: attachmentsOfType.map(({ id }) => id),
+      ids: attachmentsOfType.map(({ id }) => id),
       attachmentType,
       owner: attributes[0].owner as Owner,
       ...(alerts.ids.length > 0 ? { alertIds: alerts.ids, alertIndices: alerts.indices } : {}),
