@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { FieldsSelectorModal } from './fields_selector_modal';
 import { useFieldsModal } from './hooks/use_fields_modal';
@@ -14,8 +15,15 @@ import { DataViewContext } from '.';
 
 const ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON = 'entityAnalyticsFieldsSelectorOpenButton';
 
+const getShownOfTotalLabel = (shown: number, total: number, title: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.shownOfTotal', {
+    defaultMessage: 'Showing {shown, number} of {total, number} {title}',
+    values: { shown, total, title },
+  });
+
 export const AdditionalControls = ({
   total,
+  shown,
   title,
   columns,
   onAddColumn,
@@ -23,6 +31,7 @@ export const AdditionalControls = ({
   onResetColumns,
 }: {
   total: number;
+  shown?: number;
   title: string;
   columns: string[];
   onAddColumn: (column: string) => void;
@@ -48,9 +57,11 @@ export const AdditionalControls = ({
       )}
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <span className="entityAnalyticsDataTableTotal">{`${getAbbreviatedNumber(
-            total
-          )} ${title}`}</span>
+          <span className="entityAnalyticsDataTableTotal">
+            {shown != null && shown < total
+              ? getShownOfTotalLabel(shown, total, title)
+              : `${getAbbreviatedNumber(total)} ${title}`}
+          </span>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

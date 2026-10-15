@@ -26,6 +26,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
+import type { DashboardValidator } from './validate_dashboard';
 
 const usable = (type: string): ControlFieldCapability => ({ status: 'usable', type });
 const NOT_AGGREGATABLE: ControlFieldCapability = { status: 'not_aggregatable' };
@@ -432,6 +433,64 @@ describe('executeDashboardOperations', () => {
       collapsed: false,
       grid: { y: 12 },
       panels: [],
+    });
+  });
+
+  describe('validator', () => {
+    const validator: DashboardValidator = {
+      validatePanel: ({ config }) =>
+        'unrecognizedKey' in config ? ['config.unrecognizedKey: Unrecognized key'] : [],
+      validateDashboardFields: () => [],
+    };
+
+    it('discards invalid panels after all operations and drops their authoring notes', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Dashboard', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'request',
+                chartType: SupportedChartType.Metric,
+                query: 'show total requests',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+              {
+                source: 'request',
+                chartType: SupportedChartType.Metric,
+                query: 'show p95 latency',
+                grid: { x: 24, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent(
+            { type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } },
+            'Created a metric showing total requests.'
+          ),
+          'show p95 latency': createResolvedPanelContent(
+            { type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric', unrecognizedKey: true } },
+            'Created a metric showing p95 latency.'
+          ),
+        }),
+        validator,
+      });
+
+      const [validPanel, ...otherPanels] = getPanelsOnly(result.dashboardData.panels);
+      expect(validPanel.config).toEqual({ type: 'metric' });
+      expect(otherPanels).toEqual([]);
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+          error: expect.stringContaining('Panel was not added'),
+        }),
+      ]);
+      expect(result.panelAuthoringNotes).toEqual([
+        { panelId: validPanel.id, authoringNote: 'Created a metric showing total requests.' },
+      ]);
     });
   });
 
@@ -2846,6 +2905,15 @@ describe('add_controls / remove_controls operations', () => {
       expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
     });
 
+    it('leaves a dashboard without controls unchanged when every control is dropped', async () => {
+      const { dashboardData } = await addControls(
+        [{ type: 'options_list_control', field_name: 'missing', index }],
+        createFieldCapabilitiesResolver({})
+      );
+
+      expect(dashboardData).toEqual(emptyDashboard);
+    });
+
     const notMapped = `Not mapped on index "${index}".`;
     const notAggregatable = `Is not aggregatable on index "${index}".`;
     const conflicting = `Has conflicting mappings on index "${index}".`;
@@ -2991,6 +3059,16 @@ describe('add_controls / remove_controls operations', () => {
     const remaining = (afterRemove.pinned_panels as Array<Record<string, unknown>>)[0];
     expect(remaining.id).not.toBe(idToRemove);
     expect((remaining.config as Record<string, unknown>).title).toBe('Host');
+  });
+
+  it('remove_controls leaves a dashboard without controls unchanged', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'remove_controls', control_ids: ['nonexistent-id'] }],
+      logger,
+    });
+
+    expect(dashboardData).toEqual(emptyDashboard);
   });
 
   it('remove_controls with unknown id leaves controls unchanged', async () => {
