@@ -234,6 +234,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
   'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowUsePrompt': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
   'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;
