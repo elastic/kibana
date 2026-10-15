@@ -38,10 +38,7 @@ export const getRankWeight = (
   focusTileId: BriefTileId | undefined
 ): number => (focusTileId !== undefined && tileIds.includes(focusTileId) ? 10 : 0) + tileIds.length;
 
-/**
- * Folds alias records into their golden entity, so one identity is one candidate. The golden entity's
- * own record is used when it was read, otherwise the first alias record stands in under the golden id.
- */
+/** Folds aliases into their golden entity, using its own record when read, otherwise the first alias's. */
 export const foldAliases = (
   candidates: BriefCandidate[],
   focusTileId: BriefTileId | undefined

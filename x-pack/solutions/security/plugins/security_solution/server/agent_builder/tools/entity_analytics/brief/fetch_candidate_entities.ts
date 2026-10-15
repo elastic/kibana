@@ -21,6 +21,7 @@ import { getEntityType } from '../../../../../common/entity_analytics/entity_sto
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './brief_types';
+import { MAX_BRIEF_CANDIDATES } from './brief_types';
 import { getScopeFilters } from './describe_scope';
 import {
   foldAliases,
@@ -34,11 +35,7 @@ const MAX_RANKED_RECORDS = 100;
 /** Display names come from source logs, so an attacker can choose them. */
 const MAX_NAME_LENGTH = 80;
 
-/**
- * The `rankCandidates` order in one sort value: the entity's `getRankWeight`, then risk. Risk is the
- * resolution group's when scored, otherwise the entity's own (`getRankRisk`), so a group ranks by its
- * combined risk; the facts still state each entity's own risk, as the tiles test it.
- */
+/** The `rankCandidates` order as one sort value: `getRankWeight`, then `getRankRisk`. */
 const buildRankSort = (weights: Record<string, number>): SortCombinations => ({
   _script: {
     type: 'number',
@@ -68,6 +65,10 @@ export interface CandidateEntities {
   candidates: BriefCandidate[];
   /** Distinct entity ids captured from the available tiles. */
   capturedCount: number;
+  /** Identities among the records read, once aliases fold into their golden entity. */
+  identityCount: number;
+  /** True when a cap left out entities: more matching records than were read, or more identities than candidates. */
+  isTruncated: boolean;
   /** Captured ids with no Entity Store record. */
   notFoundCount: number;
   /** Captured ids with a record that the page's query, when applied, kept. An alias and its golden entity count twice. */
@@ -76,18 +77,13 @@ export interface CandidateEntities {
   hasPageQuery: boolean;
   /** True when the page's query couldn't be built or run, so it didn't narrow the candidates. */
   pageQueryFailed: boolean;
-  /** The latest `@timestamp` on the entities index, when known. */
-  dataTimestamp?: string;
   /** The earliest first seen on the entities index: when the Entity Store started extracting. */
   storeStartTimestamp?: string;
 }
 
 interface CandidateAggregations {
   found: { value: number };
-  all_entities: {
-    latest: { value_as_string?: string };
-    first_seen: { value_as_string?: string };
-  };
+  all_entities: { first_seen: { value_as_string?: string } };
 }
 
 /** Reads the Entity Store records of the scope's tile entities, first by rank, in one search as the requesting user. */
@@ -125,13 +121,10 @@ export const fetchCandidateEntities = async ({
       sort: [buildRankSort(weights), { 'entity.id': 'asc' }],
       aggs: {
         found: { value_count: { field: 'entity.id' } },
-        // `global` ignores the query, so these describe the whole entities index.
+        // `global` ignores the query, so this is when the whole entities index started.
         all_entities: {
           global: {},
-          aggs: {
-            latest: { max: { field: '@timestamp' } },
-            first_seen: { min: { field: 'entity.lifecycle.first_seen' } },
-          },
+          aggs: { first_seen: { min: { field: 'entity.lifecycle.first_seen' } } },
         },
       },
     });
@@ -158,14 +151,18 @@ export const fetchCandidateEntities = async ({
     return [{ id, name, type, tileIds, record }];
   });
 
+  const identities = foldAliases(candidates, focusTileId);
+  const matchedCount = getTotal(response.hits.total);
   return {
-    candidates: rankCandidates(foldAliases(candidates, focusTileId), focusTileId),
+    candidates: rankCandidates(identities, focusTileId),
+    identityCount: identities.length,
+    isTruncated:
+      matchedCount > response.hits.hits.length || identities.length > MAX_BRIEF_CANDIDATES,
     capturedCount: entityIds.length,
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
-    matchedCount: getTotal(response.hits.total),
+    matchedCount,
     hasPageQuery,
     pageQueryFailed,
-    dataTimestamp: response.aggregations?.all_entities.latest.value_as_string,
     storeStartTimestamp: response.aggregations?.all_entities.first_seen.value_as_string,
   };
 };

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { compact, orderBy } from 'lodash';
+import { compact, dropRightWhile, orderBy } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   BriefTileId,
   EntityAnalyticsScope,
@@ -13,19 +14,16 @@ import type {
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { BRIEF_TILE_IDS } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { RiskChangeEntity } from './brief_types';
-import { MAX_CHANGE_ROWS } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_TITLES,
-  describeCoverage,
-  describeTileChange,
+  describeEntityFilter,
+  describeDelta,
+  describeSample,
   filterLabel,
-  formatBriefTime,
   formatCount,
   formatCountOf,
-  getPeriodStart,
   getScopeFilters,
-  hasNoPreviousValue,
 } from './describe_scope';
 import type { CandidateEntities } from './fetch_candidate_entities';
 import type { VerifiedBrief } from './verify_brief';
@@ -35,16 +33,13 @@ const ENTITY_TABLE_INTRO =
   '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
 
 export const QUIET_LINE =
-  'Nothing in this view is flagged by the needs-attention tiles. That does not mean the environment is safe.';
+  'Nothing in this view is flagged as needing attention. That does not mean the environment is safe.';
 export const UNAVAILABLE_TILES_LINE =
-  'Nothing is flagged by the tiles that could be read, and the unavailable tiles were not checked. That does not mean the environment is safe.';
+  "Nothing is flagged in what could be read, and the rest couldn't be checked. That does not mean the environment is safe.";
 export const NO_MATCH_LINE =
-  'The search query excludes every tile entity, so there is nothing to prioritise. Clear or change the search to brief on the tiles.';
+  'The search query excludes every flagged entity, so there is nothing to prioritise. Clear or change the search to brief on them.';
 export const NO_PRIORITIES_LINE =
   'No entity in this view has enough evidence to prioritise. That does not mean the environment is safe.';
-
-/** Real comparisons rank by change relative to the previous value, floored at this many entities. */
-const MIN_CHANGE_BASE = 5;
 
 /** A risk-history chart for a priority's risk change: its render tag and whose score it shows. */
 export interface RiskChart {
@@ -54,7 +49,7 @@ export interface RiskChart {
   riskChangeEntity: RiskChangeEntity;
 }
 
-export interface RenderBriefParams {
+interface RenderBriefParams {
   scope: EntityAnalyticsScope;
   spaceId: string;
   entities: CandidateEntities;
@@ -62,7 +57,7 @@ export interface RenderBriefParams {
   verified?: VerifiedBrief;
   /** The render tag of the priorities' entity table. */
   entityTableTag?: string;
-  /** A risk-history chart, shown after the entity table. */
+  /** A risk-history chart, shown under the priority it explains. */
   riskChart?: RiskChart;
   /** True when the risk at the start of the period couldn't be read. */
   riskChangeFailed?: boolean;
@@ -81,23 +76,20 @@ export const renderBrief = ({
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   const boldName = (entityId: string) =>
     `**${escapeMarkdown(namesById.get(entityId) ?? entityId)}**`;
-  // Model text is plain prose: link, image and tag syntax is escaped, and mentions become bold names.
+  // Model text is plain prose: markdown is escaped, and mentions become bold names.
   const withNames = (text: string) =>
     text
       .split(MENTION_PATTERN)
-      .map((part, index) => (index % 2 === 1 ? boldName(part) : escapeProse(part)))
+      .map((part, index) => (index % 2 === 1 ? boldName(part) : escapeMarkdown(part)))
       .join('');
+  const sample = describeSample(scope, entities);
   const sections = [
-    [
-      renderScope(scope, spaceId, entities.dataTimestamp),
-      ...renderDisclosures(scope, entities, riskChangeFailed),
-    ],
-    renderAttention(scope, entities, verified, boldName, withNames),
+    [renderScope(scope, spaceId), ...renderDisclosures(scope, entities, riskChangeFailed)],
+    renderAttention(scope, entities, verified, withNames),
     renderChanges(scope),
-    renderPriorities(verified, boldName, withNames),
-    entityTableTag ? [ENTITY_TABLE_INTRO, '', entityTableTag] : [],
-    renderRiskChart(riskChart, boldName),
-    [`_Checked: ${describeCoverage(scope, entities.candidates.length, entities.capturedCount)}._`],
+    renderPriorities({ verified, entityTableTag, riskChart, boldName, withNames }),
+    renderRecommendation(verified, withNames),
+    sample ? [`_${sample}_`] : [],
   ];
   return sections
     .filter((lines) => lines.length > 0)
@@ -106,36 +98,25 @@ export const renderBrief = ({
 };
 
 /**
- * Stops the chat autolinking URLs, `www.` hosts and emails, without a visible backslash: a character
- * reference for `:` and `@` keeps the text as written.
+ * Escapes markdown, emphasis included (`extreme_impact` would pair with `_Next:_`), and stops autolinks
+ * with character references for `:` and `@`, so the text reads as written.
  */
-const breakAutolinks = (text: string): string =>
+const escapeMarkdown = (text: string): string =>
   text
+    .replace(/[\\`*_[\]<>|#!]/g, '\\$&')
     .replace(/:(?=\/\/)/g, '&#58;')
     .replace(/@(?=[\w-]+\.\w)/g, '&#64;')
     .replace(/\b(www)\./gi, '$1\\.');
-const escapeMarkdown = (text: string): string =>
-  breakAutolinks(text.replace(/[\\`*_[\]<>|#]/g, '\\$&'));
-const escapeProse = (text: string): string => breakAutolinks(text.replace(/[\\[\]!<>]/g, '\\$&'));
 
-const renderScope = (
-  scope: EntityAnalyticsScope,
-  spaceId: string,
-  dataTimestamp: string | undefined
-): string => {
-  const { period, capturedAt, query, entityFilters = {} } = scope;
+/** The period and every filter the page applied, as the page labels them. */
+const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
+  const { period, query, entityFilters = {} } = scope;
   const parts = [
-    `last ${BRIEF_PERIOD_LABELS[period]} (${formatBriefTime(
-      getPeriodStart(scope)
-    )} to ${formatBriefTime(capturedAt)})`,
-    ...Object.entries(entityFilters).map(([key, values]) => `${key}: ${values.join(', ')}`),
-    query?.query ? `search "${query.query}"` : undefined,
+    `Last ${BRIEF_PERIOD_LABELS[period]}`,
+    ...Object.entries(entityFilters).map(([key, values]) => describeEntityFilter(key, values)),
+    query?.query ? `Search "${query.query}"` : undefined,
     ...getScopeFilters(scope).map(filterLabel),
-    `space ${spaceId}`,
-    `captured ${formatBriefTime(capturedAt)}`,
-    dataTimestamp
-      ? `Entity Store last updated ${formatBriefTime(dataTimestamp)}`
-      : 'Entity Store update time unknown',
+    spaceId === DEFAULT_SPACE_ID ? undefined : `Space ${spaceId}`,
   ];
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
 };
@@ -155,64 +136,53 @@ const renderDisclosures = (
   entities: CandidateEntities,
   riskChangeFailed: boolean
 ): string[] => {
-  const { hasPageQuery, pageQueryFailed, capturedCount, notFoundCount } = entities;
+  const { hasPageQuery, pageQueryFailed, notFoundCount } = entities;
   const unavailable = BRIEF_TILE_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
   const disclosures = [
     hasPageQuery && !pageQueryFailed
       ? 'Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities.'
       : undefined,
-    matchesNoTileEntity(entities) ? describeNoMatch(capturedCount - notFoundCount) : undefined,
+    // No count: with no records read, aliases can't be folded, so ids would overcount people.
+    matchesNoTileEntity(entities)
+      ? 'None of the flagged entities match the search query.'
+      : undefined,
     pageQueryFailed
       ? "The search query or filters couldn't be applied, so they don't narrow the priorities."
       : undefined,
     notFoundCount > 0
       ? `${formatCountOf(
           notFoundCount,
-          'tile entity was',
-          'tile entities were'
+          'flagged entity was',
+          'flagged entities were'
         )} not found in the Entity Store.`
       : undefined,
     unavailable.length > 0
-      ? `Unavailable tiles: ${unavailable.map((tileId) => BRIEF_TILE_TITLES[tileId]).join(', ')}.`
+      ? `Not checked, because the data couldn't be read: ${unavailable
+          .map((tileId) => BRIEF_TILE_TITLES[tileId])
+          .join(', ')}.`
       : undefined,
     riskChangeFailed ? "Risk change couldn't be read." : undefined,
   ];
   return compact(disclosures).map((text) => `_${text}_`);
 };
 
-const describeNoMatch = (count: number): string =>
-  count === 1
-    ? "The tile entity doesn't match the search query."
-    : `None of the ${formatCount(count)} tile entities match the search query.`;
-
-/** The model's attention text, then the first priority's next step, which readers may not reach. */
 const renderAttention = (
   scope: EntityAnalyticsScope,
   entities: CandidateEntities,
   verified: VerifiedBrief | undefined,
-  boldName: (entityId: string) => string,
   withNames: (text: string) => string
 ): string[] => {
-  if (!verified) {
-    return ['**What needs attention**', getNoBriefLine(scope, entities)];
+  if (verified) {
+    return verified.attention ? ['**What needs attention**', withNames(verified.attention)] : [];
   }
-  const [first] = verified.priorities;
-  const lines = compact([
-    verified.attention && withNames(verified.attention),
-    first && `_Start with_ ${boldName(first.entityId)}: ${asSentence(withNames(first.nextStep))}`,
-  ]);
-  return lines.length > 0 ? ['**What needs attention**', lines.join('\n\n')] : [];
+  return ['**What needs attention**', getNoBriefLine(scope, entities)];
 };
 
 /** The chart with a caption naming its priority, and the group member when the chart is the member's. */
 const renderRiskChart = (
-  riskChart: RiskChart | undefined,
+  { tag, entityId, riskChangeEntity }: RiskChart,
   boldName: (entityId: string) => string
 ): string[] => {
-  if (!riskChart) {
-    return [];
-  }
-  const { tag, entityId, riskChangeEntity } = riskChart;
   const member =
     riskChangeEntity.id === entityId
       ? ''
@@ -224,87 +194,97 @@ const renderRiskChart = (
 
 /** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */
 const getNoBriefLine = ({ tiles }: EntityAnalyticsScope, entities: CandidateEntities): string => {
+  if (matchesNoTileEntity(entities)) {
+    return NO_MATCH_LINE;
+  }
   const scopeTiles = Object.values(tiles);
   const flagged = scopeTiles.some(
     ({ unavailable, value, entityIds }) => !unavailable && (value > 0 || entityIds.length > 0)
   );
-  if (matchesNoTileEntity(entities)) {
-    return NO_MATCH_LINE;
-  }
   if (flagged) {
     return NO_PRIORITIES_LINE;
   }
   return scopeTiles.some(({ unavailable }) => unavailable) ? UNAVAILABLE_TILES_LINE : QUIET_LINE;
 };
 
-/** The selected tile, then the tiles that moved most. Hidden when no tile has a comparison. Never summed. */
-const pickChangeRows = ({ tiles, focusTileId }: EntityAnalyticsScope): BriefTileId[] => {
-  const hasComparison = Object.values(tiles).some(
-    ({ unavailable, delta }) => !unavailable && delta !== undefined
+/** A row says something: a count above zero, or a change. A zero with no change is left out. */
+const isWorthShowing = ({ unavailable, value, delta = 0 }: EntityAnalyticsScopeTile): boolean =>
+  !unavailable && (value > 0 || delta !== 0);
+
+/** Every count with something to say, in the page's order, the selected one first. Never summed. */
+const pickChangeRows = ({
+  tiles,
+  focusTileId,
+}: EntityAnalyticsScope): Array<[BriefTileId, EntityAnalyticsScopeTile]> =>
+  orderBy(
+    BRIEF_TILE_IDS.flatMap((tileId): Array<[BriefTileId, EntityAnalyticsScopeTile]> => {
+      const tile = tiles[tileId];
+      return tile && isWorthShowing(tile) ? [[tileId, tile]] : [];
+    }),
+    ([tileId]) => tileId === focusTileId,
+    'desc'
   );
-  if (!hasComparison) {
-    return [];
-  }
-  return orderBy(
-    BRIEF_TILE_IDS.filter((tileId) => tiles[tileId]),
-    [(tileId) => tileId === focusTileId, (tileId) => movement(tiles[tileId])],
-    ['desc', 'desc']
-  ).slice(0, MAX_CHANGE_ROWS);
-};
 
-/**
- * Change relative to the previous value, floored at `MIN_CHANGE_BASE`. A rise from 0 may be missing
- * history, so it ranks below real comparisons, then no comparison, then unavailable.
- */
-const movement = (tile: EntityAnalyticsScopeTile | undefined): number => {
-  if (!tile || tile.unavailable) {
-    return -3;
-  }
-  const { value, delta } = tile;
-  if (delta === undefined) {
-    return -2;
-  }
-  if (hasNoPreviousValue(tile)) {
-    return -1;
-  }
-  return Math.abs(delta) / Math.max(value - delta, MIN_CHANGE_BASE);
-};
-
+/** The counts, with their change when any can be compared. A column of "not enough history" says nothing. */
 const renderChanges = (scope: EntityAnalyticsScope): string[] => {
-  const rows = pickChangeRows(scope).flatMap((tileId) => {
-    const tile = scope.tiles[tileId];
-    if (!tile) {
-      return [];
-    }
-    const now = tile.unavailable ? 'unavailable' : formatCount(tile.value);
-    return [
-      `| ${BRIEF_TILE_TITLES[tileId]} | ${now} | ${describeTileChange(tile, scope.period)} |`,
-    ];
-  });
+  const rows = pickChangeRows(scope);
   if (rows.length === 0) {
     return [];
   }
-  return ['**What changed**', '', '| Tile | Now | Change |', '| --- | --- | --- |', ...rows];
+  const hasComparison = rows.some(([, { delta }]) => delta !== undefined);
+  const header = hasComparison
+    ? [`|  | Entities | vs previous ${BRIEF_PERIOD_LABELS[scope.period]} |`, '| --- | --- | --- |']
+    : ['|  | Entities |', '| --- | --- |'];
+  return [
+    '**This period at a glance**',
+    '',
+    ...header,
+    ...rows.map(([tileId, tile]) => {
+      const row = `| ${BRIEF_TILE_TITLES[tileId]} | ${formatCount(tile.value)} |`;
+      return hasComparison ? `${row} ${describeDelta(tile)} |` : row;
+    }),
+  ];
 };
+
+const renderRecommendation = (
+  verified: VerifiedBrief | undefined,
+  withNames: (text: string) => string
+): string[] =>
+  verified?.recommendation ? ['**Recommended next step**', withNames(verified.recommendation)] : [];
 
 const asSentence = (text: string): string => (/[.!?…]$/.test(text) ? text : `${text}.`);
 
-const renderPriorities = (
-  verified: VerifiedBrief | undefined,
-  boldName: (entityId: string) => string,
-  withNames: (text: string) => string
-): string[] => {
+/** The priorities' entity table, then the numbered priorities, with the risk chart under its priority. */
+const renderPriorities = ({
+  verified,
+  entityTableTag,
+  riskChart,
+  boldName,
+  withNames,
+}: {
+  verified: VerifiedBrief | undefined;
+  entityTableTag: string | undefined;
+  riskChart: RiskChart | undefined;
+  boldName: (entityId: string) => string;
+  withNames: (text: string) => string;
+}): string[] => {
   if (!verified) {
     return [];
   }
   if (verified.priorities.length === 0) {
     return ['**Priorities**', NO_PRIORITIES_LINE];
   }
-  const lines = verified.priorities.map(
-    ({ entityId, observed, whyItMatters, nextStep }, index) =>
-      `${index + 1}. ${boldName(entityId)}: ${asSentence(withNames(observed))} ${asSentence(
-        withNames(whyItMatters)
-      )} _Next:_ ${asSentence(withNames(nextStep))}`
+  const table = entityTableTag ? [ENTITY_TABLE_INTRO, '', entityTableTag, ''] : [];
+  // A render tag needs blank lines around it to stay its own block.
+  const lines = verified.priorities.flatMap(
+    ({ entityId, observed, whyItMatters, nextStep }, index) => {
+      const line = `${index + 1}. ${boldName(entityId)}: ${asSentence(
+        withNames(observed)
+      )} ${asSentence(withNames(whyItMatters))} _Next:_ ${asSentence(withNames(nextStep))}`;
+      return riskChart?.entityId === entityId
+        ? [line, '', ...renderRiskChart(riskChart, boldName), '']
+        : [line];
+    }
   );
-  return ['**Priorities**', ...lines];
+  return ['**Priorities**', '', ...table, ...dropRightWhile(lines, (line) => line === '')];
 };

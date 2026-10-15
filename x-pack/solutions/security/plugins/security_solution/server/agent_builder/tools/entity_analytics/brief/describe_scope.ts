@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { upperFirst } from 'lodash';
 import type { Filter } from '@kbn/es-query';
+import type { CandidateEntities } from './fetch_candidate_entities';
 import type {
   BriefPeriod,
   BriefTileId,
@@ -55,10 +57,6 @@ const PERIOD_MS: Record<BriefPeriod, number> = {
 export const getPeriodStart = ({ capturedAt, period }: EntityAnalyticsScope): Date =>
   new Date(new Date(capturedAt).getTime() - PERIOD_MS[period]);
 
-/** A time in minutes, in UTC. */
-export const formatBriefTime = (time: Date | string): string =>
-  `${new Date(time).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
-
 /** The scope's filter pills. The scope validates them as objects with `meta`; they are Kibana filters. */
 export const getScopeFilters = ({ filters }: EntityAnalyticsScope): Filter[] =>
   (filters ?? []) as Filter[];
@@ -94,43 +92,104 @@ export const formatCountOf = (count: number, one: string, many: string): string 
 export const hasNoPreviousValue = ({ value, delta }: EntityAnalyticsScopeTile): boolean =>
   value > 0 && delta === value;
 
-/** A tile's change against the previous period, in words. */
-export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: BriefPeriod): string => {
-  const { delta, unavailable } = tile;
-  const previous = `previous ${BRIEF_PERIOD_LABELS[period]}`;
-  if (unavailable) {
-    return 'unavailable';
-  }
+/** A tile's change, for a place that already names the period: `+3`, `no change`, `none before`. */
+export const describeDelta = (tile: EntityAnalyticsScopeTile): string => {
+  const { delta } = tile;
   if (delta === undefined) {
-    return 'no comparison';
+    return 'not enough history';
   }
   if (hasNoPreviousValue(tile)) {
-    return `none in the ${previous}`;
+    return 'none before';
   }
   if (delta === 0) {
-    return `no change vs ${previous}`;
+    return 'no change';
   }
-  return `${delta > 0 ? '+' : ''}${formatCount(delta)} vs ${previous}`;
+  return `${delta > 0 ? '+' : ''}${formatCount(delta)}`;
 };
 
-/**
- * How many tile entities the facts cover. The total is the largest tile or the distinct captured
- * ids, whichever is larger, and a lower bound when a tile sent fewer ids than its value. Never a sum.
- */
-export const describeCoverage = (
+/** A tile's change against the previous period, in words. */
+export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: BriefPeriod): string => {
+  if (tile.unavailable) {
+    return 'unavailable';
+  }
+  if (tile.delta === undefined) {
+    return 'not enough history to compare';
+  }
+  const previous = `previous ${BRIEF_PERIOD_LABELS[period]}`;
+  return hasNoPreviousValue(tile)
+    ? `none in the ${previous}`
+    : `${describeDelta(tile)} vs ${previous}`;
+};
+
+interface Coverage {
+  /** True when a cap or the page's id lists left out flagged entities. */
+  isPartial: boolean;
+  /** A lower bound when a tile sent fewer ids than its value. */
+  isSampled: boolean;
+  total: number;
+}
+
+type CoverageEntities = Pick<CandidateEntities, 'candidates' | 'identityCount' | 'isTruncated'>;
+
+/** The flagged entity total: the largest count or the identities read. A lower bound when sampled, never a sum. */
+const getCoverage = (
   { tiles }: EntityAnalyticsScope,
-  checkedCount: number,
-  capturedCount: number
-): string => {
+  { identityCount, isTruncated }: CoverageEntities
+): Coverage => {
   const available = Object.values(tiles).filter(({ unavailable }) => !unavailable);
   const isSampled = available.some(({ value, entityIds }) => entityIds.length < value);
-  const total = Math.max(capturedCount, ...available.map(({ value }) => value));
-  if (!isSampled && checkedCount >= total) {
-    return `${formatCountOf(checkedCount, 'entity', 'entities')} in the page's tiles`;
+  const total = Math.max(identityCount, ...available.map(({ value }) => value));
+  return { isPartial: isSampled || isTruncated, isSampled, total };
+};
+
+const formatTotal = ({ isSampled, total }: Coverage): string =>
+  `${isSampled ? 'at least ' : ''}${formatCountOf(total, 'flagged entity', 'flagged entities')}`;
+
+/** How many flagged entities the facts cover, for the model. */
+export const describeCoverage = (
+  scope: EntityAnalyticsScope,
+  entities: CoverageEntities
+): string => {
+  const checkedCount = entities.candidates.length;
+  const coverage = getCoverage(scope, entities);
+  if (!coverage.isPartial) {
+    return `all ${formatCountOf(checkedCount, 'flagged entity', 'flagged entities')}`;
   }
-  return `${formatCount(checkedCount)} of ${isSampled ? 'at least ' : ''}${formatCountOf(
-    total,
-    'entity',
-    'entities'
-  )} in the page's tiles, chosen by selected tile, tile count, then risk`;
+  return `${formatCount(checkedCount)} of ${formatTotal(
+    coverage
+  )}, ranked by how they are flagged, then risk`;
+};
+
+/** For the reader, only when a cap left out flagged entities: the brief looked at a sample. */
+export const describeSample = (
+  scope: EntityAnalyticsScope,
+  entities: CoverageEntities
+): string | undefined => {
+  const coverage = getCoverage(scope, entities);
+  if (!coverage.isPartial) {
+    return undefined;
+  }
+  return `Based on the ${formatCount(entities.candidates.length)} highest-ranked of ${formatTotal(
+    coverage
+  )}.`;
+};
+
+/** The page's entity filters by their scope key, as the filter bar labels them. */
+const ENTITY_FILTER_LABELS: Record<string, string> = {
+  entityTypes: 'Entity type',
+  riskLevels: 'Risk level',
+  assetCriticality: 'Asset criticality',
+  dataSources: 'Data source',
+};
+
+/** A stored value as the page shows it, e.g. `extreme_impact` as "Extreme impact". */
+export const formatStoredValue = (value: string): string => upperFirst(value.replace(/_/g, ' '));
+
+/** An entity filter as the page shows it. Watchlist values are ids, so only their count is stated. */
+export const describeEntityFilter = (key: string, values: readonly string[]): string => {
+  if (key === 'watchlists') {
+    return `On ${formatCountOf(values.length, 'selected watchlist', 'selected watchlists')}`;
+  }
+  const label = ENTITY_FILTER_LABELS[key] ?? key;
+  return `${label}: ${values.map(formatStoredValue).join(', ')}`;
 };

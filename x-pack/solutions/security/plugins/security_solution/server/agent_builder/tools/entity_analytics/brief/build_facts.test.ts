@@ -7,8 +7,8 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefCandidate, BriefPriority } from './brief_types';
-import { buildFacts, getFirstCitedRiskChange } from './build_facts';
+import type { BriefCandidate } from './brief_types';
+import { buildFacts } from './build_facts';
 
 const scope: EntityAnalyticsScope = {
   period: '7d',
@@ -29,7 +29,7 @@ const candidate = (entityRecord: Entity): BriefCandidate => ({
   id: 'user:jdoe',
   name: 'jdoe',
   type: 'user',
-  tileIds: ['riskMovers'],
+  tileIds: ['entitiesWithAlerts'],
   record: entityRecord,
 });
 
@@ -44,8 +44,8 @@ const riskChangeFacts = (
       scoresById: new Map(Object.entries(scoresById)),
     },
   })
-    .filter(({ riskChangeEntity }) => riskChangeEntity)
-    .map(({ text }) => text);
+    .map(({ text }) => text)
+    .filter((text) => /risk score/i.test(text));
 
 describe('buildFacts risk change', () => {
   it.each<[string, Entity, Record<string, number>, Entity[], string[]]>([
@@ -93,7 +93,7 @@ describe('buildFacts risk change', () => {
 
   it('has no risk change fact when the risk at the start was not read', () => {
     const facts = buildFacts([candidate(record('user:jdoe', 71))], scope);
-    expect(facts.some(({ riskChangeEntity }) => riskChangeEntity)).toBe(false);
+    expect(facts.some(({ text }) => /risk score/i.test(text))).toBe(false);
   });
 });
 
@@ -131,46 +131,5 @@ describe('buildFacts first seen', () => {
       ({ text }) => text
     );
     expect(texts).toContain(expected);
-  });
-});
-
-describe('getFirstCitedRiskChange', () => {
-  it('returns the risk change fact of the first priority citing one', () => {
-    const facts = buildFacts(
-      [
-        candidate(record('user:jdoe', 71)),
-        { ...candidate(record('host:web', 60)), id: 'host:web', type: 'host' },
-      ],
-      scope,
-      {
-        riskAtStart: {
-          aliasesById: new Map(),
-          scoresById: new Map([
-            ['user:jdoe', 38],
-            ['host:web', 20],
-          ]),
-        },
-      }
-    );
-    const factId = (entityId: string, isRiskChange: boolean) =>
-      facts.find(
-        (fact) => fact.entityId === entityId && Boolean(fact.riskChangeEntity) === isRiskChange
-      )?.id ?? 0;
-    const priority = (entityId: string, factIds: number[]): BriefPriority => ({
-      entityId,
-      observed: '',
-      whyItMatters: '',
-      nextStep: '',
-      factIds,
-    });
-    const notCiting = priority('host:web', [factId('host:web', false)]);
-    const citing = priority('user:jdoe', [factId('user:jdoe', true)]);
-
-    expect(getFirstCitedRiskChange([notCiting, citing], facts)?.riskChangeEntity).toEqual({
-      id: 'user:jdoe',
-      name: 'jdoe',
-      type: 'user',
-    });
-    expect(getFirstCitedRiskChange([notCiting], facts)).toBeUndefined();
   });
 });

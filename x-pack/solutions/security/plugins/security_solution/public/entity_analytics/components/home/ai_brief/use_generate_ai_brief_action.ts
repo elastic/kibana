@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import {
   ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE,
@@ -20,7 +20,7 @@ import type { SignalCardData, SignalCardId } from '../needs_attention_tiles/data
 import type { EntityFilters } from '../use_entity_filters_param';
 import type { TimeRange } from '../use_time_range_param';
 
-interface GenerateAiBriefButtonProps {
+interface UseGenerateAiBriefActionParams {
   cards: SignalCardData[];
   entityIdsByTile: Record<SignalCardId, readonly string[]>;
   /** Tiles whose value is not real: the query failed or has no data source. */
@@ -30,21 +30,36 @@ interface GenerateAiBriefButtonProps {
   focusTileId?: SignalCardId;
 }
 
-/** Captures the page's own tiles, period and filters, and opens Agent Builder to brief on them. */
-export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
+const BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.aiBrief.buttonLabel',
+  { defaultMessage: 'Generate AI brief' }
+);
+const SCOPE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.aiBrief.scopeTooltip',
+  {
+    defaultMessage:
+      'Headline counts follow the period and entity filters, as on the page. Your search narrows the priorities.',
+  }
+);
+
+/**
+ * The page header's "Generate AI brief" action: captures the page's own tiles, period and filters, and
+ * opens Agent Builder to brief on them.
+ */
+export const useGenerateAiBriefAction = ({
   cards,
   entityIdsByTile,
   unavailableTiles,
   timeRange,
   entityFilters,
   focusTileId,
-}) => {
+}: UseGenerateAiBriefActionParams): NonNullable<AppHeaderMenu['primaryActionItem']> => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFilters = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuery);
   const globalFilters = useDeepEqualSelector(getGlobalFilters);
 
-  // Waits for the deltas too, so "What changed" never reads a delta that is still loading as missing.
+  // Waits for the deltas too, so the brief never reads a delta that is still loading as missing.
   const isLoading = cards.some(
     ({ isLoading: isCardLoading, isDeltaLoading }) => isCardLoading || isDeltaLoading
   );
@@ -102,32 +117,17 @@ export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
     autoSendInitialMessage: true,
   });
 
-  const button = (
-    <EuiButton
-      iconType="sparkles"
-      size="s"
-      isDisabled={isLoading}
-      onClick={openAgentBuilderFlyout}
-      data-test-subj="generateAiBriefButton"
-    >
-      {i18n.translate('xpack.securitySolution.entityAnalytics.home.aiBrief.buttonLabel', {
-        defaultMessage: 'Generate AI brief',
-      })}
-    </EuiButton>
-  );
-
-  if (!scope.query && !scope.filters) {
-    return button;
-  }
-  return (
-    <EuiToolTip
-      content={i18n.translate('xpack.securitySolution.entityAnalytics.home.aiBrief.scopeTooltip', {
-        defaultMessage:
-          'Headline counts follow the period and entity filters, as on the page. Your search narrows the priorities.',
-      })}
-      data-test-subj="generateAiBriefScopeTooltip"
-    >
-      {button}
-    </EuiToolTip>
+  const hasPageQuery = Boolean(scope.query || scope.filters);
+  return useMemo(
+    () => ({
+      id: 'generateAiBrief',
+      label: BUTTON_LABEL,
+      iconType: 'sparkles',
+      run: openAgentBuilderFlyout,
+      disableButton: isLoading,
+      tooltipContent: hasPageQuery ? SCOPE_TOOLTIP : undefined,
+      testId: 'generateAiBriefButton',
+    }),
+    [hasPageQuery, isLoading, openAgentBuilderFlyout]
   );
 };

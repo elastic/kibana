@@ -44,6 +44,11 @@ export const generateBrief = async ({
   const started = Date.now();
   const entities = await fetchCandidateEntities({ scope, spaceId, esClient, logger });
   const { candidates } = entities;
+  // Every candidate has facts, so with none there is nothing to brief on and no model call.
+  if (candidates.length === 0) {
+    logger.debug(`AI brief: quiet, ${entities.capturedCount} captured`);
+    return { brief: renderBrief({ scope, spaceId, entities }), priorityCount: 0 };
+  }
   // Risk change is supporting detail: a failure leaves its facts out, and the brief says so.
   const riskAtStart = await fetchRiskAtStart({ candidates, scope, spaceId, esClient }).catch(
     (error) => {
@@ -51,36 +56,18 @@ export const generateBrief = async ({
       return undefined;
     }
   );
-  const riskChangeFailed = !riskAtStart;
   const facts = buildFacts(candidates, scope, {
     riskAtStart,
     storeStartTimestamp: entities.storeStartTimestamp,
   });
   const fetched = Date.now();
 
-  if (facts.length === 0) {
-    const took = Date.now() - started;
-    logger.debug(`AI brief: quiet, ${entities.capturedCount} captured, took ${took}ms`);
-    return {
-      brief: renderBrief({ scope, spaceId, entities, riskChangeFailed }),
-      outcome: 'quiet',
-      stats: {
-        candidateCount: 0,
-        factCount: 0,
-        priorityCount: 0,
-        droppedPriorityCount: 0,
-        repaired: false,
-        took,
-      },
-    };
-  }
-
   const { draft, repaired } = await composeBrief({
     inferenceClient,
     scope,
     candidates,
     facts,
-    coverage: describeCoverage(scope, candidates.length, entities.capturedCount),
+    coverage: describeCoverage(scope, entities),
     abortSignal,
     logger,
   });
@@ -111,17 +98,9 @@ export const generateBrief = async ({
       verified,
       entityTableTag,
       riskChart,
-      riskChangeFailed,
+      riskChangeFailed: !riskAtStart,
     }),
-    outcome: verified.priorities.length > 0 ? 'brief' : 'no_priorities',
-    stats: {
-      candidateCount: candidates.length,
-      factCount: facts.length,
-      priorityCount: verified.priorities.length,
-      droppedPriorityCount: verified.droppedPriorityCount,
-      repaired,
-      took,
-    },
+    priorityCount: verified.priorities.length,
   };
 };
 
@@ -149,10 +128,7 @@ const createEntityTable = async (
   return attachment ? buildRenderAttachmentTag(attachment) : undefined;
 };
 
-/**
- * The period's risk-history chart for a cited risk change fact. A chart is supporting detail, so a
- * failure leaves the brief without one.
- */
+/** The period's risk-history chart for a cited risk change. A failure means no chart, never a failed brief. */
 const createRiskChart = async ({
   fact,
   scope,

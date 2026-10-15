@@ -24,34 +24,57 @@ const scopeWith = (overrides: Partial<EntityAnalyticsScope>): EntityAnalyticsSco
 
 const noEntities: CandidateEntities = {
   candidates: [],
+  identityCount: 0,
+  isTruncated: false,
   capturedCount: 0,
   notFoundCount: 0,
   matchedCount: 0,
   hasPageQuery: false,
   pageQueryFailed: false,
-  dataTimestamp: '2026-10-14T11:55:00.000Z',
 };
 
 const hostA: CandidateEntities = {
   ...noEntities,
   candidates: [{ id: 'host:a', name: 'web_01', type: 'host', tileIds: ['riskMovers'], record: {} }],
+  identityCount: 1,
   capturedCount: 1,
   matchedCount: 1,
 };
 
+const priority = (entityId: string, observed: string) => ({
+  entityId,
+  observed,
+  whyItMatters: 'High impact asset.',
+  nextStep: 'Review its alerts',
+  factIds: [1],
+});
+
 describe('renderBrief', () => {
-  it('renders the quiet case without priorities', () => {
+  it('renders the quiet case with the period only, and no priorities', () => {
     const brief = renderBrief({
       scope: scopeWith({ tiles: { riskMovers: { value: 0, delta: 0, entityIds: [] } } }),
       spaceId: 'default',
       entities: noEntities,
     });
-    expect(brief).toContain(QUIET_LINE);
-    expect(brief).not.toContain('**Priorities**');
+    expect(brief).toBe(`**Scope:** Last 7 days\n\n**What needs attention**\n${QUIET_LINE}`);
+  });
+
+  it('states every filter in the scope as the page labels it', () => {
+    const brief = renderBrief({
+      scope: scopeWith({
+        entityFilters: {
+          riskLevels: ['High'],
+          assetCriticality: ['extreme_impact'],
+          watchlists: ['id-1', 'id-2'],
+        },
+        query: { query: 'host.name: web*', language: 'kuery' },
+      }),
+      spaceId: 'soc',
+      entities: noEntities,
+    });
     expect(brief).toContain(
-      '**Scope:** last 7 days (2026-10-07 12:00 UTC to 2026-10-14 12:00 UTC) · space default · captured 2026-10-14 12:00 UTC · Entity Store last updated 2026-10-14 11:55 UTC'
+      '**Scope:** Last 7 days · Risk level: High · Asset criticality: Extreme impact · On 2 selected watchlists · Search "host.name: web\\*" · Space soc'
     );
-    expect(brief).toContain("_Checked: 0 entities in the page's tiles._");
   });
 
   it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string]>([
@@ -62,19 +85,19 @@ describe('renderBrief', () => {
       QUIET_LINE,
     ],
     [
-      'never calls a view quiet when a tile could not be read',
+      'never calls a view quiet when data could not be read',
       { riskMovers: { value: 0, unavailable: true, entityIds: [] } },
       {},
       UNAVAILABLE_TILES_LINE,
     ],
     [
-      'does not call a view quiet when tiles flagged entities that were not checked',
+      'does not call a view quiet when flagged entities were not checked',
       { riskMovers: { value: 2, entityIds: ['host:x'] } },
       { capturedCount: 1, notFoundCount: 1 },
       NO_PRIORITIES_LINE,
     ],
     [
-      'blames the search when it matches no tile entity',
+      'blames the search when it matches no flagged entity',
       { riskMovers: { value: 3, entityIds: ['host:x', 'host:y', 'host:z'] } },
       { capturedCount: 3, hasPageQuery: true },
       NO_MATCH_LINE,
@@ -88,40 +111,50 @@ describe('renderBrief', () => {
     expect(brief).toContain(`**What needs attention**\n${line}`);
   });
 
-  it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string]>([
+  it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string | undefined]>([
     [
-      'all tile entities',
+      'no note when every flagged entity was checked',
       { riskMovers: { value: 1, entityIds: ['host:a'] } },
-      hostA,
-      "_Checked: 1 entity in the page's tiles._",
+      {},
+      undefined,
     ],
     [
-      'a ranked cut of the tile entities',
+      'no note when aliases fold into fewer identities',
+      { newEntity: { value: 1, entityIds: ['host:a', 'host:a-alias'] } },
+      { capturedCount: 2 },
+      undefined,
+    ],
+    [
+      'a cap left entities out',
       { riskMovers: { value: 30, entityIds: Array.from({ length: 30 }, (_, i) => `host:${i}`) } },
-      { ...hostA, capturedCount: 30, matchedCount: 30 },
-      "_Checked: 1 of 30 entities in the page's tiles, chosen by selected tile, tile count, then risk._",
+      { identityCount: 30, isTruncated: true },
+      '_Based on the 1 highest-ranked of 30 flagged entities._',
     ],
     [
-      'a sample of a large tile, never summing tiles',
+      'the page sent a sample of a large count, never summing counts',
       {
         entitiesWithAlerts: { value: 48213, entityIds: ['host:a', 'host:b'] },
         riskMovers: { value: 20, entityIds: ['host:a'] },
       },
-      { ...hostA, capturedCount: 2, matchedCount: 2 },
-      "_Checked: 1 of at least 48,213 entities in the page's tiles, chosen by selected tile, tile count, then risk._",
+      {},
+      '_Based on the 1 highest-ranked of at least 48,213 flagged entities._',
     ],
-  ])('states the coverage of %s', (_name, tiles, entities, coverage) => {
+  ])('sample note: %s', (_name, tiles, entities, note) => {
     const brief = renderBrief({
       scope: scopeWith({ tiles }),
       spaceId: 'default',
-      entities: { ...noEntities, ...entities },
+      entities: { ...hostA, ...entities },
     });
-    expect(brief).toContain(coverage);
+    if (note) {
+      expect(brief).toContain(note);
+    } else {
+      expect(brief).not.toContain('Based on');
+    }
   });
 
   it.each<[string, EntityAnalyticsScope['focusTileId'], EntityAnalyticsScope['tiles'], string[]]>([
     [
-      'ranks by relative change, then rises from zero, and never sums',
+      'lists the counts in the page order, never summed',
       undefined,
       {
         entitiesWithAlerts: { value: 48213, delta: 4800, entityIds: [] },
@@ -129,122 +162,112 @@ describe('renderBrief', () => {
         riskMovers: { value: 6, delta: -2, entityIds: [] },
       },
       [
-        '| Risk movers | 6 | -2 vs previous 7 days |',
-        '| Entities with alerts | 48,213 | +4,800 vs previous 7 days |',
-        '| Newly high/critical | 3 | none in the previous 7 days |',
+        '| Entities with alerts | 48,213 | +4,800 |',
+        '| Risk movers | 6 | -2 |',
+        '| Newly high/critical | 3 | none before |',
       ],
     ],
     [
-      'puts the selected tile first and floors small bases',
-      'newEntity',
+      'puts the selected count first and leaves out rows with nothing to say',
+      'watchlisted',
       {
         entitiesWithAlerts: { value: 130, delta: 30, entityIds: [] },
-        riskMovers: { value: 0, unavailable: true, entityIds: [] },
-        watchlisted: { value: 3, delta: 1, entityIds: [] },
+        riskMovers: { value: 0, unavailable: true, delta: 4, entityIds: [] },
+        newlyHighCritical: { value: 0, delta: 0, entityIds: [] },
         newEntity: { value: 7, entityIds: [] },
+        watchlisted: { value: 3, delta: 0, entityIds: [] },
       },
       [
-        '| New entity | 7 | no comparison |',
-        '| Entities with alerts | 130 | +30 vs previous 7 days |',
-        '| Watchlisted | 3 | +1 vs previous 7 days |',
+        '| Watchlisted | 3 | no change |',
+        '| Entities with alerts | 130 | +30 |',
+        '| New entity | 7 | not enough history |',
       ],
     ],
     [
-      'hides the section when no tile has a comparison',
+      'leaves out the change column when nothing can be compared',
+      undefined,
+      { entitiesWithAlerts: { value: 5, entityIds: [] }, newEntity: { value: 4, entityIds: [] } },
+      ['| Entities with alerts | 5 |', '| New entity | 4 |'],
+    ],
+    [
+      'hides the section when no row has anything to say',
       undefined,
       {
-        entitiesWithAlerts: { value: 10, entityIds: [] },
-        riskMovers: { value: 0, unavailable: true, delta: 4, entityIds: [] },
+        entitiesWithAnomalies: { value: 0, entityIds: [] },
+        riskMovers: { value: 0, delta: 0, entityIds: [] },
+        watchlisted: { value: 4, unavailable: true, entityIds: [] },
       },
       [],
     ],
-  ])('what changed %s', (_name, focusTileId, tiles, rows) => {
+  ])('at a glance %s', (_name, focusTileId, tiles, rows) => {
     const brief = renderBrief({
       scope: scopeWith({ focusTileId, tiles }),
       spaceId: 'default',
       entities: noEntities,
     });
     if (rows.length === 0) {
-      expect(brief).not.toContain('**What changed**');
+      expect(brief).not.toContain('**This period at a glance**');
       return;
     }
-    expect(brief).toContain(`| --- | --- | --- |\n${rows.join('\n')}\n\n`);
+    expect(brief).toContain(`|\n${rows.join('\n')}\n\n`);
   });
 
-  it.each([
-    [
-      'no change',
-      { value: 1, delta: 0, entityIds: [] },
-      '| Risk movers | 1 | no change vs previous 7 days |',
-    ],
-    ['no comparison', { value: 1, entityIds: [] }, '| Risk movers | 1 | no comparison |'],
-    [
-      'unavailable',
-      { value: 0, unavailable: true as const, entityIds: [] },
-      '| Risk movers | unavailable | unavailable |',
-    ],
-  ])('renders %s', (_name, tile, row) => {
+  it('puts the table under Priorities, the chart under its priority and the recommendation last', () => {
+    const entities: CandidateEntities = {
+      ...hostA,
+      candidates: [
+        ...hostA.candidates,
+        { id: 'user:b', name: 'jdoe', type: 'user', tileIds: ['riskMovers'], record: {} },
+      ],
+    };
     const brief = renderBrief({
-      scope: scopeWith({
-        tiles: { riskMovers: tile, entitiesWithAlerts: { value: 4, delta: 1, entityIds: [] } },
-      }),
+      scope: scopeWith({ tiles: { riskMovers: { value: 2, entityIds: ['host:a', 'user:b'] } } }),
       spaceId: 'default',
-      entities: noEntities,
-    });
-    expect(brief).toContain(row);
-  });
-
-  it('replaces mentions with bold names and renders numbered priorities', () => {
-    const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 1, delta: 1, entityIds: ['host:a'] } } }),
-      spaceId: 'default',
-      entities: hostA,
+      entities,
       verified: {
         attention: '{{ entity.id host:a }} rose sharply',
-        priorities: [
-          {
-            entityId: 'host:a',
-            observed: 'Risk rose',
-            whyItMatters: 'High impact asset.',
-            nextStep: 'Review its alerts',
-            factIds: [1],
-          },
-        ],
+        priorities: [priority('host:a', 'Risk rose'), priority('user:b', 'Alerted')],
+        recommendation: 'Start with {{ entity.id user:b }}.',
         droppedPriorityCount: 0,
       },
       entityTableTag: '<render_attachment id="x" version="1" />',
       riskChart: {
         tag: '<render_attachment id="y" version="1" />',
-        entityId: 'host:a',
-        riskChangeEntity: { id: 'host:a-alias', name: 'web_01_alias', type: 'host' },
+        entityId: 'user:b',
+        riskChangeEntity: { id: 'user:b-laptop', name: 'jdoe_laptop', type: 'user' },
       },
     });
-    expect(brief).toContain(
-      '**What needs attention**\n**web\\_01** rose sharply\n\n_Start with_ **web\\_01**: Review its alerts.'
-    );
-    expect(brief).toContain(
-      '1. **web\\_01**: Risk rose. High impact asset. _Next:_ Review its alerts.'
-    );
-    // The table, then the chart, each under a sentence saying what it is.
-    expect(brief).toMatch(
-      /_The priority entities at a glance[^\n]*_\n\n<render_attachment id="x" version="1" \/>\n\n_Risk history over the period for_ \*\*web\\_01\*\* \(host web\\_01\\_alias, in its resolution group\)\n\n<render_attachment id="y" version="1" \/>/
-    );
+    expect(brief).toContain(`**Priorities**
+
+_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_
+
+<render_attachment id="x" version="1" />
+
+1. **web\\_01**: Risk rose. High impact asset. _Next:_ Review its alerts.
+2. **jdoe**: Alerted. High impact asset. _Next:_ Review its alerts.
+
+_Risk history over the period for_ **jdoe** (user jdoe\\_laptop, in its resolution group)
+
+<render_attachment id="y" version="1" />
+
+**Recommended next step**
+Start with **jdoe**.`);
   });
 
-  it('escapes link, image and tag syntax and breaks autolinks in model text', () => {
+  it('escapes markdown in model text, so it adds no links, tags or emphasis', () => {
     const brief = renderBrief({
       scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
       spaceId: 'default',
       entities: hostA,
       verified: {
         attention:
-          '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b> www.z.test ops@corp.test',
+          '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b> www.z.test ops@corp.test extreme_impact *now*',
         priorities: [],
         droppedPriorityCount: 0,
       },
     });
     expect(brief).toContain(
-      '**web\\_01** see \\[runbook\\](https&#58;//x.test) \\!\\[i\\](https&#58;//y.test) \\<b\\> www\\.z.test ops&#64;corp.test'
+      '**web\\_01** see \\[runbook\\](https&#58;//x.test) \\!\\[i\\](https&#58;//y.test) \\<b\\> www\\.z.test ops&#64;corp.test extreme\\_impact \\*now\\*'
     );
   });
 
@@ -271,9 +294,9 @@ describe('renderBrief', () => {
       "_The search query or filters couldn't be applied, so they don't narrow the priorities._",
     ],
     [
-      'a query that matches no tile entity',
+      'a query that matches no flagged entity',
       { hasPageQuery: true, capturedCount: 1200, notFoundCount: 2 },
-      '_None of the 1,198 tile entities match the search query._',
+      '_None of the flagged entities match the search query._',
     ],
   ])('discloses %s', (_name, entities, disclosure) => {
     const brief = renderBrief({
@@ -282,6 +305,5 @@ describe('renderBrief', () => {
       entities: { ...noEntities, ...entities },
     });
     expect(brief).toContain(disclosure);
-    expect(brief).toContain('search "host.name: web\\*"');
   });
 });

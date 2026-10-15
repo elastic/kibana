@@ -20,10 +20,13 @@ import type { BriefCandidate, BriefFact, BriefPriority, RiskAtStart } from './br
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_DEFINITIONS,
-  BRIEF_TILE_TITLES,
   formatCountOf,
+  formatStoredValue,
   getPeriodStart,
 } from './describe_scope';
+
+/** As the Risk movers count: a change of at least this many points. */
+const RISK_CHART_MIN_CHANGE = 10;
 
 interface EntityRisk {
   /** Normalised score, 0 to 100. */
@@ -50,10 +53,7 @@ const describeRisk = (label: string, { score, level }: EntityRisk): string =>
 
 const DAY_MS = 24 * 3_600_000;
 
-/**
- * First seen is when the Entity Store first extracted the entity, so on the store's first day it
- * includes every existing entity and doesn't mean the entity is new.
- */
+/** On the store's first day, first seen covers every existing entity, so it doesn't mean new. */
 const describeFirstSeen = (
   firstSeen: string,
   storeStartTimestamp: string | undefined,
@@ -74,10 +74,7 @@ const describeFirstSeen = (
   return `First seen by the Entity Store ${date}, inside the last ${period}`;
 };
 
-/**
- * The risk change of the candidate, or of the member of its resolution group that moved most, as the
- * Risk movers tile compares it: the score at the start of the period against the record's score now.
- */
+/** The risk change of the candidate, or of its group member that moved most, compared as the Risk movers tile does. */
 const describeRiskChange = (
   candidate: BriefCandidate,
   { aliasesById, scoresById }: RiskAtStart,
@@ -107,9 +104,13 @@ const describeRiskChange = (
     id === candidate.id
       ? ''
       : `${candidate.type} ${JSON.stringify(name)} in the same resolution group: `;
+  // Only a real move gets a chart, by the Risk movers threshold: a wobble or a first score explains nothing.
+  const hasMoved =
+    start !== undefined &&
+    Math.abs(Math.round(now.score) - Math.round(start)) >= RISK_CHART_MIN_CHANGE;
   return {
     text: upperFirst(`${subject}${describeScoreChange(start, now.score, period, periodStart)}`),
-    riskChangeEntity: { id, name, type: candidate.type },
+    riskChangeEntity: hasMoved ? { id, name, type: candidate.type } : undefined,
   };
 };
 
@@ -137,10 +138,7 @@ const describeScoreChange = (
   return `${prefix}, ${change > 0 ? 'up' : 'down'} ${Math.abs(change)} points`;
 };
 
-/**
- * Facts about each candidate from its tile membership and Entity Store record, numbered from 1. Without
- * `riskAtStart`, there are no risk change facts.
- */
+/** Facts about each candidate, numbered from 1. Risk change facts need `riskAtStart`. */
 export const buildFacts = (
   candidates: BriefCandidate[],
   scope: EntityAnalyticsScope,
@@ -156,7 +154,8 @@ export const buildFacts = (
     const add = (text: string, riskChangeEntity?: BriefFact['riskChangeEntity']) =>
       facts.push({ id: facts.length + 1, entityId: candidate.id, text, riskChangeEntity });
     for (const tileId of candidate.tileIds) {
-      add(`In the "${BRIEF_TILE_TITLES[tileId]}" tile: ${BRIEF_TILE_DEFINITIONS[tileId](period)}`);
+      // What the entity did, not which tile shows it: readers don't know the page's tiles.
+      add(upperFirst(BRIEF_TILE_DEFINITIONS[tileId](period)));
     }
     // The tiles test the entity's own risk; the group's is a separate fact when it differs.
     const ownRisk = readRisk(candidate.record.entity?.risk);
@@ -174,7 +173,7 @@ export const buildFacts = (
     }
     const criticality = getAssetCriticality(candidate);
     if (criticality) {
-      add(`Asset criticality: ${criticality}`);
+      add(`Asset criticality: ${formatStoredValue(criticality)}`);
     }
     if (extractIsPrivileged(candidate)) {
       add('On the privileged user watchlist');

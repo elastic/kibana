@@ -25,35 +25,45 @@ const SETTINGS_LABEL = i18n.translate(
 export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
 
-export const EntityAnalyticsHomeHeader = React.memo(() => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { docLinks } = useKibana().services;
+interface EntityAnalyticsHomeHeaderProps {
+  /** The header's primary button, such as "Generate AI brief". */
+  primaryActionItem?: AppHeaderMenu['primaryActionItem'];
+}
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'entityAnalyticsSettings',
-          label: SETTINGS_LABEL,
-          iconType: 'gear' as const,
-          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
-          overflow: true,
-          order: 1,
-          testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
-        },
-      ],
-    }),
-    [getSecuritySolutionUrl]
-  );
+export const EntityAnalyticsHomeHeader = React.memo<EntityAnalyticsHomeHeaderProps>(
+  ({ primaryActionItem }) => {
+    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+    const { docLinks } = useKibana().services;
 
-  return (
-    <SecurityAppHeader
-      title={PAGE_TITLE}
-      menu={menu}
-      spacing="largeBleed"
-      docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
-    />
-  );
-});
+    const menu = useMemo<AppHeaderMenu>(
+      () => ({
+        primaryActionItem,
+        items: [
+          {
+            id: 'entityAnalyticsSettings',
+            label: SETTINGS_LABEL,
+            iconType: 'gear' as const,
+            href: getSecuritySolutionUrl({
+              deepLinkId: SecurityPageName.entityAnalyticsManagement,
+            }),
+            overflow: true,
+            order: 1,
+            testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
+          },
+        ],
+      }),
+      [getSecuritySolutionUrl, primaryActionItem]
+    );
+
+    return (
+      <SecurityAppHeader
+        title={PAGE_TITLE}
+        menu={menu}
+        spacing="largeBleed"
+        docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
+      />
+    );
+  }
+);
 
 EntityAnalyticsHomeHeader.displayName = 'EntityAnalyticsHomeHeader';

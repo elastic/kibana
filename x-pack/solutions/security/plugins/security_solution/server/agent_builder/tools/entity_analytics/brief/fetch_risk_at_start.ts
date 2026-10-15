@@ -28,13 +28,7 @@ interface TypeAggregation {
   }>;
 }
 
-/**
- * The candidates' aliases, then the base risk score at the start of the period of the candidates and
- * their aliases, in one search each. Copies
- * the boundary rule of the Risk movers tile (`tile_risk_movers_query.ts`, which is in `public/`): the
- * last score in the two hours before the start. Resolution scores share the time series under the
- * golden entity's id, so they are excluded to compare with the entity's own score now.
- */
+/** Aliases, then base scores at the period start by the Risk movers rule (`tile_risk_movers_query.ts`, in `public/`). */
 export const fetchRiskAtStart = async ({
   candidates,
   scope,
@@ -46,9 +40,6 @@ export const fetchRiskAtStart = async ({
   spaceId: string;
   esClient: ElasticsearchClient;
 }): Promise<RiskAtStart> => {
-  if (candidates.length === 0) {
-    return { aliasesById: new Map(), scoresById: new Map() };
-  }
   const aliasesById = await expandAliases({
     entityIds: candidates.map(({ id }) => id),
     spaceId,
@@ -83,6 +74,7 @@ export const fetchRiskAtStart = async ({
             },
           },
         ],
+        // Resolution scores share the golden entity's id, and "now" is the entity's own base score.
         must_not: RISK_ENTITY_TYPES.map((type) => ({
           term: { [`${type}.risk.score_type`]: 'resolution' },
         })),

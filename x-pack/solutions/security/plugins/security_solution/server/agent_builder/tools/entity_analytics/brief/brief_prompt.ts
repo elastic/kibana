@@ -6,7 +6,6 @@
  */
 
 import { once } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod/v4';
 import type { ToolDefinition, ToolSchema } from '@kbn/inference-common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -17,43 +16,15 @@ import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_TITLES,
   describeTileChange,
-  formatBriefTime,
   formatCount,
   getPeriodStart,
 } from './describe_scope';
 
+/** A time in minutes, in UTC. */
+const formatBriefTime = (time: Date | string): string =>
+  `${new Date(time).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+
 export const SUBMIT_BRIEF_TOOL_NAME = 'submit_entity_analytics_brief';
-
-/** Word limits, enforced again in verification. */
-export const BRIEF_WORD_LIMITS = { attention: 40, priorityText: 20 } as const;
-
-const priorityField = (key: string): string[] => ['priorities', 'items', key];
-
-/** Descriptions added to the tool's JSON schema, by property path. They guide the model. */
-const FIELD_DESCRIPTIONS: ReadonlyArray<[path: string[], description: string]> = [
-  [
-    ['attention'],
-    `One or two sentences, at most ${BRIEF_WORD_LIMITS.attention} words, on what needs attention in this view. Mention entities only as {{ entity.id <euid> }}. No overall threat verdict.`,
-  ],
-  [
-    ['priorities'],
-    `Always present. At most ${MAX_PRIORITIES} entities to look at first, most important first. Fewer when the facts don't support more; never pad.`,
-  ],
-  [priorityField('entityId'), 'The EUID of the entity, exactly as given in the facts'],
-  [
-    priorityField('observed'),
-    `What was observed, at most ${BRIEF_WORD_LIMITS.priorityText} words. Don't start with the entity name.`,
-  ],
-  [
-    priorityField('whyItMatters'),
-    `Why it matters, at most ${BRIEF_WORD_LIMITS.priorityText} words: criticality and risk where the facts support it`,
-  ],
-  [
-    priorityField('nextStep'),
-    `One specific investigation step, at most ${BRIEF_WORD_LIMITS.priorityText} words`,
-  ],
-  [priorityField('factIds'), 'Ids of the facts about this entity that support the priority'],
-];
 
 const isToolSchema = (value: unknown): value is ToolSchema =>
   typeof value === 'object' &&
@@ -72,13 +43,6 @@ export const getSubmitBriefTool = once((): Required<ToolDefinition<ToolSchema>> 
   if (!isToolSchema(schema)) {
     throw new Error('The BriefDraft schema did not convert to an object JSON schema');
   }
-  FIELD_DESCRIPTIONS.forEach(([path, description]) =>
-    set(
-      schema,
-      [...path.flatMap((key) => (key === 'items' ? [key] : ['properties', key])), 'description'],
-      description
-    )
-  );
   return {
     description: 'Submit the Entity Analytics brief. Call exactly once with the complete brief.',
     schema,
@@ -96,18 +60,21 @@ export const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a sec
 
 ## The brief
 - attention: one or two sentences on what needs attention in this view. Mention entities only with their token, copied exactly; the reader sees the name. Never write a display name or EUID on its own.
+- recommendation: the one next step you would take first across the whole view, considering every priority and the changes in the view together, not only the first priority. It must make sense on its own, so name entities with their token rather than "this account".
 - priorities: always include this field. At most ${MAX_PRIORITIES} entities, most important first. An entity in several tiles, with high criticality, privilege or high risk usually deserves a priority. Each cites, in factIds, the ids of facts about that entity only. Use fewer than ${MAX_PRIORITIES} when the facts don't support ${MAX_PRIORITIES}; never pad.
 - A priority for an entity whose risk score went up or down cites its risk change fact.
 - Keep to the word limits in the tool schema. The whole brief is read in about a minute.
 
 ## Accuracy
 - Use only the view and the facts. Quote only numbers that appear in the facts or as tile values and changes in the view. Never calculate, add up, estimate or round numbers.
+- "No risk score at the start" means the entity wasn't scored then, not a score of 0: write "newly scored at 64", never "from 0 to 64".
 - Totals and counts of entities come only from the tile values in the view. Never describe the size of a tile, or how many entities are affected, from the entities in the facts.
 - Never claim lateral movement, compromise, attack or exfiltration. Alerts, risk changes and anomalies are reasons to investigate, not proof.
 - Be proportionate: with few or weak facts, say so plainly. Never call something critical or widespread unless a fact shows it. Give no overall threat verdict and never say the environment is safe.
 
 ## Style
-British English. Plain words, short sentences. No markdown, no filler.`;
+British English. Plain words, short sentences. No markdown, no filler.
+Never mention tiles, cards, signals or the page's layout: readers don't know them. Say what the entity did, e.g. "risk rose by at least 10 points", not "in the Risk movers tile".`;
 
 /** The user message: the period, the tiles with what the facts cover, and the facts grouped by entity. */
 export const buildUserMessage = ({

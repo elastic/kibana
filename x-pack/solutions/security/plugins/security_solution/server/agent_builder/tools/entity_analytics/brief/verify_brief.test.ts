@@ -41,9 +41,14 @@ const priority = (entityId: string, factIds: number[]): BriefPriority => ({
   factIds,
 });
 
-const draft = (attention: string, priorities: BriefPriority[]): BriefDraft => ({
+const draft = (
+  attention: string,
+  priorities: BriefPriority[],
+  recommendation = 'Review {{ entity.id host:a }} first.'
+): BriefDraft => ({
   attention,
   priorities,
+  recommendation,
 });
 
 const words = (count: number): string => Array.from({ length: count }, () => 'word').join(' ');
@@ -96,7 +101,16 @@ describe('verifyBrief', () => {
     [
       'keeps attention without priorities when it names a candidate',
       draft('{{ entity.id host:a }} rose.', []),
-      { attention: '{{ entity.id host:a }} rose.', priorities: [] },
+      { attention: '{{ entity.id host:a }} rose.', priorities: [], recommendation: undefined },
+    ],
+    [
+      'checks the recommendation like attention: unknown mentions and unsupported numbers go',
+      draft(
+        'Look.',
+        [priority('host:a', [1])],
+        'Check {{ entity.id host:a }}{{ entity.id host:zzz }} first. Then 999 hosts.'
+      ),
+      { recommendation: 'Check {{ entity.id host:a }} first.' },
     ],
     [
       'caps attention at 40 words, counting a mention as one word',
@@ -147,6 +161,11 @@ describe('verifyBrief', () => {
     ],
   ])('%s', (_name, input, expected) => {
     expect(verify(input)).toMatchObject(expected);
+  });
+
+  it('caps at whole sentences, cutting only a single over-long sentence', () => {
+    const { attention } = verify(draft(`Short one. ${words(45)}.`, [priority('host:a', [1])]));
+    expect(attention).toBe('Short one.');
   });
 
   it('caps priority text at 20 words', () => {

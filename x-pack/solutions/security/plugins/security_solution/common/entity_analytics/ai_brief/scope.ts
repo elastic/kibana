@@ -21,7 +21,7 @@ export const BRIEF_TILE_IDS = [
 ] as const;
 export type BriefTileId = (typeof BRIEF_TILE_IDS)[number];
 
-export const BRIEF_PERIODS = ['24h', '7d', '30d'] as const;
+const BRIEF_PERIODS = ['24h', '7d', '30d'] as const;
 export type BriefPeriod = (typeof BRIEF_PERIODS)[number];
 
 /** Tiles can hold hundreds of entities. The server reads the riskiest of these first. */

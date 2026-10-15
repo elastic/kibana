@@ -110,11 +110,6 @@ describe('rankCandidates', () => {
   ])('%s', (_name, candidates, focusTileId, expected) => {
     expect(rankCandidates(candidates, focusTileId).map(({ id }) => id)).toEqual(expected);
   });
-
-  it('caps the candidates', () => {
-    const many = Array.from({ length: 30 }, (_, index) => candidate(`e${index}`, ['newEntity']));
-    expect(rankCandidates(many, undefined)).toHaveLength(25);
-  });
 });
 
 describe('foldAliases', () => {

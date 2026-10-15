@@ -108,10 +108,14 @@ apiTest.describe(
       );
 
       expect(brief).toContain(PRIORITY_LINE);
-      expect(brief).toContain('| Entities with alerts | 14 | +3 vs previous 7 days |');
-      expect(brief).toContain('no comparison');
-      expect(brief).toContain('Unavailable tiles: Entities with anomalies');
-      expect(brief).not.toContain('| Entities with anomalies | 0 |');
+      expect(brief).toContain('| Entities with alerts | 14 | +3 |');
+      expect(brief).toContain('| Newly high/critical | 1 | not enough history |');
+      // An unavailable count has nothing to say, so it gets no row.
+      expect(brief).not.toContain('| Entities with anomalies |');
+      expect(brief).toContain(
+        "Not checked, because the data couldn't be read: Entities with anomalies"
+      );
+      expect(brief).toContain(`**Recommended next step**\nStart with **${SEEDED_USER.name}**.`);
       expect(brief).toContain('<render_attachment');
       // The priority doesn't cite the risk change fact, so it has no chart.
       expect(brief).not.toContain(RISK_CHART_ID);
@@ -126,7 +130,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'states the risk change and charts it after the entity table',
+      'states the risk change and charts it under the priority citing it',
       async ({ apiClient }) => {
         // Facts 1 to 3: Risk movers membership, current risk, risk change.
         mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [3]));
@@ -142,7 +146,11 @@ apiTest.describe(
           `3. Risk score ${SEEDED_USER_START_SCORE} at the start of the last 7 days`
         );
         expect(submitRequests[0]).toContain('82 now, up 44 points');
-        expect(brief.indexOf(RISK_CHART_ID)).toBeGreaterThan(brief.indexOf(ENTITY_TABLE_ID));
+        // The table comes before the list, and the chart directly under the priority citing the change.
+        const lines = brief.split('\n');
+        const priority = lines.findIndex((line) => line.startsWith(PRIORITY_LINE));
+        expect(brief.indexOf(ENTITY_TABLE_ID)).toBeLessThan(brief.indexOf(PRIORITY_LINE));
+        expect(lines[priority + 4]).toContain(RISK_CHART_ID);
       }
     );
 

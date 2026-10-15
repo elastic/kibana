@@ -18,7 +18,9 @@ import type {
 
 export const MAX_BRIEF_CANDIDATES = 25;
 export const MAX_PRIORITIES = 3;
-export const MAX_CHANGE_ROWS = 3;
+/** Word limits, enforced again in verification. */
+export const BRIEF_WORD_LIMITS = { attention: 40, priorityText: 20, recommendation: 30 } as const;
+const { attention, priorityText, recommendation } = BRIEF_WORD_LIMITS;
 
 export type BriefEntityType = 'host' | 'user' | 'service' | 'generic';
 
@@ -38,16 +40,12 @@ export interface BriefFact {
   id: number;
   entityId: string;
   text: string;
-  /** On a risk change fact: the entity whose score it states, the candidate or a member of its resolution group. */
+  /** On a risk change fact whose score moved: the entity it states, the candidate or a group member, for its chart. */
   riskChangeEntity?: RiskChangeEntity;
 }
 
 /** The entity a risk change fact is about, for its risk-history chart. */
-export interface RiskChangeEntity {
-  id: string;
-  name: string;
-  type: BriefEntityType;
-}
+export type RiskChangeEntity = Pick<BriefCandidate, 'id' | 'name' | 'type'>;
 
 /** The risk at the start of the period, read for the risk change facts. */
 export interface RiskAtStart {
@@ -57,21 +55,47 @@ export interface RiskAtStart {
   scoresById: Map<string, number>;
 }
 
-/** What the model submits. Limits are enforced after the call, so a long answer is trimmed, not rejected. */
+/**
+ * What the model submits; the descriptions guide it. Limits are enforced after the call, so a long
+ * answer is trimmed, not rejected. Structured fields come first, ahead of prose that may leak markup.
+ */
 export const BriefDraft = lazySchema(() =>
-  // Priorities come first. Claude sometimes leaks tool-call markup at the end of a string argument,
-  // which swallowed the next argument when attention came first; verification trims it.
   z.object({
-    priorities: z.array(
-      z.object({
-        entityId: z.string(),
-        observed: z.string(),
-        whyItMatters: z.string(),
-        nextStep: z.string(),
-        factIds: z.array(z.number().int()),
-      })
-    ),
-    attention: z.string(),
+    priorities: z
+      .array(
+        z.object({
+          entityId: z.string().describe('The EUID of the entity, exactly as given in the facts'),
+          observed: z
+            .string()
+            .describe(
+              `What was observed, at most ${priorityText} words. Don't start with the entity name.`
+            ),
+          whyItMatters: z
+            .string()
+            .describe(
+              `Why it matters, at most ${priorityText} words: criticality and risk where the facts support it`
+            ),
+          nextStep: z
+            .string()
+            .describe(`One specific investigation step, at most ${priorityText} words`),
+          factIds: z
+            .array(z.number().int())
+            .describe('Ids of the facts about this entity that support the priority'),
+        })
+      )
+      .describe(
+        `Always present. At most ${MAX_PRIORITIES} entities to look at first, most important first. Fewer when the facts don't support more; never pad.`
+      ),
+    attention: z
+      .string()
+      .describe(
+        `One or two sentences, at most ${attention} words, on what needs attention in this view. Mention entities only as {{ entity.id <euid> }}. No overall threat verdict.`
+      ),
+    recommendation: z
+      .string()
+      .describe(
+        `The one next step for this view, at most ${recommendation} words, drawing on all the priorities and the changes in the view. Mention entities only as {{ entity.id <euid> }}.`
+      ),
   })
 );
 export type BriefDraft = z.infer<typeof BriefDraft>;
@@ -93,23 +117,8 @@ export interface GenerateBriefParams {
   logger: Logger;
 }
 
-/**
- * - `brief`: a composed brief with at least one priority.
- * - `no_priorities`: composed, but no priority survived verification.
- * - `quiet`: nothing to brief on, so no model call was made.
- */
-export type BriefOutcome = 'brief' | 'no_priorities' | 'quiet';
-
 export interface GenerateBriefResult {
   /** Markdown, presented verbatim by the agent. */
   brief: string;
-  outcome: BriefOutcome;
-  stats: {
-    candidateCount: number;
-    factCount: number;
-    priorityCount: number;
-    droppedPriorityCount: number;
-    repaired: boolean;
-    took: number;
-  };
+  priorityCount: number;
 }

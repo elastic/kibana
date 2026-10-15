@@ -97,7 +97,7 @@ export const seedBriefEntities = async (esClient: EsClient): Promise<void> => {
   });
 };
 
-export const RISK_SCORE_INDEX = getRiskScoreTimeSeriesIndex('default');
+const RISK_SCORE_INDEX = getRiskScoreTimeSeriesIndex('default');
 /** The seeded user's base risk score at the start of a 7-day view; it is 82 now. */
 export const SEEDED_USER_START_SCORE = 38;
 
@@ -182,6 +182,7 @@ export const buildDraft = (entityId: string, factIds: number[]): BriefDraft => (
       factIds,
     },
   ],
+  recommendation: `Start with {{ entity.id ${entityId} }}.`,
 });
 
 /**
