@@ -80,6 +80,16 @@ outputs:
     type: boolean
   - name: suppressedRuleCount
     type: number
+  - name: skippedCount
+    type: number
+  - name: needsAgentCount
+    type: number
+  - name: classifierShadowMode
+    type: boolean
+  - name: classifierReasonCounts
+    type: string
+  - name: classifierProbeStatusCounts
+    type: string
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
   INVESTIGATABLE_SEVERITIES: ['critical', 'high']
@@ -119,6 +129,11 @@ steps:
           processedCount: 0
           hasWork: false
           suppressedRuleCount: 0
+          skippedCount: 0
+          needsAgentCount: 0
+          classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+          classifierReasonCounts: '{}'
+          classifierProbeStatusCounts: '{}'
 
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
@@ -189,6 +204,66 @@ steps:
     on-failure:
       continue: true
 
+  # Detections the classifier skipped are done: stamp them processed so they leave the queue. This
+  # runs before the batch gate, so it does not depend on the agent running or succeeding. A failed
+  # stamp only leaves the detection to be re-selected and re-classified next cycle.
+  - name: count_skipped_rules
+    type: data.set
+    with:
+      skippedRuleCount: '${{ steps.classify_detections.output.skipped_rule_uuids | size | default: 0 }}'
+
+  - name: stamp_skipped_detections
+    type: if
+    condition: '${{ steps.count_skipped_rules.output.skippedRuleCount > 0 }}'
+    steps:
+      # Same query shape as get_written_rules_backlog: markers carry no rule_uuid, so the rule
+      # filter must stay a should alongside `exists: processed_by`.
+      - name: get_skipped_rules_backlog
+        type: elasticsearch.esql.query
+        with:
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | KEEP detection_id
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - bool:
+                    should:
+                      - terms:
+                          rule_uuid: '${{ steps.classify_detections.output.skipped_rule_uuids }}'
+                      - exists:
+                          field: processed_by
+                    minimum_should_match: 1
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
+        on-failure:
+          continue: true
+
+      - name: foreach_stamp_skipped
+        type: foreach
+        foreach: '${{ steps.get_skipped_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: write_skipped_marker
+            type: kibana.request
+            with:
+              method: POST
+              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                detection_ids:
+                  - '{{ foreach.item[0] }}'
+                processed_by: '{{ execution.id }}'
+            on-failure:
+              continue: true
+
   # Rows for the agent. `default` would also replace a legitimately empty classified batch with the
   # raw rows, so only a missing output falls back to the raw count; a real 0 stays 0.
   - name: compute_batch_size
@@ -243,6 +318,11 @@ steps:
           processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
           hasWork: false
           suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+          skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+          needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+          classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+          classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+          classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
 
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
@@ -494,3 +574,8 @@ steps:
       processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
       hasWork: true
       suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+      skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+      needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+      classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+      classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+      classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
