@@ -61,6 +61,20 @@ describe('PatternFlyout tester button', () => {
 });
 
 describe('PatternFlyout saving', () => {
+  // The tester runs the pattern exactly as typed, so a saved rule must match what was tested: here the
+  // trailing space is an alternative that matches a space.
+  it('saves the pattern without trimming significant whitespace', async () => {
+    const onSave = jest.fn().mockResolvedValue(true);
+    renderFlyout(onSave);
+    await userEvent.type(screen.getByTestId('aiAnonymizationSettingsPatternFlyoutName'), 'Spaces');
+    await userEvent.type(screen.getByTestId('aiAnonymizationSettingsPatternFlyoutPattern'), 'ID| ');
+
+    await clickSave();
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ pattern: 'ID| ' }));
+  });
+
   it('closes once the pattern is saved', async () => {
     const onSave = jest.fn().mockResolvedValue(true);
     const { onClose } = renderFlyout(onSave);

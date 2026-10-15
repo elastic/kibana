@@ -88,7 +88,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   const testerModalTitleId = useGeneratedHtmlId();
 
   const patternError = useMemo(
-    () => (regexPattern.trim() ? getRegexPatternError(regexPattern.trim()) : undefined),
+    () => (regexPattern.trim() ? getRegexPatternError(regexPattern) : undefined),
     [regexPattern]
   );
   const isValid = name.trim().length > 0 && regexPattern.trim().length > 0 && !patternError;
@@ -130,7 +130,9 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
       const isSaved = await onSave({
         name: name.trim(),
         entityClass,
-        pattern: regexPattern.trim(),
+        // Not trimmed: the tester runs `regexPattern` as typed, and a leading or trailing space can be
+        // part of the pattern (for example `ID| `), so saving must keep what was tested.
+        pattern: regexPattern,
         enabled,
       });
       if (isSaved) {
