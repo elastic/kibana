@@ -19,7 +19,8 @@ import {
   type DetectionClassification,
   type ProbeOutcome,
 } from './classify_detection';
-import { runProbe, type ProbeResult } from './run_probe';
+import { BASELINE_DECISIONS, observeMatchSeries, type BaselineObservation } from './baseline';
+import { runProbe, runStoredQuery, type ProbeResult, type ProbeWindow } from './run_probe';
 import {
   RuleEventsClient,
   type LiveRuleMembership,
@@ -55,6 +56,15 @@ const decisionSchema = lazySchema(() =>
     reason: z.enum(DECISION_REASONS),
     probe_status: z.enum(PROBE_STATUSES).optional(),
     probe_duration_ms: z.number().int().min(0).optional(),
+    baseline: z
+      .object({
+        decision: z.enum(BASELINE_DECISIONS),
+        value: z.number(),
+        samples: z.number().int().min(0),
+        median: z.number().optional(),
+        threshold: z.number().optional(),
+      })
+      .optional(),
   })
 );
 
@@ -114,6 +124,8 @@ export interface ClassifyBatchParams {
   findLiveMembers: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
   /** Re-runs a stored query once; must not throw. */
   probe: (query: string | undefined) => Promise<ProbeResult>;
+  /** Is the detection above its own normal? Recorded in the decision, never acted on. */
+  observe?: (query: string | undefined) => Promise<BaselineObservation | undefined>;
 }
 
 /**
@@ -127,6 +139,7 @@ export const classifyBatch = async ({
   probeConcurrency,
   findLiveMembers,
   probe,
+  observe,
 }: ClassifyBatchParams): Promise<ClassifyDetectionsOutput> => {
   const parsed = rows.map((row, index) => ({
     index,
@@ -143,13 +156,19 @@ export const classifyBatch = async ({
 
   const limiter = pLimit(probeConcurrency);
   const probes = new Map<string, ProbeResult>();
+  const baselines = new Map<string, BaselineObservation>();
   await Promise.all(
     [...memberships.entries()]
       .filter(([, series]) => needsProbe(series))
       .map(([ruleUuid, series]) =>
         limiter(async () => {
           const storedQuery = series.find(({ esqlQuery }) => esqlQuery !== undefined)?.esqlQuery;
-          probes.set(ruleUuid, await probe(storedQuery));
+          const [probed, observed] = await Promise.all([
+            probe(storedQuery),
+            observe?.(storedQuery),
+          ]);
+          probes.set(ruleUuid, probed);
+          if (observed) baselines.set(ruleUuid, observed);
         })
       )
   );
@@ -160,6 +179,7 @@ export const classifyBatch = async ({
     if (!row) continue;
     const { ruleUuid, detectionId } = row;
     const probed = probes.get(ruleUuid);
+    const baseline = baselines.get(ruleUuid);
     const classification: DetectionClassification = withinCap
       ? classifyDetection({
           memberships: memberships.get(ruleUuid) ?? [],
@@ -172,6 +192,7 @@ export const classifyBatch = async ({
       ...(detectionId !== undefined ? { detection_id: detectionId } : {}),
       ...classification,
       ...(probed ? { probe_status: probed.status, probe_duration_ms: probed.durationMs } : {}),
+      ...(baseline ? { baseline } : {}),
     });
   }
 
@@ -224,6 +245,15 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         to: new Date(now).toISOString(),
       };
 
+      const run = (params: { query: string; tail: string; window: ProbeWindow }) =>
+        runStoredQuery({
+          ...params,
+          esClient,
+          timeoutMs,
+          deadlineAt: now + budgetMs,
+          abortSignal: context.abortSignal,
+        });
+
       const output = await classifyBatch({
         rows,
         shadowMode,
@@ -238,6 +268,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
             deadlineAt: now + budgetMs,
             abortSignal: context.abortSignal,
           }),
+        // Only while gathering evidence: it costs a second query per probed rule.
+        observe: shadowMode ? (query) => observeMatchSeries({ query, now, run }) : undefined,
       });
 
       logger.info(
