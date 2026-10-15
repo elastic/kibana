@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -27,15 +27,17 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
 
-const manageRuleSchema = z.object({
-  ruleAttachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) The rule attachment ID to modify. If not provided, a new rule is created.'
-    ),
-  operations: z.array(ruleOperationSchema).min(1),
-});
+const manageRuleSchema = lazySchema(() =>
+  z.object({
+    ruleAttachmentId: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) The rule attachment ID to modify. If not provided, a new rule is created.'
+      ),
+    operations: z.array(ruleOperationSchema).min(1),
+  })
+);
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;

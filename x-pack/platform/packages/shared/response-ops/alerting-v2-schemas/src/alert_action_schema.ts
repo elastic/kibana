@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
@@ -32,40 +32,50 @@ export enum ALERT_EPISODE_ACTION_TYPE {
 export type AlertEpisodeActionType =
   (typeof ALERT_EPISODE_ACTION_TYPE)[keyof typeof ALERT_EPISODE_ACTION_TYPE];
 
-const snoozeActionSchema = z
-  .object({
-    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-    snoozed_until: isoDateTime()
-      .optional()
-      .describe('ISO datetime until which the alert should be snoozed.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_snooze_alert_action' });
+const snoozeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
+      snoozed_until: isoDateTime()
+        .optional()
+        .describe('ISO datetime until which the alert should be snoozed.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_snooze_alert_action' })
+);
 
-const unsnoozeActionSchema = z
-  .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
-      .describe('Removes snooze from an alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_unsnooze_alert_action' });
+const unsnoozeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z
+        .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
+        .describe('Removes snooze from an alert.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_unsnooze_alert_action' })
+);
 
-const activateActionSchema = z
-  .object({
-    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
-    reason: z.string().min(1).max(1024).describe('Reason for activating the alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_activate_alert_action' });
+const activateActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
+      reason: z.string().min(1).max(1024).describe('Reason for activating the alert.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_activate_alert_action' })
+);
 
-const deactivateActionSchema = z
-  .object({
-    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE).describe('Deactivates an alert.'),
-    reason: z.string().min(1).max(1024).describe('Reason for deactivating the alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_deactivate_alert_action' });
+const deactivateActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z
+        .literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE)
+        .describe('Deactivates an alert.'),
+      reason: z.string().min(1).max(1024).describe('Reason for deactivating the alert.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_deactivate_alert_action' })
+);
 
 /**
  * Action types that target an alert series as a whole, identified by `group_hash`.
@@ -91,137 +101,171 @@ export type EpisodeAlertActionType = (typeof EPISODE_ALERT_ACTION_TYPES)[number]
 
 // Episode-scoped action bodies: the target episode is addressed by the
 // request path (or the bulk item key), so the body carries no episode_id.
-const tagEpisodeActionSchema = z
-  .object({
-    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
-    tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
-  })
-  .strict()
-  .meta({ id: 'alerting_tag_alert_action' });
+const tagEpisodeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
+      tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
+    })
+    .strict()
+    .meta({ id: 'alerting_tag_alert_action' })
+);
 
-const ackEpisodeActionSchema = z
-  .object({
-    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_ack_alert_action' });
+const ackEpisodeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_ack_alert_action' })
+);
 
-const unackEpisodeActionSchema = z
-  .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
-      .describe('Removes acknowledgement from an alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_unack_alert_action' });
+const unackEpisodeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z
+        .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
+        .describe('Removes acknowledgement from an alert.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_unack_alert_action' })
+);
 
-const assignEpisodeActionSchema = z
-  .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
-      .describe('Assigns an alert to a user, or clears the assignee when null.'),
-    assignee_uid: z
-      .string()
-      .min(1)
-      .max(ID_MAX_LENGTH)
-      .nullable()
-      .describe('User profile UID of the assignee, or null to remove the assignee from the alert.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_assign_alert_action' });
+const assignEpisodeActionSchema = lazySchema(() =>
+  z
+    .object({
+      action_type: z
+        .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
+        .describe('Assigns an alert to a user, or clears the assignee when null.'),
+      assignee_uid: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .nullable()
+        .describe(
+          'User profile UID of the assignee, or null to remove the assignee from the alert.'
+        ),
+    })
+    .strict()
+    .meta({ id: 'alerting_assign_alert_action' })
+);
 
-export const createSeriesAlertActionBodySchema = z
-  .discriminatedUnion('action_type', [snoozeActionSchema, unsnoozeActionSchema])
-  .describe('Request body for creating a series-level alert action. One of: snooze, unsnooze.')
-  .meta({ id: 'alerting_series_alert_action' });
+export const createSeriesAlertActionBodySchema = lazySchema(() =>
+  z
+    .discriminatedUnion('action_type', [snoozeActionSchema, unsnoozeActionSchema])
+    .describe('Request body for creating a series-level alert action. One of: snooze, unsnooze.')
+    .meta({ id: 'alerting_series_alert_action' })
+);
 export type CreateSeriesAlertActionBody = z.infer<typeof createSeriesAlertActionBodySchema>;
 
-export const createEpisodeAlertActionBodySchema = z
-  .discriminatedUnion('action_type', [
-    tagEpisodeActionSchema,
-    ackEpisodeActionSchema,
-    unackEpisodeActionSchema,
-    assignEpisodeActionSchema,
-    activateActionSchema,
-    deactivateActionSchema,
-  ])
-  .describe(
-    'Request body for creating an alert-level alert action. One of: tag, ack, unack, assign, activate, deactivate.'
-  )
-  .meta({ id: 'alerting_alert_action' });
+export const createEpisodeAlertActionBodySchema = lazySchema(() =>
+  z
+    .discriminatedUnion('action_type', [
+      tagEpisodeActionSchema,
+      ackEpisodeActionSchema,
+      unackEpisodeActionSchema,
+      assignEpisodeActionSchema,
+      activateActionSchema,
+      deactivateActionSchema,
+    ])
+    .describe(
+      'Request body for creating an alert-level alert action. One of: tag, ack, unack, assign, activate, deactivate.'
+    )
+    .meta({ id: 'alerting_alert_action' })
+);
 export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActionBodySchema>;
 
-export const seriesAlertActionParamsSchema = z
-  .object({
-    group_hash: groupHashSchema.describe(
-      'Hash identifying the alert series to apply the action to.'
-    ),
-  })
-  .strict()
-  .describe('Path parameters for series-level alert action endpoints.');
+export const seriesAlertActionParamsSchema = lazySchema(() =>
+  z
+    .object({
+      group_hash: groupHashSchema.describe(
+        'Hash identifying the alert series to apply the action to.'
+      ),
+    })
+    .strict()
+    .describe('Path parameters for series-level alert action endpoints.')
+);
 export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSchema>;
 
-export const episodeAlertActionParamsSchema = z
-  .object({
-    id: z
-      .string()
-      .min(1)
-      .max(ID_MAX_LENGTH)
-      .describe('Identifier of the alert to apply the action to.'),
-  })
-  .strict()
-  .describe('Path parameters for alert-level alert action endpoints.');
+export const episodeAlertActionParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .describe('Identifier of the alert to apply the action to.'),
+    })
+    .strict()
+    .describe('Path parameters for alert-level alert action endpoints.')
+);
 export type EpisodeAlertActionParams = z.infer<typeof episodeAlertActionParamsSchema>;
 
 // Route body schemas for the series-level endpoints (action_type comes from the path).
-export const createSnoozeSeriesActionBodySchema = snoozeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_snooze_series_action' });
+export const createSnoozeSeriesActionBodySchema = lazySchema(() =>
+  snoozeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_snooze_series_action' })
+);
 export type CreateSnoozeSeriesActionBody = z.infer<typeof createSnoozeSeriesActionBodySchema>;
 
-export const createUnsnoozeSeriesActionBodySchema = unsnoozeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_unsnooze_series_action' });
+export const createUnsnoozeSeriesActionBodySchema = lazySchema(() =>
+  unsnoozeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_unsnooze_series_action' })
+);
 export type CreateUnsnoozeSeriesActionBody = z.infer<typeof createUnsnoozeSeriesActionBodySchema>;
 
 // Route body schemas for the episode-level endpoints (action_type comes from the
 // path, episode_id from the path parameter). Ack/unack bodies are empty objects.
-export const createTagEpisodeActionBodySchema = tagEpisodeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_tag_alert_action' });
+export const createTagEpisodeActionBodySchema = lazySchema(() =>
+  tagEpisodeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_tag_alert_action' })
+);
 export type CreateTagEpisodeActionBody = z.infer<typeof createTagEpisodeActionBodySchema>;
 
-export const createAckEpisodeActionBodySchema = ackEpisodeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_ack_alert_action' });
+export const createAckEpisodeActionBodySchema = lazySchema(() =>
+  ackEpisodeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_ack_alert_action' })
+);
 export type CreateAckEpisodeActionBody = z.infer<typeof createAckEpisodeActionBodySchema>;
 
-export const createUnackEpisodeActionBodySchema = unackEpisodeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_unack_alert_action' });
+export const createUnackEpisodeActionBodySchema = lazySchema(() =>
+  unackEpisodeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_unack_alert_action' })
+);
 export type CreateUnackEpisodeActionBody = z.infer<typeof createUnackEpisodeActionBodySchema>;
 
-export const createAssignEpisodeActionBodySchema = assignEpisodeActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_assign_alert_action' });
+export const createAssignEpisodeActionBodySchema = lazySchema(() =>
+  assignEpisodeActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_assign_alert_action' })
+);
 export type CreateAssignEpisodeActionBody = z.infer<typeof createAssignEpisodeActionBodySchema>;
 
-export const createActivateEpisodeActionBodySchema = activateActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_activate_alert_action' });
+export const createActivateEpisodeActionBodySchema = lazySchema(() =>
+  activateActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_activate_alert_action' })
+);
 export type CreateActivateEpisodeActionBody = z.infer<typeof createActivateEpisodeActionBodySchema>;
 
-export const createDeactivateEpisodeActionBodySchema = deactivateActionSchema
-  .omit({ action_type: true })
-  .strict()
-  .meta({ id: 'alerting_new_deactivate_alert_action' });
+export const createDeactivateEpisodeActionBodySchema = lazySchema(() =>
+  deactivateActionSchema
+    .omit({ action_type: true })
+    .strict()
+    .meta({ id: 'alerting_new_deactivate_alert_action' })
+);
 export type CreateDeactivateEpisodeActionBody = z.infer<
   typeof createDeactivateEpisodeActionBodySchema
 >;
@@ -230,15 +274,13 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
 // body is an `{ items: [...] }` envelope of one item shape: the single-route
 // body fields plus the series/episode identifier. The envelope leaves room
 // for future request-level fields (e.g. dry_run) without a breaking change.
-const bulkGroupHashSchema = groupHashSchema.describe(
-  'Hash identifying the alert series to apply the action to.'
+const bulkGroupHashSchema = lazySchema(() =>
+  groupHashSchema.describe('Hash identifying the alert series to apply the action to.')
 );
 
-const bulkEpisodeIdSchema = z
-  .string()
-  .min(1)
-  .max(ID_MAX_LENGTH)
-  .describe('Identifier of the alert to apply the action to.');
+const bulkEpisodeIdSchema = lazySchema(() =>
+  z.string().min(1).max(ID_MAX_LENGTH).describe('Identifier of the alert to apply the action to.')
+);
 
 type BulkItemIdKey = 'alert_id' | 'group_hash';
 
@@ -284,116 +326,132 @@ const makeBulkActionBodySchema = <
     })
     .strict();
 
-export const bulkSnoozeSeriesActionItemSchema = snoozeActionSchema
-  .omit({ action_type: true })
-  .extend({ group_hash: bulkGroupHashSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_snooze_series_item' });
+export const bulkSnoozeSeriesActionItemSchema = lazySchema(() =>
+  snoozeActionSchema
+    .omit({ action_type: true })
+    .extend({ group_hash: bulkGroupHashSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_snooze_series_item' })
+);
 export type BulkSnoozeSeriesActionItem = z.infer<typeof bulkSnoozeSeriesActionItemSchema>;
 
-export const bulkSnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
-  bulkSnoozeSeriesActionItemSchema,
-  'snooze',
-  'group_hash'
-).meta({ id: 'alerting_bulk_snooze_series_request' });
+export const bulkSnoozeSeriesActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkSnoozeSeriesActionItemSchema, 'snooze', 'group_hash').meta({
+    id: 'alerting_bulk_snooze_series_request',
+  })
+);
 export type BulkSnoozeSeriesActionBody = z.infer<typeof bulkSnoozeSeriesActionBodySchema>;
 
-export const bulkUnsnoozeSeriesActionItemSchema = unsnoozeActionSchema
-  .omit({ action_type: true })
-  .extend({ group_hash: bulkGroupHashSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_unsnooze_series_item' });
+export const bulkUnsnoozeSeriesActionItemSchema = lazySchema(() =>
+  unsnoozeActionSchema
+    .omit({ action_type: true })
+    .extend({ group_hash: bulkGroupHashSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_unsnooze_series_item' })
+);
 export type BulkUnsnoozeSeriesActionItem = z.infer<typeof bulkUnsnoozeSeriesActionItemSchema>;
 
-export const bulkUnsnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
-  bulkUnsnoozeSeriesActionItemSchema,
-  'unsnooze',
-  'group_hash'
-).meta({ id: 'alerting_bulk_unsnooze_series_request' });
+export const bulkUnsnoozeSeriesActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkUnsnoozeSeriesActionItemSchema, 'unsnooze', 'group_hash').meta({
+    id: 'alerting_bulk_unsnooze_series_request',
+  })
+);
 export type BulkUnsnoozeSeriesActionBody = z.infer<typeof bulkUnsnoozeSeriesActionBodySchema>;
 
-export const bulkTagEpisodeActionItemSchema = tagEpisodeActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_tag_alerts_item' });
+export const bulkTagEpisodeActionItemSchema = lazySchema(() =>
+  tagEpisodeActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_tag_alerts_item' })
+);
 export type BulkTagEpisodeActionItem = z.infer<typeof bulkTagEpisodeActionItemSchema>;
 
-export const bulkTagEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkTagEpisodeActionItemSchema,
-  'tag',
-  'alert_id'
-).meta({ id: 'alerting_bulk_tag_alerts_request' });
+export const bulkTagEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkTagEpisodeActionItemSchema, 'tag', 'alert_id').meta({
+    id: 'alerting_bulk_tag_alerts_request',
+  })
+);
 export type BulkTagEpisodeActionBody = z.infer<typeof bulkTagEpisodeActionBodySchema>;
 
-export const bulkAckEpisodeActionItemSchema = ackEpisodeActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_ack_alerts_item' });
+export const bulkAckEpisodeActionItemSchema = lazySchema(() =>
+  ackEpisodeActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_ack_alerts_item' })
+);
 export type BulkAckEpisodeActionItem = z.infer<typeof bulkAckEpisodeActionItemSchema>;
 
-export const bulkAckEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkAckEpisodeActionItemSchema,
-  'ack',
-  'alert_id'
-).meta({ id: 'alerting_bulk_ack_alerts_request' });
+export const bulkAckEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkAckEpisodeActionItemSchema, 'ack', 'alert_id').meta({
+    id: 'alerting_bulk_ack_alerts_request',
+  })
+);
 export type BulkAckEpisodeActionBody = z.infer<typeof bulkAckEpisodeActionBodySchema>;
 
-export const bulkUnackEpisodeActionItemSchema = unackEpisodeActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_unack_alerts_item' });
+export const bulkUnackEpisodeActionItemSchema = lazySchema(() =>
+  unackEpisodeActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_unack_alerts_item' })
+);
 export type BulkUnackEpisodeActionItem = z.infer<typeof bulkUnackEpisodeActionItemSchema>;
 
-export const bulkUnackEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkUnackEpisodeActionItemSchema,
-  'unack',
-  'alert_id'
-).meta({ id: 'alerting_bulk_unack_alerts_request' });
+export const bulkUnackEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkUnackEpisodeActionItemSchema, 'unack', 'alert_id').meta({
+    id: 'alerting_bulk_unack_alerts_request',
+  })
+);
 export type BulkUnackEpisodeActionBody = z.infer<typeof bulkUnackEpisodeActionBodySchema>;
 
-export const bulkAssignEpisodeActionItemSchema = assignEpisodeActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_assign_alerts_item' });
+export const bulkAssignEpisodeActionItemSchema = lazySchema(() =>
+  assignEpisodeActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_assign_alerts_item' })
+);
 export type BulkAssignEpisodeActionItem = z.infer<typeof bulkAssignEpisodeActionItemSchema>;
 
-export const bulkAssignEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkAssignEpisodeActionItemSchema,
-  'assign',
-  'alert_id'
-).meta({ id: 'alerting_bulk_assign_alerts_request' });
+export const bulkAssignEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkAssignEpisodeActionItemSchema, 'assign', 'alert_id').meta({
+    id: 'alerting_bulk_assign_alerts_request',
+  })
+);
 export type BulkAssignEpisodeActionBody = z.infer<typeof bulkAssignEpisodeActionBodySchema>;
 
-export const bulkActivateEpisodeActionItemSchema = activateActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_activate_alerts_item' });
+export const bulkActivateEpisodeActionItemSchema = lazySchema(() =>
+  activateActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_activate_alerts_item' })
+);
 export type BulkActivateEpisodeActionItem = z.infer<typeof bulkActivateEpisodeActionItemSchema>;
 
-export const bulkActivateEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkActivateEpisodeActionItemSchema,
-  'activate',
-  'alert_id'
-).meta({ id: 'alerting_bulk_activate_alerts_request' });
+export const bulkActivateEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkActivateEpisodeActionItemSchema, 'activate', 'alert_id').meta({
+    id: 'alerting_bulk_activate_alerts_request',
+  })
+);
 export type BulkActivateEpisodeActionBody = z.infer<typeof bulkActivateEpisodeActionBodySchema>;
 
-export const bulkDeactivateEpisodeActionItemSchema = deactivateActionSchema
-  .omit({ action_type: true })
-  .extend({ alert_id: bulkEpisodeIdSchema })
-  .strict()
-  .meta({ id: 'alerting_bulk_deactivate_alerts_item' });
+export const bulkDeactivateEpisodeActionItemSchema = lazySchema(() =>
+  deactivateActionSchema
+    .omit({ action_type: true })
+    .extend({ alert_id: bulkEpisodeIdSchema })
+    .strict()
+    .meta({ id: 'alerting_bulk_deactivate_alerts_item' })
+);
 export type BulkDeactivateEpisodeActionItem = z.infer<typeof bulkDeactivateEpisodeActionItemSchema>;
 
-export const bulkDeactivateEpisodeActionBodySchema = makeBulkActionBodySchema(
-  bulkDeactivateEpisodeActionItemSchema,
-  'deactivate',
-  'alert_id'
-).meta({ id: 'alerting_bulk_deactivate_alerts_request' });
+export const bulkDeactivateEpisodeActionBodySchema = lazySchema(() =>
+  makeBulkActionBodySchema(bulkDeactivateEpisodeActionItemSchema, 'deactivate', 'alert_id').meta({
+    id: 'alerting_bulk_deactivate_alerts_request',
+  })
+);
 export type BulkDeactivateEpisodeActionBody = z.infer<typeof bulkDeactivateEpisodeActionBodySchema>;
 
 /**
