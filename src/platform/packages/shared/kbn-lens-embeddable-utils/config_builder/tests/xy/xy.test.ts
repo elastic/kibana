@@ -632,7 +632,14 @@ describe('XY', () => {
                 data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
                 ignore_global_filters: false,
                 sampling: 1,
-                thresholds: [{ column: 'threshold' }, { operation: 'static_value', value: 42 }],
+                thresholds: [
+                  { column: 'threshold' },
+                  {
+                    operation: 'static_value',
+                    value: 42,
+                    format: { type: 'bytes', decimals: 1 },
+                  },
+                ],
               },
             ],
           });
