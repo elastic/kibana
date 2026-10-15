@@ -2,6 +2,72 @@
 
 CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 
+## `node scripts/request_flaky_test_fixes`
+
+The `kibana-report-flaky-tests` pipeline selects automatic AI fixes after discovery and issue
+reporting. It groups candidates by **repository, framework and test file**, not test case or
+nested `describe`. One existing open `failed-test` issue with `failure:ai-fixable` represents
+the group; sibling issues remain separate and are linked as supporting context.
+
+The selector reuses the flaky report's ranking and thresholds. Only active report-backed
+files with failures on `main` qualify. Consistently failing tests, skipped tests, other
+pipelines, and tests outside the report's 200-test cap are not automatically admitted.
+The summary lists eligible issues outside the report. Missing/ambiguous file identity,
+unsupported classifications, team opt-outs (`Team:Kibana Management`), existing requests
+and related open PRs hold a group rather than guessing.
+
+Request history is separate from the transient `ai:fix-flaky` trigger:
+
+- `ai:fix-flaky-tracked` indexes the stable representative, including closed issues without
+  a time cutoff. Do not remove it when the fixer finishes.
+- A trusted `kibanamachine` comment with a `flaky-fix-request:v1` marker reserves the file's
+  current episode **before** applying the trigger. The issue body is not used for this
+  state, because the failure reporter updates it independently.
+- Only the representative's latest `reopened` event resets the automatic budget.
+  Reopening another sibling, adding another test issue or removing the trigger does not.
+  A retry requires fresh `failure:ai-fixable` after reopening and no related open PR.
+- Existing label events and trusted fixer comments count as attempts, including manual
+  dispatches and outcomes that produced no PR. The selector adopts this history instead of
+  rotating to another sibling.
+- An incomplete reservation or uncertain write is held for manual reconciliation. Trigger
+  writes are not retried automatically: the original may have succeeded and already been
+  consumed. Check issue history and workflow runs before retrying manually. Preserve claim
+  comments; they intentionally prevent another automatic attempt in that episode.
+
+Automatic writes run only in the pipeline's serialized `request-flaky-test-fixes` step,
+using `kibanamachine`, with at most **five requests per run** by default. The request budget
+is independent of `FLAKY_TESTS_MAX_NEW_ISSUES`. Manual `ai:fix-flaky` labels and fixer
+dispatches remain available and can override automatic scheduling. Cross-file shared root
+causes and races with manual requests still rely on the fixer's/verifier's duplicate checks.
+
+### Rollout and dry runs
+
+`FLAKY_FIXES_ENABLED=false` is the default. The selector always targets `elastic/kibana`,
+independently of the suite reporter's sandbox destination. With the investigator's automatic
+requests removed, **automatic fixing is paused until this switch is enabled**; manual fixing
+continues. The investigator still runs on opened/reopened/labeled issues and manual
+dispatch, but no longer re-investigates just because `test.failCount` reaches two.
+
+Before enabling writes:
+
+1. Review `target/flaky_tests/ai_fixes.json` and the build annotation from dry runs, including
+   sibling associations, historical attempts, ambiguous matches and coverage exclusions.
+2. Ensure `ai:fix-flaky-tracked` and `ai:fix-flaky` exist and `kibanamachine` can apply them.
+   Live preflight checks the account/labels, and writes verify the returned labels.
+3. Reconcile in-flight fixes from the old automation. Enable `FLAKY_FIXES_ENABLED=true`
+   only after the investigator no longer requests fixes. Set `FLAKY_FIXES_MAX_REQUESTS`
+   separately if changing the request budget.
+
+```bash
+GITHUB_TOKEN=... node scripts/request_flaky_test_fixes \
+  --input target/flaky_tests/flaky_tests.json --dry-run
+```
+
+Dry runs perform real GitHub issue/history reads but no writes. New suite issues awaiting
+investigation are held, not polled. Failures are recorded in the summary and fail the step;
+normal holds explain why nothing was requested. Tests cover file-level grouping, historical
+and manual requests, reopen freshness, partial writes, request caps and dry-run behavior.
+
 ## `node scripts/report_failed_tests`
 
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per

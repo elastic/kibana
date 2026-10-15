@@ -74,6 +74,23 @@ export interface GithubIssueComment {
   body: string;
 }
 
+export interface GithubIssueEvent {
+  id: number;
+  event: string;
+  created_at: string;
+  label?: { name: string };
+  body?: string;
+  user?: { login: string } | null;
+  source?: { issue: { html_url: string; pull_request?: { url: string } } };
+}
+
+export const hasIssueLabel = (issue: GithubIssue, name: string): boolean =>
+  issue.labels.some(
+    (label) =>
+      label === name ||
+      (typeof label === 'object' && label !== null && 'name' in label && label.name === name)
+  );
+
 interface RequestOptions {
   method: string;
   url: string;
@@ -164,6 +181,93 @@ export class GithubApi {
 
   getRequestCount() {
     return this.requestCount;
+  }
+
+  async getAuthenticatedLogin(): Promise<string> {
+    const { data } = await this.request<{ login: string } | undefined>(
+      { method: 'GET', url: 'https://api.github.com/user', safeForDryRun: true },
+      undefined
+    );
+    if (!data?.login) throw new Error('GitHub returned no authenticated user');
+    return data.login;
+  }
+
+  async getIssue(issueNumber: number): Promise<GithubIssue> {
+    const { data } = await this.request<GithubIssue | undefined>(
+      { method: 'GET', url: `${this.baseUrl}issues/${issueNumber}`, safeForDryRun: true },
+      undefined
+    );
+    if (!data) throw new Error(`GitHub returned no issue for #${issueNumber}`);
+    return { ...data, body: data.body ?? '' };
+  }
+
+  async getIssueTimeline(issueNumber: number): Promise<GithubIssueEvent[]> {
+    const events: GithubIssueEvent[] = [];
+    let url: string | undefined = `${this.baseUrl}issues/${issueNumber}/timeline?per_page=100`;
+    while (url) {
+      const response = await this.request<GithubIssueEvent[]>(
+        { method: 'GET', url, safeForDryRun: true },
+        []
+      );
+      events.push(...response.data);
+      url = nextPageUrl(response.headers.get('link'));
+      if (url) await sleep(DEFAULT_PAGE_INTERVAL_MS);
+    }
+    return events;
+  }
+
+  async getPullRequestState(prNumber: number): Promise<GithubIssueState> {
+    const { data } = await this.request<{ state: GithubIssueState } | undefined>(
+      { method: 'GET', url: `${this.baseUrl}pulls/${prNumber}`, safeForDryRun: true },
+      undefined
+    );
+    if (!data) throw new Error(`GitHub returned no pull request for #${prNumber}`);
+    if (data.state !== 'open' && data.state !== 'closed') {
+      throw new Error(`GitHub returned an unknown state for pull request #${prNumber}`);
+    }
+    return data.state;
+  }
+
+  async checkLabel(name: string): Promise<void> {
+    await this.request(
+      {
+        method: 'GET',
+        url: `${this.baseUrl}labels/${encodeURIComponent(name)}`,
+        safeForDryRun: true,
+      },
+      undefined
+    );
+  }
+
+  /** Never retry a consumable trigger: the first request may have succeeded despite a lost response. */
+  async addLabelsOnce(issueNumber: number, labels: string[]): Promise<void> {
+    const { data } = await this.request<Array<{ name: string }>>(
+      {
+        method: 'POST',
+        url: `${this.baseUrl}issues/${issueNumber}/labels`,
+        data: { labels },
+        maxAttempts: 1,
+      },
+      labels.map((name) => ({ name }))
+    );
+    if (labels.some((name) => !data.some((label) => label.name === name))) {
+      throw new Error(`GitHub did not apply the requested labels to #${issueNumber}`);
+    }
+  }
+
+  async addIssueCommentOnce(issueNumber: number, body: string): Promise<void> {
+    const { data } = await this.request<{ body: string }>(
+      {
+        method: 'POST',
+        url: `${this.baseUrl}issues/${issueNumber}/comments`,
+        data: { body },
+        maxAttempts: 1,
+      },
+      { body }
+    );
+    if (data.body !== body) {
+      throw new Error(`GitHub did not confirm the request record on #${issueNumber}`);
+    }
   }
 
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {

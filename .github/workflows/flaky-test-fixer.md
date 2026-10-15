@@ -276,6 +276,8 @@ Open a single draft PR with the smallest possible fix for this flaky-test issue.
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
+If `kibanamachine` posted an **Automatic flaky fix request** with a `flaky-fix-request:v1` marker, read its file-group and sibling-issue context. Investigate related failures together, but do not assume all siblings share a root cause or close issues the fix does not cover. Preserve that comment and `ai:fix-flaky-tracked`: they prevent another automatic request for a sibling after you remove `ai:fix-flaky`.
+
 ## Requester mention
 
 `${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they get pinged to review the outcome and the fix, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.

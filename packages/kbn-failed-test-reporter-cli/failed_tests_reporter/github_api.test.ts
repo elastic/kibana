@@ -77,6 +77,45 @@ describe('GithubApi writes', () => {
     jest.useRealTimers();
   });
 
+  describe('selector GitHub operations', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reads the actual timeline in dry-run mode, following Link pagination', async () => {
+      const next = 'https://api.github.com/repos/elastic/kibana/issues/1/timeline?page=2';
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify([{ id: 1, event: 'reopened' }]), {
+            headers: { link: `<${next}>; rel="next"` },
+          })
+        )
+        .mockResolvedValueOnce(jsonResponse([{ id: 2, event: 'commented', body: 'claim' }]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      expect(await api.getIssueTimeline(1)).toHaveLength(2);
+      expect(fetchMock.mock.calls[1][0]).toBe(next);
+    });
+
+    it.each(['network', 'server'])(
+      'never retries an uncertain trigger write (%s)',
+      async (failure) => {
+        const fetchMock = jest.spyOn(global, 'fetch');
+        if (failure === 'network') fetchMock.mockRejectedValue(new Error('connection lost'));
+        else fetchMock.mockResolvedValue(new Response('server error', { status: 502 }));
+        const api = new GithubApi({ log, token: 'secret', dryRun: false });
+        await expect(api.addLabelsOnce(1, ['ai:fix-flaky'])).rejects.toThrow();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('rejects a successful response that did not actually apply the label', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse([]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: false });
+      await expect(api.addLabelsOnce(1, ['ai:fix-flaky'])).rejects.toThrow('did not apply');
+    });
+  });
+
   it('logs writes without sending them in dry-run mode', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const api = new GithubApi({ log, token: undefined, dryRun: true });
