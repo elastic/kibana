@@ -123,6 +123,9 @@ import {
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
 
+// Monaco's default `scrollbar.verticalScrollbarSize`.
+const MONACO_VERTICAL_SCROLLBAR_SIZE = 14;
+
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
   quickSuggestions: {
@@ -854,13 +857,11 @@ export const WorkflowYAMLEditor = ({
       readOnly: isReadOnlyYaml,
       // The step minimap is the primary scroll indicator — hide Monaco's scrollbar so it
       // doesn't visually compete. Programmatic scrolling (revealLineInCenter, etc.) is
-      // unaffected; only the draggable track is removed.
-      ...(isMinimapVisible && {
-        scrollbar: {
-          vertical: 'hidden' as const,
-          verticalScrollbarSize: 0,
-        },
-      }),
+      // unaffected; only the draggable track is removed. Always pass both values: Monaco merges
+      // option updates, so omitting them would keep the scrollbar hidden.
+      scrollbar: isMinimapVisible
+        ? { vertical: 'hidden' as const, verticalScrollbarSize: 0 }
+        : { vertical: 'auto' as const, verticalScrollbarSize: MONACO_VERTICAL_SCROLLBAR_SIZE },
     };
   }, [isReadOnlyYaml, isMinimapVisible]);
 
