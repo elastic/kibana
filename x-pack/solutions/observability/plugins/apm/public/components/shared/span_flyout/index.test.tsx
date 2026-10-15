@@ -160,7 +160,9 @@ describe('SpanFlyout', () => {
 
   it('shows the composite callout for a composite span', () => {
     setFetch(
-      buildSpan({ composite: { count: 4, sum: { us: 4000 }, compression_strategy: 'exact_match' } }),
+      buildSpan({
+        composite: { count: 4, sum: { us: 4000 }, compression_strategy: 'exact_match' },
+      }),
       FETCH_STATUS.SUCCESS
     );
 

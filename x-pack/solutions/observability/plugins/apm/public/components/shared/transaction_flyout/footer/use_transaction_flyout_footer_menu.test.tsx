@@ -64,9 +64,7 @@ const sections = [
       key: 'serviceMap',
       title: 'Service map',
       subtitle: 'View service map filtered by this trace.',
-      actions: [
-        { key: 'serviceMap', label: 'Show in service map', href: '/map', condition: true },
-      ],
+      actions: [{ key: 'serviceMap', label: 'Show in service map', href: '/map', condition: true }],
     },
   ],
 ];
@@ -188,9 +186,12 @@ describe('useTransactionFlyoutFooterMenu', () => {
     );
 
     const create = findItem(customLinksPanel.items, 'apmCustomLinkToolbarCreateButton');
-    expect(create).toEqual(expect.objectContaining({ name: 'Create custom link', disabled: false }));
-    expect(findItem(customLinksPanel.items, 'transactionFlyoutActionsMenuItem-manageCustomLinks'))
-      .toEqual(expect.objectContaining({ href: '/app/apm/settings/custom-links' }));
+    expect(create).toEqual(
+      expect.objectContaining({ name: 'Create custom link', disabled: false })
+    );
+    expect(
+      findItem(customLinksPanel.items, 'transactionFlyoutActionsMenuItem-manageCustomLinks')
+    ).toEqual(expect.objectContaining({ href: '/app/apm/settings/custom-links' }));
 
     expect(customLinkFlyout?.props.isOpen).toBe(false);
     act(() => create?.onClick?.());

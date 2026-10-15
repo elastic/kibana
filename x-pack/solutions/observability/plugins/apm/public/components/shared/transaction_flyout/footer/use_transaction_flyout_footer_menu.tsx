@@ -137,7 +137,9 @@ export function useTransactionFlyoutFooterMenu(
         title: CUSTOM_LINKS_LABEL,
         items: [
           ...customLinkItems,
-          ...(customLinkItems.length ? [{ isSeparator: true as const, key: 'customLinksSeparator' }] : []),
+          ...(customLinkItems.length
+            ? [{ isSeparator: true as const, key: 'customLinksSeparator' }]
+            : []),
           {
             name: i18n.translate('xpack.apm.customLink.buttom.create', {
               defaultMessage: 'Create custom link',

@@ -74,9 +74,7 @@ describe('useSpanFlyoutMenuProps', () => {
   });
 
   it('has no menu actions until the span loads', () => {
-    const { result } = renderHook(() =>
-      useSpanFlyoutMenuProps({ ...params, isSpanLoaded: false })
-    );
+    const { result } = renderHook(() => useSpanFlyoutMenuProps({ ...params, isSpanLoaded: false }));
 
     expect(result.current).toBeUndefined();
   });

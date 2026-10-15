@@ -78,7 +78,10 @@ export function useSpanFlyoutTabs({
         <>
           <EuiSpacer size="m" />
           <SpanDatabase spanDb={span.span?.db} />
-          <SpanMetadata span={span} prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }} />
+          <SpanMetadata
+            span={span}
+            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+          />
         </>
       ),
     }),

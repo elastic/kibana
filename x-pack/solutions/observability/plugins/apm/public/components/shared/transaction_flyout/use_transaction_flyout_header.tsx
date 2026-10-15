@@ -175,7 +175,10 @@ export function useTransactionFlyoutHeader({
         title={DURATION_LABEL}
         data-test-subj="transactionFlyoutMeta-duration"
       >
-        <Duration duration={duration} parent={{ duration: rootTransactionDuration, type: 'trace' }} />
+        <Duration
+          duration={duration}
+          parent={{ duration: rootTransactionDuration, type: 'trace' }}
+        />
       </MetaBlock>
     );
   }
