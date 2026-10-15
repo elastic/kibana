@@ -89,7 +89,7 @@ components:
                       minimum: 1
                     kill_descendants:
                       type: boolean
-                      description: "Whether to kill all child processes of the specified process. Valid only for Endpoint agent type."
+                      description: "Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type."
                       example: true
                 - type: object
                   title: "Entity ID"
