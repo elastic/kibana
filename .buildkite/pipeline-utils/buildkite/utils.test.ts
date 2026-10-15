@@ -85,6 +85,36 @@ describe('getPipeline', () => {
     );
   });
 
+  it('registers metadata for array-valued commands', () => {
+    const filename = writePipeline(`steps:
+    - command:
+        - echo one
+        - echo two
+      key: array_step
+  `);
+
+    getPipeline(filename, { cancelOnGateFailure: true });
+    flushCancelOnGateFailureMetadata();
+
+    expect(execFileSyncMock).toHaveBeenCalledWith(
+      'buildkite-agent',
+      ['meta-data', 'set', 'cancel_on_gate_failure_batch:pipeline'],
+      { input: JSON.stringify(['array_step']), stdio: ['pipe', 'inherit', 'inherit'] }
+    );
+  });
+
+  it('throws when an array-valued command step is missing a key', () => {
+    const filename = writePipeline(`steps:
+    - command:
+        - echo one
+        - echo two
+  `);
+
+    expect(() => getPipeline(filename, { cancelOnGateFailure: true })).toThrow(
+      'is missing a "key"'
+    );
+  });
+
   it('verifies manually registered base.yml step keys exist', () => {
     const repoRoot = path.resolve(__dirname, '../../..');
     const pipelineSource = fs.readFileSync(

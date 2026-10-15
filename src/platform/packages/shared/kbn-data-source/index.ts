@@ -17,7 +17,7 @@ export type {
 
 export { DataViewSource } from './src/sources/data_view_source';
 export { EsqlSource } from './src/sources/esql_source';
-export type { EsqlSourceArgs } from './src/sources/esql_source';
+export type { EsqlSourceArgs, EsqlDataset, EsqlDatasetArgs } from './src/sources/esql_source';
 export { isSameDataset } from './src/is_same_dataset';
 
 import type { EsqlSource } from './src/sources/esql_source';

@@ -1,5 +1,5 @@
 {
-  "sha1": "ea5cc864790b27a781d234c4a00d558097ac1c4b",
+  "sha1": "5869219d6aa84602101e34b3be44995810e3b789",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,6 +117,20 @@
       }
     },
     {
+      "id": "5e800d3dd5cbcb7-09b040f0d26e117",
+      "title": "Vector DB home page opens Console, sample data and file upload from the add data links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 87,
+        "column": 38
+      }
+    },
+    {
       "id": "5e800d3dd5cbcb7-9020bb1c8a3eef3",
       "title": "Vector DB home page shows the agent skills prompt for building in an IDE",
       "expectedStatus": "passed",
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 91,
-        "column": 19
+        "line": 109,
+        "column": 77
       }
     },
     {
