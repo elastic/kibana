@@ -47,6 +47,7 @@ export interface EsqlAttachmentData {
 
 export const textAttachmentDataSchema = z.object({
   content: z.string(),
+  name: z.string().max(1024).optional(),
 });
 
 /**
@@ -55,6 +56,8 @@ export const textAttachmentDataSchema = z.object({
 export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
+  /** original file name with extension, when the text comes from a file */
+  name?: string;
 }
 
 export const screenContextTimeRangeSchema = z.object({
