@@ -18,7 +18,7 @@ import type {
 import { PartitionChartsMeta } from '../partition_charts_meta';
 import { LegendDisplay } from '../../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
-import { getLegendStats } from '../render_helpers';
+import { getLegendStats, MAX_PARTITION_LEGEND_STATS } from '../render_helpers';
 import { LegendSettings } from '../../../shared_components';
 
 export const PartitionLegendSettings = ({
@@ -74,7 +74,11 @@ export const PartitionLegendSettings = ({
 
   const onLegendStatsChange = useCallback(
     (legendStats: unknown) => {
-      onStateChange({ legendStats });
+      onStateChange({
+        legendStats: Array.isArray(legendStats)
+          ? legendStats.slice(0, MAX_PARTITION_LEGEND_STATS)
+          : legendStats,
+      });
     },
     [onStateChange]
   );

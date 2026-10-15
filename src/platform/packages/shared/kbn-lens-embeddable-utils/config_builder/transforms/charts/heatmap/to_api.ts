@@ -15,6 +15,7 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
@@ -120,7 +121,7 @@ function reverseBuildVisualizationState(
 
   const paletteProps = {
     color: visualization.palette
-      ? fromColorByValueLensStateToAPI(visualization.palette)
+      ? fromColorByValueLensStateToAPI(visualization.palette, LENS_HEATMAP_DEFAULT_COLOR_STEPS)
       : AUTO_COLOR,
   } satisfies Partial<HeatmapConfig['metric']>;
 
