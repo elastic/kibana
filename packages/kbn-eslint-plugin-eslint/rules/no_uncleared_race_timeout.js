@@ -1070,9 +1070,7 @@ function tryFlow(statement, versions, useAt) {
     return { definite: true, values: finalizer.values };
   }
   const tried = branchFlow(statement.block, versions, useAt);
-  const caught = statement.handler
-    ? branchFlow(statement.handler.body, versions, useAt)
-    : null;
+  const caught = statement.handler ? branchFlow(statement.handler.body, versions, useAt) : null;
   let values = unionValues(tried.values, caught ? caught.values : []);
   if (finalizer) {
     values = unionValues(values, finalizer.values);
