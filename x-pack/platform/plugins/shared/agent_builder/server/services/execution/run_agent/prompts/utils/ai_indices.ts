@@ -38,8 +38,6 @@ export const getAiIndicesInstructions = ({
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
-  // Using AI Indices is the `ki-retrieval` skill's job; this section only says they exist.
-  // The skill is named, not pathed: `load_skill` resolves a name, and the SKILLS section lists the path.
   return cleanPrompt(`
 ## AI INDICES
 
