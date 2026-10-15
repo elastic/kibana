@@ -53,26 +53,35 @@ export interface LayoutRequest {
   sections: LayoutSection[];
 }
 
-/** Grid positions returned by the layout call. */
+const arrangedPanelsSchema = z
+  .array(
+    z.object({
+      id: z.string().max(256),
+      x: z
+        .number()
+        .int()
+        .min(0)
+        .max(GRID_COLUMNS - 1),
+      y: z.number().int().min(0).max(1000),
+      w: z.number().int().min(1).max(GRID_COLUMNS),
+      h: z.number().int().min(1).max(100),
+    })
+  )
+  .max(500);
+
+/** Grid positions returned by the layout call, in the containers of the request. */
 export const layoutArrangementSchema = z.object({
-  panels: z
+  panels: arrangedPanelsSchema.describe('Every top-level panel.'),
+  sections: z
     .array(
       z.object({
         id: z.string().max(256),
-        x: z
-          .number()
-          .int()
-          .min(0)
-          .max(GRID_COLUMNS - 1),
         y: z.number().int().min(0).max(1000),
-        w: z.number().int().min(1).max(GRID_COLUMNS),
-        h: z.number().int().min(1).max(100),
+        panels: arrangedPanelsSchema.describe(
+          'Every panel of this section, with section-relative coordinates.'
+        ),
       })
     )
-    .max(500)
-    .describe('Every panel, top level and in sections. Section panels use section-relative y.'),
-  sections: z
-    .array(z.object({ id: z.string().max(256), y: z.number().int().min(0).max(1000) }))
     .max(100)
     .describe('Every section, with its row in the top-level grid.'),
 });

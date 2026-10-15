@@ -65,13 +65,18 @@ const mockArrangeLayout = jest.fn<Promise<LayoutArrangement>, [LayoutRequest]>()
 const keepRequestedLayout = async ({
   panels,
   sections,
-}: LayoutRequest): Promise<LayoutArrangement> => ({
-  panels: [...panels, ...sections.flatMap((section) => section.panels)].map(({ id, grid }) => ({
-    id,
-    ...grid,
-  })),
-  sections: sections.map(({ id, y }) => ({ id, y })),
-});
+}: LayoutRequest): Promise<LayoutArrangement> => {
+  const toArrangedPanels = (layoutPanels: LayoutRequest['panels']) =>
+    layoutPanels.map(({ id, grid }) => ({ id, ...grid }));
+  return {
+    panels: toArrangedPanels(panels),
+    sections: sections.map(({ id, y, panels: sectionPanels }) => ({
+      id,
+      y,
+      panels: toArrangedPanels(sectionPanels),
+    })),
+  };
+};
 
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 

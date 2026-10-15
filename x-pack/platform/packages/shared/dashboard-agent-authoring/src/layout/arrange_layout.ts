@@ -207,28 +207,40 @@ const requestArrangement = async (
 
 /**
  * Applying only part of an arrangement mixes the old and the new layout, so an arrangement that
- * misses a panel or section, or overflows the grid, is rejected as a whole.
+ * misses a panel or section, places a panel in another container, or overflows the grid, is
+ * rejected as a whole.
  */
 const getIncompleteArrangementIssue = (
   { panels, sections }: LayoutRequest,
   arrangement: LayoutArrangement
 ): string | undefined => {
-  const overflowingPanel = arrangement.panels.find(({ x, w }) => x + w > GRID_COLUMNS);
-  if (overflowingPanel) {
-    return `panel "${overflowingPanel.id}" overflows the ${GRID_COLUMNS}-column grid`;
-  }
-
-  const arrangedPanelIds = new Set(arrangement.panels.map(({ id }) => id));
-  const missingPanel = [...panels, ...sections.flatMap((section) => section.panels)].find(
-    ({ id }) => !arrangedPanelIds.has(id)
+  const arrangedSectionsById = new Map(
+    arrangement.sections.map((section) => [section.id, section])
   );
-  if (missingPanel) {
-    return `panel "${missingPanel.id}" is missing`;
+  const missingSection = sections.find(({ id }) => !arrangedSectionsById.has(id));
+  if (missingSection) {
+    return `section "${missingSection.id}" is missing`;
   }
 
-  const arrangedSectionIds = new Set(arrangement.sections.map(({ id }) => id));
-  const missingSection = sections.find(({ id }) => !arrangedSectionIds.has(id));
-  return missingSection ? `section "${missingSection.id}" is missing` : undefined;
+  const containers = [
+    { requested: panels, arranged: arrangement.panels },
+    ...sections.map(({ id, panels: requested }) => ({
+      requested,
+      arranged: arrangedSectionsById.get(id)?.panels ?? [],
+    })),
+  ];
+  for (const { requested, arranged } of containers) {
+    const overflowingPanel = arranged.find(({ x, w }) => x + w > GRID_COLUMNS);
+    if (overflowingPanel) {
+      return `panel "${overflowingPanel.id}" overflows the ${GRID_COLUMNS}-column grid`;
+    }
+    const arrangedPanelIds = new Set(arranged.map(({ id }) => id));
+    const missingPanel = requested.find(({ id }) => !arrangedPanelIds.has(id));
+    if (missingPanel) {
+      return `panel "${missingPanel.id}" is missing from its container`;
+    }
+  }
+  return undefined;
 };
 
 /**
@@ -239,23 +251,34 @@ const applyArrangement = (
   dashboardData: DashboardAttachmentData,
   { panels, sections }: LayoutArrangement
 ): DashboardAttachmentData => {
-  const gridByPanelId = new Map(panels.map(({ id, ...grid }) => [id, grid]));
-  const sectionYById = new Map(sections.map(({ id, y }) => [id, y]));
-  const placePanel = (panel: AttachmentPanel): AttachmentPanel => ({
-    ...panel,
-    grid: gridByPanelId.get(panel.id) ?? panel.grid,
-  });
+  const toGridByPanelId = (arrangedPanels: LayoutArrangement['panels']) =>
+    new Map(arrangedPanels.map(({ id, ...grid }) => [id, grid]));
+  const topLevelGridByPanelId = toGridByPanelId(panels);
+  const sectionsById = new Map(
+    sections.map(({ id, y, panels: sectionPanels }) => [
+      id,
+      { y, gridByPanelId: toGridByPanelId(sectionPanels) },
+    ])
+  );
+  const placePanel =
+    (gridByPanelId: ReadonlyMap<string, AttachmentPanel['grid']> | undefined) =>
+    (panel: AttachmentPanel): AttachmentPanel => ({
+      ...panel,
+      grid: gridByPanelId?.get(panel.id) ?? panel.grid,
+    });
 
   return {
     ...dashboardData,
-    panels: dashboardData.panels.map((widget) =>
-      isSection(widget)
-        ? {
-            ...widget,
-            grid: { y: sectionYById.get(widget.id) ?? widget.grid.y },
-            panels: widget.panels.map(placePanel),
-          }
-        : placePanel(widget)
-    ),
+    panels: dashboardData.panels.map((widget) => {
+      if (!isSection(widget)) {
+        return placePanel(topLevelGridByPanelId)(widget);
+      }
+      const arrangedSection = sectionsById.get(widget.id);
+      return {
+        ...widget,
+        grid: { y: arrangedSection?.y ?? widget.grid.y },
+        panels: widget.panels.map(placePanel(arrangedSection?.gridByPanelId)),
+      };
+    }),
   };
 };

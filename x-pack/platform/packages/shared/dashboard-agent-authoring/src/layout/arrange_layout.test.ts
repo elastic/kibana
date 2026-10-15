@@ -49,9 +49,8 @@ const completeArrangement: LayoutArrangement = {
   panels: [
     { id: 'existing', x: 0, y: 0, w: 48, h: 9 },
     { id: 'new-panel', x: 0, y: 9, w: 48, h: 9 },
-    { id: 'inner', x: 0, y: 0, w: 12, h: 6 },
   ],
-  sections: [{ id: 'section-a', y: 18 }],
+  sections: [{ id: 'section-a', y: 18, panels: [{ id: 'inner', x: 0, y: 0, w: 12, h: 6 }] }],
 };
 
 describe('arrangeDashboardLayout', () => {
@@ -98,11 +97,8 @@ describe('arrangeDashboardLayout', () => {
 
   it('calls the layout for unchanged panels when there is a layout request', async () => {
     const arrangeLayout = jest.fn(async () => ({
-      panels: [
-        { id: 'existing', x: 0, y: 0, w: 48, h: 9 },
-        { id: 'inner', x: 0, y: 0, w: 48, h: 9 },
-      ],
-      sections: [{ id: 'section-a', y: 9 }],
+      panels: [{ id: 'existing', x: 0, y: 0, w: 48, h: 9 }],
+      sections: [{ id: 'section-a', y: 9, panels: [{ id: 'inner', x: 0, y: 0, w: 48, h: 9 }] }],
     }));
 
     const result = await arrange(arrangeLayout, {
@@ -190,7 +186,7 @@ describe('arrangeDashboardLayout', () => {
   it('sets relayout to position for new sections only', async () => {
     const arrangeLayout = jest.fn(async () => ({
       ...completeArrangement,
-      sections: [...completeArrangement.sections, { id: 'section-b', y: 19 }],
+      sections: [...completeArrangement.sections, { id: 'section-b', y: 19, panels: [] }],
     }));
     const dashboardWithNewSection: DashboardAttachmentData = {
       ...dashboardWithNewPanel,
@@ -243,9 +239,17 @@ describe('arrangeDashboardLayout', () => {
       'misses a panel',
       {
         ...completeArrangement,
-        panels: completeArrangement.panels.filter(({ id }) => id !== 'inner'),
+        sections: [{ id: 'section-a', y: 18, panels: [] }],
       },
-      'panel "inner" is missing',
+      'panel "inner" is missing from its container',
+    ],
+    [
+      'places a panel in another container',
+      {
+        panels: [...completeArrangement.panels, { id: 'inner', x: 0, y: 18, w: 48, h: 9 }],
+        sections: [{ id: 'section-a', y: 27, panels: [] }],
+      },
+      'panel "inner" is missing from its container',
     ],
     [
       'misses a section',

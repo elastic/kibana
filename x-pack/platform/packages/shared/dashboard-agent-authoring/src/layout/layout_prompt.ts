@@ -7,7 +7,7 @@
 
 import type { LayoutRequest } from './types';
 
-const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section.
+const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section in that section's \`panels\`. Order panels by purpose only within their container.
 
 The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left corner. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
 
@@ -57,6 +57,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 - **Automatic upward movement:** Kibana moves each panel upward at its current \`x\` until another panel or the top of its grid blocks it. A larger \`y\` does not preserve empty space above a panel or guarantee row alignment.
 - **Eliminate dead space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align row heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate), they should generally have the exact same height (\`h\`). If they do not, you must fill the resulting empty vertical space before placing the next full-width panel.
+- **Fill row widths:** The widths of every row add up to 48. The sizes by chart type are starting points: when they leave columns unused at the end of a row, widen the panels of that row to fill it. For example, 5 metrics → \`w: 8, 8, 8, 12, 12\`; a pie (\`w: 12\`) and a bar chart (\`w: 24\`) → \`w: 24\` each; a panel alone in its row → \`w: 48\`.
 
 ## Positioning rules
 
@@ -72,7 +73,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 ## Reflow after layout changes
 
 - After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above, and do not keep old coordinates that leave gaps. Reflow each section separately.
-- Before answering, check the planned coordinates for avoidable gaps, overlaps, and grid bounds.
+- Before answering, check the planned coordinates for avoidable gaps, overlaps, and grid bounds: in every container, list each row and check that its widths add up to 48.
 
 ## Section grid rules
 
