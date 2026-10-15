@@ -206,6 +206,38 @@ describe('arrangeDashboardLayout', () => {
     ]);
   });
 
+  it.each<[string, DashboardAttachmentData['panels'], boolean | undefined, boolean | undefined]>([
+    [
+      'a top-level panel moved into a section',
+      [createSection('section-a', 0, [createLensPanel('inner'), createLensPanel('existing', 9)])],
+      true,
+      undefined,
+    ],
+    [
+      'a section panel moved to the top level',
+      [createLensPanel('existing'), createLensPanel('inner', 9), createSection('section-a', 18)],
+      undefined,
+      true,
+    ],
+    [
+      'a removed section panel',
+      [createLensPanel('existing'), createSection('section-a', 9)],
+      undefined,
+      true,
+    ],
+  ])(
+    'sets reflow on the container that lost %s',
+    async (_, panels, topLevelReflow, sectionReflow) => {
+      const arrangeLayout = jest.fn(async () => completeArrangement);
+
+      await arrange(arrangeLayout, { dashboardData: { ...originalDashboardData, panels } });
+
+      const [[request]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+      expect(request.reflow).toBe(topLevelReflow);
+      expect(request.sections[0].reflow).toBe(sectionReflow);
+    }
+  );
+
   it.each<[string, LayoutArrangement, string]>([
     [
       'misses a panel',

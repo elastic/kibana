@@ -56,7 +56,7 @@ interface ArrangeLayoutParams {
   dashboardData: DashboardAttachmentData;
   /** Grid rows that panels authored in this call declare for their content, by panel id. */
   panelPreferredHeights: ReadonlyMap<string, number>;
-  /** The user's own arrangement or size request. */
+  /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
   arrangeLayout: ArrangeDashboardLayout;
   reportFailure: (failure: OperationFailure) => void;
@@ -81,7 +81,7 @@ export const arrangeDashboardLayout = async ({
   logger,
 }: ArrangeLayoutParams): Promise<DashboardAttachmentData> => {
   const reportUnappliedRequest = (reason: string) => {
-    // The agent no longer sees grids, so it can only learn from a failure that the user's request
+    // The agent no longer sees grids, so it can only learn from a failure that its layout request
     // was not applied.
     if (instructions !== undefined) {
       reportFailure({
@@ -121,12 +121,20 @@ export const arrangeDashboardLayout = async ({
   };
 
   const placedPanels = getPlacedPanels(dashboardData.panels);
-  const panelIds = new Set(placedPanels.map(({ panel }) => panel.id));
+  const containerIdByPanelId = new Map(
+    placedPanels.map(({ panel, containerId }) => [panel.id, containerId])
+  );
   const sectionIds = getSectionIds(dashboardData.panels);
   const originalSectionIds = getSectionIds(originalPanels);
+  // A container that lost a panel, removed or moved out, keeps a hole at the panel's old grid.
+  const containersWithHoles = new Set(
+    [...originalPanelsById.values()]
+      .filter(({ panel, containerId }) => containerIdByPanelId.get(panel.id) !== containerId)
+      .map(({ containerId }) => containerId)
+  );
   const hasLayoutChange =
     placedPanels.some((placedPanel) => getRelayout(placedPanel) !== undefined) ||
-    [...originalPanelsById.keys()].some((id) => !panelIds.has(id)) ||
+    containersWithHoles.size > 0 ||
     sectionIds.length !== originalSectionIds.length ||
     sectionIds.some((id) => !originalSectionIds.includes(id));
   if (instructions === undefined && !hasLayoutChange) {
@@ -153,6 +161,7 @@ export const arrangeDashboardLayout = async ({
 
   const request: LayoutRequest = {
     ...(instructions !== undefined ? { instructions } : {}),
+    ...(containersWithHoles.has(null) ? { reflow: true } : {}),
     panels: toLayoutPanels(
       dashboardData.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)),
       null
@@ -162,6 +171,7 @@ export const arrangeDashboardLayout = async ({
       title: section.title,
       y: section.grid.y,
       ...(originalSectionIds.includes(section.id) ? {} : { relayout: 'position' as const }),
+      ...(containersWithHoles.has(section.id) ? { reflow: true } : {}),
       panels: toLayoutPanels(section.panels, section.id),
     })),
   };

@@ -38,13 +38,17 @@ export interface LayoutSection {
   y: number;
   /** `position` for a section added in this call, whose `y` is temporary; omitted otherwise. */
   relayout?: Extract<Relayout, 'position'>;
+  /** Set when panels were moved out of the section or removed from it, leaving holes. */
+  reflow?: boolean;
   /** Panels of the section, with coordinates relative to the section. */
   panels: LayoutPanel[];
 }
 
 export interface LayoutRequest {
-  /** The user's own arrangement or size request. */
+  /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
+  /** Set when top-level panels were moved into a section or removed, leaving holes. */
+  reflow?: boolean;
   panels: LayoutPanel[];
   sections: LayoutSection[];
 }

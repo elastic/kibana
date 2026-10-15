@@ -11,17 +11,25 @@ const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Retu
 
 The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left corner. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
 
-## Priorities
+## What you get
 
-1. The user's request in \`instructions\`, when given. It may override the sizes below.
-2. Stability: a panel without \`relayout\` keeps its position and size unless something changed around it (a panel with \`relayout\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged it by hand. A panel with \`relayout\` changes only what it names:
-   - \`all\`: new, or moved with a new chart type or preferred height. Its \`grid\` is a temporary placeholder at the bottom of its container: place it, and take \`w\` and \`h\` from *Grid sizes by chart type*, not from \`grid\`.
-   - \`position\`: moved to another section or the top level. Place it and keep its size.
-   - \`size\`: chart type or \`preferredHeight\` changed. Keep its position, and take \`w\` and \`h\` from *Grid sizes by chart type*, not from its old \`grid\`.
+- \`panels\`: the top-level panels in reading order. \`sections\`: each section with its row and its panels, in section-relative coordinates.
+- \`relayout\` marks what the edit touched:
+  - \`all\`: a new or edited panel. Its \`grid\` is a placeholder at the bottom of its container: place it and size it by *Grid sizes by chart type*.
+  - \`position\`: a panel moved into this container. Place it, and resize it if needed to fill the rows of its new container.
+  - \`size\`: its content changed. Size it again by *Grid sizes by chart type*.
+  - On a section, \`relayout: position\` means the section is new and its \`y\` is a placeholder.
+- \`reflow: true\`, on the request for the top level or on a section: panels were moved out of that container or removed, so its old coordinates have holes.
+- \`preferredHeight\`: the approximate rows the content of a markdown or custom content panel needs at \`w: 24\`.
+- \`instructions\`: where panels and sections go, from the user or the authoring agent. They override the rules below.
 
-   A section with \`relayout: position\` is new: its \`y\` is a temporary row at the bottom. Place it among the other sections by purpose, e.g. key metrics before trends. Sections without \`relayout\` keep their order.
-3. No gaps and no overlaps.
-4. Grid sizes by chart type. These decide \`w\` and \`h\` for every panel with \`relayout: all\` or \`relayout: size\`.
+## How to lay out
+
+Lay out the dashboard as a careful author would after this edit:
+
+- Reflow every container (the top level or a section) with \`reflow: true\` or with a panel that has \`relayout: size\`: lay out all its panels again with the rules below, keeping the order of its existing panels, so rows are full and aligned and no holes remain. Widen panels or move them up rather than keeping old coordinates.
+- Place each panel with \`relayout: all\` or \`relayout: position\` in an empty space of its container (positioning rule 5), or else below its last row. The other panels of that container keep their grid.
+- Keep the arrangement of every other container, unless \`instructions\` ask for a change. The user may have arranged it by hand.
 
 ## Grid sizes by chart type
 
@@ -37,10 +45,10 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Tagcloud** → \`w: 24, h: 10\`.
 - **Pie** → \`w: 12, h: 10\`.
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
-- **Markdown and custom content** → \`w: 24–48\`, \`h\` from \`preferredHeight\`: the approximate rows the content needs at \`w: 24\`. At \`w: 48\`, markdown text needs about two thirds of it. Too short makes the panel scroll inside its own frame; too tall leaves an empty gap under its content.
+- **Markdown and custom content** → \`w: 24–48\`, \`h\` from \`preferredHeight\`. At \`w: 48\`, markdown text needs about two thirds of it. Too short makes the panel scroll inside its own frame; too tall leaves an empty gap under its content.
 - **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
 - **Vega and ML panels** → \`w: 24–48, h: 12–16\`.
-- **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep the current \`h\` unless \`instructions\` ask for a change.
+- **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep the current \`h\`.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
@@ -58,7 +66,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
 3. **Same \`h\` per row** when possible, so rows align cleanly.
 4. Panels' \`x + w\` must never exceed 48.
-5. **When updating a dashboard**, inspect the existing panels' \`grid\`. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place a panel with \`relayout: all\` or \`relayout: position\` in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space. Otherwise keep it at the bottom of its container.
+5. **When updating a dashboard**, inspect the existing panels' \`grid\`. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 6. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
 
 ## Reflow after layout changes
@@ -70,8 +78,8 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 - Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. Internal section panel heights do not increase the section's outer-grid height.
-- When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
-- Place top-level panels with \`relayout: all\` or \`relayout: position\` above the first section. Top-level panels without \`relayout\` keep their place, even between sections.
+- Top-level panels and sections share the outer grid and never share a row. Compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`. Moving a section up moves every top-level panel below it down by one row.
+- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the order of existing sections and of top-level panels between them.
 
 ## Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 
