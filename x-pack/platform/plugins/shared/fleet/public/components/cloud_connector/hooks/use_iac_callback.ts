@@ -127,6 +127,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     }
   }, []);
 
+  /** True once a later Launch has replaced `id` as the record being waited on. */
+  const isSuperseded = (id: string) =>
+    activeIdRef.current !== undefined && activeIdRef.current !== id;
+
   /**
    * Retires the record on the server. Settles the hook when the answer is final: a received
    * report is surfaced, a cancelled or missing record stops the wait. The caller sets the status
@@ -163,19 +167,6 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     [stopPolling]
   );
 
-  const cancel = useCallback(async (): Promise<IacCallbackCancelOutcome> => {
-    const id = activeIdRef.current;
-    if (!id) {
-      return 'cancelled';
-    }
-    const outcome = await retire(id);
-    if (outcome === 'cancelled') {
-      // Cancelled, or already gone: nothing will arrive.
-      setStatus('idle');
-    }
-    return outcome;
-  }, [retire]);
-
   const startPolling = useCallback(
     (id: string, expiresAt: string) => {
       let deadline = Math.min(
@@ -198,6 +189,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
           const outcome = await retire(id).finally(() => {
             isRetiring = false;
           });
+          if (isSuperseded(id)) {
+            // A new Launch is waiting on its own record; leave its state alone.
+            return;
+          }
           if (outcome === 'cancelled') {
             setStatus('expired');
           } else if (outcome === 'created' && activeIdRef.current === id) {
@@ -240,6 +235,27 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     },
     [retire, stopPolling]
   );
+
+  const cancel = useCallback(async (): Promise<IacCallbackCancelOutcome> => {
+    const id = activeIdRef.current;
+    if (!id) {
+      return 'cancelled';
+    }
+    const outcome = await retire(id);
+    if (isSuperseded(id)) {
+      return outcome;
+    }
+    if (outcome === 'cancelled') {
+      // Cancelled, or already gone: nothing will arrive.
+      setStatus('idle');
+    } else if (outcome === 'created' && activeIdRef.current === id && !timerRef.current) {
+      // The report is being applied and nothing is polling any more (the deadline had passed
+      // and its cancel failed). Watch for the identity a little longer.
+      setStatus('pending');
+      startPolling(id, new Date(Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS).toISOString());
+    }
+    return outcome;
+  }, [retire, startPolling]);
 
   const start = useCallback(
     async (identity: IacCallbackStartInput) => {

@@ -274,6 +274,64 @@ describe('useIacCallback', () => {
       expect(result.current.status).toBe('expired');
     });
 
+    it('leaves a newer launch alone when its cancel settles after that launch', async () => {
+      let resolveDelete: (value: unknown) => void = () => {};
+      mockedDelete.mockReturnValue(new Promise((resolve) => (resolveDelete = resolve)) as any);
+      const result = await startAndPassDeadline();
+      expect(mockedDelete).toHaveBeenCalledWith('cb-1');
+
+      // The clock is past the first record's expiry; the new one expires later.
+      const later = pendingItem('cb-2', { expires_at: '2026-10-13T14:00:00.000Z' });
+      mockedCreate.mockResolvedValue({ data: { item: later, api_key: 'k2' }, error: null } as any);
+      mockedGet.mockResolvedValue({ data: { item: later }, error: null } as any);
+      await act(async () => {
+        await result.current.start({});
+      });
+      expect(result.current.status).toBe('pending');
+
+      await act(async () => {
+        resolveDelete({
+          data: { item: pendingItem('cb-1', { status: 'cancelled' }) },
+          error: null,
+        });
+      });
+
+      expect(result.current.status).toBe('pending');
+      await poll();
+      expect(mockedGet).toHaveBeenCalledWith('cb-2');
+    });
+
+    it('watches again when a manual Create after a failed cancel finds the report being applied', async () => {
+      mockedDelete.mockResolvedValue({ data: null, error: { statusCode: 503 } } as any);
+      const result = await startAndPassDeadline();
+      expect(result.current.status).toBe('expired');
+
+      mockedDelete.mockResolvedValue({
+        data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
+        error: null,
+      } as any);
+      let outcome: string | undefined;
+      await act(async () => {
+        outcome = await result.current.cancel();
+      });
+      expect(outcome).toBe('created');
+      expect(result.current.status).toBe('pending');
+
+      mockedGet.mockResolvedValue({
+        data: {
+          item: pendingItem('cb-1', {
+            status: 'received',
+            ...RECEIVED_VALUES,
+            cloud_connector_id: 'cc-1',
+          }),
+        },
+        error: null,
+      } as any);
+      await poll();
+      expect(result.current.status).toBe('received');
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1' });
+    });
+
     it('keeps the record for a manual Create to retire when the cancel failed', async () => {
       mockedDelete.mockResolvedValue({ data: null, error: { statusCode: 503 } } as any);
 
