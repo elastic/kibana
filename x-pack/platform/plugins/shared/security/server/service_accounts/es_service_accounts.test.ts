@@ -443,6 +443,19 @@ describe('EsServiceAccounts', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    // Elasticsearch service accounts have no `assumable_by`; dropping the field silently would
+    // hand back an account the platform service cannot use.
+    it('rejects platform assumers, which only UIAM supports', async () => {
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          assumableByPlatformServiceAccounts: ['sandbox-api'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('rolls back the token and the account when the credential cannot be stored', async () => {
       mockHappyPath();
       credentialStore.set.mockRejectedValue(new Error('encryption key rotated'));

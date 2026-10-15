@@ -292,10 +292,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles, description } = parseCreateServiceAccountParams(
-      params,
-      ES_SERVICE_ACCOUNT_ROLE_LIMITS
-    );
+    const { name, roles, description, assumableByPlatformServiceAccounts } =
+      parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
+    // Silently dropping the platform assumers would leave the caller holding an account that the
+    // platform service it was created for cannot use.
+    if (assumableByPlatformServiceAccounts) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `assumableByPlatformServiceAccounts` requires the UIAM backend'
+      );
+    }
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;

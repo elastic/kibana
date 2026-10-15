@@ -167,6 +167,32 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
+    it('appends the requested platform service accounts to `assumable_by` after the project', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        assumableByPlatformServiceAccounts: ['sandbox-api', 'other-service', 'sandbox-api'],
+      });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          assumable_by: [
+            {
+              type: 'project-service-account',
+              organization_id: 'organization-id',
+              project_type: 'security',
+              project_id: 'project-id',
+            },
+            { type: 'platform-service-account', service_account_id: 'sandbox-api' },
+            { type: 'platform-service-account', service_account_id: 'other-service' },
+          ],
+        }),
+        undefined
+      );
+    });
+
     // UIAM counts duplicates against its 50-role cap before dropping them, so the request is
     // normalized before it leaves.
     it('drops duplicate roles, keeping first occurrences in order', async () => {

@@ -8,16 +8,39 @@
 import Boom from '@hapi/boom';
 
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
+import { z } from '@kbn/zod';
 
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
 import {
   getCreateServiceAccountParamsSchema,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 
-/** Create parameters, once validated: the same shape the route accepts. */
+/** UIAM caps `assumable_by` at 100 entries, and the current project always takes one of them. */
+export const MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS = 99;
+
+/**
+ * Create parameters accepted from callers of the server contract. A superset of the route body:
+ * `assumableByPlatformServiceAccounts` is never accepted over HTTP. Duplicate IDs are dropped,
+ * keeping first occurrences in order.
+ */
+const getServerCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
+  getCreateServiceAccountParamsSchema(limits).extend({
+    assumableByPlatformServiceAccounts: z
+      .preprocess(
+        (ids) => (Array.isArray(ids) ? Array.from(new Set(ids)) : ids),
+        z
+          .array(z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH))
+          .min(1)
+          .max(MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS)
+      )
+      .optional(),
+  });
+
+/** Create parameters, once validated. */
 export type ParsedCreateServiceAccountParams = ReturnType<
-  ReturnType<typeof getCreateServiceAccountParamsSchema>['parse']
+  ReturnType<typeof getServerCreateServiceAccountParamsSchema>['parse']
 >;
 
 /**
@@ -34,7 +57,7 @@ export const parseCreateServiceAccountParams = (
   params: CreateServiceAccountParams,
   limits: ServiceAccountRoleLimits
 ): ParsedCreateServiceAccountParams => {
-  const parsed = getCreateServiceAccountParamsSchema(limits).safeParse(params);
+  const parsed = getServerCreateServiceAccountParamsSchema(limits).safeParse(params);
 
   if (!parsed.success) {
     throw Boom.badRequest(

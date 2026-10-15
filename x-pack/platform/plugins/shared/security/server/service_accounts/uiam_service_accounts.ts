@@ -230,10 +230,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles, description } = parseCreateServiceAccountParams(
-      params,
-      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
-    );
+    const { name, roles, description, assumableByPlatformServiceAccounts } =
+      parseCreateServiceAccountParams(params, UIAM_SERVICE_ACCOUNT_ROLE_LIMITS);
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
@@ -266,7 +264,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           project_type: this.cloudProjectContext.projectType,
           project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy({
+            ...this.cloudProjectContext,
+            platformServiceAccountIds: assumableByPlatformServiceAccounts,
+          }),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.

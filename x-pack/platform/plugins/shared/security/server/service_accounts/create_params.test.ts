@@ -9,7 +9,10 @@ import Boom from '@hapi/boom';
 
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
 
-import { parseCreateServiceAccountParams } from './create_params';
+import {
+  MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS,
+  parseCreateServiceAccountParams,
+} from './create_params';
 import { SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH } from '../../common/service_accounts';
 
 /** Each backend passes its own limits. Small ones keep the boundary cases readable. */
@@ -172,5 +175,42 @@ describe('parseCreateServiceAccountParams', () => {
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`description`');
+  });
+
+  describe('assumableByPlatformServiceAccounts', () => {
+    it('passes the platform service accounts along, dropping duplicates', () => {
+      expect(
+        parseCreateServiceAccountParams(
+          {
+            name: 'nightshift-sandbox',
+            roles: ['viewer'],
+            assumableByPlatformServiceAccounts: ['sandbox-api', 'sandbox-api', 'other'],
+          },
+          limits
+        )
+      ).toEqual({
+        name: 'nightshift-sandbox',
+        roles: ['viewer'],
+        assumableByPlatformServiceAccounts: ['sandbox-api', 'other'],
+      });
+    });
+
+    it.each<[string, string[]]>([
+      ['an empty list', []],
+      ['an empty id', ['']],
+      [
+        'more ids than UIAM accepts next to the project',
+        Array.from({ length: MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS + 1 }, (_, i) => `sa-${i}`),
+      ],
+    ])('rejects %s', (_, assumableByPlatformServiceAccounts) => {
+      const error = expectRejection({
+        name: 'nightshift-sandbox',
+        roles: ['viewer'],
+        assumableByPlatformServiceAccounts,
+      });
+
+      expect(error.output.statusCode).toBe(400);
+      expect(error.message).toContain('`assumableByPlatformServiceAccounts');
+    });
   });
 });
