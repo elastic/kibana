@@ -13,8 +13,7 @@ import type {
   StreamQuery,
 } from '@kbn/significant-events-schema';
 import type { QueryStatus } from '@kbn/significant-events-plugin/common';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { getQueryBucketParams } from './get_query_bucket_params';
+import { getQueryBucketParams, toTimeState } from './get_query_bucket_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
@@ -34,15 +33,6 @@ export interface QueriesTableFetchResult {
   perPage: number;
   total: number;
 }
-
-// Resolved on every fetch, so a relative window like `now-24h` stays current across refetches.
-const toTimeState = (
-  timefilter: { calculateBounds: (range: TimeRange) => TimeRangeBounds },
-  timeRange: TimeRange
-): { start: number; end: number } | undefined => {
-  const { min, max } = timefilter.calculateBounds(timeRange);
-  return min && max ? { start: min.valueOf(), end: max.valueOf() } : undefined;
-};
 
 export const useFetchDiscoveryQueries = (
   options: {
