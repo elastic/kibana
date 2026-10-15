@@ -79,7 +79,6 @@ const arrangedPanelsSchema = z
 export const layoutArrangementSchema = z.object({
   plan: z
     .string()
-    .max(4000)
     .describe(
       'Written before the grids: per container, the rows that change and why, then each changed row as its panels with `w` and `h`. Check that the widths of every row add up to 48 and that panels side by side end on the same row.'
     ),
