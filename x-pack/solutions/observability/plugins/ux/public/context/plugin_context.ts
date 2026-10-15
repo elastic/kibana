@@ -11,7 +11,7 @@ import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/pu
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export interface PluginContextValue {
-  appMountParameters: AppMountParameters;
+  appMountParameters?: AppMountParameters;
   exploratoryView: ExploratoryViewPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   spaceId: string;

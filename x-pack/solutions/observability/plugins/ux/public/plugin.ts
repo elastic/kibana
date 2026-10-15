@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import type { ComponentType } from 'react';
+import { BehaviorSubject, from, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type {
   FetchDataParams,
@@ -16,6 +16,7 @@ import type {
 } from '@kbn/observability-plugin/public';
 import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -46,9 +47,31 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { createLazyClassicRumDashboard } from './embeddable/lazy_classic_rum_dashboard';
+import { fetchClassicRumApplications } from './embeddable/fetch_classic_rum_applications';
+import { createCallApmApi as initCallApmApi } from './services/rest/create_call_apm_api';
 
-export type UxPluginSetup = void;
-export type UxPluginStart = void;
+export interface UxPluginSetup {
+  hideLegacyNavigation(): void;
+}
+
+export interface ClassicRumTimeRange {
+  rangeFrom: string;
+  rangeTo: string;
+}
+
+export interface ClassicRumDashboardProps {
+  serviceName: string;
+  /** Time range owned by the host app; the dashboard falls back to the global timefilter. */
+  timeRange?: ClassicRumTimeRange;
+  /** Called when the user changes the time range from the dashboard's own date picker. */
+  onTimeRangeChange?: (timeRange: ClassicRumTimeRange) => void;
+}
+
+export interface UxPluginStart {
+  ClassicRumDashboard: ComponentType<ClassicRumDashboardProps>;
+  fetchClassicRumApplications(params: { start: number; end: number }): Promise<string[]>;
+}
 
 export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
@@ -83,10 +106,15 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
+  private legacyNavigationHidden = false;
+  private pluginSetupDeps?: ApmPluginSetupDeps;
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps): UxPluginSetup {
     const pluginSetupDeps = plugins;
+    this.pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
@@ -145,7 +173,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         map(([coreStart]) => {
           // checking apm capability, since ux for now doesn't have it's
           // own capability
-          if (coreStart.application.capabilities.apm.show) {
+          if (!this.legacyNavigationHidden && coreStart.application.capabilities.apm.show) {
             return [
               // UX navigation
               {
@@ -178,6 +206,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
+      updater$: this.appUpdater$,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: [
         'RUM',
@@ -214,6 +243,32 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         });
       },
     });
+
+    return {
+      hideLegacyNavigation: () => {
+        this.legacyNavigationHidden = true;
+        this.appUpdater$.next(() => ({ visibleIn: [] }));
+      },
+    };
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+
+  public start(core: CoreStart, plugins: ApmPluginStartDeps): UxPluginStart {
+    const { pluginSetupDeps } = this;
+    if (!pluginSetupDeps) {
+      throw new Error('UxPlugin.start was called before setup');
+    }
+
+    return {
+      ClassicRumDashboard: createLazyClassicRumDashboard({
+        core,
+        setupDeps: pluginSetupDeps,
+        startDeps: plugins,
+        isDev: this.initContext.env.mode.dev,
+      }),
+      fetchClassicRumApplications: ({ start, end }) => {
+        initCallApmApi(core);
+        return fetchClassicRumApplications({ data: plugins.data, start, end });
+      },
+    };
+  }
 }
