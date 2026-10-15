@@ -15,7 +15,6 @@ import {
   initialState,
   model,
   pollEsNodesVersion,
-  pollingInterval,
   type NodesVersionResult,
   type NodesVersionConfig,
   type NodesVersionState,
@@ -44,51 +43,60 @@ const fail = (error: Error): NodesVersionResult => ({ ok: false, error, complete
 const compatibilityOf = (nodes: NodesInfo) =>
   compatibilityFromNodesInfo(nodes, config.kibanaVersion, config.ignoreVersionMismatch);
 
-describe('pollingInterval', () => {
-  it('follows the control state', () => {
-    expect(pollingInterval(config, 'STARTUP')).toBe(config.healthCheckStartupInterval);
-    expect(pollingInterval(config, 'FAILING')).toBe(config.healthCheckFailureInterval);
-    expect(pollingInterval(config, 'NORMAL')).toBe(config.healthCheckInterval);
+/** A state after the cluster first answered compatible. */
+const normal: NodesVersionState = {
+  controlState: 'NORMAL',
+  compatibility: compatibilityOf(compatible),
+  attemptsLeft: config.healthCheckRetry,
+};
+
+describe('the wait of a step', () => {
+  const start = initialState(config);
+
+  it('is the interval of the control state the step reached', () => {
+    expect(model(config, start, ok(incompatible)).wait).toBe(config.healthCheckStartupInterval);
+    expect(model(config, start, ok(compatible)).wait).toBe(config.healthCheckInterval);
+    expect(model(config, { ...normal, attemptsLeft: 0 }, fail(requestError)).wait).toBe(
+      config.healthCheckFailureInterval
+    );
+    expect(model(config, normal, ok(compatible)).wait).toBe(config.healthCheckInterval);
+  });
+
+  it('keeps the interval of the current control state through a retry', () => {
+    expect(model(config, start, fail(requestError)).wait).toBe(config.healthCheckStartupInterval);
+    expect(model(config, normal, fail(requestError)).wait).toBe(config.healthCheckInterval);
   });
 });
 
 describe('FAILING tracks request errors, not incompatibility', () => {
-  const normal: NodesVersionState = {
-    controlState: 'NORMAL',
-    compatibility: compatibilityOf(compatible),
-    attemptsLeft: 0,
-  };
+  const settled: NodesVersionState = { ...normal, attemptsLeft: 0 };
 
   it('stays NORMAL for a reachable cluster running an incompatible version', () => {
-    const { state: primed } = model(config, normal, ok(incompatible));
+    const { state: primed } = model(config, settled, ok(incompatible));
     expect(primed.compatibility?.isCompatible).toBe(false);
     expect(primed.controlState).toBe('NORMAL');
   });
 
   it('goes FAILING when the request itself fails', () => {
-    const { state: primed } = model(config, normal, fail(requestError));
+    const { state: primed } = model(config, settled, fail(requestError));
     expect(primed.controlState).toBe('FAILING');
   });
 });
 
 describe('attemptsLeft', () => {
-  const normal: NodesVersionState = {
-    controlState: 'NORMAL',
-    compatibility: compatibilityOf(compatible),
-    attemptsLeft: config.healthCheckRetry,
-  };
-
   it('uses attempts on request errors without settling a compatibility', () => {
     const first = model(config, normal, fail(requestError));
     expect(first).toEqual({
       state: { ...normal, attemptsLeft: 1 },
       event: { type: 'retried' },
+      wait: config.healthCheckInterval,
     });
 
     const second = model(config, first.state, fail(requestError));
     expect(second).toEqual({
       state: { ...normal, attemptsLeft: 0 },
       event: { type: 'retried' },
+      wait: config.healthCheckInterval,
     });
 
     const { state: settled } = model(config, second.state, fail(requestError));
@@ -104,7 +112,8 @@ describe('attemptsLeft', () => {
 
 describe('STARTUP', () => {
   it('is the initial state, with no compatibility and every attempt left', () => {
-    expect(initialState(config)).toEqual({
+    const start = initialState(config);
+    expect(start).toEqual({
       controlState: 'STARTUP',
       compatibility: undefined,
       attemptsLeft: config.healthCheckRetry,
@@ -124,12 +133,6 @@ describe('STARTUP', () => {
 });
 
 describe('the event of a step', () => {
-  const normal: NodesVersionState = {
-    controlState: 'NORMAL',
-    compatibility: compatibilityOf(compatible),
-    attemptsLeft: config.healthCheckRetry,
-  };
-
   it('is compatibilityChanged for the first compatibility, whatever it is', () => {
     const { state, event } = model(config, initialState(config), ok(incompatible));
     expect(event).toEqual({ type: 'compatibilityChanged', compatibility: state.compatibility });

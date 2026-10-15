@@ -9,8 +9,8 @@
 
 /**
  * The Elasticsearch version check as a state-action machine. The control state
- * names the polling interval: STARTUP until the cluster is first compatible,
- * FAILING while the request fails, NORMAL otherwise.
+ * names the polling interval each step waits: STARTUP until the cluster is first
+ * compatible, FAILING while the request fails, NORMAL otherwise.
  */
 
 import { ReplaySubject, type Observable } from 'rxjs';
@@ -28,9 +28,9 @@ import {
   run,
   type Action,
   type ActionResult,
-  type AugmentedState,
   type Clock,
   type StateActionMachine,
+  type Step,
 } from './state_action_machine';
 
 export interface NodesVersionConfig {
@@ -65,7 +65,7 @@ export const initialState = (config: NodesVersionConfig): NodesVersionState => (
   attemptsLeft: config.healthCheckRetry,
 });
 
-export const pollingInterval = (
+const pollingInterval = (
   config: NodesVersionConfig,
   controlState: NodesVersionControlState
 ): number => {
@@ -108,7 +108,7 @@ export const model = (
   config: NodesVersionConfig,
   state: NodesVersionState,
   result: NodesVersionResult
-): AugmentedState<NodesVersionState, NodesVersionEvent> => {
+): Step<NodesVersionState, NodesVersionEvent> => {
   if (!result.ok && state.attemptsLeft > 0) {
     return {
       state: {
@@ -116,6 +116,7 @@ export const model = (
         attemptsLeft: state.attemptsLeft - 1,
       },
       event: { type: 'retried' },
+      wait: pollingInterval(config, state.controlState),
     };
   }
 
@@ -134,6 +135,7 @@ export const model = (
     event: changed
       ? { type: 'compatibilityChanged', compatibility }
       : { type: 'compatibilityUnchanged' },
+    wait: pollingInterval(config, controlState),
   };
 };
 
@@ -144,7 +146,6 @@ export const nodesVersionMachine = (
   initialState: initialState(config),
   next: () => action,
   model: (state, result) => model(config, state, result),
-  delay: (state) => pollingInterval(config, state.controlState),
 });
 
 export interface CheckEsNodesVersionOptions {
