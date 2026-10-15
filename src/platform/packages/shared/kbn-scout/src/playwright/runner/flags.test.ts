@@ -155,6 +155,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'serverless',
         domain: 'observability_complete',
@@ -185,6 +186,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -214,6 +216,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'serverless',
         domain: 'security_ease',
@@ -244,6 +247,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -274,6 +278,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
@@ -372,6 +377,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         serverConfigSet: 'default',
         testFiles: [testFile],
+        targetAttributes: [],
         testTarget: {
           arch: 'stateful',
           domain: 'classic',
@@ -416,6 +422,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         serverConfigSet: 'default',
         testFiles,
+        targetAttributes: [],
         testTarget: {
           arch: 'stateful',
           domain: 'classic',
