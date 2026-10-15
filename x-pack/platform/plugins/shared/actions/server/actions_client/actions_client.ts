@@ -274,10 +274,13 @@ export class ActionsClient {
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<
+  public async getAll({
+    includeSystemActions = false,
+    sandboxCapableOnly = false,
+  }: { includeSystemActions?: boolean; sandboxCapableOnly?: boolean } = {}): Promise<
     ConnectorWithExtraFindData[]
   > {
-    return getAll({ context: this.context, includeSystemActions });
+    return getAll({ context: this.context, includeSystemActions, sandboxCapableOnly });
   }
 
   /**

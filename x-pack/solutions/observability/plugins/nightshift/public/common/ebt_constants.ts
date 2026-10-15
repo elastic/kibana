@@ -53,6 +53,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
+  VIEW_SOURCES: 'viewSources',
 } as const;
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
