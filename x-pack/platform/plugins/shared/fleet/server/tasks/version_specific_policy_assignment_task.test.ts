@@ -455,6 +455,41 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       }
     });
 
+    it('Should not reassign more batches once the task is aborted', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = Array.from({ length: 2500 }, (_, i) => ({
+        id: `agent-${i}`,
+        policy_id: 'policy-1',
+        policy_revision: 1,
+        agent: { version: '8.18.0' },
+      })) as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: agents.length,
+        agents,
+        page: 1,
+        perPage: agents.length,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      const abortController = new AbortController();
+      mockedReassignAgents.mockReset();
+      // the task is aborted (e.g. its timeout) while the first batch is being moved
+      mockedReassignAgents.mockImplementationOnce(async () => {
+        abortController.abort();
+        return { actionId: 'action-1' };
+      });
+
+      await mockTask.start({ taskManager: tmStartMock() });
+      await mockTask.runTask(MOCK_TASK_INSTANCE, mockCore, abortController.signal);
+
+      expect(mockedReassignAgents).toHaveBeenCalledTimes(1);
+    });
+
     it('Should skip agents already on correct versioned policy regardless of revision', async () => {
       const agentPolicies = [
         {
