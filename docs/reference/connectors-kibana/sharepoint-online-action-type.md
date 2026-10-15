@@ -21,7 +21,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 SharePoint Online connectors support the following authentication types:
 
-#### Quick Connect OAuth 2.0 (recommended)
+#### Quick Connect OAuth 2.0 (recommended for delegated access)
 
 ```{applies_to}
 serverless: preview
@@ -172,7 +172,7 @@ To use app-only authentication, register an application in Microsoft Entra (form
     - **Client ID**: Found in the **Overview** section (also called Application ID).
     - **Client Secret**: The value you copied in step 15.
 
-### OAuth Client Certificate (Microsoft Entra) — recommended for production [sharepoint-online-cert-credentials]
+### OAuth Client Certificate (Microsoft Entra) — recommended for production app-only access [sharepoint-online-cert-credentials]
 
 To use certificate-based app-only authentication, register an application in Microsoft Entra:
 
