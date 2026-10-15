@@ -329,7 +329,9 @@ export const getPackagePolicyUpdateCallback = (
 
       // Stripped before license validation for the same reason as custom YARA signatures above.
       if (
-        (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointRegistryCredentialHardening) ||
+        (!productFeatures.isEnabled(
+          ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+        ) ||
           !experimentalFeatures.registryCredentialHardening) &&
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
