@@ -53,7 +53,7 @@ const CURL_AUTH_NOTE = API_KEY
   : '';
 const CURL_AUTH = API_KEY
   ? `-H "Authorization: ApiKey $API_KEY"`
-  : `-u ${ES_USERNAME}:${ES_PASSWORD}`;
+  : `-u '${`${ES_USERNAME}:${ES_PASSWORD}`.replace(/'/g, "'\\''")}'`; // single-quoted so $, ", ` survive pasting
 
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
