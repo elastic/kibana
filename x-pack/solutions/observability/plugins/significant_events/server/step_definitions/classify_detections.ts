@@ -36,8 +36,8 @@ const rowsSchema = lazySchema(() =>
 
 const inputSchema = lazySchema(() =>
   z.object({
-    /** The `get_detections` rows: `[rule_uuid, _source, ...]`. */
-    rows: rowsSchema,
+    /** The `get_detections` rows: `[rule_uuid, _source, ...]`. Absent when that query had none. */
+    rows: rowsSchema.optional(),
     space_id: z.string().max(MAX_ID_LENGTH),
     shadow_mode: z.boolean(),
     probe_window_minutes: z.number().int().min(15).max(360),
@@ -207,7 +207,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
     outputSchema,
     handler: async (context) => {
       const {
-        rows,
+        rows = [],
         space_id: spaceId,
         shadow_mode: shadowMode,
         probe_window_minutes: windowMinutes,

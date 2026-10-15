@@ -98,7 +98,7 @@ describe('discovery workflow detection classifier wiring', () => {
       const withBlock = requireStep('classify_detections').with ?? {};
 
       expect(withBlock).toEqual({
-        rows: '${{ steps.get_detections.output.values | default: [] }}',
+        rows: '${{ steps.get_detections.output.values }}',
         space_id: '{{ variables.spaceId }}',
         shadow_mode: '${{ inputs.classifierShadowMode }}',
         probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}',
@@ -106,6 +106,37 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
       });
+    });
+  });
+
+  describe('when the detections query returned nothing or failed (on-failure: continue)', () => {
+    const rowsExpression = () => requireStep('classify_detections').with?.rows;
+
+    it('passes an empty result through as an empty list', () => {
+      const emptyResult = { steps: { get_detections: { output: { values: [] } } } };
+
+      expect(evaluate(rowsExpression(), emptyResult)).toEqual([]);
+    });
+
+    it.each([
+      ['has no output', { steps: { get_detections: { output: {} } } }],
+      ['failed', { steps: { get_detections: { error: { message: 'boom' } } } }],
+    ])(
+      'leaves rows undefined when the query %s, which the step reads as an empty batch',
+      (_n, ctx) => {
+        expect(evaluate(rowsExpression(), ctx)).toBeUndefined();
+      }
+    );
+
+    it('counts zero raw detections, so the run ends as having no work', () => {
+      const failed = { steps: { get_detections: { error: { message: 'boom' } } } };
+
+      expect(evaluate(requireStep('count_detections').with?.detectionCount, failed)).toBe(0);
+      expect(
+        evaluate(requireStep('compute_batch_size').with?.processedCount, {
+          steps: { count_detections: { output: { detectionCount: 0 } } },
+        })
+      ).toBe(0);
     });
   });
 

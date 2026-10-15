@@ -194,7 +194,9 @@ steps:
   - name: classify_detections
     type: significantEvents.classifyDetections
     with:
-      rows: '${{ steps.get_detections.output.values | default: [] }}'
+      # No `| default: []`: the engine evaluates that to undefined even for an empty array, and the
+      # step already treats a missing `rows` as an empty batch.
+      rows: '${{ steps.get_detections.output.values }}'
       space_id: '{{ variables.spaceId }}'
       shadow_mode: '${{ inputs.classifierShadowMode }}'
       probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
