@@ -43,7 +43,6 @@ steps:
   - name: check_index_scope
     type: kibana.request
     with:
-      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/index_scope"
       headers:
@@ -84,7 +83,6 @@ steps:
     type: kibana.request
     if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true }}"
     with:
-      use_server_info: true
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/candidates"
       headers:
