@@ -31,9 +31,9 @@ import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '
 import type { FlyoutWrapperProps } from './types';
 
 /**
- * Nested Emotion `css` on EuiFlyout often loses to EUI's own classes on
- * `.euiFlyout__content` / body overflow. Global + !important scoped to Lens
- * inline flyouts forces the classic "visible ancestors + one guttered scrollport" model.
+ * Nested Emotion `css` on EuiFlyout loses to chrome-layout clip-path and EUI overflow.
+ * Global + !important scoped to Lens inline flyouts restores visible ancestors +
+ * one guttered scrollport for DnD extras.
  */
 const inlineFlyoutDndOverflowFix = css`
   /* Must beat chrome-layout grid_global_app_style.tsx:
@@ -96,19 +96,6 @@ const inlineFlyoutDndOverflowFix = css`
     transform: none !important;
     padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
     margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
-  }
-
-  .euiFlyout[data-test-subj='customizeLens'] .kbnOverlayMountWrapper,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .kbnOverlayMountWrapper,
-  .euiFlyout.kbnPresentationLazyFlyout .kbnOverlayMountWrapper {
-    padding-left: 400px !important;
-    margin-left: -400px !important;
-  }
-
-  .euiFlyout[data-test-subj='customizeLens'] .domDroppable__extraTargets,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .domDroppable__extraTargets,
-  .euiFlyout.kbnPresentationLazyFlyout .domDroppable__extraTargets {
-    width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px !important;
   }
 `;
 
@@ -258,23 +245,26 @@ export const FlyoutWrapper = ({
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
-          // Visible on the body so extras can reach the __overflow gutter. Scrolling lives
-          // on __overflow only (classic Lens: one scrollport with a left gutter).
-          overflow: visible !important;
+          // styles needed to display extra drop targets that are outside of the config panel main area
+          // (Global styles reinforce overflow/gutter against EUI + chrome-layout)
+          overflow-y: auto;
+          padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
           pointer-events: none;
+          // Override the default max-width of drag-drop extra targets to reduce
+          // horizontal overflow space requirements
           .domDroppable__extraTargets {
             width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
           }
           .euiFlyoutBody__overflow {
-            // Override euiYScroll (overflow-x: hidden + mask). Keep y-scroll; reserve left
-            // gutter so absolute DnD UI stays inside this clipport.
-            transform: none !important;
-            mask-image: none !important;
-            -webkit-mask-image: none !important;
-            padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
-            margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
-            overflow-x: hidden !important;
-            overflow-y: ${isScrollable ? 'auto' : 'hidden'} !important;
+            transform: initial;
+            -webkit-mask-image: none;
+            padding-left: inherit;
+            margin-left: inherit;
+            ${!isScrollable &&
+            `
+                overflow-y: hidden;
+              `}
             > * {
               pointer-events: auto;
             }
@@ -282,7 +272,6 @@ export const FlyoutWrapper = ({
           .euiFlyoutBody__overflowContent {
             background-color: ${euiTheme.colors.emptyShade};
             padding: 0;
-            overflow: visible !important;
           }
         `}
       >

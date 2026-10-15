@@ -26,11 +26,7 @@ import type {
   TypedLensSerializedState,
   LensDatasourceId,
 } from '@kbn/lens-common';
-import {
-  LENS_DATASOURCE_ID,
-  isTextBasedAttributes,
-  DRAG_DROP_EXTRA_TARGETS_WIDTH,
-} from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -583,17 +579,11 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* Do not clip horizontally here — EUI overflow:hidden / overflow-y:auto on the
-                 accordion was the nearest clipper. Let extras paint into the flyout body
-                 __overflow gutter; vertical scroll stays on .euiFlyoutBody__overflow. */
+              /* Don't clip DnD extras here — gutter/scroll live on .euiFlyoutBody__overflow. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
                 overflow: visible !important;
                 pointer-events: none;
-
-                .domDroppable__extraTargets {
-                  width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
-                }
                 > * {
                   pointer-events: auto;
                 }
@@ -629,8 +619,6 @@ export function LensEditConfigurationFlyout({
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
                 }
-                // DnD extras use the flyout __overflow left gutter; content still needs
-                // normal horizontal padding so fields aren't flush to the panel edge.
                 padding: 0 ${euiTheme.euiTheme.size.base};
               `}
             >
