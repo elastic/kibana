@@ -12,8 +12,8 @@ import { spaceTest } from '../fixtures';
 spaceTest.describe(
   'Anonymization Settings - Page Display',
   {
-    // This page is available in every offering, not just Observability, so it
-    // is exercised across stateful classic and every serverless project type.
+    // This page is available in every offering (with an Enterprise license), not just
+    // Observability, so it is exercised across stateful classic and every serverless project type.
     tag: [...tags.stateful.classic, ...tags.serverless.all],
   },
   () => {
