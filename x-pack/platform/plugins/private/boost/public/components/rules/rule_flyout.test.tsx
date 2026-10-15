@@ -10,6 +10,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  BUILTIN_DATA_STREAMS_PROFILE_NAMES,
   BUILTIN_PROFILES,
   DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_SIMPLE_MODE_DEFAULTS,
@@ -372,7 +373,7 @@ describe('RuleFlyout pattern matches', () => {
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
     expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Exact matches');
-    expect(screen.queryByTestId('boostRulePotentialMatch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostRulePartialMatch')).not.toBeInTheDocument();
   });
 
   it('shows what a partial pattern could match until it matches something', async () => {
@@ -381,30 +382,28 @@ describe('RuleFlyout pattern matches', () => {
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
-    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent(
-      'Potential matches'
-    );
-    const [potentialMatch] = screen.getAllByTestId('boostRulePotentialMatch');
-    expect(potentialMatch).toHaveTextContent('catalog-fall');
+    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Partial matches');
+    const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
+    expect(partialMatch).toHaveTextContent('catalog-fall');
     // The rule doesn't apply to it yet, so what ranks higher doesn't matter.
-    expect(within(potentialMatch).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+    expect(within(partialMatch).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
     expect(screen.queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
   });
 
-  it('finds potential matches by any part of their name', async () => {
+  it('finds partial matches by any part of their name', async () => {
     renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'fall');
 
-    expect(screen.getByTestId('boostRulePotentialMatch')).toHaveTextContent('catalog-fall');
+    expect(screen.getByTestId('boostRulePartialMatch')).toHaveTextContent('catalog-fall');
   });
 
-  it('finds potential matches for a pattern that only needs a leading wildcard', async () => {
+  it('finds partial matches for a pattern that only needs a leading wildcard', async () => {
     renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'alog-*');
 
-    expect(screen.getByTestId('boostRulePotentialMatch')).toHaveTextContent('catalog-fall');
+    expect(screen.getByTestId('boostRulePartialMatch')).toHaveTextContent('catalog-fall');
   });
 
   it('says when nothing matches, in the same panel', async () => {
@@ -414,6 +413,76 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
+  });
+
+  it('asks for a pattern until one is entered', () => {
+    renderNewRule();
+
+    expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
+      'Enter an index pattern to see matches'
+    );
+    expect(screen.queryByTestId('boostRulePatternMatchCount')).not.toBeInTheDocument();
+  });
+
+  it('lists every index, highlighting the same matches', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+
+    const [catalog, products] = screen.getAllByTestId('boostRuleAvailableTarget');
+    expect(catalog).toHaveTextContent('catalog-fall');
+    expect(within(catalog).getByText('catalog-', { selector: 'mark' })).toBeInTheDocument();
+    expect(products).toHaveTextContent('products');
+    expect(products.querySelector('mark')).toBeNull();
+  });
+
+  it('keeps showing every index while the pattern changes', async () => {
+    renderNewRule();
+
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
+
+    expect(screen.getByTestId('boostRuleAllTab')).toHaveAttribute('aria-selected', 'true');
+    // Nothing matches exactly, so the partial match is highlighted, as in the matching list.
+    expect(screen.getByText('prod', { selector: 'mark' })).toBeInTheDocument();
+  });
+
+  it('says when there are no data sources of the type to list', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout
+          initialProfileName={BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_1_day}
+          onClose={jest.fn()}
+        />
+      </IntlProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+
+    expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
+      'No data streams detected'
+    );
+  });
+
+  it('keeps every index from the list until a profile is selected', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
+      'Enter an index pattern to see matches'
+    );
+    const allTab = screen.getByTestId('boostRuleAllTab');
+    expect(allTab).toBeDisabled();
+    // EUI turns off pointer events on disabled tabs, so hovers land on the tooltip's anchor.
+    await userEvent.hover(allTab.parentElement as HTMLElement);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Select a boost profile to see all indices.'
+    );
   });
 
   it('explains why the pattern is disabled before a profile is selected', async () => {

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { css } from '@emotion/react';
 import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
@@ -25,13 +24,11 @@ import {
   EuiFormRow,
   EuiHighlight,
   EuiLink,
-  EuiPanel,
   EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiOverflowScroll,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -54,7 +51,9 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
-import { SupersedingRule, TargetName } from './target_name';
+import { SupersedingRule } from './target_name';
+import type { TargetPreview } from './pattern_matches';
+import { PatternMatches } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -145,12 +144,6 @@ interface PickOptionData {
   supersededBy?: string;
 }
 
-interface TargetPreview {
-  name: string;
-  /** A higher-ranked rule that still applies to this target, if any. */
-  overriddenBy?: string;
-}
-
 const getInitialDraft = (
   rule: BoostRule | undefined,
   duplicateOf: BoostRule | undefined,
@@ -174,12 +167,10 @@ const getInitialDraft = (
 /** Creates a custom boost rule, from scratch or a copy, or edits a custom or default one. */
 export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: RuleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
-  const scrollStyles = useEuiOverflowScroll('y', true);
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
   const titleId = useGeneratedHtmlId();
   const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
-  const matchesTitleId = useGeneratedHtmlId();
   const [draft, setDraft] = useState<RuleDraft>(() =>
     getInitialDraft(rule, duplicateOf, initialProfileName, state)
   );
@@ -380,15 +371,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           })
       : [];
 
-  // Until the pattern matches something, what contains it, so a remembered part of a name finds it.
-  const potentialPattern = `*${pattern}*`;
-  const potentialMatches =
-    draft.mode === 'pattern' && !errors.pattern && patternPreview.length === 0
-      ? typedDataSources
-          .filter(({ name }) => matchesIndexPattern(potentialPattern, name))
-          .map(({ name }) => name)
-      : [];
-
   // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
   // when editing, or the original when duplicating.
   const hasValidTargets =
@@ -475,22 +457,12 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const priorityError =
     visibleErrors.priority && RULE_PRIORITY_ERROR_MESSAGES[visibleErrors.priority];
 
-  // What a valid pattern matches, counted beside its label and listed below it.
-  const hasPatternPreview = Boolean(type && draft.pattern.trim() && !errors.pattern);
+  // What a valid pattern matches, counted beside its label.
+  const hasMatchCount = Boolean(type && pattern && !errors.pattern);
   const matchesLabel = i18n.translate('xpack.boost.ruleForm.matchesLabel', {
     defaultMessage: '{count, plural, one {# match} other {# matches}}',
     values: { count: patternPreview.length },
   });
-  const matchesTitle =
-    patternPreview.length > 0
-      ? i18n.translate('xpack.boost.ruleForm.exactMatchesTitle', {
-          defaultMessage: 'Exact matches',
-        })
-      : potentialMatches.length > 0
-      ? i18n.translate('xpack.boost.ruleForm.potentialMatchesTitle', {
-          defaultMessage: 'Potential matches',
-        })
-      : undefined;
   const patternRow = (
     <EuiFormRow
       display="rowCompressed"
@@ -498,7 +470,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         defaultMessage: 'Index pattern',
       })}
       labelAppend={
-        hasPatternPreview && (
+        hasMatchCount && (
           <EuiText size="xs" color="subdued" data-test-subj="boostRulePatternMatchCount">
             {matchesLabel}
           </EuiText>
@@ -742,101 +714,16 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                     {patternRow}
                   </EuiToolTip>
                 )}
-                {hasPatternPreview && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiPanel
-                      color="subdued"
-                      hasBorder
-                      hasShadow={false}
-                      paddingSize="none"
-                      data-test-subj="boostRulePatternMatches"
-                    >
-                      {matchesTitle && (
-                        // Outside the scrolling list, so it stays in view.
-                        <EuiTitle size="xxxs">
-                          <h3
-                            id={matchesTitleId}
-                            css={{ padding: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}
-                            data-test-subj="boostRulePatternMatchesTitle"
-                          >
-                            {matchesTitle}
-                          </h3>
-                        </EuiTitle>
-                      )}
-                      <div
-                        tabIndex={0}
-                        role="region"
-                        aria-label={matchesTitle ? undefined : matchesLabel}
-                        aria-labelledby={matchesTitle ? matchesTitleId : undefined}
-                        css={css`
-                          ${scrollStyles}
-                          max-block-size: ${PREVIEW_HEIGHT}px;
-                          padding: ${euiTheme.size.s};
-                          padding-block-start: ${matchesTitle ? euiTheme.size.xs : euiTheme.size.s};
-                          border-radius: inherit;
-                        `}
-                      >
-                        {patternPreview.length > 0 ? (
-                          patternPreview.map(({ name, overriddenBy }) => (
-                            <EuiFlexGroup
-                              key={name}
-                              gutterSize="s"
-                              justifyContent="spaceBetween"
-                              alignItems="center"
-                              responsive={false}
-                              css={{ paddingBlock: euiTheme.size.xs }}
-                            >
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="s">
-                                  <TargetName
-                                    name={name}
-                                    pattern={pattern}
-                                    supersededBy={overriddenBy}
-                                  />
-                                </EuiText>
-                              </EuiFlexItem>
-                              {overriddenBy && (
-                                <EuiFlexItem grow={false}>
-                                  <EuiText size="xs" color="subdued">
-                                    <SupersedingRule rule={overriddenBy} />
-                                  </EuiText>
-                                </EuiFlexItem>
-                              )}
-                            </EuiFlexGroup>
-                          ))
-                        ) : potentialMatches.length > 0 ? (
-                          // Subdued, and without what ranks higher, since the rule doesn't apply to
-                          // these yet.
-                          <EuiText size="s" color="subdued">
-                            {potentialMatches.map((name) => (
-                              <div
-                                key={name}
-                                css={{ paddingBlock: euiTheme.size.xs }}
-                                data-test-subj="boostRulePotentialMatch"
-                              >
-                                <TargetName name={name} pattern={potentialPattern} />
-                              </div>
-                            ))}
-                          </EuiText>
-                        ) : (
-                          <EuiText
-                            size="s"
-                            color="subdued"
-                            textAlign="center"
-                            css={{ fontWeight: euiTheme.font.weight.bold }}
-                          >
-                            <p>
-                              {i18n.translate('xpack.boost.ruleForm.noMatches', {
-                                defaultMessage: 'No matches detected',
-                              })}
-                            </p>
-                          </EuiText>
-                        )}
-                      </div>
-                    </EuiPanel>
-                  </>
-                )}
+                <EuiSpacer size="s" />
+                <PatternMatches
+                  type={type}
+                  targetType={targetType}
+                  pattern={pattern}
+                  isPatternValid={!errors.pattern}
+                  exactMatches={patternPreview}
+                  names={typedDataSources.map(({ name }) => name)}
+                  height={PREVIEW_HEIGHT}
+                />
               </>
             ) : (
               <EuiFormRow
