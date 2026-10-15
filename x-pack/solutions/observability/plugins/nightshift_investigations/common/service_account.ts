@@ -36,6 +36,11 @@ export interface NightshiftBoundWorkflowStatus {
  */
 export interface InvestigatorServiceAccountStatus {
   serviceAccountsEnabled: boolean;
+  /**
+   * Whether the caller holds `manage_security`, which writing any workflow bound to a service
+   * account requires: setting the space up, and creating, changing or deleting automations.
+   */
+  canModifyBoundWorkflows: boolean;
   /** The agent account investigations run as. */
   serviceAccountId: string;
   /** The role the agent account holds. */

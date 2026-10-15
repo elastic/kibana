@@ -7,11 +7,13 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useKibana } from '../hooks/use_kibana';
+import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 import { useAutomationFilters } from './hooks/use_automation_filters';
 import { useAutomationUsage, type TimeRange } from './hooks/use_automation_usage';
@@ -44,9 +46,17 @@ export const AutomationsPage = (): React.ReactElement => {
   const history = useHistory();
   const { id } = useParams<{ id: string }>();
   const { services } = useKibana();
-  const canManage = getNightshiftCapabilities(
+  const hasManagePrivilege = getNightshiftCapabilities(
     services.application.capabilities.nightshift
   ).canManage;
+  // Automations run as the space's automations service account, and writing a workflow bound to
+  // a service account requires manage_security.
+  const { data: serviceAccount } = useInvestigatorServiceAccount();
+  const needsManageSecurity = serviceAccount?.serviceAccountsEnabled === true;
+  const canManage =
+    hasManagePrivilege &&
+    (!needsManageSecurity || serviceAccount?.canModifyBoundWorkflows === true);
+  const isReadOnlyForServiceAccount = hasManagePrivilege && needsManageSecurity && !canManage;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
   const refreshAutomations = useRefreshAutomations();
@@ -148,6 +158,23 @@ export const AutomationsPage = (): React.ReactElement => {
 
   return (
     <>
+      {isReadOnlyForServiceAccount && (
+        <>
+          <KbnInfoCallout
+            size="s"
+            title={i18n.translate('xpack.nightshift.automations.serviceAccountReadOnlyTitle', {
+              defaultMessage: 'Automations run as the Nightshift automations service account',
+            })}
+            data-test-subj="nightshiftAutomationsServiceAccountReadOnly"
+          >
+            {i18n.translate('xpack.nightshift.automations.serviceAccountReadOnlyBody', {
+              defaultMessage:
+                'Creating, changing, or deleting them requires the manage_security cluster privilege. Ask an administrator.',
+            })}
+          </KbnInfoCallout>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {!isEmpty && (
         <>
           {rateLimitedCount > 0 && (

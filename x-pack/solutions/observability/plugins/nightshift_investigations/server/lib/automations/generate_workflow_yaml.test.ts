@@ -48,6 +48,24 @@ describe('generateWorkflowYaml', () => {
     });
   });
 
+  describe('service account', () => {
+    it('runs as the given account', () => {
+      const yaml = parse(
+        generateWorkflowYaml('auto-123', baseAutomation(), {
+          serviceAccountId: 'kibana/nightshift-automations-default',
+        })
+      );
+      expect(yaml.settings.run_as).toBe('kibana/nightshift-automations-default');
+      expect(yaml.settings.concurrency.key).toBe('auto-123');
+    });
+
+    it('is unbound without one', () => {
+      expect(parse(generateWorkflowYaml('auto-123', baseAutomation())).settings.run_as).toBe(
+        undefined
+      );
+    });
+  });
+
   describe('alert trigger', () => {
     it('emits alerting.alertStatusChanged when alert rows are present', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
@@ -154,6 +172,13 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'schedule' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers[0].type).toBe('manual');
+    });
+
+    it('investigates the prompt rather than an alert', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'schedule' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with).toMatchObject({ subject_type: 'manual', subject_id: 'auto-123' });
     });
   });
 

@@ -7,7 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { parse as parseYaml } from 'yaml';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AgentAccessControlRole } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -29,6 +35,7 @@ import {
   getBoundInvestigationWorkflowId,
   getInvestigatorServiceAccountId,
   getNightshiftRoleName,
+  isEntryPointReady,
   getNightshiftRoleOfAccount,
   getNightshiftServiceAccountId,
   getNightshiftServiceAccountName,
@@ -39,12 +46,17 @@ import {
 import { buildNightshiftRole, NIGHTSHIFT_ROLE_METADATA } from './roles';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
 import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
+import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import { generateWorkflowYaml } from '../automations/generate_workflow_yaml';
+import type { NightshiftAutomationAttributes } from '../automations/types';
 
 interface Deps {
   core: CoreStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
+  /** Automations are hidden saved objects; this client can read and write them. */
+  getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
   /** Set when decision trees are on, so the reinforcement agent exists and must admit the agent. */
   reinforcementAgent?: {
     agentBuilder: AgentBuilderPluginStart;
@@ -133,9 +145,17 @@ export const createInvestigatorServiceAccountService = ({
   workflowsExtensions,
   workflowsManagement,
   spaces,
+  getAutomationsSoClient,
   reinforcementAgent,
   logger,
 }: Deps) => {
+  const canManageSecurity = async (request: KibanaRequest): Promise<boolean> => {
+    const { has_all_requested: allowed } = await core.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
+    return allowed;
+  };
+
   /**
    * The decision-tree reinforcement agent is private and system-owned, so only admins can see or
    * run it. Agent optimize runs it as the agent account, so the account gets the `user` role on it.
@@ -206,7 +226,9 @@ export const createInvestigatorServiceAccountService = ({
     );
     const byId = (id: BoundWorkflowId) => boundWorkflows[BOUND_WORKFLOW_IDS.indexOf(id)];
     const entryPoint = byId(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID);
+    const canModifyBoundWorkflows = await canManageSecurity(request).catch(() => false);
     return {
+      canModifyBoundWorkflows,
       serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
       serviceAccountId: getInvestigatorServiceAccountId(spaceId),
       role: getNightshiftRoleOfAccount('agent', spaceId),
@@ -218,6 +240,81 @@ export const createInvestigatorServiceAccountService = ({
       serviceAccounts: getServiceAccounts(spaceId),
       boundWorkflows,
     };
+  };
+
+  /** Changing or deleting an automation whose workflow is bound to an account needs this. */
+  const assertCanModifyBoundAutomations = async (request: KibanaRequest): Promise<void> => {
+    if (!(await canManageSecurity(request))) {
+      throw Boom.forbidden(
+        'Automations run as the Nightshift automations service account, so changing them requires the manage_security cluster privilege.'
+      );
+    }
+  };
+
+  /**
+   * The account an automation's workflow runs as, `kibana/nightshift-automations-<space>`, so
+   * automations keep running whoever created them. Writing a workflow bound to a service account
+   * requires `manage_security` (the workflows plugin enforces it on every create, update and
+   * delete), so this refuses callers without it. Returns undefined when service accounts are off:
+   * the workflow then runs as its author, as before.
+   */
+  const resolveAutomationRunAs = async (
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<string | undefined> => {
+    if (!core.security.serviceAccounts.isEnabled()) return undefined;
+    const entryPoint = await workflowsManagement?.management
+      .getWorkflow(getBoundInvestigationWorkflowId(spaceId), spaceId, request)
+      .catch(() => null);
+    if (!isEntryPointReady(entryPoint, spaceId)) {
+      throw Boom.badRequest(
+        'Nightshift is not set up in this space. An admin must enable its service accounts before automations can run.'
+      );
+    }
+    await assertCanModifyBoundAutomations(request);
+    return getNightshiftServiceAccountId('automations', spaceId);
+  };
+
+  /**
+   * Binds every automation's workflow in the space to the automations account, as the admin
+   * setting the space up, so automations created before setup (or before this binding existed)
+   * stop running as their authors. A failure is logged per automation, not fatal.
+   */
+  const bindAutomations = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+    if (!getAutomationsSoClient || !workflowsManagement) return;
+    const soClient = getAutomationsSoClient(request, spaceId);
+    const serviceAccountId = getNightshiftServiceAccountId('automations', spaceId);
+    const finder = soClient.createPointInTimeFinder<NightshiftAutomationAttributes>({
+      type: NIGHTSHIFT_AUTOMATION_SO_TYPE,
+      perPage: 100,
+    });
+    try {
+      for await (const { saved_objects: automations } of finder.find()) {
+        for (const { id, attributes } of automations) {
+          if (!attributes.workflowId) continue;
+          try {
+            const workflow = await workflowsManagement.management.getWorkflow(
+              attributes.workflowId,
+              spaceId,
+              request
+            );
+            if (workflow?.definition?.settings?.run_as === serviceAccountId) continue;
+            await workflowsManagement.management.updateWorkflow(
+              attributes.workflowId,
+              { yaml: generateWorkflowYaml(id, attributes, { serviceAccountId }) },
+              spaceId,
+              request
+            );
+          } catch (error) {
+            logger.warn(
+              `Nightshift setup in space [${spaceId}] could not bind automation [${id}] to [${serviceAccountId}]: ${error}`
+            );
+          }
+        }
+      }
+    } finally {
+      await finder.close();
+    }
   };
 
   const assertSpaceExists = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -242,10 +339,7 @@ export const createInvestigatorServiceAccountService = ({
       );
     }
     const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
-    const { has_all_requested: canManageSecurity } = await esClient.security.hasPrivileges({
-      cluster: ['manage_security'],
-    });
-    if (!canManageSecurity) {
+    if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
         'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'
       );
@@ -283,6 +377,7 @@ export const createInvestigatorServiceAccountService = ({
 
     // After the installs: the agent is only available once the space's entry point is.
     await admitAgentToReinforcementAgent(request, spaceId);
+    await bindAutomations(request, spaceId);
 
     const status = await getStatus(request, spaceId);
     // A workflow that fails validation here (the Slack thread workflow without the Slack trigger)
@@ -356,7 +451,13 @@ export const createInvestigatorServiceAccountService = ({
     return getStatus(request, spaceId);
   };
 
-  return { enable, disable, getStatus };
+  return {
+    enable,
+    disable,
+    getStatus,
+    resolveAutomationRunAs,
+    assertCanModifyBoundAutomations,
+  };
 };
 
 export type InvestigatorServiceAccountService = ReturnType<

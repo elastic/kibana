@@ -22,7 +22,7 @@ import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
   subject_type: z
-    .enum(['significant_event', 'alert'])
+    .enum(['significant_event', 'alert', 'manual'])
     .describe('The type of entity being investigated'),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
   title: z

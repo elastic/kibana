@@ -9,6 +9,7 @@ import { isNightshiftSetUp } from './use_investigator_service_account';
 
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
+  canModifyBoundWorkflows: true,
   serviceAccountId: 'kibana/nightshift-agent-default',
   role: 'nightshift_agent_default',
   bound: true,

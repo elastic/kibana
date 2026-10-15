@@ -713,6 +713,7 @@ export class NightshiftInvestigationsPlugin
       workflowsExtensions: this.workflowsExtensionsStart,
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
+      getAutomationsSoClient: this.getAutomationsSoClient,
       reinforcementAgent:
         this.decisionTreesEnabled && this.agentBuilder
           ? { agentBuilder: this.agentBuilder, availability: this.getInvestigationAvailability() }

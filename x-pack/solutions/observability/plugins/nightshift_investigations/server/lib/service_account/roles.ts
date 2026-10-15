@@ -87,6 +87,10 @@ export const buildNightshiftRole = (
         cluster: ['monitor_inference'],
         applications: kibanaFeatures(spaceId, {
           nightshift: ['read'],
+          // A start claims the investigation's subjects, which needs `manage_investigations`.
+          // Nightshift `read` does not grant it, and Nightshift `all` would also grant
+          // `manage_nightshift`, so it comes from the investigations sub-feature alone.
+          agenticInvestigations: ['minimal_read', 'investigations_all'],
           // The start API requires `agentBuilder:write`.
           agentBuilder: ['minimal_all'],
           actions: ['read'],

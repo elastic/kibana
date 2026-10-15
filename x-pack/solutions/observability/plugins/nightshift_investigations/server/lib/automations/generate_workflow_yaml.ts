@@ -40,7 +40,13 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
  */
 export function generateWorkflowYaml(
   automationId: string,
-  automation: NightshiftAutomationAttributes
+  automation: NightshiftAutomationAttributes,
+  {
+    serviceAccountId,
+  }: {
+    /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+    serviceAccountId?: string;
+  } = {}
 ): string {
   const alertRows = automation.trigger.rows.filter(
     (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
@@ -57,6 +63,7 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
       concurrency: {
         key: automationId,
         strategy,
@@ -69,7 +76,9 @@ export function generateWorkflowYaml(
         name: 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
-          subject_type: 'alert',
+          // An alert investigation needs the alert snapshots in `context.alerts`, which only an
+          // alert trigger has; a manually run automation investigates its prompt instead.
+          subject_type: isAlertTrigger ? 'alert' : 'manual',
           subject_id: isAlertTrigger ? '{{ trigger.alert.uuid }}' : automationId,
           title: isAlertTrigger ? '{{ trigger.rule.name }}' : automation.name,
           summary: automation.name,

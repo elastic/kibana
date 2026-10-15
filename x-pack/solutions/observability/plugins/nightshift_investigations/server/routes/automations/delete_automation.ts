@@ -24,7 +24,14 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
   params: z.object({
     path: z.object({ id: z.string().min(1).max(512) }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
 
     const spaceId =
@@ -37,17 +44,31 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
 
     // Delete the backing workflow first so it cannot fire after the SO is gone.
-    // Best-effort: if workflow deletion fails the SO is still removed; any orphaned
-    // workflow will be inert because the automation SO is the source of truth for routing.
     if (workflowsManagement && existing.attributes.workflowId) {
-      try {
+      const workflow = await workflowsManagement.management
+        .getWorkflow(existing.attributes.workflowId, spaceId, request)
+        .catch(() => null);
+      if (workflow?.definition?.settings?.run_as) {
+        // A bound workflow keeps running as its account, so it must not outlive the automation:
+        // refuse before deleting anything, and let a failed delete fail the request.
+        await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
         await workflowsManagement.management.deleteWorkflows(
           [existing.attributes.workflowId],
           spaceId,
           request
         );
-      } catch {
-        // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+      } else {
+        // Best-effort: an orphaned unbound workflow is inert, because the automation SO is the
+        // source of truth for routing.
+        try {
+          await workflowsManagement.management.deleteWorkflows(
+            [existing.attributes.workflowId],
+            spaceId,
+            request
+          );
+        } catch {
+          // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+        }
       }
     }
 

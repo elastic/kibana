@@ -63,7 +63,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         .optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -72,6 +79,11 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const existing = await soClient.get<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -99,7 +111,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
-        const yaml = generateWorkflowYaml(params.path.id, merged);
+        const yaml = generateWorkflowYaml(params.path.id, merged, { serviceAccountId });
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
           { yaml },

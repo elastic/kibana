@@ -41,6 +41,7 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   installError,
   reinforcementEntries,
+  automations,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -51,7 +52,18 @@ const setup = ({
   installError?: Error;
   /** Entries of the reinforcement agent; omit to run without decision trees. */
   reinforcementEntries?: Array<Record<string, unknown>>;
+  /** Automation saved objects in the space; omit to run without automations. */
+  automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
+  const updateWorkflow = jest.fn().mockResolvedValue({});
+  const automationsSoClient = {
+    createPointInTimeFinder: jest.fn(() => ({
+      async *find() {
+        yield { saved_objects: automations ?? [] };
+      },
+      close: jest.fn(),
+    })),
+  };
   const registry = {
     get: jest.fn().mockResolvedValue({ access_control: { entries: reinforcementEntries ?? [] } }),
     updateAccessControl: jest.fn().mockResolvedValue({}),
@@ -97,7 +109,7 @@ const setup = ({
     definition: { settings: { run_as: runAs } },
   });
   const workflowsManagement = {
-    management: { getWorkflow },
+    management: { getWorkflow, updateWorkflow },
   } as unknown as WorkflowsServerPluginSetup;
   const getSpace = spaceExists
     ? jest.fn().mockResolvedValue({ id: SPACE_ID })
@@ -111,6 +123,7 @@ const setup = ({
     workflowsExtensions,
     workflowsManagement,
     spaces,
+    getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
     reinforcementAgent: reinforcementEntries
       ? { agentBuilder: agentBuilder as never, availability: {} as never }
       : undefined,
@@ -122,6 +135,7 @@ const setup = ({
     serviceAccounts,
     managedWorkflows,
     getWorkflow,
+    updateWorkflow,
     agentBuilder,
     registry,
   };
@@ -331,5 +345,82 @@ describe('createInvestigatorServiceAccountService', () => {
     await service.enable(request, SPACE_ID);
 
     expect(registry.updateAccessControl).not.toHaveBeenCalled();
+  });
+
+  describe('automations', () => {
+    const AUTOMATIONS_ACCOUNT = 'kibana/nightshift-automations-obs';
+    const automation = (id: string) => ({
+      id,
+      attributes: {
+        name: id,
+        automationType: 'custom',
+        isEnabled: true,
+        workflowId: `wf-${id}`,
+        trigger: { rows: [{ kind: 'alert' }] },
+        execution: {},
+        completions: [],
+        runtime: {},
+      },
+    });
+
+    it('binds existing automations to the automations account on setup', async () => {
+      const { service, getWorkflow, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === 'wf-a-2'
+          ? { enabled: true, definition: { settings: { run_as: AUTOMATIONS_ACCOUNT } } }
+          : { enabled: true, definition: { settings: { run_as: AGENT_ACCOUNT } } }
+      );
+
+      await service.enable(request, SPACE_ID);
+
+      // a-2 is already bound; only a-1 is rewritten.
+      expect(updateWorkflow).toHaveBeenCalledTimes(1);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        'wf-a-1',
+        { yaml: expect.stringContaining(`run_as: ${AUTOMATIONS_ACCOUNT}`) },
+        SPACE_ID,
+        request
+      );
+    });
+
+    it('keeps setting the space up when an automation cannot be bound', async () => {
+      const { service, updateWorkflow } = setup({ automations: [automation('a-1')] });
+      updateWorkflow.mockRejectedValue(new Error('invalid'));
+
+      await expect(service.enable(request, SPACE_ID)).resolves.toMatchObject({ bound: true });
+    });
+
+    it('runs automations as the automations account', async () => {
+      const { service } = setup();
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBe(
+        AUTOMATIONS_ACCOUNT
+      );
+    });
+
+    it('leaves automations unbound while service accounts are off', async () => {
+      const { service, esClient } = setup({ serviceAccountsEnabled: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBeUndefined();
+      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('refuses automations in a space that is not set up', async () => {
+      const { service } = setup({ runAs: 'kibana/nightshift_investigator' });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+    });
+
+    it('refuses callers without manage_security', async () => {
+      const { service } = setup({ canManageSecurity: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
   });
 });

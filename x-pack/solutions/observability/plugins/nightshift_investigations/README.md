@@ -58,7 +58,7 @@ POST /internal/nightshift/investigations/service_account/_disable  # teardown, n
 |---|---|---|
 | `kibana/nightshift-agent-<space>` | `nightshift_agent_<space>` | Investigations, their sandbox tools, the Agent Builder hook workflows, the Slack thread workflow |
 | `kibana/relay-<space>` | `nightshift_agent_<space>` | The Relay Slack bot (outside Kibana). Not bound to anything in Kibana. |
-| `kibana/nightshift-automations-<space>` | `nightshift_automations_<space>` | Automation workflows an admin binds to it. Their starts run as the agent account through the entry point. |
+| `kibana/nightshift-automations-<space>` | `nightshift_automations_<space>` | Every Nightshift automation's workflow. Its investigations run as the agent account through the entry point. |
 | `kibana/nightshift-detection-<space>` | `nightshift_detection_<space>` | Detection and context pipeline workflows an admin binds to it. |
 
 Role names cannot start with an underscore (Elasticsearch reserves those), so the proposed `_nightshift_agent` is `nightshift_agent_<space>`.
@@ -66,10 +66,10 @@ Role names cannot start with an underscore (Elasticsearch reserves those), so th
 | Role | Cluster | Indices | Kibana (`space:<space>` only) |
 |---|---|---|---|
 | agent | `monitor_inference` | `ai-index-idx-nightshift-cortex`: read, index, delete, auto_configure. `ai-index-idx-nightshift-semantic-memory`, `ai-index-idx-nightshift-decision-trees`: read, index, auto_configure | `nightshift` minimal_all, `agentBuilder` minimal_all, `actions` read |
-| automations | `monitor_inference` | none | `nightshift` read, `agentBuilder` minimal_all, `actions` read |
+| automations | `monitor_inference` | none | `nightshift` read, `agenticInvestigations` minimal_read + `investigations_all`, `agentBuilder` minimal_all, `actions` read |
 | detection | `monitor_inference` | `.significant_events-detections`: read. `$.nightshift.sources.<space>.*`: read, manage | `nightshift` minimal_all, `alerting_v2_rules` all, `agentBuilder` minimal_all, `actions` read |
 
-Nightshift's `manage-engines` sub-feature is in none of them. Telemetry is not in the agent role: sandbox queries use the telemetry connector's credentials.
+Nightshift's `manage-engines` sub-feature is in none of them. The automations role deviates from the proposal: a start claims the investigation's subjects, which needs `manage_investigations`. Nightshift `read` does not grant it and Nightshift `all` would add `manage_nightshift`, so it comes from the agentic investigations sub-feature. Telemetry is not in the agent role: sandbox queries use the telemetry connector's credentials.
 
 Roles carry `metadata.managed_by: nightshift`. `_enable` brings them to the current definition on every run, so a privilege change ships with the code. A role of the same name that Nightshift did not create is never overwritten (409). Existing accounts are reused.
 
@@ -91,12 +91,20 @@ Agent Builder starts hook workflows with the request of the agent run, and the w
 
 The decision-tree reinforcement agent is private and system-owned, so only admins can see or run it. `_enable` grants the agent account the `user` role on it, as the admin setting the space up.
 
+### Automations
+
+An automation's workflow runs as `kibana/nightshift-automations-<space>` (`settings.run_as`), so it keeps working whoever created it. Its `nightshift.triggerInvestigation` step starts the investigation through the space's entry point, which runs it as the agent account: automations account → start → agent account, as the proposal describes.
+
+The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page is read-only for them, with a callout that says why. This matches AlertZero workers.
+
+Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist to the automations account. When service accounts are off, automations keep running as their authors.
+
 ### `_enable`
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
 2. Creates or updates the roles, then creates the accounts that are missing.
 3. Installs the bound workflows, the entry point last, so a setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-4. Admits the agent account to the reinforcement agent.
+4. Admits the agent account to the reinforcement agent, and binds existing automations to the automations account (a failure is logged per automation, not fatal).
 5. Checks that every installed workflow is bound to the agent account, and fails otherwise. A workflow that fails validation (the Slack thread workflow on a deployment without the `slack2.message` trigger) is reported in the status, not fatal.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed or are bound to another account (for example `kibana/nightshift_investigator` from an earlier version of this POC), and brings the roles up to date.
@@ -113,7 +121,8 @@ The status reports, per bound workflow, whether it is installed, enabled, valid,
 
 - **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That run executes as the chat user, so `_ensure` rejects it.
 - **Deleted account.** If an account is force-deleted, every run fails with a token exchange error. Recovery: delete the leftover token, then run `_disable` and `_enable` again.
-- **Automations and detection accounts are not bound to anything yet.** They exist with their roles, for admins to bind workflows to. Nightshift's own detection workflows still run as their callers.
+- **The detection account is not bound to anything yet.** Nightshift's own detection workflows still run as their callers.
+- **Automations need `manage_security` to edit.** Users with only Nightshift manage can view automations but not change them.
 - **Kibana application name.** The roles use `kibana-.kibana`, the default. A deployment with a custom `kibana.index` needs the matching application name.
 
 ## How investigations are stored and run
