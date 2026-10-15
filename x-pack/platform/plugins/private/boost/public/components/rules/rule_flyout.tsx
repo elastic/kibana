@@ -53,7 +53,7 @@ import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import { SupersedingRule } from './target_name';
 import type { TargetPreview } from './pattern_matches';
-import { PatternMatches } from './pattern_matches';
+import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -189,7 +189,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // Whether the pattern or profile field has focus. While one does, an estimate it made
   // unavailable stays, faded.
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
-  const patternInputRef = useRef<HTMLInputElement>(null);
   // Text typed to search the list to select from, which sizes the list to what it shows.
   const [pickSearch, setPickSearch] = useState('');
   // Set when leaving the profile form, so the link that opened it gets focus back.
@@ -246,17 +245,25 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     is_builtin: false,
   };
   const pattern = draft.pattern.trim();
-  const patternPreview: TargetPreview[] =
-    draft.mode === 'pattern' && !draftErrors.pattern
-      ? typedDataSources
-          .filter(({ name }) => matchesIndexPattern(pattern, name))
-          .map((dataSource) => {
-            const winner = resolveRule(dataSource, [...otherRules, draftRule], profilesByName);
-            return {
-              name: dataSource.name,
-              overriddenBy: winner && winner !== draftRule ? winner.name : undefined,
-            };
-          })
+  const previewPattern = (previewedPattern: string): TargetPreview[] => {
+    const previewRule = { ...draftRule, index_patterns: [previewedPattern] };
+    return typedDataSources
+      .filter(({ name }) => matchesIndexPattern(previewedPattern, name))
+      .map((dataSource) => {
+        const winner = resolveRule(dataSource, [...otherRules, previewRule], profilesByName);
+        return {
+          name: dataSource.name,
+          overriddenBy: winner && winner !== previewRule ? winner.name : undefined,
+        };
+      });
+  };
+  const isPatternPreviewable = draft.mode === 'pattern' && !draftErrors.pattern;
+  const patternPreview = isPatternPreviewable ? previewPattern(pattern) : [];
+  // Until the pattern matches something, what contains it, ranked as if the pattern were widened to
+  // match them. Widening only adds wildcards, so it ranks the same however it's done.
+  const partialPreview =
+    isPatternPreviewable && patternPreview.length === 0
+      ? previewPattern(getPartialPattern(pattern))
       : [];
 
   // A valid pattern has to match something, unless it's the rule's saved pattern, so a rule whose
@@ -524,7 +531,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         })}
         isInvalid={Boolean(patternError)}
         disabled={isSaving || !type}
-        inputRef={patternInputRef}
         data-test-subj="boostRulePattern"
       />
     </EuiFormRow>
@@ -751,15 +757,10 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                   type={type}
                   targetType={targetType}
                   pattern={pattern}
-                  isPatternValid={!errors.pattern}
                   exactMatches={patternPreview}
+                  partialMatches={partialPreview}
                   names={typedDataSources.map(({ name }) => name)}
                   maxHeight={PREVIEW_MAX_HEIGHT}
-                  onUsePattern={(suggestedPattern) => {
-                    updateDraft({ pattern: suggestedPattern });
-                    // The link that was used goes away, so focus returns to the pattern.
-                    patternInputRef.current?.focus();
-                  }}
                 />
               </>
             ) : (

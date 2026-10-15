@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -22,8 +21,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { matchesIndexPattern, widenIndexPattern } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { SupersedingRule, TargetName } from './target_name';
 
@@ -33,6 +30,12 @@ export interface TargetPreview {
   /** A higher-ranked rule that still applies to this target, if any. */
   overriddenBy?: string;
 }
+
+/**
+ * What partially matches a pattern until it matches something: whatever contains it, so a
+ * remembered part of a name finds it.
+ */
+export const getPartialPattern = (pattern: string) => `*${pattern}*`;
 
 type MatchesTab = 'matching' | 'all';
 
@@ -72,23 +75,20 @@ interface PatternMatchesProps {
   /** The type the wording follows, indices until a profile sets it. */
   targetType: BoostProfileType;
   pattern: string;
-  isPatternValid: boolean;
   /** What the pattern matches. */
   exactMatches: readonly TargetPreview[];
+  /** What contains the pattern, until it matches something. */
+  partialMatches: readonly TargetPreview[];
   /** Every data source of the rule's type, in the order they're listed. */
   names: readonly string[];
   /** The panel's tallest height, past which its list scrolls. */
   maxHeight: number;
-  /** Replaces the pattern with a suggested one. */
-  onUsePattern: (pattern: string) => void;
 }
 
 interface ListTitle {
   label: string;
   iconType: string;
   color: 'success' | 'subdued';
-  /** Shown after the label, such as a way to turn partial matches into exact ones. */
-  action?: ReactNode;
 }
 
 /**
@@ -99,11 +99,10 @@ export const PatternMatches = ({
   type,
   targetType,
   pattern,
-  isPatternValid,
   exactMatches,
+  partialMatches,
   names,
   maxHeight,
-  onUsePattern,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
@@ -114,17 +113,12 @@ export const PatternMatches = ({
   const panelId = `${idPrefix}-panel`;
   const getTabId = (id: MatchesTab) => `${idPrefix}-${id}`;
 
-  // Until the pattern matches something, what contains it, so a remembered part of a name finds it.
-  const partialPattern = `*${pattern}*`;
-  const partialMatches =
-    pattern && isPatternValid && exactMatches.length === 0
-      ? names.filter((name) => matchesIndexPattern(partialPattern, name))
-      : [];
+  const partialPattern = getPartialPattern(pattern);
   // The full list highlights the same names as the matching one.
   const hasExactMatches = exactMatches.length > 0;
   const highlightPattern = hasExactMatches ? pattern : partialPattern;
   const highlightedNames = new Set(
-    hasExactMatches ? exactMatches.map(({ name }) => name) : partialMatches
+    (hasExactMatches ? exactMatches : partialMatches).map(({ name }) => name)
   );
 
   const renderEmpty = (message: string) => (
@@ -162,7 +156,6 @@ export const PatternMatches = ({
         >
           <EuiIcon type={title.iconType} size="s" aria-hidden={true} />
           {title.label}
-          {title.action}
         </EuiText>
       )}
       <EuiText
@@ -186,6 +179,34 @@ export const PatternMatches = ({
     </>
   );
 
+  // Each target, struck through with the rule that keeps it when a higher-ranked rule does.
+  const renderTargets = (
+    targets: readonly TargetPreview[],
+    targetPattern: string,
+    testSubj?: string
+  ) =>
+    targets.map(({ name, overriddenBy }) => (
+      <EuiFlexGroup
+        key={name}
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+        data-test-subj={testSubj}
+      >
+        <EuiFlexItem grow={false}>
+          <TargetName name={name} pattern={targetPattern} supersededBy={overriddenBy} />
+        </EuiFlexItem>
+        {overriddenBy && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <SupersedingRule rule={overriddenBy} />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ));
+
   const renderMatching = () => {
     if (!type || !pattern) {
       return renderEmpty(
@@ -202,68 +223,20 @@ export const PatternMatches = ({
         iconType: 'checkCircleFill',
         color: 'success' as const,
       };
-      return renderList(
-        title.label,
-        exactMatches.map(({ name, overriddenBy }) => (
-          <EuiFlexGroup
-            key={name}
-            gutterSize="s"
-            justifyContent="spaceBetween"
-            alignItems="center"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <TargetName name={name} pattern={pattern} supersededBy={overriddenBy} />
-            </EuiFlexItem>
-            {overriddenBy && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  <SupersedingRule rule={overriddenBy} />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )),
-        { title }
-      );
+      return renderList(title.label, renderTargets(exactMatches, pattern), { title });
     }
     if (partialMatches.length > 0) {
-      // The narrowest pattern that matches all of them exactly, offered in one click.
-      const suggestedPattern = widenIndexPattern(pattern, partialMatches);
       const title = {
         label: i18n.translate('xpack.boost.patternMatches.partialMatchesTitle', {
           defaultMessage: 'Partial matches',
         }),
         iconType: 'partial',
         color: 'subdued' as const,
-        action: (
-          <>
-            <span aria-hidden={true}>·</span>
-            <EuiLink
-              onClick={() => onUsePattern(suggestedPattern)}
-              data-test-subj="boostRulePatternSuggestion"
-            >
-              <FormattedMessage
-                id="xpack.boost.patternMatches.usePattern"
-                defaultMessage="Use {pattern}"
-                values={{
-                  pattern: (
-                    <span css={{ fontFamily: euiTheme.font.familyCode }}>{suggestedPattern}</span>
-                  ),
-                }}
-              />
-            </EuiLink>
-          </>
-        ),
       };
-      // Subdued, and without what ranks higher, since the rule doesn't apply to these yet.
+      // Subdued, since the rule doesn't apply to these yet.
       return renderList(
         title.label,
-        partialMatches.map((name) => (
-          <div key={name} data-test-subj="boostRulePartialMatch">
-            <TargetName name={name} pattern={partialPattern} />
-          </div>
-        )),
+        renderTargets(partialMatches, partialPattern, 'boostRulePartialMatch'),
         { title, isSubdued: true }
       );
     }
@@ -299,7 +272,7 @@ export const PatternMatches = ({
       data-test-subj="boostRulePatternMatches"
     >
       {/* A margin rather than padding, so the tabs' border stops at the panel's padding. */}
-      <EuiTabs size="s" expand css={{ margin: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}>
+      <EuiTabs size="s" css={{ margin: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}>
         {TABS.map((id) => (
           <EuiTab
             key={id}

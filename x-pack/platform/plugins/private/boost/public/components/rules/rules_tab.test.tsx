@@ -201,7 +201,7 @@ describe('RulesTab matches', () => {
     await userEvent.hover(within(screen.getByRole('dialog')).getByText('products-first'));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      '"products-first" ranks higher, so it applies instead.'
+      '"products-first" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.'
     );
   });
 

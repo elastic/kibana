@@ -25,21 +25,6 @@ const escapeRegExp = (value: string) => value.replace(/[.+?^${}()|[\]\\]/g, '\\$
 export const matchesIndexPattern = (pattern: string, name: string): boolean =>
   new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`).test(name);
 
-/**
- * The narrowest way to widen an index pattern with wildcards so it matches every name: a trailing
- * `*`, then a leading one, then both.
- */
-export const widenIndexPattern = (pattern: string, names: readonly string[]): string => {
-  const candidates = [`${pattern}*`, `*${pattern}`, `*${pattern}*`].map((candidate) =>
-    candidate.replace(/\*+/g, '*')
-  );
-  const widest = candidates[candidates.length - 1];
-  return (
-    candidates.find((candidate) => names.every((name) => matchesIndexPattern(candidate, name))) ??
-    widest
-  );
-};
-
 /** A part of a data source name, and whether the index pattern spells it out rather than a `*`. */
 export interface IndexPatternPart {
   text: string;

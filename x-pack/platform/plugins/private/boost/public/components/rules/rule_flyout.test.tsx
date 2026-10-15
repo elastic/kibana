@@ -385,20 +385,11 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Partial matches');
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
-    // The rule doesn't apply to it yet, so what ranks higher doesn't matter.
-    expect(within(partialMatch).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
-  });
-
-  it('offers a pattern that exactly matches the partial matches', async () => {
-    renderNewRule();
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
-    await userEvent.click(screen.getByTestId('boostRulePatternSuggestion'));
-
-    expect(screen.getByTestId('boostRulePattern')).toHaveValue('cat*');
-    expect(screen.getByTestId('boostRulePattern')).toHaveFocus();
-    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Exact matches');
+    // A pattern widened to match it would still rank below the saved catalogs rule.
+    expect(within(partialMatch).getByTestId('boostSupersededTarget')).toHaveTextContent(
+      'catalog-fall'
+    );
+    expect(within(partialMatch).getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
   });
 
   it('finds partial matches by any part of their name', async () => {

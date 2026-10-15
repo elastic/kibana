@@ -98,7 +98,8 @@ export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProp
     <EuiToolTip
       id={tooltipId}
       content={i18n.translate('xpack.boost.targetName.supersedingDescription', {
-        defaultMessage: '"{rule}" ranks higher, so it applies instead.',
+        defaultMessage:
+          '"{rule}" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.',
         values: { rule },
       })}
     >
