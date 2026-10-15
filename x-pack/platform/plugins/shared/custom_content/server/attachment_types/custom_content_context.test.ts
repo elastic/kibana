@@ -71,6 +71,16 @@ describe('createCustomContentContextAttachmentType', () => {
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
+    it('returns invalid when panel_height is out of range', () => {
+      const result = createCustomContentContextAttachmentType().validate({
+        panel_template: '<div>hi</div>',
+        embeddable_id: 'panel-1',
+        panel_height: 99999,
+      });
+
+      expect(result).toEqual({ valid: false, error: expect.any(String) });
+    });
+
     it('returns invalid when panel_template has the wrong type', () => {
       const definition = createCustomContentContextAttachmentType();
       const result = definition.validate({ panel_template: 123 });

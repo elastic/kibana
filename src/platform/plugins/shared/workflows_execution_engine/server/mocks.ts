@@ -27,6 +27,12 @@ export {
 export const workflowsExecutionEngineMock = {
   createSetup: jest.fn().mockReturnValue({} as jest.Mocked<WorkflowsExecutionEnginePluginSetup>),
   createStart: jest.fn().mockReturnValue({
+    serviceAccountBindings: {
+      isEnabled: jest.fn().mockReturnValue(false),
+      bindWorkload: jest.fn(),
+      unbindWorkload: jest.fn(),
+      getWorkloadBinding: jest.fn(),
+    },
     __internalStorage: {
       workflowExecutionsDataClient: createMockWorkflowDataClient(),
       stepExecutionsDataClient: createMockStepDataClient(),
@@ -35,7 +41,7 @@ export const workflowsExecutionEngineMock = {
     executeWorkflow: jest.fn(),
     executeWorkflowStep: jest.fn(),
     cancelWorkflowExecution: jest.fn(),
-    cancelAllActiveWorkflowExecutions: jest.fn(),
+    cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
     resumeWorkflowExecution: jest.fn(),
     scheduleWorkflow: jest.fn(),
     bulkScheduleWorkflow: jest.fn(),

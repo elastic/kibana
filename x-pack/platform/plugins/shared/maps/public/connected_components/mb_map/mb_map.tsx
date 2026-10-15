@@ -12,12 +12,11 @@ import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
-import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import type { Map as MapApi, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import {
   getPreserveDrawingBuffer,
@@ -27,7 +26,7 @@ import {
 import type { ILayer } from '../../classes/layers/layer';
 import type {
   CustomIcon,
-  Goto,
+  MapCenter,
   MapCenterAndZoom,
   MapSettings,
   Timeslice,
@@ -54,13 +53,28 @@ import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { transformRequest } from './transform_request';
 import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
+function getMapExtentState(mapApi: MapApi): MapExtentState {
+  const zoom = mapApi.getZoom();
+  const mbCenter = mapApi.getCenter();
+  const mbBounds = mapApi.getBounds();
+  return {
+    zoom: _.round(zoom, ZOOM_PRECISION),
+    center: {
+      lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
+      lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
+    },
+    extent: boundsToExtent(mbBounds),
+  };
+}
+
 export interface Props {
-  isMapReady: boolean;
+  setMapApi: (mapApi?: MapApi) => void;
+  initialMapCenter: MapCenter | null;
+  initialMapZoom: number | null;
   settings: MapSettings;
   customIcons: CustomIcon[];
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
-  goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
@@ -68,7 +82,6 @@ export interface Props {
   onMapDestroyed: () => void;
   setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => void;
   clearMouseCoordinates: () => void;
-  clearGoto: () => void;
   setMapInitError: (errorMessage: string) => void;
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
@@ -79,14 +92,12 @@ export interface Props {
   featureModeActive: boolean;
   filterModeActive: boolean;
   onMapMove?: (lat: number, lon: number, zoom: number) => void;
+  isMapLoading: boolean;
 }
 
-interface State {
-  mbMap: MapboxMap | undefined;
-}
-
-export class MbMap extends Component<Props, State> {
+export class MbMap extends Component<Props> {
   private _isMounted: boolean = false;
+  private _mbMap: MapApi | undefined;
   private _containerRef: HTMLDivElement | null = null;
   private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
@@ -95,31 +106,30 @@ export class MbMap extends Component<Props, State> {
   private _prevTimeslice?: Timeslice;
   private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
 
-  state: State = {
-    mbMap: undefined,
-  };
-
   componentDidMount() {
     this._initializeMap();
     this._isMounted = true;
   }
 
-  componentDidUpdate() {
-    this._syncMbMapWithMapState(); // do not debounce syncing of map-state
+  componentDidUpdate(prevProps: Props) {
     this._debouncedSync();
+    if (this._containerRef && prevProps.isMapLoading !== this.props.isMapLoading) {
+      this._containerRef.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this.state.mbMap) {
-      this.state.mbMap.remove();
-      this.state.mbMap = undefined;
+    if (this._mbMap) {
+      this._mbMap.remove();
+      this._mbMap = undefined;
+      this.props.setMapApi(undefined);
     }
     this.props.onMapDestroyed();
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
+    if (this._isMounted && this._mbMap) {
       const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
       const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
       if (hasLayerListChanged || hasTimesliceChanged) {
@@ -128,26 +138,20 @@ export class MbMap extends Component<Props, State> {
         this._syncMbMapWithLayerList();
         this._syncMbMapWithInspector();
       }
-      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+      this.props.spatialFiltersLayer.syncLayerWithMB(this._mbMap);
       this._syncSettings();
     }
   }, 256);
 
-  _getMapExtentState(): MapExtentState {
-    const zoom = this.state.mbMap!.getZoom();
-    const mbCenter = this.state.mbMap!.getCenter();
-    const mbBounds = this.state.mbMap!.getBounds();
-    return {
-      zoom: _.round(zoom, ZOOM_PRECISION),
-      center: {
-        lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
-        lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
-      },
-      extent: boundsToExtent(mbBounds),
-    };
+  _updateViewDataAttributes() {
+    if (!this._containerRef || !this._mbMap) return;
+    const { zoom, center } = getMapExtentState(this._mbMap);
+    this._containerRef.dataset.mapLat = String(center.lat);
+    this._containerRef.dataset.mapLon = String(center.lon);
+    this._containerRef.dataset.mapZoom = String(zoom);
   }
 
-  async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
+  async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapApi> {
     this._reportUsage();
     return new Promise((resolve) => {
       const glyphs = getGlyphs();
@@ -174,6 +178,14 @@ export class MbMap extends Component<Props, State> {
         options.center = {
           lng: initialView.lon,
           lat: initialView.lat,
+        };
+      } else if (this.props.initialMapCenter) {
+        if (this.props.initialMapZoom !== null) {
+          options.zoom = this.props.initialMapZoom;
+        }
+        options.center = {
+          lng: this.props.initialMapCenter.lon,
+          lat: this.props.initialMapCenter.lat,
         };
       } else {
         options.bounds = [-170, -60, 170, 75];
@@ -220,12 +232,12 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _initializeMap() {
-    const initialView = await getInitialView(this.props.goto, this.props.settings);
+    const initialView = await getInitialView(this.props.settings);
     if (!this._isMounted) {
       return;
     }
 
-    let mbMap: MapboxMap;
+    let mbMap: MapApi;
     try {
       mbMap = await this._createMbMapInstance(initialView);
     } catch (error) {
@@ -237,23 +249,24 @@ export class MbMap extends Component<Props, State> {
       return;
     }
 
-    this.setState({ mbMap }, () => {
-      this._loadMakiSprites(mbMap);
-      this._registerMapEventListeners(mbMap);
-      this.props.onMapReady(this._getMapExtentState());
-    });
+    this._mbMap = mbMap;
+    this.props.setMapApi(mbMap);
+    this._updateViewDataAttributes();
+    this.props.onMapReady(getMapExtentState(mbMap));
+    this._loadMakiSprites(mbMap);
+    this._registerMapEventListeners(mbMap);
   }
 
-  _registerMapEventListeners(mbMap: MapboxMap) {
+  _registerMapEventListeners(mbMap: MapApi) {
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
-    // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
-    // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
+    // * During opening/closing of layer details panel, the EUI animation results in 8 moveend events
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        if (this._isMounted) {
-          this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted && this._mbMap) {
+          this._updateViewDataAttributes();
+          this.props.extentChanged(getMapExtentState(this._mbMap));
         }
       }, 100)
     );
@@ -261,8 +274,8 @@ export class MbMap extends Component<Props, State> {
     // do not update redux state on 'move' event for performance reasons
     // instead, callback provided for cases where consumers need to react to "move" event
     mbMap.on('move', () => {
-      if (this.props.onMapMove) {
-        const { zoom, center } = this._getMapExtentState();
+      if (this.props.onMapMove && this._mbMap) {
+        const { zoom, center } = getMapExtentState(this._mbMap);
         this.props.onMapMove(center.lat, center.lon, zoom);
       }
     });
@@ -301,7 +314,7 @@ export class MbMap extends Component<Props, State> {
     }
   }
 
-  async _loadMakiSprites(mbMap: MapboxMap) {
+  async _loadMakiSprites(mbMap: MapApi) {
     if (this._isMounted) {
       // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
       // Math.max wrapper ensures value is always at least 1 in these cases
@@ -320,83 +333,50 @@ export class MbMap extends Component<Props, State> {
     }
   }
 
-  _syncMbMapWithMapState = () => {
-    const { isMapReady, goto, clearGoto } = this.props;
-
-    if (!isMapReady || !goto || !this.state.mbMap) {
-      return;
-    }
-
-    clearGoto();
-
-    if (goto.bounds) {
-      // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
-      const lnLatBounds = new maplibregl.LngLatBounds(
-        new maplibregl.LngLat(
-          clampToLonBounds(goto.bounds.minLon),
-          clampToLatBounds(goto.bounds.minLat)
-        ),
-        new maplibregl.LngLat(
-          clampToLonBounds(goto.bounds.maxLon),
-          clampToLatBounds(goto.bounds.maxLat)
-        )
-      );
-      // maxZoom ensure we're not zooming in too far on single points or small shapes
-      // the padding is to avoid too tight of a fit around edges
-      this.state.mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
-    } else if (goto.center) {
-      this.state.mbMap.setZoom(goto.center.zoom);
-      this.state.mbMap.setCenter({
-        lng: goto.center.lon,
-        lat: goto.center.lat,
-      });
-    }
-  };
-
   _syncMbMapWithLayerList = () => {
-    if (!this.state.mbMap) {
+    if (!this._mbMap) {
       return;
     }
 
     removeOrphanedSourcesAndLayers(
-      this.state.mbMap,
+      this._mbMap,
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
     this.props.layerList.forEach((layer) =>
-      layer.syncLayerWithMB(this.state.mbMap!, this.props.timeslice)
+      layer.syncLayerWithMB(this._mbMap!, this.props.timeslice)
     );
-    syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
+    syncLayerOrder(this._mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.inspectorAdapters.map || !this.state.mbMap) {
+    if (!this.props.inspectorAdapters.map || !this._mbMap) {
       return;
     }
 
     const stats = {
-      center: this.state.mbMap.getCenter().toArray(),
-      zoom: this.state.mbMap.getZoom(),
+      center: this._mbMap.getCenter().toArray(),
+      zoom: this._mbMap.getZoom(),
     };
     this.props.inspectorAdapters.map.setMapState({
       stats,
-      style: this.state.mbMap.getStyle(),
+      style: this._mbMap.getStyle(),
     });
   };
 
   _syncSettings() {
-    if (!this.state.mbMap) {
+    if (!this._mbMap) {
       return;
     }
 
     if (this._prevProjection !== this.props.settings.projection) {
       this._prevProjection = this.props.settings.projection;
       if (this.props.settings.projection === 'globeInterpolate') {
-        this.state.mbMap.setProjection({
+        this._mbMap.setProjection({
           type: ['interpolate', ['linear'], ['zoom'], 0, 'globe', 9, 'mercator'],
         });
       } else {
-        this.state.mbMap.setProjection({ type: 'mercator' });
+        this._mbMap.setProjection({ type: 'mercator' });
       }
     }
 
@@ -407,19 +387,19 @@ export class MbMap extends Component<Props, State> {
     ) {
       this._prevDisableInteractive = this.props.settings.disableInteractive;
       if (this.props.settings.disableInteractive) {
-        this.state.mbMap.boxZoom.disable();
-        this.state.mbMap.doubleClickZoom.disable();
-        this.state.mbMap.dragPan.disable();
+        this._mbMap.boxZoom.disable();
+        this._mbMap.doubleClickZoom.disable();
+        this._mbMap.dragPan.disable();
         try {
-          this.state.mbMap.removeControl(this._navigationControl);
+          this._mbMap.removeControl(this._navigationControl);
         } catch (error) {
           // ignore removeControl errors
         }
       } else {
-        this.state.mbMap.boxZoom.enable();
-        this.state.mbMap.doubleClickZoom.enable();
-        this.state.mbMap.dragPan.enable();
-        this.state.mbMap.addControl(this._navigationControl, 'top-left');
+        this._mbMap.boxZoom.enable();
+        this._mbMap.doubleClickZoom.enable();
+        this._mbMap.dragPan.enable();
+        this._mbMap.addControl(this._navigationControl, 'top-left');
       }
     }
 
@@ -428,7 +408,7 @@ export class MbMap extends Component<Props, State> {
       !_.isEqual(this._prevCustomIcons, this.props.customIcons)
     ) {
       this._prevCustomIcons = this.props.customIcons;
-      const mbMap = this.state.mbMap;
+      const mbMap = this._mbMap;
       for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData | null) => {
@@ -447,12 +427,12 @@ export class MbMap extends Component<Props, State> {
     }
 
     let zoomRangeChanged = false;
-    if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
-      this.state.mbMap.setMinZoom(this.props.settings.minZoom);
+    if (this.props.settings.minZoom !== this._mbMap.getMinZoom()) {
+      this._mbMap.setMinZoom(this.props.settings.minZoom);
       zoomRangeChanged = true;
     }
-    if (this.props.settings.maxZoom !== this.state.mbMap.getMaxZoom()) {
-      this.state.mbMap.setMaxZoom(this.props.settings.maxZoom);
+    if (this.props.settings.maxZoom !== this._mbMap.getMaxZoom()) {
+      this._mbMap.setMaxZoom(this.props.settings.maxZoom);
       zoomRangeChanged = true;
     }
 
@@ -461,8 +441,9 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        if (this._isMounted) {
-          this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted && this._mbMap) {
+          this._updateViewDataAttributes();
+          this.props.extentChanged(getMapExtentState(this._mbMap));
         }
       }, 300);
     }
@@ -470,6 +451,9 @@ export class MbMap extends Component<Props, State> {
 
   _setContainerRef = (element: HTMLDivElement) => {
     this._containerRef = element;
+    if (element) {
+      element.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   };
 
   render() {
@@ -479,17 +463,17 @@ export class MbMap extends Component<Props, State> {
     let scaleControl;
     let keydownScrollZoomControl;
     let tileStatusTrackerControl;
-    if (this.state.mbMap) {
+    if (this._mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
-          <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+          <DrawFilterControl mbMap={this._mbMap} addFilters={this.props.addFilters} />
         ) : null;
       drawFeatureControl = this.props.featureModeActive ? (
-        <DrawFeatureControl mbMap={this.state.mbMap} />
+        <DrawFeatureControl mbMap={this._mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
-          mbMap={this.state.mbMap}
+          mbMap={this._mbMap}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
@@ -498,12 +482,12 @@ export class MbMap extends Component<Props, State> {
         />
       ) : null;
       scaleControl = this.props.settings.showScaleControl ? (
-        <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
+        <ScaleControl mbMap={this._mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
       keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
-        <KeydownScrollZoom mbMap={this.state.mbMap} />
+        <KeydownScrollZoom mbMap={this._mbMap} />
       ) : null;
-      tileStatusTrackerControl = <TileStatusTracker mbMap={this.state.mbMap} />;
+      tileStatusTrackerControl = <TileStatusTracker mbMap={this._mbMap} />;
     }
     return (
       <div

@@ -36,6 +36,60 @@ export const CONNECTORS_ROLE: KibanaRole = {
   ],
 };
 
+const READ_ONLY_ES_PRIVILEGES: KibanaRole['elasticsearch'] = {
+  cluster: ['monitor'],
+  indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
+};
+
+/*
+ * Grants the classic Rules management capability (`stackAlerts`) without any
+ * Alerting v2 privilege, so the heading tabs can be asserted for a viewer who
+ * cannot read Alerting v2 rules.
+ */
+export const RULES_V1_READ_ROLE: KibanaRole = {
+  elasticsearch: READ_ONLY_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: { stackAlerts: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/*
+ * As above, plus Alerting v2 rules read access, so the classic Rules page's
+ * heading shows both the V1 and V2 rules tabs.
+ */
+export const RULES_V1_AND_V2_READ_ROLE: KibanaRole = {
+  elasticsearch: READ_ONLY_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: { stackAlerts: ['read'], alerting_v2_rules: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/*
+ * Grants `triggersActionsRules` management reachability via the `actions`
+ * feature alone, which has no `alerting` privilege block — so the viewer can
+ * reach the classic Rules page while `authorizedToReadAnyRules` stays false,
+ * unlike `stackAlerts` (whose `read`/`all` privileges both grant rule-type
+ * read for every stack_alerts-registered rule type).
+ */
+export const ACTIONS_ONLY_ROLE: KibanaRole = {
+  elasticsearch: READ_ONLY_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: { actions: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const RULE_DETAILS_APP_PATH = 'management/insightsAndAlerting/triggersActions';
 export const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
 export const MAINTENANCE_WINDOWS_APP_PATH =
@@ -54,7 +108,14 @@ export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_NAME: 'appHeaderTitle',
   ALERTS_SEARCH_BAR_ROW: 'ruleDetailsAlertsSearchBarRow',
   ALERTS_TABLE_EMPTY_STATE: 'alertsTableEmptyState',
+  ROW_EXPAND: 'expand-event',
+  ALERT_FLYOUT: 'alertFlyout',
+  FLYOUT_TABLE_TAB: 'alertFlyoutTableTab',
+  FLYOUT_TABLE_TAB_PANEL: 'alertFlyoutTableTabPanel',
+  FLYOUT_FIELDS_TABLE_FILTER_INPUT: 'alertFieldsTableFilterInput',
 } as const;
+
+export const ALERTS_TABLE_EXPAND_COLUMN_ID = 'expandColumn';
 
 export const STACK_ALERTS_PAGE_PATH =
   '/app/management/insightsAndAlerting/triggersActionsAlerts' as const;

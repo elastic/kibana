@@ -25,6 +25,7 @@ import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/d
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
+import { useInvalidateGetMigrationPrebuiltRules } from '../logic/use_get_migration_prebuilt_rules';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
@@ -73,6 +74,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     };
 
     const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+    const invalidateGetMigrationPrebuiltRules = useInvalidateGetMigrationPrebuiltRules();
     const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
     const refetchData = useCallback(() => {
       if (!migrationId) {
@@ -80,8 +82,10 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
       refreshStats();
       invalidateGetRuleMigrations(migrationId);
+      invalidateGetMigrationPrebuiltRules(migrationId);
       invalidateGetMigrationTranslationStats(migrationId);
     }, [
+      invalidateGetMigrationPrebuiltRules,
       invalidateGetMigrationTranslationStats,
       invalidateGetRuleMigrations,
       migrationId,

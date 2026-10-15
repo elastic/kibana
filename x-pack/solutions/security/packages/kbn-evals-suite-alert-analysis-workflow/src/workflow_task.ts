@@ -9,12 +9,15 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  extractAgentConversationIds,
+  readAgentToolCallsFromTraces,
+} from '@kbn/security-evals-workflow-traces';
+import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
   ALERT_ANALYSIS_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
@@ -22,24 +25,50 @@ import {
 } from './constants';
 
 /**
- * The `ai.agent` step in alert_analysis_workflow.yaml whose structured output we grade. We match on
+ * The step in alert_analysis_workflow.yaml whose structured output we grade: `ai.agent` when the
+ * space classifies with an agent, `ai.prompt` when it classifies with a prompt. We match on
  * `stepType` rather than the step's name so the harness survives step renames in the workflow
- * definition (the step has been called both `onechat_runAgent_step` and `runAgent_step`). The name
- * list is a fallback for execution records that omit `stepType`.
+ * definition (the agent step has been called both `onechat_runAgent_step` and `runAgent_step`).
+ * The name list is a fallback for execution records that omit `stepType`.
  */
-const AGENT_STEP_TYPE = 'ai.agent';
-const AGENT_STEP_ID_FALLBACKS = ['runAgent_step', 'onechat_runAgent_step'];
+const CLASSIFICATION_STEP_TYPES = ['ai.agent', 'ai.prompt'];
+const CLASSIFICATION_STEP_ID_FALLBACKS = [
+  'runAgent_step',
+  'onechat_runAgent_step',
+  'runPrompt_step',
+];
 
-const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
-  step.stepType === AGENT_STEP_TYPE ||
-  (step.stepType === undefined && AGENT_STEP_ID_FALLBACKS.includes(step.stepId));
+const isClassificationStep = (step: WorkflowStepExecutionDto): boolean =>
+  (step.stepType !== undefined && CLASSIFICATION_STEP_TYPES.includes(step.stepType)) ||
+  (step.stepType === undefined && CLASSIFICATION_STEP_ID_FALLBACKS.includes(step.stepId));
 
-/** Structured output the workflow's `ai.agent` step is schema-constrained to return. */
-interface StructuredOutput {
+/** One verdict, as the workflow's classification step is schema-constrained to return it. */
+interface Verdict {
+  /**
+   * Alert id the model echoes back. The agent schema names this `id` (matched in
+   * `apply_verdicts` via `where: 'id'`). Do not fall back to `alert_id` — that field is only
+   * introduced later when building caller-facing `output_verdicts`, and production pairing
+   * ignores it.
+   */
+  id?: string;
   classification?: Classification;
   confidence_score?: number;
   rationale?: string;
   contributing_factors?: string[];
+}
+
+/**
+ * The classification step classifies a whole batch of alerts per call, so its structured output
+ * carries a `verdicts` array. The agent step returns it as `structured_output`, the prompt step as
+ * `content`.
+ */
+interface StructuredOutput {
+  verdicts?: Verdict[];
+}
+
+interface ClassificationStepOutput {
+  structured_output?: StructuredOutput;
+  content?: StructuredOutput;
 }
 
 /**
@@ -54,6 +83,8 @@ export interface AlertAnalysisVerdict {
   contributingFactors?: string[];
   executionId: string;
   executionStatus: ExecutionStatus;
+  /** What classified the alerts: the space's agent or a single prompt. */
+  classificationMethod: ClassificationMethod;
   traceId?: string;
   /** Ordered agent tool IDs from OTel TOOL spans on the workflow execution trace. */
   toolCallIds?: string[];
@@ -61,33 +92,69 @@ export interface AlertAnalysisVerdict {
   toolCallsUnavailable?: boolean;
 }
 
+export type ClassificationMethod = 'agent' | 'prompt';
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
 /**
- * Reads the agent step's structured output. Each step yields multiple execution records (an
- * enter record whose `output` is null and the record that carries the result), and both report
- * status `completed`, so we cannot key off status alone. We seed one alert per run, so there is a
- * single logical agent step: scan every agent-step record and return the first
- * `structured_output` payload we find.
+ * Reads the verdict for `alertId` out of the classification step's output. Each step yields
+ * multiple execution records (an enter record whose `output` is null and the record that carries
+ * the result), and both report status `completed`, so we cannot key off status alone: scan every
+ * classification-step record and return the first verdict we find for the alert.
+ *
+ * The agent schema keys the alert as `id` (see alert_analysis_workflow.yaml); `apply_verdicts`
+ * pairs on the same field. Match only `id` so eval accuracy tracks production pairing.
+ *
+ * We seed one alert per run, so the batch the workflow builds holds exactly that alert; the id is
+ * still matched explicitly rather than taking `verdicts[0]`, so a run that somehow classified a
+ * different alert is reported as "no verdict" instead of being graded against the wrong alert.
  */
-const readAgentStructuredOutput = (
-  stepExecutions: WorkflowStepExecutionDto[]
-): StructuredOutput | undefined => {
-  const agentSteps = stepExecutions.filter(isAgentStep);
-  for (const step of agentSteps) {
-    const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
-    if (output?.structured_output) {
-      return output.structured_output;
+export const readVerdict = (
+  stepExecutions: WorkflowStepExecutionDto[],
+  alertId: string
+): Verdict | undefined => {
+  const classificationSteps = stepExecutions.filter(isClassificationStep);
+  for (const step of classificationSteps) {
+    const output = step.output as ClassificationStepOutput | null | undefined;
+    const verdicts = output?.structured_output?.verdicts ?? output?.content?.verdicts;
+    const verdict = verdicts?.find(({ id }) => id === alertId);
+    if (verdict?.classification) {
+      return verdict;
     }
   }
   return undefined;
 };
 
+const readAgentToolCalls = async ({
+  traceEsClient,
+  log,
+  workflowExecutionId,
+  stepExecutions,
+}: {
+  traceEsClient?: EsClient;
+  log: ToolingLog;
+  workflowExecutionId: string;
+  stepExecutions: WorkflowStepExecutionDto[];
+}) => {
+  const conversationIds = extractAgentConversationIds(stepExecutions).map(
+    ({ conversationId }) => conversationId
+  );
+  const result = await readAgentToolCallsFromTraces({ traceEsClient, conversationIds, log });
+
+  if (result.unavailable) {
+    log.warning(
+      `Agent tool calls unavailable for execution ${workflowExecutionId} ` +
+        `(conversation ids: ${conversationIds.length > 0 ? conversationIds.join(', ') : 'none'})`
+    );
+  }
+  return result;
+};
+
 /**
  * Runs the managed alert-analysis workflow end-to-end for a single seeded alert and
- * returns the agent's verdict.
+ * returns the verdict of the classification step (agent or prompt, per the space's settings).
  *
  * Uses the production `alert` trigger path: passing `triggerType: 'alert'` + `alertIds`
  * makes the run route fetch the alert from ES and build the standardized event
@@ -99,6 +166,7 @@ export const runAlertAnalysisWorkflow = async ({
   traceEsClient,
   alertId,
   alertIndex,
+  classificationMethod,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
@@ -107,6 +175,8 @@ export const runAlertAnalysisWorkflow = async ({
   traceEsClient?: EsClient;
   alertId: string;
   alertIndex: string;
+  /** What the space is configured to classify with; decides whether agent tool calls are read. */
+  classificationMethod: ClassificationMethod;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<AlertAnalysisVerdict> => {
@@ -157,7 +227,7 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const structured = readAgentStructuredOutput(execution.stepExecutions);
+  const structured = readVerdict(execution.stepExecutions, alertId);
 
   if (!structured?.classification) {
     log.warning(
@@ -165,21 +235,16 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const { toolCallIds, unavailable } = traceEsClient
-    ? await readWorkflowAgentToolCalls({
-        traceEsClient,
-        traceId: execution.traceId,
-        log,
-      })
-    : { toolCallIds: undefined, unavailable: true };
-
-  if (toolCallIds && toolCallIds.length > 0) {
-    log.warning(
-      `Workflow agent called unexpected tools: ${toolCallIds.join(
-        ', '
-      )} (execution ${workflowExecutionId})`
-    );
-  }
+  // A prompt has no agent conversation and makes no tool calls, so there is nothing to read.
+  const { toolCallIds, unavailable } =
+    classificationMethod === 'agent'
+      ? await readAgentToolCalls({
+          traceEsClient,
+          log,
+          workflowExecutionId,
+          stepExecutions: execution.stepExecutions,
+        })
+      : { toolCallIds: undefined, unavailable: undefined };
 
   return {
     classification: structured?.classification,
@@ -188,6 +253,7 @@ export const runAlertAnalysisWorkflow = async ({
     contributingFactors: structured?.contributing_factors,
     executionId: workflowExecutionId,
     executionStatus: execution.status,
+    classificationMethod,
     traceId: execution.traceId,
     toolCallIds,
     toolCallsUnavailable: unavailable,

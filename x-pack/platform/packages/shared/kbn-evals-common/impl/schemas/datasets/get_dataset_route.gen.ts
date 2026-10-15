@@ -24,6 +24,7 @@ export const DatasetExample = lazySchema(() =>
     input: z.object({}).catchall(z.unknown()).optional(),
     output: z.object({}).catchall(z.unknown()).optional(),
     metadata: z.object({}).catchall(z.unknown()).optional(),
+    source: z.literal('import').optional(),
     created_at: z.string(),
     updated_at: z.string(),
   })

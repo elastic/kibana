@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
 import { ResolutionRulesClient } from './rule_client';
+import { RESOLUTION_RULE_CONFIGS } from './rule_registry';
 
 const NAMESPACE = 'default';
 
@@ -24,20 +25,17 @@ describe('ResolutionRulesClient', () => {
     };
     const client = createClient(soClient);
 
-    await expect(client.getEffectiveRules()).resolves.toEqual([
-      {
-        id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
-        kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    const rules = await client.getEffectiveRules();
+
+    expect(rules).toEqual(
+      RESOLUTION_RULE_CONFIGS.map((config) => ({
+        id: config.id,
+        kind: config.kind,
+        description: config.description,
         managed: true,
-        enabled: true,
-      },
-      {
-        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
-        managed: true,
-        enabled: false,
-      },
-    ]);
+        enabled: config.defaultEnabled,
+      }))
+    );
   });
 
   it('merges saved object overrides over in-code defaults', async () => {

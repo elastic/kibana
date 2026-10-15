@@ -1,5 +1,5 @@
 {
-  "sha1": "2747e51f6df47c8464d7a1954937ec5d0b831e2c",
+  "sha1": "933a18849493bebc25674d5d97fb8a22206d0d61",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 103,
-        "column": 22
+        "line": 77,
+        "column": 40
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 121,
-        "column": 29
+        "line": 91,
+        "column": 54
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 132,
-        "column": 4
+        "line": 106,
+        "column": 25
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 144,
-        "column": 50
+        "line": 119,
+        "column": 14
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 151,
-        "column": 75
+        "line": 125,
+        "column": 22
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -352,24 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "45b3d09166622fb-ffede76b443a709",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-user-id\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -384,40 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "45b3d09166622fb-0320318eb1a5364",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-ad-user-name-domain\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "45b3d09166622fb-87402f3901cb755",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-from-dataset\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -432,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -448,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -464,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -480,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 139,
+        "column": 30
       }
     },
     {
@@ -496,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 181,
+        "line": 165,
         "column": 7
       }
     },
@@ -512,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 181,
+        "line": 165,
         "column": 7
       }
     },
@@ -528,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 181,
+        "line": 165,
         "column": 7
       }
     },
@@ -544,7 +496,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 181,
+        "line": 165,
         "column": 7
       }
     },
@@ -560,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 211,
-        "column": 6
+        "line": 206,
+        "column": 12
       }
     },
     {
@@ -576,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 239,
-        "column": 16
+        "line": 231,
+        "column": 11
       }
     },
     {
@@ -592,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 257,
-        "column": 19
+        "line": 247,
+        "column": 9
       }
     },
     {
@@ -608,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 264,
-        "column": 34
+        "line": 257,
+        "column": 4
       }
     },
     {
@@ -624,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 273,
-        "column": 14
+        "line": 270,
+        "column": 68
       }
     },
     {
@@ -640,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 317,
-        "column": 38
+        "line": 313,
+        "column": 16
       }
     },
     {
@@ -656,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 333,
-        "column": 9
+        "line": 284,
+        "column": 24
       }
     },
     {
@@ -672,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 57,
+        "line": 26,
         "column": 11
       }
     },
@@ -688,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 71,
-        "column": 41
+        "line": 46,
+        "column": 21
       }
     },
     {
@@ -704,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 91,
-        "column": 33
+        "line": 63,
+        "column": 22
       }
     },
     {
@@ -720,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 104,
-        "column": 14
+        "line": 86,
+        "column": 5
       }
     },
     {
@@ -736,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 114,
-        "column": 25
+        "line": 89,
+        "column": 22
       }
     },
     {
@@ -752,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 137,
-        "column": 25
+        "line": 124,
+        "column": 14
       }
     },
     {
@@ -768,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 156,
-        "column": 9
+        "line": 141,
+        "column": 14
       }
     },
     {
@@ -784,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 175,
-        "column": 8
+        "line": 166,
+        "column": 9
       }
     },
     {
@@ -800,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 197,
-        "column": 16
+        "line": 183,
+        "column": 50
       }
     },
     {
@@ -816,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 197,
-        "column": 16
+        "line": 183,
+        "column": 50
       }
     },
     {
@@ -832,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 197,
-        "column": 16
+        "line": 183,
+        "column": 50
       }
     },
     {
@@ -848,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 197,
-        "column": 16
+        "line": 183,
+        "column": 50
       }
     },
     {
@@ -864,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 218,
-        "column": 29
+        "line": 207,
+        "column": 68
       }
     },
     {
@@ -880,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 228,
-        "column": 41
+        "line": 225,
+        "column": 4
       }
     },
     {
@@ -896,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 125,
-        "column": 40
+        "line": 97,
+        "column": 22
       }
     },
     {
@@ -912,8 +864,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 125,
-        "column": 40
+        "line": 97,
+        "column": 22
       }
     },
     {
@@ -928,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 125,
-        "column": 40
+        "line": 97,
+        "column": 22
       }
     },
     {
@@ -944,8 +896,56 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 125,
-        "column": 40
+        "line": 97,
+        "column": 22
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-83ce2f254454415",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-user-id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 126,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0d600e31082dc1f",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-ad-user-name-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 126,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-c05ec5e2e15dc2f",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-from-dataset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 126,
+        "column": 29
       }
     },
     {
@@ -960,7 +960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 152,
+        "line": 126,
         "column": 29
       }
     },
@@ -976,7 +976,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 152,
+        "line": 126,
         "column": 29
       }
     },
@@ -992,7 +992,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 152,
+        "line": 126,
         "column": 29
       }
     },
@@ -1008,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1024,8 +1024,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1040,8 +1040,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1056,8 +1056,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1072,8 +1072,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1088,8 +1088,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1104,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1120,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1136,8 +1136,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1152,8 +1152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1168,8 +1168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1184,8 +1184,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1200,8 +1200,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1216,8 +1216,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1232,8 +1232,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1248,8 +1248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1264,8 +1264,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1280,8 +1280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1296,8 +1296,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1312,8 +1312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1328,24 +1328,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-83ce2f254454415",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-user-id",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1360,40 +1344,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0d600e31082dc1f",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-ad-user-name-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-c05ec5e2e15dc2f",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-from-dataset",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1408,8 +1360,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1424,8 +1376,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1440,8 +1392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1456,8 +1408,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1472,8 +1424,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 140,
+        "column": 7
       }
     },
     {
@@ -1488,8 +1440,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 184,
-        "column": 31
+        "line": 163,
+        "column": 15
       }
     }
   ]

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { createHookTestProviders } from '../test_utils/test_providers';
 import { useInstallRuleTemplate } from './use_install_rule_template';
 
 jest.mock('@kbn/core-di-browser');
@@ -27,7 +26,7 @@ const mockCreatePayload: CreateRuleData = {
   metadata: { name: 'CPU usage' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
 };
 
 const mockTemplate: RuleTemplateResponse = {
@@ -40,31 +39,22 @@ const mockRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'CPU usage',
-    version: 1,
     description: '',
     tags: [],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'test-user',
+  query: { base: 'FROM logs-*' },
+  created_by: { profile_uid: 'test-user' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'test-user',
+  updated_by: { profile_uid: 'test-user' },
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-};
+const createWrapper = () => createHookTestProviders();
 
 describe('useInstallRuleTemplate', () => {
   const mockCreateRule = jest.fn();

@@ -68,6 +68,7 @@ toc:
           - file: system-user.md
           - file: encrypted-saved-objects.md
           - file: audit-logging.md
+          - file: bounded-string-schemas.md
       - file: saved-objects.md
         children:
           - file: saved-objects/structure.md
@@ -88,7 +89,6 @@ toc:
           - file: data-views.md
       - folder: ui
         children:
-          - file: building-blocks.md
           - file: embeddables.md
           - file: ui-actions.md
           - file: lens.md
@@ -130,12 +130,12 @@ toc:
       - file: generating-oas-for-http-apis.md
       - file: registering-an-application.md
       - file: kibana-page-template.md
-      - file: chrome-recently-viewed.md
       - file: kibana-expressions-service.md
       - file: lens-config-builder-api-examples.md
       - file: home-tutorials.md
       - file: configuring-your-plugin.md
       - file: ui-settings.md
+      - file: files.md
       - file: i18n.md
       - file: logging-service.md
       - file: reporting-integration.md

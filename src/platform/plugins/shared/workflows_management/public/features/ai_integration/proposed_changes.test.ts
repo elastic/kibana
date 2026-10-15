@@ -710,6 +710,59 @@ describe('ProposalManager', () => {
     });
   });
 
+  describe('suspend and resume', () => {
+    const replaceContent = (editor: ReturnType<typeof createRealisticMockEditor>, text: string) => {
+      const model = editor.getModel();
+      const lastLine = model.getLineCount();
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range: {
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: lastLine,
+              endColumn: model.getLineMaxColumn(lastLine),
+            },
+            text,
+          },
+        ],
+        () => null
+      );
+      editor._simulateExternalContentChange();
+    };
+
+    it('keeps pending proposals while the editor shows other content', () => {
+      const editor = createRealisticMockEditor('line1\nline2\nline3\n');
+      manager.initialize(editor);
+      manager.applyAfterYaml('line1\nchanged\nline3\n');
+
+      manager.suspend();
+      expect(manager.hasPendingProposals()).toBe(false);
+      expect(manager.hasSuspendedProposals()).toBe(true);
+
+      // A past execution's YAML, then the proposed YAML from the store again.
+      replaceContent(editor, 'line1\nline2\nline3\n');
+      replaceContent(editor, 'line1\nchanged\nline3\n');
+      manager.resume();
+
+      expect(manager.hasSuspendedProposals()).toBe(false);
+      expect(manager.getDiffHunks()).toHaveLength(1);
+
+      manager.rejectAll();
+      expect(editor.getModel().getValue()).toBe('line1\nline2\nline3\n');
+    });
+
+    it('does nothing without pending proposals', () => {
+      const editor = createRealisticMockEditor('line1\n');
+      manager.initialize(editor);
+
+      manager.suspend();
+
+      expect(manager.hasSuspendedProposals()).toBe(false);
+    });
+  });
+
   describe('granular undo/redo', () => {
     beforeEach(() => {
       mockUndoRedoService = createMockUndoRedoService();

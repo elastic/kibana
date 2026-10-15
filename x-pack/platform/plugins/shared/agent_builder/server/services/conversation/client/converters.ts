@@ -10,6 +10,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
   ToolResult,
@@ -17,7 +18,11 @@ import type {
   SerializedMetadataValue,
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -50,6 +55,7 @@ import type {
 } from './types';
 import type { ConversationProperties } from './storage';
 import { isReadBy, migrateReadBy } from './read_by';
+import { isPinnedBy, migratePinnedBy } from './pinned_by';
 import type { ConversationTemplateResolver } from '../templates/serialize';
 import { withDeserializedMetadata } from '../templates/serialize';
 import {
@@ -58,8 +64,9 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
+import { reconcileEvents } from './round_writes';
 
 export type Document = Omit<
   Required<
@@ -79,31 +86,10 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-/**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
- */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
-
-  const events = [...roundDerived];
-  for (const event of additive) {
-    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
-    if (insertAt === -1) {
-      events.push(event);
-    } else {
-      events.splice(insertAt, 0, event);
-    }
-  }
-  return events;
-};
-
 export const fromEsWithoutRounds = (
   document: Document,
   user: CurrentUser
-): ConversationWithoutRounds => {
+): Omit<ConversationWithoutRounds, 'attachments'> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -114,13 +100,14 @@ export const fromEsWithoutRounds = (
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     status: document._source.status,
     read: isReadBy({ source: document._source, user }),
-    pinned: document._source.pinned,
+    pinned: isPinnedBy({ source: document._source, user }),
     read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
@@ -213,6 +200,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
   });
 }
 
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
+
 /**
  * Migrates legacy RoundState format.
  * v1 stored a single `node`; current format uses `nodes` (array).
@@ -246,8 +240,9 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 
 export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
-  const readBy = {
+  const perUserFlags = {
     read_by: migrateReadBy(document._source),
+    pinned_by: migratePinnedBy(document._source),
   };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
@@ -276,7 +271,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
 
   const conversation: NormalizedConversation = {
     ...base,
-    ...readBy,
+    ...perUserFlags,
     rounds: roundsWithRefs,
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
@@ -333,7 +328,11 @@ const verifyRoundTrip = (conversation: Conversation): Conversation =>
     : conversation;
 
 const stripInternalFields = (conversation: NormalizedConversation): Conversation => {
-  const { read_by: _readBy, ...conversationWithoutInternalFields } = conversation;
+  const {
+    read_by: _readBy,
+    pinned_by: _pinnedBy,
+    ...conversationWithoutInternalFields
+  } = conversation;
 
   return conversationWithoutInternalFields;
 };
@@ -383,8 +382,12 @@ export const toResponseConversationWithoutRounds = ({
   user: CurrentUser;
   resolveTemplate: ConversationTemplateResolver;
 }): ConversationWithoutRoundsWithPermissions => {
+  const attachments = toAttachmentSummaries(document._source?.attachments);
   const conversation = withDeserializedMetadata(
-    fromEsWithoutRounds(document, user),
+    {
+      ...fromEsWithoutRounds(document, user),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    },
     resolveTemplate
   );
 
@@ -401,6 +404,7 @@ export const toEs = (
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -414,7 +418,9 @@ export const toEs = (
     // Explicitly omit read to ensure migration
     read: undefined,
     read_by: conversation.read_by ?? [],
-    pinned: conversation.pinned,
+    // Explicitly omit pinned to ensure migration
+    pinned: undefined,
+    pinned_by: conversation.pinned_by ?? [],
     read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
@@ -455,7 +461,7 @@ export const updateConversation = ({
   updateDate: Date;
 }) => {
   const {
-    events: _ignoredEvents,
+    events: updateEvents,
     schema_version: _ignoredSchemaVersion,
     ...safeUpdate
   } = update as ConversationUpdatableFields & {
@@ -471,14 +477,24 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+    };
+  }
+
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
   return {
     ...merged,
     schema_version: CONVERSATION_SCHEMA_VERSION,
-    events: reconcileEvents(merged),
+    // `conversation.rounds` are the document's rounds at write time: what the caller could see.
+    events: reconcileEvents(merged, conversation.rounds),
   };
 };
 
@@ -498,24 +514,26 @@ export const createRequestToEs = ({
   const effectiveUser = conversation.user ?? currentUser;
   const createdAt = creationDate.toISOString();
 
-  // The initial timeline is derived from the rounds being created, using the same user that
-  // gets persisted so `user_message` actors match the stored ownership.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: effectiveUser.id, username: effectiveUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events = roundsToEvents(forEvents);
+  const events =
+    conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents);
 
   return {
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
     created_at: createdAt,
@@ -527,7 +545,7 @@ export const createRequestToEs = ({
     state: conversation.state,
     status: conversation.status,
     read_by: [],
-    pinned: false,
+    pinned_by: [],
     read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),

@@ -33,9 +33,10 @@ export const ServiceIcon: React.FC<ServiceIconProps> = ({ service }) => {
 
   const packageInfo = data?.item;
 
-  // Tier 1: icon from the matching policy template
+  // Tier 1: icon from the matching policy template.
+  // OTel twins alias an ECS policy template via policyTemplate — use that name for lookup.
   const policyTemplateIcon = packageInfo?.policy_templates
-    ?.find((pt) => pt.name === service.id)
+    ?.find((pt) => pt.name === (service.policyTemplate ?? service.id))
     ?.icons?.find((icon) => icon.type === 'image/svg+xml');
 
   // Tier 2: package-level icon

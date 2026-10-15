@@ -81,7 +81,7 @@ export class AbortMonitor {
       }
       if (execution.status === ExecutionStatus.aborted) {
         this.logger.info(`Execution ${this.executionId} was aborted, propagating abort signal`);
-        this.abortController.abort();
+        this.abortController.abort(execution.abortReason);
         this.stop();
       } else if (
         execution.status === ExecutionStatus.completed ||

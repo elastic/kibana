@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/discoveries'
   - '@kbn/security-plugin'
   - '@kbn/scout-security'
+  - '@kbn/security-solution-test-api-clients'
   - '@kbn/securitysolution-es-utils'
   - '@kbn/securitysolution-utils'
   - '@kbn/spaces-plugin'
@@ -59,6 +60,7 @@ dependsOn:
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod

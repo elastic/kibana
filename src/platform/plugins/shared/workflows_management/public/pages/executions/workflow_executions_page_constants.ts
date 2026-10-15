@@ -14,7 +14,7 @@ export type ExecutionTableSortOrder = ReadonlyArray<readonly [string, 'asc' | 'd
 
 export const EXECUTION_FILTERS_URL_PARAM_KEY = 'workflowsExecutionsPageFilters' as const;
 export const EXECUTION_FILTERS_STORAGE_KEY = 'workflows.executions.pageFilters' as const;
-export const EXECUTION_TABLE_DEFAULT_PAGE_SIZE = 25;
+export const EXECUTION_TABLE_DEFAULT_PAGE_SIZE = 50;
 export const EXECUTION_TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const EXECUTION_TABLE_DEFAULT_SORT: ExecutionTableSortOrder = [['startedAt', 'desc']];
 
@@ -42,7 +42,7 @@ export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   },
   {
     title: i18n.translate('workflowsManagement.executionsPage.filterExecutedBy', {
-      defaultMessage: 'Executed by',
+      defaultMessage: 'Triggered by',
     }),
     field_name: 'executedBy',
   },

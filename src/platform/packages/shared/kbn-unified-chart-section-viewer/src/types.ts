@@ -47,7 +47,7 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    */
   externalServices?: ExternalServices;
   /**
-   * Current per-`metric_type` aggregation overrides (counter/gauge/histogram).
+   * Current aggregation, dimension, and search settings for the metrics grid.
    * Falls back to `METRICS_GRID_SETTINGS_DEFAULTS` when not provided by the host.
    */
   gridSettings?: MetricsGridSettings;
@@ -117,6 +117,19 @@ export interface ParsedMetricItem {
   readonly dimensionFields: Dimension[];
 }
 
+export interface HistogramBounds {
+  readonly min: number;
+  readonly max: number;
+}
+
+export type HistogramBoundsResult = HistogramBounds | { readonly error: Error };
+
+export interface HistogramBoundsQuery {
+  readonly metricKey: string;
+  readonly source: string;
+  readonly esqlQuery: string;
+}
+
 export interface MetricsTelemetry {
   total_number_of_metrics: number;
   total_number_of_dimensions: number;
@@ -139,6 +152,8 @@ export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
   activeDimensions: Dimension[];
+  /** Fetch params captured when the current `metricItems` landed. */
+  loadedFetchParams?: ChartSectionProps['fetchParams'];
 }
 
 export interface ParsedMetricsWithTelemetry extends ParsedMetrics {

@@ -51,9 +51,6 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
-    iacProvisioner: {
-      enabled: true,
-    },
     enableExperimental: true,
     experimentalFeatures: true,
     developer: {
@@ -281,7 +278,6 @@ export const config: PluginConfigDescriptor = {
       ),
       iacProvisioner: schema.maybe(
         schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -390,8 +386,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
-        // Test/development escape hatch that skips all package upload validation, e.g. for
-        // uploading packages whose names exist in EPR or as bundled packages.
+        // Test/development escape hatch: skips package upload validation (name/version checks,
+        // bundled-package guards) AND asset privilege authz. Do not set in production deployments —
+        // it disables the security checks that prevent unprivileged users from uploading gated assets.
         skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),

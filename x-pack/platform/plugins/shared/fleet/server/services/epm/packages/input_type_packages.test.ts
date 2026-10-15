@@ -81,7 +81,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
       packagePolicy: {} as any,
     });
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toBeCalled();
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
   });
 
   const TEST_PKG_INFO_INPUT = {
@@ -122,7 +122,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackageNotFoundError);
+    ).rejects.toThrow(PackageNotFoundError);
   });
 
   it('should skip index template creation when existing data stream is owned by different package with force true', async () => {
@@ -578,7 +578,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -586,6 +586,68 @@ describe('installAssetsForInputPackagePolicy', () => {
         'test.tata': 'log-test.tata-*',
       }
     );
+  });
+
+  describe('OTel es_index_patterns', () => {
+    afterEach(() => {
+      jest.mocked(appContextService.getExperimentalFeatures).mockReset();
+    });
+
+    it('stores an .otel-suffixed es index pattern for an otelcol input package', async () => {
+      jest
+        .mocked(appContextService.getExperimentalFeatures)
+        .mockReturnValue({ enableOtelIntegrations: true } as any);
+      const OTEL_PKG_INFO = {
+        type: 'input',
+        name: 'verifier_otel',
+        version: '0.1.1',
+        policy_templates: [
+          {
+            name: 'verifierreceiver',
+            title: 'Permission Verifier',
+            type: 'logs',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+          },
+        ],
+      };
+      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null as any);
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: { name: 'verifier_otel', version: '0.1.1', installed_es: [] },
+        packageInfo: OTEL_PKG_INFO,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: jest.mocked(appContextService.getLogger()),
+        packagePolicy: {
+          inputs: [
+            {
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'verifier.status' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+        expect.anything(),
+        'verifier_otel',
+        [],
+        { 'verifier.status': 'logs-verifier.status.otel-*' }
+      );
+    });
   });
 
   it('should remove time_series index mode for non-metrics data stream types', async () => {
@@ -1489,7 +1551,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'custom_dataset',
       {
         es_index_patterns: { custom_dataset: 'logs-my-integration.custom_dataset-*' },
@@ -1520,7 +1582,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should clean up assets for input packages with status = installed', async () => {
@@ -1566,7 +1628,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         es_index_patterns: { test: 'logs-udp.test-*' },
@@ -1624,7 +1686,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         installed_es: [
@@ -1659,7 +1721,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should log error if cleanupAssets failed', async () => {
@@ -1683,7 +1745,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(mockedLogger.error).toBeCalled();
+    expect(mockedLogger.error).toHaveBeenCalled();
   });
 
   describe('isInputPackageDatasetUsedByMultiplePolicies', () => {
@@ -2053,7 +2115,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       });
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toBeCalled();
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should install templates for integration package with custom dataset', async () => {

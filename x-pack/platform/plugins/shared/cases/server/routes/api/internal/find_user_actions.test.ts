@@ -93,8 +93,8 @@ const userActionsMockData = {
 const attachmentsMockData = {
   attachments: [
     {
-      comment: 'Edited first comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Edited first comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:01.283Z',
       created_by: {
@@ -116,8 +116,8 @@ const attachmentsMockData = {
       version: 'WzksMV0=',
     },
     {
-      comment: 'Second comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Second comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:08.015Z',
       created_by: {
@@ -134,8 +134,8 @@ const attachmentsMockData = {
       version: 'WzYsMV0=',
     },
     {
-      comment: 'Edited first comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Edited first comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:01.283Z',
       created_by: {
@@ -194,14 +194,13 @@ describe('findUserActionsRoute', () => {
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
-      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
           latestAttachments: expect.arrayContaining([
             expect.objectContaining({
-              comment: 'Edited first comment',
+              data: { content: 'Edited first comment' },
               created_at: '2025-01-07T13:32:01.283Z',
               created_by: {
                 email: null,
@@ -213,7 +212,7 @@ describe('findUserActionsRoute', () => {
               owner: 'cases',
               pushed_at: null,
               pushed_by: null,
-              type: 'user',
+              type: 'comment',
               updated_at: '2025-01-07T13:32:18.127Z',
               updated_by: {
                 email: null,
@@ -227,6 +226,136 @@ describe('findUserActionsRoute', () => {
         }),
       })
     );
+  });
+
+  it('projects comment user action payloads to the unified shape', async () => {
+    const casesClientMock = {
+      userActions: {
+        find: jest.fn().mockResolvedValue(userActionsMockData),
+      },
+      attachments: {
+        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+      },
+    };
+    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const request = {
+      params: { case_id: 'my_fake_case_id' },
+      query: {},
+    };
+    const logger = { warn: jest.fn() };
+
+    // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+    await findUserActionsRoute.handler({ context, request, response, logger });
+
+    const { body } = response.ok.mock.calls[0][0];
+
+    expect(body.userActions[1].payload.comment).toEqual({
+      type: 'comment',
+      data: { content: 'First comment' },
+      owner: 'cases',
+    });
+    expect(body.userActions[0].payload).toEqual(userActionsMockData.userActions[0].payload);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('legacy comment payload projection', () => {
+    const toCommentUserAction = (comment: Record<string, unknown>) => ({
+      ...userActionsMockData.userActions[1],
+      payload: { comment },
+    });
+
+    const projectPayload = async (comment: Record<string, unknown>) => {
+      const casesClientMock = {
+        userActions: {
+          find: jest.fn().mockResolvedValue({
+            userActions: [toCommentUserAction(comment)],
+            page: 1,
+            perPage: 10,
+            total: 1,
+          }),
+        },
+        attachments: {
+          bulkGet: jest.fn().mockResolvedValue({ attachments: [], errors: [] }),
+        },
+      };
+      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+      const request = { params: { case_id: 'my_fake_case_id' }, query: {} };
+      const logger = { warn: jest.fn() };
+
+      // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+      await findUserActionsRoute.handler({ context, request, response, logger });
+
+      const { body } = response.ok.mock.calls[0][0];
+      return { comment: body.userActions[0].payload.comment, logger };
+    };
+
+    it('projects a legacy alert to the owner-prefixed alert type', async () => {
+      const { comment, logger } = await projectPayload({
+        type: 'alert',
+        alertId: 'alert-1',
+        index: 'index-1',
+        rule: { id: 'rule-1', name: 'My rule' },
+        owner: 'securitySolution',
+      });
+
+      expect(comment).toEqual({
+        type: 'security.alert',
+        attachmentId: 'alert-1',
+        metadata: { index: 'index-1', rule: { id: 'rule-1', name: 'My rule' } },
+        owner: 'securitySolution',
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('projects a legacy file external reference using the restored reference id', async () => {
+      const files = [
+        { name: 'screenshot', extension: 'png', mimeType: 'image/png', created: '2025-01-07' },
+      ];
+      const { comment } = await projectPayload({
+        type: 'externalReference',
+        externalReferenceId: 'file-1',
+        externalReferenceStorage: { type: 'savedObject', soType: 'file' },
+        externalReferenceAttachmentTypeId: '.files',
+        externalReferenceMetadata: { files },
+        owner: 'cases',
+      });
+
+      expect(comment).toEqual({
+        type: 'file',
+        attachmentId: 'file-1',
+        metadata: { files, soType: 'file' },
+        owner: 'cases',
+      });
+    });
+
+    it('projects a legacy lens persistable state to the unified value shape', async () => {
+      const state = {
+        attributes: { title: 'My visualization' },
+        timeRange: { from: 'now-7d', to: 'now' },
+      };
+      const { comment } = await projectPayload({
+        type: 'persistableState',
+        persistableStateAttachmentTypeId: '.lens',
+        persistableStateAttachmentState: state,
+        owner: 'cases',
+      });
+
+      expect(comment).toEqual({ type: 'lens', data: { state }, owner: 'cases' });
+    });
+
+    it('keeps the original payload and logs a warning when the projection throws', async () => {
+      const legacyAlert = {
+        type: 'alert',
+        alertId: ['alert-1', 'alert-2'],
+        index: ['index-1'],
+        rule: { id: 'rule-1', name: 'My rule' },
+        owner: 'securitySolution',
+      };
+      const { comment, logger } = await projectPayload(legacyAlert);
+
+      expect(comment).toEqual(legacyAlert);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('query param decoding', () => {
@@ -381,14 +510,13 @@ describe('findUserActionsRoute', () => {
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
-      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
           latestAttachments: expect.arrayContaining([
             expect.objectContaining({
-              comment: 'Edited first comment',
+              data: { content: 'Edited first comment' },
               created_at: '2025-01-07T13:32:01.283Z',
               created_by: {
                 email: null,
@@ -400,7 +528,7 @@ describe('findUserActionsRoute', () => {
               owner: 'cases',
               pushed_at: null,
               pushed_by: null,
-              type: 'user',
+              type: 'comment',
               updated_at: '2025-01-07T13:32:18.127Z',
               updated_by: {
                 email: null,

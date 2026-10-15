@@ -43,7 +43,13 @@ export const PartitioningLayout = ({ availableStreams, children }: PartitioningL
     <EuiFlexItem className={overflowAutoClass} grow>
       <EuiFlexGroup direction="column" gutterSize="s" className={overflowAutoClass}>
         <QueryStreamCreationProvider>
-          <EuiPanel hasShadow={false} className={panelClass} paddingSize="none">
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            borderRadius="none"
+            className={panelClass}
+            paddingSize="none"
+          >
             <EuiResizableContainer>
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>

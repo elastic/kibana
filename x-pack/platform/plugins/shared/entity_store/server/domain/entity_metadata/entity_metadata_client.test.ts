@@ -216,7 +216,7 @@ describe('EntityMetadataClient', () => {
       const [params] = esClient.search.mock.calls[0] as [Record<string, unknown>];
       expect(params.index).toBe('.entities.v2.metadata.default');
       expect(params.size).toBe(1);
-      expect(params.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(params.sort).toEqual([{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }]);
     });
 
     it('filters by event.action and entity.id', async () => {

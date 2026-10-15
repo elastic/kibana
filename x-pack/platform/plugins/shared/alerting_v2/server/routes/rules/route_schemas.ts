@@ -6,11 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import { entityIdSchema, ENTITY_ID_NOTE } from '@kbn/alerting-v2-schemas';
 
 /**
  * Shared path params schema for routes that accept a single rule ID.
  */
-export const ruleIdParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule.'),
-});
+export const ruleIdParamsSchema = z
+  .object({
+    id: entityIdSchema.describe(`The identifier for the rule. ${ENTITY_ID_NOTE}`),
+  })
+  .strict();

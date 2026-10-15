@@ -9,3 +9,4 @@
 
 export { apiTest } from '@kbn/scout';
 export { INTERNAL_HEADERS } from './constants';
+export { ALL_KEYS, DEFAULT_VALUES, createHelpers } from './helpers';

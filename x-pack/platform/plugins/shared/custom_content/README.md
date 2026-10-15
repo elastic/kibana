@@ -21,7 +21,7 @@ The template is the source of truth for what renders. It is either generated ser
 
 | Package | Contents |
 |---------|----------|
-| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the two update schemas (`customContentUpdateSchema` for the dashboard tool, `customContentPanelUpdateSchema` for the chat tool), `stripMarkdownFences` |
+| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the chat tool's update schema (`customContentPanelUpdateSchema`), `resolveEsqlQueryEdit`, `stripMarkdownFences` |
 | `@kbn/custom-content-server` | `createCustomContentTemplateResolver` (the LLM template generator) and `sanitizeCellValue` |
 
 Both packages are separate from `agent_builder_dashboards` because this plugin and the dashboard generation tool consume the same code.
@@ -120,13 +120,13 @@ Passing `esqlQuery: null` removes the query entirely.
 
 `embeddable_id` is **required**. One conversation can hold a context attachment per panel, so without an explicit target the tool would act on whichever panel was attached first — refining a second panel would silently edit the first. The id is surfaced to the agent in each attachment's text representation (`Custom content panel (embeddable_id: …)`, see `formatPanelContext`) and echoed in `getAgentDescription()`.
 
-This is why the tool takes `customContentPanelUpdateSchema` rather than `customContentUpdateSchema` (`@kbn/custom-content-common`). The two share their field definitions and their "at least one of prompt or esqlQuery" rule, but only the chat variant carries an identifier — the dashboard generation tool already targets by `panelId`, and a second identifier in its config would be redundant and unfillable.
+This is why the tool's schema, `customContentPanelUpdateSchema` (`@kbn/custom-content-common`), carries `embeddable_id` alongside `prompt` and `esqlQuery`, with an "at least one of prompt or esqlQuery" rule. The dashboard generation tool does not need an identifier in its input: it targets panels by `panelId`.
 
 #### Panels that are not attached
 
 Only panels the user explicitly sent to chat via "Refine with chat" have a context attachment. Asking a fresh conversation to update some other custom content panel therefore misses, even though the panel is visible on the dashboard.
 
-That is recoverable rather than fatal: the dashboard attachment is added automatically for a new conversation (`dashboard_app_integration.ts`), and `edit_panels` accepts `type: "custom_content"` targeting by `panelId`, needing no context attachment at all. Both the tool description and the not-found error therefore name `platform.dashboard.generate_dashboard` as the route to take, alongside the ids that *are* attached. Without that the agent dead-ends and invents its own remediation — in practice, asking the user to click the panel, which attaches nothing.
+That is recoverable rather than fatal: the dashboard attachment is added automatically for a new conversation (`dashboard_app_integration.ts`), and `edit_panels` accepts `source: "request"`, `renderer: "custom_content"` targeting by `panelId`, needing no context attachment at all. Both the tool description and the not-found error therefore name `platform.dashboard.generate_dashboard` as the route to take, alongside the ids that *are* attached. Without that the agent dead-ends and invents its own remediation — in practice, asking the user to click the panel, which attaches nothing.
 
 Two consequences worth knowing. The fallback applies the change through `api.setState(...)`, a whole-dashboard state replace, rather than the targeted `template$`/`esqlQuery$` update the attachment route uses. And the tool id is inlined as a string constant rather than imported from `@kbn/agent-builder-dashboards-common`, to avoid a plugin dependency for prompt copy — it needs keeping in sync with `dashboardTools.generateDashboard`.
 
@@ -140,9 +140,11 @@ Because each round's card is pinned to the version that round produced, clicking
 
 ### 2. Agent-driven dashboard creation and editing
 
-`agent_builder_dashboards` registers a `custom_content` panel type for its dashboard generation tool (`.../operations/panels/custom_content/index.ts`). Both the create and edit schemas omit `template` — the agent supplies only `prompt` and optionally `esqlQuery`, and the server generates the template.
+The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../operations/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change) and optionally `esql`; it never supplies `template`. The server generates the template in `.../resolvers/custom_content_panel_resolver.ts`, in the same parallel phase as the tool's other generated panels.
 
-The edit variant reuses `customContentUpdateSchema` and adds its own `panelId`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
+Unlike Lens and Vega, the query is not generated for you: a new panel without `esql` is static. On an edit, omitting `esql` keeps the current query and `null` removes it.
+
+The edit variant targets a panel by `panelId`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
 
 ### The shared template resolver
 
@@ -163,7 +165,7 @@ When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LL
 
 A valid query that matches no rows is **not** a failure — Elasticsearch returns the real columns with empty values, and the template is generated with a "no rows available for the current time range" note.
 
-Callers already surface this: `applyCustomContentTemplates` drops the panel and records a failure, `edit_panels` records a failure and leaves the existing panel untouched, and `custom_content_update_panel` returns an error result. The dashboard skill instructs the agent to explain each `data.failures` entry to the user.
+Callers already surface this: the dashboard generation tool records a failure and skips the panel (on an edit, the existing panel is left untouched), and `custom_content_update_panel` returns an error result. The dashboard skill instructs the agent to explain each `data.failures` entry to the user.
 
 ## Security
 

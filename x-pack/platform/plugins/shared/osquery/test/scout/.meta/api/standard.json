@@ -1,5 +1,5 @@
 {
-  "sha1": "3ec42fded9f2299ae5d153f4710fa29b9fad624b",
+  "sha1": "014abbdc1b325a508fd6069b0deaa45186519e38",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -729,8 +729,8 @@
       }
     },
     {
-      "id": "252c3b4ba53b90e-cc6825be0d63ce0",
-      "title": "Osquery search strategy returns action results for a reader",
+      "id": "252c3b4ba53b90e-4506710e9313a9f",
+      "title": "Osquery search strategy returns 404 for an unknown action to a reader",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -738,8 +738,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
-        "line": 111,
-        "column": 24
+        "line": 112,
+        "column": 87
       }
     },
     {

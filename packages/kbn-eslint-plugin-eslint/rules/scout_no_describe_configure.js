@@ -41,7 +41,7 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     CallExpression(node) {
       if (isDescribeConfigure(node)) {
         context.report({

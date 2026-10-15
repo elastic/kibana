@@ -6,6 +6,7 @@
  */
 
 import type { KiTypeCount } from './ai_indices';
+import type { KiReferenceRelation } from '../step_types/ki';
 
 export interface KiListItem {
   id: string;
@@ -29,8 +30,40 @@ export interface ListKisResponse {
 export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 
+export interface KiDocumentProvenanceWriter {
+  uri?: string;
+  metadata?: Record<string, KiJsonValue>;
+}
+
+export interface KiDocumentGovernance {
+  lifecycle?: {
+    status?: string;
+  };
+  provenance?: {
+    created_by?: KiJsonValue | KiDocumentProvenanceWriter;
+    updated_by?: KiJsonValue | KiDocumentProvenanceWriter;
+  };
+}
+
+export interface KiDocumentReference {
+  uri?: string;
+  relation?: KiReferenceRelation | string;
+  description?: string;
+}
+
 export interface KiDocument {
-  [key: string]: KiJsonValue;
+  id?: string;
+  type?: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  tags?: string[];
+  '@timestamp'?: string;
+  updated_at?: string;
+  expires_at?: string;
+  attributes?: Record<string, KiJsonValue>;
+  references?: KiDocumentReference[];
+  governance?: KiDocumentGovernance;
 }
 
 export interface GetKiResponse {

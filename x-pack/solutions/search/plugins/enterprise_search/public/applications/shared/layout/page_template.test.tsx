@@ -13,7 +13,7 @@ jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   return { KibanaPageTemplate: MockKibanaPageTemplate };
 });
 
-import { setMockValues } from '../../__mocks__/kea_logic';
+import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -23,6 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
+import {
+  ENDPOINTS_API_KEYS_BUTTON_TEST_SUBJ,
+  EndpointsHeaderAction,
+} from './endpoints_header_action';
 import type { PageTemplateProps } from './page_template';
 import { EnterpriseSearchPageTemplateWrapper } from './page_template';
 
@@ -364,6 +368,57 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       });
 
       expect(screen.queryByTestId('mockSolutionNavFooter')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('endpoints & API keys', () => {
+    const DummyAppHeader = ({
+      menu,
+    }: {
+      menu?: { items?: Array<{ label?: string; run?: () => void; testId?: string }> };
+    }) => (
+      <div>
+        {menu?.items?.map((item) => (
+          <button key={item.testId} data-test-subj={item.testId} onClick={() => item.run?.()}>
+            {item.label}
+          </button>
+        ))}
+      </div>
+    );
+
+    it('registers chrome header actions when there is no app header', () => {
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
+
+      expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(EndpointsHeaderAction);
+    });
+
+    it('does not register chrome header actions when useEndpointHeaderActions is false', () => {
+      renderWithKibanaRenderContext(
+        <EnterpriseSearchPageTemplateWrapper useEndpointHeaderActions={false} />
+      );
+
+      expect(mockKibanaValues.renderHeaderActions).not.toHaveBeenCalledWith(EndpointsHeaderAction);
+    });
+
+    it('moves endpoints into the app menu and skips chrome header actions', () => {
+      renderWithKibanaRenderContext(
+        <EnterpriseSearchPageTemplateWrapper appHeader={<DummyAppHeader />} />
+      );
+
+      expect(mockKibanaValues.renderHeaderActions).not.toHaveBeenCalledWith(EndpointsHeaderAction);
+      expect(screen.getByTestId(ENDPOINTS_API_KEYS_BUTTON_TEST_SUBJ)).toBeInTheDocument();
+      expect(screen.getByText('Endpoints & API keys')).toBeInTheDocument();
+    });
+
+    it('does not add endpoints to the app menu when useEndpointHeaderActions is false', () => {
+      renderWithKibanaRenderContext(
+        <EnterpriseSearchPageTemplateWrapper
+          appHeader={<DummyAppHeader />}
+          useEndpointHeaderActions={false}
+        />
+      );
+
+      expect(screen.queryByTestId(ENDPOINTS_API_KEYS_BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
     });
   });
 });

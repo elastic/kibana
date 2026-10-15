@@ -13,8 +13,11 @@ import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
+  isBeatsOutput,
+  isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -32,18 +35,21 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  KafkaOutput,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 
 import {
   dataTypes,
+  kafkaAuthType,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData, buildKafkaSecrets } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -67,9 +73,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -87,6 +97,7 @@ export async function getFullAgentPolicy(
     agentVersion?: string;
     /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
     redactProxySecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -106,7 +117,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -122,7 +137,7 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSource,
+    downloadSources,
     downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
@@ -161,6 +176,17 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
+
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
@@ -169,14 +195,16 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    const dataOutputProxy = dataOutput?.proxy_id
-      ? proxies.find((p) => p.id === dataOutput.proxy_id)
-      : undefined;
+    const dataOutputProxy =
+      dataOutput && isBeatsOutput(dataOutput) && dataOutput.proxy_id
+        ? proxies.find((p) => p.id === dataOutput.proxy_id)
+        : undefined;
 
     const packageOutputs = new Map<string, Output>();
     for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
@@ -234,8 +262,8 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-  const downloadSourceSecretReferences = downloadSource
-    ? getDownloadSourceSecretReferences(downloadSource)
+  const downloadSourceSecretReferences = downloadSources[0]
+    ? getDownloadSourceSecretReferences(downloadSources[0])
     : [];
   // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
   // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
@@ -289,7 +317,9 @@ export async function getFullAgentPolicy(
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
+          isBeatsOutput(output) && output.proxy_id
+            ? proxies.find((proxy) => output.proxy_id === proxy.id)
+            : undefined,
           standalone,
           redactProxySecrets
         );
@@ -306,7 +336,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
+      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -392,12 +422,12 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-
       if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
@@ -422,7 +452,7 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      if (originalOutput?.write_to_logs_streams) {
+      if (originalOutput && isBeatsOutput(originalOutput) && originalOutput.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
             indices: [
@@ -437,7 +467,21 @@ export async function getFullAgentPolicy(
       }
 
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
@@ -612,6 +656,11 @@ export function transformOutputToFullPolicyOutput(
   standalone = false,
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
+  if (isOtlpOutput(output)) {
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
+  }
+
   const {
     config_yaml,
     type,
@@ -626,6 +675,14 @@ export function transformOutputToFullPolicyOutput(
 
   const configJs = config_yaml ? parse(config_yaml) : {};
 
+  const outputSecrets =
+    type === outputType.Kafka
+      ? buildKafkaSecrets({
+          auth_type: (output as KafkaOutput).auth_type,
+          secrets: (output as KafkaOutput).secrets,
+        })
+      : secrets;
+
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
@@ -639,9 +696,11 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
+      oauth2,
       partition,
       random,
       round_robin,
@@ -684,13 +743,13 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl, oauth2 }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
-      timeout,
+      // the agent runs a Kafka output with OAuth2 in the OTel collector, which does not support
+      // this setting: it would fall back to the Beats runtime, that cannot do OAuth2
+      ...(auth_type === kafkaAuthType.OAuth2 ? {} : { timeout }),
       broker_timeout,
       required_acks,
     };
@@ -726,7 +785,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...(secrets ? { secrets } : {}),
+    ...(outputSecrets ? { secrets: outputSecrets } : {}),
   };
   if (ssl) {
     newOutput.ssl = {
@@ -775,7 +834,7 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
+  if (outputTypeSupportPresets(output)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
@@ -933,46 +992,47 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 }
 
 export function getBinarySourceSettings(
-  downloadSource: DownloadSource,
+  downloadSources: DownloadSource[],
   downloadSourceProxy: FleetProxy | undefined,
   redactProxySecrets = false
 ) {
+  const primarySource = downloadSources[0];
+
+  // sourceURI kept for backwards compat with agents older than 9.6.0 that do not read `sources`
   const config: FullAgentPolicyDownload = {
-    sourceURI: downloadSource.host,
+    sourceURI: primarySource.host,
+    sources: downloadSources.map((ds) => ds.host),
   };
 
-  if (downloadSource?.ssl) {
+  if (primarySource?.ssl) {
     config.ssl = {
-      ...(downloadSource.ssl?.certificate_authorities && {
-        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      ...(primarySource.ssl?.certificate_authorities && {
+        certificate_authorities: primarySource.ssl.certificate_authorities,
       }),
-      ...(downloadSource.ssl?.certificate && {
-        certificate: downloadSource.ssl.certificate,
+      ...(primarySource.ssl?.certificate && {
+        certificate: primarySource.ssl.certificate,
       }),
-      ...(downloadSource.ssl?.key &&
-        !downloadSource?.secrets?.ssl?.key && {
-          key: downloadSource.ssl.key,
+      ...(primarySource.ssl?.key &&
+        !primarySource?.secrets?.ssl?.key && {
+          key: primarySource.ssl.key,
         }),
     };
   }
 
-  if (downloadSource?.auth) {
+  if (primarySource?.auth) {
     const authConfig: FullAgentPolicyDownload['auth'] = {};
-    if (downloadSource.auth.username) {
-      authConfig.username = downloadSource.auth.username;
+    if (primarySource.auth.username) {
+      authConfig.username = primarySource.auth.username;
     }
-    if (
-      downloadSource.auth.password &&
-      typeof downloadSource?.secrets?.auth?.password !== 'object'
-    ) {
-      authConfig.password = downloadSource.auth.password;
+    if (primarySource.auth.password && typeof primarySource?.secrets?.auth?.password !== 'object') {
+      authConfig.password = primarySource.auth.password;
     }
-    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
-      authConfig.api_key = downloadSource.auth.api_key;
+    if (primarySource.auth.api_key && typeof primarySource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = primarySource.auth.api_key;
     }
     // Filter out empty headers (both key and value are empty)
-    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
-      const filteredHeaders = downloadSource.auth.headers.filter(
+    if (primarySource.auth.headers && primarySource.auth.headers.length > 0) {
+      const filteredHeaders = primarySource.auth.headers.filter(
         (header) => header.key !== '' || header.value !== ''
       );
       if (filteredHeaders.length > 0) {
@@ -984,22 +1044,22 @@ export function getBinarySourceSettings(
     }
   }
 
-  if (downloadSource?.secrets) {
+  if (primarySource?.secrets) {
     const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
 
-    if (downloadSource.secrets?.ssl?.key) {
+    if (primarySource.secrets?.ssl?.key) {
       secretsConfig.ssl = {
-        key: downloadSource.secrets.ssl.key,
+        key: primarySource.secrets.ssl.key,
       };
     }
 
-    if (downloadSource.secrets?.auth) {
+    if (primarySource.secrets?.auth) {
       const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
-      if (typeof downloadSource.secrets.auth.password === 'object') {
-        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      if (typeof primarySource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = primarySource.secrets.auth.password;
       }
-      if (typeof downloadSource.secrets.auth.api_key === 'object') {
-        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      if (typeof primarySource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = primarySource.secrets.auth.api_key;
       }
       if (Object.keys(authSecretsConfig).length > 0) {
         secretsConfig.auth = authSecretsConfig;

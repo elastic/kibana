@@ -24,7 +24,9 @@
 
 import { tags } from '@kbn/scout';
 import {
+  getConnectorActionTypeId,
   selectEvaluators,
+  type EvalConnector,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
@@ -39,6 +41,7 @@ import { callEaseSummary } from '../src/ease_summary_task';
 const easeJsonCompliance = {
   name: 'EaseJsonCompliance',
   kind: 'CODE' as const,
+  direction: 'maximize' as const,
   evaluate: async ({ output }: { output: unknown; metadata: unknown }) => {
     const rawResponse = (output as { rawResponse?: string })?.rawResponse ?? '';
 
@@ -89,7 +92,7 @@ function createEvaluateEaseSummary({
   log,
 }: {
   fetch: HttpHandler;
-  connector: { id: string; actionTypeId: string };
+  connector: EvalConnector;
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
 }) {
@@ -113,7 +116,7 @@ function createEvaluateEaseSummary({
           return callEaseSummary({
             fetch,
             connectorId: connector.id,
-            actionTypeId: connector.actionTypeId,
+            actionTypeId: getConnectorActionTypeId(connector),
             alertContext: (input as EaseSummaryExample['input']).alertContext,
             log,
           });

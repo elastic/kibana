@@ -8,6 +8,7 @@
 import type { ToolMessage } from '@langchain/core/messages';
 
 import {
+  createToolCallMessage,
   createToolResultMessage,
   createUserMessage,
   extractToolReturn,
@@ -34,9 +35,7 @@ describe('extractToolReturn', () => {
   it('should throw an error if the message does not contain an artifact and is not an error message', () => {
     const mockMessage = createMessage(undefined);
 
-    expect(() => extractToolReturn(mockMessage)).toThrowError(
-      'No artifact attached to tool message'
-    );
+    expect(() => extractToolReturn(mockMessage)).toThrow('No artifact attached to tool message');
   });
 
   it('should return an error artifact if the message does not contain an artifact and is an error message', () => {
@@ -60,7 +59,7 @@ describe('extractToolReturn', () => {
       results: 'not-an-array',
     });
 
-    expect(() => extractToolReturn(mockMessage)).toThrowError(
+    expect(() => extractToolReturn(mockMessage)).toThrow(
       'Artifact is not a structured tool artifact. Received artifact={"results":"not-an-array"}'
     );
   });
@@ -143,6 +142,17 @@ describe('createUserMessage with images', () => {
       { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
       { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,BBB' } },
     ]);
+  });
+});
+
+describe('createToolCallMessage', () => {
+  it('sanitizes the tool name', () => {
+    const message = createToolCallMessage({
+      toolCallId: 'call-1',
+      toolName: 'platform.core.search',
+      args: {},
+    });
+    expect(message.tool_calls?.[0].name).toBe('platform_core_search');
   });
 });
 

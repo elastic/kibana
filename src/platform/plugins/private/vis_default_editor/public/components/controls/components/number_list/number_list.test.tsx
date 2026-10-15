@@ -82,7 +82,7 @@ describe('NumberList', () => {
   test('should set validity as true', () => {
     mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(defaultProps.setValidity).lastCalledWith(true);
+    expect(defaultProps.setValidity).toHaveBeenLastCalledWith(true);
   });
 
   test('should set validity as false when the order is invalid', () => {
@@ -90,10 +90,10 @@ describe('NumberList', () => {
     defaultProps.validateAscendingOrder = true;
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(defaultProps.setValidity).lastCalledWith(false);
+    expect(defaultProps.setValidity).toHaveBeenLastCalledWith(false);
 
     comp.setProps({ numberArray: [1, 2] });
-    expect(defaultProps.setValidity).lastCalledWith(true);
+    expect(defaultProps.setValidity).toHaveBeenLastCalledWith(true);
   });
 
   test('should set validity as false when there is an empty field', () => {
@@ -101,21 +101,21 @@ describe('NumberList', () => {
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
     comp.setProps({ numberArray: [1, undefined] });
-    expect(defaultProps.setValidity).lastCalledWith(false);
+    expect(defaultProps.setValidity).toHaveBeenLastCalledWith(false);
   });
 
   test('should set 0 when number array is empty', () => {
     defaultProps.numberArray = [];
     mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(defaultProps.onChange).lastCalledWith([0]);
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith([0]);
   });
 
   test('should add a number', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
     comp.find('EuiButtonEmpty').simulate('click');
 
-    expect(defaultProps.onChange).lastCalledWith([1, 2, 3]);
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith([1, 2, 3]);
   });
 
   test('should remove a number', () => {
@@ -123,7 +123,7 @@ describe('NumberList', () => {
     const row = comp.find(NumberRow).first();
     row.prop('onDelete')(row.prop('model').id);
 
-    expect(defaultProps.onChange).lastCalledWith([2]);
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith([2]);
   });
 
   test('should disable remove button if there is one number', () => {
@@ -138,13 +138,13 @@ describe('NumberList', () => {
     const row = comp.find(NumberRow).first();
     row.prop('onChange')({ id: row.prop('model').id, value: '3' });
 
-    expect(defaultProps.onChange).lastCalledWith([3, 2]);
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith([3, 2]);
   });
 
   test('should call setTouched', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
     comp.find(NumberRow).first().prop('onBlur')();
 
-    expect(defaultProps.setTouched).toBeCalled();
+    expect(defaultProps.setTouched).toHaveBeenCalled();
   });
 });

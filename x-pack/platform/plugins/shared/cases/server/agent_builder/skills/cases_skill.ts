@@ -50,6 +50,20 @@ const buildManageModesCell = (isTemplatesEnabled: boolean) => {
   return isTemplatesEnabled ? `${base}, \`set_extended_fields\`` : base;
 };
 
+const FIND_TEMPLATES_ROW = `
+| \`${platformCoreCasesTools.findTemplates}\` | Look up case templates by name to resolve a \`case_template_id\` |`;
+
+const FIND_TEMPLATES_SECTION = `
+## Finding a template by name
+
+\`create_from_template\` (see \`${platformCoreCasesTools.manage}\`) requires a \`case_template_id\`, not a name. If the user names a template (e.g. "create a case from the phishing template") instead of giving you an ID, call \`${platformCoreCasesTools.findTemplates}\` first with \`search\` set to the name they gave and the established \`owner\` — do not guess an ID or invent one.
+
+\`search\` also matches template descriptions and field names/labels, not just the template name — check each result's \`nameMatch\` flag. Judge how many templates matched by the response's \`total\`, never by how many rows are on the current page (a paginated response can end with a single row that is not a unique hit):
+- \`total: 0\`: tell the user, don't fall back to a plain \`create\`.
+- \`total: 1\` with \`nameMatch: true\`: use its \`templateId\` for \`case_template_id\`.
+- \`total\` greater than 1, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match or a lone last-page row.
+`;
+
 export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
   defineSkillType({
     id: 'cases-management',
@@ -74,6 +88,8 @@ You have full read **and write** access to Elastic cases across Security, Observ
       platformCoreCasesTools.manageAttachments
     }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
+      isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
+    }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${
       isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
     }
 
@@ -148,7 +164,11 @@ When in doubt, render — a missing render loses information, a redundant one is
       platformCoreCasesTools.getAttachments
     }\` — returns the discriminated attachments array; summarize them.
 - \`${platformCoreCasesTools.manage}\` mode \`delete\` — case is gone.
-- \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.
+- \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.${
+      isTemplatesEnabled
+        ? `\n- \`${platformCoreCasesTools.findTemplates}\` — returns template metadata, not a case.`
+        : ''
+    }
 
 ## Comments and discussion
 
@@ -171,5 +191,6 @@ Use \`${
       platformCoreCasesTools.getAttachments,
       platformCoreCasesTools.manageAttachments,
       platformCoreCasesTools.observables,
+      ...(isTemplatesEnabled ? [platformCoreCasesTools.findTemplates] : []),
     ],
   });

@@ -20,7 +20,6 @@ import type {
 } from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
 import { isReadAt, type NotificationReadState } from './read_state';
-import { severityTTLQuery } from './severity_ttl_query';
 
 /**
  * Max number of results the client will get back per query. This is enforced on the
@@ -42,7 +41,7 @@ export interface NotificationQueryDeps {
  */
 const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
   const { namespace, type, from, to } = params;
-  const filters: QueryDslQueryContainer[] = [severityTTLQuery('visible')];
+  const filters: QueryDslQueryContainer[] = [];
   if (namespace) {
     filters.push({ term: { namespace } });
   }
@@ -61,7 +60,7 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 /**
  * Fetch the notification list
  * - Return only the newest doc per `notification_id`, collapse duplicates.
- * - Filter by severity TTL, namespace, type and time-range
+ * - Filter by namespace, type and time-range
  * - Sort by newest first.
  * - Annotate results with read state if provided (headless consumers don't have a read state)
  */

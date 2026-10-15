@@ -116,7 +116,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -177,7 +177,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -240,7 +240,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -358,7 +358,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed in index 1
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -590,7 +590,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.bulkUpdateCases({ alerts, caseIds });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -599,7 +599,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -608,7 +608,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -633,7 +633,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.removeCaseIdFromAlerts({ alerts, caseId });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -642,7 +642,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -651,7 +651,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -666,9 +666,7 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdFromAlerts({ alerts, caseId })
-      ).resolves.not.toThrowError();
+      await expect(alertService.removeCaseIdFromAlerts({ alerts, caseId })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing case test-case from alerts: An error'
@@ -682,7 +680,7 @@ describe('updateAlertsStatus', () => {
     it('remove all case ids from alerts', async () => {
       await alertService.removeCaseIdsFromAllAlerts({ caseIds });
 
-      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toHaveBeenCalledWith({ caseIds });
     });
 
     it('does not call the alerts client with no case ids', async () => {
@@ -696,9 +694,7 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdsFromAllAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdsFromAllAlerts({ caseIds })
-      ).resolves.not.toThrowError();
+      await expect(alertService.removeCaseIdsFromAllAlerts({ caseIds })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
@@ -836,6 +832,190 @@ describe('updateAlertsStatus', () => {
       await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
         /Failed to verify referenced events exist/
       );
+    });
+  });
+
+  describe('ensureAttacksAuthorized', () => {
+    const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
+    const AD_HOC_ATTACK_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+    const attacks = [{ id: 'attack-1', index: ATTACK_INDEX }];
+    const adHocAttacks = [{ id: 'attack-1', index: AD_HOC_ATTACK_INDEX }];
+
+    const attackDoc = (source: Record<string, unknown>) => ({
+      docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
+    });
+
+    const validAttackSource = {
+      'kibana.alert.rule.rule_type_id': 'attack-discovery',
+      'kibana.space_ids': ['default'],
+    };
+
+    const validAdHocAttackSource = {
+      'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
+      'kibana.space_ids': ['default'],
+    };
+
+    const adHocAttackDoc = (source: Record<string, unknown>) => ({
+      docs: [{ _index: AD_HOC_ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
+    });
+
+    it('authorizes an attack discovery alert in the current space', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        docs: [{ _id: 'attack-1', _index: ATTACK_INDEX }],
+        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
+      });
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts: attacks });
+    });
+
+    it('authorizes an ad-hoc attack discovery alert in the current space', async () => {
+      esClient.mget.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        docs: [{ _id: 'attack-1', _index: AD_HOC_ATTACK_INDEX }],
+        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
+      });
+      // `attack_discovery_ad_hoc_rule_type_id` is a sentinel the alerting framework never
+      // registers, so alerting RBAC cannot authorize it. The `mget` above runs as the current
+      // user, which is the index privilege gate ad-hoc discoveries are read with everywhere else.
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('sends only the scheduled attacks of a mixed batch through alerting RBAC', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: AD_HOC_ATTACK_INDEX,
+            _id: 'attack-1',
+            found: true,
+            _source: validAdHocAttackSource,
+          },
+          { _index: ATTACK_INDEX, _id: 'attack-2', found: true, _source: validAttackSource },
+        ],
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: AD_HOC_ATTACK_INDEX },
+            { id: 'attack-2', index: ATTACK_INDEX },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [{ id: 'attack-2', index: ATTACK_INDEX }],
+      });
+    });
+
+    it('throws when an ad-hoc attack belongs to another space', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        adHocAttackDoc({
+          'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
+          'kibana.space_ids': ['space-2'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced document does not exist', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: false }],
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced document is not an alert', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc({ message: 'just a document' }) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced alert is not an attack discovery', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+          'kibana.space_ids': ['default'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced attack belongs to another space', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'attack-discovery',
+          'kibana.space_ids': ['space-2'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [{ id: 'attack-1', index: `my-linked-project:${ATTACK_INDEX}` }],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('does not call mget when there are no non-empty attacks', async () => {
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [{ id: '', index: '' }],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows authorization errors', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Failed to authorize attacks/);
     });
   });
 });

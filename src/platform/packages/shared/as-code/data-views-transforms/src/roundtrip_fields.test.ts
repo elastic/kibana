@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
+import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataViewSpec,
@@ -452,7 +452,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
         },
       };
       const fieldFormats = {
-        prim: { id: 'number', params: { decimals: 2 } },
+        prim: { id: 'number', params: { pattern: '0,0.[000]b' } },
         'comp.sub_y': { id: 'date', params: { pattern: 'MM/DD/YYYY' } },
       };
       const fieldAttrs = {

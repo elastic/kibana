@@ -33,7 +33,7 @@ This configuration allows to run two local ES clusters in parallel, each one hav
 - Start ES 1
 
 ```
-yarn es snapshot -E http.port=9500 -E transport.port=9600 -E path.data=../remote --license trial -E http.host=0.0.0.0
+pnpm es snapshot -E http.port=9500 -E transport.port=9600 -E path.data=../remote --license trial -E http.host=0.0.0.0
 ```
 
 Verify that node is healthy
@@ -45,7 +45,7 @@ Verify that node is healthy
 - Start Kibana 1
 
 ```
-yarn start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.basePathProxyTarget=5703
+pnpm start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.basePathProxyTarget=5703
 ```
 - Login into http://localhost:5701/<YOUR_PATH>
 
@@ -54,7 +54,7 @@ yarn start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.
 - Start ES 2
 
 ```
-yarn es snapshot --license trial -E path.data=/tmp/es-data -E http.host=0.0.0.0
+pnpm es snapshot --license trial -E path.data=/tmp/es-data -E http.host=0.0.0.0
 ```
 Note that `transport.port` defaults to `9300`
 
@@ -67,7 +67,7 @@ curl -k -u elastic:changeme http://localhost:9200
 - Start Kibana 2
 
 ```
-yarn start
+pnpm start
 ```
 
 - Login into http://localhost:5601/<YOUR_PATH>

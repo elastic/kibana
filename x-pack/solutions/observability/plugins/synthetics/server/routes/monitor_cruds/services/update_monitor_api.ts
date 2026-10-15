@@ -122,11 +122,9 @@ export class UpdateMonitorAPI {
     decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     patchById: Map<string, Partial<EncryptedSyntheticsMonitor>>
   ): Promise<MaintenanceWindow[] | undefined> {
+    // Bulk updates can include non-`ui` monitors that still need MW ref
+    // resolution (e.g. enable/disable), matching the single-edit route.
     const hasMaintenanceWindowRefs = decryptedMonitors.some((monitor) => {
-      if (monitor.attributes[ConfigKey.MONITOR_SOURCE_TYPE] !== 'ui') {
-        return false;
-      }
-
       const patch = patchById.get(monitor.id);
       const refs =
         patch?.[ConfigKey.MAINTENANCE_WINDOWS] ?? monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS];
@@ -187,7 +185,8 @@ export class UpdateMonitorAPI {
     // (`editSyntheticsMonitorRoute`). Without this, io-ts `t.exact` in
     // `validateMonitor` would silently strip them instead of failing.
     const { errorMessage: unsupportedKeysError, formattedConfig } = normalizeAPIConfig(
-      merged as CreateMonitorPayLoad
+      merged as CreateMonitorPayLoad,
+      { previousParams: (prevAttrs as MonitorFields)[ConfigKey.PARAMS] }
     );
     if (unsupportedKeysError) {
       this.result.perIdErrors[monitorId] = {
