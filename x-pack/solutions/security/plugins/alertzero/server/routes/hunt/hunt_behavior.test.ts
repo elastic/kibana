@@ -13,6 +13,7 @@ import {
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -26,6 +27,7 @@ const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof 
 const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
+const mitreDataClient = { list: jest.fn() } as unknown as MitreAttackDataClient;
 const tier2Result: HuntBehaviorResult = {
   status: 'no_behaviors_found',
   has_hit: false,
@@ -47,6 +49,7 @@ const makeDeps = () => {
       ({
         getInference: () => inference,
         getSearchInferenceEndpoints: () => undefined,
+        mitreDataClient,
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
@@ -162,13 +165,15 @@ describe('registerHuntBehaviorRoute', () => {
       { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asCurrentUser
+      asCurrentUser,
+      mitreDataClient
     );
     expect(huntBehaviorMock).not.toHaveBeenCalledWith(
       { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asInternalUser
+      asInternalUser,
+      mitreDataClient
     );
   });
 
@@ -300,7 +305,8 @@ describe('registerHuntBehaviorRoute', () => {
         llm_confidence_threshold: 0.8,
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
       }),
-      expect.anything()
+      expect.anything(),
+      mitreDataClient
     );
   });
 

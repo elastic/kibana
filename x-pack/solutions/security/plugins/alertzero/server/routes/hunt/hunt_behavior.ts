@@ -52,7 +52,7 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
           // why that distinction matters. Tier 2 needs both of its tiers (Frontier for
@@ -103,7 +103,8 @@ export const registerHuntBehaviorRoute = ({
               article_context,
               allowed_indices: indexPatterns,
             },
-            esClient
+            esClient,
+            mitreDataClient
           );
 
           return response.ok({ body });

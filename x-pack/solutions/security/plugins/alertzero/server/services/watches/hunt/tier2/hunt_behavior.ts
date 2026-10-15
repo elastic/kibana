@@ -17,6 +17,7 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
@@ -563,7 +564,8 @@ export const huntBehavior = async (
   models: HuntBehaviorModels,
   logger: Logger,
   params: HuntBehaviorParams,
-  esClient?: ElasticsearchClient
+  esClient?: ElasticsearchClient,
+  mitreDataClient?: MitreAttackDataClient
 ): Promise<HuntBehaviorResult> => {
   const {
     text,
@@ -583,6 +585,40 @@ export const huntBehavior = async (
     rowLimit !== undefined &&
     allowedIndices.length > 0 &&
     esClient !== undefined;
+
+  // Load the catalog first so a run without one pays for no model call. An empty catalog is a
+  // deployment-side gap (population failed or data missing), not evidence the model invented ids.
+  const { techniqueById, subtechniqueById } = await getMitreCatalog({
+    mitreDataClient,
+    logger,
+  });
+  if (techniqueById.size === 0 && subtechniqueById.size === 0) {
+    logger.warn(
+      '[hunt:extract] the managed MITRE ATT&CK data is unavailable; extraction was skipped and ' +
+        'no technique was verified or hunted.'
+    );
+    // Nothing was extracted, so there is no per-technique gap to name: one report-level
+    // entry (no technique_id), retryable by `completeness.ts`.
+    return {
+      status: 'no_behaviors_validated',
+      report_id: reportId,
+      behaviors: [],
+      indexed_behaviors: [],
+      has_hit: false,
+      incomplete: [
+        {
+          reason: 'catalog_unavailable',
+          detail:
+            'The managed MITRE ATT&CK data is unavailable (mitreAttack plugin disabled, ' +
+            'population failed, or data missing), so no technique could be extracted or ' +
+            'verified and the report was not hunted.',
+        },
+      ],
+      next_step:
+        'Managed MITRE ATT&CK data is unavailable; retry the hunt once the mitreAttack plugin ' +
+        'has populated its data.',
+    };
+  }
 
   const structured = models.extraction.chatModel.withStructuredOutput(
     huntBehaviorLlmExtractionSchema
@@ -618,7 +654,6 @@ export const huntBehavior = async (
   const droppedIds: string[] = [];
   const ungroundedQuoteIds: string[] = [];
 
-  const { techniqueById, subtechniqueById } = getMitreCatalog();
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);

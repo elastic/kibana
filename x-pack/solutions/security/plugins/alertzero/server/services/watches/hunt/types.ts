@@ -8,6 +8,7 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntModelTierId } from '@kbn/alertzero-common';
 
@@ -69,4 +70,11 @@ export interface HuntServices {
    * chain in `scoped_model.ts` when it is absent.
    */
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  /**
+   * MITRE data client instance, for the Tier 2 technique catalog (pinned to ATT&CK Enterprise).
+   * Undefined when the optional mitreAttack plugin is disabled or its managed source is off,
+   * in which case Tier 2 sees an empty catalog, returns early before extraction, and reports a
+   * report-level `catalog_unavailable`.
+   */
+  mitreDataClient?: MitreAttackDataClient;
 }

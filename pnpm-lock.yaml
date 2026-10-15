@@ -5813,6 +5813,9 @@ importers:
       '@kbn/security-labs-artifact-builder':
         specifier: workspace:*
         version: link:x-pack/packages/ai-infra/security-labs-artifact-builder
+      '@kbn/security-mitre-attack-mocks':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/security-mitre-attack-mocks
       '@kbn/security-solution-test-api-clients':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/test-api-clients
@@ -9800,6 +9803,8 @@ importers:
   x-pack/solutions/security/packages/security-ai-prompts: {}
 
   x-pack/solutions/security/packages/security-mitre-attack-common: {}
+
+  x-pack/solutions/security/packages/security-mitre-attack-mocks: {}
 
   x-pack/solutions/security/packages/security-mitre-attack-server: {}
 

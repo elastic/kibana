@@ -1964,6 +1964,7 @@
     "@kbn/security-evals-matrix": "workspace:*",
     "@kbn/security-evals-workflow-traces": "workspace:*",
     "@kbn/security-labs-artifact-builder": "workspace:*",
+    "@kbn/security-mitre-attack-mocks": "workspace:*",
     "@kbn/security-solution-test-api-clients": "workspace:*",
     "@kbn/set-map": "workspace:*",
     "@kbn/shared-ux-card-no-data-mocks": "workspace:*",
