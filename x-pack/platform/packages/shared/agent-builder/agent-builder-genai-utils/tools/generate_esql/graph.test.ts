@@ -41,11 +41,11 @@ const fakeResource: ResolvedResourceWithSampling = {
   isTsdb: false,
 };
 
-const createMockModel = () => {
+const createMockModel = (generateResponse = GENERATE_RESPONSE) => {
   const docModelInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: [] });
   const docRunnable = { withConfig: jest.fn(() => ({ invoke: docModelInvoke })) };
 
-  const generateModelInvoke = jest.fn().mockResolvedValue({ content: GENERATE_RESPONSE });
+  const generateModelInvoke = jest.fn().mockResolvedValue({ content: generateResponse });
   const generateRunnable = { invoke: generateModelInvoke };
 
   const chatModel = {
@@ -56,11 +56,16 @@ const createMockModel = () => {
   return { chatModel, docModelInvoke };
 };
 
-const buildGraph = (chatModel: ReturnType<typeof createMockModel>['chatModel']) =>
+const createDocBase = () => ({ getDocumentation: jest.fn().mockReturnValue({}) });
+
+const buildGraph = (
+  chatModel: ReturnType<typeof createMockModel>['chatModel'],
+  docBase = createDocBase()
+) =>
   createNlToEsqlGraph({
     model: { chatModel } as unknown as ScopedModel,
     esClient: {} as ElasticsearchClient,
-    docBase: { getDocumentation: jest.fn().mockReturnValue({}) } as any,
+    docBase: docBase as any,
     documentation: {
       getDocContent: jest.fn().mockReturnValue(''),
     } as unknown as EsqlLoadedDocumentation,
@@ -107,6 +112,19 @@ describe('createNlToEsqlGraph — requestDocumentation node', () => {
     await graph.invoke({ ...BASE_INPUT, actions: [] }, { recursionLimit: 25 });
 
     expect(docModelInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetches the PROMQL documentation when the query mentions PromQL, even if the LLM did not request it', async () => {
+    const { chatModel } = createMockModel();
+    const docBase = createDocBase();
+    const graph = buildGraph(chatModel, docBase);
+
+    await graph.invoke(
+      { ...BASE_INPUT, nlQuery: 'cpu utilization using PromQL', actions: [] },
+      { recursionLimit: 25 }
+    );
+
+    expect(docBase.getDocumentation).toHaveBeenCalledWith(['LIMIT', 'PROMQL']);
   });
 });
 
@@ -166,9 +184,48 @@ describe('createNlToEsqlGraph — execute_query node', () => {
       expect.objectContaining({ limit: 1, dropNullColumns: false })
     );
     expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('FROM logs-test');
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toBeUndefined();
     expect(outState.results).toEqual({
       columns: [{ name: 'count', type: 'long' }],
       values: [[42]],
     });
+  });
+
+  const TS_QUERY = 'TS metrics-test | STATS SUM(RATE(requests))';
+  const TS_RESPONSE = `\`\`\`esql\n${TS_QUERY}\n\`\`\``;
+
+  it('schema execute bounds a TS query to the time range with a @timestamp filter', async () => {
+    const { chatModel } = createMockModel(TS_RESPONSE);
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke(
+      {
+        ...BASE_INPUT,
+        execute: 'schema',
+        maxRetries: 1,
+        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      },
+      { recursionLimit: 25 }
+    );
+
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: '2026-01-01T00:00:00.000Z',
+          lte: '2026-01-02T00:00:00.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('data execute does not filter a TS query', async () => {
+    const { chatModel } = createMockModel(TS_RESPONSE);
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke({ ...BASE_INPUT, execute: 'data', maxRetries: 1 }, { recursionLimit: 25 });
+
+    expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('TS metrics-test');
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toBeUndefined();
   });
 });

@@ -25,13 +25,17 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
+  /**
+   * Optional pre-generated saved object id. The internal POST /attachments route
+   * supplies this so it can locate the created attachment in the returned case.
+   */
+  id?: string;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
   /**
-   * Unified payloads only. Callers with mixed wire shapes convert first via
-   * toUnifiedAttachmentRequest.
+   * Unified payloads only.
    */
   attachments: UnifiedAttachmentPayload[];
 }
@@ -58,6 +62,23 @@ export interface BulkDeleteFileArgs {
    * The ids of the file saved objects
    */
   fileIds: string[];
+}
+
+/**
+ * Parameters for deleting multiple attachments of a case.
+ */
+export interface BulkDeleteArgs {
+  /**
+   * The id of the case
+   */
+  caseId: string;
+  /**
+   * The saved object ids of the attachments to delete.
+   *
+   * Deliberately not named `attachmentIds`: that name is reserved for the ids of the documents an
+   * attachment points at (alert ids, event ids, ...), which this endpoint may accept later on.
+   */
+  savedObjectIds: string[];
 }
 
 /**

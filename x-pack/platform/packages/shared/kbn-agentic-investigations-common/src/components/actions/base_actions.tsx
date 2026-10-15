@@ -22,6 +22,7 @@ import { CONVERSATION_CARD_ACTIONS } from '../conversation_card/translations';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps, isDecided } from '../helpers';
+import { COPY_LINK_ACTION } from './copy_link_action';
 
 interface ActionConfig {
   key: string;
@@ -43,10 +44,18 @@ const useContextMenuItems = (
       actions.flatMap(({ key, icon, color = 'text', name, onClick, separator }) => {
         const item = (
           <EuiContextMenuItem
-            style={{
+            css={{
               padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+              borderRadius: 0,
+              '&:first-of-type': {
+                borderRadius: `${euiTheme.size.m} ${euiTheme.size.m} 0 0`,
+              },
+              '&:last-of-type': {
+                borderRadius: `0 0 ${euiTheme.size.m} ${euiTheme.size.m}`,
+              },
             }}
             key={key}
+            role="menuitem"
             icon={icon}
             color={color}
             onClick={(ev) => {
@@ -66,17 +75,8 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
+export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close';
 
-/**
- * Returns true when at least one action will appear in the menu for this investigation.
- * Use this to decide whether to render the menu trigger at all; an empty menu should not
- * be reachable.
- */
-export const hasAvailableActions = (
-  investigation: Investigation,
-  canManageEscalations = false
-): boolean => !isDecided(investigation) || canManageEscalations;
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
@@ -90,6 +90,8 @@ export interface BaseActionsProps {
    * the HTTP mutation. Without it the fallback modal does nothing.
    */
   canCloseInvestigation?: boolean;
+  /** Always offered, including on a decided investigation, so the menu is never empty. */
+  onCopyLink: (id: Investigation['id']) => void;
   'data-test-subj'?: string;
 }
 
@@ -101,6 +103,7 @@ export const BaseActions = memo<BaseActionsProps>(
     onClickRecommendedAction,
     canManageEscalations = false,
     canCloseInvestigation = false,
+    onCopyLink,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -159,22 +162,23 @@ export const BaseActions = memo<BaseActionsProps>(
                 onClick: () => onClickAction('createEscalation', investigation.recordId),
               },
               {
-                key: 'addToEscalation',
-                icon: 'link' as IconType,
-                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
-                onClick: () => onClickAction('addToEscalation', investigation.recordId),
+                key: 'attachToEscalation',
+                icon: 'branch' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.attachToEscalation,
+                onClick: () => onClickAction('attachToEscalation', investigation.recordId),
               },
             ]
           : []),
+        {
+          key: 'copyLink',
+          icon: COPY_LINK_ACTION.iconType as IconType,
+          name: COPY_LINK_ACTION.label,
+          onClick: () => onCopyLink(investigation.id),
+          separator: true,
+        },
         ...(decided
           ? []
           : [
-              {
-                key: 'assign',
-                icon: 'user',
-                name: ACTIONS_TRANSLATIONS.buttons.assign,
-                onClick: () => onClickAction('assign', investigation.recordId),
-              },
               // Only show Close when the caller has the capability AND the investigation is not
               // already closed. Flyout investigations are conversation-derived and have no
               // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
@@ -186,7 +190,6 @@ export const BaseActions = memo<BaseActionsProps>(
                       icon: 'cross' as IconType,
                       name: ACTIONS_TRANSLATIONS.buttons.close,
                       onClick: () => onClickAction('close', investigation.recordId),
-                      separator: true,
                     },
                   ]
                 : []),
@@ -199,6 +202,7 @@ export const BaseActions = memo<BaseActionsProps>(
         onClickAction,
         canManageEscalations,
         canCloseInvestigation,
+        onCopyLink,
       ]
     );
 

@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/orchestrate_vm_builds.yml
@@ -34,5 +34,9 @@ spec:
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
-        everyone:
+        kibana-release-operators:
           access_level: BUILD_AND_READ
+        artifact-management:
+          access_level: BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY

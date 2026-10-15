@@ -17,8 +17,8 @@ import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public'
 import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { FETCH_STATUS, isPending } from '../../hooks/use_fetcher';
@@ -213,21 +213,24 @@ export function ServiceMapEmbeddable({
     }
   }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
-  const { start, end } = useMemo(() => {
-    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
-    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
-  }, [rangeFrom, rangeTo]);
+  // `optional` keeps the raw range when date math cannot parse, and `timeRangeId`
+  // (inside useTimeRange) re-resolves relative ranges on Refresh.
+  const { start: resolvedStart, end: resolvedEnd } = useTimeRange({
+    rangeFrom,
+    rangeTo,
+    optional: true,
+  });
+  const start = resolvedStart ?? rangeFrom;
+  const end = resolvedEnd ?? rangeTo;
 
-  const { start: badgesStart, end: badgesEnd } = useMemo(() => {
-    if (badgesRangeFrom == null || badgesRangeTo == null) {
-      return { start, end };
-    }
-    const { start: parsedStart, end: parsedEnd } = getDateRange({
-      rangeFrom: badgesRangeFrom,
-      rangeTo: badgesRangeTo,
-    });
-    return { start: parsedStart ?? badgesRangeFrom, end: parsedEnd ?? badgesRangeTo };
-  }, [badgesRangeFrom, badgesRangeTo, start, end]);
+  const { start: resolvedBadgesStart, end: resolvedBadgesEnd } = useTimeRange({
+    rangeFrom: badgesRangeFrom,
+    rangeTo: badgesRangeTo,
+    optional: true,
+  });
+  const hasBadgesRange = badgesRangeFrom != null && badgesRangeTo != null;
+  const badgesStart = hasBadgesRange ? resolvedBadgesStart ?? badgesRangeFrom : start;
+  const badgesEnd = hasBadgesRange ? resolvedBadgesEnd ?? badgesRangeTo : end;
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();

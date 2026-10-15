@@ -16,22 +16,36 @@ export interface SignificantEventsMaintenanceFailure {
    */
   target: string;
   error: string;
+  /**
+   * The space the failure belongs to. Absent for failures that are not tied to one
+   * space (data streams, snapshots, a missing plugin), which every space reports.
+   */
+  spaceId?: string;
+}
+
+export interface SignificantEventsMaintenanceDeletedCounts {
+  knowledgeIndicators: number;
+  storedQueries: number;
+  rules: number;
+  dataStreams: number;
 }
 
 /**
  * Structured result of a state transition (or the last pause/reassert snapshot).
  * While `state` is `paused`, `workflowsDisabled` / `rulesDisabled` are the
  * sizes of the current disabled snapshots (not only the last sweep’s deltas).
- * `executionsCancelled` is reserved for compatibility and is always 0 — pause
- * cancels in-flight work best-effort without returning a count. On a successful
- * resume workflow/rule counts are zero. On an incomplete resume they reflect
- * what is still recorded as disabled after the resume attempt.
+ * `executionsCancelled` is reserved for compatibility and is always 0. The
+ * workflow engine exposes cancellation callbacks, but the management wrapper
+ * consumes them for audit and returns no count. On a successful resume
+ * workflow/rule counts are zero. On an incomplete resume they reflect what is
+ * still recorded as disabled after the resume attempt.
  */
 export interface SignificantEventsMaintenanceSummary {
   state: SignificantEventsMaintenanceState;
   executionsCancelled: number;
   workflowsDisabled: number;
   rulesDisabled: number;
+  deleted?: SignificantEventsMaintenanceDeletedCounts;
   partialFailures: SignificantEventsMaintenanceFailure[];
 }
 

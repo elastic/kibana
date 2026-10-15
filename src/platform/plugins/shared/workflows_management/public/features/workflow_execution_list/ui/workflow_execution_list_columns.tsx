@@ -34,7 +34,8 @@ import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 /** Fixed column widths for the execution-history table (panel must not scroll horizontally). */
 export const EXECUTION_HISTORY_COLUMN_WIDTHS = {
-  status: '120px',
+  /** Fits the HITL 'Action is required' badge (wider than Success / Waiting). */
+  status: '160px',
   /** Fits `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
   started: '120px',
   duration: '72px',
@@ -197,7 +198,15 @@ export const getExecutionHistoryColumns = (
           data-test-subj="workflowExecutionListStatusCell"
         >
           <EuiFlexItem grow={false}>
-            <StatusPill status={execution.status} />
+            {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
+              <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
+                {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                  defaultMessage: 'Action is required',
+                })}
+              </EuiBadge>
+            ) : (
+              <StatusPill status={execution.status} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <RunModeFlask isTestRun={execution.isTestRun} stepId={execution.stepId} />

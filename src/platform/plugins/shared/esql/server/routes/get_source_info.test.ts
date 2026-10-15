@@ -9,11 +9,21 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
+import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { buildEsQuery } from '@kbn/es-query';
+import { getTime } from '@kbn/data-plugin/common';
 import { registerGetSourceInfoRoute } from './get_source_info';
+import { esqlRouteRequestCounter } from '../metrics';
+
+jest.mock('../metrics', () => ({
+  ...jest.requireActual('../metrics'),
+  esqlRouteRequestCounter: { add: jest.fn() },
+}));
 
 jest.mock('@kbn/esql-utils', () => ({
   getNamedParams: jest.fn().mockReturnValue([]),
   fixESQLQueryWithVariables: jest.fn((query: string) => query),
+  parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@kbn/es-query', () => ({
@@ -57,6 +67,7 @@ function buildMocks() {
   const response = {
     ok: jest.fn((r) => ({ status: 200, ...r })),
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
+    customError: jest.fn((r) => ({ status: r.statusCode, ...r })),
   };
   const context = { logger: { get: () => errorLogger } };
 
@@ -112,6 +123,72 @@ describe('registerGetSourceInfoRoute', () => {
     });
   });
 
+  describe('time filter', () => {
+    const timeRange = { from: 'now-15m', to: 'now' };
+    const timeFilter = { range: { '@timestamp': {} } };
+    const dslFilter = { bool: { filter: [timeFilter] } };
+
+    const run = async (body: Record<string, unknown>, timeFieldInQuery?: string) => {
+      const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+      (parseTimeFieldFromESQLQuery as jest.Mock).mockReturnValue(timeFieldInQuery);
+      (getTime as jest.Mock).mockReturnValue(timeFilter);
+      (buildEsQuery as jest.Mock).mockReturnValue(dslFilter);
+      registerGetSourceInfoRoute(router, context);
+      await handler(requestHandlerContext, { body }, response);
+      return esqlQuery;
+    };
+
+    it('filters on the given time field', async () => {
+      const esqlQuery = await run({
+        query: 'FROM logs-*',
+        timeRange,
+        timeFieldName: 'event.created',
+      });
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: 'event.created' });
+      expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter: dslFilter }));
+    });
+
+    it('filters on the time field found in the query when none is given', async () => {
+      const esqlQuery = await run(
+        { query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(100)', timeRange },
+        '@timestamp'
+      );
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: '@timestamp' });
+      expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter: dslFilter }));
+    });
+
+    it('prefers the given time field over the one found in the query', async () => {
+      await run(
+        {
+          query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(100)',
+          timeRange,
+          timeFieldName: 'event.created',
+        },
+        '@timestamp'
+      );
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: 'event.created' });
+    });
+
+    it('does not filter a query without a time field when none is given', async () => {
+      const esqlQuery = await run({ query: 'FROM logs-* | STATS COUNT(*) BY agent', timeRange });
+
+      expect(getTime).not.toHaveBeenCalled();
+      expect(esqlQuery).toHaveBeenCalledWith(
+        expect.not.objectContaining({ filter: expect.anything() })
+      );
+    });
+
+    it('does not look for a time field in the query without a time range', async () => {
+      await run({ query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(1 hour)' });
+
+      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
+      expect(getTime).not.toHaveBeenCalled();
+    });
+  });
+
   it('appends LIMIT 0 on a new line so a trailing // comment cannot swallow it', async () => {
     const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
     registerGetSourceInfoRoute(router, context);
@@ -149,14 +226,62 @@ describe('registerGetSourceInfoRoute', () => {
     esqlQuery.mockRejectedValueOnce(new Error('esql failed'));
     registerGetSourceInfoRoute(router, context);
 
-    await expect(
-      handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response)
-    ).rejects.toThrow('esql failed');
+    await handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
 
     expect(errorLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch ES|QL source info columns'),
       expect.objectContaining({ tags: ['esql', 'source_info'] })
     );
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'esql failed' },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('answers an invalid query with no columns and the error, without logging an error', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery, errorLogger } =
+      buildMocks();
+    esqlQuery.mockRejectedValueOnce(
+      Object.assign(new Error('Unknown index [lo]'), { meta: { statusCode: 400 } })
+    );
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM lo' } }, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { columns: [], error: { statusCode: 400, message: 'Unknown index [lo]' } },
+    });
+    // The metric records the status actually returned, and why the query failed.
+    expect(esqlRouteRequestCounter.add).toHaveBeenCalledWith(1, {
+      route: 'source_info',
+      outcome: 'failure',
+      'http.response.status_code': 200,
+      'error.type': '400',
+    });
+    expect(response.customError).not.toHaveBeenCalled();
+    expect(errorLogger.error).not.toHaveBeenCalled();
+  });
+
+  it('keeps errors that are not about the query as HTTP errors', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+    esqlQuery.mockRejectedValueOnce(
+      Object.assign(new Error('unauthorized'), { meta: { statusCode: 403 } })
+    );
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'unauthorized' },
+    });
+    expect(esqlRouteRequestCounter.add).toHaveBeenCalledWith(1, {
+      route: 'source_info',
+      outcome: 'failure',
+      'http.response.status_code': 403,
+      'error.type': '403',
+    });
     expect(response.ok).not.toHaveBeenCalled();
   });
 });

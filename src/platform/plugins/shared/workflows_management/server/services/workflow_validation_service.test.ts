@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
@@ -35,12 +36,19 @@ const makeDeps = (
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
+        isReady: jest.fn().mockResolvedValue(undefined),
         getTriggerDefinition: (triggerType: string) =>
           listedTriggers.find(({ id }) => id === triggerType) as any,
         getStepDefinition: (stepTypeId: string) => stepDefinitions[stepTypeId] as any,
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
+      getCoreStart: () =>
+        ({
+          featureFlags: {
+            getBooleanValue$: jest.fn().mockReturnValue(of(false)),
+          },
+        } as any),
     },
     actionsClient,
     actionsClientWithRequest,

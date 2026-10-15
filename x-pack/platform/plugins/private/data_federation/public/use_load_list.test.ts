@@ -60,6 +60,24 @@ describe('useLoadList', () => {
     expect(result.current.items).toEqual([2, 3]);
   });
 
+  it('reload rejects with the fetch error and clears items when get throws', async () => {
+    const error = new Error('refresh failed');
+    const get = jest.fn().mockResolvedValueOnce([1]).mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useLoadList(get));
+
+    await waitFor(() => {
+      expect(result.current.items).toEqual([1]);
+    });
+
+    await act(async () => {
+      await expect(result.current.reload()).rejects.toBe(error);
+    });
+
+    expect(result.current.items).toEqual([]);
+    expect(result.current.hasLoaded).toBe(true);
+  });
+
   it('does not update state after unmount (aborted signal)', async () => {
     let resolve!: (items: number[]) => void;
     let capturedSignal: AbortSignal | undefined;

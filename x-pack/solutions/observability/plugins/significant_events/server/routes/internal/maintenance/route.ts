@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -23,7 +26,7 @@ const bootstrapCleanupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -57,12 +60,13 @@ const pauseRoute = createServerRoute({
     access: 'internal',
     summary: 'Pause Significant Events activity',
     description:
-      'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
+      'Pauses Significant Events activity in the current space only: disables that space’s scheduled workflows, cancels their in-flight executions (including executions of the shared workflows running in that space), turns off its continuous onboarding and scheduled discovery settings, and disables the alerting rules backing knowledge indicator queries in that space. Other spaces are not affected. The shared workflows stay enabled because every space uses them. Existing data is kept. Idempotent while paused. ' +
+      'The state is stored per space. Authorization uses the caller’s space-scoped Nightshift manage privilege, which is enough to pause that space. ' +
+      'Stays available while the Nightshift feature flag is off, so background activity can be stopped without turning Nightshift back on.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -73,7 +77,7 @@ const pauseRoute = createServerRoute({
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
+    await assertSignificantEventsAccess({ server, licensing, ignore: ['feature_flag'] });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.pause({ request, updatedBy });
@@ -86,11 +90,11 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled.',
+      'Re-enables the workflows and alerting rules that Pause disabled in the current space, and restores the settings it turned off there. Other spaces are not affected. Does not restart cancelled executions. Idempotent while enabled.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -108,13 +112,44 @@ const resumeRoute = createServerRoute({
   },
 });
 
+const resetRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/_reset',
+  options: {
+    access: 'internal',
+    summary: 'Reset Significant Events activity and data',
+    description:
+      'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
+      'Unlike pause and resume, this is deployment-wide: every space is paused while the data is deleted and returned to enabled afterwards. Authorization requires the Nightshift manage and configure privileges in every space, not only the one the request is sent to, and the request is rejected with 403 before anything changes when any space lacks them; there is no separate cluster-level privilege today. The workflow and settings sweep covers every space, and spaces that were already paused are returned to enabled too. If the final write fails in a space after the data was deleted, that space stays paused and the error names it; run reset again to return it to enabled. ' +
+      'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status. ' +
+      'NOTE: Significant Events documents stored in `.rule-events` (owned by alerting_v2) are NOT cleared by this operation. Alerting v2 does not yet expose a scoped delete-by-source API; a direct deleteByQuery on the shared stream would bypass the owner abstraction and require delete privileges not granted by the Nightshift manage+configure role, failing silently for non-admins. Track the follow-up in the alerting_v2 team.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    maintenanceService,
+  }): Promise<SignificantEventsMaintenanceSummary> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
+    return maintenanceService.reset({ request, updatedBy });
+  },
+});
+
 const statusRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/maintenance/_status',
   options: {
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused).',
+      'Returns the maintenance state of Significant Events activity in the current space (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
   },
   security: {
     authz: {
@@ -129,7 +164,7 @@ const statusRoute = createServerRoute({
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceStatus> => {
     const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
+    await assertSignificantEventsAccess({ server, licensing, ignore: ['feature_flag'] });
 
     return maintenanceService.getStatus({ request });
   },
@@ -139,5 +174,6 @@ export const internalMaintenanceRoutes = {
   ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
+  ...resetRoute,
   ...statusRoute,
 };

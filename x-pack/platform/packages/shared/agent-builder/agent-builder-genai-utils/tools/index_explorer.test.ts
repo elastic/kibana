@@ -172,6 +172,7 @@ describe('indexExplorer', () => {
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
       includeDatasets: false,
+      includeViews: false,
       esClient,
     });
   });
@@ -421,5 +422,139 @@ describe('gatherResourceDescriptors', () => {
       expect.arrayContaining([expect.objectContaining({ path: '@timestamp' })])
     );
     expect(denied?.fields).toEqual([]);
+  });
+
+  it('returns view descriptors with output columns and the stored query', async () => {
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [],
+      aliases: [],
+      data_streams: [],
+      views: [
+        {
+          type: EsResourceType.view,
+          name: 'logs-proxy-parsed',
+          query: 'FROM logs-* | KEEP status',
+          description: 'Parsed proxy logs',
+        },
+      ],
+    });
+    esClient.esql.query.mockResolvedValue({
+      columns: [{ name: 'status', type: 'integer' }],
+      values: [],
+    });
+
+    const result = await gatherResourceDescriptors({
+      indexPattern: 'logs-proxy-parsed',
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result).toEqual([
+      {
+        type: EsResourceType.view,
+        name: 'logs-proxy-parsed',
+        description:
+          'Parsed proxy logs ES|QL view. Query with "FROM logs-proxy-parsed". Defined as: FROM logs-* | KEEP status',
+        fields: [{ path: 'status', type: 'integer' }],
+      },
+    ]);
+  });
+
+  it('keeps a broken view with empty fields and still returns a valid index', async () => {
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [{ type: EsResourceType.index, name: 'logs-hot' }],
+      aliases: [],
+      data_streams: [],
+      views: [
+        {
+          type: EsResourceType.view,
+          name: 'logs-proxy-parsed',
+          query: 'FROM missing-index | KEEP status',
+        },
+      ],
+    });
+    getIndexFieldsMock.mockResolvedValue({
+      'logs-hot': {
+        fields: [{ path: 'message', type: 'text', meta: {} }],
+      },
+    });
+    esClient.esql.query.mockRejectedValue(new Error('Unknown index [missing-index]'));
+
+    const result = await gatherResourceDescriptors({
+      indexPattern: '*',
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result).toEqual([
+      {
+        type: EsResourceType.index,
+        name: 'logs-hot',
+        description: undefined,
+        fields: [{ path: 'message', type: 'text' }],
+      },
+      {
+        type: EsResourceType.view,
+        name: 'logs-proxy-parsed',
+        description:
+          'ES|QL view. Query with "FROM logs-proxy-parsed". Defined as: FROM missing-index | KEEP status',
+        fields: [],
+      },
+    ]);
+  });
+
+  it('introspects listed views with bounded concurrency', async () => {
+    const viewCount = 10;
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [],
+      aliases: [],
+      data_streams: [],
+      views: Array.from({ length: viewCount }, (_, index) => ({
+        type: EsResourceType.view,
+        name: `view-${index}`,
+        query: 'FROM logs-*',
+      })),
+    });
+
+    let started = 0;
+    const pending: Array<() => void> = [];
+    esClient.esql.query.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          started += 1;
+          pending.push(() =>
+            resolve({
+              columns: [{ name: 'status', type: 'integer' }],
+              values: [],
+            })
+          );
+        })
+    );
+
+    const resultPromise = gatherResourceDescriptors({
+      indexPattern: '*',
+      includeViews: true,
+      esClient,
+    });
+
+    for (let i = 0; i < 20 && started < 5; i++) {
+      await Promise.resolve();
+    }
+
+    expect(started).toBe(5);
+    pending.splice(0).forEach((release) => release());
+
+    for (let i = 0; i < 20 && started < viewCount; i++) {
+      await Promise.resolve();
+    }
+    expect(started).toBe(viewCount);
+    pending.splice(0).forEach((release) => release());
+
+    const result = await resultPromise;
+    expect(result).toHaveLength(viewCount);
+    expect(result.every((resource) => resource.type === EsResourceType.view)).toBe(true);
   });
 });

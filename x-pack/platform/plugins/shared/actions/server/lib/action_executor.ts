@@ -22,7 +22,6 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
@@ -602,11 +601,7 @@ export class ActionExecutor {
             signal,
             authMode,
             profileUid,
-            ...(actionType.source === ACTION_TYPE_SOURCES.spec
-              ? {
-                  connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
-                }
-              : {}),
+            connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
           });
 
           if (rawResult && rawResult.status === 'error') {

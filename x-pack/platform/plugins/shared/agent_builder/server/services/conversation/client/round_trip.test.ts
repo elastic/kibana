@@ -59,6 +59,16 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
   it('preserves a maximal completed round (steps, structured output, attachments, trace_id, state, overrides)', () => {
     const steps: ConversationRoundStep[] = [
       {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '  <system_update>\nexact model context\n</system_update>  ',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': {
+            version: 1,
+            data: { recalled_ids: ['memory-1', ' memory-2 '] },
+          },
+        },
+      },
+      {
         type: ConversationRoundStepType.toolCall,
         tool_call_id: 'tc-1',
         tool_id: 'platform.core.execute_esql',
@@ -138,7 +148,44 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
     expect(reconstructed.author).toEqual({ id: 'user-1', username: 'alice' });
   });
 
+  it('preserves a service account author', () => {
+    const round = baseRound({
+      author: {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      },
+    });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('attributes an authorless round to a service account owner', () => {
+    const { author, ...noAuthor } = baseRound();
+    const conversation: Conversation = {
+      ...conversationWith([noAuthor as ConversationRound]),
+      user: {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      },
+    };
+
+    const [reconstructed] = eventsToRounds(roundsToEvents(conversation));
+
+    expect(reconstructed.author).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      type: 'service_account',
+    });
+  });
+
   describe('accepted, documented losses', () => {
+    it('drops an explicit `type: user` author, which is the default anyway', () => {
+      const round = baseRound({ author: { id: 'user-1', username: 'alice', type: 'user' } });
+
+      expect(roundTrip([round])[0].author).toEqual({ id: 'user-1', username: 'alice' });
+    });
+
     it('drops an in-progress round (the run has no terminal event yet)', () => {
       expect(roundTrip([baseRound({ status: ConversationRoundStatus.inProgress })])).toEqual([]);
     });

@@ -44,9 +44,11 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
           type: 'example',
           tags: ['demo', 'user-activity'],
         },
-        metadata: {
-          some_field_1: 'some_value_1',
-          some_field_2: 'some_value_2',
+        kibana: {
+          security: {
+            some_field_1: 'some_value_1',
+            some_field_2: 'some_value_2',
+          },
         },
       });
 

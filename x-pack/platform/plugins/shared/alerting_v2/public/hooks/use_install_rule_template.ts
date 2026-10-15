@@ -14,6 +14,6 @@ export const useInstallRuleTemplate = () => {
 
   return useMutation({
     mutationFn: (template: RuleTemplateResponse) =>
-      mutateAsync({ payload: template.rule, enabled: false }),
+      mutateAsync({ payload: template.rule, enabled: false, templateId: template.id }),
   });
 };

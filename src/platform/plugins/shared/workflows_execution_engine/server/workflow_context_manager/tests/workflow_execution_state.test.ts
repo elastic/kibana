@@ -58,6 +58,9 @@ describe('WorkflowExecutionState', () => {
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
     workflowExecutionRepository.updateWorkflowExecution = jest.fn();
+    workflowExecutionRepository.getWorkflowExecutionCancelState = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
     stepExecutionRepository.bulkUpsert = jest.fn();
@@ -145,6 +148,7 @@ describe('WorkflowExecutionState', () => {
       stepExecutionIndex: 0,
       globalExecutionIndex: 0,
       isTestRun: false,
+      managed: false,
     } as Partial<EsWorkflowStepExecution>);
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
   });
@@ -177,6 +181,31 @@ describe('WorkflowExecutionState', () => {
         workflowId: 'test-workflow-id',
         isTestRun: true,
       })
+    );
+  });
+
+  it('should set managed on step execution from workflow execution', () => {
+    const state = new WorkflowExecutionState(
+      {
+        id: 'test-workflow-execution-id',
+        workflowId: 'test-workflow-id',
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2025-08-05T20:00:00.000Z',
+        isTestRun: false,
+        managed: true,
+      } as EsWorkflowExecution,
+      workflowExecutionRepository
+    );
+
+    state.upsertStep({
+      id: 'fake-id',
+      stepId: 'test-step',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-08-05T20:00:00.000Z',
+    } as EsWorkflowStepExecution);
+
+    expect(state.getLatestStepExecution('test-step')).toEqual(
+      expect.objectContaining({ managed: true })
     );
   });
 
@@ -255,9 +284,41 @@ describe('WorkflowExecutionState', () => {
 
   describe('flush', () => {
     beforeEach(() => {
-      workflowExecutionRepository.getWorkflowExecutionById = jest
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest
         .fn()
-        .mockResolvedValue({} as EsWorkflowExecution);
+        .mockResolvedValue({ cancelRequested: false });
+    });
+
+    it('should pick up an external cancellation even when there are no pending changes', async () => {
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest.fn().mockResolvedValue({
+        cancelRequested: true,
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user',
+      });
+
+      await ioService.flush();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(underTest.getWorkflowExecution()).toEqual(
+        expect.objectContaining({
+          cancelRequested: true,
+          cancelledAt: '2025-08-05T20:02:00.000Z',
+          cancelledBy: 'user',
+        })
+      );
+    });
+
+    it('should keep in-memory changes when merging the external cancellation', async () => {
+      underTest.updateWorkflowExecution({ currentNodeId: 'node-in-memory' });
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest
+        .fn()
+        .mockResolvedValue({ cancelRequested: true });
+
+      await ioService.flush();
+
+      expect(underTest.getWorkflowExecution()).toEqual(
+        expect.objectContaining({ cancelRequested: true, currentNodeId: 'node-in-memory' })
+      );
     });
 
     it('should flush workflow execution changes', async () => {

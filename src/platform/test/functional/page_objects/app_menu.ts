@@ -33,15 +33,38 @@ export class AppMenuPageObject extends FtrService {
     });
   }
 
-  async clickMenuItem(testId: string, { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+  private async assertMenuItemEnabled(testId: string) {
+    if (!(await this.testSubjects.isEnabled(testId))) {
+      throw new Error(`App menu item "${testId}" is disabled`);
+    }
+  }
+
+  /**
+   * @description Clicks an app menu item, whether it is displayed directly or inside the overflow
+   * popover. Pass `waitForEnabled` for items that are briefly disabled while the app is busy: a
+   * click on a disabled item is silently dropped, so it is retried until the item accepts it.
+   */
+  async clickMenuItem(
+    testId: string,
+    {
+      isInOverflowMenu,
+      waitForEnabled,
+    }: { isInOverflowMenu?: boolean; waitForEnabled?: boolean } = {}
+  ) {
     await this.retry.try(async () => {
       if (!isInOverflowMenu && (await this.testSubjects.exists(testId))) {
+        if (waitForEnabled) {
+          await this.assertMenuItemEnabled(testId);
+        }
         await this.testSubjects.click(testId);
         return;
       }
 
       await this.openOverflowPopover();
       await this.testSubjects.existOrFail(testId, { timeout: 5000 });
+      if (waitForEnabled) {
+        await this.assertMenuItemEnabled(testId);
+      }
       await this.testSubjects.click(testId);
     });
   }

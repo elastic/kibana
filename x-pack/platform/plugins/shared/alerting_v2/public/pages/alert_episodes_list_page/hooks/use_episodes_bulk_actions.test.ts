@@ -116,4 +116,20 @@ describe('useEpisodesBulkActions', () => {
     const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
     expect(resolvedIds).not.toContain('classic-ep');
   });
+
+  it('filters out actions with supportsBulk set to false', () => {
+    const bulkAction = stubAction({ id: 'BULK_ACTION' });
+    const singleOnlyAction = stubAction({ id: 'SINGLE_ONLY', supportsBulk: false });
+
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [bulkAction, singleOnlyAction],
+        episodesData: [],
+        onSuccess: jest.fn(),
+      })
+    );
+
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].key).toBe('BULK_ACTION');
+  });
 });

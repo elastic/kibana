@@ -21,6 +21,7 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
   enabled: true,
+  storage: { source: 'plain_index', dataRetention: '90d' },
   eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
   maxWorkflowDepth: 10,
   logging: { console: true },
@@ -105,7 +106,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowLogger: {},
     nodesFactory: {},
     workflowExecutionGraph: {},
-    workflowTaskManager: {},
+    workflowTaskManager: { removeTasksForExecution: jest.fn().mockResolvedValue(undefined) },
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
     telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
@@ -124,11 +125,12 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
+  eventQueue: undefined,
   nodesFactory: {},
   workflowExecutionGraph: {},
   esClient: {},
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
   signal: options.signal,
-  workflowTaskManager: {},
+  workflowTaskManager: { removeTasksForExecution: expect.any(Function) },
 });

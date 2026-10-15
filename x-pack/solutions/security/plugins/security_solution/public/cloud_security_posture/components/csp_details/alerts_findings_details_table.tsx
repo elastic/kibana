@@ -174,8 +174,11 @@ export const AlertsDetailsTable = memo(
       if (!euidApi?.euid) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
-    }, [euidApi?.euid, entityTypeResolved, entityRecord]);
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityTypeResolved),
+        entityRecord
+      );
+    }, [euidApi, entityTypeResolved, entityRecord]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
@@ -418,7 +421,7 @@ export const AlertsDetailsTable = memo(
 
     return (
       <>
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiLink onClick={() => openAlertsInAlertsPage()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {

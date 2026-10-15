@@ -27,7 +27,7 @@ const ebtElement = {
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageKiListPanel: 'contextEngine.aiIndexDetailPage.kiListPanel',
-  aiIndexEditFlyout: 'contextEngine.aiIndexEditFlyout',
+  viewKiPage: 'contextEngine.viewKiPage',
   aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
@@ -86,9 +86,8 @@ const ebtAction = {
   automations: {
     SUGGEST: 'suggest_automation',
     CREATE: 'create_automation',
-    EDIT: 'edit_automations',
-    SAVE: 'save_automations',
-    CANCEL: 'cancel_automations',
+    ADD_MENU: 'open_add_automation_menu',
+    ROW_ACTIONS_MENU: 'open_automation_actions_menu',
     PREVIEW_WORKFLOW: 'preview_automation',
     OPEN_WORKFLOW: 'open_workflow',
     REMOVE: 'remove_automation',
@@ -110,6 +109,10 @@ const ebtAction = {
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     TOGGLE_ROW: 'toggle_row',
+  },
+  viewKi: {
+    TAB_DETAILS: 'tab_details',
+    TAB_DOCUMENT: 'tab_document',
   },
 } as const;
 

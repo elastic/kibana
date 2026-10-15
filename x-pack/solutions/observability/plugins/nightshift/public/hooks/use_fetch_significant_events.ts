@@ -163,7 +163,7 @@ export const useFetchSignificantEvents = (): UseQueryResult<
 
 export const markEventInvestigationCompleteInCache = (
   queryClient: QueryClient,
-  eventUuid: string,
+  eventId: string,
   completedAt: string = new Date().toISOString()
 ): void => {
   queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
@@ -175,7 +175,7 @@ export const markEventInvestigationCompleteInCache = (
 
       let changed = false;
       const hits = current.hits.map((hit) => {
-        if (hit.event_uuid !== eventUuid) {
+        if (hit.event_id !== eventId) {
           return hit;
         }
 

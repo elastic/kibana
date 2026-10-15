@@ -16,11 +16,7 @@ import {
   ExternalReferenceStorageType,
   AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
-import {
-  INDICATOR_ATTACHMENT_TYPE,
-  LEGACY_INDICATOR_ATTACHMENT_TYPE,
-  LENS_ATTACHMENT_TYPE,
-} from '@kbn/cases-plugin/common/constants';
+import { LENS_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { expect } from 'expect';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import {
@@ -101,8 +97,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   /**
    * These specs exercise real migrated attachment types via their legacy wire shapes
-   * (`indicator` external reference, `.lens` persistable state). They are registered by their
-   * owning plugins (security_solution, lens), not by the cases test fixture.
+   * (`osquery` external reference, `.lens` persistable state). They are registered by their
+   * owning plugins (osquery, lens), not by the cases test fixture. Solution-prefixed types such
+   * as `security.indicator` are rejected on a `cases` owned case.
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
@@ -119,11 +116,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(
-          INDICATOR_ATTACHMENT_TYPE,
-          attachmentId,
-          INDICATOR_ATTACHMENT_TYPE
-        );
+        await validateAttachment(OSQUERY_ATTACHMENT_TYPE, attachmentId, OSQUERY_ATTACHMENT_TYPE);
       });
     });
 
@@ -209,9 +202,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const externalReferenceAttachmentId = comments[0].comment_id;
         const lensAttachmentId = comments[1].comment_id;
         await validateAttachment(
-          INDICATOR_ATTACHMENT_TYPE,
+          OSQUERY_ATTACHMENT_TYPE,
           externalReferenceAttachmentId,
-          INDICATOR_ATTACHMENT_TYPE
+          OSQUERY_ATTACHMENT_TYPE
         );
         await validateAttachment(LENS_ATTACHMENT_TYPE, lensAttachmentId, LENS_ATTACHMENT_TYPE);
 
@@ -436,13 +429,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(caseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(caseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -468,13 +456,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(theCaseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(theCaseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -557,12 +540,12 @@ const getLensState = (dataViewId: string) => ({
 const getExternalReferenceAttachment = (): ExternalReferenceNoSOAttachmentPayload => ({
   type: AttachmentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-  externalReferenceId: 'indicator-1',
-  externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  externalReferenceId: 'action-1',
+  externalReferenceAttachmentTypeId: OSQUERY_ATTACHMENT_TYPE,
   externalReferenceMetadata: {
-    indicatorName: 'malware.exe',
-    indicatorType: 'file',
-    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+    actionId: 'action-1',
+    agentIds: ['agent-1'],
+    queryId: 'query-1',
   },
   owner: 'cases',
 });

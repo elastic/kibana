@@ -114,7 +114,7 @@ describe('create_data_source_flyout_authentication', () => {
         description: '',
         settings: {
           auth: 'ignored',
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -125,7 +125,7 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'access_and_secret_keys');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           auth: 'static_credentials',
@@ -141,7 +141,7 @@ describe('create_data_source_flyout_authentication', () => {
         name: 's3',
         description: '',
         settings: {
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -155,7 +155,7 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'federated_identity');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
+          endpoint: 'https://s3.example',
           role_arn: 'role',
           jwt_audience: 'aud',
           role_session_name: 'session',
@@ -168,13 +168,46 @@ describe('create_data_source_flyout_authentication', () => {
       expect(applied.settings).not.toHaveProperty('secret_key');
     });
 
-    it('keeps no credentials or federated fields when anonymous selected (s3)', () => {
+    it('preserves non-auth s3 settings when switching auth modes', () => {
       const data: DataSourceWithSecrets = {
         type: 's3',
         name: 's3',
         description: '',
         settings: {
           region: 'us-east-1',
+          endpoint: 'https://s3.example',
+          // arbitrary settings that are not part of auth selection
+          path_style_access: 'true',
+          access_key: 'AKIA',
+          secret_key: 'SECRET',
+          role_arn: 'role',
+          jwt_audience: 'aud',
+        } as any,
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'access_and_secret_keys');
+      expect(applied.settings).toEqual(
+        expect.objectContaining({
+          region: 'us-east-1',
+          endpoint: 'https://s3.example',
+          path_style_access: 'true',
+          access_key: 'AKIA',
+          secret_key: 'SECRET',
+          auth: 'static_credentials',
+        })
+      );
+      // it does not have auth fields
+      expect(applied.settings).not.toHaveProperty('role_arn');
+      expect(applied.settings).not.toHaveProperty('jwt_audience');
+    });
+
+    it('keeps no credentials or federated fields when anonymous selected (s3)', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: {
+          endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           role_arn: 'role',
@@ -184,13 +217,40 @@ describe('create_data_source_flyout_authentication', () => {
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
       expect(applied.settings).toEqual(
-        expect.objectContaining({ region: 'us-east-1', auth: 'anonymous' })
+        expect.objectContaining({ endpoint: 'https://s3.example', auth: 'anonymous' })
       );
       expect(applied.settings).not.toHaveProperty('access_key');
       expect(applied.settings).not.toHaveProperty('secret_key');
       expect(applied.settings).not.toHaveProperty('role_arn');
       expect(applied.settings).not.toHaveProperty('jwt_audience');
     });
+
+    it('applies anonymous s3 auth when settings were dropped from the form', () => {
+      const data = {
+        type: 's3',
+        name: 's3',
+        description: '',
+      } as DataSourceWithSecrets;
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual({ auth: 'anonymous' });
+    });
+
+    it.each(['s3', 'gcs', 'azure'] as const)(
+      'works when %s settings were dropped from the form',
+      (type) => {
+        const data = {
+          type,
+          name: 'ds',
+          description: '',
+        } as DataSourceWithSecrets;
+
+        expect(() => applyAuthenticationModeToDataSource(data, 'anonymous')).not.toThrow();
+
+        const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+        expect(applied.settings).toEqual({ auth: 'anonymous' });
+      }
+    );
 
     it('trims and applies gcs credentials when access_and_secret_keys selected', () => {
       const data: DataSourceWithSecrets = {

@@ -16,6 +16,19 @@ export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
+  title?: string;
+  source_name?: string;
+  published_at?: string;
+  severity?: string;
+  /**
+   * KEV-shaped vendor and product the report names, when the extraction found them.
+   * Scope resolution matches them against the datasets present in the hunt universe, so a
+   * report about any product can find the indices that hold its telemetry. Only set when
+   * the stored value is a non-empty string.
+   */
+  vendor?: string;
+  product?: string;
   /**
    * What the bounds below dropped, so the run can report the part of the report it
    * never looked at. Silently hunting a prefix is the failure mode: an IOC past the
@@ -35,10 +48,14 @@ export interface ReportHuntContext {
 }
 
 interface StoredReportSource {
-  content?: { body_text?: string };
+  '@timestamp'?: string;
+  content?: { title?: string; body_text?: string };
+  source?: { name?: string };
+  severity?: { level?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ttps?: { techniques?: string[] };
+    vulnerability?: { vendor?: string; product?: string };
   };
 }
 
@@ -50,6 +67,8 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
 /** Matches the OpenAPI `techniques` maxItems and item maxLength. */
 export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
+/** A vendor or product name is a short label; anything longer is malformed extraction, not a name. */
+const MAX_HUNT_VENDOR_PRODUCT_CHARS = 256;
 
 /**
  * A stored IOC of a kind Tier 1 can map to an ECS field, carrying something to search for.
@@ -66,8 +85,22 @@ const isSearchableIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc
 const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
   value.length <= MAX_HUNT_IOC_VALUE_CHARS;
 
+const MAX_REPORT_LABEL_CHARS = 512;
+
+const asLabel = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
+    : undefined;
+
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
+
+/** A stored vendor or product label, or undefined when it is absent, blank, or not a string. */
+const readVendorProduct = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, MAX_HUNT_VENDOR_PRODUCT_CHARS) : undefined;
+};
 
 /**
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
@@ -100,7 +133,17 @@ export const loadReportHuntContext = async ({
         filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
       },
     },
-    _source: ['content.body_text', 'extracted.iocs', 'extracted.ttps.techniques'],
+    _source: [
+      '@timestamp',
+      'content.title',
+      'content.body_text',
+      'source.name',
+      'severity.level',
+      'extracted.iocs',
+      'extracted.ttps.techniques',
+      'extracted.vulnerability.vendor',
+      'extracted.vulnerability.product',
+    ],
   });
   const source = response.hits.hits[0]?._source;
   if (!source) return null;
@@ -108,6 +151,8 @@ export const loadReportHuntContext = async ({
   const rawText = source.content?.body_text;
   const hasText = typeof rawText === 'string' && rawText.length > 0;
   const text = hasText ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS) : undefined;
+  const vendor = readVendorProduct(source.extracted?.vulnerability?.vendor);
+  const product = readVendorProduct(source.extracted?.vulnerability?.product);
 
   // Counted before the bounds are applied, and only over values that survived
   // validation: an IOC kind Tier 1 cannot map is dropped by design and is not lost
@@ -143,10 +188,20 @@ export const loadReportHuntContext = async ({
       }),
   };
 
+  const title = asLabel(source.content?.title);
+  const sourceName = asLabel(source.source?.name);
+  const publishedAt = asLabel(source['@timestamp']);
+  const severity = asLabel(source.severity?.level);
   return {
+    ...(title !== undefined ? { title } : {}),
+    ...(sourceName !== undefined ? { source_name: sourceName } : {}),
+    ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
+    ...(severity !== undefined ? { severity } : {}),
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
     techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),
+    ...(vendor !== undefined ? { vendor } : {}),
+    ...(product !== undefined ? { product } : {}),
     ...(Object.keys(truncated).length > 0 ? { truncated } : {}),
   };
 };

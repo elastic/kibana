@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export {
+  resolveNightshiftModel,
+  type NightshiftModelRestriction,
+  type ResolveNightshiftModelOptions,
+} from './src/resolve_nightshift_model';
+export { resolveNightshiftModelForRequest } from './src/resolve_nightshift_model_for_request';
 export type { AnalysisTarget } from './src/shared/analysis_target';
 export { getDiverseSampleDocuments } from './src/shared/sampling/get_diverse_sample_documents';
 export { EMPTY_TOKENS, sumTokens } from './src/shared/tokens/sum_tokens';
@@ -42,6 +48,22 @@ export {
   type SimilarFeatureHit,
 } from './src/significant_events/features/identify_features';
 export { featuresPrompt } from './src/significant_events/features/prompt';
+export { buildFeatureIdentificationUserMessage } from './src/significant_events/features/build_feature_identification_user_message';
+export {
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
+} from './src/significant_events/features/parse_finalized_features';
+export {
+  compactInferenceDocuments,
+  MAX_INFERENCE_DOCUMENTS_BYTES,
+  MAX_INFERENCE_DOCUMENT_BYTES,
+  MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_INFERENCE_FIELD_NAME_LENGTH,
+} from './src/significant_events/features/compact_inference_documents';
+export {
+  buildKIQueryGenerationUserMessage,
+  MAX_EXISTING_QUERIES_FOR_CONTEXT,
+} from './src/significant_events/queries/build_ki_query_generation_user_message';
 export {
   createGetStreamFeaturesTool,
   createGetFeatureQueryFromToolArgs,
