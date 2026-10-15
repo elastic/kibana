@@ -1889,9 +1889,9 @@ export class RulesClient {
     if (nextEnabled !== wasEnabled) {
       const eventRule = { ruleId: rule.id, spaceId: this.spaceId, rule };
       if (nextEnabled) {
-        this.ruleEventPublisher.emitRuleEnabled(this.request, [eventRule]);
+        this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [eventRule]);
       } else {
-        this.ruleEventPublisher.emitRuleDisabled(this.request, [eventRule]);
+        this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [eventRule]);
       }
     }
     return { rule, created: false };
