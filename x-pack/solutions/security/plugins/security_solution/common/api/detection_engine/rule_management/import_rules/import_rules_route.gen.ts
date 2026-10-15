@@ -25,11 +25,7 @@ export const ImportRulesRequestQuery = lazySchema(() =>
     /**
      * Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
      */
-    overwrite: BooleanFromString.optional()
-      .default(false)
-      .describe(
-        "Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`."
-      ),
+    overwrite: BooleanFromString.optional().default(false),
     /**
      * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
      */
@@ -64,34 +60,21 @@ export const ImportRulesResponse = lazySchema(() =>
           /**
            * Rules created by this import.
            */
-          created: z.number().int().min(0).describe('Rules created by this import.'),
+          created: z.number().int().min(0),
           /**
            * Existing rules overwritten because the payload changed.
            */
-          updated: z
-            .number()
-            .int()
-            .min(0)
-            .describe('Existing rules overwritten because the payload changed.'),
+          updated: z.number().int().min(0),
           /**
            * Existing rules skipped because nothing changed. Included in `success_count`.
            */
-          skipped: z
-            .number()
-            .int()
-            .min(0)
-            .describe(
-              'Existing rules skipped because nothing changed. Included in `success_count`.'
-            ),
+          skipped: z.number().int().min(0),
           /**
            * Rules that did not import successfully.
            */
-          failed: z.number().int().min(0).describe('Rules that did not import successfully.'),
+          failed: z.number().int().min(0),
         })
-        .strict()
-        .describe(
-          'Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.'
-        ),
+        .strict(),
       errors: z.array(ErrorSchema),
       action_connectors_errors: z.array(ErrorSchema),
       action_connectors_warnings: z.array(WarningSchema),
