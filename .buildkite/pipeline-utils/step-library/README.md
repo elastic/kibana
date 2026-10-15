@@ -81,7 +81,10 @@ using `options`.
 - `render.fixtures.test.ts` runs the renderer over every YAML fragment that
   still exists.
 - `fragments.test.ts` snapshots every fragment (from its YAML, or from its
-  TypeScript function once ported) after a semantic normalization.
+  TypeScript function once ported) after a semantic normalization. The
+  `sync_pull_request_fragments.sh` quick check registers new `pull_request/*.yml`
+  files in `FRAGMENTS` (and drops deleted unported ones), writes snapshots for
+  new fragments, and auto-commits. It never rewrites an existing snapshot.
   `pipeline.scenarios.test.ts` (in `scripts/pipelines/pull_request`) snapshots the
   ordered step ids of the whole pipeline for example PRs. Update a snapshot
   deliberately, never to make a change pass.

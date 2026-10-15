@@ -1099,6 +1099,39 @@ exports[`pull_request fragments pull_request/response_ops_cases 1`] = `
 }
 `;
 
+exports[`pull_request fragments pull_request/scout_fleet_real_agent 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/scout_fleet_real_agent.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "scout-fleet-real-agent",
+      "label": "Scout Fleet Real Agent",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
 exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] = `
 {
   "steps": [

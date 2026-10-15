@@ -58,6 +58,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   yamlFragment('pull_request/renovate'),
   yamlFragment('pull_request/response_ops'),
   yamlFragment('pull_request/response_ops_cases'),
+  yamlFragment('pull_request/scout_fleet_real_agent'),
   yamlFragment('pull_request/security_solution/ai4dsoc'),
   yamlFragment('pull_request/security_solution/ai_assistant'),
   yamlFragment('pull_request/security_solution/asset_inventory'),
