@@ -57,7 +57,7 @@ function kueryReferencesStatusField(kuery?: string): boolean {
   if (!kuery) {
     return false;
   }
-  const referencesStatus = (node: any): boolean =>
+  const referencesStatus = (node?: KueryNode): boolean =>
     node?.type === 'function' &&
     ((node.arguments?.[0]?.type === 'literal' && node.arguments[0].value === 'status') ||
       (node.arguments ?? []).some(referencesStatus));

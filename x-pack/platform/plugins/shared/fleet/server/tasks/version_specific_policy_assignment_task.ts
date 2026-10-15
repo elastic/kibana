@@ -646,7 +646,7 @@ export class VersionSpecificPolicyAssignmentTask {
     });
 
     if (response.aggregations?.without_policy_base_id?.policy_ids?.sum_other_doc_count) {
-      this.logger.warn(
+      this.logger.debug(
         `[VersionSpecificPolicyAssignmentTask] More than ${MAX_AGENTS_WITHOUT_POLICY_BASE_ID} policy ids of agents without policy_base_id: looking at all the agent policies of the page`
       );
       return policyIds;
