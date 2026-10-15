@@ -16,6 +16,11 @@ import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
+const transformWithCurrentTs = transformWithTs as unknown as (
+  typescript: TypeScript,
+  options: Parameters<typeof transformWithTs>[1]
+) => ts.TransformerFactory<ts.SourceFile>;
+
 import { extractMessagesFromCallExpression, MessageDescriptor, ExtractorOpts } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
@@ -167,7 +172,7 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
               });
             },
           }),
-          transformWithTs(ts, {
+          transformWithCurrentTs(ts, {
             additionalFunctionNames: ['translate'],
             extractSourceLocation: true,
             removeDefaultMessage: true,

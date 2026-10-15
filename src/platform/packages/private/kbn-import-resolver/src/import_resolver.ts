@@ -173,7 +173,7 @@ export class ImportResolver {
     if (req.startsWith('zod/v4')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
     }
-    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+    if (req === 'zod' || req.startsWith('zod/v3')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
     }
 
@@ -183,6 +183,15 @@ export class ImportResolver {
 
     if (req.startsWith('vega-tooltip')) {
       return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
+    }
+
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    if (req === 'stylelint') {
+      return Path.resolve(REPO_ROOT, `node_modules/stylelint/lib/index.mjs`);
+    }
+
+    if (req === 'meow') {
+      return Path.resolve(REPO_ROOT, `node_modules/meow/build/index.js`);
     }
 
     // turn root-relative paths into relative paths

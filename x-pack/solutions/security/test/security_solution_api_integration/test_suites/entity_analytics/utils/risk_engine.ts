@@ -287,6 +287,29 @@ export const waitForRiskEngineRun = async ({
   );
 };
 
+/**
+ * Waits until the risk engine task is idle and ready to be scheduled again.
+ */
+export const waitForRiskEngineIdle = async ({
+  supertest,
+  log,
+}: {
+  supertest: SuperTest.Agent;
+  log: ToolingLog;
+}): Promise<void> => {
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+
+  await waitFor(
+    async () => {
+      const { body } = await riskEngineRoutes.getStatus();
+      const status = body?.risk_engine_task_status?.status;
+      return status === 'idle' || status === 'failed';
+    },
+    'waitForRiskEngineIdle',
+    log
+  );
+};
+
 export const getRiskEngineTasks = async ({
   es,
   index = ['.kibana_task_manager*'],

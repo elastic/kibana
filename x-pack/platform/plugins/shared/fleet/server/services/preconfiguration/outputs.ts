@@ -377,7 +377,9 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
+    (existingOutput.type !== 'kafka' &&
+      isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||

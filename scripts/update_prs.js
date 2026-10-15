@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/prs/run_update_prs_cli');
+require('@kbn/dev/prs/run_update_prs_cli');

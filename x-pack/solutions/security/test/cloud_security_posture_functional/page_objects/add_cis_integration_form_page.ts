@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { setTimeout as sleep } from 'node:timers/promises';
-import expect from '@kbn/expect';
 import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -44,6 +43,7 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const logger = getService('log');
+  const retry = getService('retry');
 
   const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 
@@ -345,8 +345,14 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
-  const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
+  const waitForPostInstallModal = async (timeout: number = 20000) =>
+    await retry.waitForWithTimeout(
+      'post-install modal to appear',
+      timeout,
+      async () =>
+        (await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON)) ||
+        (await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT))
+    );
 
   const clickSaveIntegrationButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);
@@ -360,6 +366,17 @@ export function AddCisIntegrationFormPageProvider({
   const checkIntegrationPliAuthBlockExists = async () => {
     return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
   };
+
+  const waitForIntegrationPliAuthBlock = async () =>
+    testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK, { timeout: 20000 });
+
+  const waitForCreateIntegrationForm = async () =>
+    testSubjects.existOrFail(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE, { timeout: 20000 });
+
+  const waitUntilLaunchCloudFormationButtonAppears = async () =>
+    testSubjects.existOrFail('confirmCloudFormationModalConfirmButton', {
+      timeout: 20000,
+    });
 
   const fillInTextField = async (selector: string, text: string) => {
     const textField = await testSubjects.find(selector);
@@ -515,10 +532,8 @@ export function AddCisIntegrationFormPageProvider({
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
+    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 20000 });
     await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // Check if the Direct Access Key is updated package policy api with successful toast
-    expect(await testSubjects.exists(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST)).to.be(true);
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -617,6 +632,8 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    waitForIntegrationPliAuthBlock,
+    waitForCreateIntegrationForm,
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
@@ -637,5 +654,6 @@ export function AddCisIntegrationFormPageProvider({
     navigateToEditAgentlessIntegrationPage,
     closeAllOpenTabs,
     waitUntilLaunchCloudFormationButtonAppears,
+    waitForPostInstallModal,
   };
 }

@@ -20,7 +20,7 @@ interface Props {
   query: TypeOf<ApmRoutes, '/dependencies/overview'>['query'];
   subtype?: string;
   type?: string;
-  onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
 export function DependencyLink({ query, subtype, type, onClick }: Props) {

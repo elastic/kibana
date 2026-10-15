@@ -47,8 +47,9 @@ export const controlGroupSavedObjectStateToSerializableRuntimeState = (
       defaultControlGroupInput.labelPosition,
     autoApplySelections: !savedObjectState?.showApplySelections,
     ignoreParentSettings: safeJSONParse(savedObjectState?.ignoreParentSettingsJSON) ?? {},
-    panels: safeJSONParse(savedObjectState?.panelsJSON) ?? {},
-  };
+    panels:
+      safeJSONParse<SerializableControlGroupState['panels']>(savedObjectState?.panelsJSON) ?? {},
+  } as SerializableControlGroupState;
 };
 
 export const serializableRuntimeStateToControlGroupSavedObjectState = (

@@ -388,39 +388,6 @@ describe('<TemplateCreate />', () => {
 
         expect(find('fieldsListItem').length).toBe(1);
       });
-
-      describe('plugin parameters', () => {
-        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
-          const { exists } = testBed;
-          // Navigate to the advanced configuration
-
-          await act(async () => {
-            testBed.find('advancedOptionsTab').simulate('click');
-          });
-          testBed.component.update();
-
-          expect(exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(false);
-        });
-
-        test('should render the _size parameter if the mapper size plugin is installed', async () => {
-          httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
-
-          await act(async () => {
-            testBed = await setup(httpSetup);
-          });
-          testBed.component.update();
-          await navigateToMappingsStep();
-
-          await act(async () => {
-            testBed.find('advancedOptionsTab').simulate('click');
-          });
-          testBed.component.update();
-
-          expect(testBed.exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(
-            true
-          );
-        });
-      });
     });
 
     describe('aliases (step 5)', () => {

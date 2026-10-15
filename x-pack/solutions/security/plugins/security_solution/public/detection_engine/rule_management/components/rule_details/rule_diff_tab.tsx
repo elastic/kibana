@@ -21,6 +21,7 @@ import { normalizeMachineLearningJobIds } from '../../../../../common/detection_
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
+import { normalizeRequiredFieldsForDisplay } from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -119,6 +120,26 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   return rule;
 };
 
+/**
+ * Computes the stringified `[old, new]` rule sources shown in the diff.
+ */
+export const getRuleDiffSources = (
+  oldRule: RuleResponse,
+  newRule: RuleResponse
+): [string, string] => {
+  const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
+  /* Only compare properties that are present in the update. */
+  const visibleOldRuleProperties = pick(
+    normalizeRule(oldRule),
+    Object.keys(visibleNewRuleProperties)
+  );
+
+  return [
+    sortAndStringifyJson(normalizeRequiredFields(visibleOldRuleProperties)),
+    sortAndStringifyJson(normalizeRequiredFields(visibleNewRuleProperties)),
+  ];
+};
+
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
@@ -136,18 +157,10 @@ export const RuleDiffTab = ({
   leftDiffSideDescription,
   rightDiffSideDescription,
 }: RuleDiffTabProps) => {
-  const [oldSource, newSource] = useMemo(() => {
-    const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
-    const visibleOldRuleProperties = omit(
-      /* Only compare properties that are present in the update. */
-      pick(normalizeRule(oldRule), Object.keys(visibleNewRuleProperties))
-    );
-
-    return [
-      sortAndStringifyJson(visibleOldRuleProperties),
-      sortAndStringifyJson(visibleNewRuleProperties),
-    ];
-  }, [oldRule, newRule]);
+  const [oldSource, newSource] = useMemo(
+    () => getRuleDiffSources(oldRule, newRule),
+    [oldRule, newRule]
+  );
 
   return (
     <>
@@ -178,4 +191,16 @@ export const RuleDiffTab = ({
       </EuiPanel>
     </>
   );
+};
+
+/* Order and duplicates of required fields don't matter. */
+const normalizeRequiredFields = (ruleProperties: Partial<RuleResponse>): Partial<RuleResponse> => {
+  if (!ruleProperties.required_fields) {
+    return ruleProperties;
+  }
+
+  return {
+    ...ruleProperties,
+    required_fields: normalizeRequiredFieldsForDisplay(ruleProperties.required_fields),
+  };
 };

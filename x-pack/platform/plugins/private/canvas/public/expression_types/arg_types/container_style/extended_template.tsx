@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
@@ -29,7 +29,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ExtendedTemplate: FunctionComponent<Props> = ({
+export const ExtendedTemplate: CanvasFunctionComponent<Props> = ({
   getArgValue,
   setArgValue,
   workpad,
@@ -66,7 +66,6 @@ ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 ExtendedTemplate.propTypes = {
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,
   }).isRequired,

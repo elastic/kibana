@@ -546,6 +546,7 @@ export interface HealthDiagnosticConfiguration {
   eventLoopUtilizationCircuitBreaker: EventLoopUtilizationCircuitBreakerConfig;
   eventLoopDelayCircuitBreaker: EventLoopDelayCircuitBreakerConfig;
   elasticsearchCircuitBreaker: ElasticsearchCircuitBreakerConfig;
+  apiQueryAllowlist: Array<{ path: string }>;
 }
 
 export interface PaginationConfiguration {

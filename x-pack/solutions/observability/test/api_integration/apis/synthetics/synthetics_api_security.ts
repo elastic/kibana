@@ -32,13 +32,26 @@ export default function ({ getService }: FtrProviderContext) {
         username: string;
         password: string;
         writeAccess?: boolean;
+        anyRequiredPrivileges?: string[];
         tags?: string;
         readUser?: boolean;
       }
     ) => {
       let resp;
-      const { statusCodes, SPACE_ID, username, password, writeAccess, readUser } = options;
-      let tags = !writeAccess ? '[uptime-read]' : options.tags ?? '[uptime-read,uptime-write]';
+      const {
+        statusCodes,
+        SPACE_ID,
+        username,
+        password,
+        writeAccess,
+        anyRequiredPrivileges,
+        readUser,
+      } = options;
+      let tags = anyRequiredPrivileges?.length
+        ? `[${readUser ? '' : 'uptime-read,'}${anyRequiredPrivileges.join(',')}]`
+        : !writeAccess
+        ? '[uptime-read]'
+        : options.tags ?? '[uptime-read,uptime-write]';
       if (
         (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
         path.includes('private_locations')
@@ -122,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           username,
           password,
           writeAccess: route.writeAccess ?? true,
+          anyRequiredPrivileges: route.anyRequiredPrivileges,
         });
       }
     });
@@ -131,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const routeFn of allRoutes) {
         const route = routeFn();
-        if (route.writeAccess === false) {
+        if (route.writeAccess === false && !route.anyRequiredPrivileges?.length) {
           continue;
         }
         await assertPermissions(route.method, route.path, {
@@ -140,10 +154,48 @@ export default function ({ getService }: FtrProviderContext) {
           username,
           password,
           writeAccess: route.writeAccess ?? true,
+          anyRequiredPrivileges: route.anyRequiredPrivileges,
           tags: '[uptime-write]',
           readUser: true,
         });
       }
+    });
+
+    it('allows a read user with manual-run access to trigger a test', async () => {
+      const { SPACE_ID, username, password } = await monitorTestService.addsNewSpace([
+        'read',
+        'can_run_test_manually',
+      ]);
+
+      await assertPermissions(
+        'POST',
+        `${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/00000000-0000-4000-8000-000000000000`,
+        {
+          statusCodes: [404],
+          SPACE_ID,
+          username,
+          password,
+          writeAccess: false,
+          anyRequiredPrivileges: ['uptime-write', 'monitor-run-manually'],
+        }
+      );
+    });
+
+    it('allows an all user to trigger a test', async () => {
+      const { SPACE_ID, username, password } = await monitorTestService.addsNewSpace(['all']);
+
+      await assertPermissions(
+        'POST',
+        `${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/00000000-0000-4000-8000-000000000000`,
+        {
+          statusCodes: [404],
+          SPACE_ID,
+          username,
+          password,
+          writeAccess: false,
+          anyRequiredPrivileges: ['uptime-write', 'monitor-run-manually'],
+        }
+      );
     });
 
     it('no permissions errors for all user', async () => {

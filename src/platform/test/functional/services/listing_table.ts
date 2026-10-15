@@ -348,7 +348,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async onListingPage(appName: AppName) {
-    return await this.testSubjects.exists(`${appName}LandingPage`, {
+    return await this.testSubjects.waitForExists(`${appName}LandingPage`, {
       timeout: 5000,
     });
   }

@@ -157,6 +157,15 @@ describe('fetch package', () => {
         PackageNotFoundError
       );
     });
+
+    it('Should rethrow registry errors when throwOnError is true', async () => {
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
+      mockGetBundledPackageByName.mockResolvedValue(null);
+
+      await expect(() =>
+        fetchFindLatestPackageOrThrow('testpkg', { throwOnError: true })
+      ).rejects.toThrow('Registry error');
+    });
   });
 });
 

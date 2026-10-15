@@ -13,7 +13,7 @@ This document builds off of [Keeping Chromium Up-To-Date](https://docs.google.co
 ## 1. **Installing new puppeteer version**
 
 - Determine the version for the current latest release by checking [here](https://github.com/puppeteer/puppeteer/releases).
-- Install the current version by running `yarn add puppeteer@23.3.1` if we assume for the sake of this guide that the latest version is `23.3.1`. Run `yarn kbn bootstrap` after installing.
+- Install the current version by running `pnpm add -w puppeteer@23.3.1` if we assume for the sake of this guide that the latest version is `23.3.1`. Run `pnpm kbn bootstrap` after installing.
 - Determine the version of chromium that's been verified to work with this specific version of puppeteer by running the following utility script
 
  `node scripts/chromium_version.js 23.3.1`

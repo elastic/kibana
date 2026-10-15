@@ -1,5 +1,8 @@
 {
   "sha1": "0fdbe324d6db1ce1a59827d7b2ea3257b4c3c320",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "8d72edc08d77646-1054e603e578b92",
@@ -24,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/alert_details_url_sync.spec.ts",
-        "line": 33,
+        "line": 31,
         "column": 14
       }
     }

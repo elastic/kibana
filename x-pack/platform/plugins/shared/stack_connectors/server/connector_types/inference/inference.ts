@@ -196,13 +196,14 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         asStream: true,
         meta: true,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        headers: {
+          // asStream bypasses the transport's decompression step, so explicitly request
+          // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
+          'accept-encoding': 'identity',
+          ...(params.telemetryMetadata?.pluginId
+            ? { 'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId }
+            : {}),
+        },
       }
     );
     // errors should be thrown as it will not be a stream response

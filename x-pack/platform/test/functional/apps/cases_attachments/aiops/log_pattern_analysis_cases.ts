@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const aiops = getService('aiops');
   const ml = getService('ml');
   const selectedField = '@message';
-  const totalDocCount = 14005;
+  const totalDocCount = 14004;
   const cases = getService('cases');
 
   describe('log pattern analysis in cases', function () {

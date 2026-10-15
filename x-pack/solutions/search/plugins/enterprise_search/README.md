@@ -56,8 +56,8 @@ Jest tests can be run from the root kibana directory, however, since the tests t
 - `x-pack/solutions/search/plugins/enterprise_search/server/jest.config.js`
 
 ```bash
-yarn test:jest --config {YOUR_JEST_CONFIG_FILE}
-yarn test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
+pnpm test:jest --config {YOUR_JEST_CONFIG_FILE}
+pnpm test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
 ```
 
 Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:
@@ -103,11 +103,11 @@ There are 3 ways you can spin up the required environments to run our Cypress te
 
 1. Running Cypress against local dev environments:
    - Elasticsearch:
-     - Start a local instance, or use Kibana's `yarn es snapshot` command (with all configurations/versions required to run Enterprise Search locally)
+     - Start a local instance, or use Kibana's `pnpm es snapshot` command (with all configurations/versions required to run Enterprise Search locally)
      - NOTE: We generally recommend a fresh instance (or blowing away your `data/` folder) to reduce false negatives due to custom user data
    - Kibana:
      - You **must** have `csp.strict: false` and `csp.warnLegacyBrowsers: false` set in your `kibana.dev.yml`.
-     - You should either start Kibana with `yarn start --no-base-path` or pass `--config baseUrl=http://localhost:5601/xyz` into your Cypress command.
+     - You should either start Kibana with `pnpm start --no-base-path` or pass `--config baseUrl=http://localhost:5601/xyz` into your Cypress command.
    - Enterprise Search:
      - Nothing extra is required to run Cypress tests, only what is already needed to run Kibana/Enterprise Search locally.
 2. Running Cypress against Kibana's functional test server:

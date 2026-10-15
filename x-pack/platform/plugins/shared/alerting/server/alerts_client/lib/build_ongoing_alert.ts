@@ -25,6 +25,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -112,6 +113,7 @@ export const buildOngoingAlert = <
     // Set latest match count
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
+    [ALERT_TRACKED]: true,
     // Set the time range
     ...(legacyAlert.getState().start
       ? {

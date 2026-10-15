@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ export interface Props {
   workpadName: string;
 }
 
-export const Toolbar: FC<Props> = ({
+export const Toolbar: CanvasFunctionComponent<Props> = ({
   isWriteable,
   selectedElement,
   selectedPageNumber,
@@ -151,7 +151,6 @@ export const Toolbar: FC<Props> = ({
 
 Toolbar.propTypes = {
   isWriteable: PropTypes.bool.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   selectedElement: PropTypes.object,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,

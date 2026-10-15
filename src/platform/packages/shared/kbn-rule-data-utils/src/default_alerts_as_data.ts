@@ -137,6 +137,9 @@ const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 // kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
 const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
 
+// kibana.alert.tracked - whether this alert is currently tracked for the next execution
+const ALERT_TRACKED = `${ALERT_NAMESPACE}.tracked` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -185,6 +188,7 @@ export const fields = {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
 };
 
 export {
@@ -235,6 +239,7 @@ export {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

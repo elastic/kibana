@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Shape } from '../../../canvas_plugin_src/renderers/shape';
@@ -20,7 +20,12 @@ interface Props {
   ariaLabel?: string;
 }
 
-export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLabel }) => {
+export const ShapePickerPopover: CanvasFunctionComponent<Props> = ({
+  shapes,
+  onChange,
+  value,
+  ariaLabel,
+}) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
@@ -39,8 +44,6 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
 ShapePickerPopover.propTypes = {
   ariaLabel: PropTypes.string,
   onChange: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
   shapes: PropTypes.object.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };

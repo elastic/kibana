@@ -64,7 +64,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
+  runtimeMappings?: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -264,11 +264,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
+        // Forward the page-scoped data view runtime mappings so the group-level
+        // status update can resolve fields not natively mapped on the alerts index.
+        runtimeMappings,
       };
 
       return groupTakeActionItems?.(takeActionParams) ?? [];
     },
-    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId, runtimeMappings]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(

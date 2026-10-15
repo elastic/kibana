@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
+import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite/index.ts';
 import {
   AGENT_DISK_GIB,
   RETRIES,
   STEP_KEYS,
   TEST_STEP_TIMEOUT_MINUTES,
   TEST_STEP_TIMEOUT_MINUTES_UNIT,
-} from './const';
-import type { FunctionalGroup } from './types';
+} from './const.ts';
+import type { FunctionalGroup } from './types.ts';
 import { expandAgentQueue } from '#pipeline-utils';
 
 interface JestStepOptions {

@@ -10,7 +10,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render, fireEvent, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { TEST_MESSAGE } from '../../../common/email/constants';
 import EmailParamsFields from './email_params';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { getFormattedEmailOptions } from './email_params';
@@ -79,6 +81,35 @@ describe('EmailParamsFields renders', () => {
     expect(screen.getByTestId('toEmailAddressInput').textContent).toStrictEqual('test@test.com');
     expect(screen.getByTestId('subjectInput')).toBeVisible();
     expect(await screen.findByTestId('messageTextArea')).toBeVisible();
+  });
+
+  test('sets the subject and message to the test message in test mode', () => {
+    const editAction = jest.fn();
+
+    render(
+      <IntlProvider locale="en">
+        <EmailParamsFields
+          actionParams={{
+            cc: [],
+            bcc: [],
+            to: ['test@test.com'],
+            subject: 'subject',
+            message: 'message',
+          }}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+          editAction={editAction}
+          defaultMessage="default message"
+          index={0}
+          executionMode={ActionConnectorMode.Test}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('emailTestModeFixedMessageCallout')).toBeVisible();
+    expect(screen.queryByTestId('subjectInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('messageTextArea')).not.toBeInTheDocument();
+    expect(editAction).toHaveBeenCalledWith('subject', TEST_MESSAGE, 0);
+    expect(editAction).toHaveBeenCalledWith('message', TEST_MESSAGE, 0);
   });
 
   emailTestCases.forEach(({ field, fieldValue, expected }) => {

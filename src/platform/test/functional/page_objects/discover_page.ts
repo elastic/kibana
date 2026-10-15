@@ -618,7 +618,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    if (await this.testSubjects.exists('select-text-based-language-btn')) {
+    if (
+      await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 5000 })
+    ) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();

@@ -7,5 +7,7 @@
 
 import queryString from 'query-string';
 
+// query-string 9 types array entries as nullable. Callers rely on the 6.x typing, which matches what
+// these URLs carry in practice.
 export const parseQueryParams = (search: string) =>
-  queryString.parse(search, { arrayFormat: 'bracket' });
+  queryString.parse(search, { arrayFormat: 'bracket' }) as Record<string, string | string[] | null>;

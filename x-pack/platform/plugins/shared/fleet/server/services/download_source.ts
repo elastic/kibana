@@ -25,12 +25,13 @@ import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { getFleetProxy } from './fleet_proxies';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
+export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;
 
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: sourceId ?? so.id,
     ...attributes,
+    id: sourceId ?? so.id,
   };
 }
 
@@ -116,8 +117,9 @@ class DownloadSourceService {
     newData: Partial<DownloadSource>
   ) {
     const logger = appContextService.getLogger();
-    logger.debug(`Updating download source ${id} with ${newData}`);
-    const updateData: Partial<DownloadSourceSOAttributes> = newData;
+    logger.debug(`Updating download source ${id}`);
+    const { id: _id, ...newDataWithoutId } = newData as Partial<DownloadSource> & { id?: string };
+    const updateData: Partial<DownloadSourceSOAttributes> = newDataWithoutId;
 
     if (updateData.proxy_id) {
       await this.throwIfProxyNotFound(soClient, updateData.proxy_id);
