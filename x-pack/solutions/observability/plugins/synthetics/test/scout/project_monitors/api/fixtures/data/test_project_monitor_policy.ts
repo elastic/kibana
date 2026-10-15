@@ -850,6 +850,8 @@ export const getTestProjectSyntheticsPolicy = (
       ],
     },
   ],
+  // Test private locations enroll no complete agent, so a browser monitor is pinned to nobody.
+  condition: "${agent.id} == '__synthetics_unassigned__'",
   is_managed: true,
   revision: 1,
   created_at: '2022-08-23T13:52:42.531Z',

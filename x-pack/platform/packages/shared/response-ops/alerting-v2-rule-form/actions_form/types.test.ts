@@ -6,7 +6,7 @@
  */
 
 import type { ExistingWorkflowActionDraft, InlineWorkflowActionDraft } from './types';
-import { isActionValid } from './types';
+import { isActionValid, validateInlineAction } from './types';
 
 const inline = (overrides: Partial<InlineWorkflowActionDraft> = {}): InlineWorkflowActionDraft => ({
   id: 'a1',
@@ -79,5 +79,38 @@ describe('isActionValid', () => {
     it('is invalid for malformed YAML', () => {
       expect(isActionValid(inline({ params: 'to: "unterminated\n' }))).toBe(false);
     });
+  });
+});
+
+describe('validateInlineAction', () => {
+  it('returns no errors for a complete draft', () => {
+    expect(validateInlineAction(inline())).toEqual({ connector: undefined, params: [] });
+  });
+
+  it('reports a missing connector', () => {
+    expect(validateInlineAction(inline({ connectorId: null })).connector).toBe(
+      'Select a connector.'
+    );
+  });
+
+  it('names every field left empty', () => {
+    expect(
+      validateInlineAction(inline({ params: 'to:\n  - ""\nsubject: ""\nmessage: Body\n' })).params
+    ).toEqual(['to is required.', 'subject is required.']);
+  });
+
+  it('reports malformed YAML with its location', () => {
+    expect(validateInlineAction(inline({ params: 'to: "unterminated\n' })).params).toEqual([
+      'Invalid YAML: Missing closing "quote at line 2, column 1',
+    ]);
+  });
+
+  it.each([
+    ['empty', ''],
+    ['a list', '- a\n- b\n'],
+  ])('reports %s params', (_, params) => {
+    expect(validateInlineAction(inline({ params })).params).toEqual([
+      'Parameters must be a YAML map of field names to values.',
+    ]);
   });
 });

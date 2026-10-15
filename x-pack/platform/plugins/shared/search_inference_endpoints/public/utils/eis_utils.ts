@@ -91,6 +91,11 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
 };
 
+export const getModelTitle = (modelName: string, modelCreator: string): string => {
+  const providerPrefix = `${modelCreator} `;
+  return modelName.startsWith(providerPrefix) ? modelName.slice(providerPrefix.length) : modelName;
+};
+
 export const getModelMetadata = (
   endpoint: EisInferenceEndpoint
 ): EisInferenceEndpointMetadata | undefined => {
@@ -254,6 +259,7 @@ export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  selectedRegionOptions?: string[];
   showOutsideRegionPreferences?: boolean;
   showEndOfLifeModels?: boolean;
   showPreviewModels?: boolean;
@@ -265,6 +271,7 @@ export const filterGroupedModels = (
     searchQuery,
     selectedTaskTypes,
     selectedProviders,
+    selectedRegionOptions = [],
     showOutsideRegionPreferences = false,
     showEndOfLifeModels = false,
     showPreviewModels = false,
@@ -285,6 +292,12 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (
+        selectedRegionOptions.length > 0 &&
+        !selectedRegionOptions.some((key) => modelMatchesRegionOption(m, key))
+      ) {
         return false;
       }
       if (!showOutsideRegionPreferences) {
@@ -529,3 +542,6 @@ export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOptio
     return true;
   });
 };
+
+export const modelMatchesRegionOption = (model: GroupedModel, key: string): boolean =>
+  getRegionOptions(model.endpoints).some((option) => option.key === key);

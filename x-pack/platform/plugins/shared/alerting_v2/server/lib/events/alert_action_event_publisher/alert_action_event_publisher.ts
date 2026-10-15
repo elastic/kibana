@@ -86,7 +86,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
-    const context = { request };
+    const context: AlertingPublisherContext = { request, origin: 'user' };
     for (const action of actions) {
       const event = this.buildEvent(action);
       if (event) {
@@ -152,7 +152,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
             resource: action.action_type,
             ...(action.rule_id != null ? { rule_id: action.rule_id } : {}),
             group_hash: action.group_hash,
-            ...(action.episode_id != null ? { episode_id: action.episode_id } : {}),
+            ...(action.alert_id != null ? { alert_id: action.alert_id } : {}),
           },
         });
         return undefined;
@@ -163,7 +163,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
     return {
       occurredAt: action['@timestamp'] ?? new Date().toISOString(),
       groupHash: action.group_hash,
-      episodeId: action.episode_id ?? null,
+      episodeId: action.alert_id ?? null,
       ruleId: action.rule_id,
       spaceId: action.space_id,
       actorUid: action.actor.profile_uid ?? null,

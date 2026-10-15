@@ -40,9 +40,11 @@ describe('ServiceAccountsTable', () => {
   const renderTable = ({
     hasMore = false,
     hasLoadMoreError = false,
+    onDeleteAccount,
   }: {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
+    onDeleteAccount?: (account: ServiceAccountTableItem) => void;
   } = {}) => {
     const onLoadMore = jest.fn();
 
@@ -54,6 +56,7 @@ describe('ServiceAccountsTable', () => {
           isLoadingMore={false}
           hasLoadMoreError={hasLoadMoreError}
           onLoadMore={onLoadMore}
+          onDeleteAccount={onDeleteAccount}
         />
       </EuiProvider>
     );
@@ -239,5 +242,23 @@ describe('ServiceAccountsTable', () => {
 
     expect(screen.getByText('Unable to load more service accounts.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  });
+
+  it('starts deleting the account from its row', () => {
+    const onDeleteAccount = jest.fn();
+    renderTable({ onDeleteAccount });
+
+    const [firstRowDelete] = screen.getAllByTestId('serviceAccountsDeleteAction');
+    fireEvent.click(firstRowDelete);
+
+    expect(onDeleteAccount).toHaveBeenCalledTimes(1);
+    expect(onDeleteAccount.mock.calls[0][0]).toMatchObject({ id: expect.any(String) });
+  });
+
+  it('offers no row actions unless deleting is allowed', () => {
+    renderTable();
+
+    expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 });

@@ -41,7 +41,7 @@ export const getEsqlDatatableFromDocuments = ({
       type: 'datatable',
       rows: documentsValue.result.map((r) => r.raw),
       columns: esqlQueryColumns,
-      meta: { type: ESQL_TABLE_TYPE },
+      meta: { type: ESQL_TABLE_TYPE, approximationApplied: documentsValue.approximationApplied },
     },
     esqlQueryColumns,
   };

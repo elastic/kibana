@@ -10,10 +10,12 @@
 import Fs from 'fs';
 import Path from 'path';
 import { getPackages } from '@kbn/repo-packages';
+import { testConfigs } from '@kbn/scout-reporting';
 import { snakeCase } from 'lodash';
 import ts from 'typescript';
 import type { ScoutServerConfig } from '../types';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
+import { getScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
 
 const CONFIG_SETS_DIR = 'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets';
 const DEFAULT_SET = 'default';
@@ -22,7 +24,7 @@ const DEFAULT_SET = 'default';
  * Sets that must stay separate on purpose, with the reason. The audit leaves them out of every
  * merge suggestion. Add a set here only when its tests or docs show the separate server is needed.
  */
-export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
+export const MUST_STAY_SEPARATE: Readonly<Record<string, string>> = {
   shared_ux_no_data: 'tests need a clean ES and Kibana with no data from other suites',
   trial_license: 'tests permanently downgrade the license and would break a shared cluster',
   interactive_setup_no_tls_api:
@@ -258,6 +260,17 @@ export function listConfigSetFiles(repoRoot: string): ConfigSetFile[] {
   return out;
 }
 
+/**
+ * Config sets with at least one test config that CI runs in a Scout lane. A set nobody runs in
+ * CI costs no lane, so the audit ignores it.
+ */
+export const findSetsRunInCi = (): Set<string> => {
+  const excluded = new Set(getScoutCiExcludedConfigs());
+  return new Set(
+    testConfigs.all.filter(({ path }) => !excluded.has(path)).map(({ server }) => server.configSet)
+  );
+};
+
 /** Compares every config set against the default set of the same flavor and file. */
 export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsReport> {
   const runtimeKeys = findRuntimeUpdatableKeys(repoRoot);
@@ -275,8 +288,9 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
 
   const sets: ConfigSetOverrides[] = [];
   const failed: ConfigSetsReport['failed'] = [];
+  const runInCi = findSetsRunInCi();
   for (const entry of listConfigSetFiles(repoRoot)) {
-    if (entry.name in KEEP_SEPARATE) continue;
+    if (entry.name in MUST_STAY_SEPARATE || !runInCi.has(entry.name)) continue;
     let set: ScoutServerConfig;
     let base: ScoutServerConfig;
     try {

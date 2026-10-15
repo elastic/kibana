@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -20,35 +17,11 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
-import { resolveScopedModel } from './lib/scoped_model';
+import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
+import { resolveHuntModels } from './lib/hunt_models';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
-
-/**
- * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
- * connector is the ordinary outcome, not an error, so it never fails the request: the
- * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
- */
-const resolveModelForHunt = async ({
-  resolve,
-  logger,
-}: {
-  resolve: () => ReturnType<typeof resolveScopedModel>;
-  logger: Logger;
-}): Promise<ScopedModel | undefined> => {
-  try {
-    const outcome = await resolve();
-    return outcome.ok ? outcome.model : undefined;
-  } catch (err) {
-    logger.debug(
-      `hunt_coordinator: model resolution failed, running without a model — ${
-        (err as Error).message
-      }`
-    );
-    return undefined;
-  }
-};
 
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
@@ -56,6 +29,11 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
  * The coordinator does NOT write feedback — `completed_successfully` on the result
  * tells the caller whether the managed-workflow feedback step should proceed.
+ *
+ * A blocked scope answers 200 with `status: 'blocked'` rather than an error status,
+ * deliberately differing from the standalone `hunt_for_threat` route's 409: this route
+ * chains Tier 1 into Tier 2, so a caller already reads the status field either way, and
+ * `hunt_for_threat` has no such chain to read one from. See elastic/security-team#19741.
  */
 export const registerHuntCoordinatorRoute = ({
   router,
@@ -94,7 +72,7 @@ export const registerHuntCoordinatorRoute = ({
           // with the internal user and scoped by the explicit space filter.
           const esClient = core.elasticsearch.client.asCurrentUser;
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
-          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
@@ -113,54 +91,69 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
-          // one that actually runs Tier 2 in production) resolves the same model. It is
-          // resolved regardless of `tier2_when`, since resolving a connector spends no
-          // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
+          // One model per tier, resolved independently: a tier with no usable endpoint is
+          // absent from `models` and only its consumers degrade (see `HuntModels`). A missing
+          // connector is the ordinary outcome, not an error, so it never fails the request.
+          // They are resolved regardless of `tier2_when`, since resolving a connector spends
+          // no tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
           // so a `never` run stays `never`.
-          const model = await resolveModelForHunt({
-            resolve: () =>
-              resolveScopedModel({
-                inference: getInference(),
-                searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-                request,
-                uiSettingsClient: core.uiSettings.client,
-                logger,
-              }),
+          const { models, failures } = await resolveHuntModels({
+            inference: getInference(),
+            searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            request,
+            uiSettingsClient: core.uiSettings.client,
             logger,
           });
+          for (const failure of failures) {
+            // A missing connector is the ordinary outcome, but a resolution that threw is a
+            // fault, and at debug it would be invisible in production.
+            const log =
+              failure.reason === 'resolution_error'
+                ? logger.warn.bind(logger)
+                : logger.debug.bind(logger);
+            log(
+              `hunt_coordinator: ${failure.tier} model unavailable, its consumers will degrade — ${failure.message}`
+            );
+          }
 
           // The Worker fan-out supplies a run id so one sweep's children share it,
           // which is what the packaging barrier and conclusion dedupe key off. Only
           // mint one when the caller has no sweep to tie the run to.
-          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
-            report_id,
-            spaceId,
-            text,
-            iocs,
-            techniques,
-            time_range,
-            size,
-            max_assets,
-            llm_confidence_threshold,
-            tier2_when,
-            max_tier2_sample_events,
-            trigger,
-            indexPatterns,
-            // The Worker fan-out supplies a run id so one sweep's children share it,
-            // which is what the packaging barrier and conclusion dedupe key off. Only
-            // mint one when the caller has no sweep to tie the run to.
-            run_id: run_id ?? randomUUID(),
-          });
+          const result = await huntCoordinator(
+            { esClient, reportsEsClient, mitreDataClient },
+            models,
+            logger,
+            {
+              report_id,
+              spaceId,
+              text,
+              iocs,
+              techniques,
+              time_range,
+              size,
+              max_assets,
+              llm_confidence_threshold,
+              tier2_when,
+              max_tier2_sample_events,
+              trigger,
+              indexPatterns,
+              // The Worker fan-out supplies a run id so one sweep's children share it,
+              // which is what the packaging barrier and conclusion dedupe key off. Only
+              // mint one when the caller has no sweep to tie the run to.
+              run_id: run_id ?? randomUUID(),
+            }
+          );
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
-          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
-          const body: HuntCoordinatorResponse =
-            result.has_confirmed_hit && report_id
-              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
-              : result;
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone. The impact
+          // entities come from those same entries, so a run attaches impact only
+          // for what it confirmed.
+          let body: HuntCoordinatorResponse = result;
+          if (result.has_confirmed_hit && report_id) {
+            const sse = buildSseData(result, report_id, { spaceId });
+            body = { ...result, sse, impacted_entities: buildImpactEntities(sse) };
+          }
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

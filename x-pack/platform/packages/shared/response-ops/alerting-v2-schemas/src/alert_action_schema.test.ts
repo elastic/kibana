@@ -17,6 +17,7 @@ import {
   episodeAlertActionParamsSchema,
   seriesAlertActionParamsSchema,
 } from './alert_action_schema';
+import { ID_MAX_LENGTH } from './constants';
 
 const GROUP_HASH = 'a'.repeat(64);
 const OTHER_GROUP_HASH = 'b'.repeat(64);
@@ -80,6 +81,18 @@ describe('createEpisodeAlertActionBodySchema', () => {
     ).toThrow();
   });
 
+  it('bounds assignee_uid like the read model (1 to ID_MAX_LENGTH chars)', () => {
+    const assign = (assigneeUid: string) =>
+      createEpisodeAlertActionBodySchema.safeParse({
+        action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+        assignee_uid: assigneeUid,
+      }).success;
+
+    expect(assign('a'.repeat(ID_MAX_LENGTH))).toBe(true);
+    expect(assign('a'.repeat(ID_MAX_LENGTH + 1))).toBe(false);
+    expect(assign('')).toBe(false);
+  });
+
   it('rejects alert_id in the body (strict, the alert is addressed by the path)', () => {
     expect(() =>
       createEpisodeAlertActionBodySchema.parse({
@@ -123,15 +136,13 @@ describe('seriesAlertActionParamsSchema', () => {
 });
 
 describe('episodeAlertActionParamsSchema', () => {
-  it('accepts an alert_id and rejects an empty one', () => {
-    expect(() => episodeAlertActionParamsSchema.parse({ alert_id: 'episode-1' })).not.toThrow();
-    expect(() => episodeAlertActionParamsSchema.parse({ alert_id: '' })).toThrow();
+  it('accepts an id and rejects an empty one', () => {
+    expect(() => episodeAlertActionParamsSchema.parse({ id: 'episode-1' })).not.toThrow();
+    expect(() => episodeAlertActionParamsSchema.parse({ id: '' })).toThrow();
   });
 
   it('rejects unknown keys (strict mode)', () => {
-    expect(() =>
-      episodeAlertActionParamsSchema.parse({ alert_id: 'episode-1', foo: 'bar' })
-    ).toThrow();
+    expect(() => episodeAlertActionParamsSchema.parse({ id: 'episode-1', foo: 'bar' })).toThrow();
   });
 });
 
@@ -205,5 +216,25 @@ describe('verb-specific bulk action body schemas', () => {
         items: [{ group_hash: GROUP_HASH, assignee_uid: null }],
       })
     ).toThrow();
+  });
+
+  it('rejects an episode envelope that repeats an alert_id', () => {
+    expect(() =>
+      bulkTagEpisodeActionBodySchema.parse({
+        items: [
+          { alert_id: 'e1', tags: ['p1'] },
+          { alert_id: 'e2', tags: ['p1'] },
+          { alert_id: 'e1', tags: ['p2'] },
+        ],
+      })
+    ).toThrow('Each alert_id can appear at most once per request; [e1] is repeated');
+  });
+
+  it('rejects a series envelope that repeats a group_hash', () => {
+    expect(() =>
+      bulkSnoozeSeriesActionBodySchema.parse({
+        items: [{ group_hash: GROUP_HASH }, { group_hash: GROUP_HASH }],
+      })
+    ).toThrow(`Each group_hash can appear at most once per request; [${GROUP_HASH}] is repeated`);
   });
 });

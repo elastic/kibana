@@ -11,7 +11,12 @@ import type {
   SignalType,
   ServiceCategory,
 } from './aws_service_matrix';
-import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from './aws_service_matrix';
+import {
+  AWS_SERVICES_STATIC,
+  applyDeploymentMethodView,
+  buildAwsServiceMatrix,
+  makeDsView,
+} from './aws_service_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
 const VALID_DEPLOYMENT_METHODS: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
@@ -744,6 +749,89 @@ describe('AWS service matrix', () => {
         { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
       ]);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
+    });
+  });
+  describe('deployment-method-aware settings view', () => {
+    const v = (name: string, extra: object = {}) => ({
+      name,
+      type: 'text',
+      required: true,
+      show_user: true,
+      ...extra,
+    });
+    const WAF_PKG = {
+      policy_templates: [
+        {
+          name: 'waf',
+          data_streams: ['waf'],
+          deployment_modes: { agentless: { enabled: false } },
+          inputs: [
+            { type: 'aws-s3', title: 'S3' },
+            { type: 'aws-cloudwatch', title: 'CloudWatch' },
+          ],
+        },
+      ],
+      data_streams: [
+        {
+          path: 'waf',
+          type: 'logs',
+          streams: [
+            {
+              input: 'aws-s3',
+              vars: [v('bucket_arn'), v('queue_url', { required: false }), v('collect_s3_logs')],
+            },
+            { input: 'aws-cloudwatch', vars: [v('log_group_arn'), v('region_name')] },
+          ],
+        },
+      ],
+    };
+    const [waf] = buildAwsServiceMatrix(
+      { aws: WAF_PKG as any },
+      AWS_SERVICES_STATIC.filter((e) => e.id === 'waf') as any
+    );
+
+    it('keeps the full manifest config on the entry and derives ecfSettings separately', () => {
+      expect(waf.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
+      expect(waf.requiredConfig).toEqual(
+        expect.arrayContaining(['bucket_arn', 'log_group_arn', 'region_name'])
+      );
+      expect(waf.ecfInputs).toEqual(['aws-s3']);
+      expect(waf.ecfSettings).toEqual(
+        expect.objectContaining({ requiredConfig: ['bucket_arn'], inputs: ['aws-s3'] })
+      );
+    });
+
+    it('shows the ECF-minimal view unless agent-based is selected', () => {
+      const managed = applyDeploymentMethodView(waf, 'managed_integration');
+      expect(managed.requiredConfig).toEqual(['bucket_arn']);
+      expect(managed.optionalConfig).toBeUndefined();
+      expect(managed.inputs).toEqual(['aws-s3']);
+      expect(managed.settingsScope).toBe('ecf');
+    });
+
+    it('shows the full manifest view, including CloudWatch, under agent-based', () => {
+      const agent = applyDeploymentMethodView(waf, 'agent_based');
+      expect(agent).toBe(waf);
+      expect(agent.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
+      expect(agent.settingsScope).toBeUndefined();
+    });
+
+    it('scopes makeDsView inputs to ecfInputs only in the ECF view', () => {
+      expect(
+        makeDsView(applyDeploymentMethodView(waf, 'managed_integration'), 'waf').inputs
+      ).toEqual(['aws-s3']);
+      expect(makeDsView(applyDeploymentMethodView(waf, 'agent_based'), 'waf').inputs).toEqual([
+        'aws-s3',
+        'aws-cloudwatch',
+      ]);
+    });
+
+    it('keeps ecfOnly OTel twins on the ECF view even under agent-based', () => {
+      const [wafOtel] = buildAwsServiceMatrix(
+        { aws: WAF_PKG as any },
+        AWS_SERVICES_STATIC.filter((e) => e.id === 'waf_otel') as any
+      );
+      expect(applyDeploymentMethodView(wafOtel, 'agent_based').settingsScope).toBe('ecf');
     });
   });
 });
