@@ -21,6 +21,7 @@ import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getAlertsBadgeEndMs } from '../../../utils/get_alerts_badge_end';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
@@ -57,6 +58,10 @@ export async function getServicesAlerts({
       ? Math.min(serviceNames.length, maxNumServices)
       : maxNumServices;
 
+  // Badge counts mean currently active alerts: extend a past picker end to now so
+  // inventory, alerts_count, and service-map badges share the same window.
+  const badgesEnd = getAlertsBadgeEndMs(end);
+
   const params = {
     size: 0,
     track_total_hits: false,
@@ -64,7 +69,7 @@ export async function getServicesAlerts({
       bool: {
         filter: [
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, end),
+          ...rangeQuery(start, badgesEnd),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
           // Either a bounded list (e.g. service map) or a single service — not both. When

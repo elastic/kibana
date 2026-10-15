@@ -349,9 +349,7 @@
     "x-pack/solutions/search/packages/kbn-search-code-examples/src/getting-started-tutorials": "'getting-started-tutorials' should be snake_case",
     "x-pack/solutions/search/test/functional_search/fixtures/search-books": "'search-books' should be snake_case",
     "x-pack/solutions/search/test/functional_search/fixtures/search-empty-index": "'search-empty-index' should be snake_case",
-    "x-pack/solutions/search/test/functional_search/fixtures/search-national-parks": "'search-national-parks' should be snake_case",
-    "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
-    "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case"
+    "x-pack/solutions/search/test/functional_search/fixtures/search-national-parks": "'search-national-parks' should be snake_case"
   },
   "@elastic/obs-exploration-team": {
     "src/platform/packages/shared/shared-ux/toolbar_selector": "'toolbar_selector' should be kebab-case"

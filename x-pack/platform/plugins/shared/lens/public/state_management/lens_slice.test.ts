@@ -553,6 +553,64 @@ describe('lensSlice', () => {
       // into LayerTabs and addLayer is no longer part of ConfigPanel,
       // we are just testing the state behavior here.
       describe('setLayerDefaultDimension', () => {
+        it('should preserve visualization state when datasource initialization is a no-op', () => {
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const previousVisualizationState = { metricAccessor: 'existingColumn' };
+          const datasourceWithNoDefault = {
+            ...datasourceMap.formBased,
+            initializeDimension: jest.fn((state) => state),
+          };
+          const storeWithNoDefault = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'formBased',
+              datasourceStates,
+              visualization: {
+                activeId: activeVisId,
+                state: previousVisualizationState,
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getSupportedLayers: jest.fn(() => [
+                    {
+                      type: LayerTypes.DATA,
+                      label: 'Data Layer',
+                      initialDimensions: [{ groupId: 'max', columnId: 'maximumColumn' }],
+                    },
+                  ]),
+                  getLayerType: jest.fn(() => LayerTypes.DATA),
+                  setDimension: jest.fn(({ prevState, columnId }) => ({
+                    ...prevState,
+                    maxAccessor: columnId,
+                    showBar: true,
+                  })),
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                formBased: datasourceWithNoDefault,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          storeWithNoDefault.dispatch(
+            setLayerDefaultDimension({
+              layerId: 'layer1',
+              columnId: 'maximumColumn',
+              groupId: 'max',
+            })
+          );
+
+          expect(datasourceWithNoDefault.initializeDimension).toHaveBeenCalled();
+          expect(storeWithNoDefault.getState().lens.visualization.state).toEqual(
+            previousVisualizationState
+          );
+          expect(storeWithNoDefault.getState().lens.datasourceStates).toEqual(datasourceStates);
+        });
+
         it('should not call initializeDimension when layer has noDatasource: true', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
           const formBasedWithInit = {

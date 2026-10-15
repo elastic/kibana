@@ -168,26 +168,46 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
-  it('renders proposals as direct siblings so the grouped first/last-child borders apply', () => {
+  it('keeps the order the API returned, so paging and display agree', () => {
+    const retry = { ...mockProposal, id: 'retry' };
+    const failedLast = { ...decidedProposal, id: 'failed-last', status: 'failed' as const };
+    const failedFirst = { ...decidedProposal, id: 'failed-first', status: 'failed' as const };
+    mockConversationProposalsPage([retry, failedLast, failedFirst]);
+    renderSlot();
+
+    const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutProposedAction-retry',
+      'investigationFlyoutProposedAction-failed-last',
+      'investigationFlyoutProposedAction-failed-first',
+    ]);
+  });
+
+  it('renders every proposal as a row of the one bordered list', () => {
     mockConversationProposalsPage([mockProposal, decidedProposal]);
 
     renderSlot();
 
-    const first = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
-    const last = screen.getByTestId('investigationFlyoutProposedAction-proposal-2');
-    expect(first.parentElement).toBe(last.parentElement);
-    expect(first).toBe(first.parentElement?.firstElementChild);
-    expect(last).toBe(last.parentElement?.lastElementChild);
+    const list = screen.getByTestId('investigationFlyoutProposedActionsList');
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+    expect(
+      within(list).getByTestId('investigationFlyoutProposedAction-proposal-1')
+    ).toBeInTheDocument();
+    expect(
+      within(list).getByTestId('investigationFlyoutProposedAction-proposal-2')
+    ).toBeInTheDocument();
   });
 
-  it('renders a lone proposal as the only child of its group', () => {
-    mockConversationProposalsPage([mockProposal]);
+  it('keeps Show more outside the list, so the last row still closes the card', () => {
+    mockConversationProposalsPage([mockProposal], { hasNextPage: true, fetchNextPage: jest.fn() });
 
     renderSlot();
 
-    const only = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
-    expect(only).toBe(only.parentElement?.firstElementChild);
-    expect(only).toBe(only.parentElement?.lastElementChild);
+    const list = screen.getByTestId('investigationFlyoutProposedActionsList');
+    expect(
+      within(list).queryByTestId('investigationFlyoutProposedActionsShowMore')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationFlyoutProposedActionsShowMore')).toBeInTheDocument();
   });
 
   it('renders a decided proposal as a closed record, but still opens a read-only modal for it', () => {

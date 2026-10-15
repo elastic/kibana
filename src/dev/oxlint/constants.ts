@@ -13,6 +13,8 @@ import { bin } from 'oxlint/package.json';
 export const LINT_LABEL = 'oxlint';
 export const LINT_LOG_PREFIX = `[${LINT_LABEL}]`;
 export const OXLINT_CONFIG_PATH = 'oxlint.config.mjs';
+/** `OXLINT_CONFIG_PATH` with `warn` rules off: `--fix` uses it so only errors are autofixed. */
+export const OXLINT_FIX_CONFIG_PATH = 'oxlint.fix.config.mjs';
 
 /** Mirrors `LINTABLE_EXTENSIONS` in `packages/kbn-lint-cli/run_lint_cli.ts`. */
 export const LINTABLE_EXTENSIONS: Record<string, true> = {

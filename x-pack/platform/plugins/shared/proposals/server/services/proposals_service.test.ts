@@ -14,6 +14,7 @@ import {
   type ListProposalsQuery,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import { IMPACT_RANK_FIELD } from '../storage/sort_ranks';
 import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
@@ -58,6 +59,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
 /** The full query shape, so a test only states the filters it cares about. */
 const listQuery = (overrides: Partial<ListProposalsQuery> = {}): ListProposalsQuery => ({
   excludeSuperseded: false,
+  excludeUndecidedSuperseded: false,
   excludeExpired: false,
   size: 50,
   from: 0,
@@ -2016,6 +2018,42 @@ describe('ProposalsService', () => {
   });
 
   describe('getLatestRevision', () => {
+    it('rejects an id nothing is under with ProposalNotFoundError, which a caller reads as "free"', async () => {
+      // Hunt picks the id a proposal is created under by asking each generation of a subject
+      // whether anything is there, and treats exactly this error as "no": anything else fails closed.
+      const { service } = createService(createStorage());
+
+      await expect(service.getLatestRevision('nothing-here', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
+    it('does not find a proposal that is in another space', async () => {
+      // The read is filtered to the caller's space, so another space's proposal under the same id
+      // does not hold a subject here.
+      const storage = createStorage();
+      storage.search.mockImplementation(
+        async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+          const space = query.bool.filter.find(
+            (clause) => 'term' in clause && 'spaceId' in clause.term
+          );
+          return space?.term.spaceId === 'other-space'
+            ? {
+                hits: {
+                  hits: [searchHit(baseDocument({ spaceId: 'other-space' }))],
+                  total: { value: 1 },
+                },
+              }
+            : { hits: { hits: [], total: { value: 0 } } };
+        }
+      );
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevision('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
       const { service } = createService(storage);
@@ -2281,6 +2319,54 @@ describe('ProposalsService', () => {
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+      );
+    });
+
+    it('should order a conversation history newest first when asked, undecided leading', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ order: 'newest' }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort).toEqual([
+        { decidedAt: { order: 'desc', missing: '_first' } },
+        { createdAt: { order: 'desc' } },
+        { rootProposalId: { order: 'asc' } },
+        { revision: { order: 'asc' } },
+      ]);
+    });
+
+    it('should keep ranking by priority unless a newest-first order is asked for', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort[0]).toEqual({ [IMPACT_RANK_FIELD]: { order: 'asc' } });
+    });
+
+    it('should keep a decided superseded proposal but drop an undecided one', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ excludeUndecidedSuperseded: true }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  filter: [{ exists: { field: 'supersededBy' } }],
+                  must_not: [{ exists: { field: 'decision' } }],
+                },
+              },
+            },
+          },
+        ])
       );
     });
 
