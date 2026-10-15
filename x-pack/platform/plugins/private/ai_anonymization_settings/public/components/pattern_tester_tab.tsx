@@ -4,24 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { PatternTesterPanel } from './pattern_tester_panel';
 
 interface PatternTesterTabProps {
-  builtInPatterns: RegexAnonymizationRule[];
-  customPatterns: RegexAnonymizationRule[];
+  /** The enabled rules in persisted order, which decides how overlapping matches resolve. */
+  enabledRules: RegexAnonymizationRule[];
 }
 
 /** Full-page Pattern tester: exercises every currently-enabled built-in and custom pattern. */
-export const PatternTesterTab: React.FC<PatternTesterTabProps> = ({
-  builtInPatterns,
-  customPatterns,
-}) => {
-  const enabledRules = useMemo(
-    () => [...builtInPatterns, ...customPatterns].filter((rule) => rule.enabled),
-    [builtInPatterns, customPatterns]
-  );
-
-  return <PatternTesterPanel rules={enabledRules} />;
-};
+export const PatternTesterTab: React.FC<PatternTesterTabProps> = ({ enabledRules }) => (
+  <PatternTesterPanel rules={enabledRules} />
+);

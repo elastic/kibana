@@ -136,6 +136,9 @@ export function useAnonymizationSettings() {
   const regexRules = useMemo(() => value.rules.filter(isRegexRule), [value.rules]);
   const builtInPatterns = useMemo(() => regexRules.filter((rule) => rule.builtIn), [regexRules]);
   const customPatterns = useMemo(() => regexRules.filter((rule) => !rule.builtIn), [regexRules]);
+  // In persisted order: the pipeline decides same-position overlaps by rule order, and settings saved
+  // before built-ins existed keep their custom rules first, so the tester must not regroup them.
+  const enabledRules = useMemo(() => regexRules.filter((rule) => rule.enabled), [regexRules]);
 
   const setMaskingEnabled = useCallback(
     (maskingEnabled: boolean) => persist({ ...value, maskingEnabled }),
@@ -201,6 +204,7 @@ export function useAnonymizationSettings() {
     onFailure: value.onFailure ?? 'block',
     builtInPatterns,
     customPatterns,
+    enabledRules,
     setMaskingEnabled,
     setOnFailure,
     setRuleEnabled,

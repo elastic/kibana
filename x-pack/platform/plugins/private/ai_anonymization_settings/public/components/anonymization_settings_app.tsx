@@ -52,6 +52,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     onFailure,
     builtInPatterns,
     customPatterns,
+    enabledRules,
     setMaskingEnabled,
     setOnFailure,
     setRuleEnabled,
@@ -134,8 +135,6 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     'data-test-subj': 'aiAnonymizationSettingsTechPreviewBadge',
   };
 
-  const enabledRules = [...builtInPatterns, ...customPatterns].filter((rule) => rule.enabled);
-
   const closeFlyout = () => {
     setIsFlyoutOpen(false);
     setFlyoutPattern(undefined);
@@ -202,7 +201,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
               />
             )}
             {selectedTab === 'tester' && isPatternTesterEnabled && (
-              <PatternTesterTab builtInPatterns={builtInPatterns} customPatterns={customPatterns} />
+              <PatternTesterTab enabledRules={enabledRules} />
             )}
             {selectedTab === 'settings' && (
               <SettingsTab

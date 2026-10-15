@@ -91,6 +91,35 @@ describe('useAnonymizationSettings', () => {
     expect(afterReload.current.maskingEnabled).toBe(true);
   });
 
+  // The pipeline resolves same-position overlaps by rule order, and settings saved before built-ins
+  // existed keep their custom rules first. The tester must use that order, not built-ins first.
+  it('lists the enabled rules in persisted order, even when a custom rule precedes a built-in one', async () => {
+    const customRule = {
+      type: 'RegExp',
+      id: 'custom-1',
+      name: 'Custom',
+      entityClass: 'MISC',
+      pattern: 'abc',
+      enabled: true,
+      builtIn: false,
+    };
+    const builtInRule = { ...DEFAULT_BUILTIN_REGEX_RULES[0], enabled: true };
+    client = new FakeJsonUiSettingsClient(
+      JSON.stringify({ maskingEnabled: true, onFailure: 'block', rules: [customRule, builtInRule] })
+    );
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { settings: { client }, notifications: { toasts: { addDanger } } },
+    });
+
+    const { result } = renderHook(() => useAnonymizationSettings());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.enabledRules.map((rule) => rule.id)).toEqual([
+      'custom-1',
+      builtInRule.id,
+    ]);
+  });
+
   it('reverts local state and shows a toast when persisting fails', async () => {
     client.set = jest.fn().mockRejectedValueOnce(new Error('nope'));
     const { result } = renderHook(() => useAnonymizationSettings());
