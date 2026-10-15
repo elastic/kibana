@@ -391,13 +391,20 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
   });
 
-  it("doesn't continue a pattern that already ends in a wildcard", async () => {
+  it('finds potential matches by any part of their name', async () => {
     renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat-*');
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'fall');
 
-    expect(screen.queryByTestId('boostRulePotentialMatch')).not.toBeInTheDocument();
-    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
+    expect(screen.getByTestId('boostRulePotentialMatch')).toHaveTextContent('catalog-fall');
+  });
+
+  it('finds potential matches for a pattern that only needs a leading wildcard', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'alog-*');
+
+    expect(screen.getByTestId('boostRulePotentialMatch')).toHaveTextContent('catalog-fall');
   });
 
   it('says when nothing matches, in the same panel', async () => {

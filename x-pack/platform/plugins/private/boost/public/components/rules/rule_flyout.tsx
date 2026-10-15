@@ -380,14 +380,10 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           })
       : [];
 
-  // Until the pattern matches something, what it would match if it continued, like the data view
-  // editor does. A pattern that already ends in `*` has nothing left to continue.
-  const potentialPattern = `${pattern}*`;
+  // Until the pattern matches something, what contains it, so a remembered part of a name finds it.
+  const potentialPattern = `*${pattern}*`;
   const potentialMatches =
-    draft.mode === 'pattern' &&
-    !errors.pattern &&
-    !pattern.endsWith('*') &&
-    patternPreview.length === 0
+    draft.mode === 'pattern' && !errors.pattern && patternPreview.length === 0
       ? typedDataSources
           .filter(({ name }) => matchesIndexPattern(potentialPattern, name))
           .map(({ name }) => name)
