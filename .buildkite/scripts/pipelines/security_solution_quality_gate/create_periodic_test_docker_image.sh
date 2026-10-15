@@ -52,7 +52,7 @@ docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
-docker_login_kibanamachine
+docker_login_push
 docker_with_retry push "$KIBANA_IMAGE-arm64"
 docker_with_retry push "$KIBANA_IMAGE-amd64"
 

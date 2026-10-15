@@ -373,12 +373,50 @@ print_if_dry_run() {
   fi
 }
 
+# Push login for image steps that run in both publish and PR pipelines
+docker_login_push() {
+  if is_publish_pipeline; then
+    docker_login_kibana_ci_publish
+  else
+    docker_login_kibanamachine
+  fi
+}
+
+# Must match the pipelines granted kv/ci-shared/kibana/publish/* in elastic/terrazzo
+is_publish_pipeline() {
+  case "${BUILDKITE_PIPELINE_SLUG:-}" in
+    kibana-artifacts-container-image | \
+    kibana-artifacts-snapshot | \
+    kibana-artifacts-staging | \
+    kibana-elasticsearch-serverless-promote | \
+    kibana-elasticsearch-snapshot-build | \
+    kibana-elasticsearch-snapshot-promote | \
+    kibana-package-registry-verify-and-promote | \
+    kibana-uiam-cosmos-db-emulator-verify-and-promote | \
+    kibana-uiam-verify-and-promote)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Push access to trusted docker.elastic.co/kibana-ci/* repositories, readable only by publish pipelines
+docker_login_kibana_ci_publish() {
+  is_docker_available || return 0
+  local username password
+  username="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/publish/container-registry)"
+  password="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/publish/container-registry)"
+  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
+}
+
 # Pull-only access to the docker.elastic.co repositories Kibana CI consumes
 docker_login_kibana_ci_read() {
   is_docker_available || return 0
   local username password
-  username="$(vault_get kibana-ci-read username)"
-  password="$(vault_get kibana-ci-read password)"
+  username="$(vault_get kibana-container-registry-ci-read username)"
+  password="$(vault_get kibana-container-registry-ci-read password)"
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 

@@ -29,21 +29,11 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  case "$BUILDKITE_PIPELINE_SLUG" in
-    kibana-artifacts-snapshot | \
-    kibana-artifacts-staging | \
-    kibana-elasticsearch-serverless-promote | \
-    kibana-elasticsearch-snapshot-build | \
-    kibana-elasticsearch-snapshot-promote | \
-    kibana-package-registry-verify-and-promote | \
-    kibana-uiam-cosmos-db-emulator-verify-and-promote | \
-    kibana-uiam-verify-and-promote)
-      retry 5 15 docker_login_kibanamachine
-      ;;
-    *)
-      retry 5 15 docker_login_kibana_ci_read
-      ;;
-  esac
+  if is_publish_pipeline; then
+    retry 5 15 docker_login_kibana_ci_publish
+  else
+    retry 5 15 docker_login_kibana_ci_read
+  fi
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
