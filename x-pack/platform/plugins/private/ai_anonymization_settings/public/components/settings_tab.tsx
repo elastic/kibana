@@ -74,7 +74,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.aiAnonymizationSettings.settingsTab.maskingHelpText"
-          defaultMessage="Applies to AI features in this space."
+          defaultMessage="Applies to AI features in this space that use Kibana's shared AI integration, with any connector. Features that call a connector directly are not masked."
         />
       </EuiText>
 
