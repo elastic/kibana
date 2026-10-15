@@ -195,7 +195,11 @@ export function WorkflowsPage() {
         docLink={WORKFLOWS_DOCUMENTATION_URL}
         spacing="compact"
       />
-      <EuiPageTemplate.Section restrictWidth={false}>
+      {/* With no workflows (and no filters above it), center the landing vertically like `/create`. */}
+      <EuiPageTemplate.Section
+        restrictWidth={false}
+        {...(shouldShowFilters ? {} : { grow: true, alignment: 'center' as const })}
+      >
         {shouldShowFilters ? (
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
