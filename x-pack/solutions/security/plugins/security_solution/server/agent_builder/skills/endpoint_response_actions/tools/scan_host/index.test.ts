@@ -134,6 +134,30 @@ describe('scanHostTool', () => {
     expect(prompt?.message).toContain('/tmp');
   });
 
+  it('shows a padded path on the confirmation card with its leading and trailing whitespace visible', async () => {
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+    const tool = scanHostTool(service);
+    const prompt = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp/payload ' },
+      context: mockContext,
+    });
+    expect(prompt?.message).toContain('"/tmp/payload "');
+
+    const padded = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '  /tmp/x' },
+      context: mockContext,
+    });
+    expect(padded?.message).toContain('"  /tmp/x"');
+  });
+
   it('returns insufficient_privileges and does not dispatch when caller lacks canWriteScanOperations', async () => {
     service.getEndpointAuthz = jest
       .fn()
@@ -297,6 +321,7 @@ describe('scanHostTool', () => {
 
     expect(tool.schema.safeParse({ hostName: 'h', path: '   ' }).success).toBe(false);
     expect(tool.schema.safeParse({ hostName: 'h', path: '\t\n' }).success).toBe(false);
+    expect(tool.schema.safeParse({ hostName: 'h', path: '/' }).success).toBe(true);
 
     const parsed = tool.schema.safeParse({ hostName: 'h', path: '/tmp/payload ' });
     expect(parsed.success).toBe(true);

@@ -80,10 +80,14 @@ export const scanHostTool = (
             color: 'warning',
             confirmText: 'Run scan',
             comment: toolParams.comment as string | undefined,
-            describe: (host) =>
-              `This will scan \`${
-                (toolParams.path as string) ?? 'the specified path'
-              }\` on ${host} for malware.`,
+            describe: (host) => {
+              // Quoted so leading/trailing whitespace in the path is visible to the analyst.
+              const shownPath =
+                typeof toolParams.path === 'string'
+                  ? JSON.stringify(toolParams.path)
+                  : 'the specified path';
+              return `This will scan \`${shownPath}\` on ${host} for malware.`;
+            },
           }
         ),
     },
