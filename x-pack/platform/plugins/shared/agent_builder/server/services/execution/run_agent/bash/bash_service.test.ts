@@ -117,6 +117,17 @@ describe('BashService', () => {
     expect(result.stdout).toContain('"ok":true');
   });
 
+  it('yq returns a parse error instead of hanging on a malformed TOML document', async () => {
+    // Regression test for GHSA-7w5x-hrqm-74c2: just-bash < 3.4.0 inlines a smol-toml
+    // version that loops forever on a comment with no trailing newline inside an
+    // unclosed array. The loop is synchronous, so the wall-clock timeout can't catch it.
+    const { fsService, workspaceVolume } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume);
+    const result = await bash.exec("printf 'a = [1 #c' > bad.toml && yq -p toml . bad.toml");
+    expect(result.exit_code).not.toBe(0);
+    expect(result.stderr).toContain('parse error');
+  });
+
   describe('getOrCreateWorkspaceId', () => {
     it('returns the existing id when one is set', async () => {
       const { fsService, workspaceVolume } = await makeFixture({ workspaceId: 'existing' });

@@ -1,9 +1,23 @@
 {
-  "sha1": "962f23ab33c2beb10470ceb6a9deb9f8ea52d3e7",
+  "sha1": "16ad84ab3a15b45341367122cd8fbdf5291bbd2a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "5cf4d3914ca83e3-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
     {
       "id": "0a5797a2d1b37f3-f83dbbba7a68b4d",
       "title": "Email connector should use the kibana config for aws ses defaults",
@@ -548,6 +562,20 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_webhook.spec.ts",
         "line": 98,
         "column": 20
+      }
+    },
+    {
+      "id": "5a9057ab2a3590a-a55560dcd95bea7",
+      "title": "Restore the default alerting v2 setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

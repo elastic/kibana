@@ -20,6 +20,7 @@ export type NightshiftTriggerRow =
   | {
       kind: 'alert';
       ruleNamePattern?: string;
+      ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       alertStatus?: AlertStatus;
       tags?: string[];
@@ -76,7 +77,7 @@ export interface NightshiftAutomationAttributes {
   workflowId?: string;
   trigger: NightshiftAutomationTrigger;
   execution: NightshiftAutomationExecution;
-  completion: NightshiftAutomationCompletion;
+  completions: NightshiftAutomationCompletion[];
   runtime: NightshiftAutomationRuntime;
   createdAt: string;
   updatedAt: string;

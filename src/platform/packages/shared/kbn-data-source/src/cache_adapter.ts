@@ -12,7 +12,6 @@ import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
 import type { Column } from './types';
 import type { EsqlSource } from './sources/esql_source';
 
@@ -27,14 +26,6 @@ const NON_AGGREGATABLE_ES_TYPES: ReadonlySet<string> = new Set([
   'unsupported',
 ]);
 
-/** Same id as the legacy ES|QL ad-hoc DataView, so persisted filters and Lens keep resolving it. */
-const getDatasetDataViewId = (source: EsqlSource): Promise<string> =>
-  getESQLAdHocDataviewId({
-    indexPattern: source.title,
-    timeFieldName: source.timeFieldName,
-    projectRouting: source.projectRouting,
-  });
-
 /**
  * Transitional shim: registers one DataView per dataset (FROM target, time field, project routing)
  * whose fields are the source's filterable fields, never fetched from field caps.
@@ -44,7 +35,7 @@ export async function registerEsqlSourceInDataViewsCache(
   source: EsqlSource,
   http?: HttpStart
 ): Promise<DataView> {
-  const id = await getDatasetDataViewId(source);
+  const { datasetId: id } = source;
   const filterableFields = await source.getFilterableFields(http);
   const spec = {
     id,

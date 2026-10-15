@@ -93,6 +93,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
       getByIds: async (ids, opts) => get().then((c) => c.getByIds(ids, opts)),
       bulk: async (r) => get().then((c) => c.bulk(r)),
       deleteByQuery: async (r) => get().then((c) => c.deleteByQuery(r)),
+      refresh: async () => get().then((c) => c.refresh()),
     };
 
     instrumentAsyncMethods(`DataClientBundle(${this.deps.source})`, deferredClient);

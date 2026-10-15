@@ -235,6 +235,12 @@ export const allowedExperimentalValues = Object.freeze({
    */
   enableAlertsAndAttacksAlignment: true,
   /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachmentsEnabled: false,
+  /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
@@ -303,9 +309,8 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the investigate-rule Agent Builder skill.
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  investigateRuleSkill: false,
+  investigateRuleSkill: true,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
@@ -371,6 +376,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.6
    */
   perOsPolicySettings: false,
+
+  /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: false,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's

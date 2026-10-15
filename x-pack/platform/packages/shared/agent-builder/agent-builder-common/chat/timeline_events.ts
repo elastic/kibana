@@ -16,6 +16,7 @@ import type {
   RoundModelUsageStats,
 } from './conversation';
 import type { RoundState } from './round_state';
+import type { UserPrincipalType } from '../base/users';
 import type { ExecutionInterruption } from './events';
 
 /**
@@ -60,6 +61,8 @@ export interface EventActor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** Kept apart from `type` so a service account's messages still read back as user messages. */
+  principal_type?: UserPrincipalType;
   /** For external actors, the origin the event came from (which system). */
   origin?: ConversationRoundOrigin;
 }
