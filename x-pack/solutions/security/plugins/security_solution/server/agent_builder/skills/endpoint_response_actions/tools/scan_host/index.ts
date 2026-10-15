@@ -28,9 +28,12 @@ const scanHostSchema = z
     ...hostTargetFields('The hostname of the endpoint to scan for malware.'),
     path: z
       .string()
-      .trim()
       .min(1)
       .max(MAX_FILE_PATH_LENGTH)
+      // Mirrors the HTTP route (`ScanActionRequestSchema`): reject whitespace-only
+      // input but keep the path literal. No `.trim()`: a trailing space names a
+      // different file on Linux/macOS.
+      .refine((value) => value.trim().length > 0, 'path cannot be an empty string')
       .describe('The absolute file or folder path on the endpoint to scan for malware.'),
     comment: z
       .string()

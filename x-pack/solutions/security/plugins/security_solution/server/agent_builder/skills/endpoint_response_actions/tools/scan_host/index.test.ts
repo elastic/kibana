@@ -292,15 +292,21 @@ describe('scanHostTool', () => {
     }
   );
 
-  it('rejects a whitespace-only path and trims a padded one', () => {
+  it('rejects a whitespace-only path, passes a padded one through unchanged, and rejects >4096 chars', () => {
     const tool = scanHostTool(service);
 
     expect(tool.schema.safeParse({ hostName: 'h', path: '   ' }).success).toBe(false);
     expect(tool.schema.safeParse({ hostName: 'h', path: '\t\n' }).success).toBe(false);
 
-    const parsed = tool.schema.safeParse({ hostName: 'h', path: '  /tmp/x  ' });
+    const parsed = tool.schema.safeParse({ hostName: 'h', path: '/tmp/payload ' });
     expect(parsed.success).toBe(true);
-    expect(parsed.data?.path).toBe('/tmp/x');
+    expect(parsed.data?.path).toBe('/tmp/payload ');
+
+    const leading = tool.schema.safeParse({ hostName: 'h', path: '  /tmp/x  ' });
+    expect(leading.data?.path).toBe('  /tmp/x  ');
+
+    expect(tool.schema.safeParse({ hostName: 'h', path: 'a'.repeat(4096) }).success).toBe(true);
+    expect(tool.schema.safeParse({ hostName: 'h', path: 'a'.repeat(4097) }).success).toBe(false);
   });
 
   it('returns an error result when the response actions client throws', async () => {
