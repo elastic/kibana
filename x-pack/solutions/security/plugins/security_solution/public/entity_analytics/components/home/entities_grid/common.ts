@@ -49,15 +49,22 @@ export const isOneOf = <T extends string>(options: readonly T[], value: unknown)
 /**
  * Identity and namespace source fields from entity definitions. The alert enrich rebuilds
  * each row's EUID filter from them; without the namespace sources (e.g. `event.module`)
- * the filter derives a different namespace and misses unstamped alerts.
+ * the filter derives a different namespace and misses unstamped alerts. Identity fields that
+ * the definition does not store (such as `user.entity.id`) are left out: the entity records
+ * have no such column, so keeping them would fail the query.
  */
 const IDENTITY_KEEP_FIELDS = [
   ...new Set([
     ...ALLOWED_ENTITY_TYPES.flatMap((t) => {
       const definition = getBuiltInEntityDefinition(t);
+      const storedFields = new Set(
+        definition.extraction.fields.map(({ destination }) => destination)
+      );
       const { exactMatchFields, prefixMatchFields } = getEuidNamespaceSourceFields(definition);
       return [
-        ...getEuidSourceFields(definition).identitySourceFields,
+        ...getEuidSourceFields(definition).identitySourceFields.filter((field) =>
+          storedFields.has(field)
+        ),
         ...exactMatchFields,
         ...prefixMatchFields,
       ];

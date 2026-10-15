@@ -51,9 +51,13 @@ export type KnowledgePageHeaderProps = Pick<
   | 'automationsHref'
 >;
 
+const KnowledgeLoadingSpinner = () => (
+  <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLoading" />
+);
+
 const KnowledgePageLoading = () => (
   <EuiPageTemplate.Section component="div" restrictWidth={false}>
-    <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLoading" />
+    <KnowledgeLoadingSpinner />
   </EuiPageTemplate.Section>
 );
 
@@ -108,7 +112,7 @@ export function KnowledgePage({
         tabs={tabs}
       />
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
-        <React.Suspense fallback={<KnowledgePageLoading />}>
+        <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
           {tab === 'cortex' && <CortexTab />}
           {tab === 'memory' && <MemoryTab />}

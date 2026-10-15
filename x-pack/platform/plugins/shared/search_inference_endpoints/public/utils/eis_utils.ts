@@ -91,6 +91,11 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
 };
 
+export const getModelTitle = (modelName: string, modelCreator: string): string => {
+  const providerPrefix = `${modelCreator} `;
+  return modelName.startsWith(providerPrefix) ? modelName.slice(providerPrefix.length) : modelName;
+};
+
 export const getModelMetadata = (
   endpoint: EisInferenceEndpoint
 ): EisInferenceEndpointMetadata | undefined => {

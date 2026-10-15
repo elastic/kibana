@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+const HIGH_CONFIDENCE_THRESHOLD = 70;
+const MEDIUM_CONFIDENCE_THRESHOLD = 40;
+
 export const getConfidenceColor = (confidence: number): string => {
-  if (confidence >= 70) return 'success';
-  if (confidence >= 40) return 'warning';
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'success';
+  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'warning';
   return 'danger';
 };
