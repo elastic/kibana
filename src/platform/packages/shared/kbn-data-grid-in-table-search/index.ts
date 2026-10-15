@@ -12,6 +12,7 @@ export {
   InTableSearchCellContext,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
+  type InTableSearchScrollToCell,
 } from './src';
 
 export {
