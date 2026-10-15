@@ -112,7 +112,7 @@ describe('destination models', () => {
       secret: 'example-secret-access-key',
     });
 
-    it('writes the bucket, region, access_key and secret config entries', () => {
+    it('writes the bucket, region, access_key_id and secret_access_key config entries', () => {
       expect(s3Destination).toEqual({
         id: 's3-archive',
         name: 'S3 archive',
@@ -121,8 +121,8 @@ describe('destination models', () => {
         config: [
           { name: 'bucket', value: 'demo-bucket' },
           { name: 'region', value: 'eu-west-1' },
-          { name: 'access_key', value: 'AKIAEXAMPLEKEYID' },
-          { name: 'secret', value: 'example-secret-access-key' },
+          { name: 'access_key_id', value: 'AKIAEXAMPLEKEYID' },
+          { name: 'secret_access_key', value: 'example-secret-access-key' },
         ],
       });
     });
@@ -139,8 +139,8 @@ describe('destination models', () => {
         bucket: 'demo-bucket',
         region: 'eu-west-1',
       });
-      expect(Object.keys(s3)).not.toContain('secret');
-      expect(Object.keys(s3)).not.toContain('access_key');
+      expect(Object.keys(s3)).not.toContain('secret_access_key');
+      expect(Object.keys(s3)).not.toContain('access_key_id');
       expect(Object.keys(s3)).not.toContain('accessKey');
       expect(JSON.stringify(s3)).not.toContain('example-secret-access-key');
       expect(JSON.stringify(s3)).not.toContain('AKIAEXAMPLEKEYID');

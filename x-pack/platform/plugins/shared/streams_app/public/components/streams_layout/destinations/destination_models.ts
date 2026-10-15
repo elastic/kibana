@@ -63,7 +63,7 @@ const readDestinationIndexPatterns = (destination: UnitDestination, index: strin
   return indexUsesTemplate(index) ? [] : [index];
 };
 
-/** Credentials (`access_key`, `secret`) are deliberately not read. */
+/** Credentials (`access_key_id`, `secret_access_key`) are deliberately not read. */
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
@@ -129,7 +129,7 @@ export const createUnitDestination = ({
 };
 
 /**
- * S3 destination with the config entry names the demo collector reads.
+ * S3 destination with the config entry names from the streams spec.
  * Credentials are plain text in `config` until credential sealing lands.
  */
 export const createS3UnitDestination = ({
@@ -147,7 +147,7 @@ export const createS3UnitDestination = ({
   config: [
     { name: 'bucket', value: bucket },
     { name: 'region', value: region },
-    { name: 'access_key', value: accessKey },
-    { name: 'secret', value: secret },
+    { name: 'access_key_id', value: accessKey },
+    { name: 'secret_access_key', value: secret },
   ],
 });
