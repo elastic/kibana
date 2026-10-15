@@ -118,6 +118,25 @@ describe('request validation', () => {
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
+
+  it.each([
+    ['no filters', {}],
+    ['empty filter lists', { channels: [], users: [] }],
+    ['blank filter values', { channels: [' '], users: [''], messageFilter: '  ' }],
+  ])('rejects a Slack trigger row with %s', (_name, filters) => {
+    expect(() => parseRows([{ kind: 'slack', event: 'message', ...filters }])).toThrow(
+      'at least one of channels, users or messageFilter'
+    );
+  });
+
+  it.each([
+    ['channels', { channels: ['C123'] }],
+    ['users', { users: ['U123'] }],
+    ['messageFilter', { messageFilter: 'outage' }],
+  ])('accepts a Slack trigger row with only %s', (_name, filters) => {
+    const row = { kind: 'slack', event: 'message', ...filters };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+  });
 });
 
 it('runs the automation as the automations service account', async () => {

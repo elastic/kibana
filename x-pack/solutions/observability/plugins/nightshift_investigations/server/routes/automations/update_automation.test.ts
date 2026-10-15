@@ -158,6 +158,12 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects a Slack trigger row with no filters', () => {
+    expect(() => parseRows([{ kind: 'slack', event: 'message' }])).toThrow(
+      'at least one of channels, users or messageFilter'
+    );
+  });
+
   it('accepts the action removal payload sent by the edit form', () => {
     expect(
       params.parse({ path: { id: 'automation-1' }, body: { completions: [] } }).body.completions
