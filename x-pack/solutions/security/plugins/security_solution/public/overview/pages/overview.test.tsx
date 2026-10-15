@@ -28,6 +28,7 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { DASHBOARDS, OVERVIEW } from '../../app/translations';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');
@@ -77,7 +78,9 @@ jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 jest.mock('../../explore/components/search_with_data_view', () => ({
-  SearchWithDataView: () => <div data-test-subj="mockSearchWithDataView" />,
+  SearchWithDataView: ({ scope }: { scope?: string }) => (
+    <div data-test-subj="mockSearchWithDataView" data-scope={scope} />
+  ),
 }));
 jest.mock('../../common/components/user_privileges');
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -310,6 +313,15 @@ describe('Overview', () => {
       const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
       expect(backButton).toHaveAttribute('href', '/app/security/dashboards');
       expect(backButton).toHaveAttribute('aria-label', expect.stringContaining(DASHBOARDS));
+    });
+
+    it('passes the default page scope to the search band', () => {
+      renderOverview();
+
+      expect(screen.getByTestId('mockSearchWithDataView')).toHaveAttribute(
+        'data-scope',
+        PageScope.default
+      );
     });
 
     it('renders the search band with the data view picker instead of the global filters strip', () => {

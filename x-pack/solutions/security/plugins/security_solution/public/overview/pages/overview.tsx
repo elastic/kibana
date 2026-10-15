@@ -39,6 +39,7 @@ import {
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { SearchWithDataView } from '../../explore/components/search_with_data_view';
+import { PageScope } from '../../data_view_manager/constants';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -125,7 +126,7 @@ const OverviewComponent = () => {
         )}
         {indicesExist && (
           <>
-            <SearchWithDataView dataView={dataView} />
+            <SearchWithDataView dataView={dataView} scope={PageScope.default} />
             {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
