@@ -3529,7 +3529,6 @@
     "esqlEditor.query.warningsTitle": "Avisos",
     "esqlEditor.queryStats.documentsProcessed": "{count} documentos processados",
     "esqlEditor.starred.searchPlaceholder": "Buscar consultas marcadas",
-    "esqlEditor.suggestFix.acceptLabel": "Manter correção de IA",
     "esqlEditor.suggestFix.error": "Não foi possível gerar uma correção de IA para a consulta",
     "esqlEditor.suggestFix.rejectLabel": "Desfazer correção de IA",
     "esqlEditor.visor.nlError": "Falha ao gerar a consulta ES|QL",

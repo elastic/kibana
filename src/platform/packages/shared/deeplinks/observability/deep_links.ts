@@ -108,7 +108,9 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type SignificantEventsLinkId = 'sources' | 'knowledge_indicators' | 'events' | 'rules';
+export type SignificantEventsLinkId = 'sources' | 'events' | 'rules';
+
+export type NightshiftLinkId = 'knowledge_indicators';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'
@@ -140,4 +142,5 @@ export type DeepLinkId =
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`
   | `${SignificantEventsApp}:${SignificantEventsLinkId}`
+  | `${NightshiftApp}:${NightshiftLinkId}`
   | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;
