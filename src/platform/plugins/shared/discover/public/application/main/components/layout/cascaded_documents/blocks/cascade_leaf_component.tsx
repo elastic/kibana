@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import {
   getRenderCustomToolbarWithElements,
@@ -15,6 +23,7 @@ import {
   DataLoadingState,
   DataGridDensity,
   type UnifiedDataTableProps,
+  type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
 import {
   type DataCascadeRowCellProps,
@@ -23,6 +32,13 @@ import {
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+import { createPortal } from 'react-dom';
+import {
+  createHtmlPortalNode,
+  InPortal,
+  OutPortal,
+  type HtmlPortalNode,
+} from 'react-reverse-portal';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
@@ -40,7 +56,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'virtualizerController' | 'nodePath' | 'nodePathMap'
+      'virtualizerController' | 'nodePath' | 'nodePathMap' | 'stickyHeaderExtensionPoint'
     > {
   cellData: DataTableRecord[];
   cellId: string;
@@ -54,6 +70,25 @@ interface CustomCascadeGridBodyProps
   isFullScreenMode?: boolean;
   cellId: string;
   rowIndex: number;
+  /**
+   * Reverse portal node that the data grid toolbar is rendered into. The grid body outputs it
+   * ahead of the header row whenever the header is relocated into the cascade sticky header.
+   */
+  toolbarPortalNode: HtmlPortalNode;
+  /**
+   * When set, the toolbar and header row are portaled into this element (the cascade row's
+   * sticky header extension point) instead of being rendered in place.
+   */
+  stickyHeaderPortalTarget: HTMLDivElement | null;
+  /**
+   * Exposes scrolling of the custom virtualized body to the owning leaf cell, e.g. so that
+   * in-table search can bring the active match into view.
+   */
+  scrollApiRef: React.Ref<CustomCascadeGridBodyScrollApi>;
+}
+
+export interface CustomCascadeGridBodyScrollApi {
+  scrollToRow: (rowIndex: number) => void;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -73,6 +108,9 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
+  toolbarPortalNode,
+  stickyHeaderPortalTarget,
+  scrollApiRef,
 }: CustomCascadeGridBodyProps) {
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -107,6 +145,18 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     }
   }, [isFullScreenMode, isDetached, handle]);
 
+  useImperativeHandle(
+    scrollApiRef,
+    () => ({
+      scrollToRow: (targetRowIndex) => {
+        // 'center' keeps the row clear of the cascade sticky header (toolbar + grid header row),
+        // whether the body scrolls with the cascade or on its own in full screen mode
+        virtualizer.scrollToIndex(targetRowIndex, { align: 'center', behavior: 'auto' });
+      },
+    }),
+    [virtualizer]
+  );
+
   const items = virtualizer.getVirtualItems();
 
   const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
@@ -118,7 +168,20 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <>{headerRow}</>
+      {stickyHeaderPortalTarget
+        ? createPortal(
+            <>
+              <OutPortal node={toolbarPortalNode} />
+              <div
+                data-test-subj="discoverCascadeCustomDataPortalledGridHeaderContainer"
+                css={customCascadeGridBodyStyle.portalledGridHeaderContainer}
+              >
+                {headerRow}
+              </div>
+            </>,
+            stickyHeaderPortalTarget
+          )
+        : headerRow}
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -168,6 +231,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     onUpdateDataGridDensity,
     nodePath,
     nodePathMap,
+    stickyHeaderExtensionPoint,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
@@ -220,7 +284,30 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
-    const renderCustomToolbarWithElements = useMemo(
+    // In full screen mode the grid is fixed-positioned above the cascade, so the sticky header
+    // slot is not visible and the toolbar/header must stay in their default positions.
+    const stickyHeaderPortalTarget =
+      !isCellInFullScreenMode && stickyHeaderExtensionPoint?.isActiveSticky
+        ? stickyHeaderExtensionPoint.extensionPointElement
+        : null;
+
+    const isToolbarInStickyHeader = stickyHeaderPortalTarget !== null;
+
+    // The data grid toolbar is rendered by EuiDataGrid outside of the custom grid body. To move it
+    // into the cascade sticky header without remounting it, it is rendered into a reverse portal
+    // node; an `OutPortal` then places the toolbar DOM either in its default position or in the
+    // sticky header while its React subtree (and state) stays put.
+    const toolbarPortalNode = useMemo(
+      () =>
+        createHtmlPortalNode({
+          attributes: {
+            ['data-test-subj']: 'discoverCascadeToolbarPortal',
+          },
+        }),
+      []
+    );
+
+    const renderToolbarWithElements = useMemo(
       () =>
         getRenderCustomToolbarWithElements({
           leftSide: (
@@ -236,6 +323,26 @@ export const ESQLDataCascadeLeafCell = React.memo(
           ),
         }),
       [cellData.length]
+    );
+
+    const scrollApiRef = useRef<CustomCascadeGridBodyScrollApi | null>(null);
+
+    const scrollToCell = useCallback<NonNullable<UnifiedDataTableProps['scrollToCell']>>(
+      ({ rowIndex: matchRowIndex }) => {
+        // the match row index maps directly onto `cellData`, since the leaf grid is not paginated
+        scrollApiRef.current?.scrollToRow(matchRowIndex);
+      },
+      []
+    );
+
+    const renderCustomToolbar = useCallback<UnifiedDataTableRenderCustomToolbar>(
+      (toolbarProps) => (
+        <>
+          <InPortal node={toolbarPortalNode}>{renderToolbarWithElements(toolbarProps)}</InPortal>
+          {!isToolbarInStickyHeader && <OutPortal node={toolbarPortalNode} />}
+        </>
+      ),
+      [toolbarPortalNode, renderToolbarWithElements, isToolbarInStickyHeader]
     );
 
     const renderCustomCascadeGridBodyCallback = useCallback<
@@ -264,10 +371,22 @@ export const ESQLDataCascadeLeafCell = React.memo(
           cellId={cellId}
           rowIndex={rowIndex}
           isFullScreenMode={isCellInFullScreenMode}
+          toolbarPortalNode={toolbarPortalNode}
+          stickyHeaderPortalTarget={stickyHeaderPortalTarget}
+          scrollApiRef={scrollApiRef}
         />
       ),
-      [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
+      [
+        virtualizerController,
+        isCellInFullScreenMode,
+        cellId,
+        cellData,
+        rowIndex,
+        toolbarPortalNode,
+        stickyHeaderPortalTarget,
+      ]
     );
+
     return (
       <UnifiedDataTable
         dataView={dataView}
@@ -275,7 +394,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
-        enableInTableSearch={false}
+        enableInTableSearch
+        scrollToCell={scrollToCell}
         showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
         rows={cellData}
@@ -283,7 +403,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         columns={selectedColumns}
         dataSource={cascadedLeafDataSource}
         onSetColumns={setSelectedColumns}
-        renderCustomToolbar={renderCustomToolbarWithElements}
+        renderCustomToolbar={renderCustomToolbar}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
         setExpandedDoc={setExpandedDoc}
         dataGridDensityState={cascadeDataGridDensityState}
