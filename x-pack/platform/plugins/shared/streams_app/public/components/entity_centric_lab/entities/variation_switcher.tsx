@@ -51,9 +51,9 @@ const PROTOTYPE_CHANGELOG: readonly {
   {
     date: '2026-10-15',
     summary:
-      'Add page-level display density setting and tighten vertical spacing.',
+      'Add alert filter, nav badge counts, and page-level display density setting.',
     details:
-      'New Display options popover (Compact / Normal / Expanded) persisted in localStorage, controlling EuiInMemoryTable compressed prop, EuiDataGrid cell padding/font size, and hex-map card panel padding. Reduce margins between hex blocks. Chase vertical space across list view (toolbar spacers, HR margins, gutter sizes). Bump to v1.04.',
+      'Filter entities by alert status (with active alerts / no active alerts / no alert set up). Show alert counts as badges in the left nav per category. New Display options popover (Compact / Normal / Expanded) persisted in localStorage, controlling table density, data-grid cell padding/font size, and hex-map card panel padding. Reduce margins between hex blocks and chase vertical space across list view. Bump to v1.04.',
   },
   {
     date: '2026-10-15',
