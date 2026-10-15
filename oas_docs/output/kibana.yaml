@@ -169348,6 +169348,41 @@ components:
           type: boolean
         is_preconfigured:
           type: boolean
+        kerberos:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            auth_type:
+              description: 'How the agent authenticates to Kerberos: with a keytab file or with a username and a password.'
+              enum:
+                - keytab
+                - password
+              type: string
+            config_path:
+              description: Path of the Kerberos configuration file (`krb5.conf`) on the agent host.
+              minLength: 1
+              type: string
+            enable_krb5_fast:
+              description: Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.
+              type: boolean
+            keytab:
+              description: Path of the keytab file on the agent host. Required when `auth_type` is `keytab`.
+              type: string
+            realm:
+              description: Kerberos realm.
+              minLength: 1
+              type: string
+            service_name:
+              description: Name of the Kerberos service of the Kafka brokers.
+              type: string
+            username:
+              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              type: string
+          required:
+            - auth_type
+            - config_path
+            - realm
         key:
           type: string
         name:
@@ -169484,6 +169519,22 @@ components:
           additionalProperties: false
           type: object
           properties:
+            kerberos:
+              additionalProperties: false
+              type: object
+              properties:
+                password:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             oauth2:
               additionalProperties: false
               type: object
@@ -171787,6 +171838,41 @@ components:
           type: boolean
         is_preconfigured:
           type: boolean
+        kerberos:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            auth_type:
+              description: 'How the agent authenticates to Kerberos: with a keytab file or with a username and a password.'
+              enum:
+                - keytab
+                - password
+              type: string
+            config_path:
+              description: Path of the Kerberos configuration file (`krb5.conf`) on the agent host.
+              minLength: 1
+              type: string
+            enable_krb5_fast:
+              description: Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.
+              type: boolean
+            keytab:
+              description: Path of the keytab file on the agent host. Required when `auth_type` is `keytab`.
+              type: string
+            realm:
+              description: Kerberos realm.
+              minLength: 1
+              type: string
+            service_name:
+              description: Name of the Kerberos service of the Kafka brokers.
+              type: string
+            username:
+              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              type: string
+          required:
+            - auth_type
+            - config_path
+            - realm
         key:
           type: string
         name:
@@ -171923,6 +172009,22 @@ components:
           additionalProperties: true
           type: object
           properties:
+            kerberos:
+              additionalProperties: true
+              type: object
+              properties:
+                password:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             oauth2:
               additionalProperties: true
               type: object
@@ -177633,6 +177735,41 @@ components:
           type: boolean
         is_preconfigured:
           type: boolean
+        kerberos:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            auth_type:
+              description: 'How the agent authenticates to Kerberos: with a keytab file or with a username and a password.'
+              enum:
+                - keytab
+                - password
+              type: string
+            config_path:
+              description: Path of the Kerberos configuration file (`krb5.conf`) on the agent host.
+              minLength: 1
+              type: string
+            enable_krb5_fast:
+              description: Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.
+              type: boolean
+            keytab:
+              description: Path of the keytab file on the agent host. Required when `auth_type` is `keytab`.
+              type: string
+            realm:
+              description: Kerberos realm.
+              minLength: 1
+              type: string
+            service_name:
+              description: Name of the Kerberos service of the Kafka brokers.
+              type: string
+            username:
+              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              type: string
+          required:
+            - auth_type
+            - config_path
+            - realm
         key:
           type: string
         name:
@@ -177769,6 +177906,22 @@ components:
           additionalProperties: false
           type: object
           properties:
+            kerberos:
+              additionalProperties: false
+              type: object
+              properties:
+                password:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             oauth2:
               additionalProperties: false
               type: object
