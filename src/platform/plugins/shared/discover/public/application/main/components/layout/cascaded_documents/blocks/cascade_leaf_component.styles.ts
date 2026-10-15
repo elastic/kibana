@@ -30,6 +30,16 @@ export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme'])
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
   }),
+  portalledGridHeaderContainer: css({
+    contain: 'content',
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    padding: `0 ${euiTheme.size.xs}`,
+
+    '& .euiDataGridHeader': {
+      width: '100%',
+      border: 'none',
+    },
+  }),
   virtualizerContainer: css({
     width: '100%',
     height: '100%',
