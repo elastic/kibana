@@ -75,6 +75,7 @@ const keepRequestedLayout = async ({
   const toArrangedPanels = (layoutPanels: LayoutRequest['current']['panels']) =>
     layoutPanels.map(({ id }) => ({ id, ...(gridById.get(id) ?? { x: 0, y: 0, w: 24, h: 10 }) }));
   return {
+    plan: '',
     panels: toArrangedPanels(current.panels),
     sections: current.sections.map(({ id, panels }) => ({
       id,
@@ -270,7 +271,8 @@ describe('generateDashboardTool handler', () => {
         panelAuthoringNotes: [],
       });
       mockArrangeLayout.mockResolvedValue({
-        panels: [{ id: 'panel', ...fullWidthGrid }],
+        plan: '',
+        panels: [{ id: 'p1', ...fullWidthGrid }],
         sections: [],
       });
 
@@ -290,7 +292,8 @@ describe('generateDashboardTool handler', () => {
     it('writes a version when a layout request changes the grid', async () => {
       mockExistingDashboard();
       mockArrangeLayout.mockResolvedValue({
-        panels: [{ id: 'panel', ...fullWidthGrid }],
+        plan: '',
+        panels: [{ id: 'p1', ...fullWidthGrid }],
         sections: [],
       });
 

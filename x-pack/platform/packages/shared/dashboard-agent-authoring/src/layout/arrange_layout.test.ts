@@ -47,11 +47,12 @@ const dashboardWithNewPanel: DashboardAttachmentData = {
 };
 
 const completeArrangement: LayoutArrangement = {
+  plan: '',
   panels: [
-    { id: 'existing', x: 0, y: 0, w: 48, h: 9 },
-    { id: 'new-panel', x: 0, y: 9, w: 48, h: 9 },
+    { id: 'p1', x: 0, y: 0, w: 48, h: 9 },
+    { id: 'p3', x: 0, y: 9, w: 48, h: 9 },
   ],
-  sections: [{ id: 'section-a', y: 18, panels: [{ id: 'inner', x: 0, y: 0, w: 12, h: 6 }] }],
+  sections: [{ id: 's1', y: 18, panels: [{ id: 'p2', x: 0, y: 0, w: 12, h: 6 }] }],
 };
 
 describe('arrangeDashboardLayout', () => {
@@ -95,10 +96,28 @@ describe('arrangeDashboardLayout', () => {
     expect(result).toBe(dashboardWithRetitledPanel);
   });
 
+  it('calls the layout when a panel changes chart type', async () => {
+    const arrangeLayout = jest.fn(async () => ({
+      plan: '',
+      panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 10 }],
+      sections: [{ id: 's1', y: 10, panels: [{ id: 'p2', x: 0, y: 0, w: 24, h: 9 }] }],
+    }));
+    const dashboardWithNewChartType: DashboardAttachmentData = {
+      ...originalDashboardData,
+      panels: [createLensPanel('existing', 0, 'xy'), originalDashboardData.panels[1]],
+    };
+
+    await arrange(arrangeLayout, { dashboardData: dashboardWithNewChartType });
+
+    const [[{ changes }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+    expect(changes).toEqual({ editedPanels: ['p1'] });
+  });
+
   it('calls the layout for unchanged panels when there is a layout request', async () => {
     const arrangeLayout = jest.fn(async () => ({
-      panels: [{ id: 'existing', x: 0, y: 0, w: 48, h: 9 }],
-      sections: [{ id: 'section-a', y: 9, panels: [{ id: 'inner', x: 0, y: 0, w: 48, h: 9 }] }],
+      plan: '',
+      panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 9 }],
+      sections: [{ id: 's1', y: 9, panels: [{ id: 'p2', x: 0, y: 0, w: 48, h: 9 }] }],
     }));
 
     const result = await arrange(arrangeLayout, {
@@ -112,24 +131,24 @@ describe('arrangeDashboardLayout', () => {
     expect(result.panels[0].grid).toEqual({ x: 0, y: 0, w: 48, h: 9 });
   });
 
-  it('sends the previous and current dashboards with what changed, and applies the arrangement', async () => {
+  it('sends the previous and current dashboards with short ids, and applies the arrangement', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
 
     const result = await arrange(arrangeLayout);
 
     const previousPanel = {
-      id: 'existing',
+      id: 'p1',
       type: LENS_EMBEDDABLE_TYPE,
       chartType: 'metric',
       title: 'Panel existing',
     };
-    const previousInner = { ...previousPanel, id: 'inner', title: 'Panel inner' };
+    const previousInner = { ...previousPanel, id: 'p2', title: 'Panel inner' };
     expect(arrangeLayout).toHaveBeenCalledWith({
       previous: {
         panels: [{ ...previousPanel, grid: { x: 0, y: 0, w: 24, h: 9 } }],
         sections: [
           {
-            id: 'section-a',
+            id: 's1',
             title: 'Section section-a',
             y: 9,
             panels: [{ ...previousInner, grid: { x: 0, y: 0, w: 24, h: 9 } }],
@@ -137,10 +156,10 @@ describe('arrangeDashboardLayout', () => {
         ],
       },
       current: {
-        panels: [previousPanel, { ...previousPanel, id: 'new-panel', title: 'Panel new-panel' }],
-        sections: [{ id: 'section-a', title: 'Section section-a', panels: [previousInner] }],
+        panels: [previousPanel, { ...previousPanel, id: 'p3', title: 'Panel new-panel' }],
+        sections: [{ id: 's1', title: 'Section section-a', panels: [previousInner] }],
       },
-      changes: { addedPanels: ['new-panel'] },
+      changes: { addedPanels: ['p3'] },
     });
     expect(result.panels).toEqual([
       expect.objectContaining({ id: 'existing', grid: { x: 0, y: 0, w: 48, h: 9 } }),
@@ -167,8 +186,8 @@ describe('arrangeDashboardLayout', () => {
 
     const [[request]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
     expect(request.previous).toBeUndefined();
-    expect(request.changes.addedPanels).toEqual(['existing', 'inner', 'new-panel']);
-    expect(request.changes.addedSections).toEqual(['section-a']);
+    expect(request.changes.addedPanels).toEqual(['p1', 'p2', 'p3']);
+    expect(request.changes.addedSections).toEqual(['s1']);
   });
 
   it('reports moved and edited panels, and removed and added sections', async () => {
@@ -185,16 +204,17 @@ describe('arrangeDashboardLayout', () => {
 
     const [[{ changes }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
     expect(changes).toEqual({
-      movedPanels: ['inner', 'existing'],
-      editedPanels: ['existing'],
-      addedSections: ['section-b'],
-      removedSections: ['section-a'],
+      movedPanels: ['p1', 'p2'],
+      editedPanels: ['p2'],
+      addedSections: ['s1'],
+      removedSections: ['s2'],
     });
   });
 
   it('sends the content of markdown panels and reports edited content', async () => {
     const arrangeLayout = jest.fn(async () => ({
-      panels: [{ id: 'intro', x: 0, y: 0, w: 48, h: 6 }],
+      plan: '',
+      panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 6 }],
       sections: [],
     }));
     const createMarkdownPanel = (content: string): AttachmentPanel => ({
@@ -214,7 +234,7 @@ describe('arrangeDashboardLayout', () => {
 
     const [[{ current, changes }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
     expect(current.panels[0].content).toBe('Longer text');
-    expect(changes).toEqual({ editedPanels: ['intro'] });
+    expect(changes).toEqual({ editedPanels: ['p1'] });
   });
 
   it.each<[string, LayoutArrangement, string]>([
@@ -222,17 +242,26 @@ describe('arrangeDashboardLayout', () => {
       'misses a panel',
       {
         ...completeArrangement,
-        sections: [{ id: 'section-a', y: 18, panels: [] }],
+        sections: [{ id: 's1', y: 18, panels: [] }],
       },
       'panel "inner" is missing from its container',
     ],
     [
       'places a panel in another container',
       {
-        panels: [...completeArrangement.panels, { id: 'inner', x: 0, y: 18, w: 48, h: 9 }],
-        sections: [{ id: 'section-a', y: 27, panels: [] }],
+        ...completeArrangement,
+        panels: [...completeArrangement.panels, { id: 'p2', x: 0, y: 18, w: 48, h: 9 }],
+        sections: [{ id: 's1', y: 27, panels: [] }],
       },
       'panel "inner" is missing from its container',
+    ],
+    [
+      'returns an unknown id',
+      {
+        ...completeArrangement,
+        panels: [completeArrangement.panels[0], { ...completeArrangement.panels[1], id: 'p9' }],
+      },
+      'panel "new-panel" is missing from its container',
     ],
     [
       'misses a section',
@@ -240,11 +269,27 @@ describe('arrangeDashboardLayout', () => {
       'section "section-a" is missing',
     ],
     [
+      'repeats a panel',
+      {
+        ...completeArrangement,
+        panels: [...completeArrangement.panels, { id: 'p1', x: 0, y: 30, w: 48, h: 9 }],
+      },
+      'a panel is repeated in its container',
+    ],
+    [
+      'puts a section on the row of a top-level panel',
+      {
+        ...completeArrangement,
+        sections: [{ ...completeArrangement.sections[0], y: 12 }],
+      },
+      'section "section-a" shares a row with another section or panel',
+    ],
+    [
       'overflows the grid',
       {
         ...completeArrangement,
         panels: completeArrangement.panels.map((panel) =>
-          panel.id === 'new-panel' ? { ...panel, x: 24, w: 48 } : panel
+          panel.id === 'p3' ? { ...panel, x: 24, w: 48 } : panel
         ),
       },
       'panel "new-panel" overflows the 48-column grid',
@@ -267,7 +312,7 @@ describe('arrangeDashboardLayout', () => {
     expect(reportFailure).not.toHaveBeenCalled();
   });
 
-  it('reports a failure when a layout request is made for a dashboard without panels', async () => {
+  it('skips the layout call for a dashboard without panels', async () => {
     const arrangeLayout = jest.fn();
     const dashboardData: DashboardAttachmentData = { title: 'Dashboard', panels: [] };
 
@@ -278,11 +323,7 @@ describe('arrangeDashboardLayout', () => {
 
     expect(arrangeLayout).not.toHaveBeenCalled();
     expect(result).toBe(dashboardData);
-    expect(reportFailure).toHaveBeenCalledWith({
-      type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
-      identifier: 'layout',
-      error: expect.stringContaining('the dashboard has no panels'),
-    });
+    expect(reportFailure).not.toHaveBeenCalled();
   });
 
   it('reports a failure when a layout request is not applied', async () => {

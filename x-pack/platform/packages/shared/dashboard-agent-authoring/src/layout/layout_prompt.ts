@@ -20,25 +20,25 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 ## How to lay out
 
-- Start from the \`previous\` grids. The user may have arranged them by hand, so keep the grid of every unchanged panel unless \`instructions\` ask for a change, or removed and moved panels leave gaps that need a reflow (see *Reflow after layout changes*).
+- Start from the \`previous\` grids. The user may have arranged them by hand, so without \`instructions\` change only the rows that hold an added, removed, moved or edited panel, and the rows below them that must move up or down. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels are affected too. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Apply the packing, positioning and reflow rules to those rows only; keep every other panel's grid as it is, even where it breaks those rules.
 - Size added and edited panels by *Grid sizes by chart type*, and place them by the positioning rules.
 
 ## Grid sizes by chart type
 
 Use these sizes — **do not make metric or gauge panels full-width**:
 
-- **Metric** (\`chartType: metric\`) → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
+- **Metric** (\`chartType: metric\` or \`legacy_metric\`) → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
   - 8 metrics in a row: each \`w: 6, h: 5\`
   - 6 metrics in a row: each \`w: 8, h: 5\`
   - 4 metrics in a row: each \`w: 12, h: 5\`
-- **Gauge** → \`w: 12, h: 8\`. Fit up to 4 per row.
-- **XY (line / area / bar)** → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
-- **Heatmap** → \`w: 24, h: 10\`. Needs height for the color matrix.
-- **Tagcloud** → \`w: 24, h: 10\`.
-- **Pie** → \`w: 12, h: 10\`.
-- **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
-- **Markdown** → \`w: 24–48, h: 4–9\`. Size based on \`content\` length and layout needs — not always full-width.
-- **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
+- **Gauge** (\`gauge\`) → \`w: 12, h: 8\`. Fit up to 4 per row.
+- **XY (line / area / bar)** (\`xy\`) → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
+- **Heatmap** (\`heatmap\`) → \`w: 24, h: 10\`. Needs height for the color matrix.
+- **Tagcloud** (\`tag_cloud\`) → \`w: 24, h: 10\`.
+- **Pie** (\`pie\`) → \`w: 12, h: 10\`.
+- **Treemap / Waffle / Mosaic** (\`treemap\`, \`waffle\`, \`mosaic\`) → \`w: 24, h: 10\`.
+- **Markdown** (\`type: markdown\`) → \`w: 24–48, h: 4–9\`. Size based on \`content\` length and layout needs — not always full-width.
+- **Datatable** (\`data_table\`) → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
 - **Custom content** → \`w: 24–48\`, \`h\` from what its \`content\` actually contains — the most common sizing mistake is making these too short, which leaves the panel scrolling inside its own frame:
   - a single KPI or status card, or one short row of them: \`h: 6–8\`
   - a list, table or status board of rows: \`h: 10–16\`, sized for the number of rows the ES|QL query returns

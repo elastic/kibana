@@ -38,11 +38,34 @@ const getContent = ({ type, config }: AttachmentPanel): string | undefined => {
   return type === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? JSON.stringify(config) : undefined;
 };
 
-const toLayoutPanel = (panel: AttachmentPanel, withGrid: boolean): LayoutPanel => {
+/** Short ids for the layout call, since models miscopy long ids such as UUIDs. */
+const createAliases = (...widgetLists: Widgets[]): Map<string, string> => {
+  const aliasById = new Map<string, string>();
+  let panelCount = 0;
+  let sectionCount = 0;
+  for (const widget of widgetLists.flat()) {
+    const panels = isSection(widget) ? widget.panels : [widget];
+    if (isSection(widget) && !aliasById.has(widget.id)) {
+      aliasById.set(widget.id, `s${++sectionCount}`);
+    }
+    for (const { id } of panels) {
+      if (!aliasById.has(id)) {
+        aliasById.set(id, `p${++panelCount}`);
+      }
+    }
+  }
+  return aliasById;
+};
+
+const toLayoutPanel = (
+  panel: AttachmentPanel,
+  withGrid: boolean,
+  aliasById: ReadonlyMap<string, string>
+): LayoutPanel => {
   const { id, type, config, grid } = panel;
   const content = getContent(panel);
   return {
-    id,
+    id: aliasById.get(id) ?? id,
     type,
     ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
     ...(typeof config.title === 'string' ? { title: config.title } : {}),
@@ -54,9 +77,13 @@ const toLayoutPanel = (panel: AttachmentPanel, withGrid: boolean): LayoutPanel =
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
-const toLayoutDashboard = (widgets: Widgets, withGrid: boolean): LayoutDashboard => {
+const toLayoutDashboard = (
+  widgets: Widgets,
+  withGrid: boolean,
+  aliasById: ReadonlyMap<string, string>
+): LayoutDashboard => {
   const toLayoutPanels = (panels: AttachmentPanel[]) =>
-    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, withGrid));
+    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, withGrid, aliasById));
   return {
     panels: toLayoutPanels(
       widgets.filter((widget): widget is AttachmentPanel => !isSection(widget))
@@ -65,7 +92,7 @@ const toLayoutDashboard = (widgets: Widgets, withGrid: boolean): LayoutDashboard
       .filter(isSection)
       .sort((a, b) => a.grid.y - b.grid.y)
       .map(({ id, title, grid, panels }) => ({
-        id,
+        id: aliasById.get(id) ?? id,
         title,
         ...(withGrid ? { y: grid.y } : {}),
         panels: toLayoutPanels(panels),
@@ -86,7 +113,11 @@ const getPanelsById = (
     )
   );
 
-const getChanges = (previousWidgets: Widgets, currentWidgets: Widgets): LayoutChanges => {
+const getChanges = (
+  previousWidgets: Widgets,
+  currentWidgets: Widgets,
+  aliasById: ReadonlyMap<string, string>
+): LayoutChanges => {
   const previousPanels = getPanelsById(previousWidgets);
   const currentPanels = getPanelsById(currentWidgets);
   const previousSectionIds = new Set(previousWidgets.filter(isSection).map(({ id }) => id));
@@ -115,7 +146,11 @@ const getChanges = (previousWidgets: Widgets, currentWidgets: Widgets): LayoutCh
     addedSections: [...currentSectionIds].filter((id) => !previousSectionIds.has(id)),
     removedSections: [...previousSectionIds].filter((id) => !currentSectionIds.has(id)),
   };
-  return Object.fromEntries(Object.entries(changes).filter(([, ids]) => ids.length > 0));
+  return Object.fromEntries(
+    Object.entries(changes)
+      .filter(([, ids]) => ids.length > 0)
+      .map(([key, ids]: [string, string[]]) => [key, ids.map((id) => aliasById.get(id) ?? id)])
+  );
 };
 
 interface ArrangeLayoutParams {
@@ -144,56 +179,79 @@ export const arrangeDashboardLayout = async ({
   reportFailure,
   logger,
 }: ArrangeLayoutParams): Promise<DashboardAttachmentData> => {
-  const reportUnappliedRequest = (reason: string) => {
-    // The agent no longer sees grids, so it can only learn from a failure that its layout request
-    // was not applied.
-    if (instructions !== undefined) {
-      reportFailure({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
-        identifier: 'layout',
-        error: `The layout request was not applied, so panel positions and sizes are unchanged: ${reason}`,
-      });
-    }
-  };
-
   if (dashboardData.panels.length === 0) {
-    reportUnappliedRequest('the dashboard has no panels');
     return dashboardData;
   }
 
-  const changes = getChanges(originalPanels, dashboardData.panels);
+  const aliasById = createAliases(dashboardData.panels, originalPanels);
+  const changes = getChanges(originalPanels, dashboardData.panels, aliasById);
   if (instructions === undefined && Object.keys(changes).length === 0) {
     return dashboardData;
   }
 
   const request: LayoutRequest = {
     ...(instructions !== undefined ? { instructions } : {}),
-    ...(originalPanels.length > 0 ? { previous: toLayoutDashboard(originalPanels, true) } : {}),
-    current: toLayoutDashboard(dashboardData.panels, false),
+    ...(originalPanels.length > 0
+      ? { previous: toLayoutDashboard(originalPanels, true, aliasById) }
+      : {}),
+    current: toLayoutDashboard(dashboardData.panels, false, aliasById),
     changes,
   };
 
-  const result = await requestArrangement(arrangeLayout, request);
+  const result = await requestArrangement(arrangeLayout, request, aliasById, dashboardData.panels);
   if ('arrangement' in result) {
     return applyArrangement(dashboardData, result.arrangement);
   }
 
   logger.warn(`Dashboard layout kept the current layout: ${result.error}`);
-  reportUnappliedRequest(result.error);
+  // The agent does not see grids, so it can only learn from a failure that its layout request was
+  // not applied.
+  if (instructions !== undefined) {
+    reportFailure({
+      type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
+      identifier: 'layout',
+      error: `The layout request was not applied, so panel positions and sizes are unchanged: ${result.error}`,
+    });
+  }
   return dashboardData;
+};
+
+/** Maps the arrangement back to ids. Unknown aliases are kept, so the check reports them. */
+const fromAliases = (
+  arrangement: LayoutArrangement,
+  aliasById: ReadonlyMap<string, string>
+): LayoutArrangement => {
+  const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
+  const toIds = (arrangedPanels: LayoutArrangement['panels']) =>
+    arrangedPanels.map((panel) => ({ ...panel, id: idByAlias.get(panel.id) ?? panel.id }));
+  return {
+    ...arrangement,
+    panels: toIds(arrangement.panels),
+    sections: arrangement.sections.map((section) => ({
+      ...section,
+      id: idByAlias.get(section.id) ?? section.id,
+      panels: toIds(section.panels),
+    })),
+  };
 };
 
 const requestArrangement = async (
   arrangeLayout: ArrangeDashboardLayout,
-  request: LayoutRequest
+  request: LayoutRequest,
+  aliasById: ReadonlyMap<string, string>,
+  currentWidgets: Widgets
 ): Promise<{ arrangement: LayoutArrangement } | { error: string }> => {
   try {
     const result = layoutArrangementSchema.safeParse(await arrangeLayout(request));
     if (!result.success) {
       return { error: `invalid arrangement: ${result.error.message}` };
     }
-    const issue = getIncompleteArrangementIssue(request, result.data);
-    return issue ? { error: `incomplete arrangement: ${issue}` } : { arrangement: result.data };
+    const arrangement = fromAliases(result.data, aliasById);
+    const issue = getIncompleteArrangementIssue(
+      toLayoutDashboard(currentWidgets, false, new Map()),
+      arrangement
+    );
+    return issue ? { error: `incomplete arrangement: ${issue}` } : { arrangement };
   } catch (error) {
     return { error: `layout call failed: ${getErrorMessage(error)}` };
   }
@@ -201,11 +259,12 @@ const requestArrangement = async (
 
 /**
  * Applying only part of an arrangement mixes the old and the new layout, so an arrangement that
- * misses a panel or section, places a panel in another container, or overflows the grid, is
- * rejected as a whole.
+ * misses or repeats a panel or section, places a panel in another container, overflows the grid,
+ * or puts a section on a row shared with another section or a top-level panel, is rejected as a
+ * whole.
  */
 const getIncompleteArrangementIssue = (
-  { current: { panels, sections } }: LayoutRequest,
+  { panels, sections }: LayoutDashboard,
   arrangement: LayoutArrangement
 ): string | undefined => {
   const arrangedSectionsById = new Map(
@@ -214,6 +273,18 @@ const getIncompleteArrangementIssue = (
   const missingSection = sections.find(({ id }) => !arrangedSectionsById.has(id));
   if (missingSection) {
     return `section "${missingSection.id}" is missing`;
+  }
+  if (arrangedSectionsById.size < arrangement.sections.length) {
+    return 'a section is repeated';
+  }
+  // Kibana orders sections and top-level panels by row, so a shared row has no defined order.
+  const sectionOnSharedRow = arrangement.sections.find(
+    ({ id, y }) =>
+      arrangement.sections.some((other) => other.id !== id && other.y === y) ||
+      arrangement.panels.some((panel) => panel.y <= y && y < panel.y + panel.h)
+  );
+  if (sectionOnSharedRow) {
+    return `section "${sectionOnSharedRow.id}" shares a row with another section or panel`;
   }
 
   const containers = [
@@ -229,6 +300,9 @@ const getIncompleteArrangementIssue = (
       return `panel "${overflowingPanel.id}" overflows the ${GRID_COLUMNS}-column grid`;
     }
     const arrangedPanelIds = new Set(arranged.map(({ id }) => id));
+    if (arrangedPanelIds.size < arranged.length) {
+      return 'a panel is repeated in its container';
+    }
     const missingPanel = requested.find(({ id }) => !arrangedPanelIds.has(id));
     if (missingPanel) {
       return `panel "${missingPanel.id}" is missing from its container`;
