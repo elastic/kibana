@@ -29,7 +29,7 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   { key: 'dataSources', field: 'entity.source', isMultiValue: true },
 ];
 
-/** Not `COALESCE(…) IN (…)`: a computed filter makes Elasticsearch scan every entity (22s vs 1s at 10M). */
+/** Plain field filters, not `COALESCE(…) IN (…)`: Lucene can only run filters on stored fields, not on computed values. */
 const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
   `(${RESOLUTION_RISK_LEVEL_FIELD} IN (${toList(
     values
