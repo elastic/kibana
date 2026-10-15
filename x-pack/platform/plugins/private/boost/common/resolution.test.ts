@@ -16,6 +16,7 @@ import {
   getRuleCoverage,
   matchesIndexPattern,
   resolveRule,
+  splitByIndexPattern,
 } from './resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from './types';
 
@@ -63,6 +64,33 @@ describe('matchesIndexPattern', () => {
 
   it('treats other characters literally', () => {
     expect(matchesIndexPattern('logs.app', 'logsXapp')).toBe(false);
+  });
+});
+
+describe('splitByIndexPattern', () => {
+  it('separates the parts a pattern spells out from what its wildcards match', () => {
+    expect(splitByIndexPattern('arch*-20*', 'archive-2024')).toEqual([
+      { text: 'arch', isLiteral: true },
+      { text: 'ive', isLiteral: false },
+      { text: '-20', isLiteral: true },
+      { text: '24', isLiteral: false },
+    ]);
+    expect(splitByIndexPattern('*-2024', 'archive-2024')).toEqual([
+      { text: 'archive', isLiteral: false },
+      { text: '-2024', isLiteral: true },
+    ]);
+  });
+
+  it('spells out a whole exact name', () => {
+    expect(splitByIndexPattern('products', 'products')).toEqual([
+      { text: 'products', isLiteral: true },
+    ]);
+  });
+
+  it("leaves a name the pattern doesn't match as it is", () => {
+    expect(splitByIndexPattern('logs-*', 'products')).toEqual([
+      { text: 'products', isLiteral: false },
+    ]);
   });
 });
 

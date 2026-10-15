@@ -63,7 +63,7 @@ import {
   useUpdateDefaultRule,
   useUpdateRule,
 } from '../../hooks/use_boost_state';
-import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
+import { PROFILE_TYPE_LABELS } from '../format';
 import type { RuleDraft } from './rule_draft';
 import {
   createEmptyRuleDraft,
@@ -115,6 +115,10 @@ const NEW_PROFILE_NAME = '<new profile>';
 
 const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
   defaultMessage: 'Select a boost profile to choose targets.',
+});
+
+const SELECT_PROFILE_FOR_PATTERN = i18n.translate('xpack.boost.ruleForm.selectProfileForPattern', {
+  defaultMessage: 'Select a boost profile to input an index pattern.',
 });
 
 const getProfileHelpText = (defaultRuleType: BoostProfileType | undefined) => {
@@ -463,8 +467,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // What a valid pattern matches, counted beside its label and listed below it.
   const hasPatternPreview = Boolean(type && draft.pattern.trim() && !errors.pattern);
   const matchesLabel = i18n.translate('xpack.boost.ruleForm.matchesLabel', {
-    defaultMessage: 'Matches {targets}',
-    values: { targets: formatDataSourceCount(type, patternPreview.length) },
+    defaultMessage: '{count, plural, one {# match} other {# matches}}',
+    values: { count: patternPreview.length },
   });
   const patternRow = (
     <EuiFormRow
@@ -490,7 +494,10 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         onChange={({ target: { value } }) => updateDraft({ pattern: value })}
         onFocus={() => setIsEditingEstimateInput(true)}
         onBlur={() => setIsEditingEstimateInput(false)}
-        placeholder={targetType === 'data_streams' ? 'logs-*' : 'products-*'}
+        placeholder={i18n.translate('xpack.boost.ruleForm.patternPlaceholder', {
+          defaultMessage: 'Example: {pattern}',
+          values: { pattern: targetType === 'data_streams' ? 'logs-*' : 'products-*' },
+        })}
         isInvalid={Boolean(patternError)}
         disabled={isSaving || !type}
         data-test-subj="boostRulePattern"
@@ -707,7 +714,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                   patternRow
                 ) : (
                   <EuiToolTip
-                    content={SELECT_PROFILE_FIRST}
+                    content={SELECT_PROFILE_FOR_PATTERN}
                     display="block"
                     anchorProps={{ css: { marginBlockStart: euiTheme.size.base } }}
                   >
@@ -741,12 +748,17 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                               key={name}
                               gutterSize="s"
                               justifyContent="spaceBetween"
+                              alignItems="center"
                               responsive={false}
                               css={{ paddingBlock: euiTheme.size.xs }}
                             >
                               <EuiFlexItem grow={false}>
-                                <EuiText size="xs">
-                                  <TargetName name={name} supersededBy={overriddenBy} />
+                                <EuiText size="s">
+                                  <TargetName
+                                    name={name}
+                                    pattern={draft.pattern.trim()}
+                                    supersededBy={overriddenBy}
+                                  />
                                 </EuiText>
                               </EuiFlexItem>
                               {overriddenBy && (
@@ -759,10 +771,15 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                             </EuiFlexGroup>
                           ))
                         ) : (
-                          <EuiText size="s" color="subdued">
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            textAlign="center"
+                            css={{ fontWeight: euiTheme.font.weight.bold }}
+                          >
                             <p>
-                              {i18n.translate('xpack.boost.ruleForm.noMatchesYet', {
-                                defaultMessage: 'Nothing matches yet.',
+                              {i18n.translate('xpack.boost.ruleForm.noMatches', {
+                                defaultMessage: 'No matches detected',
                               })}
                             </p>
                           </EuiText>

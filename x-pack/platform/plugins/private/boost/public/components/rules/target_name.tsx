@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiIcon,
+  EuiMark,
   EuiScreenReaderOnly,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { splitByIndexPattern } from '../../../common/resolution';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
 const SUPERSEDING_ICON = 'sortAscending';
@@ -24,6 +26,8 @@ const SUPERSEDING_LABEL = i18n.translate('xpack.boost.targetName.supersedingLabe
 
 interface TargetNameProps {
   name: string;
+  /** The index pattern that matched this target, whose spelled-out parts are highlighted. */
+  pattern?: string;
   /** A higher-ranked rule that applies to this target instead. */
   supersededBy?: string;
 }
@@ -32,12 +36,19 @@ interface TargetNameProps {
  * A target's name, struck through when a higher-ranked rule applies to it instead, since the rule
  * targets it but doesn't apply.
  */
-export const TargetName = ({ name, supersededBy }: TargetNameProps) => (
+export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => (
   <span
     css={{ textDecoration: supersededBy ? 'line-through' : undefined }}
     data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
   >
-    {name}
+    {pattern === undefined
+      ? name
+      : splitByIndexPattern(pattern, name).map(({ text, isLiteral }, index) => (
+          <Fragment key={index}>
+            {/* The name already says what matched, so screen readers skip the highlights. */}
+            {isLiteral ? <EuiMark hasScreenReaderHelpText={false}>{text}</EuiMark> : text}
+          </Fragment>
+        ))}
   </span>
 );
 

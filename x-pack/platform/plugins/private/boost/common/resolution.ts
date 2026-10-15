@@ -25,6 +25,26 @@ const escapeRegExp = (value: string) => value.replace(/[.+?^${}()|[\]\\]/g, '\\$
 export const matchesIndexPattern = (pattern: string, name: string): boolean =>
   new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`).test(name);
 
+/** A part of a data source name, and whether the index pattern spells it out rather than a `*`. */
+export interface IndexPatternPart {
+  text: string;
+  isLiteral: boolean;
+}
+
+/** Splits a data source name into the parts an index pattern spells out and the parts its `*`s match. */
+export const splitByIndexPattern = (pattern: string, name: string): IndexPatternPart[] => {
+  const literals = pattern.split('*').map((literal) => `(${escapeRegExp(literal)})`);
+  const match = new RegExp(`^${literals.join('(.*)')}$`).exec(name);
+  if (!match) {
+    return [{ text: name, isLiteral: false }];
+  }
+  // Groups alternate between the pattern's literals and what its `*`s match.
+  return match
+    .slice(1)
+    .map((text, index) => ({ text, isLiteral: index % 2 === 0 }))
+    .filter(({ text }) => text.length > 0);
+};
+
 /** Ranks how specifically a pattern matches: exact names first, then longer literal patterns. */
 const getSpecificity = (pattern: string): [number, number] => [
   pattern.includes('*') ? 0 : 1,

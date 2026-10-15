@@ -351,8 +351,19 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('Matches 1 index');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 match');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
+  });
+
+  it('highlights the parts of each match that the pattern spells out', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat*-fa*');
+
+    const highlights = within(screen.getByTestId('boostRulePatternMatches'))
+      .getAllByText((_content, element) => element?.tagName === 'MARK')
+      .map(({ textContent }) => textContent);
+    expect(highlights).toEqual(['cat', '-fa']);
   });
 
   it('says when nothing matches, in the same panel', async () => {
@@ -360,8 +371,8 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('Matches 0 indices');
-    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('Nothing matches yet.');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
   it('explains why the pattern is disabled before a profile is selected', async () => {
@@ -376,7 +387,7 @@ describe('RuleFlyout pattern matches', () => {
     await userEvent.hover(screen.getByText('Index pattern', { selector: 'label' }));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Select a boost profile to choose targets.'
+      'Select a boost profile to input an index pattern.'
     );
   });
 });
