@@ -147,7 +147,7 @@ const runHuntCoordinatorJob = async ({
  * hunt child whether its evidence step should proceed. A blocked scope is a `completed`
  * envelope whose result has `status: 'blocked'`, deliberately differing from the standalone
  * `hunt_for_threat` route's 409: this route chains Tier 1 into Tier 2, so a caller already
- * reads the status field either way. See elastic/security-team#19741.
+ * reads the status field either way.
  */
 export const registerHuntCoordinatorRoute = ({
   router,

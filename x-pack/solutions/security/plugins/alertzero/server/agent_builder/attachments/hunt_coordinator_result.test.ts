@@ -89,6 +89,45 @@ describe('createHuntCoordinatorResultAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
+    // The route's terminal write goes through this validate before the child can poll the
+    // result. Route tests mock the attachment client, so they never exercise the lock; a
+    // producer field that drifts from HuntCoordinatorResult would only surface as a silent
+    // poll timeout after writeTerminal fails.
+    it('accepts the enriched completed shape the route stores on a confirmed hit', async () => {
+      const enriched: HuntCoordinatorResult = {
+        ...fullResult,
+        status: 'tier1_and_tier2',
+        has_confirmed_hit: true,
+        sse: [
+          {
+            attachment_id: 'sse-report-1-T1078.004',
+            data: {
+              type: 'security.significant_security_event',
+              run_id: 'run-1',
+              hunt_result: { nested: true },
+            },
+          },
+        ],
+        impacted_entities: [{ id: 'host:web-1', name: 'web-1', type: 'host' }],
+      };
+      const result = await attachmentType.validate({
+        run_id: 'run-1',
+        report_id: 'report-1',
+        state: 'completed',
+        result: enriched,
+      });
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.data).toEqual({
+          run_id: 'run-1',
+          report_id: 'report-1',
+          state: 'completed',
+          result: enriched,
+        });
+      }
+    });
+
     it.each([
       ['completed envelope without a result', { ...running, state: 'completed' }],
       ['failed envelope without an error', { ...running, state: 'failed' }],
