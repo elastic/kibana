@@ -279,11 +279,6 @@ export function makeService(params?: {
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
-  /** `null` models the investigations plugin being unavailable. */
-  investigations?: {
-    deleted: number;
-    failures: Array<{ id: string; spaceId: string; error: string }>;
-  } | null;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -366,11 +361,6 @@ export function makeService(params?: {
   };
   const initializeClient = jest.fn(async (_name: string) => ({}));
   const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));
-  const investigations =
-    params?.investigations === null
-      ? undefined
-      : params?.investigations ?? { deleted: 0, failures: [] };
-  const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
   const initialSettings = {
     [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]:
@@ -471,7 +461,6 @@ export function makeService(params?: {
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
-    nightshiftInvestigations: deleteAllInvestigations ? { deleteAllInvestigations } : undefined,
     spaces: {
       spacesService: {
         createSpacesClient: jest.fn(() => ({
@@ -526,7 +515,6 @@ export function makeService(params?: {
     streamDocuments,
     esClient,
     asScoped,
-    deleteAllInvestigations,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
   };
