@@ -101,12 +101,6 @@ export interface ProposalsServiceDeps {
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
 
-/** A settlement for a proposal its gate can no longer settle. */
-interface OrphanSettlement {
-  status: Extract<ProposalStatus, 'expired' | 'failed'>;
-  executionError: string;
-}
-
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
 
@@ -474,10 +468,9 @@ export class ProposalsService {
 
     const execution = await this.getGateExecution(proposal, spaceId, request);
     if (isTerminalStatus(execution.status)) {
-      const executionError = gateEndedError(execution.status);
-      await this.settleOrphan(id, { status: 'expired', executionError }, spaceId);
+      await this.settleOrphan(id, execution.status, spaceId);
       throw new ProposalConflictError(
-        `Proposal [${id}] can no longer be decided: ${executionError}`
+        `Proposal [${id}] can no longer be decided: ${gateEndedError(execution.status)}`
       );
     }
     if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT || execution.finishedAt) {
@@ -543,8 +536,15 @@ export class ProposalsService {
    * here rather than in the workflow YAML so they hold for every caller.
    */
   async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
+    return this.applyUpdate(await this.load(params.id, spaceId), params);
+  }
+
+  /** `update` against a record already loaded, written under that load's sequence number. */
+  private async applyUpdate(
+    { proposal, seqNo, primaryTerm }: StoredProposal,
+    params: UpdateProposalParams
+  ): Promise<Proposal> {
     const { id } = params;
-    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // The status vocabulary admits `superseded`, but it is only correct alongside
     // the successor that replaced the row, which only `revise()` establishes.
@@ -1209,7 +1209,7 @@ export class ProposalsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<Proposal[]> {
-    const settlements = new Map<string, OrphanSettlement>();
+    const settlements = new Map<string, ExecutionStatus>();
     const awaitingGate: Array<{ proposal: Proposal; executionId: string }> = [];
     for (const proposal of proposals) {
       if (isUnsettled(proposal) && proposal.workflowExecutionId) {
@@ -1225,11 +1225,7 @@ export class ProposalsService {
     for (const { proposal, executionId } of awaitingGate) {
       const gateStatus = endedGates.get(executionId);
       if (gateStatus !== undefined) {
-        settlements.set(proposal.id, {
-          // `executing` is only ever approved, and `pending` only ever undecided.
-          status: proposal.status === 'executing' ? 'failed' : 'expired',
-          executionError: gateEndedError(gateStatus),
-        });
+        settlements.set(proposal.id, gateStatus);
       }
     }
 
@@ -1240,7 +1236,7 @@ export class ProposalsService {
       await asyncMapWithLimit(
         [...settlements],
         10,
-        async ([id, settlement]) => [id, await this.settleOrphan(id, settlement, spaceId)] as const
+        async ([id, gateStatus]) => [id, await this.settleOrphan(id, gateStatus, spaceId)] as const
       )
     );
     return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
@@ -1271,22 +1267,35 @@ export class ProposalsService {
   }
 
   /**
-   * Writes a settlement through `update`, so its guards decide a race: a
-   * proposal that moved since it was read is refused rather than overwritten.
-   * Returns undefined when the write did not land.
+   * Settles a proposal whose gate ended, but only while it is still unsettled,
+   * checked on the same load the write is guarded by: `update` accepts the same
+   * terminal status twice, so a gate that settled it first would otherwise have
+   * its real error replaced. Returns the stored record when the gate got there
+   * first, and undefined when the write did not land.
    */
   private async settleOrphan(
     id: string,
-    { status, executionError }: OrphanSettlement,
+    gateStatus: ExecutionStatus,
     spaceId: string
   ): Promise<Proposal | undefined> {
     try {
-      return await this.update({ id, status, executionError }, spaceId);
+      const stored = await this.load(id, spaceId);
+      if (!isUnsettled(stored.proposal)) {
+        return stripRanks(stored.proposal);
+      }
+      return await this.applyUpdate(stored, {
+        id,
+        // `executing` is only ever approved, and `pending` only ever undecided.
+        status: stored.proposal.status === 'executing' ? 'failed' : 'expired',
+        executionError: gateEndedError(gateStatus),
+      });
     } catch (error) {
       if (error instanceof ProposalConflictError) {
         this.deps.logger.debug(`Proposal [${id}] moved before it could be settled: ${error}`);
       } else {
-        this.deps.logger.warn(`Could not settle proposal [${id}] as ${status}: ${error}`);
+        this.deps.logger.warn(
+          `Could not settle proposal [${id}] after its gate ended as ${gateStatus}: ${error}`
+        );
       }
       return undefined;
     }

@@ -2684,6 +2684,66 @@ describe('ProposalsService', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    // `update` accepts the same terminal status twice, so without the fresh check the
+    // settle would replace the error the gate recorded with its own generic one.
+    it.each([
+      {
+        read: 'executing',
+        readDocument: baseDocument({ status: 'executing', decision: 'approved' }),
+        storedDocument: baseDocument({
+          status: 'failed',
+          decision: 'approved',
+          executionError: 'Action workflow failed: rule not found',
+        }),
+        endedAs: ExecutionStatus.FAILED,
+      },
+      {
+        read: 'pending',
+        readDocument: baseDocument(),
+        storedDocument: baseDocument({
+          status: 'expired',
+          executionError: 'Step await_decision timed out',
+        }),
+        endedAs: ExecutionStatus.COMPLETED,
+      },
+    ])(
+      'should keep the outcome the gate recorded when it settled the $read proposal first',
+      async ({ readDocument, storedDocument, endedAs }) => {
+        const storage = createStorage(storedDocument);
+        storage.search.mockResolvedValueOnce({
+          hits: { hits: [searchHit(readDocument)], total: { value: 1 } },
+        });
+        const { service, workflowsApi } = createService(storage);
+        workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(gateStatus(endedAs));
+
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+        expect(storage.index).not.toHaveBeenCalled();
+        expect(proposal).toMatchObject({
+          status: storedDocument.status,
+          executionError: storedDocument.executionError,
+        });
+      }
+    );
+
+    it('should settle as failed when the proposal was approved after it was read', async () => {
+      const storage = createStorage(baseDocument({ status: 'executing', decision: 'approved' }));
+      storage.search.mockResolvedValueOnce({
+        hits: { hits: [searchHit(baseDocument())], total: { value: 1 } },
+      });
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.CANCELLED)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal).toMatchObject({ status: 'failed', decision: 'approved' });
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ status: 'failed' }) })
+      );
+    });
+
     it('should read the gates of a whole page in one bulk read', async () => {
       const storage = createStorage();
       storage.search.mockResolvedValue({
