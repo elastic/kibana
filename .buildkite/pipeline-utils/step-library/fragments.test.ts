@@ -14,17 +14,27 @@
 import fs from 'fs';
 import path from 'path';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
+import type { Fragment } from './fragments.ts';
 import { FRAGMENTS, loadFragmentDocument } from './fragments.ts';
 
 const root = getKibanaDir();
 
+// Set by the quick check that regenerates snapshots with `-u`. A ported fragment's snapshot is what
+// its TypeScript must match, so it is skipped (not removed, which `-u` would treat as obsolete).
+const skipPorted = process.env.SKIP_PORTED_FRAGMENTS === 'true';
+
+const matchesSnapshot = (_name: string, fragment: Fragment) => {
+  expect(loadFragmentDocument(fragment)).toMatchSnapshot();
+};
+
 describe('pull_request fragments', () => {
-  it.each(FRAGMENTS.map((fragment) => [fragment.name, fragment] as const))(
-    '%s',
-    (_name, fragment) => {
-      expect(loadFragmentDocument(fragment)).toMatchSnapshot();
-    }
-  );
+  const table = (ported: boolean) =>
+    FRAGMENTS.filter((fragment) => Boolean(fragment.steps) === ported).map(
+      (fragment) => [fragment.name, fragment] as const
+    );
+
+  it.each(table(false))('%s', matchesSnapshot);
+  (skipPorted ? it.skip : it).each(table(true))('%s', matchesSnapshot);
 
   it('registers every YAML fragment that still exists', () => {
     const dir = path.join(root, '.buildkite/pipelines/pull_request');
