@@ -8,9 +8,13 @@
 import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './usable_report_filter';
 
 describe('HUNT_USABLE_FILTER', () => {
-  it('returns a must_not term excluding pending extraction_method', () => {
+  it.each([
+    ['lineage.extraction_method', 'pending'],
+    ['lineage.extraction_method', 'workflow_v4_rejected'],
+    ['extracted.gate.is_intelligence', false],
+  ])('returns a must_not term excluding %s %s', (field, value) => {
     expect(HUNT_USABLE_FILTER).toMatchObject({
-      bool: { must_not: [{ term: { 'lineage.extraction_method': 'pending' } }] },
+      bool: { must_not: expect.arrayContaining([{ term: { [field]: value } }]) },
     });
   });
 

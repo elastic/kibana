@@ -12,9 +12,10 @@ import type { estypes } from '@elastic/elasticsearch';
  *
  * Hunt-usable: supply finished the report. `lineage.extraction_method` is present
  * and not `pending` (enrich still owes work), with title or body text and
- * `severity.level`. It is a denylist on `pending`, so `workflow_v2`, `kev`,
- * `text_indicator_list`, `seeded` and any future adapter value count; a missing
- * `extraction_method` does not.
+ * `severity.level`. It is a denylist on `pending` and on gate rejections
+ * (`workflow_v4_rejected`, `extracted.gate.is_intelligence: false`), so
+ * `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
+ * value count; a missing `extraction_method` does not.
  *
  * Indicator-eligible: at least one nested IOC. Find and readiness AND it with
  * hunt-usable; promote keeps its own IOC-only filter. KEV reports are hunt-usable
@@ -40,7 +41,11 @@ export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
       },
       { exists: { field: 'severity.level' } },
     ],
-    must_not: [{ term: { 'lineage.extraction_method': 'pending' } }],
+    must_not: [
+      { term: { 'lineage.extraction_method': 'pending' } },
+      { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+      { term: { 'extracted.gate.is_intelligence': false } },
+    ],
   },
 };
 
