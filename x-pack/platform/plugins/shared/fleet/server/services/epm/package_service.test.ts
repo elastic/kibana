@@ -374,4 +374,66 @@ describe('PackageService', () => {
       ).rejects.toThrow(`Package info for ${pkgName}-${pkgVersion} does not exist`);
     });
   });
+
+  describe('reinstallEsAssets - transform install source', () => {
+    const packageInfo: InstallablePackage = {
+      format_version: '1.0.0',
+      name: 'my_package',
+      title: 'My Package',
+      description: 'description',
+      version: '1.0.0',
+      release: 'ga',
+      owner: { github: 'elastic' },
+    };
+    const paths = ['my_package-1.0.0/elasticsearch/transform/probe/transform.yml'];
+
+    const mockInstallation = (installSource: string) => {
+      jest
+        .mocked(epmPackagesGet.getInstallation)
+        .mockResolvedValue({ name: packageInfo.name, install_source: installSource } as any);
+      jest.mocked(getEsPackage).mockResolvedValue({ assetsMap: new Map() } as any);
+    };
+
+    // A reinstall replays the archive stored at install time, so the source recorded on the
+    // installation — not the reinstall call site — decides whether transforms may run as
+    // kibana_system.
+    it.each(['registry', 'upload'])(
+      'forwards install_source %p from the installation',
+      async (installSource) => {
+        mockInstallation(installSource);
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ installSource }));
+      }
+    );
+
+    // The documented new failure mode: an uploaded package reinstalled without a user request
+    // has no credentials to grant a secondary authorization API key from, so installTransforms
+    // refuses rather than falling back to kibana_system.
+    it('surfaces the unauthorized error when an uploaded package is reinstalled without a request', async () => {
+      mockInstallation('upload');
+      jest
+        .spyOn(epmTransformsInstall, 'installTransforms')
+        .mockRejectedValue(new FleetUnauthorizedError('no secondary authorization'));
+
+      await expect(
+        mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths)
+      ).rejects.toThrow(FleetUnauthorizedError);
+    });
+
+    it('passes no request when not scoped to one', async () => {
+      mockInstallation('upload');
+      const spy = jest
+        .spyOn(epmTransformsInstall, 'installTransforms')
+        .mockResolvedValue({ installedTransforms: [] } as any);
+
+      await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ request: undefined }));
+    });
+  });
 });

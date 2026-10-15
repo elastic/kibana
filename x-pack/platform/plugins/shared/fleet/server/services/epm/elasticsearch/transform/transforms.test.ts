@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -1766,6 +1768,75 @@ _meta:
         headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
       })
     );
+  });
+
+  describe('deleting the previous installation', () => {
+    const legacyPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/default.json';
+
+    const installLegacyOverExisting = () => {
+      (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue({
+        installed_es: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            type: ElasticsearchAssetType.transform,
+          },
+        ],
+      } as unknown as Installation);
+
+      return installTransforms({
+        installSource: 'upload',
+        packageInstallContext: {
+          packageInfo: { name: 'my_upload', version: '1.0.0' },
+          paths: [legacyPath],
+          archiveIterator: createArchiveIteratorFromMap(
+            new Map([
+              [
+                legacyPath,
+                Buffer.from(
+                  JSON.stringify({
+                    source: { index: ['ordinary-index'] },
+                    dest: { index: 'attacker_readable_index' },
+                  })
+                ),
+              ],
+            ])
+          ),
+        } as unknown as PackageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger: loggerMock.create(),
+        esReferences: [],
+        request: httpServerMock.createKibanaRequest(),
+      });
+    };
+
+    // Legacy deletes pass delete_dest_index, so running them on the internal client would let an
+    // uploader have Fleet drop a destination index their own privileges cannot reach.
+    it('deletes the previous legacy transform with the caller credentials', async () => {
+      await installLegacyOverExisting();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
+        })
+      );
+    });
+
+    // A package installed before this change owns transforms created as kibana_system. An
+    // uploader without rights over them now fails the install rather than silently cleaning up
+    // with Kibana's own privileges. Failing closed here is deliberate.
+    it('fails the install when the caller cannot delete the previous transform', async () => {
+      esClient.transform.deleteTransform.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception', reason: 'action [...] is unauthorized' } },
+        } as any)
+      );
+
+      await expect(installLegacyOverExisting()).rejects.toThrow();
+      expect(esClient.transform.putTransform).not.toHaveBeenCalled();
+    });
   });
 });
 

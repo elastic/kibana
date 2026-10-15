@@ -287,7 +287,7 @@ async function assertNoRestrictedTransformIndices(
 
       for (const content of contents) {
         for (const expression of collectTransformIndexExpressions(content)) {
-          if (normalizeIndexExpressions(expression).some((p) => p.startsWith('.'))) {
+          if (normalizeIndexExpressions(expression).some((pattern) => pattern.startsWith('.'))) {
             throw new PackageInvalidArchiveError(
               i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
                 defaultMessage:

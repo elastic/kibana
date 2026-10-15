@@ -88,7 +88,7 @@ interface TransformInstallation extends TransformModuleBase {
 }
 
 const untrustedTransformAuthErrorMessage = (installSource: InstallSource) =>
-  `Cannot install transforms from a ${installSource} package: they must run with the installing user's Elasticsearch privileges, but no secondary authorization API key could be granted for this request. Retry from an authenticated user request — a reinstall triggered by a background task has none.`;
+  `Cannot install transforms from a ${installSource} package: they must run with the installing user's Elasticsearch privileges, but no secondary authorization API key could be granted. That needs Elasticsearch security enabled and an authenticated user request — a reinstall triggered by a background task carries no request.`;
 
 const installLegacyTransformsAssets = async (
   packageInstallContext: PackageInstallContext,
@@ -110,9 +110,6 @@ const installLegacyTransformsAssets = async (
   // that ships none leaves the stale-transform cleanup below on the internal client, so dropping
   // transforms from a package can never be blocked by the installer's own privileges.
   const isTrustedSource = isTrustedInstallSource(installSource);
-  const username = request
-    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
-    : undefined;
   const secondaryAuth =
     !isTrustedSource && transformPaths.length > 0
       ? await generateTransformSecondaryAuthHeaders({
@@ -120,7 +117,6 @@ const installLegacyTransformsAssets = async (
           logger,
           pkgName: packageInstallContext.packageInfo.name,
           pkgVersion: packageInstallContext.packageInfo.version,
-          username,
         })
       : undefined;
 
@@ -130,6 +126,13 @@ const installLegacyTransformsAssets = async (
     throw new FleetUnauthorizedError(untrustedTransformAuthErrorMessage(installSource));
   }
 
+  // Deletion is caller-bound too, matching the yml path. This is not just consistency: legacy
+  // deletes pass delete_dest_index, so running them on the internal client would let an uploader
+  // have Fleet drop a destination index their own privileges could never touch — the same
+  // confused-deputy shape this binding exists to remove, pointed at deletion instead of reads.
+  // The trade-off is that re-uploading a package whose transforms were created as kibana_system
+  // before this change fails for an uploader without rights over them, rather than silently
+  // cleaning up. Failing closed is the intended behaviour; see the tests in transforms.test.ts.
   await deleteTransforms(
     esClient,
     previousInstalledTransformEsAssets.map((asset) => asset.id),
