@@ -298,7 +298,7 @@ export const getApiKeyAndUserScope = async (
           // not want to invalidate a specific API key that was not created by the task manager.
           // Cloned and granted keys are owned by Task Manager and invalidated on task removal.
           apiKeyCreatedByUser,
-          userProfileId: user?.profile_uid,
+          userProfileId: options?.userProfileId ?? user?.profile_uid,
           userName: user?.username,
         },
       });

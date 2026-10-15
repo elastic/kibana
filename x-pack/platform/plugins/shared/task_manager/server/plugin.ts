@@ -373,7 +373,7 @@ export class TaskManagerPlugin
     core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
-    const { savedObjects, elasticsearch, executionContext, security } = core;
+    const { savedObjects, elasticsearch, executionContext, security, userProfile } = core;
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -435,6 +435,7 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       security,
+      userProfile,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
       executionContext,

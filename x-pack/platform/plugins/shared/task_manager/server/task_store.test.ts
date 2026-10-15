@@ -338,6 +338,78 @@ describe('TaskStore', () => {
       );
     });
 
+    describe('scheduler profile uid', () => {
+      const scheduleWithProfileLookup = async (getCurrentProfileId: jest.Mock) => {
+        const userProfile = coreStart.userProfile;
+        userProfile.getCurrentProfileId = getCurrentProfileId;
+
+        const storeWithProfiles = new TaskStore({
+          logger: mockLogger(),
+          index: 'tasky',
+          taskManagerId: '',
+          serializer,
+          esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+          definitions: taskDefinitions,
+          savedObjectsRepository: savedObjectsClient,
+          adHocTaskCounter,
+          allowReadingInvalidState: false,
+          savedObjectsService: coreStart.savedObjects,
+          security: coreStart.security,
+          userProfile,
+          canEncryptSavedObjects: true,
+          getIsSecurityEnabled: () => true,
+          executionContext: mockExecutionContextStart,
+          apiKeyStrategy: new EsApiKeyStrategy(),
+        });
+        storeWithProfiles.registerEncryptedSavedObjectsClient(esoClient);
+
+        const request = httpServerMock.createKibanaRequest();
+        coreStart.security.authc.getCurrentUser = jest
+          .fn()
+          .mockReturnValue({ username: 'testUser' });
+        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          new Map([['id', { apiKey: 'key', userScope: { apiKeyId: 'apiKeyId' } }]])
+        );
+        coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+        scopedSavedObjectsClient.create.mockImplementation(
+          async (type: string, attributes: unknown) => ({
+            id: 'id',
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          })
+        );
+
+        await storeWithProfiles.schedule(
+          { id: 'id', params: {}, state: {}, taskType: 'report' } as TaskInstance,
+          { request }
+        );
+
+        return { request, grantOpts: (getApiKeyAndUserScope as jest.Mock).mock.calls[0][3] };
+      };
+
+      test('stores the profile uid resolved for the scheduling request', async () => {
+        const getCurrentProfileId = jest.fn().mockResolvedValue('u_scheduler_profile');
+
+        const { request, grantOpts } = await scheduleWithProfileLookup(getCurrentProfileId);
+
+        expect(getCurrentProfileId).toHaveBeenCalledWith({ request });
+        expect(grantOpts).toEqual(
+          expect.objectContaining({ userProfileId: 'u_scheduler_profile' })
+        );
+      });
+
+      test('still schedules when the profile lookup fails', async () => {
+        const getCurrentProfileId = jest.fn().mockRejectedValue(new Error('activation failed'));
+
+        const { grantOpts } = await scheduleWithProfileLookup(getCurrentProfileId);
+
+        expect(grantOpts).not.toHaveProperty('userProfileId');
+        expect(scopedSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      });
+    });
+
     test('schedule a task with API key if request is provided', async () => {
       const task = {
         id: 'id',

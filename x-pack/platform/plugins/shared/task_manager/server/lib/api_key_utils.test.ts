@@ -683,6 +683,25 @@ describe('api_key_utils', () => {
       });
     });
 
+    test('should prefer the resolved userProfileId when the current user has none', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `ApiKey: ${mockApiKey}` },
+      });
+      const coreStart = coreMock.createStart();
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest
+        .fn()
+        .mockReturnValue({ authentication_type: 'api_key', username: 'testUser' });
+
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security, {
+        userProfileId: 'u_profile_from_key',
+      });
+
+      expect(result.get('task')?.userScope.userProfileId).toBe('u_profile_from_key');
+    });
+
     test('should still capture userProfileId when apiKeyCreatedByUser is true', async () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
       const request = httpServerMock.createKibanaRequest({
