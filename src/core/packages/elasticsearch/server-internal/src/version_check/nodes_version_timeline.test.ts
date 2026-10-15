@@ -40,7 +40,7 @@ const requestError = new Error('boom');
 interface Tick {
   /** The virtual instant this state was produced. */
   at: number;
-  /** When the next request is due. */
+  /** When the next request is due: `at` plus the step's wait. */
   dueAt: number;
   controlState: NodesVersionState['controlState'];
   isCompatible: boolean | undefined;
@@ -134,7 +134,7 @@ describe('the version machine on a virtual clock', () => {
     ]);
   });
 
-  it('holds the interval through a retry, then switches to the failure interval on recovery', async () => {
+  it('holds the interval through a retry, uses the failure interval once the error settles, and the normal interval again on recovery', async () => {
     // With retry: 1, the first error retries after the normal interval and the second settles FAILING.
     const timeline = await runTimeline(
       [compatible, requestError, requestError, compatible],
@@ -148,6 +148,23 @@ describe('the version machine on a virtual clock', () => {
       tick(100, 200, 'NORMAL', true, 'retried'),
       tick(200, 230, 'FAILING', false, 'compatibilityChanged'),
       tick(230, 330, 'NORMAL', true, 'compatibilityChanged'),
+    ]);
+  });
+
+  it('polls at the startup interval while the cluster is unreachable at startup', async () => {
+    // With retry: 1, every second error settles; it is still STARTUP, so still the startup interval.
+    const timeline = await runTimeline(
+      [requestError, requestError, requestError, compatible],
+      { ...baseConfig, healthCheckStartupInterval: 50, healthCheckFailureInterval: 30 },
+      5
+    );
+
+    expect(timeline).toEqual([
+      initialTick,
+      tick(0, 50, 'STARTUP', undefined, 'retried'),
+      tick(50, 100, 'STARTUP', false, 'compatibilityChanged'),
+      tick(100, 150, 'STARTUP', false, 'retried'),
+      tick(150, 250, 'NORMAL', true, 'compatibilityChanged'),
     ]);
   });
 
