@@ -91,9 +91,8 @@ export const addToHistory = async ({
   restoredFrom?: number;
 }) => {
   const core = await ctx.core;
+  // getCurrentUser() returns null when security is disabled; attribute those changes to the system actor
   const user = core.security.authc.getCurrentUser();
-  if (!user) return; // just skip history logging if there is an authentication error; saving was already succesful
-
   let client;
   try {
     client = getChangeHistoryClient();
@@ -123,8 +122,8 @@ export const addToHistory = async ({
 
     await client.log(change, {
       action: 'dashboard_update',
-      username: user.username,
-      userProfileId: user.profile_uid,
+      username: user?.username ?? '', // if no user, record without actor
+      userProfileId: user?.profile_uid,
       spaceId,
       data: {
         metadata: {
