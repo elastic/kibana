@@ -57,6 +57,9 @@ const scheduleOptionsToStoreApiKeyOptions = (
   if (options.cloneApiKey === true) {
     storeOpts.cloneApiKey = true;
   }
+  if (options.waitForApiKeyRefresh === true) {
+    storeOpts.waitForApiKeyRefresh = true;
+  }
   if (options.regenerateApiKey !== undefined) {
     storeOpts.regenerateApiKey = options.regenerateApiKey;
   }

@@ -127,7 +127,11 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      {
+        request: getWorkflowOriginalRequest(fakeRequest),
+        cloneApiKey: true,
+        waitForApiKeyRefresh: true,
+      }
     );
 
     return {
@@ -158,7 +162,11 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      {
+        request: getWorkflowOriginalRequest(fakeRequest),
+        cloneApiKey: true,
+        waitForApiKeyRefresh: true,
+      }
     );
 
     return {
@@ -209,7 +217,11 @@ export class WorkflowTaskManager {
         enabled: true,
         priority,
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      {
+        request: getWorkflowOriginalRequest(request),
+        cloneApiKey: true,
+        waitForApiKeyRefresh: true,
+      }
     );
 
     return { taskId: task.id };
@@ -289,7 +301,11 @@ export class WorkflowTaskManager {
         priority,
       },
       fakeRequest
-        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+        ? {
+            request: getWorkflowOriginalRequest(fakeRequest),
+            cloneApiKey: true,
+            waitForApiKeyRefresh: true,
+          }
         : undefined
     );
     return { taskId };
@@ -391,7 +407,11 @@ export class WorkflowTaskManager {
         scope: [`workflow:execution:${params.executionId}`],
       },
       params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
+        ? {
+            request: getWorkflowOriginalRequest(params.fakeRequest),
+            cloneApiKey: true,
+            waitForApiKeyRefresh: true,
+          }
         : undefined
     );
   }
