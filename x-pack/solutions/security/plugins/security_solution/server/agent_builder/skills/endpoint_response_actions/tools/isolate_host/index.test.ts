@@ -38,9 +38,20 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 }
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
+
+// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation card
+// records the target the analyst was shown here, and the handler reads it back
+// once the call is confirmed.
+const toolCallState: { value?: unknown } = { value: undefined };
 const mockContext = {
   callContext: { callSource: 'agent' },
   logger: mockLogger,
+  stateManager: {
+    getState: () => toolCallState.value,
+    setState: (state: unknown) => {
+      toolCallState.value = state;
+    },
+  },
   runContext: {
     runId: 'run-test-1',
     stack: [{ type: 'agent', agentId: 'test-agent', conversationId: 'conv-test-1' }],
@@ -54,6 +65,24 @@ function assertStandardReturn(result: unknown) {
   return (result as ToolHandlerStandardReturn).results;
 }
 
+// The runner builds the confirmation card and then runs the handler with the
+// same tool-call state; dispatching tests replay both phases so the handler sees
+// the target the analyst was shown.
+async function confirmThenHandle(
+  tool: ReturnType<typeof isolateHostTool>,
+  toolParams: Record<string, unknown>
+) {
+  const getConfirmation = tool.confirmation?.getConfirmation;
+  if (!getConfirmation) {
+    throw new Error(`${tool.id} has no confirmation to build`);
+  }
+
+  const card = await getConfirmation({ toolParams, context: mockContext });
+  const result = await tool.handler(toolParams, mockContext);
+
+  return { card, result };
+}
+
 describe('isolateHostTool', () => {
   // waitForActionCompletion mocks resolve on the first poll attempt, but the
   // extra promise hop through p-retry has been observed to push these tests
@@ -65,6 +94,7 @@ describe('isolateHostTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    toolCallState.value = undefined;
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
@@ -204,7 +234,7 @@ describe('isolateHostTool', () => {
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
-      await tool.handler({ hostName: 'my-host', comment: 'test comment' }, mockContext);
+      await confirmThenHandle(tool, { hostName: 'my-host', comment: 'test comment' });
 
       expect(mockAgentService.listAgents).toHaveBeenCalledWith({
         showInactive: true,
@@ -259,10 +289,10 @@ describe('isolateHostTool', () => {
         hosts: { 'agent-123': { name: 'my-host' } },
       });
 
-      const result = await tool.handler(
-        { hostName: 'my-host', comment: 'malware detected' },
-        mockContext
-      );
+      const { result } = await confirmThenHandle(tool, {
+        hostName: 'my-host',
+        comment: 'malware detected',
+      });
 
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
@@ -326,7 +356,7 @@ describe('isolateHostTool', () => {
         hosts: { 'agent-123': { name: 'test-host' } },
       });
 
-      await tool.handler({ hostName: 'test-host' }, mockContext);
+      await confirmThenHandle(tool, { hostName: 'test-host' });
 
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
@@ -416,7 +446,7 @@ describe('isolateHostTool', () => {
         hosts: { 'agent-123': { name: 'my-host' } },
       });
 
-      await tool.handler({ hostName: 'my-host' }, mockContext);
+      await confirmThenHandle(tool, { hostName: 'my-host' });
 
       expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
         expect.objectContaining({ agentType: 'endpoint', isAutomated: false })
@@ -475,7 +505,7 @@ describe('isolateHostTool', () => {
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+      const { result } = await confirmThenHandle(tool, { hostName: 'my-host' });
 
       expect(assertStandardReturn(result)).toHaveLength(1);
       expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);

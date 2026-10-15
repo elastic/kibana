@@ -92,6 +92,32 @@ export type ConfirmationTarget =
   | { kind: 'blocked'; message: string };
 
 /**
+ * What the analyst was shown and approved, recorded while the confirmation card
+ * is built and read back by the handler after the click.
+ *
+ * The handler re-resolves the target once the call is confirmed, so without this
+ * record the card and the dispatch are independent evaluations of the same
+ * request: a transient Fleet/authz failure renders a "this action will be
+ * refused" card, and the handler dispatches to whatever it resolves after the
+ * service recovers — a target the card never showed. The record is stored on the
+ * tool call (`stateManager` is scoped to it), so it survives the prompt round.
+ */
+export type DispatchConfirmationState =
+  | {
+      /** The card named the verified target: dispatch only to this agent id. */
+      kind: 'confirmed';
+      action: DispatchActionName;
+      agentId: string;
+    }
+  | {
+      /** The card said the action would be refused: never dispatch. */
+      kind: 'refused';
+      action: DispatchActionName;
+      /** The refusal the analyst was shown, echoed to the caller. */
+      reason: string;
+    };
+
+/**
  * A lookup that can only resolve Elastic Defend agents. Both the hostname walk
  * and the agent-id lookup honour it, so neither path can hand a non-Defend
  * agent to a vendor response-actions client.
@@ -156,6 +182,66 @@ const mismatchResult = (mismatch: HostNameMismatch) =>
     }' is not a hostname of the supplied agentId (known: ${quotedNames(
       mismatch.knownHostNames
     )}), so the target is ambiguous. Call the tool again with the agentId alone (or with one of those hostnames).`
+  );
+
+/** Sentence both the refusal card and the recorded confirmation use. */
+const hostNameMismatchRefusal = (mismatch: HostNameMismatch, agentId: string): string =>
+  `The requested hostname '${
+    mismatch.providedHostName
+  }' is not a hostname of agent ID ${agentId} (known: ${quotedNames(mismatch.knownHostNames)}).`;
+
+/**
+ * Records what the card tells the analyst, so the handler can hold the dispatch
+ * to it. A refused card (failed preflight, missing privilege, hostname/agent-id
+ * mismatch) is recorded as a refusal: approving it must never dispatch.
+ */
+const recordConfirmation = (request: DispatchRequest, target: ConfirmationTarget): void => {
+  const { action, context } = request;
+
+  if (target.kind === 'blocked') {
+    context.stateManager.setState<DispatchConfirmationState>({
+      kind: 'refused',
+      action,
+      reason: target.message,
+    });
+    return;
+  }
+
+  if (target.mismatch) {
+    context.stateManager.setState<DispatchConfirmationState>({
+      kind: 'refused',
+      action,
+      reason: hostNameMismatchRefusal(target.mismatch, target.endpoint.agentId),
+    });
+    return;
+  }
+
+  context.stateManager.setState<DispatchConfirmationState>({
+    kind: 'confirmed',
+    action,
+    agentId: target.endpoint.agentId,
+  });
+};
+
+/**
+ * A dispatch reaching the handler without a verification of the target the card
+ * named — the analyst approved a refusal, or the tool call was resumed with no
+ * confirmation record at all. Nothing is dispatched; re-running the tool is what
+ * produces a fresh card naming the host that will be acted on.
+ */
+const unconfirmedDispatchResult = (state: DispatchConfirmationState | undefined) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    state?.kind === 'refused'
+      ? `The confirmation shown for this call reported that the action would be refused (${state.reason}), so nothing was dispatched. Resolve that and call the tool again, so the analyst is shown a new confirmation card naming the verified host.`
+      : `The target of this call is not covered by a confirmation, so nothing was dispatched. Call the tool again, so the analyst is asked to confirm the resolved host.`
+  );
+
+/** The host resolved for the call is not the one the analyst confirmed. */
+const changedTargetResult = (confirmedAgentId: string, resolvedAgentId: string) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The host resolved for this call changed after the analyst confirmed it (confirmed agent ID ${confirmedAgentId}, which now resolves to ${resolvedAgentId}), so nothing was dispatched. Call the tool again, so the analyst is shown the current target on a new confirmation card.`
   );
 
 /**
@@ -250,6 +336,23 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: mismatchResult(mismatch) };
   }
 
+  // The card is the human gate, and the handler re-resolves after the click, so
+  // the dispatch is held to what the card showed: the agent id recorded when the
+  // card was built. A card that reported a refusal records no verified target
+  // and can therefore never dispatch here, however the lookup behaves now.
+  const approved = context.stateManager.getState<DispatchConfirmationState>();
+
+  if (approved?.kind !== 'confirmed' || approved.action !== request.action) {
+    return { kind: 'result', result: unconfirmedDispatchResult(approved) };
+  }
+
+  if (approved.agentId !== target.endpoint.agentId) {
+    return {
+      kind: 'result',
+      result: changedTargetResult(approved.agentId, target.endpoint.agentId),
+    };
+  }
+
   return { kind: 'ready', target };
 };
 
@@ -286,6 +389,11 @@ export const buildDispatchConfirmation = async (
   options: ConfirmationCardOptions
 ) => {
   const target = await describeDispatchTargetForConfirmation(request);
+  // Record what the card is about to tell the analyst before it is returned: the
+  // state is snapshotted with the prompt and read back by the handler after the
+  // click, which is what keeps a refused card from authorizing a later dispatch.
+  recordConfirmation(request, target);
+
   const base = {
     title: options.title,
     color: options.color,
@@ -304,11 +412,10 @@ export const buildDispatchConfirmation = async (
     return {
       ...base,
       color: 'warning' as const,
-      message: `**This action will be refused.** The requested hostname '${
-        target.mismatch.providedHostName
-      }' is not a hostname of agent ID ${target.endpoint.agentId} (known: ${quotedNames(
-        target.mismatch.knownHostNames
-      )}).`,
+      message: `**This action will be refused.** ${hostNameMismatchRefusal(
+        target.mismatch,
+        target.endpoint.agentId
+      )}`,
     };
   }
 

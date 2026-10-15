@@ -30,11 +30,24 @@ jest.mock('../../../../endpoint/services/actions', () => {
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
 
+// Tool-call state, as `run_tool.ts` scopes it: the confirmation card records the
+// approved target here and the handler reads it back after the analyst confirms.
+const toolCallState: { value?: unknown } = { value: undefined };
+
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
   callContext: { callSource: 'agent' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
+  // Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation
+  // card records the target the analyst was shown here, and the handler reads it
+  // back once the call is confirmed.
+  stateManager: {
+    getState: () => toolCallState.value,
+    setState: (state: unknown) => {
+      toolCallState.value = state;
+    },
+  },
   runContext: {
     runId: 'run-test-1',
     stack: [{ type: 'agent', agentId: 'test-agent', conversationId: 'conv-test-1' }],
@@ -47,6 +60,23 @@ const results = (result: unknown) => {
   }
   return (result as ToolHandlerStandardReturn).results;
 };
+
+// The runner builds the confirmation card and then runs the handler with the same
+// tool-call state; dispatching steps replay both phases so the handler sees the
+// target the analyst was shown.
+async function confirmThenDispatch(
+  tool: ReturnType<Case['build']>,
+  toolParams: Record<string, unknown>
+) {
+  const getConfirmation = tool.confirmation?.getConfirmation;
+  if (!getConfirmation) {
+    throw new Error(`${tool.id} has no confirmation to build`);
+  }
+
+  await getConfirmation({ toolParams, context: mockContext });
+
+  return tool.handler(toolParams, mockContext);
+}
 
 interface Case {
   label: string;
@@ -110,6 +140,7 @@ describe.each(CASES)(
 
     beforeEach(() => {
       jest.clearAllMocks();
+      toolCallState.value = undefined;
       service = createMockEndpointAppContext().service;
       getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
       jest.spyOn(service, 'getEndpointMetadataService').mockImplementation((() => ({
@@ -161,7 +192,7 @@ describe.each(CASES)(
 
       // Step 1: the shared hostname is ambiguous and nothing is dispatched.
       const first = results(
-        await tool.handler({ hostName: 'dup-host', ...extraParams }, mockContext)
+        await confirmThenDispatch(tool, { hostName: 'dup-host', ...extraParams })
       );
       const ambiguous = first[0].data as Record<string, unknown>;
       expect(ambiguous.reason).toBe('ambiguous_hostname');
@@ -176,7 +207,7 @@ describe.each(CASES)(
       // exactly that agent, and does not walk the hostname again.
       listAgents.mockClear();
       const second = results(
-        await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext)
+        await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams })
       );
       const data = second[0].data as Record<string, unknown>;
 
@@ -220,12 +251,106 @@ describe.each(CASES)(
     it('uses agentId without resolving the hostname when both agree', async () => {
       const tool = build(service);
 
-      await tool.handler({ hostName: 'dup-host', agentId: 'agent-b', ...extraParams }, mockContext);
+      await confirmThenDispatch(tool, { hostName: 'dup-host', agentId: 'agent-b', ...extraParams });
 
       expect(listAgents).not.toHaveBeenCalled();
       expect(client[clientMethod].mock.calls[0][0]).toEqual(
         expect.objectContaining({ endpoint_ids: ['agent-b'] })
       );
+    });
+
+    it('records the resolved agent as the confirmed target when the card names a host', async () => {
+      const tool = build(service);
+
+      await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'dup-host', agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(toolCallState.value).toEqual({ kind: 'confirmed', action, agentId: 'agent-b' });
+    });
+
+    it('records a refusal, not a target, when the card reports the action will be refused', async () => {
+      getAgent.mockRejectedValue(new Error('fleet search failed'));
+      const tool = build(service);
+
+      await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(toolCallState.value).toEqual({
+        kind: 'refused',
+        action,
+        reason: expect.stringContaining('fleet search failed'),
+      });
+    });
+
+    it('does not dispatch when the analyst approves a card that said the action would be refused', async () => {
+      // The preflight cannot read the target, so the card the analyst is shown
+      // reports a refusal and names no host.
+      getAgent.mockRejectedValueOnce(new Error('fleet search failed'));
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+      expect(card?.message).toContain('will be refused');
+
+      // By the time the approval comes back the service has recovered and the
+      // handler resolves the target cleanly — but the approved card never named
+      // it, so the failure must not turn into a dispatch.
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
+
+      expect(out[0].type).toBe('error');
+      expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+      expect((out[0].data as Record<string, unknown>).message).toEqual(
+        expect.stringContaining('reported that the action would be refused')
+      );
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('does not dispatch when the host now resolves to a different agent than the confirmed one', async () => {
+      listAgents.mockResolvedValueOnce({
+        agents: [{ id: 'agent-b', status: 'online', packages: ['endpoint'] }],
+      });
+      const tool = build(service);
+
+      await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'dup-host', ...extraParams },
+        context: mockContext,
+      });
+
+      // The confirmed agent goes offline and another agent answers to the same
+      // hostname, so the handler's own walk would pick a host the card never
+      // named.
+      listAgents.mockResolvedValue({
+        agents: [{ id: 'agent-a', status: 'online', packages: ['endpoint'] }],
+      });
+
+      const out = results(
+        await tool.handler({ hostName: 'dup-host', ...extraParams }, mockContext)
+      );
+
+      expect(out[0].type).toBe('error');
+      expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+      expect((out[0].data as Record<string, unknown>).message).toEqual(
+        expect.stringContaining('changed after the analyst confirmed it')
+      );
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('does not dispatch a call that carries no confirmation at all', async () => {
+      const tool = build(service);
+
+      const out = results(await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext));
+
+      expect(out[0].type).toBe('error');
+      expect((out[0].data as Record<string, unknown>).message).toEqual(
+        expect.stringContaining('not covered by a confirmation')
+      );
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
     it('refuses a hostName that does not match the Fleet hostname of the agentId, instead of acting on the agent', async () => {
@@ -280,7 +405,7 @@ describe.each(CASES)(
       const tool = build(service);
 
       const out = results(
-        await tool.handler({ hostName: 'web-01', agentId: 'agent-b', ...extraParams }, mockContext)
+        await confirmThenDispatch(tool, { hostName: 'web-01', agentId: 'agent-b', ...extraParams })
       );
 
       expect(out[0].type).not.toBe('error');
@@ -293,7 +418,7 @@ describe.each(CASES)(
     it("reads the Defend hostnames keyed on the supplied agent id, so another agent's alias is never accepted", async () => {
       const tool = build(service);
 
-      await tool.handler({ hostName: 'dup-host', agentId: 'agent-b', ...extraParams }, mockContext);
+      await confirmThenDispatch(tool, { hostName: 'dup-host', agentId: 'agent-b', ...extraParams });
 
       expect(getHostMetadataList).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -456,7 +581,7 @@ describe.each(CASES)(
         mockGetActionDetailsById.mockRejectedValue(new Error('es unavailable'));
         const tool = build(service);
 
-        const pending = tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext);
+        const pending = confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams });
         await jest.advanceTimersByTimeAsync(5 * 60_000);
         const out = results(await pending);
 
