@@ -31,6 +31,13 @@ describe('useAutoCollapseSideNav', () => {
     expect(sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
   });
 
+  it('expands the side nav again when the page unloads', () => {
+    const { sideNav } = setup(false);
+
+    window.dispatchEvent(new Event('pagehide'));
+    expect(sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
+  });
+
   it('leaves a side nav the user already collapsed unchanged', () => {
     const { sideNav, unmount } = setup(true);
     unmount();

@@ -24,6 +24,13 @@ export const useAutoCollapseSideNav = (): void => {
       return;
     }
     sideNav.setIsCollapsed(true);
-    return () => sideNav.setIsCollapsed(false);
+    // Unmount does not run on reload or tab close. Chrome persists synchronously, so restoring
+    // on `pagehide` keeps the user's preference saved.
+    const restore = () => sideNav.setIsCollapsed(false);
+    window.addEventListener('pagehide', restore);
+    return () => {
+      window.removeEventListener('pagehide', restore);
+      restore();
+    };
   }, [chrome]);
 };
