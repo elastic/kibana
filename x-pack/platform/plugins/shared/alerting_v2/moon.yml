@@ -130,6 +130,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod

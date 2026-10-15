@@ -24,6 +24,9 @@ describe('config validation', () => {
             "resetPageDelayMs": 0,
             "resetTaskTimeoutMinutes": 60,
           },
+          "assigneeIdentity": Object {
+            "enabled": true,
+          },
           "attachments": Object {
             "enabled": true,
           },

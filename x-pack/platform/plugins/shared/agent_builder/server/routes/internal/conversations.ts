@@ -45,10 +45,13 @@ export function registerInternalConversationRoutes({
       const { title } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update({
-        id: conversationId,
-        title,
-      });
+      const updatedConversation = await client.update(
+        {
+          id: conversationId,
+          title,
+        },
+        { access: 'owner', retryOnConflict: true }
+      );
 
       return response.ok<RenameConversationResponse>({
         body: {
@@ -86,7 +89,7 @@ export function registerInternalConversationRoutes({
           id: conversationId,
           read,
         },
-        { access: 'converse' }
+        { access: 'converse', retryOnConflict: true }
       );
 
       return response.ok<MarkReadConversationResponse>({

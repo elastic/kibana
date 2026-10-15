@@ -23,7 +23,9 @@ export const attachIndex = async ({
   connectorId,
   indexName,
 }: AttachIndexApiLogicArgs): Promise<AttachIndexApiLogicResponse> => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/index_name/${indexName}`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/index_name/${encodeURIComponent(indexName)}`;
 
   await HttpLogic.values.http.put(route);
   return { connectorId, indexName };

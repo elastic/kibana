@@ -31,7 +31,8 @@ import {
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
-import type { RegistryDataStream } from '../../../../types';
+import type { PackageInfo, RegistryDataStream } from '../../../../types';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
@@ -2502,6 +2503,210 @@ describe('EPM template', () => {
       );
     });
 
+    describe('mapper_parsing_exception', () => {
+      // The composed index template defines both analysis components, so a rollover can pick
+      // them up in the new backing index.
+      const simulatedAnalysis = {
+        normalizer: {
+          uppercase_normalizer: { type: 'custom', filter: ['uppercase'] },
+        },
+        analyzer: {
+          standard_lower: { type: 'custom', tokenizer: 'standard', filter: ['lowercase'] },
+        },
+      };
+
+      const setupEsClientForMapperParsingException = (
+        error: any,
+        { analysis = simulatedAnalysis }: { analysis?: object } = {}
+      ) => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.indices.getDataStream.mockResponse({
+          data_streams: [{ name: 'test.prefix1-default' }],
+        } as any);
+        esClient.indices.get.mockResponse({
+          'test.prefix1-default': {
+            mappings: {},
+          },
+        } as any);
+        esClient.indices.simulateTemplate.mockResponse({
+          template: {
+            settings: { index: { analysis } },
+            mappings: {},
+          },
+        } as any);
+        esClient.indices.putMapping.mockImplementation(() => {
+          throw new errors.ResponseError({
+            statusCode: 400,
+            body: { error },
+          } as any);
+        });
+        return esClient;
+      };
+
+      const indexTemplates = [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ];
+
+      const expectRollover = (
+        esClient: ReturnType<typeof setupEsClientForMapperParsingException>
+      ) =>
+        expect(esClient.transport.request).toHaveBeenCalledWith(
+          expect.objectContaining({
+            path: '/test.prefix1-default/_rollover',
+            querystring: {
+              lazy: true,
+            },
+          })
+        );
+
+      it('should rollover when a normalizer is not found for a field', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+        });
+
+        await updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates);
+
+        expectRollover(esClient);
+      });
+
+      it('should rollover when an analyzer has not been configured in mappings', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason:
+            'Failed to parse mapping: analyzer [standard_lower] has not been configured in mappings',
+          caused_by: {
+            type: 'illegal_argument_exception',
+            reason: 'analyzer [standard_lower] has not been configured in mappings',
+          },
+        });
+
+        await updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates);
+
+        expectRollover(esClient);
+      });
+
+      it('should rollover when the matching reason is only nested under caused_by', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason: 'Failed to parse mapping',
+          caused_by: {
+            type: 'illegal_argument_exception',
+            reason: 'analyzer [standard_lower] has not been configured in mappings',
+          },
+        });
+
+        await updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates);
+
+        expectRollover(esClient);
+      });
+
+      it('should not rollover on an unrelated mapper_parsing_exception and should throw', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason: 'No handler for type [keywrod] declared on field [foo]',
+        });
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should not rollover when the reason is not about an analyzer or normalizer', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason: 'copy_to [bar] not found for field [foo]',
+        });
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should not rollover when the normalizer is missing from the composed template too', async () => {
+        // A new backing index would be built from the same broken definition, so the error has
+        // to surface rather than be masked by a rollover that reports a successful install.
+        const esClient = setupEsClientForMapperParsingException(
+          {
+            type: 'mapper_parsing_exception',
+            reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+          },
+          { analysis: {} }
+        );
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should not rollover when the template itself cannot be simulated', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.indices.getDataStream.mockResponse({
+          data_streams: [{ name: 'test.prefix1-default' }],
+        } as any);
+        esClient.indices.get.mockResponse({
+          'test.prefix1-default': { mappings: {} },
+        } as any);
+        esClient.indices.simulateTemplate.mockImplementation(() => {
+          throw new errors.ResponseError({
+            statusCode: 400,
+            body: {
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+              },
+            },
+          } as any);
+        });
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should skip rollover when "skipDataStreamRollover" is enabled', async () => {
+        const esClient = setupEsClientForMapperParsingException({
+          type: 'mapper_parsing_exception',
+          reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+        });
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates, {
+            skipDataStreamRollover: true,
+          })
+        ).resolves.not.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+    });
+
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -2970,26 +3175,81 @@ describe('EPM template', () => {
       });
     });
 
-    // TODO: generateESIndexPatterns does not accept an isOtelInputType flag and therefore
-    // never appends the '.otel' suffix for OTel input packages. The pattern is stored in
-    // the Fleet installation saved object (es_index_patterns) and used by get.ts to match
-    // active data streams for the Fleet UI — it does not affect ES index template routing.
-    // With the missing suffix, the UI will fail to match data streams named
-    // 'logs-generic.otel-<namespace>' against the stored pattern 'logs-generic-*'.
-    // The test below locks in the current (incorrect) behavior so any future fix is explicit.
-    it('does not append .otel suffix for OTel input data streams (current behavior — see TODO above)', () => {
-      const otelDataStream = {
+    describe('with package context', () => {
+      const regularDataStream = {
         type: 'logs',
-        dataset: 'generic',
-        title: 'Generic OTel logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
         release: 'ga',
-        package: 'otel',
-        path: 'generic',
+        package: 'nginx',
+        path: 'access',
         ingest_pipeline: 'default',
+        streams: [{ input: 'logfile' }],
       } as RegistryDataStream;
 
-      expect(generateESIndexPatterns([otelDataStream])).toEqual({
-        generic: 'logs-generic-*',
+      const otelDataStream = {
+        type: 'metrics',
+        dataset: 'supabase.metrics',
+        title: 'Supabase OTel metrics',
+        release: 'ga',
+        package: 'supabase',
+        path: 'metrics',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otelcol' }],
+      } as RegistryDataStream;
+
+      const packageInfo = {
+        policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+      } as PackageInfo;
+
+      beforeEach(() => {
+        appContextService.start(
+          createAppContextStartContractMock({}, undefined, undefined, {
+            enableOtelIntegrations: true,
+          } as ExperimentalFeatures)
+        );
+      });
+
+      it('appends the .otel suffix only for data streams on the OTel input', () => {
+        expect(generateESIndexPatterns([regularDataStream, otelDataStream], packageInfo)).toEqual({
+          access: 'logs-nginx.access-*',
+          metrics: 'metrics-supabase.metrics.otel-*',
+        });
+      });
+
+      it('resolves an input referenced by name', () => {
+        const namedInputDataStream = {
+          ...otelDataStream,
+          streams: [{ input: 'otel_metrics' }],
+        } as RegistryDataStream;
+
+        expect(
+          generateESIndexPatterns([namedInputDataStream], {
+            policy_templates: [
+              { name: 'supabase', inputs: [{ type: 'otelcol', name: 'otel_metrics' }] },
+            ],
+          } as PackageInfo)
+        ).toEqual({
+          metrics: 'metrics-supabase.metrics.otel-*',
+        });
+      });
+
+      it('leaves patterns unsuffixed when no package context is given', () => {
+        expect(generateESIndexPatterns([otelDataStream])).toEqual({
+          metrics: 'metrics-supabase.metrics-*',
+        });
+      });
+
+      it('leaves patterns unsuffixed when OTel integrations are disabled', () => {
+        appContextService.start(
+          createAppContextStartContractMock({}, undefined, undefined, {
+            enableOtelIntegrations: false,
+          } as ExperimentalFeatures)
+        );
+
+        expect(generateESIndexPatterns([otelDataStream], packageInfo)).toEqual({
+          metrics: 'metrics-supabase.metrics-*',
+        });
       });
     });
   });

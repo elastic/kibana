@@ -119,19 +119,6 @@ ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 </details>
 
 <details>
-<summary>Phoenix executor (backward compatibility)</summary>
-
-The Phoenix-backed executor is maintained in [`@kbn/evals-phoenix-executor`](../kbn-evals-phoenix-executor/) for backward compatibility. That package is the source of truth for Phoenix integration.
-
-To switch:
-
-```bash
-KBN_EVALS_EXECUTOR=phoenix node scripts/evals run --suite <id>
-```
-
-</details>
-
-<details>
 <summary>Running directly via Playwright</summary>
 
 Only use this if the CLI doesn't cover your use case. Ensure Scout and EDOT are already running.

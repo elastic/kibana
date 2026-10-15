@@ -203,7 +203,7 @@ const serverlessInstances = (cpsPlugin: boolean) => {
   return createTestServerlessInstances({
     adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
     enableCPS: false,
-    // Match `yarn es serverless --projectType observability ...`
+    // Match `pnpm es serverless --projectType observability ...`
     projectType: 'oblt',
     // Setup-only: use superuser so tests can create temp indices.
     kibana: {

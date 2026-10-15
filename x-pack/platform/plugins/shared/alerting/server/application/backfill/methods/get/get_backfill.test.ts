@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
@@ -103,6 +104,7 @@ describe('getBackfill()', () => {
     mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,

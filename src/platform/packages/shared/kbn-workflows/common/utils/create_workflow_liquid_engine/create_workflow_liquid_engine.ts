@@ -9,6 +9,7 @@
 
 import type { FS, LiquidOptions } from 'liquidjs';
 import { Liquid } from 'liquidjs';
+import { pickObjectFields } from '../pick_object_fields/pick_object_fields';
 
 /**
  * LiquidJS tags supported in workflow templates.
@@ -96,5 +97,47 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     memoryLimit,
   });
   removeDisallowedLiquidTags(engine);
+  registerWorkflowLiquidFilters(engine);
   return engine;
+};
+
+/**
+ * Registers the custom filters required by workflow templates onto the given engine.
+ * Called automatically by {@link createWorkflowLiquidEngine}; exposed for testing.
+ *
+ * Registering centrally here ensures every engine instance (server-side execution,
+ * YAML validation, editor evaluation) uses identical filter implementations and
+ * eliminates the risk of divergence (e.g. a no-op stub instead of the real function).
+ */
+export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
+  // Converts a JSON string to a parsed object; passes non-strings through unchanged.
+  engine.registerFilter('json_parse', (value: unknown): unknown => {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  });
+
+  // Converts a plain object to an array of { key, value } pairs.
+  engine.registerFilter('entries', (value: unknown): unknown => {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return value;
+    }
+    return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+  });
+
+  // Keeps only the given dotted-path fields of an object, preserving nested structure.
+  // Accepts a single array of paths (| pick: consts.fields) or several string args
+  // (| pick: "a", "b").
+  engine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
+    const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+    return pickObjectFields(
+      value,
+      paths.filter((path): path is string => typeof path === 'string')
+    );
+  });
 };

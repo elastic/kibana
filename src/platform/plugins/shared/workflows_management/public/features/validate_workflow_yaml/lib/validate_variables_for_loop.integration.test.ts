@@ -17,13 +17,17 @@ import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
+  FOREACH_STEP_ESQL_CELL_YAML,
+  foreachStepEsqlCellWorkflowDefinition,
   forLoopNestedWorkflowDefinition,
   forLoopValidationWorkflowDefinition,
 } from './__fixtures__/for_loop_validation_workflow';
+import { collectAllVariables } from './collect_all_variables';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 import { extendContextWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
+import { FOREACH_ITEM_SCHEMA_DESC } from '../../workflow_context/lib/get_foreach_state_schema';
 
 describe('validateVariables for-loop integration', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
@@ -290,5 +294,28 @@ steps:
       nestedModel
     );
     expect(innerResults.find((r) => r.id === 'inner-var')?.severity).toBeNull();
+  });
+
+  it('warns instead of erroring for a foreach step iterating an ES|QL result cell', () => {
+    const esqlGraph = WorkflowGraph.fromWorkflowDefinition(foreachStepEsqlCellWorkflowDefinition);
+    const esqlDoc = parseDocument(FOREACH_STEP_ESQL_CELL_YAML);
+    const esqlModel = createFakeMonacoModel(FOREACH_STEP_ESQL_CELL_YAML);
+
+    const variableItems = collectAllVariables(esqlModel, esqlDoc, esqlGraph);
+    const collectionItem = variableItems.find((item) => item.type === 'foreach');
+    expect(collectionItem?.key).toBe('steps.run_query.output.values[0][0]');
+
+    const results = validateVariables(
+      variableItems,
+      esqlGraph,
+      foreachStepEsqlCellWorkflowDefinition,
+      esqlDoc,
+      esqlModel
+    );
+
+    expect(results.filter((r) => r.severity === 'error')).toHaveLength(0);
+    const collectionResult = results.find((r) => r.id === collectionItem?.id);
+    expect(collectionResult?.severity).toBe('warning');
+    expect(collectionResult?.message).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
   });
 });

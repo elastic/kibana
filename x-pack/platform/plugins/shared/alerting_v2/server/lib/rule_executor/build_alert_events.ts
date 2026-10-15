@@ -151,7 +151,7 @@ export interface BuildRecoveryAlertEventsOpts {
   ruleVersion: number;
   spaceId: string;
   activeGroupHashes: ActiveAlertGroupHash[];
-  breachedGroupHashes: Set<string>;
+  breachedGroupHashes: ReadonlySet<string>;
   scheduledTimestamp: string;
   dataPresentGroupHashes?: ReadonlySet<string>;
 }
@@ -282,7 +282,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   spaceId: string;
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
-  breachedGroupHashes: Set<string>;
+  breachedGroupHashes: ReadonlySet<string>;
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }

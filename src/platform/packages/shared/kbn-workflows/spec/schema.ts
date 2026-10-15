@@ -25,7 +25,7 @@ import {
   MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
-  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
@@ -61,11 +61,24 @@ export const WorkflowRetrySchema = z.object({
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
+// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
+// well inside the stack limit, and this bounds it. A longer expression can be hoisted
+// into a `data.set` step and compared here as a short flag.
+export const IF_CONDITION_MAX_LENGTH = 2000;
+
+const IfConditionSchema = z
+  .string()
+  .max(IF_CONDITION_MAX_LENGTH)
+  .describe(
+    'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
+  );
+
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
   'max-step-size': ByteSizeSchema.optional(),
+  if: IfConditionSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -222,7 +235,7 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
 export const StepWithIfConditionSchema = z.object({
-  if: z.string().optional().describe('KQL condition that controls whether this step runs'),
+  if: IfConditionSchema.optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
@@ -234,7 +247,6 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   with: z.record(z.string(), z.any()).optional(),
 })
-  .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
   .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
@@ -288,9 +300,17 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
     .describe('Slack API connector saved object id or name'),
   channels: z
-    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe('Slack channel ID (e.g. C0123456789) or channel name (e.g. #alerts)')
+    )
     .min(1)
-    .describe('Slack channel ids to post approval actions to'),
+    .describe(
+      'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
+    ),
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -302,8 +322,12 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
 
 export const WaitForApprovalChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional(),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+    slack: WaitForApprovalSlackChannelSchema.optional().describe(
+      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
+    ),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
+      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
+    ),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -509,7 +533,6 @@ export const ForEachStepSchema = BaseStepSchema.extend({
       'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
     ),
   ...ForEachStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -554,7 +577,6 @@ export const WhileStepSchema = BaseStepSchema.extend({
       'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
     ),
   ...WhileStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -600,7 +622,6 @@ export const SwitchStepSchema = BaseStepSchema.extend({
       'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
     ),
   ...SwitchStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...TimeoutPropSchema.shape,
 });
 export type SwitchStep = z.infer<typeof SwitchStepSchema>;
@@ -623,11 +644,12 @@ export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = fals
 };
 
 export const IfStepConfigSchema = z.object({
-  condition: z
-    .string()
-    .describe(
-      'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
-    ),
+  condition: IfConditionSchema,
+  // This step already gates on `condition`; a step-level `if` would be a second,
+  // invisible gate. Reject it instead of stripping it, so the author sees why.
+  if: z
+    .never({ error: 'The `if` step gates on `condition`; a step-level `if` is not supported here' })
+    .optional(),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
   else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
 });
@@ -880,7 +902,6 @@ export const LoopBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('loop.break')
     .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
 
@@ -890,7 +911,6 @@ export const LoopContinueStepSchema = BaseStepSchema.extend({
     .describe(
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
     ),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 
@@ -930,7 +950,7 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
   type: z.literal('workflow.output'),
   status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
   with: z.record(z.string(), z.any()),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
 export const WorkflowFailStepSchema = BaseStepSchema.extend({
@@ -941,7 +961,7 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
       reason: z.string().optional(),
     })
     .optional(),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */

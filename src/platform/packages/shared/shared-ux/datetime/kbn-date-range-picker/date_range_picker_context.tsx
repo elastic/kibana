@@ -33,6 +33,7 @@ import type {
   DateRangePickerSettings,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
+import { hasRoundedOffset } from './utils';
 import { textToTimeRange } from './parse';
 import { prettifyValue } from './parse/prettify_value';
 import {
@@ -78,7 +79,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   /** Recently used time ranges shown in the Recent section. */
   recent: TimeRangeBoundsOption[];
   /**
-   * Assembled `{ presets, dateFormat, roundRelativeTime, timePrecision, locale }`
+   * Assembled `{ presets, inputDateFormats, roundRelativeTime, timePrecision, locale }`
    * passed to `textToTimeRange`/`prettifyValue`/`timeRangeToDisplayText` and to
    * the part-level parser. Single source of truth so every call site forwards
    * the same options instead of rebuilding (and risking dropping) them by hand.
@@ -86,6 +87,11 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   transformOptions: TimeRangeTransformOptions;
   /** Human-readable display text for the current time range (shown when idle). */
   displayText: string;
+  /**
+   * Whether a relative bound of the current range is rounded (e.g. `now-1y/y`).
+   * Shown as a suffix next to `displayText` when idle, never in the input.
+   */
+  isRounded: boolean;
   /** Full formatted text including absolute dates, used for tooltips. */
   displayFullFormattedText: string;
   /** Short duration label (e.g., "15m"), or `null` if duration cannot be computed. */
@@ -166,7 +172,7 @@ export function DateRangePickerProvider({
   value,
   defaultValue,
   onChange,
-  dateFormat,
+  inputDateFormats,
   locale,
   isInvalid = false,
   disabled = false,
@@ -198,12 +204,12 @@ export function DateRangePickerProvider({
   const transformOptions: TimeRangeTransformOptions = useMemo(
     () => ({
       presets,
-      dateFormat,
+      inputDateFormats,
       roundRelativeTime: settings.roundRelativeTime,
       timePrecision,
       locale,
     }),
-    [presets, dateFormat, settings.roundRelativeTime, timePrecision, locale]
+    [presets, inputDateFormats, settings.roundRelativeTime, timePrecision, locale]
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -228,6 +234,7 @@ export function DateRangePickerProvider({
     () => timeRangeToFullFormattedText(timeRange, { ...transformOptions, timePrecision: 'ms' }),
     [timeRange, transformOptions]
   );
+  const isRounded = hasRoundedOffset(timeRange);
   const duration =
     timeRange.startDate && timeRange.endDate
       ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
@@ -340,6 +347,7 @@ export function DateRangePickerProvider({
       compressed,
       collapsed,
       displayText,
+      isRounded,
       displayFullFormattedText,
       displayShortDuration,
       inputRef,
@@ -377,6 +385,7 @@ export function DateRangePickerProvider({
       compressed,
       collapsed,
       displayText,
+      isRounded,
       displayFullFormattedText,
       displayShortDuration,
       panelId,

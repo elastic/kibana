@@ -14,7 +14,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+. "$DIR/bin/kibana_env"
 
 {{#rspack}}
 export KBN_USE_RSPACK=true
@@ -62,9 +62,6 @@ BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
 if [ "$KBN_DISALLOW_CODE_GEN_FROM_STRINGS" = 'true' ]; then
   BASE_NODE_OPTIONS="$BASE_NODE_OPTIONS --disallow-code-generation-from-strings"
 fi
-if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
-fi
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
@@ -85,4 +82,4 @@ if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep
   [ "$heap_mb" -ge "$min_heap_mb" ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
 fi
 
-NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
+NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/node_modules/@kbn/cli/kibana/dist" "${@}"

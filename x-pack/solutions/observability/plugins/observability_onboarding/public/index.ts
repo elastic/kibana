@@ -20,7 +20,6 @@ import type {
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
@@ -59,7 +58,6 @@ export interface ObservabilityOnboardingAppServices {
   featureFlags: FeatureFlagsStart;
   observability: ObservabilityPublicStart;
   cloud?: CloudStart;
-  streams?: StreamsPluginStart;
 }
 
 export const plugin: PluginInitializer<

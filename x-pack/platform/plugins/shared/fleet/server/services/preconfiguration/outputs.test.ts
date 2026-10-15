@@ -1335,7 +1335,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1369,7 +1369,7 @@ describe('Outputs preconfiguration', () => {
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1397,7 +1397,7 @@ describe('Outputs preconfiguration', () => {
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,
             { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,
@@ -1434,7 +1434,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             {
               id: SERVERLESS_PRIVATE_OUTPUT_ID,

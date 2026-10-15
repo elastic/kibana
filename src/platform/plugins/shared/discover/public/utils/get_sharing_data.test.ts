@@ -417,6 +417,49 @@ describe('getSharingData', () => {
       result2.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
     ).toEqual([absoluteTimeFilter]);
   });
+
+  test('uses explicit absoluteTimeRange when provided to build the absolute filter', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const servicesMock = createDiscoverServicesMock();
+
+    const defaultAbsoluteFilter = {
+      meta: { field: 'timestamp', type: 'range' as const },
+      query: {
+        range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' } },
+      },
+    };
+    const lastFetchAbsoluteFilter = {
+      meta: { field: 'timestamp', type: 'range' as const },
+      query: {
+        range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:15:00.000Z' } },
+      },
+    };
+    const lastFetchAbsoluteRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-01T00:15:00.000Z',
+    };
+
+    servicesMock.data.query.timefilter.timefilter.createFilter = jest.fn((index, timeRange) => {
+      return timeRange ? lastFetchAbsoluteFilter : defaultAbsoluteFilter;
+    }) as jest.MockedFunction<typeof servicesMock.data.query.timefilter.timefilter.createFilter>;
+
+    const result = await getSharingData(
+      searchSourceMock,
+      { columns: [] },
+      servicesMock,
+      lastFetchAbsoluteRange
+    );
+
+    // The absolute filter should be built with the passed-in absolute time range
+    expect(servicesMock.data.query.timefilter.timefilter.createFilter).toHaveBeenCalledWith(
+      expect.anything(),
+      lastFetchAbsoluteRange
+    );
+
+    expect(
+      result.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
+    ).toEqual([lastFetchAbsoluteFilter]);
+  });
 });
 
 describe('showPublicUrlSwitch', () => {

@@ -45,6 +45,7 @@ const LOCKED_EDITOR_STYLES: React.CSSProperties = {
 
 interface LockedBaseEditorProps {
   query: string;
+  dataTestSubj?: string;
 }
 
 const LOCKED_FONT_SIZE = 13;
@@ -61,7 +62,7 @@ const BLOCK_EDITOR_WRAPPER_STYLES: React.CSSProperties = {
   minHeight: MIN_EDITOR_HEIGHT,
 };
 
-const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
+const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query, dataTestSubj }) => {
   const [height, setHeight] = useState(query.split('\n').length * LOCKED_LINE_HEIGHT + 4);
 
   const handleEditorMount = useCallback((editor: IStandaloneCodeEditor) => {
@@ -89,6 +90,7 @@ const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
           automaticLayout: true,
         }}
         editorDidMount={handleEditorMount}
+        dataTestSubj={dataTestSubj}
       />
     </div>
   );
@@ -101,6 +103,7 @@ interface BlockEditorProps {
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
   readOnly?: boolean;
+  dataTestSubj?: string;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -109,6 +112,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   lineNumberOffset,
   onEditorMount,
   readOnly = false,
+  dataTestSubj,
 }) => {
   const options = useMemo(() => {
     const lineNumbers: LineNumbersType | undefined =
@@ -132,6 +136,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       height="100%"
       options={options}
       editorDidMount={onEditorMount}
+      dataTestSubj={dataTestSubj}
     />
   );
 };
@@ -293,12 +298,15 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
             onChange={onBaseQueryChange}
             lineNumberOffset={0}
             readOnly={readOnly}
+            dataTestSubj="composeDiscoverBlockEditor-base"
           />
         );
       case 'alert':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={alertBlock}
@@ -306,6 +314,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onAlertEditorMount}
                 readOnly={readOnly}
+                dataTestSubj="composeDiscoverBlockEditor-alert"
               />
             </div>
           </div>
@@ -313,7 +322,9 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
       case 'recovery':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={recoveryBlock}
@@ -321,6 +332,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onRecoveryEditorMount}
                 readOnly={readOnly}
+                dataTestSubj="composeDiscoverBlockEditor-recovery"
               />
             </div>
           </div>

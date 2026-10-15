@@ -9,7 +9,9 @@ import React, { type ReactElement } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EntityAnalyticsDashboardAttachment } from './entity_analytics_dashboard_attachment';
 import { createEntityAnalyticsDashboardAttachmentDefinition } from './entity_analytics_dashboard_attachment';
 import { navigateToEntityAnalyticsHomePageInApp } from './entity_explore_navigation';
@@ -20,6 +22,10 @@ interface ResizeDimensions {
 }
 
 const RESIZE_CALLBACK_KEY = '__eaDashboardOnResize';
+
+const experimentalFeatures = {
+  newFlyoutSystemDisabled: false,
+} as ExperimentalFeatures;
 
 jest.mock('@elastic/eui', () => {
   const React_ = jest.requireActual('react');
@@ -130,6 +136,7 @@ const renderCanvas = (
   const application = applicationServiceMock.createStartContract();
   const definition = createEntityAnalyticsDashboardAttachmentDefinition({
     application,
+    experimentalFeatures,
     searchSession: overrides.searchSession,
   });
   return render(
@@ -159,6 +166,7 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     const application = applicationServiceMock.createStartContract();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
+      experimentalFeatures,
       searchSession,
     });
 
@@ -189,7 +197,10 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
   it('returns a Preview action from getActionButtons when not in canvas mode', () => {
     const application = applicationServiceMock.createStartContract();
     const openCanvas = jest.fn();
-    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
 
     const buttons = definition.getActionButtons!({
       attachment: makeAttachment(),
@@ -241,14 +252,20 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
 
   it('sets canvasWidth to 50vw so the dashboard uses the full canvas flyout width', () => {
     const application = applicationServiceMock.createStartContract();
-    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
     expect(definition.canvasWidth).toBe('50vw');
   });
 
   it('forwards closeCanvas from the canvas render callbacks into the navigation provider so per-row navigation can dismiss the canvas overlay', () => {
     const closeCanvas = jest.fn();
     const application = applicationServiceMock.createStartContract();
-    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
 
     const providerElement = definition.renderCanvasContent!(
       {
@@ -261,5 +278,29 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     ) as ReactElement<{ closeCanvas?: () => void }>;
 
     expect(providerElement.props.closeCanvas).toBe(closeCanvas);
+  });
+
+  it('forwards the new flyout setting to entity navigation in the canvas preview', () => {
+    const application = applicationServiceMock.createStartContract();
+    const uiSettings = {
+      get: jest.fn(() => true),
+    } as unknown as IUiSettingsClient;
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+      uiSettings,
+    });
+
+    const providerElement = definition.renderCanvasContent!(
+      {
+        attachment: makeAttachment(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
+      {
+        closeCanvas: jest.fn(),
+        registerActionButtons: jest.fn(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
+    ) as ReactElement<{ isNewFlyoutEnabled?: boolean }>;
+
+    expect(providerElement.props.isNewFlyoutEnabled).toBe(true);
   });
 });

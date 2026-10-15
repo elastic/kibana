@@ -150,6 +150,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -202,6 +209,18 @@ export class ConsolePageObject extends FtrService {
     const textArea = await this.getTextArea();
     const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
     await textArea.pressKeys([selectionKey, 'a']);
+  }
+
+  public async getSelectedRequestsCount() {
+    const container = await this.testSubjects.find('consoleMonacoEditorContainer');
+    const count = await container.getAttribute('data-currently-selected-requests');
+    return Number(count ?? 0);
+  }
+
+  public async waitForSelectedRequestsCount(expectedCount: number) {
+    await this.retry.waitFor(`editor to recognize ${expectedCount} selected requests`, async () => {
+      return (await this.getSelectedRequestsCount()) === expectedCount;
+    });
   }
 
   public async getEditor() {
@@ -404,6 +423,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {
@@ -482,15 +506,23 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', {
+      timeout: 2000,
+    });
     if (tourShown) {
       await this.clickSkipTour();
     }
   }
 
   public async clickContextMenu() {
-    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
-    await contextMenu.click();
+    if (await this.isContextMenuOpen()) return;
+    await this.retry.tryForTime(5000, async () => {
+      const contextMenu = await this.testSubjects.find('toggleConsoleMenu', 1000);
+      await contextMenu.scrollIntoViewIfNecessary();
+      await contextMenu.moveMouseTo();
+      await contextMenu.click();
+      await this.testSubjects.existOrFail('consoleMenu', { timeout: 1500 });
+    });
   }
 
   public async isContextMenuOpen() {

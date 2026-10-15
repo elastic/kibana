@@ -125,4 +125,34 @@ describe('useQueryAlerts', () => {
     rerender();
     expect(abortSpy).toHaveBeenCalledTimes(2);
   });
+
+  describe('refetch invariant', () => {
+    test('refetch is null before the first fetch completes', () => {
+      // Synchronous snapshot: fetch is in flight but has not resolved yet.
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      expect(result.current.refetch).toBeNull();
+    });
+
+    test('refetch is a function after a successful fetch', async () => {
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch is a function after a failed fetch', async () => {
+      jest.spyOn(api, 'fetchQueryAlerts').mockImplementation(() => {
+        throw new Error('fetch error');
+      });
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch stays null permanently when skip=true', async () => {
+      const { result } = renderHook(() =>
+        useQueryAlerts<unknown, unknown>({ ...defaultProps, skip: true })
+      );
+      // Allow any pending microtasks / effects to flush before asserting.
+      await act(async () => {});
+      expect(result.current.refetch).toBeNull();
+    });
+  });
 });

@@ -457,7 +457,7 @@ Stream type definitions live in `@kbn/streams-schema`. When changing the shape o
 
 ```bash
 # Bootstrap (run after switching branches or on dependency errors)
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # Generate sample log data (useful for testing streams)
 node scripts/synthtrace.js sample_logs --live
@@ -469,44 +469,48 @@ Streams are shipped in Observability serverless. Enable wired streams via the St
 
 ```bash
 # Streams plugin
-yarn test:type_check --project x-pack/platform/plugins/shared/streams/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/streams/tsconfig.json
 
 # Streams app plugin
-yarn test:type_check --project x-pack/platform/plugins/shared/streams_app/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/streams_app/tsconfig.json
 
 # Streams schema package
-yarn test:type_check --project x-pack/platform/packages/shared/kbn-streams-schema/tsconfig.json
+pnpm test:type_check --project x-pack/platform/packages/shared/kbn-streams-schema/tsconfig.json
 
 # Streamlang package
-yarn test:type_check --project x-pack/platform/packages/shared/kbn-streamlang/tsconfig.json
+pnpm test:type_check --project x-pack/platform/packages/shared/kbn-streamlang/tsconfig.json
 ```
 
 ### Unit Tests (Jest)
 
 ```bash
 # Run tests for a specific file
-yarn test:jest path/to/file.test.ts
+pnpm test:jest path/to/file.test.ts
 
 # Run all tests in a directory (config is auto-discovered)
-yarn test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
+pnpm test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
 ```
 
 ### Integration Tests (Scout)
 
-Scout tests for the streams_app use Playwright:
+Scout tests for the streams_app use Playwright. They are split into one
+namespace per feature area, each with its own config at
+`test/scout/<namespace>/ui/playwright.config.ts` — see
+[the suite README](../streams_app/test/scout/README.md) for the namespace list
+and how to pick one. The examples below use `routing`:
 
 ```bash
 # Start server (ESS)
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:

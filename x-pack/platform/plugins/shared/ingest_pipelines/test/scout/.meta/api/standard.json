@@ -1,5 +1,8 @@
 {
-  "sha1": "a1f6fec0a342a9ccdbe2b76bfd437b08a85b45a9",
+  "sha1": "849896840c80555467ed82dc82e273523c9fb1d3",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "bff6a9ee7d96cf9-ff99aaa78ec522c",
@@ -497,6 +500,34 @@
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
         "line": 166,
         "column": 10
+      }
+    },
+    {
+      "id": "40434ff90c67387-00b69de433d4720",
+      "title": "Ingest pipelines parse CSV payload limit API accepts a mapping CSV within the payload limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "40434ff90c67387-fe11f3916c2a8f9",
+      "title": "Ingest pipelines parse CSV payload limit API rejects a body larger than the route maxBytes at the HTTP layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_payload_limit.spec.ts",
+        "line": 40,
+        "column": 12
       }
     },
     {

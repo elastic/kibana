@@ -57,12 +57,7 @@ import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/cons
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 import type {
-  ExternalReferenceAttachmentType,
-  AttachmentViewObject,
-  PersistableStateAttachmentType,
-} from '../client/attachment_framework/types';
-import type {
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
@@ -463,6 +458,7 @@ export const allCases: CasesFindResponseUI = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+  mttr: 2000,
 };
 
 export const similarCases: CasesSimilarResponseUI = {
@@ -630,7 +626,7 @@ export const casesSnake: Cases = [
   caseWithRegisteredAttachmentsSnake,
 ];
 
-export const allCasesSnake: CasesFindResponse = {
+export const allCasesSnake: CasesSearchResponse = {
   cases: casesSnake,
   page: 1,
   per_page: 5,
@@ -638,6 +634,7 @@ export const allCasesSnake: CasesFindResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
   count_open_cases: 20,
+  mttr: 2000,
 };
 
 export const similarCasesSnake: CasesSimilarResponse = {
@@ -1026,19 +1023,6 @@ export const getExternalReferenceUserAction = (
   ...overrides,
 });
 
-export const getExternalReferenceAttachment = (
-  viewObject: AttachmentViewObject = {}
-): ExternalReferenceAttachmentType => ({
-  id: '.test',
-  icon: 'casesApp',
-  displayName: 'Test',
-  getAttachmentViewObject: () => ({
-    event: 'added a chart',
-    timelineAvatar: 'casesApp',
-    ...viewObject,
-  }),
-});
-
 export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
@@ -1055,19 +1039,6 @@ export const getPersistableStateUserAction = (
     },
   },
   ...overrides,
-});
-
-export const getPersistableStateAttachment = (
-  viewObject: AttachmentViewObject = {}
-): PersistableStateAttachmentType => ({
-  id: '.test',
-  icon: 'casesApp',
-  displayName: 'Test',
-  getAttachmentViewObject: () => ({
-    event: 'added an embeddable',
-    timelineAvatar: 'casesApp',
-    ...viewObject,
-  }),
 });
 
 export const getCaseUsersMockResponse = (): CaseUsers => {

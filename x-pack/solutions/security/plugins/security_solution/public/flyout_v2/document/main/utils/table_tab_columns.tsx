@@ -51,10 +51,6 @@ export type ColumnsProvider = (providerOptions: {
    */
   ruleId: string;
   /**
-   * Whether the preview link is in preview mode
-   */
-  isRulePreview: boolean;
-  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue: (field: string) => string | null;
@@ -77,8 +73,7 @@ export type ColumnsProvider = (providerOptions: {
   hit: DataTableRecord;
   /**
    * Optional wrapper that renders a preview link for supported field types (host, ip, rule).
-   * Injected by the caller: the new flyout passes `OpenFlyoutLink`, the legacy flyout omits it
-   * so the value cell keeps using the expandable-flyout `PreviewLink`.
+   * When omitted, the value cell falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
@@ -92,7 +87,6 @@ export const getTableTabColumns: ColumnsProvider = ({
   scopeId,
   getLinkValue,
   ruleId,
-  isRulePreview,
   onTogglePinned,
   entityId,
   renderCellActions,
@@ -154,7 +148,6 @@ export const getTableTabColumns: ColumnsProvider = ({
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
             ruleId={ruleId}
-            isRulePreview={isRulePreview}
             values={values}
             entityId={entityId}
             hit={hit}

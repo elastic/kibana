@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -322,6 +323,7 @@ export interface DocLinks {
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
     readonly attacksPage: string;
+    readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
@@ -340,6 +342,7 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
@@ -616,6 +619,9 @@ export interface DocLinks {
     elasticAgentStandaloneLoggingConfig: string;
     agentPolicyLogLevel: string;
     elasticAgentLogFileRetention: string;
+    elasticAgentDownloads: string;
+    integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -757,6 +763,7 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+    readonly aiAssistant: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;

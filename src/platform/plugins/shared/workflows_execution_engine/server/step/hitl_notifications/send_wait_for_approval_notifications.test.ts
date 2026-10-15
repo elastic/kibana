@@ -141,6 +141,29 @@ describe('send_wait_for_approval_notifications', () => {
       expect(execute.mock.calls[1][0].input.subActionParams.channelIds).toEqual(['C0456']);
     });
 
+    it('sends slack_api #channel values as channelNames', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['#alerts', 'C0123'] },
+        },
+        message: 'Approve change?',
+        approveLabel: 'Approve',
+        rejectLabel: 'Decline',
+        resumeLinks,
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelNames: ['#alerts'] })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelIds: ['C0123'] })
+      );
+    });
+
     it('throws when a configured connector fails', async () => {
       const execute = jest
         .fn()

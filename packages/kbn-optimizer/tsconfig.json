@@ -30,6 +30,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/jest-serializers",
     "@kbn/repo-packages",
+    "@kbn/projects-solutions-groups",
     "@kbn/node-libs-browser-webpack-plugin",
   ]
 }

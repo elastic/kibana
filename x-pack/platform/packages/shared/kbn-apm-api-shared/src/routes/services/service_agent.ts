@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import type { ServerlessType } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';
 
@@ -22,6 +23,6 @@ export const serviceAgentRoute = defineRoute<ServiceAgentResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/agent',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, environmentRt]),
   }),
 });

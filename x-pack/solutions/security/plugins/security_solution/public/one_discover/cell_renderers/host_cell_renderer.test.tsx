@@ -16,8 +16,16 @@ import { Host } from '../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -63,6 +71,7 @@ jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', 
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },
+  telemetry: { reportEvent: mockReportEvent },
 } as unknown as StartServices;
 const mockStore = {} as SecurityAppStore;
 
@@ -90,6 +99,7 @@ const baseProps: DataGridCellValueElementProps = {
 describe('HostCellRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: new Promise<void>(() => {}) });
   });
 
   it('should render a single host name as a clickable link', () => {
@@ -119,6 +129,13 @@ describe('HostCellRenderer', () => {
     expect(hostElement).toBeDefined();
     expect(hostElement?.props.hostName).toBe('host-1');
     expect(hostElement?.props.hit).toBe(baseProps.row);
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.HOST,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+    });
   });
 
   it('should render multiple host names as separate links', () => {

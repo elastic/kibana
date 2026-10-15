@@ -21,6 +21,7 @@
  */
 
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { runBuild, formatSize } from './run_build';
 import type { ThemeTag } from './types';
 
@@ -34,6 +35,9 @@ interface StartMessage {
     dist?: boolean;
     examples?: boolean;
     themeTags?: ThemeTag[];
+    pluginPaths?: string[];
+    pluginScanDirs?: string[];
+    allowlistPluginGroups?: readonly KibanaGroup[];
     hmr?: boolean;
     basePath?: string;
   };
@@ -63,6 +67,9 @@ async function handleStart(options: StartMessage['options']) {
       dist: options.dist,
       examples: options.examples,
       themeTags: options.themeTags ?? [...DEFAULT_THEME_TAGS],
+      pluginPaths: options.pluginPaths,
+      pluginScanDirs: options.pluginScanDirs,
+      allowlistPluginGroups: options.allowlistPluginGroups,
       hmr: options.hmr,
       basePath: options.basePath,
       log,

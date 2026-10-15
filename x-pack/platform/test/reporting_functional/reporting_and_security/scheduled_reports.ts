@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import moment from 'moment';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+const START_DATE_PICKER_FORMAT = 'MMM D, YYYY @ HH:mm';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObject }: FtrProviderContext) {
@@ -16,6 +19,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboard = getPageObject('dashboard');
   const common = getPageObject('common');
+  const security = getPageObject('security');
   const retry = getService('retry');
   const reportingFunctional = getService('reportingFunctional');
   const reportingAPI = getService('reportingAPI');
@@ -51,19 +55,28 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       );
     };
 
-    const openFlyout = async () => {
+    const navigateToDashboard = async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Ecom Dashboard');
+    };
+
+    const openExportFlyout = async () => {
       await testSubjects.click('exportTopNavButton');
       await testSubjects.click('scheduleExport');
       await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
     };
 
+    const openFlyout = async () => {
+      await navigateToDashboard();
+      await openExportFlyout();
+    };
+
     const fillInSchedule = async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(10, 0, 0, 0);
-      const futureDateString = tomorrow.toLocaleDateString();
+      const futureDateString = moment()
+        .add(1, 'day')
+        .startOf('day')
+        .hours(10)
+        .format(START_DATE_PICKER_FORMAT);
       await testSubjects.setValue('startDatePicker', futureDateString);
       // Close the date picker to prevent it from blocking other fields
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -98,9 +111,8 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       expect(titleValue).to.equal('Ecom Dashboard');
 
       // Test date validation with a past date
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const pastDateString = yesterday.toLocaleDateString();
+      const pastDateString = moment().subtract(1, 'day').format(START_DATE_PICKER_FORMAT);
+
       await testSubjects.setValue('startDatePicker', pastDateString);
       // Close the date picker by pressing Escape key
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -232,8 +244,17 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     it('without reporting management privileges disables and hides the email recipient fields', async () => {
-      await retry.try(() => reportingFunctional.loginReportingUser());
-      await openFlyout();
+      // `common.navigateToApp` silently re-authenticates as the default super user (`test_user`,
+      // which holds manageReporting) if the reporting_user session is transiently prompted for
+      // login on navigation, rendering this non-manager flyout with manager privileges. Confirm
+      // we navigated as the reporting user before opening the flyout.
+      await retry.try(async () => {
+        await reportingFunctional.loginReportingUser();
+        await navigateToDashboard();
+        const currentUser = await security.getCurrentUser();
+        expect(currentUser?.username).to.equal('reporting_user');
+      });
+      await openExportFlyout();
 
       // Enable email
       await testSubjects.click('sendByEmailToggle');

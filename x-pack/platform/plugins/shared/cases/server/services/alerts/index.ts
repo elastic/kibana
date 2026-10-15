@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   ALERT_WORKFLOW_REASON,
@@ -273,12 +275,59 @@ export class AlertService {
         return;
       }
 
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an alert');
+
       await this.alertsClient.ensureAllAlertsAuthorizedRead({
         alerts: nonEmptyAlerts,
       });
     } catch (error) {
       throw createCaseError({
         message: `Failed to authorize alerts: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Rejects CPS/CCS index references before any `mget` — rule_registry's own authorization check
+   * silently skips (doesn't throw) a hit missing `_source`, which is what a cross-project `mget` returns.
+   */
+  private rejectNonLocalIndices(alerts: AlertInfo[], label: string): void {
+    const nonLocalAlert = alerts.find((alert) => isNonLocalIndexName(alert.index));
+
+    if (nonLocalAlert != null) {
+      throw Boom.badRequest(
+        `Cannot attach ${label} from a linked project or remote cluster index: ${nonLocalAlert.index}`
+      );
+    }
+  }
+
+  /**
+   * Existence check for non-alert indexed attachments (events) — no alerting RBAC, and CPS/CCS
+   * refs are rejected before `mget`.
+   */
+  public async ensureDocumentsExist({ alerts }: { alerts: AlertInfo[] }): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an event');
+
+      const results = await this.getAlerts(nonEmptyAlerts);
+      const missingEventIds = (results?.docs ?? [])
+        .filter((doc) => !('found' in doc && doc.found))
+        .map((doc) => doc._id);
+
+      if (missingEventIds.length > 0) {
+        throw Boom.badRequest(`Referenced event(s) not found: ${missingEventIds.join(', ')}`);
+      }
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to verify referenced events exist: ${error}`,
         error,
         logger: this.logger,
       });

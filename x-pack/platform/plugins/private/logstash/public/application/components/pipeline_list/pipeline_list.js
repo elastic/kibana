@@ -171,6 +171,7 @@ class PipelineListUi extends React.Component {
     const { isForbidden, isLoading } = this.state;
     return isForbidden && !isLoading ? (
       <EuiCallOut
+        announceOnMount
         color="danger"
         iconType="cross"
         title={

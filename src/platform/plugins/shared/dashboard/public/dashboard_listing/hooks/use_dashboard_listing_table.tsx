@@ -17,6 +17,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { asyncMap } from '@kbn/std';
+import { PAGINATION_MAX_SIZE } from '@kbn/as-code-shared-schemas';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import { dashboardClient, findService, hasLibraryItemWithTitle } from '../../dashboard_client';
@@ -203,7 +204,7 @@ export const useDashboardListingTable = ({
       return findService
         .search({
           query: searchTerm,
-          per_page: listingLimit,
+          per_page: Math.min(listingLimit, PAGINATION_MAX_SIZE),
           tags: (references ?? []).map(({ id }) => id),
           excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),
         })

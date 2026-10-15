@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { TimelineAttachmentPayloadSchema } from '../../../../common/cases/attachments/timeline';
@@ -40,10 +40,10 @@ CaseViewTimelinesTab.displayName = 'CaseViewTimelinesTab';
 export const getTimelineAttachment = () =>
   defineAttachment({
     id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
-    icon: 'timeline',
-    displayName: i18n.TIMELINE_DISPLAY_NAME,
+    getIcon: () => 'timeline',
+    getLabel: () => i18n.TIMELINE_DISPLAY_NAME,
     schema: TimelineAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => {
+    getCreationActivity: (props) => {
       const { savedObjectId, attachmentId, metadata } = props;
       const title = metadata?.title ?? '';
 
@@ -58,19 +58,11 @@ export const getTimelineAttachment = () =>
             />
           </Suspense>
         ),
-        timelineAvatar: (
-          <EuiAvatar
-            name="timeline"
-            color="subdued"
-            iconType="timeline"
-            aria-label={i18n.TIMELINE_AVATAR_ARIA}
-          />
-        ),
-        deleteSuccessTitle: i18n.DELETE_TIMELINE_SUCCESS_TITLE,
+        deleteSuccessToast: i18n.DELETE_TIMELINE_SUCCESS_TOAST,
       };
     },
-    getAttachmentRemovalObject: () => ({
+    getRemovalActivity: () => ({
       event: i18n.REMOVED_TIMELINE_LABEL,
     }),
-    getAttachmentTabViewObject: () => ({ children: CaseViewTimelinesTab }),
+    getAttachmentList: () => ({ children: CaseViewTimelinesTab }),
   });

@@ -27,11 +27,13 @@ export const keepAlivePersistentIndicatorsRoute = createServerRoute({
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
+      await getScopedClients({
+        request,
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.streamName);
 
     const kiClient = await getKnowledgeIndicatorClient();
     const { refreshed } = await kiClient.keepAlivePersistentIndicators(params.path.streamName, {

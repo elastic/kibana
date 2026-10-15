@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
@@ -71,6 +72,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -1809,7 +1811,10 @@ describe('update()', () => {
       },
     });
 
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: myType/my alert name',
+      undefined
+    );
   });
 
   it('should update rule flapping', async () => {
@@ -5011,7 +5016,7 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );

@@ -15,7 +15,9 @@ import {
   EuiText,
   EuiLink,
   EuiButton,
+  EuiButtonIcon,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,9 +29,11 @@ import { START_TOUR } from '../tour/translations';
 interface Props {
   /** When provided, renders a "Start tour" button that launches the templates guided tour. */
   onStartTour?: () => void;
+  /** When provided, renders a dismiss button that hides the panel. */
+  onDismiss?: () => void;
 }
 
-const TemplatesInfoPanelComponent: React.FC<Props> = ({ onStartTour }) => {
+const TemplatesInfoPanelComponent: React.FC<Props> = ({ onStartTour, onDismiss }) => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
 
@@ -39,11 +43,28 @@ const TemplatesInfoPanelComponent: React.FC<Props> = ({ onStartTour }) => {
       hasBorder={false}
       data-test-subj="templates-info-panel"
       css={css`
+        position: relative;
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
         border-radius: ${euiTheme.size.s};
         padding: ${euiTheme.size.base};
       `}
     >
+      {onDismiss ? (
+        <EuiToolTip content={i18n.TEMPLATES_INFO_PANEL_DISMISS} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            color="text"
+            aria-label={i18n.TEMPLATES_INFO_PANEL_DISMISS}
+            onClick={onDismiss}
+            data-test-subj="templates-info-panel-dismiss"
+            css={css`
+              position: absolute;
+              top: ${euiTheme.size.s};
+              right: ${euiTheme.size.s};
+            `}
+          />
+        </EuiToolTip>
+      ) : null}
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiImage

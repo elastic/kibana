@@ -35,6 +35,7 @@ import type {
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
+import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
@@ -324,10 +325,30 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   return columns.map((column) => column.name);
 };
 
-export const getESQLQueryVariables = (esql: string): string[] => {
+/**
+ * Returns the names of ES|QL variables used in a query, without `?`/`??` prefixes.
+ * @param esql The ESQL query string
+ * @param prefix Keep only Identifier (`??`) or Value (`?`) variables; omit for both.
+ */
+export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+  const params: Array<{ text: string; paramKind?: string }> = [];
+  const collect = (node: { literalType: string; text: string; paramKind?: string }) => {
+    if (node.literalType === 'param') params.push({ text: node.text, paramKind: node.paramKind });
+  };
+  // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
+  // that natively collects PromQL param literals via visitPromqlLiteral.
+  Walker.walk(root, {
+    visitLiteral: collect,
+    promql: { visitPromqlLiteral: collect },
+  });
+  return [
+    ...new Set(
+      params
+        .filter((p) => !prefix || p.paramKind === prefix)
+        .map((p) => p.text.replace(LEADING_PARAM_PREFIX_REGEX, ''))
+    ),
+  ];
 };
 
 /**

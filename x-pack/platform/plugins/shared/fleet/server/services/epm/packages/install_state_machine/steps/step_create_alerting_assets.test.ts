@@ -161,6 +161,98 @@ describe('createAlertingRuleFromTemplate', () => {
     });
   });
 
+  describe('when the rule already exists', () => {
+    const ruleId = 'fleet-default-test-package-template-id';
+    const createdAt = new Date('2025-11-01T00:00:00.000Z');
+
+    const getExistingRule = (overrides: Record<string, unknown> = {}) => ({
+      id: ruleId,
+      enabled: true,
+      createdAt,
+      updatedAt: createdAt,
+      lastRun: {
+        outcome: 'failed',
+        outcomeMsg: [
+          'verification_exception: Found 1 problem\nline 2:9: Unknown column [process.executable]',
+        ],
+      },
+      ...overrides,
+    });
+
+    const runWithExistingRule = async (
+      existingRule: ReturnType<typeof getExistingRule>,
+      disableRule = jest.fn()
+    ) => {
+      const rulesClient = {
+        getTemplate: jest.fn().mockResolvedValue({
+          id: 'template-id',
+          ruleTypeId: 'rule-type-id',
+          name: 'Template Rule',
+          consumer: 'alerts',
+          params: {},
+          schedule: { interval: '1m' },
+          actions: [],
+          tags: [],
+        }),
+        get: jest.fn().mockResolvedValue(existingRule),
+        create: jest.fn(),
+        disableRule,
+      } as unknown as RulesClientApi;
+
+      const result = await createAlertingRuleFromTemplate(
+        { rulesClient, logger },
+        {
+          alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+          pkgName: 'test-package',
+          spaceId: 'default',
+        }
+      );
+
+      return { rulesClient, result };
+    };
+
+    beforeEach(() => {
+      jest.mocked(logger.info).mockClear();
+      jest.mocked(logger.warn).mockClear();
+    });
+
+    it('should disable an enabled, unmodified rule that is failing with verification_exception', async () => {
+      const { rulesClient, result } = await runWithExistingRule(getExistingRule());
+
+      expect(rulesClient.disableRule).toHaveBeenCalledWith({ id: ruleId });
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining(ruleId));
+      expect(result).toEqual({ id: ruleId, deferred: false, type: 'alert' });
+    });
+
+    it.each([
+      ['the rule is disabled', { enabled: false }],
+      ['the rule was modified after creation', { updatedAt: new Date(createdAt.getTime() + 1000) }],
+      ['the rule has not run yet', { lastRun: undefined }],
+      ['the last run did not fail', { lastRun: { outcome: 'succeeded', outcomeMsg: null } }],
+      [
+        'the last run failed for another reason',
+        { lastRun: { outcome: 'failed', outcomeMsg: ['Unable to authenticate the API key'] } },
+      ],
+    ])('should not disable the rule when %s', async (_description, overrides) => {
+      const { rulesClient, result } = await runWithExistingRule(getExistingRule(overrides));
+
+      expect(rulesClient.disableRule).not.toHaveBeenCalled();
+      expect(result).toEqual({ id: ruleId, deferred: false, type: 'alert' });
+    });
+
+    it('should not mark the rule as deferred when disabling it fails', async () => {
+      const { rulesClient, result } = await runWithExistingRule(
+        getExistingRule(),
+        jest.fn().mockRejectedValue(new Error('Unable to disable the rule'))
+      );
+
+      expect(rulesClient.disableRule).toHaveBeenCalledWith({ id: ruleId });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(ruleId), expect.anything());
+      expect(result).toEqual({ id: ruleId, deferred: false, type: 'alert' });
+    });
+  });
+
   it('should look up template by hashed space-scoped ID when installAsAdditionalSpace is true', async () => {
     const hashedId = getSpaceScopedAssetId('template-id', 'my-space');
     const rulesClient = {

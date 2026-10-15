@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { addGeneratedActionValues } from './add_generated_action_values';
 import type { RuleAction, RuleSystemAction } from '../../../common';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -45,6 +46,7 @@ describe('addGeneratedActionValues()', () => {
   uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
 
   const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,

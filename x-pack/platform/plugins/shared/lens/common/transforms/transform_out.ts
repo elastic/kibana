@@ -41,6 +41,10 @@ export const getTransformOut = (
     id,
     useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
   ) {
+    // Capture savedObjectId prior to stripInheritedContext
+    const legacySavedObjectId =
+      'savedObjectId' in storedState ? storedState.savedObjectId : undefined;
+
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -57,6 +61,11 @@ export const getTransformOut = (
         ...state,
         ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
+    }
+
+    // Fallback to handle legacy SO with missing savedObjectRef reference
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
     }
 
     const migratedAttributes = migrateAttributes(attributes);

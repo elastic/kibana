@@ -13,7 +13,10 @@ import { getDetailedTypeDescription } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
-import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
+import {
+  FOREACH_ITEM_SCHEMA_DESC,
+  getForeachItemSchema,
+} from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
 export function validateVariable(
@@ -50,7 +53,7 @@ export function validateVariable(
       if (itemSchema instanceof z.ZodUnknown) {
         return {
           ...variableItem,
-          message: 'Unable to determine foreach item type',
+          message: itemSchema.description ?? FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
           severity: 'warning',
           owner: 'variable-validation',
           hoverMessage: getVariableHoverMessage(key, itemSchema),

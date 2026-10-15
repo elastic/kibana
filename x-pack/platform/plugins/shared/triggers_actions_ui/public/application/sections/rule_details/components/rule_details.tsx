@@ -17,7 +17,6 @@ import {
   EuiPageSection,
   EuiCallOut,
   EuiSpacer,
-  EuiButton,
   EuiIcon,
   EuiLink,
   EuiIconTip,
@@ -111,7 +110,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     notifications: { toasts },
     setBreadcrumbs,
   } = useKibana().services;
-  const { capabilities, getUrlForApp } = application;
+  const { capabilities } = application;
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -131,7 +130,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -193,34 +192,33 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }
           ),
           text: toMountPoint(
-            <>
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
-                  defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
-                />
-              </p>
-              {hasEditButton && (
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="ruleIntervalToastEditButton"
-                      onClick={() => {
-                        toasts.remove(configurationToast);
-                        onEditRuleClick();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton"
-                        defaultMessage="Edit rule"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </>,
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
+                defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
+              />
+            </p>,
             { i18n: i18nStart, theme, userProfile }
           ),
+          ...(hasEditButton
+            ? {
+                actionProps: {
+                  primary: {
+                    'data-test-subj': 'ruleIntervalToastEditButton',
+                    onClick: () => {
+                      toasts.remove(configurationToast);
+                      onEditRuleClick();
+                    },
+                    children: i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton',
+                      {
+                        defaultMessage: 'Edit rule',
+                      }
+                    ),
+                  },
+                },
+              }
+            : {}),
         });
       }
     }

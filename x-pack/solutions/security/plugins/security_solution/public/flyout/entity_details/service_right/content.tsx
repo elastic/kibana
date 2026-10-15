@@ -38,6 +38,8 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   refetchEntityRecord?: () => void;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
@@ -55,6 +57,11 @@ interface ServicePanelContentProps {
    * their `useQueryInspector` registration
    */
   riskScoreQueryId: string;
+  /**
+   * When true, hides the "open in tool" header icons on the section panels. Used by the new EUI
+   * system flyout, where sections are opened via {@link openDetailsPanel} instead.
+   */
+  hideHeaderIcons?: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -70,10 +77,12 @@ export const ServicePanelContent = ({
   isPreviewMode,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   onShowEntity,
   riskScoreQueryId,
+  hideHeaderIcons = false,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -98,6 +107,7 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            hideHeaderIcon={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>
@@ -109,6 +119,7 @@ export const ServicePanelContent = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
         </>
@@ -121,11 +132,12 @@ export const ServicePanelContent = ({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             onShowEntity={onShowEntity}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>
       )}
-      {!entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: serviceName, type: EntityType.service }}
           onChange={onAssetCriticalityChange}

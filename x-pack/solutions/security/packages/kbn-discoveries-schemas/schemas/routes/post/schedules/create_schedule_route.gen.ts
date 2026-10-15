@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Create Attack Discovery Schedule Internal API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import type { z } from '@kbn/zod/v4';

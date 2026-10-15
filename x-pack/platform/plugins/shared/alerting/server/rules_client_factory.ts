@@ -31,6 +31,7 @@ import {
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -47,6 +48,7 @@ import {
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -57,7 +59,8 @@ export interface RulesClientCreateOptions {
   /**
    * When true, clone the request's API key for each newly created rule.
    * The cloned key is independent, non-expiring, and managed by alerting
-   * (invalidated on rule delete/update). Only applies to rule creation.
+   * (invalidated on rule delete/update). Only applies to rule creation, and
+   * is a no-op unless the request is API-key authenticated (nothing to clone).
    */
   cloneApiKeysOnCreate?: boolean;
 }
@@ -341,6 +344,21 @@ export class RulesClientFactory {
                   .join(', ')}`
               );
             }
+            // A refresh=false grant on bulk action can be missed out of ES search results.
+            const missed =
+              result &&
+              result.invalidated_api_keys.length === 0 &&
+              result.previously_invalidated_api_keys.length === 0;
+            if (missed && apiKey) {
+              this.logger.warn(
+                `Synchronous ES API key invalidation found no key for alerting rule : ${ruleName}; queueing for delayed invalidation.`
+              );
+              await bulkMarkApiKeysForInvalidation(
+                { apiKeys: [apiKey] },
+                this.logger,
+                this.internalSavedObjectsRepository
+              );
+            }
           } catch (err) {
             this.logger.error(
               `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${
@@ -392,6 +410,7 @@ export class RulesClientFactory {
       .asScopedToNamespace(spaceId);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
@@ -420,7 +439,7 @@ export class RulesClientFactory {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
-      async createAPIKey(name: string) {
+      async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
@@ -431,11 +450,15 @@ export class RulesClientFactory {
 
         let createEsAPIKeyResult;
         try {
-          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
-            name,
-            role_descriptors: {},
-            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          });
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
+            request,
+            {
+              name,
+              role_descriptors: {},
+              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            },
+            { refresh }
+          );
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
           if (createUiamApiKeyResult?.id) {
@@ -522,7 +545,14 @@ export class RulesClientFactory {
         }
         return { apiKeysEnabled: false };
       },
-      cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      // A caller running on a borrowed API key (e.g. a background task) declares it with this
+      // header so created rules are minted their own framework-managed keys instead of persisting
+      // the caller's. Derived here so every client reaching this factory honors it — the alerting
+      // route context, `getRulesClientWithRequest` (how Detection Engine gets its client), and
+      // `getRulesClientWithRequestInSpace` alike. An explicit option still wins.
+      cloneApiKeysOnCreate:
+        options?.cloneApiKeysOnCreate ??
+        request.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true',
       async invalidateApiKeyNow(params) {
         await factory.invalidateApiKeyNow(params);
       },

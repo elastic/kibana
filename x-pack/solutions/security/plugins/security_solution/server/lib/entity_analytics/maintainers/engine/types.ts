@@ -165,6 +165,30 @@ interface RelationshipIntegrationBase {
    * log-based maintainer behavior.
    */
   disableLookbackWindow?: boolean;
+  /**
+   * Declares that every document this integration reads describes a *host-scoped*
+   * (non-IDP) user — an identity meaningful only within one host, keyed by
+   * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
+   * about the *data*, not a build directive, but it lets Step 2 skip work that
+   * only exists to handle the general case:
+   *
+   * - the actor EUID comes from `euid.experimental.getHostScopedUserEuidEsql()`, which emits
+   *   the namespace directly instead of deriving `entity.namespace` (a 7-arm
+   *   CASE/COALESCE tree over `event.module`, `event.dataset`,
+   *   `data_stream.dataset`, `cloud.provider` and `event.kind`);
+   * - the target EUID and its existence gate read `host.id` alone, skipping the
+   *   `host.name` / `host.hostname` fallback chain.
+   *
+   * Net effect is ~2 EVAL columns per row instead of ~35 — measured ~26× faster
+   * on logs-system.auth (~700M docs, 30d lookback).
+   *
+   * Both claims must hold. `system_auth` and `system_security` qualify (SSH and
+   * Windows logon events are host-scoped and always carry `host.id`). Setting
+   * this where IDP-issued users can appear silently produces EUIDs that do not
+   * match the entity store, 404-ing every write; setting it where `host.id` can
+   * be absent silently drops those documents.
+   */
+  hostScopedUsersOnly?: true;
 }
 
 /**
@@ -317,3 +341,15 @@ export interface EntityRelationshipRecord {
    */
   relationships: Record<string, string[]>;
 }
+
+/**
+ * Union of all known relationship maintainer identifiers. Passed into
+ * `runRelationshipMaintainer` as a required `maintainerName` field so that
+ * per-integration completion logs carry an unambiguous maintainer label.
+ */
+export type RelationshipMaintainerName =
+  | 'communicates_with'
+  | 'accesses_frequently_and_infrequently'
+  | 'administers'
+  | 'supervises'
+  | 'owns';

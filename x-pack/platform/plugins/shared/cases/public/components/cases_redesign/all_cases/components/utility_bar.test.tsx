@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -128,11 +128,15 @@ describe('Severity form field', () => {
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
+    await screen.findByTestId('case-table-bulk-actions-context-menu');
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
+    // waitForElementToBeRemoved is unreliable here: in userEvent v14 the element may
+    // already be gone before the call, or still animating out. waitFor handles both.
+    await waitFor(() => {
+      expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).not.toBeInTheDocument();
+    });
   });
 
   it('does not show the bulk actions without update & delete permissions', async () => {

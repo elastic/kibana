@@ -816,7 +816,11 @@ export default function ({ getService }: FtrProviderContext) {
         }).length
       ).eql(1);
 
-      // api_key_to_invalidate saved object should be created for the cloned key
+      // api_key_to_invalidate saved object should be created for the cloned key.
+      // The same key can be marked more than once (the one-shot task's completion
+      // removal races the explicit DELETE above, and each removal path creates a
+      // fresh un-deduped SO), so assert it was queued at least once rather than
+      // exactly once. Invalidation itself is verified below.
       await retry.try(async () => {
         const response = await es.search({
           index: '.kibana_task_manager',
@@ -828,10 +832,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(response.hits.hits.length).to.eql(1);
-        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
-          result.userScope?.apiKeyId
-        );
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).to.be.greaterThan(0);
       });
 
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)

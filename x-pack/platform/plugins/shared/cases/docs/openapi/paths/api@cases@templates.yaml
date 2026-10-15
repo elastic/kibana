@@ -35,3 +35,83 @@ get:
           examples:
             response401:
               $ref: '../components/examples/response_401.yaml'
+post:
+  summary: Create a case template
+  operationId: createCaseTemplateDefaultSpace
+  description: >
+    Creates a case template from a YAML definition. You must have the "Manage templates"
+    sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the
+    full validation (body, YAML definition, name uniqueness, authorization) without creating
+    anything. Requires the Cases feature to be enabled in the space.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - in: query
+      name: dry_run
+      description: 'When true, validates the request without creating the template and returns `{"valid": true}`.'
+      required: false
+      schema:
+        type: boolean
+        default: false
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/template_write_request.yaml'
+        examples:
+          createCaseTemplateRequest:
+            $ref: '../components/examples/template_write_request.yaml'
+  responses:
+    '200':
+      description: 'Indicates a successful call. Returns the created template, or `{"valid": true}` for a dry run.'
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../components/schemas/template_v2_response.yaml'
+              - $ref: '../components/schemas/template_dry_run_response.yaml'
+          examples:
+            createCaseTemplateResponse:
+              $ref: '../components/examples/get_case_template_response.yaml'
+            dryRunResponse:
+              $ref: '../components/examples/template_dry_run_response.yaml'
+    '400':
+      description: >
+        The request body, YAML definition, or template name is invalid, or a resource limit was
+        exceeded (max 200 templates per owner, max 200 fields per template).
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_template_limit.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the manage templates privilege for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '409':
+      description: A template with the same name already exists for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409.yaml'

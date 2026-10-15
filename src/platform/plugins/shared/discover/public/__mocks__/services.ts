@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
+import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -202,6 +203,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     chrome: corePluginMock.chrome,
     history,
     getScopedHistory: () => scopedHistoryMock.create(),
+    initialTabStateService: new InitialTabStateService(),
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),

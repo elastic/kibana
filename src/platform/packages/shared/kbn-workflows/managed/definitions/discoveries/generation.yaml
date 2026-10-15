@@ -5,8 +5,8 @@ description: |
   Generation only; (no Alert retrieval or validation steps are executed)
 enabled: true
 tags:
-  - Attack discovery
-  - Security
+  - attack-discovery
+  - security
   - attackDiscovery:generation
 
 triggers:

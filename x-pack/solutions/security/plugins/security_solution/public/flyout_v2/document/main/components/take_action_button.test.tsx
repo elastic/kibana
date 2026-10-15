@@ -120,6 +120,25 @@ jest.mock(
   })
 );
 
+const mockIsOsqueryAvailable = jest.fn().mockReturnValue(false);
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      osquery: {
+        isOsqueryAvailable: mockIsOsqueryAvailable,
+      },
+    },
+  }),
+}));
+
+jest.mock('../../../../detections/components/osquery/osquery_flyout', () => ({
+  OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
+    <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
+      {`osquery-mock-${agentId}`}
+    </button>
+  ),
+}));
+
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
@@ -192,6 +211,7 @@ describe('<TakeActionButton />', () => {
     mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
     mockUseResponderActionItem.mockReturnValue([]);
     mockUseHostIsolationAction.mockReturnValue([]);
+    mockIsOsqueryAvailable.mockReturnValue(false);
     mockUseFlyoutTelemetry.mockReturnValue({
       reportActionClicked: mockReportActionClicked,
       reportHeaderItemClicked: jest.fn(),
@@ -439,6 +459,72 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
     expect(getByText('Respond')).toBeInTheDocument();
+  });
+
+  describe('Run Osquery', () => {
+    it('should include Run Osquery when osquery is available for local documents', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Run Osquery')).toBeInTheDocument();
+      expect(mockIsOsqueryAvailable).toHaveBeenCalledWith({ agentId: 'agent-1' });
+    });
+
+    it('should hide Run Osquery when osquery is not available', () => {
+      mockIsOsqueryAvailable.mockReturnValue(false);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Run Osquery')).not.toBeInTheDocument();
+    });
+
+    it('should hide Run Osquery for remote documents', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(
+          { 'event.kind': 'signal', 'agent.id': 'agent-1' },
+          'remote-cluster:.alerts-security.alerts-default'
+        ),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Run Osquery')).not.toBeInTheDocument();
+    });
+
+    it('should open and close the Osquery flyout from the menu item', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText, queryByTestId } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      expect(queryByTestId('osqueryFlyoutMock')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Run Osquery'));
+
+      expect(getByTestId('osqueryFlyoutMock')).toBeInTheDocument();
+      expect(getByText('osquery-mock-agent-1')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('osqueryFlyoutMock'));
+
+      expect(queryByTestId('osqueryFlyoutMock')).not.toBeInTheDocument();
+    });
   });
 
   it('should not include run workflow menu item when hook returns empty (no permissions)', () => {
@@ -858,6 +944,23 @@ describe('<TakeActionButton />', () => {
       expect(mockReportActionClicked).toHaveBeenCalledWith({
         flyoutType: FLYOUT_TYPE.DOCUMENT,
         action: FLYOUT_ACTION.ISOLATE_HOST,
+      });
+    });
+
+    it('reports action "run_osquery" when "Run Osquery" is clicked', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Run Osquery'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.RUN_OSQUERY,
       });
     });
 

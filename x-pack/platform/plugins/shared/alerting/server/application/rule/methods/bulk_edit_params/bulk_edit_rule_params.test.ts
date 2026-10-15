@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -56,6 +57,7 @@ const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

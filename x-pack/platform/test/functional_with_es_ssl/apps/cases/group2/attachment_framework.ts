@@ -9,18 +9,21 @@ import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   Case,
-  ExternalReferenceAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
   PersistableStateAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
   ExternalReferenceStorageType,
   AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
-import { expect } from 'expect';
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
-  deleteAllCaseItems,
+  INDICATOR_ATTACHMENT_TYPE,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
+import { expect } from 'expect';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import {
   findAttachments,
   findCaseUserActions,
   findCases,
@@ -61,7 +64,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const find = getService('find');
-  const es = getService('es');
   const common = getPageObject('common');
   const retry = getService('retry');
   const dashboard = getPageObject('dashboard');
@@ -71,7 +73,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
+  const createAttachmentAndNavigate = async (attachment: AttachmentRequestV2) => {
     const caseData = await cases.api.createCase({
       title: `Registered attachment of type ${attachment.type}`,
     });
@@ -90,16 +92,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const validateAttachment = async (
     type: string,
-    attachmentId?: string | null,
-    attachmentTypeId = '.test'
+    attachmentId: string | null | undefined,
+    attachmentTypeId: string
   ) => {
     await testSubjects.existOrFail(`comment-${type}-${attachmentTypeId}`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
   };
 
   /**
-   * Attachment types are being registered in
-   * x-pack/platform/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
+   * These specs exercise real migrated attachment types via their legacy wire shapes
+   * (`indicator` external reference, `.lens` persistable state). They are registered by their
+   * owning plugins (security_solution, lens), not by the cases test fixture.
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
@@ -116,8 +119,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(AttachmentType.externalReference, attachmentId);
-        await testSubjects.existOrFail('test-attachment-content');
+        await validateAttachment(
+          INDICATOR_ATTACHMENT_TYPE,
+          attachmentId,
+          INDICATOR_ATTACHMENT_TYPE
+        );
       });
     });
 
@@ -200,12 +206,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const comments = userActions.filter((userAction) => userAction.type === 'comment');
 
-        const externalRefAttachmentId = comments[0].comment_id;
+        const externalReferenceAttachmentId = comments[0].comment_id;
         const lensAttachmentId = comments[1].comment_id;
-        await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
+        await validateAttachment(
+          INDICATOR_ATTACHMENT_TYPE,
+          externalReferenceAttachmentId,
+          INDICATOR_ATTACHMENT_TYPE
+        );
         await validateAttachment(LENS_ATTACHMENT_TYPE, lensAttachmentId, LENS_ATTACHMENT_TYPE);
 
-        await testSubjects.existOrFail('test-attachment-content');
         await retry.waitFor(
           'lens visualization to exist',
           async () => await find.existsByCssSelector('.lnsExpressionRenderer')
@@ -242,7 +251,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders solutions selection', async () => {
@@ -278,13 +287,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/240166
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
           await common.clickAndValidate('case-fixture-attach-to-existing-case', 'all-cases-modal');
-          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.waitForNthToBeListed(createdCases.size * 2);
         };
 
         const closeModal = async () => {
@@ -293,6 +301,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         before(async () => {
+          await cases.api.deleteAllCases();
+
           for (const owner of TOTAL_OWNERS) {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
@@ -304,7 +314,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await deleteAllCaseItems(es);
+          await cases.api.deleteAllCases();
         });
 
         it('renders different solutions', async () => {
@@ -324,11 +334,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
             await cases.casesTable.filterByOwner(owner);
             await cases.casesTable.getCaseById(currentCaseId);
-            /**
-             * The select button matched the query of the
-             * [data-test-subj*="cases-table-row-" query
-             */
-            await cases.casesTable.validateCasesTableHasNthRows(2);
             await closeModal();
           }
         });
@@ -340,13 +345,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await cases.casesTable.filterByOwner(owner);
           }
 
-          await cases.casesTable.waitForTableToFinishLoading();
-
-          /**
-           * The select button matched the query of the
-           * [data-test-subj*="cases-table-row-" query
-           */
-          await cases.casesTable.validateCasesTableHasNthRows(6);
+          // Each case contributes two matches to the row selector: the row itself and its select
+          // button (`cases-table-row-select-<id>`).
+          await cases.casesTable.waitForNthToBeListed(TOTAL_OWNERS.length * 2);
 
           for (const caseId of createdCases.values()) {
             await cases.casesTable.getCaseById(caseId);
@@ -359,7 +360,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
 
-            await cases.casesTable.waitForTableToFinishLoading();
             await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
@@ -425,14 +425,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
-        await testSubjects.click('cases-table-add-case-filter-bar');
-
-        await cases.create.createCase({
+        await cases.create.createCaseFromModal({
           title: caseTitle,
           description: 'test description',
           owner: 'cases',
         });
-        await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
@@ -556,12 +553,17 @@ const getLensState = (dataViewId: string) => ({
   },
 });
 
-const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
+// The attachment owner must equal the parent case owner (enforced server-side)
+const getExternalReferenceAttachment = (): ExternalReferenceNoSOAttachmentPayload => ({
   type: AttachmentType.externalReference,
-  externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-  externalReferenceAttachmentTypeId: '.test',
-  externalReferenceMetadata: null,
+  externalReferenceId: 'indicator-1',
+  externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    indicatorName: 'malware.exe',
+    indicatorType: 'file',
+    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+  },
   owner: 'cases',
 });
 

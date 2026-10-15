@@ -9,6 +9,7 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { ExecutionListFiltersProps } from './workflow_execution_list_filters';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
 import { TestWrapper } from '../../../shared/test_utils';
@@ -62,6 +63,34 @@ describe('ExecutionListFilters', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Status')).toBeInTheDocument();
+    });
+  });
+
+  it('shows distinct labels for wait-related statuses', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Waiting')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for input')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for child workflow')).toBeInTheDocument();
+    });
+  });
+
+  it.each([
+    ['Waiting', ExecutionStatus.WAITING],
+    ['Waiting for input', ExecutionStatus.WAITING_FOR_INPUT],
+    ['Waiting for child workflow', ExecutionStatus.WAITING_FOR_CHILD],
+  ])('applies %s filter as %s', async (label, status) => {
+    const onFiltersChange = jest.fn();
+    renderComponent({ onFiltersChange });
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    fireEvent.click(await screen.findByText(label));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      statuses: [status],
+      executionTypes: [],
+      executedBy: [],
     });
   });
 

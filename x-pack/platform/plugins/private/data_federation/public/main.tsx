@@ -772,7 +772,7 @@ export const Main: FunctionComponent<MainProps> = ({
           <>
             <span data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</span>
             &nbsp;
-            <EuiBetaBadge label={mainTranslations.technicalPreview} size="m" />
+            <EuiBetaBadge label={mainTranslations.experimental} size="m" />
           </>
         }
         description={

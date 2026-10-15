@@ -31,4 +31,3 @@ export { registerGetMaintainers } from './entity_maintainers/get_maintainers';
 export { registerInitMaintainers } from './entity_maintainers/init';
 export { registerRunMaintainer } from './entity_maintainers/run';
 export { registerCheckPrivileges } from './check_privileges';
-export { registerGetPreferences, registerUpdatePreferences } from './preferences';

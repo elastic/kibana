@@ -36,7 +36,7 @@ const RulesPage = () => {
   const location = useLocation();
   const {
     chrome: { docTitle },
-    application: { getUrlForApp, isAppRegistered },
+    application: { isAppRegistered },
     http,
     notifications: { toasts },
     ruleTypeRegistry,
@@ -156,14 +156,14 @@ const RulesPage = () => {
   useEffect(() => {
     if (setBreadcrumbs) {
       if (currentSection === 'logs') {
-        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
       }
     }
     docTitle.change(getCurrentDocTitle('rules'));
-  }, [docTitle, setBreadcrumbs, currentSection, getUrlForApp, isAppRegistered]);
+  }, [docTitle, setBreadcrumbs, currentSection, isAppRegistered]);
 
   return (
     <>

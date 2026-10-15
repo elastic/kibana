@@ -30,14 +30,14 @@ describe('filterHostedPolicies', () => {
     const agents = await filterHostedPolicies(
       soClient,
       [
-        { id: 'agent1', policy_id: 'hosted' },
-        { id: 'agent2', policy_id: 'other' },
+        { id: 'agent1', policy_id: 'hosted', policy_base_id: 'hosted' },
+        { id: 'agent2', policy_id: 'other', policy_base_id: 'other' },
       ] as Agent[],
       outgoingErrors,
       'error'
     );
 
-    expect(agents).toEqual([{ id: 'agent2', policy_id: 'other' }]);
+    expect(agents).toEqual([{ id: 'agent2', policy_id: 'other', policy_base_id: 'other' }]);
     expect(outgoingErrors).toEqual({
       agent1: new HostedAgentPolicyRestrictionRelatedError('error'),
     });

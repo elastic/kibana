@@ -8,10 +8,16 @@
 import React, { type ReactNode } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-export const getMemoryDumpHelpUsage = (): ReactNode => {
+export const getMemoryDumpHelpUsage = (includeRaw: boolean = false): ReactNode => {
   return (
     <>
       {'memory-dump --kernel [ --comment ]'}
+      {includeRaw && (
+        <>
+          <EuiSpacer size="xs" />
+          {'memory-dump --raw [ --comment ]'}
+        </>
+      )}
       <EuiSpacer size="xs" />
       {'memory-dump --process --entityId [ --comment ]'}
       <EuiSpacer size="xs" />

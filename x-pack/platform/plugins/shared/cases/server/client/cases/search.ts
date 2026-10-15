@@ -11,8 +11,8 @@ import Boom from '@hapi/boom';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
@@ -40,7 +40,7 @@ export const search = async (
   params: CasesSearchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<CasesFindResponse> => {
+): Promise<CasesSearchResponse> => {
   const {
     services: { caseService, licensingService, templatesService, fieldDefinitionsService },
     authorization,
@@ -117,6 +117,7 @@ export const search = async (
       status: undefined,
       customFieldsConfiguration,
       authorizationFilter,
+      searchType: 'search',
     });
 
     const caseQueryOptions = constructQueryOptions({
@@ -172,21 +173,27 @@ export const search = async (
       : [];
     const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
 
-    const [cases, statusStats] = await Promise.all([
-      caseService.searchCasesGroupedByID({
-        caseOptions: {
-          ...paramArgs,
-          ...caseQueryOptions,
-          searchFields: asArray(paramArgs.searchFields),
-        },
-        namespaces,
-        extendedFieldFilters: resolvedExtendedFieldFilters,
-        fieldLabelFilters: resolvedFieldLabelFilters,
-      }),
-      caseService.getCaseStatusStats({
-        searchOptions: statusStatsOptions,
-      }),
-    ]);
+    const cases = await caseService.searchCasesGroupedByID({
+      caseOptions: {
+        ...paramArgs,
+        ...caseQueryOptions,
+        searchFields: asArray(paramArgs.searchFields),
+      },
+      namespaces,
+      extendedFieldFilters: resolvedExtendedFieldFilters,
+      fieldLabelFilters: resolvedFieldLabelFilters,
+      // Status counts and MTTR are computed with the full search query (free-text search,
+      // extended field filters, attachment matches) so the metrics shown next to the list
+      // always reflect it; only the status clause is stripped (statusStatsOptions) so all
+      // three status counts stay populated.
+      statsOptions: { filter: statusStatsOptions.filter },
+    });
+
+    const statusStats = cases.searchStats?.statusStats ?? {
+      open: 0,
+      'in-progress': 0,
+      closed: 0,
+    };
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
@@ -198,11 +205,12 @@ export const search = async (
       countOpenCases: statusStats.open,
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
+      mttr: cases.searchStats?.mttr ?? null,
     });
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
 
-    return decodeOrThrow(CasesFindResponseRt)(res);
+    return decodeOrThrow(CasesSearchResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

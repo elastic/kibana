@@ -21,7 +21,12 @@ import {
   ENTITY_LATEST,
   getLatestEntityIndexPattern,
 } from '../../../../common/domain/entity_index';
-import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 import { getMetadataEntitiesDataStreamName } from '../../../../server/domain/asset_manager/metadata_data_stream';
@@ -34,11 +39,13 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
   interface RoleOptions {
     withTargetIndex?: boolean;
+    withWriteOnTargetIndex?: boolean;
     withSavedObjectCreate?: boolean;
   }
 
   const buildRoleDescriptor = ({
     withTargetIndex = true,
+    withWriteOnTargetIndex = true,
     withSavedObjectCreate = true,
   }: RoleOptions = {}): ElasticsearchRoleDescriptor => {
     const indices = [
@@ -48,7 +55,11 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
     if (withTargetIndex) {
       // Install creates the concrete latest index (+ alias) and the updates/metadata data
-      // streams, all as the requesting user, so `manage` is required on each.
+      // streams as the requesting user, so `manage` is required on each. Maintainer tasks
+      // run as the installing user and write entity documents, so `write` is also required.
+      const targetPrivileges = withWriteOnTargetIndex
+        ? ENTITY_STORE_TARGET_INDICES_PRIVILEGES
+        : ENTITY_STORE_TARGET_INDICES_PRIVILEGES.filter((p) => p !== 'write');
       indices.push({
         names: [
           TARGET_INDEX_LATEST,
@@ -56,7 +67,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
           TARGET_INDEX_UPDATES,
           TARGET_INDEX_METADATA,
         ],
-        privileges: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+        privileges: targetPrivileges,
       });
     }
 
@@ -77,6 +88,8 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
   const getRoleWithAllPrivileges = () => buildRoleDescriptor();
   const getRoleWithoutTargetIndexPrivileges = () => buildRoleDescriptor({ withTargetIndex: false });
+  const getRoleWithoutWriteOnTargetIndex = () =>
+    buildRoleDescriptor({ withWriteOnTargetIndex: false });
   const getRoleWithoutSavedObjectCreate = () =>
     buildRoleDescriptor({ withSavedObjectCreate: false });
 
@@ -154,6 +167,34 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
             expect.objectContaining({
               index: TARGET_INDEX_LATEST,
               privileges: expect.arrayContaining(ENTITY_STORE_TARGET_INDICES_PRIVILEGES),
+            }),
+          ]),
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'install - Should fail when user lacks write privilege on target index patterns',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutWriteOnTargetIndex()
+      );
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: {},
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: expect.arrayContaining([
+            expect.objectContaining({
+              index: TARGET_INDEX_LATEST,
+              privileges: expect.arrayContaining(['write']),
             }),
           ]),
         },
@@ -240,6 +281,34 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
   );
 
   apiTest(
+    'update - Should fail when user lacks write privilege on target index patterns',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutWriteOnTargetIndex()
+      );
+
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: { logExtraction: {} },
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: expect.arrayContaining([
+            expect.objectContaining({
+              index: TARGET_INDEX_LATEST,
+              privileges: expect.arrayContaining(['write']),
+            }),
+          ]),
+        },
+      });
+    }
+  );
+
+  apiTest(
     'update - Should fail when user lacks permissions for entity store saved object descriptor',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
@@ -251,6 +320,76 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
         responseType: 'json',
         body: { logExtraction: {} },
       });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  // --- entity maintainers lifecycle (mutating routes require management privileges) ---
+  // The privilege check runs before any maintainer lookup, so an under-privileged caller is
+  // rejected with 403 regardless of whether the store is installed or the id exists.
+
+  apiTest(
+    'maintainers stop - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.put(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  apiTest(
+    'maintainers start - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.put(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  apiTest(
+    'maintainers run - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
 
       expect(response.statusCode).toBe(403);
       expect(response.body.attributes).toMatchObject({

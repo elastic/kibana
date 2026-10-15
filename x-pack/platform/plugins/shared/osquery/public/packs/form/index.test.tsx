@@ -403,6 +403,79 @@ describe('PackForm', () => {
       expect(submitted).toHaveProperty('schedule_type');
     });
 
+    it('legacy pack (schedule_type: undefined) — saving without touching schedule emits no schedule fields', async () => {
+      // Blocker #1: a legacy/prebuilt pack saved without touching the schedule
+      // section must NOT emit schedule_type/interval/rrule_schedule. Without the
+      // dirty-gate, the client synthesizes { schedule_type:'interval', interval:3600 }
+      // even though the user never touched the schedule, which triggers a server-side
+      // legacy→interval transition that strips every bare per-query interval.
+      const defaultValue = {
+        id: 'legacy-pack-id',
+        saved_object_id: 'legacy-so-id',
+        name: 'legacy-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        // No schedule_type: this is a legacy pack.
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      // Click save without touching the schedule section.
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // The dirty-gate must suppress all schedule fields.
+      expect(submitted).not.toHaveProperty('schedule_type');
+      expect(submitted).not.toHaveProperty('interval');
+      expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+
+    it('explicit-schedule pack (schedule_type set) — saving without touching schedule still emits schedule fields', async () => {
+      // A pack that already has an explicit schedule_type must keep emitting
+      // schedule fields even when the schedule section is not touched, so that
+      // the server can preserve the current mode.
+      const defaultValue = {
+        id: 'explicit-pack-id',
+        saved_object_id: 'explicit-so-id',
+        name: 'explicit-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // packHasExplicitSchedule is true → schedule fields must be present.
+      expect(submitted.schedule_type).toBe('interval');
+      expect(typeof submitted.interval).toBe('number');
+    });
+
     it('should call updateAsync with pack saved_object_id in edit mode', async () => {
       const savedObjectId = 'saved-object-id-b5';
       const defaultValue = {

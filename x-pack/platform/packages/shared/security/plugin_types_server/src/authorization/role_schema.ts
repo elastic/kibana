@@ -322,8 +322,11 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  */
 export const getKibanaRoleSchema = (
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
-) =>
-  schema.arrayOf(
+) => {
+  // Resolving base privilege names rebuilds the full privilege map; do it once per schema.
+  const getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames);
+
+  return schema.arrayOf(
     schema.object(
       {
         /**
@@ -348,7 +351,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that grants applies to all spaces.',
                 },
                 validate(value) {
-                  const globalPrivileges = getBasePrivilegeNames().global;
+                  const globalPrivileges = getMemoizedBasePrivilegeNames().global;
                   if (!globalPrivileges.some((privilege) => privilege === value)) {
                     return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                   }
@@ -362,7 +365,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that applies to specific spaces.',
                 },
                 validate(value) {
-                  const spacePrivileges = getBasePrivilegeNames().space;
+                  const spacePrivileges = getMemoizedBasePrivilegeNames().space;
                   if (!spacePrivileges.some((privilege) => privilege === value)) {
                     return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                   }
@@ -430,18 +433,21 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
+      maxSize: 1000,
       validate(value) {
-        for (const [indexA, valueA] of value.entries()) {
-          for (const valueB of value.slice(indexA + 1)) {
-            const spaceIntersection = _.intersection(valueA.spaces, valueB.spaces);
-            if (spaceIntersection.length !== 0) {
-              return `more than one privilege is applied to the following spaces: [${spaceIntersection}]`;
+        const claimed = new Set<string>();
+        for (const { spaces } of value) {
+          for (const space of spaces) {
+            if (claimed.has(space)) {
+              return `more than one privilege is applied to the following spaces: [${space}]`;
             }
+            claimed.add(space);
           }
         }
       },
     }
   );
+};
 
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;

@@ -67,6 +67,15 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   y: 'year',
 };
 
+/** One date-math operation: an offset (`+3M`, `-1y`) or a rounding (`/y`, `/ms`). */
+const DATE_MATH_OP = '(?:[+-]\\d*(?:ms|[smhdwMy])|\\/(?:ms|[smhdwMy]))';
+
+/**
+ * Chained Elasticsearch date math: optional `now` plus one or more operations.
+ * e.g. `now/y+3M`, `now-3M/y+3M`, `-1y/y+3M`, `now/d`.
+ */
+export const CHAINED_DATE_MATH_RE = new RegExp(`^(now)?(${DATE_MATH_OP}+)$`);
+
 /**
  * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
  *

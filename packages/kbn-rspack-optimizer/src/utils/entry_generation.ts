@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 import type { PluginEntry } from '../types';
 import { createCoreEntry } from './plugin_discovery';
 

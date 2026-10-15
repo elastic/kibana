@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/inference-tracing'
   - '@kbn/logging'
   - '@kbn/es'
+  - '@kbn/cli'
 tags:
   - shared-common
   - package

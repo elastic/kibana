@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -39,6 +43,7 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 import { getFleetProxy } from './fleet_proxies';
 import {
   extractAndWriteDownloadSourcesSecrets,
@@ -46,7 +51,7 @@ import {
 } from './secrets';
 import { isSSLSecretStorageEnabled } from './secrets';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
+export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { ssl, auth, source_id: sourceId, secrets, ...attributes } = so.attributes;
 
   // Clean up null values from secrets (they may be set during updates to force removal)
@@ -67,12 +72,13 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
     }
   }
 
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: sourceId ?? so.id,
     ...attributes,
     ...(cleanedSecrets ? { secrets: cleanedSecrets } : {}),
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(auth ? { auth: JSON.parse(auth as string) } : {}),
+    id: sourceId ?? so.id,
   };
 }
 
@@ -260,7 +266,7 @@ class DownloadSourceService {
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {
-      ...omit(newData, ['ssl', 'auth', 'secrets']),
+      ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
     };
 
     if (updateData.proxy_id) {
@@ -437,7 +443,7 @@ class DownloadSourceService {
     }
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { request?: KibanaRequest }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
@@ -446,6 +452,26 @@ class DownloadSourceService {
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
+
+    if (options?.request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingDownloadSource(id);
+        if (truncated) {
+          throw new DownloadSourceError(
+            `Unable to verify delete authorization for download source ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to delete download source ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+      }
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id
