@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/streamlang'
   - '@kbn/repo-info'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
