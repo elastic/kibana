@@ -9,9 +9,6 @@ import { z } from '@kbn/zod/v4';
 
 export const GRID_COLUMNS = 48;
 
-/** Size of a new panel until the layout call places it. */
-export const DEFAULT_PANEL_SIZE = { w: 24, h: 10 } as const;
-
 /** A panel as the layout call sees it. */
 export interface LayoutPanel {
   id: string;

@@ -11,7 +11,8 @@ import { z } from '@kbn/zod/v4';
 import { createPanelInputMaterializer } from './panel_creation';
 import { defineOperation } from './types';
 import { addSectionPanelItemSchema } from './panels';
-import { findSectionIndex, getTemporaryPanelGrid, getWidgetsBottomY } from '../dashboard_state';
+import { findSectionIndex, getWidgetsBottomY } from '../dashboard_state';
+import { getPlaceholderGrid } from '../layout/placeholder_grid';
 
 export const addSectionOperation = defineOperation({
   schema: z.object({
@@ -72,7 +73,7 @@ export const addSectionOperation = defineOperation({
         sectionPanels.push({
           id: panelId,
           ...panel.panelContent,
-          grid: getTemporaryPanelGrid(sectionPanels),
+          grid: getPlaceholderGrid(sectionPanels),
         });
         if (panel.authoringNote) {
           context.panelAuthoringNotes.push({

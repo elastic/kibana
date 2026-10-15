@@ -7,11 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import {
-  appendPanelsToDashboard,
-  getContainerWidgets,
-  getTemporaryPanelGrid,
-} from '../dashboard_state';
+import { appendPanelsToDashboard, getContainerWidgets } from '../dashboard_state';
+import { getPlaceholderGrid } from '../layout/placeholder_grid';
 import { defineOperation } from './types';
 import { addPanelsItemSchema } from './panels';
 import { createPanelInputMaterializer } from './panel_creation';
@@ -47,7 +44,7 @@ export const addPanelsOperation = defineOperation({
           {
             id: panelId,
             ...panel.panelContent,
-            grid: getTemporaryPanelGrid(getContainerWidgets(nextDashboardData, item.sectionId)),
+            grid: getPlaceholderGrid(getContainerWidgets(nextDashboardData, item.sectionId)),
           },
         ],
         sectionId: item.sectionId,
