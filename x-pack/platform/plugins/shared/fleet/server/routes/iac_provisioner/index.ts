@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { IAC_PROVISIONER_API_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -197,6 +199,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_iac_callback.yaml'),
+        },
         validate: {
           request: ReceiveIacCallbackRequestSchema,
           response: {

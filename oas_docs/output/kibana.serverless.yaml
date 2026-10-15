@@ -52965,7 +52965,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: ID of the callback record, as issued to the stack.
+          in: path
           name: callbackId
           required: true
           schema:
@@ -52975,6 +52976,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              receiveIacCallbackRequestExample:
+                description: The report the launched CloudFormation stack sends once its IAM role exists
+                value:
+                  role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
+                  stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
             schema:
               additionalProperties: false
               type: object
@@ -52996,6 +53003,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                receiveIacCallbackExample:
+                  description: The report was applied and the federated identity exists
+                  value:
+                    status: received
               schema:
                 additionalProperties: false
                 type: object
@@ -53009,10 +53021,17 @@ paths:
                     type: string
                 required:
                   - status
-          description: 'OK: the values were stored, or were already stored.'
+          description: The values were stored, or were already stored
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: The role and the stack are in different AWS accounts
+                  value:
+                    error: Bad Request
+                    message: role_arn and stack_arn must be in the same AWS account
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53031,10 +53050,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No record has this ID, or the API key is not the one issued for it
+                  value:
+                    error: Not Found
+                    message: Callback not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -53043,10 +53069,17 @@ paths:
                     type: string
                 required:
                   - message
-          description: Not found.
+          description: Not Found
         '409':
           content:
             application/json:
+              examples:
+                conflictExample:
+                  description: A report with different values was already received
+                  value:
+                    error: Conflict
+                    message: Callback already received with different values
+                    statusCode: 409
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53065,10 +53098,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Different values were already received for this callback.
+          description: Conflict
         '410':
           content:
             application/json:
+              examples:
+                goneExample:
+                  description: The record expired or was cancelled before the report arrived
+                  value:
+                    error: Gone
+                    message: Callback is no longer accepting values
+                    statusCode: 410
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53087,7 +53127,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: The callback has expired.
+          description: Gone
       summary: Receive an IaC callback
       tags:
         - Fleet IaC provisioner

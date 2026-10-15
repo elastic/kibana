@@ -12,7 +12,11 @@ import { isCloudFormationStackArn } from '../../../common/services/cloud_connect
 const AWS_IAM_ROLE_ARN_PATTERN = /^arn:aws[a-zA-Z-]*:iam::\d{12}:role\/.+$/;
 
 const CallbackIdParamsSchema = schema.object({
-  callbackId: schema.string({ minLength: 1, maxLength: 128 }),
+  callbackId: schema.string({
+    minLength: 1,
+    maxLength: 128,
+    meta: { description: 'ID of the callback record, as issued to the stack.' },
+  }),
 });
 
 const IacCallbackStatusSchema = schema.oneOf([
