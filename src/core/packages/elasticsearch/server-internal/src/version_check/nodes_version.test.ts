@@ -14,6 +14,7 @@ import {
   fetchNodesInfo,
   initialState,
   model,
+  nodesVersionMachine,
   pollEsNodesVersion,
   type NodesVersionResult,
   type NodesVersionConfig,
@@ -51,20 +52,21 @@ const normal: NodesVersionState = {
 };
 
 describe('the wait of a step', () => {
+  const { model: step } = nodesVersionMachine(async () => compatible, config);
   const start = initialState(config);
 
   it('is the interval of the control state the step reached', () => {
-    expect(model(config, start, ok(incompatible)).wait).toBe(config.healthCheckStartupInterval);
-    expect(model(config, start, ok(compatible)).wait).toBe(config.healthCheckInterval);
-    expect(model(config, { ...normal, attemptsLeft: 0 }, fail(requestError)).wait).toBe(
+    expect(step(start, ok(incompatible)).wait).toBe(config.healthCheckStartupInterval);
+    expect(step(start, ok(compatible)).wait).toBe(config.healthCheckInterval);
+    expect(step({ ...normal, attemptsLeft: 0 }, fail(requestError)).wait).toBe(
       config.healthCheckFailureInterval
     );
-    expect(model(config, normal, ok(compatible)).wait).toBe(config.healthCheckInterval);
+    expect(step(normal, ok(compatible)).wait).toBe(config.healthCheckInterval);
   });
 
   it('keeps the interval of the current control state through a retry', () => {
-    expect(model(config, start, fail(requestError)).wait).toBe(config.healthCheckStartupInterval);
-    expect(model(config, normal, fail(requestError)).wait).toBe(config.healthCheckInterval);
+    expect(step(start, fail(requestError)).wait).toBe(config.healthCheckStartupInterval);
+    expect(step(normal, fail(requestError)).wait).toBe(config.healthCheckInterval);
   });
 });
 
@@ -89,14 +91,12 @@ describe('attemptsLeft', () => {
     expect(first).toEqual({
       state: { ...normal, attemptsLeft: 1 },
       event: { type: 'retried' },
-      wait: config.healthCheckInterval,
     });
 
     const second = model(config, first.state, fail(requestError));
     expect(second).toEqual({
       state: { ...normal, attemptsLeft: 0 },
       event: { type: 'retried' },
-      wait: config.healthCheckInterval,
     });
 
     const { state: settled } = model(config, second.state, fail(requestError));
