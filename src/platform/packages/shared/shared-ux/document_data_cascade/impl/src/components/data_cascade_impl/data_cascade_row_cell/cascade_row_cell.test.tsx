@@ -191,6 +191,7 @@ describe('CascadeRowCellPrimitive', () => {
             nodePathMap: expect.any(Object),
             data: expect.anything(),
             rowIndex: expect.any(Number),
+            stickyHeaderExtensionPoint: null,
           })
         );
       });
