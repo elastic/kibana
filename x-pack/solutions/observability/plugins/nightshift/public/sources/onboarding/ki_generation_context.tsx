@@ -48,6 +48,8 @@ interface KiGenerationContextValue {
   /** Every source of the space, disabled ones included; only enabled sources can be onboarded. */
   sources: NightshiftSource[];
   isSourcesLoading: boolean;
+  /** A request for the source list is in flight, including a background refetch of cached data. */
+  isSourcesFetching: boolean;
   /** The last source list request failed; `sources` then holds what was cached, if anything. */
   isSourcesError: boolean;
   refetchSources: () => void;
@@ -108,6 +110,7 @@ export function KiGenerationProvider({
   const sourcesFetch = useFetchSources();
   const fetchedSources = sourcesFetch.data;
   const isSourcesLoading = sourcesFetch.isLoading;
+  const isSourcesFetching = sourcesFetch.isFetching;
   const isSourcesError = sourcesFetch.isError;
   const refetchSources = sourcesFetch.refetch;
 
@@ -256,6 +259,7 @@ export function KiGenerationProvider({
       cancelOnboarding: bulkOnboarding.cancelOnboarding,
       sources: fetchedSources ?? NO_SOURCES,
       isSourcesLoading,
+      isSourcesFetching,
       isSourcesError,
       refetchSources,
       isInitialGenerationStatusLoading,
@@ -276,6 +280,7 @@ export function KiGenerationProvider({
       bulkOnboarding.cancelOnboarding,
       fetchedSources,
       isSourcesLoading,
+      isSourcesFetching,
       isSourcesError,
       refetchSources,
       isInitialGenerationStatusLoading,

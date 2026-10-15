@@ -56,6 +56,7 @@ export function SourcesView() {
   const {
     sources,
     isSourcesLoading,
+    isSourcesFetching,
     isSourcesError,
     refetchSources,
     isScheduling,
@@ -100,10 +101,12 @@ export function SourcesView() {
   }, [canManage, history, isCreating, search]);
 
   useEffect(() => {
+    // A cached list can predate the linked source, so wait for any refetch to finish too.
     if (
       sourceId === undefined ||
       isCreating ||
       isSourcesLoading ||
+      isSourcesFetching ||
       isSourcesError ||
       routedSource
     ) {
@@ -115,6 +118,7 @@ export function SourcesView() {
     history,
     isCreating,
     isSourcesError,
+    isSourcesFetching,
     isSourcesLoading,
     routedSource,
     search,

@@ -31,6 +31,7 @@ const createSource = (id: string): NightshiftSource => ({
 let mockSources: NightshiftSource[];
 let mockCanManage = true;
 let mockIsSourcesLoading = false;
+let mockIsSourcesFetching = false;
 let mockIsSourcesError = false;
 const mockToasts = { addWarning: jest.fn() };
 
@@ -46,6 +47,7 @@ jest.mock('./onboarding/ki_generation_context', () => ({
   useKiGeneration: () => ({
     sources: mockSources,
     isSourcesLoading: mockIsSourcesLoading,
+    isSourcesFetching: mockIsSourcesFetching,
     isSourcesError: mockIsSourcesError,
     refetchSources: jest.fn(),
     isScheduling: false,
@@ -138,6 +140,7 @@ describe('SourcesView routes', () => {
     mockSources = [createSource('source-1'), createSource('source-2')];
     mockCanManage = true;
     mockIsSourcesLoading = false;
+    mockIsSourcesFetching = false;
     mockIsSourcesError = false;
     mockToasts.addWarning.mockClear();
   });
@@ -159,7 +162,7 @@ describe('SourcesView routes', () => {
     expect(screen.queryByRole('button', { name: 'Create source' })).not.toBeInTheDocument();
   });
 
-  it('opens a source deep link and preserves the time range when closing', async () => {
+  it('opens a source deep link and preserves the query string when closing', async () => {
     const { history } = renderSources('/sources/source-1?rangeFrom=now-24h&rangeTo=now');
 
     expect(await screen.findByTestId('sourceFlyout')).toHaveTextContent('source-1');
@@ -211,6 +214,22 @@ describe('SourcesView routes', () => {
 
     mockSources = [createSource('source-1')];
     mockIsSourcesLoading = false;
+    rerenderSources();
+
+    expect(await screen.findByTestId('sourceFlyout')).toHaveTextContent('source-1');
+    expect(mockToasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('waits for a refetch before treating a deep link missing from cached sources as unknown', async () => {
+    mockSources = [];
+    mockIsSourcesFetching = true;
+    const { history, rerenderSources } = renderSources('/sources/source-1');
+
+    expect(history.location.pathname).toBe('/sources/source-1');
+    expect(mockToasts.addWarning).not.toHaveBeenCalled();
+
+    mockSources = [createSource('source-1')];
+    mockIsSourcesFetching = false;
     rerenderSources();
 
     expect(await screen.findByTestId('sourceFlyout')).toHaveTextContent('source-1');
