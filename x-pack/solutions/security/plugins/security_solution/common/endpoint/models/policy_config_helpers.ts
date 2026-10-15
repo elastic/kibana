@@ -103,6 +103,13 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
     enableValue: true,
   },
   {
+    keyPath: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+    optionalOsList: [PolicyOperatingSystem.windows],
+  },
+  {
     keyPath: 'antivirus_registration.enabled',
     osList: [PolicyOperatingSystem.windows],
     disableValue: false,
@@ -241,6 +248,9 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     credential_hardening: {
       enabled: false,
     },
+    ...(policy.windows.attack_surface_reduction.registry_credential_hardening === undefined
+      ? {}
+      : { registry_credential_hardening: { enabled: false } }),
   },
 });
 
@@ -453,6 +463,23 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
   return {
     ...policy,
     linux: { ...linuxRest, popup: popupRest },
+  };
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Windows registry credential hardening
+ * field removed.
+ */
+export const removeRegistryCredentialHardening = (policy: PolicyConfig): PolicyConfig => {
+  const { registry_credential_hardening: registryCredentialHardening, ...attackSurfaceReduction } =
+    policy.windows.attack_surface_reduction;
+
+  return {
+    ...policy,
+    windows: {
+      ...policy.windows,
+      attack_surface_reduction: attackSurfaceReduction,
+    },
   };
 };
 
