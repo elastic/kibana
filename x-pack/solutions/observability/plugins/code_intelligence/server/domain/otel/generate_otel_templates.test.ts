@@ -7,6 +7,7 @@
 
 import { extractOtelSignalsFromWindows } from './extract_otel_signals';
 import { generateOtelTemplates } from './generate_otel_templates';
+import type { OtelSignal } from '../models/otel_signal_codec';
 
 /** Supplies immutable scope metadata for generated attribute templates. */
 const context = {
@@ -24,6 +25,48 @@ const signalsFor = (source: string) =>
 /** Extracts one Go source line and renders its attribute queries. */
 const attributeQueriesFor = (source: string): readonly string[] =>
   generateOtelTemplates({ context, signals: signalsFor(source) }).map(({ query }) => query);
+
+describe('generateOtelTemplates metric queries', () => {
+  /** Renders the query of one literal metric signal. */
+  const metricQueryFor = (signal: Partial<OtelSignal>): readonly string[] =>
+    generateOtelTemplates({
+      context,
+      signals: [
+        {
+          evidence: [{ excerpt: 'x', line: 1, path: 'src/m.ts' }],
+          kind: 'metric_name',
+          language: 'TypeScript',
+          metricKind: 'counter',
+          value: 'bridge.events',
+          ...signal,
+        },
+      ],
+    }).map(({ query }) => query);
+
+  it('keeps an ungrouped query when no dimensions were recorded', () => {
+    expect(metricQueryFor({})).toEqual([
+      'TS metrics*\n| WHERE metrics.bridge.events IS NOT NULL\n| STATS rate = SUM(RATE(metrics.bridge.events))',
+    ]);
+  });
+
+  it('groups by every recorded dimension as an attributes field', () => {
+    expect(
+      metricQueryFor({
+        dimensions: ['event.name', 'http.response.status_code'],
+        metricKind: 'histogram',
+        value: 'bridge.operation.duration',
+      })
+    ).toEqual([
+      'TS metrics*\n| WHERE metrics.bridge.operation.duration IS NOT NULL\n| STATS p95 = AVG(PERCENTILE_OVER_TIME(metrics.bridge.operation.duration, 95)) BY attributes.event.name, attributes.http.response.status_code',
+    ]);
+  });
+
+  it('quotes a dimension key that is not a bare ES|QL field name', () => {
+    expect(metricQueryFor({ dimensions: ['cache-result.kind'] })).toEqual([
+      'TS metrics*\n| WHERE metrics.bridge.events IS NOT NULL\n| STATS rate = SUM(RATE(metrics.bridge.events)) BY `attributes.cache-result.kind`',
+    ]);
+  });
+});
 
 describe('generateOtelTemplates attribute queries', () => {
   it('keeps the percentile template for a numeric measure', () => {
