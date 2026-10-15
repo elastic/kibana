@@ -332,6 +332,7 @@ export interface DocLinks {
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
+    readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
