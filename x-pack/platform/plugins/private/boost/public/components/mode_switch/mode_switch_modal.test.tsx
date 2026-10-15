@@ -63,11 +63,9 @@ describe('ModeSwitchModal', () => {
       'Turning off advanced mode suspends custom boost rules and profiles, and default rules go back to the profiles chosen in simple mode.'
     );
     expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
-      'Nothing is deleted, and turning advanced mode back on restores them.'
+      'No boost rules or profiles will be deleted. Returning to advanced mode will restore them.'
     );
-    expect(
-      screen.getByText('2 indices and 1 data stream change boost profile')
-    ).toBeInTheDocument();
+    expect(screen.getByText('3 boost profiles will change')).toBeInTheDocument();
   });
 
   it('explains what turning on advanced mode restores', () => {
@@ -82,9 +80,7 @@ describe('ModeSwitchModal', () => {
   it('lists each index and data stream with its current and new profile', () => {
     renderModal();
 
-    const table = screen.getByRole('table', {
-      name: '2 indices and 1 data stream change boost profile',
-    });
+    const table = screen.getByRole('table', { name: '3 boost profiles will change' });
     const [, ...rows] = within(table).getAllByRole('row');
     expect(
       rows.map((row) =>

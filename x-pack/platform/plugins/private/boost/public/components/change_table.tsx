@@ -69,12 +69,11 @@ export const ChangeTable = ({ columns, rows, maxHeight, ...labelProps }: ChangeT
           role="row"
           gutterSize="s"
           responsive={false}
+          // Rows that scroll start below the area's padding, which takes the place of the
+          // headers' bottom padding.
           css={
             isScrollable
-              ? {
-                  padding: euiTheme.size.s,
-                  borderBlockEnd: euiTheme.border.thin,
-                }
+              ? { padding: `${euiTheme.size.s} ${euiTheme.size.s} 0` }
               : { paddingBlockEnd: euiTheme.size.xs }
           }
         >

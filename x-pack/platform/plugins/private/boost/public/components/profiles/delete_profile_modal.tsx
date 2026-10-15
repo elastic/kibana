@@ -20,6 +20,7 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
 import { formatDataSourceCount } from '../format';
 import { ChangeTable } from '../change_table';
+import { MODAL_WIDTH } from '../modal_width';
 import { RuleChangeList } from '../rule_change_list';
 
 interface DeleteProfileModalProps {
@@ -142,8 +143,7 @@ export const DeleteProfileModal = ({
       }
       buttonColor="danger"
       isLoading={isDeleting}
-      // Wide enough for three columns beside the rule list's indent, so default rule names fit.
-      maxWidth={640}
+      maxWidth={MODAL_WIDTH}
       data-test-subj="deleteBoostProfileModal"
     >
       {deletedRules.length === 0 ? (

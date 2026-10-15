@@ -65,7 +65,12 @@ describe('DeleteProfileModal', () => {
     );
 
     const catalogs = within(screen.getByTestId('deletedRule-catalogs'));
-    await userEvent.click(catalogs.getByRole('button', { name: /catalogs/ }));
+    const toggle = catalogs.getByRole('button', { name: /catalogs/ });
+    // The chevron at the row's end points down until the rule opens, then up.
+    const getChevron = () => toggle.querySelector('[data-euiicon-type^="chevronSingle"]');
+    expect(getChevron()).toHaveAttribute('data-euiicon-type', 'chevronSingleDown');
+    await userEvent.click(toggle);
+    expect(getChevron()).toHaveAttribute('data-euiicon-type', 'chevronSingleUp');
 
     const [header, ...rows] = within(catalogs.getByRole('table')).getAllByRole('row');
     expect(header).toHaveTextContent('Affected indexNew ruleNew profile');

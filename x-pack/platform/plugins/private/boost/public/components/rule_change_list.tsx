@@ -10,6 +10,9 @@ import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiHorizontalRule,
   EuiNotificationBadge,
   EuiPanel,
@@ -76,34 +79,49 @@ export const RuleChangeList = ({ titleId, items }: RuleChangeListProps) => {
                     id={`${accordionIdPrefix}-${name}`}
                     forceState={openRuleName === name ? 'open' : 'closed'}
                     onToggle={(isOpen) => setOpenRuleName(isOpen ? name : undefined)}
-                    buttonContent={<EuiText size="s">{label}</EuiText>}
-                    buttonProps={{ paddingSize: 's' }}
-                    extraAction={
-                      count && <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge>
+                    // The whole row opens the rule, with its count and a chevron at the end. EUI's
+                    // own arrow only points right or down, so the chevron is drawn here instead.
+                    arrowDisplay="none"
+                    buttonContent={
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem>
+                          <EuiText size="s">{label}</EuiText>
+                        </EuiFlexItem>
+                        {count && (
+                          <EuiFlexItem grow={false}>
+                            {/* An inline block keeps the row's hover and focus underline off the
+                                badge. */}
+                            <span css={{ display: 'inline-block' }}>
+                              <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge>
+                            </span>
+                          </EuiFlexItem>
+                        )}
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            type={openRuleName === name ? 'chevronSingleUp' : 'chevronSingleDown'}
+                            aria-hidden={true}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     }
+                    // The content fills the row, so the count and chevron sit at its end.
+                    buttonContentClassName="eui-fullWidth"
+                    buttonProps={{ paddingSize: 's' }}
                     css={{ paddingInline: euiTheme.size.s }}
                     data-test-subj={dataTestSubj}
                   >
-                    {/* Indented by the accordion arrow's width and gap, so the content lines up
-                        with the rule name above it. */}
-                    <div
-                      css={{
-                        paddingBlock: euiTheme.size.s,
-                        paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                      }}
-                    >
+                    {/* Lines up with the rule name above it. */}
+                    <div css={{ padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}` }}>
                       {details}
                     </div>
                   </EuiAccordion>
                 ) : (
-                  // Matches an accordion's padding, line height, and chevron indent, so rule names
-                  // line up whether or not the rule opens.
+                  // Matches an accordion's padding and line height, so rule names line up whether
+                  // or not the rule opens.
                   <EuiText
                     size="s"
                     css={{
-                      paddingBlock: euiTheme.size.s,
-                      paddingInlineStart: `calc(${euiTheme.size.s} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                      paddingInlineEnd: euiTheme.size.s,
+                      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
                       lineHeight: euiTheme.size.l,
                     }}
                     data-test-subj={dataTestSubj}

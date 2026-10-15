@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import type { ModeSwitchChange } from '../../../common/mode_switch';
 import type { BoostMode } from '../../../common/types';
 import { ChangeTable } from '../change_table';
-import { formatDataSourceCounts } from '../format';
+import { MODAL_WIDTH } from '../modal_width';
 
 interface ModeSwitchModalProps {
   /** The mode being switched to. */
@@ -59,7 +59,7 @@ const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: b
       cause,
       i18n.translate('xpack.boost.modeSwitchModal.suspendEffect', {
         defaultMessage:
-          'The indices and data streams below change boost profile. Nothing is deleted, and turning advanced mode back on restores them.',
+          'The indices and data streams below change boost profile. No boost rules or profiles will be deleted. Returning to advanced mode will restore them.',
       }),
     ].join(' ');
   }
@@ -104,7 +104,7 @@ export const ModeSwitchModal = ({
     <EuiModal
       aria-labelledby={titleId}
       onClose={onCancel}
-      maxWidth={576}
+      maxWidth={MODAL_WIDTH}
       data-test-subj="boostModeSwitchModal"
     >
       <EuiModalHeader>
@@ -132,13 +132,9 @@ export const ModeSwitchModal = ({
         <EuiSpacer size="l" />
         <EuiFormLabel id={listTitleId}>
           {i18n.translate('xpack.boost.modeSwitchModal.changesListTitle', {
-            defaultMessage: '{targets} change boost profile',
-            values: {
-              targets: formatDataSourceCounts(
-                changes.filter(({ type }) => type === 'indices').length,
-                changes.filter(({ type }) => type === 'data_streams').length
-              ),
-            },
+            defaultMessage:
+              '{count, plural, one {# boost profile will change} other {# boost profiles will change}}',
+            values: { count: changes.length },
           })}
         </EuiFormLabel>
         <EuiSpacer size="xs" />
