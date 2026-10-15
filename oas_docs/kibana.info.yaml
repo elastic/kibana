@@ -8,7 +8,7 @@ info:
     request.
     API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - PATCH: Applies partial modifications to the existing information.
