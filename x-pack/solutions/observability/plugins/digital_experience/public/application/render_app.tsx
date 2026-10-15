@@ -10,7 +10,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { digitalExperienceRouter } from '../routes';
@@ -34,7 +33,7 @@ export const renderApp = ({
   const { PageTemplate } = pluginsStart.observabilityShared.navigation;
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
         <RouterProvider history={history} router={router}>
           <div className={APP_WRAPPER_CLASS} data-test-subj="digitalExperienceMainContainer">
@@ -44,7 +43,7 @@ export const renderApp = ({
           </div>
         </RouterProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

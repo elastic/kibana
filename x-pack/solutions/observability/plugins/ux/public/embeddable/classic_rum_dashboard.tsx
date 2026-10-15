@@ -10,7 +10,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { EuiPageSection } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
@@ -47,32 +46,30 @@ export const createClassicRumDashboard =
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
     return (
-      <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={{ ...core, ...setupDeps, ...startDeps }}>
-          <PluginContext.Provider
-            value={{
-              exploratoryView,
-              observabilityShared,
-              spaceId: activeSpace?.id ?? 'default',
-              isDev,
-            }}
-          >
-            <RouterProvider history={history} router={uxRouter}>
-              <DatePickerContextProvider>
-                <InspectorContextProvider>
-                  <UrlParamsProvider>
-                    <CsmSharedContextProvider>
-                      <EuiPageSection paddingSize="m" restrictWidth={false}>
-                        <DashboardToolbar showWebApplicationSelect={false} />
-                        <RumOverview />
-                      </EuiPageSection>
-                    </CsmSharedContextProvider>
-                  </UrlParamsProvider>
-                </InspectorContextProvider>
-              </DatePickerContextProvider>
-            </RouterProvider>
-          </PluginContext.Provider>
-        </KibanaContextProvider>
-      </KibanaRenderContextProvider>
+      <KibanaContextProvider services={{ ...core, ...setupDeps, ...startDeps }}>
+        <PluginContext.Provider
+          value={{
+            exploratoryView,
+            observabilityShared,
+            spaceId: activeSpace?.id ?? 'default',
+            isDev,
+          }}
+        >
+          <RouterProvider history={history} router={uxRouter}>
+            <DatePickerContextProvider>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <CsmSharedContextProvider>
+                    <EuiPageSection paddingSize="m" restrictWidth={false}>
+                      <DashboardToolbar showWebApplicationSelect={false} />
+                      <RumOverview />
+                    </EuiPageSection>
+                  </CsmSharedContextProvider>
+                </UrlParamsProvider>
+              </InspectorContextProvider>
+            </DatePickerContextProvider>
+          </RouterProvider>
+        </PluginContext.Provider>
+      </KibanaContextProvider>
     );
   };
