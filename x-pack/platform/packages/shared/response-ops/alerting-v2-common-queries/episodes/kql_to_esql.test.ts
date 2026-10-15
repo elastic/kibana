@@ -17,6 +17,10 @@ describe('convertKqlToEsqlExpression', () => {
     ['data.host.name: web-*', 'JSON_EXTRACT(episode_data, "host.name") LIKE "web-*"'],
     ['data.enabled: true', 'JSON_EXTRACT(episode_data, "enabled") == "true"'],
     ['data.enabled: false', 'JSON_EXTRACT(episode_data, "enabled") == "false"'],
+    ['*', 'true'],
+    ['*:*', 'true'],
+    ['*: *', 'true'],
+    ['duration: 5000', 'duration == 5000'],
     ['duration >= 5000', 'duration >= 5000'],
   ])('converts %s', (kql, expected) => {
     expect(convertKqlToEsqlExpression(kql)).toBe(expected);
@@ -54,6 +58,12 @@ describe('convertKqlToEsqlExpression', () => {
   it('keeps the boolean structure when a predicate only applies to classic alerts', () => {
     expect(convertKqlToEsqlExpression('alert.status: active OR kibana.alert.status: active')).toBe(
       '(`episode.status` == "active" OR false)'
+    );
+  });
+
+  it('preserves match-all expressions in boolean queries', () => {
+    expect(convertKqlToEsqlExpression('* AND severity: critical')).toBe(
+      '(true AND severity == "critical")'
     );
   });
 });

@@ -73,7 +73,7 @@ const getValueExpression = (value: string | number | boolean | null): string => 
   return String(value);
 };
 
-const getRangeValueExpression = (field: string, node: KueryNode): string => {
+const getFieldValueExpression = (field: string, node: KueryNode): string => {
   const value = getLiteralValue(node);
   if (
     field === 'duration' &&
@@ -108,11 +108,20 @@ const convertNode = (node: KueryNode): string => {
       return field ? `${field} IS NOT NULL` : 'false';
     }
     case 'is': {
-      const field = getFieldExpression(firstArgument as KueryNode);
+      const fieldNode = firstArgument as KueryNode;
+      const valueNode = secondArgument as KueryNode;
+      if (
+        nodeTypes.wildcard.isNode(valueNode) &&
+        nodeTypes.wildcard.isLoneWildcard(valueNode) &&
+        ((nodeTypes.literal.isNode(fieldNode) && fieldNode.value === null) ||
+          (nodeTypes.wildcard.isNode(fieldNode) && nodeTypes.wildcard.isLoneWildcard(fieldNode)))
+      ) {
+        return 'true';
+      }
+      const field = getFieldExpression(fieldNode);
       if (!field) {
         return 'false';
       }
-      const valueNode = secondArgument as KueryNode;
       if (nodeTypes.wildcard.isNode(valueNode)) {
         if (nodeTypes.wildcard.isLoneWildcard(valueNode)) {
           return `${field} IS NOT NULL`;
@@ -121,11 +130,13 @@ const convertNode = (node: KueryNode): string => {
         return `${field} LIKE ${escapeStringValue(pattern)}`;
       }
       const value = getLiteralValue(valueNode);
-      const fieldName = getLiteralValue(firstArgument as KueryNode);
+      const fieldName = getLiteralValue(fieldNode);
       if (typeof value === 'boolean' && String(fieldName).startsWith(DATA_FIELD_PREFIX)) {
         return `${field} == ${escapeStringValue(String(value))}`;
       }
-      return value === null ? `${field} IS NULL` : `${field} == ${getValueExpression(value)}`;
+      return value === null
+        ? `${field} IS NULL`
+        : `${field} == ${getFieldValueExpression(String(fieldName), valueNode)}`;
     }
     case 'range': {
       const field = getFieldExpression(firstArgument as KueryNode);
@@ -138,7 +149,7 @@ const convertNode = (node: KueryNode): string => {
       if (!esqlOperator) {
         return unsupported(`range operator ${operator}`);
       }
-      return `${field} ${esqlOperator} ${getRangeValueExpression(
+      return `${field} ${esqlOperator} ${getFieldValueExpression(
         String(fieldName),
         thirdArgument as KueryNode
       )}`;
