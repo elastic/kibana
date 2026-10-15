@@ -40,7 +40,7 @@ function getColors(props) {
 }
 
 function GaugeVisualization(props) {
-  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig, isInteractive } = props;
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
@@ -55,7 +55,9 @@ function GaugeVisualization(props) {
             ? createReactFieldFormatter(
                 getMetricsField(seriesDef.metrics),
                 fieldFormatMap,
-                hasTextColorRules
+                hasTextColorRules,
+                undefined,
+                isInteractive
               )
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
@@ -91,6 +93,7 @@ function GaugeVisualization(props) {
 }
 
 GaugeVisualization.propTypes = {
+  isInteractive: PropTypes.bool,
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
   additionalLabel: PropTypes.string,

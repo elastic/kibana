@@ -1343,6 +1343,12 @@ describe('HITL external channel schemas', () => {
       channels: ['C0123'],
       message: 'slack2 note',
     },
+    teams: {
+      'connector-id': 'teams-1',
+      'team-id': 'team-1',
+      'channel-id': 'channel-1',
+      message: 'teams note',
+    },
     servicenow: {
       'connector-id': 'snow-1',
       table: 'incident',
@@ -1383,6 +1389,7 @@ describe('HITL external channel schemas', () => {
       slack_api: ['connector-id', 'channels', 'message'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
+      teams: ['connector-id', 'team-id', 'channel-id', 'message'],
       servicenow: ['connector-id', 'table', 'sys-id', 'message'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
@@ -1401,6 +1408,7 @@ describe('HITL external channel schemas', () => {
       slack_api: ['connector-id', 'channels'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
       slack2: ['connector-id', 'channels'],
+      teams: ['connector-id', 'team-id', 'channel-id'],
       servicenow: ['connector-id', 'table', 'sys-id'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
