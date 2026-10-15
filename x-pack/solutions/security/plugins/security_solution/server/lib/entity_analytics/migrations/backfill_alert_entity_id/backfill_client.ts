@@ -6,9 +6,9 @@
  */
 
 import type {
-  BulkIndexByScrollFailure,
   QueryDslBoolQuery,
   QueryDslQueryContainer,
+  UpdateByQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
@@ -246,6 +246,31 @@ export const startBackfill = async ({
   return typeof response.task === 'string' ? response.task : undefined;
 };
 
+/**
+ * Asks Elasticsearch to stop a running update-by-query.
+ */
+export const cancelBackfill = async ({
+  esClient,
+  logger,
+  esTaskId,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  esTaskId: string;
+  signal: AbortSignal;
+}): Promise<void> => {
+  try {
+    await esClient.tasks.cancel({ task_id: esTaskId }, { signal });
+  } catch (e) {
+    // Already finished, already cancelled, or the node running it is gone. Nothing left to stop.
+    if (e?.meta?.statusCode === 404) {
+      return;
+    }
+    logger.warn(`Could not cancel update-by-query task "${esTaskId}": ${e.message}`);
+  }
+};
+
 export interface BackfillProgress {
   completed: boolean;
   updated: number;
@@ -260,6 +285,25 @@ export interface BackfillProgress {
   /** True when the task id no longer resolves, so the request has to be started again. */
   vanished: boolean;
   failures: string[];
+}
+
+/**
+ * The counters a running update-by-query reports.
+ * Elasticsearch keeps this status live as batches complete, then builds the response from the final one.
+ */
+type UpdateByQueryTaskStatus = Pick<
+  UpdateByQueryResponse,
+  'total' | 'updated' | 'version_conflicts'
+>;
+
+export class BackfillRequestFailedError extends Error {
+  // Alerts the request stamped before it failed.
+  public readonly updated: number;
+
+  constructor(message: string, updated: number) {
+    super(message);
+    this.updated = updated;
+  }
 }
 
 /**
@@ -286,17 +330,30 @@ export const pollBackfill = async ({
       { logger }
     );
 
-    const status = task.task?.status as
-      | { total?: number; updated?: number; version_conflicts?: number }
-      | undefined;
-    const response = task.response as { failures?: BulkIndexByScrollFailure[] } | undefined;
+    const status = task.task?.status as UpdateByQueryTaskStatus | undefined;
+    // The id always comes from `startBackfill`, and the Tasks API stores the operation's own
+    // response — here the update-by-query's — under `response`
+    const response = task.response as UpdateByQueryResponse | undefined;
+    // Preferred from the response because that shape is documented. There is
+    // no response until the request finishes, so a running one is read from its live status.
+    const counts = response ?? status;
+
+    if (task.error) {
+      throw new BackfillRequestFailedError(
+        `task "${esTaskId}" returned error: ${task.error.type} - ${
+          task.error.reason ?? 'no reason given'
+        }`,
+        counts?.updated ?? 0
+      );
+    }
+
     const failures = (response?.failures ?? []).map((failure) => JSON.stringify(failure));
 
     return {
       completed: task.completed === true,
-      updated: status?.updated ?? 0,
-      total: status?.total ?? 0,
-      versionConflicts: status?.version_conflicts ?? 0,
+      updated: counts?.updated ?? 0,
+      total: counts?.total ?? 0,
+      versionConflicts: counts?.version_conflicts ?? 0,
       vanished: false,
       failures,
     };

@@ -11,6 +11,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { runBackfillTask } from '.';
 import {
+  BackfillRequestFailedError,
+  cancelBackfill,
   countPendingAlerts,
   pollBackfill,
   resolveTargetIndices,
@@ -23,14 +25,24 @@ import {
   MAX_CONFLICT_REISSUES,
   MAX_DOCS_PER_REQUEST,
   MAX_CONSECUTIVE_SPACE_FAILURES,
+  MAX_RUNS,
   MIN_RUN_INTERVAL_MS,
   RUN_INTERVAL_MS,
 } from './constants';
 
-jest.mock('./backfill_client');
+// Everything is automocked except the error class, which is kept real so a thrown instance behaves
+// like one: carrying its message, and satisfying the `instanceof` check the task uses to tell a
+// request Elasticsearch failed from any other failure.
+jest.mock('./backfill_client', () => ({
+  ...jest.createMockFromModule<typeof import('./backfill_client')>('./backfill_client'),
+  BackfillRequestFailedError:
+    jest.requireActual<typeof import('./backfill_client')>('./backfill_client')
+      .BackfillRequestFailedError,
+}));
 
 const startBackfillMock = startBackfill as jest.MockedFunction<typeof startBackfill>;
 const pollBackfillMock = pollBackfill as jest.MockedFunction<typeof pollBackfill>;
+const cancelBackfillMock = cancelBackfill as jest.MockedFunction<typeof cancelBackfill>;
 const resolveTargetIndicesMock = resolveTargetIndices as jest.MockedFunction<
   typeof resolveTargetIndices
 >;
@@ -77,10 +89,10 @@ const createEntityStore = (spaces: SpaceFixture[]) =>
     ]),
   } as unknown as EntityStoreStartContract);
 
-const runTask = (spaces: SpaceFixture[], state = defaultState) =>
+const runTask = (spaces: SpaceFixture[], state = defaultState, logger = loggerMock.create()) =>
   runBackfillTask({
     coreStart: createCoreStart(spaces),
-    logger: loggerMock.create(),
+    logger,
     entityStore: createEntityStore(spaces),
     enabled: true,
     state,
@@ -193,6 +205,44 @@ describe('runBackfillTask', () => {
     );
     expect(startBackfillMock).not.toHaveBeenCalled();
     expect(stateOf(result).spaces.default).toMatchObject({ esTaskId: 'node:123', stamped: 0 });
+  });
+
+  it('reports the space being backfilled as in progress rather than remaining', async () => {
+    const logger = loggerMock.create();
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 1,
+    };
+
+    await runTask([{ spaceId: 'default' }], state, logger);
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'Task "security-solution-ea-backfill-alert-entity-id" run 2 finished. Backfill in progress for space "default".'
+    );
+  });
+
+  it('counts only spaces that have not started', async () => {
+    const logger = loggerMock.create();
+    const state = {
+      spaces: {
+        a: { esTaskId: 'node:123', done: false, failures: 0, conflictReissues: 0, stamped: 0 },
+      },
+      runs: 1,
+    };
+
+    await runTask([{ spaceId: 'a' }, { spaceId: 'b' }], state, logger);
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'Task "security-solution-ea-backfill-alert-entity-id" run 2 finished. Backfill in progress for space "a". Remaining spaces: 1.'
+    );
   });
 
   it('starts the next space in the same run as one finishing', async () => {
@@ -336,6 +386,88 @@ describe('runBackfillTask', () => {
     expect(stateOf(result).spaces.default).toMatchObject({ esTaskId: undefined, done: false });
   });
 
+  it('reissues a request Elasticsearch failed rather than re-reading its spent task id', async () => {
+    const updatedBeforeFailing = 4200;
+    const stampedOnPriorRun = 1_000;
+    pollBackfillMock.mockRejectedValue(
+      new BackfillRequestFailedError('script_exception', updatedBeforeFailing)
+    );
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: stampedOnPriorRun,
+        },
+      },
+      runs: 1,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({
+      esTaskId: undefined,
+      failures: 1,
+      done: false,
+      stamped: stampedOnPriorRun + updatedBeforeFailing,
+    });
+  });
+
+  it('counts a request that aborted on a document failure as a failed pass', async () => {
+    const updatedBeforeFailing = 3;
+    pollBackfillMock.mockResolvedValue({
+      completed: true,
+      updated: updatedBeforeFailing,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      failures: ['{"index":"alerts-000003","cause":{"type":"document_parsing_exception"}}'],
+    });
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 1,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({
+      esTaskId: undefined,
+      failures: 1,
+      done: false,
+      stamped: updatedBeforeFailing,
+    });
+  });
+
+  it('keeps the task id when the failure was not the request failing', async () => {
+    pollBackfillMock.mockRejectedValue(new Error('connection reset'));
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 1,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({ esTaskId: 'node:123', failures: 1 });
+  });
+
   it('completes a space that has no alert indices yet', async () => {
     // A risk engine can be enabled before any rule has run in that space.
     resolveTargetIndicesMock.mockResolvedValue({ usable: new Set<string>(), unusable: 0 });
@@ -375,6 +507,36 @@ describe('runBackfillTask', () => {
     await expect(runTask([{ spaceId: 'default' }], state)).resolves.toMatchObject({
       shouldDeleteTask: true,
     });
+  });
+
+  it('gives the failure budget back once a poll succeeds', async () => {
+    // The limit is consecutive failures. A long backfill is a long run of in-progress polls, so
+    // without this a space one blip away from the limit stays there for hours, and unrelated
+    // errors far apart add up until it is abandoned while still making progress.
+    pollBackfillMock.mockResolvedValue({
+      completed: false,
+      updated: 4200,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      failures: [],
+    });
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: MAX_CONSECUTIVE_SPACE_FAILURES - 1,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 5,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({ failures: 0, done: false });
   });
 
   it('ignores a space where Entity Analytics was never set up', async () => {
@@ -600,6 +762,64 @@ describe('runBackfillTask', () => {
 
     expect(result).toMatchObject({ shouldDeleteTask: true });
     expect(startBackfillMock).not.toHaveBeenCalled();
+  });
+
+  it('stops the request still running when the kill switch is set', async () => {
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 3,
+    };
+
+    await runBackfillTask({
+      coreStart: createCoreStart([{ spaceId: 'default' }]),
+      logger: loggerMock.create(),
+      entityStore: createEntityStore([{ spaceId: 'default' }]),
+      enabled: false,
+      state,
+      signal: new AbortController().signal,
+    });
+
+    expect(cancelBackfillMock).toHaveBeenCalledWith(
+      expect.objectContaining({ esTaskId: 'node:123' })
+    );
+  });
+
+  it('stops the request still running when it gives up at the run limit', async () => {
+    pollBackfillMock.mockResolvedValue({
+      completed: false,
+      updated: 10,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      failures: [],
+    });
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: MAX_RUNS - 1,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(result).toMatchObject({ shouldDeleteTask: true });
+    expect(cancelBackfillMock).toHaveBeenCalledWith(
+      expect.objectContaining({ esTaskId: 'node:123' })
+    );
   });
 
   describe('the completion event', () => {

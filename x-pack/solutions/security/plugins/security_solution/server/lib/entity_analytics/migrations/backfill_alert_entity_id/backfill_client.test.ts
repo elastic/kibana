@@ -9,7 +9,9 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import {
+  BackfillRequestFailedError,
   buildBackfillQuery,
+  cancelBackfill,
   pollBackfill,
   resolveTargetIndices,
   startBackfill,
@@ -204,6 +206,41 @@ describe('startBackfill', () => {
   });
 });
 
+describe('cancelBackfill', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
+
+  const cancel = () => cancelBackfill({ esClient, logger, esTaskId: 'node:123', signal: SIGNAL });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('asks Elasticsearch to stop the request', async () => {
+    await cancel();
+
+    expect(esClient.tasks.cancel).toHaveBeenCalledWith(
+      { task_id: 'node:123' },
+      expect.objectContaining({ signal: SIGNAL })
+    );
+  });
+
+  it('does not throw when the request could not be stopped', async () => {
+    esClient.tasks.cancel.mockRejectedValue(new Error('node left the cluster'));
+
+    await expect(cancel()).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('says nothing when the task has already gone', async () => {
+    esClient.tasks.cancel.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await expect(cancel()).resolves.toBeUndefined();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
+
 describe('pollBackfill', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   const logger = loggerMock.create();
@@ -257,6 +294,18 @@ describe('pollBackfill', () => {
     esClient.tasks.get.mockRejectedValue({ meta: { statusCode: 404 } });
 
     await expect(poll()).resolves.toMatchObject({ vanished: true, completed: false });
+  });
+
+  it('throws when Elasticsearch failed the request rather than finishing it', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 4200, total: 10_000 } },
+      error: { type: 'script_exception', reason: 'compile error' },
+    } as never);
+
+    await expect(poll()).rejects.toThrow(BackfillRequestFailedError);
+    await expect(poll()).rejects.toThrow('script_exception - compile error');
+    await expect(poll()).rejects.toMatchObject({ updated: 4200 });
   });
 
   it('reports alerts another writer held', async () => {

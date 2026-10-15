@@ -76,6 +76,24 @@ export const createTestIndices = async (esClient: EsClient) => {
   });
 };
 
+/**
+ * An index that maps the field, but as a `long`, so every write to it fails.
+ */
+export const createWrongTypeIndex = async (esClient: EsClient) => {
+  await esClient.indices.create({
+    index: WRONG_TYPE_INDEX,
+    mappings: {
+      dynamic: false,
+      properties: {
+        '@timestamp': TEST_INDEX_PROPERTIES['@timestamp'],
+        'host.name': TEST_INDEX_PROPERTIES['host.name'],
+        [ALERT_ENTITY_ID]: { type: 'long' },
+      },
+    },
+    aliases: { [ALIAS]: {} },
+  });
+};
+
 export const deleteTestIndices = async (esClient: EsClient) => {
   // Named rather than a wildcard: clusters run with `action.destructive_requires_name`.
   // `ignore_unavailable` because only some tests create the wrong-type index, and without it one

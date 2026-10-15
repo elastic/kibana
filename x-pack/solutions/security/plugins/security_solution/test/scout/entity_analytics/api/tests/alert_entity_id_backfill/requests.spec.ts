@@ -26,11 +26,11 @@ import {
   BACKFILL_TAGS,
   MAPPED_INDEX,
   SIGNAL,
-  TEST_INDEX_PROPERTIES,
   WINDOW,
   WRONG_TYPE_INDEX,
   asKibanaLogger,
   createTestIndices,
+  createWrongTypeIndex,
   deleteTestIndices,
   pollUntilComplete,
   readBackfillProgress,
@@ -92,17 +92,20 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
       const logger = asKibanaLogger(log);
       await seedHosts(esClient, MAPPED_INDEX, NUM_DOCS);
 
-      const progress = await pollUntilComplete(
-        esClient,
-        logger,
-        await start(esClient, logger, CAP)
-      );
+      const esTaskId = await start(esClient, logger, CAP);
+      const progress = await pollUntilComplete(esClient, logger, esTaskId);
 
       expect(progress.completed).toBe(true);
       expect(progress.total).toBe(NUM_DOCS);
       expect(progress.updated).toBe(NUM_DOCS);
       expect(progress.failures).toStrictEqual([]);
       expect(progress.versionConflicts).toBe(0);
+
+      const { task } = await esClient.tasks.get({ task_id: esTaskId, wait_for_completion: false });
+      const statusKeys = Object.keys(task.status as Record<string, unknown>);
+      expect(statusKeys).toContain('total');
+      expect(statusKeys).toContain('updated');
+      expect(statusKeys).toContain('version_conflicts');
     }
   );
 
@@ -145,28 +148,21 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
   });
 
   apiTest('surfaces per-document failures the request reported', async ({ esClient, log }) => {
-    // An index that has the field but with the wrong type. It passes the mapping check, so the
-    // request targets it, and then every write fails
     const logger = asKibanaLogger(log);
-    await esClient.indices.create({
-      index: WRONG_TYPE_INDEX,
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': TEST_INDEX_PROPERTIES['@timestamp'],
-          'host.name': TEST_INDEX_PROPERTIES['host.name'],
-          [ALERT_ENTITY_ID]: { type: 'long' },
-        },
-      },
-      aliases: { [ALIAS]: {} },
-    });
+    await createWrongTypeIndex(esClient);
     await seedHosts(esClient, WRONG_TYPE_INDEX, 3);
 
-    const progress = await pollUntilComplete(
+    const esTaskId = await startBackfill({
       esClient,
       logger,
-      await start(esClient, logger, 1_000)
-    );
+      alertsIndex: ALIAS,
+      query: buildBackfillQuery(WINDOW, new Set([WRONG_TYPE_INDEX])),
+      alertsPerSecond: -1,
+      maxDocs: 1_000,
+      signal: SIGNAL,
+    });
+
+    const progress = await pollUntilComplete(esClient, logger, esTaskId as string);
 
     expect(progress.failures.length).toBeGreaterThan(0);
     // Asserting on what the logged entry has to tell an operator — which index and which field —

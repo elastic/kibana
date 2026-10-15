@@ -39,7 +39,9 @@ import {
 } from './constants';
 import type { BackfillProgress } from './backfill_client';
 import {
+  BackfillRequestFailedError,
   buildBackfillQuery,
+  cancelBackfill,
   countPendingAlerts,
   pollBackfill,
   resolveTargetIndices,
@@ -176,7 +178,7 @@ const advanceSpace = async ({
     if (vanished) {
       // Dropping the id reissues the request next run; alerts already stamped are excluded by the
       // query, so the reissued request picks up exactly what the lost one had not reached.
-      return { progress: { ...progress, window, esTaskId: undefined } };
+      return { progress: { ...progress, window, esTaskId: undefined, failures: 0 } };
     }
 
     if (!completed) {
@@ -184,16 +186,17 @@ const advanceSpace = async ({
       // its own count from zero, so folding an in-flight figure in would make the total regress.
       logger.debug(`Backfill in progress for space "${spaceId}": ${updated} alerts stamped.`);
       return {
-        progress: { ...progress, window },
+        progress: { ...progress, window, failures: 0 },
         nextPollMs: nextPollDelayMs(backfill),
       };
     }
 
     if (failures.length > 0) {
-      logger.warn(
-        `Update-by-query for space "${spaceId}" reported ${failures.length} failure(s): ${failures
+      throw new BackfillRequestFailedError(
+        `update-by-query reported ${failures.length} document failure(s): ${failures
           .slice(0, 3)
-          .join('; ')}`
+          .join('; ')}`,
+        updated
       );
     }
 
@@ -340,6 +343,30 @@ const advanceSpace = async ({
   return { progress: { ...progress, window, esTaskId, failures: 0 } };
 };
 
+/**
+ * Removes the task, stopping every update-by-query it has running first.
+ */
+const removeTask = async ({
+  esClient,
+  logger,
+  spaces,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  spaces: Record<string, SpaceProgress>;
+  signal: AbortSignal;
+}) => {
+  for (const [spaceId, { esTaskId }] of Object.entries(spaces)) {
+    if (esTaskId !== undefined) {
+      logger.info(`Cancelling the update-by-query still running for space "${spaceId}".`);
+      await cancelBackfill({ esClient, logger, esTaskId, signal });
+    }
+  }
+
+  return getDeleteTaskRunResult();
+};
+
 export const runBackfillTask = async ({
   coreStart,
   logger,
@@ -355,6 +382,8 @@ export const runBackfillTask = async ({
   state: LatestTaskStateSchema;
   signal: AbortSignal;
 }) => {
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
+
   // Read on every run, not only at scheduling: deleting the task document does not stop this for
   // good, because `ensureScheduled` recreates it on the next Kibana restart. This is the only way
   // to halt a backfill that is already under way and keep it halted.
@@ -362,10 +391,9 @@ export const runBackfillTask = async ({
     logger.info(
       `Task "${TASK_TYPE}" is disabled by configuration; removing the task. Alerts that were not stamped keep using the risk scoring fallback.`
     );
-    return getDeleteTaskRunResult();
+    return removeTask({ esClient, logger, spaces: state.spaces, signal });
   }
 
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
   const startedAt = Date.now();
 
   const configuredSpaces = await findSpacesRiskEngineConfig(coreStart, logger);
@@ -382,7 +410,7 @@ export const runBackfillTask = async ({
     logger.info(
       `Task "${TASK_TYPE}" found no spaces with a risk engine configuration; removing the task.`
     );
-    return getDeleteTaskRunResult();
+    return removeTask({ esClient, logger, spaces: state.spaces, signal });
   }
 
   const pending: ConfiguredSpace[] = [];
@@ -463,7 +491,21 @@ export const runBackfillTask = async ({
         );
       }
 
-      spaces[spaceId] = { ...progress, window, failures, done: exhaustedRetries };
+      // When task polling returns an error, the task is done, so the task id is dropped so a new request can be started.
+      const esTaskId = e instanceof BackfillRequestFailedError ? undefined : progress.esTaskId;
+      // A request that failed part way still stamped what it got through, and those alerts stay
+      // stamped, so they are counted rather than lost to the throw.
+      const stamped =
+        e instanceof BackfillRequestFailedError ? progress.stamped + e.updated : progress.stamped;
+
+      spaces[spaceId] = {
+        ...progress,
+        window,
+        esTaskId,
+        failures,
+        stamped,
+        done: exhaustedRetries,
+      };
       break;
     }
   }
@@ -473,10 +515,7 @@ export const runBackfillTask = async ({
   const updatedState: LatestTaskStateSchema = { spaces, runs: state.runs + 1, firstRunAt };
   const remaining = progresses.filter(({ done }) => !done).length;
   const totalStamped = progresses.reduce((sum, { stamped }) => sum + stamped, 0);
-
-  logger.info(
-    `Task "${TASK_TYPE}" run ${updatedState.runs} finished. Alerts stamped so far: ${totalStamped}. Spaces remaining: ${remaining}.`
-  );
+  logTaskCompletion({ logger, taskRuns: updatedState.runs, spaces, progresses });
 
   const abandoned = progresses.filter(
     ({ failures }) => failures >= MAX_CONSECUTIVE_SPACE_FAILURES
@@ -501,7 +540,8 @@ export const runBackfillTask = async ({
         : `Task "${TASK_TYPE}" finished with ${abandoned} space(s) abandoned after repeated failures; removing the task.`
     );
     reportCompletion(false);
-    return getDeleteTaskRunResult();
+
+    return removeTask({ esClient, logger, spaces, signal });
   }
 
   if (updatedState.runs >= MAX_RUNS) {
@@ -509,7 +549,7 @@ export const runBackfillTask = async ({
       `Task "${TASK_TYPE}" reached the ${MAX_RUNS} run limit with ${remaining} space(s) unfinished; removing the task. Their alerts keep using the risk scoring fallback.`
     );
     reportCompletion(true);
-    return getDeleteTaskRunResult();
+    return removeTask({ esClient, logger, spaces, signal });
   }
 
   return {
@@ -615,4 +655,39 @@ export const scheduleAlertEntityIdBackfill = async ({
   } catch (e) {
     logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
   }
+};
+
+const logTaskCompletion = ({
+  logger,
+  taskRuns,
+  spaces,
+  progresses,
+}: {
+  logger: Logger;
+  taskRuns: number;
+  spaces: Record<string, SpaceProgress>;
+  progresses: SpaceProgress[];
+}) => {
+  const notStarted = progresses.filter(
+    ({ done, esTaskId, window }) => !done && esTaskId === undefined && window === undefined
+  ).length;
+  const inProgressIds = Object.entries(spaces)
+    .filter(
+      ([, { done, esTaskId, window }]) => !done && (esTaskId !== undefined || window !== undefined)
+    )
+    .map(([spaceId]) => spaceId);
+
+  let progressSummary = '';
+  if (inProgressIds.length > 0) {
+    progressSummary = ` Backfill in progress for ${
+      inProgressIds.length === 1
+        ? `space "${inProgressIds[0]}"`
+        : `spaces ${inProgressIds.map((spaceId) => `"${spaceId}"`).join(', ')}`
+    }.`;
+  }
+  if (notStarted > 0) {
+    progressSummary = `${progressSummary} Remaining spaces: ${notStarted}.`;
+  }
+
+  logger.info(`Task "${TASK_TYPE}" run ${taskRuns} finished.${progressSummary}`);
 };
