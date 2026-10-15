@@ -13,6 +13,10 @@
  * The timer callback, and anything it closes over, stays on the heap until the
  * timeout fires. clearTimeout, or withTimeout from @kbn/std, drops that graph
  * when the race settles. A race may still wait on abort or shutdown as well.
+ *
+ * This is a direct check. It looks at a `new Promise` written in the race, or
+ * an identifier assigned one earlier in the same function. It does not follow
+ * helpers, later reassignment, or which branch actually reaches the race.
  */
 
 const MESSAGE =
@@ -360,9 +364,6 @@ function bindingsOf(scope) {
       collectVarBindings(scope.body, names);
     }
   }
-  if (scope.type === 'Program') {
-    collectVarBindings(scope, names);
-  }
   if (scope.type === 'CatchClause' && scope.param) {
     collectPatternNames(scope.param, names);
   }
@@ -552,16 +553,7 @@ function promiseInitsByScope(scope) {
       versions = [];
       inits.set(identifier.name, versions);
     }
-    const home = scopeFunction(bindingScope);
-    const writeFn = enclosingScope(identifier);
-    const ordered = writeFn === home;
-    versions.push({
-      value: init,
-      at: nodeStart(identifier),
-      ordered,
-      fn: ordered ? null : writeFn,
-      anchor: identifier,
-    });
+    versions.push({ value: init, at: nodeStart(identifier) });
   }
 
   walk(
@@ -605,30 +597,6 @@ function nodeStart(node) {
 }
 
 /**
- * @param {any} node
- * @returns {number}
- */
-function nodeEnd(node) {
-  if (node && node.range) {
-    return node.range[1];
-  }
-  const end = node && node.loc && node.loc.end;
-  if (end) {
-    return end.line * 100000 + end.column;
-  }
-  return nodeStart(node);
-}
-
-/**
- * @param {any} node
- * @param {number} at
- * @returns {boolean}
- */
-function rangeContains(node, at) {
-  return Boolean(node) && nodeStart(node) <= at && at < nodeEnd(node);
-}
-
-/**
  * The value this identifier refers to at this point in the function.
  * A later assignment to the same binding is not visible yet.
  *
@@ -648,7 +616,7 @@ function lookupValue(identifier, valuesByScope) {
       /** @type {{ value: any, at: number } | undefined} */
       let chosen;
       for (const version of versions) {
-        if (version.at <= useAt && (!chosen || version.at >= chosen.at)) {
+        if (version.at <= useAt) {
           chosen = version;
         }
       }
@@ -668,660 +636,12 @@ function lookupValue(identifier, valuesByScope) {
 }
 
 /**
- * Function or program that owns bindings in `scope`.
- *
- * @param {any} scope
+ * @param {any} identifier
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} initsByScope
  * @returns {any}
  */
-function scopeFunction(scope) {
-  if (!scope || FUNCTION_TYPES.has(scope.type) || scope.type === 'Program') {
-    return scope;
-  }
-  const parent = enclosingScope(scope);
-  return parent && parent !== scope ? parent : scope;
-}
-
-/**
- * True when `node` might not run because a conditional or loop sits between it
- * and `stop`. The test of an `if` still runs.
- *
- * @param {any} node
- * @param {any} stop
- * @returns {boolean}
- */
-function isConditional(node, stop) {
-  let child = node;
-  let current = node && node.parent;
-  while (current && current !== stop) {
-    if (current.type === 'IfStatement' && child !== current.test) {
-      return true;
-    }
-    if (current.type === 'ConditionalExpression' && child !== current.test) {
-      return true;
-    }
-    if (current.type === 'LogicalExpression' && child === current.right) {
-      return true;
-    }
-    if (
-      (current.type === 'WhileStatement' ||
-        current.type === 'DoWhileStatement' ||
-        current.type === 'ForStatement') &&
-      child !== current.test &&
-      child !== current.init
-    ) {
-      return true;
-    }
-    if (
-      (current.type === 'ForInStatement' || current.type === 'ForOfStatement') &&
-      child !== current.right &&
-      child !== current.left
-    ) {
-      return true;
-    }
-    if (current.type === 'SwitchStatement' && child !== current.discriminant) {
-      return true;
-    }
-    if (current.type === 'CatchClause') {
-      return true;
-    }
-    if (FUNCTION_TYPES.has(current.type)) {
-      break;
-    }
-    child = current;
-    current = current.parent;
-  }
-  return false;
-}
-
-/**
- * Source offset of the first await or yield in `fn`, ignoring nested functions.
- *
- * @param {any} fn
- * @returns {number}
- */
-function firstSuspensionAt(fn) {
-  let at = Infinity;
-  const root = fn && (fn.body || fn);
-  if (!root || FUNCTION_TYPES.has(root.type)) {
-    return at;
-  }
-
-  /**
-   * @param {any} node
-   */
-  function visit(node) {
-    if (node.type === 'AwaitExpression' || node.type === 'YieldExpression') {
-      at = Math.min(at, nodeStart(node));
-    }
-    for (const child of childNodes(node)) {
-      if (FUNCTION_TYPES.has(child.type)) {
-        continue;
-      }
-      visit(child);
-    }
-  }
-
-  visit(root);
-  return at;
-}
-
-/**
- * Direct calls in `fn` before `beforeAt`. Nested functions are separate.
- *
- * @param {any} fn
- * @param {number} beforeAt
- * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
- * @returns {Array<{ at: number, node: any, fn: any, conditional: boolean, awaited: boolean }>}
- */
-function callsIn(fn, beforeAt, functions) {
-  /** @type {Array<{ at: number, node: any, fn: any, conditional: boolean, awaited: boolean }>} */
-  const calls = [];
-  const root = fn && fn.type === 'Program' ? fn : fn && fn.body;
-  if (!root || FUNCTION_TYPES.has(root.type)) {
-    return calls;
-  }
-
-  /**
-   * @param {any} node
-   */
-  function visit(node) {
-    if (
-      node.type === 'CallExpression' &&
-      node.callee &&
-      node.callee.type === 'Identifier' &&
-      nodeStart(node) < beforeAt
-    ) {
-      const target = lookupValue(node.callee, functions);
-      if (target && FUNCTION_TYPES.has(target.type)) {
-        calls.push({
-          at: nodeStart(node),
-          node,
-          fn: target,
-          conditional: isConditional(node, fn),
-          awaited: isAwaitedCall(node),
-        });
-      }
-    }
-    for (const child of childNodes(node)) {
-      if (FUNCTION_TYPES.has(child.type)) {
-        continue;
-      }
-      visit(child);
-    }
-  }
-
-  visit(root);
-  return calls;
-}
-
-/**
- * `await arm()` has finished arm's later assignments. `arm()` has not.
- *
- * @param {any} node
- * @returns {boolean}
- */
-function isAwaitedCall(node) {
-  let current = node && node.parent;
-  while (current && UNWRAP_TYPES.has(current.type)) {
-    if (current.type === 'AwaitExpression') {
-      return true;
-    }
-    current = current.parent;
-  }
-  return false;
-}
-
-/**
- * Promises a run of `fn` may assign. A fire-and-forget call only sees writes
- * before the first await. An awaited call sees writes after that await too.
- * Conditional writes and calls keep the previous value.
- *
- * @param {any} fn
- * @param {Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>} versions
- * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
- * @param {Set<any>} seen
- * @param {boolean} includeDeferred
- * @returns {{ values: any[], definite: boolean }}
- */
-function syncInstalls(fn, versions, functions, seen, includeDeferred) {
-  if (!fn || seen.has(fn)) {
-    return { values: [], definite: false };
-  }
-  seen.add(fn);
-
-  const suspendAt = includeDeferred ? Infinity : firstSuspensionAt(fn);
-  /** @type {Array<{ at: number, kind: 'write' | 'call', value?: any, fn?: any, conditional: boolean }>} */
-  const events = [];
-  for (const version of versions) {
-    if (!version.ordered && version.fn === fn && version.at < suspendAt) {
-      events.push({
-        at: version.at,
-        kind: 'write',
-        value: version.value,
-        conditional: isConditional(version.anchor, fn),
-      });
-    }
-  }
-  for (const call of callsIn(fn, suspendAt, functions)) {
-    events.push({
-      at: call.at,
-      kind: 'call',
-      fn: call.fn,
-      conditional: call.conditional,
-      awaited: call.awaited,
-    });
-  }
-  events.sort((left, right) => left.at - right.at);
-
-  /** @type {any[]} */
-  let possible = [];
-  let definite = false;
-  for (const event of events) {
-    if (event.kind === 'write') {
-      if (event.conditional) {
-        possible = possible.concat(event.value);
-      } else {
-        possible = [event.value];
-        definite = true;
-      }
-      continue;
-    }
-    const inner = syncInstalls(event.fn, versions, functions, seen, Boolean(event.awaited));
-    if (!inner.values.length) {
-      continue;
-    }
-    if (event.conditional || !inner.definite) {
-      possible = possible.concat(inner.values);
-    } else {
-      possible = inner.values.slice();
-      definite = true;
-    }
-  }
-  return { values: possible, definite };
-}
-
-/**
- * If statements in `home` that have an else and start at or before `useAt`.
- *
- * @param {any} home
- * @param {number} useAt
- * @returns {any[]}
- */
-function ifStatementsBefore(home, useAt) {
-  /** @type {any[]} */
-  const found = [];
-  const root = home && home.type === 'Program' ? home : home && home.body;
-  if (!root || FUNCTION_TYPES.has(root.type)) {
-    return found;
-  }
-
-  /**
-   * @param {any} node
-   */
-  function visit(node) {
-    if (node.type === 'IfStatement' && node.alternate && nodeStart(node) <= useAt) {
-      found.push(node);
-    }
-    for (const child of childNodes(node)) {
-      if (FUNCTION_TYPES.has(child.type)) {
-        continue;
-      }
-      visit(child);
-    }
-  }
-
-  visit(root);
-  return found;
-}
-
-/**
- * @param {any[]} left
- * @param {any[]} right
- * @returns {any[]}
- */
-function unionValues(left, right) {
-  /** @type {any[]} */
-  const values = [];
-  const seen = new Set();
-  for (const value of left.concat(right)) {
-    if (!seen.has(value)) {
-      seen.add(value);
-      values.push(value);
-    }
-  }
-  return values;
-}
-
-/**
- * True when `node` sits inside a function nested under `stop`.
- *
- * @param {any} node
- * @param {any} stop
- * @returns {boolean}
- */
-function isInNestedFunction(node, stop) {
-  let current = node && node.parent;
-  while (current && current !== stop) {
-    if (FUNCTION_TYPES.has(current.type)) {
-      return true;
-    }
-    current = current.parent;
-  }
-  return false;
-}
-
-/**
- * Writes of this binding inside `branch` that run as part of `branch`.
- *
- * @param {any} branch
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {Array<{ value: any, at: number, anchor: any }>}
- */
-function writesReaching(branch, versions, useAt) {
-  return versions.filter(
-    (version) =>
-      version.anchor &&
-      version.ordered !== false &&
-      version.at <= useAt &&
-      containsNode(branch, version.anchor) &&
-      !isInNestedFunction(version.anchor, branch)
-  );
-}
-
-/**
- * Values that reach the end of `branch`. `definite` means every path assigns.
- * A later conditional assignment stays possible; an earlier one does not.
- *
- * @param {any} branch
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {{ definite: boolean, values: any[] }}
- */
-function branchFlow(branch, versions, useAt) {
-  if (!branch) {
-    return { definite: false, values: [] };
-  }
-  if (branch.type === 'BlockStatement') {
-    /** @type {any[]} */
-    let possible = [];
-    let definite = false;
-    for (const statement of branch.body) {
-      const step = branchFlow(statement, versions, useAt);
-      if (step.definite) {
-        possible = step.values.slice();
-        definite = true;
-      } else if (step.values.length) {
-        possible = unionValues(possible, step.values);
-      }
-    }
-    return { definite, values: possible };
-  }
-  if (branch.type === 'IfStatement' && branch.alternate) {
-    const thenResult = branchFlow(branch.consequent, versions, useAt);
-    const elseResult = branchFlow(branch.alternate, versions, useAt);
-    const values = unionValues(thenResult.values, elseResult.values);
-    return { definite: thenResult.definite && elseResult.definite, values };
-  }
-  if (branch.type === 'IfStatement') {
-    return { definite: false, values: branchFlow(branch.consequent, versions, useAt).values };
-  }
-  if (branch.type === 'TryStatement') {
-    return tryFlow(branch, versions, useAt);
-  }
-  if (branch.type === 'DoWhileStatement') {
-    return doWhileFlow(branch, versions, useAt);
-  }
-  if (branch.type === 'ForStatement') {
-    return forFlow(branch, versions, useAt);
-  }
-  if (
-    branch.type === 'ForInStatement' ||
-    branch.type === 'ForOfStatement' ||
-    branch.type === 'WhileStatement' ||
-    branch.type === 'SwitchStatement'
-  ) {
-    return {
-      definite: false,
-      values: writesReaching(branch, versions, useAt).map((version) => version.value),
-    };
-  }
-
-  const writes = writesReaching(branch, versions, useAt).filter(
-    (version) => !isConditional(version.anchor, branch)
-  );
-  if (!writes.length) {
-    return { definite: false, values: [] };
-  }
-  writes.sort((left, right) => left.at - right.at);
-  return { definite: true, values: [writes[writes.length - 1].value] };
-}
-
-/**
- * A `finally` that always assigns replaces the try and catch values.
- * Without that, the try is definite only when both the try and the catch assign.
- *
- * @param {any} statement
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {{ definite: boolean, values: any[] }}
- */
-function tryFlow(statement, versions, useAt) {
-  const finalizer = statement.finalizer ? branchFlow(statement.finalizer, versions, useAt) : null;
-  if (finalizer && finalizer.definite) {
-    return { definite: true, values: finalizer.values };
-  }
-  const tried = branchFlow(statement.block, versions, useAt);
-  const caught = statement.handler ? branchFlow(statement.handler.body, versions, useAt) : null;
-  // An empty catch still resumes after the try, so a throw can leave an earlier
-  // assignment live. A definite catch overwrites those, and no catch skips the race.
-  let triedValues = tried.values;
-  if (caught && !caught.definite) {
-    triedValues = unionValues(
-      triedValues,
-      writesReaching(statement.block, versions, useAt).map((version) => version.value)
-    );
-  }
-  let values = unionValues(triedValues, caught ? caught.values : []);
-  if (finalizer) {
-    values = unionValues(values, finalizer.values);
-  }
-  return { definite: Boolean(caught && tried.definite && caught.definite), values };
-}
-
-/**
- * Assignments inside an expression. The condition of a loop runs as an expression,
- * so a write there is not a statement of its own.
- *
- * @param {any} expression
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {{ definite: boolean, values: any[] }}
- */
-function expressionFlow(expression, versions, useAt) {
-  if (!expression) {
-    return { definite: false, values: [] };
-  }
-  const writes = writesReaching(expression, versions, useAt);
-  const unconditional = writes.filter((version) => !isConditional(version.anchor, expression));
-  if (!unconditional.length) {
-    return { definite: false, values: writes.map((version) => version.value) };
-  }
-  unconditional.sort((left, right) => left.at - right.at);
-  const last = unconditional[unconditional.length - 1];
-  const later = writes.filter((version) => version.at > last.at).map((version) => version.value);
-  return { definite: true, values: unionValues([last.value], later) };
-}
-
-/**
- * The condition runs after the body, including the iteration that ends the loop.
- *
- * @param {any} statement
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {{ definite: boolean, values: any[] }}
- */
-function doWhileFlow(statement, versions, useAt) {
-  const body = branchFlow(statement.body, versions, useAt);
-  const test = expressionFlow(statement.test, versions, useAt);
-  if (test.definite) {
-    return { definite: true, values: test.values };
-  }
-  return { definite: body.definite, values: unionValues(body.values, test.values) };
-}
-
-/**
- * The initializer and the test run even when the body never does.
- * Body and update writes stay optional.
- *
- * @param {any} statement
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @returns {{ definite: boolean, values: any[] }}
- */
-function forFlow(statement, versions, useAt) {
-  let result = statement.init
-    ? branchFlow(statement.init, versions, useAt)
-    : { definite: false, values: [] };
-  if (statement.test) {
-    const test = expressionFlow(statement.test, versions, useAt);
-    if (test.definite) {
-      result = { definite: true, values: test.values };
-    } else if (test.values.length) {
-      result = { definite: result.definite, values: unionValues(result.values, test.values) };
-    }
-  }
-  const optional = unionValues(
-    writesReaching(statement.body, versions, useAt).map((version) => version.value),
-    statement.update
-      ? writesReaching(statement.update, versions, useAt).map((version) => version.value)
-      : []
-  );
-  return { definite: result.definite, values: unionValues(result.values, optional) };
-}
-
-/**
- * @param {any} statement
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {number} useAt
- * @param {Set<any>} covered
- */
-function coverBranchWrites(statement, versions, useAt, covered) {
-  if (!statement) {
-    return;
-  }
-  for (const version of versions) {
-    if (
-      version.anchor &&
-      version.ordered !== false &&
-      version.at <= useAt &&
-      containsNode(statement, version.anchor) &&
-      !isInNestedFunction(version.anchor, statement)
-    ) {
-      covered.add(version);
-    }
-  }
-}
-
-/**
- * Local assignments that can reach `useAt`. An if/else that assigns on every
- * path replaces whatever came before it, including nested conditional writes
- * that can still reach the end of a branch.
- *
- * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
- * @param {any} home
- * @param {number} useAt
- * @returns {Array<{ at: number, values: any[], replace: boolean }>}
- */
-function localAssignmentEvents(versions, home, useAt) {
-  /** @type {Array<{ at: number, values: any[], replace: boolean }>} */
-  const events = [];
-  const covered = new Set();
-  for (const statement of ifStatementsBefore(home, useAt)) {
-    if (!home || isConditional(statement, home)) {
-      continue;
-    }
-    if (rangeContains(statement, useAt)) {
-      const inThen = rangeContains(statement.consequent, useAt);
-      const inElse = Boolean(statement.alternate && rangeContains(statement.alternate, useAt));
-      if (!inThen && !inElse) {
-        continue;
-      }
-      const taken = inThen ? statement.consequent : statement.alternate;
-      const other = inThen ? statement.alternate : statement.consequent;
-      coverBranchWrites(other, versions, useAt, covered);
-      const takenResult = branchFlow(taken, versions, useAt);
-      if (takenResult.definite) {
-        // The condition runs before the branch, so its writes stay ahead of this.
-        events.push({
-          at: nodeEnd(statement.test),
-          values: takenResult.values,
-          replace: true,
-        });
-        coverBranchWrites(taken, versions, useAt, covered);
-      }
-      continue;
-    }
-    const thenResult = branchFlow(statement.consequent, versions, useAt);
-    const elseResult = branchFlow(statement.alternate, versions, useAt);
-    if (!thenResult.definite || !elseResult.definite) {
-      continue;
-    }
-    events.push({
-      at: nodeEnd(statement.test),
-      values: unionValues(thenResult.values, elseResult.values),
-      replace: true,
-    });
-    coverBranchWrites(statement, versions, useAt, covered);
-  }
-  for (const version of versions) {
-    if (covered.has(version) || version.ordered === false || version.at > useAt) {
-      continue;
-    }
-    const conditional = Boolean(version.anchor && home && isConditional(version.anchor, home));
-    events.push({
-      at: version.at,
-      values: [version.value],
-      replace: !conditional,
-    });
-  }
-  return events;
-}
-
-/**
- * @param {Array<{ at: number, values: any[], replace: boolean }>} events
- * @returns {any[]}
- */
-function reduceEvents(events) {
-  const ordered = events.slice().sort((left, right) => left.at - right.at);
-  /** @type {any[]} */
-  let possible = [];
-  for (const event of ordered) {
-    possible = event.replace ? event.values.slice() : unionValues(possible, event.values);
-  }
-  return possible;
-}
-
-/**
- * Promises this binding may hold at `useAt`.
- *
- * @param {Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>} versions
- * @param {any} bindingScope
- * @param {number} useAt
- * @returns {any[]}
- */
-function possiblePromises(versions, bindingScope, useAt) {
-  const home = scopeFunction(bindingScope);
-  const functions = functionValuesByScope(home);
-  const events = localAssignmentEvents(versions, home, useAt);
-  for (const call of callsIn(home, useAt + 1, functions)) {
-    // Arguments are evaluated before the callee runs, so a race inside this
-    // call does not see assignments the call makes.
-    if (rangeContains(call.node, useAt)) {
-      continue;
-    }
-    const installed = syncInstalls(call.fn, versions, functions, new Set(), call.awaited);
-    if (!installed.values.length) {
-      continue;
-    }
-    events.push({
-      at: call.at,
-      values: installed.values,
-      replace: installed.definite && !call.conditional,
-    });
-  }
-  return reduceEvents(events).filter((value) => value);
-}
-
-/**
- * @param {any} identifier
- * @param {Map<any, Map<string, Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>>>} initsByScope
- * @returns {any[]}
- */
-function lookupPromises(identifier, initsByScope) {
-  const useAt = nodeStart(identifier);
-  /** @type {Set<any>} */
-  const seen = new Set();
-  let scope = parentLexicalScope(identifier);
-  while (scope && !seen.has(scope)) {
-    seen.add(scope);
-    const versions = initsByScope.get(scope) && initsByScope.get(scope).get(identifier.name);
-    if (versions) {
-      const values = possiblePromises(versions, scope, useAt);
-      if (values.length) {
-        return values;
-      }
-    }
-    if (bindingsOf(scope).has(identifier.name)) {
-      return [];
-    }
-    const parent = parentLexicalScope(scope);
-    if (!parent || parent === scope) {
-      break;
-    }
-    scope = parent;
-  }
-  return [];
+function lookupPromise(identifier, initsByScope) {
+  return lookupValue(identifier, initsByScope);
 }
 
 /**
@@ -1390,8 +710,8 @@ function isTimerCleared(timer, cleared) {
   const sites = target.memberKey
     ? cleared.members.filter((site) => site.key === target.memberKey)
     : target.identifier
-    ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
-    : [];
+      ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
+      : [];
   return sites.some((site) => !callback || !containsNode(callback, site.node));
 }
 
@@ -1443,7 +763,7 @@ function functionValuesByScope(scope) {
       versions = [];
       values.set(identifier.name, versions);
     }
-    versions.push({ value: fn, at, anchor: identifier });
+    versions.push({ value: fn, at });
   }
 
   walk(
@@ -1454,8 +774,9 @@ function functionValuesByScope(scope) {
       }
       if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init) {
         const init = unwrap(node.init);
-        const fn = init && FUNCTION_TYPES.has(init.type) ? init : null;
-        add(node.id, fn, nodeStart(node.id));
+        if (init && FUNCTION_TYPES.has(init.type)) {
+          add(node.id, init, nodeStart(node.id));
+        }
       }
       if (
         node.type === 'AssignmentExpression' &&
@@ -1463,8 +784,9 @@ function functionValuesByScope(scope) {
         node.left.type === 'Identifier'
       ) {
         const right = unwrap(node.right);
-        const fn = right && FUNCTION_TYPES.has(right.type) ? right : null;
-        add(node.left, fn, nodeStart(node.left));
+        if (right && FUNCTION_TYPES.has(right.type)) {
+          add(node.left, right, nodeStart(node.left));
+        }
       }
     },
     true
@@ -1473,39 +795,14 @@ function functionValuesByScope(scope) {
 }
 
 /**
- * Functions this identifier may still refer to. A conditional overwrite keeps
- * the previous callback. An if/else that assigns on every path replaces it.
+ * True when `node` calls the executor's resolve or reject, following local functions.
  *
- * @param {any} identifier
- * @param {Map<any, Map<string, Array<{ value: any, at: number, anchor: any }>>>} valuesByScope
- * @returns {any[]}
+ * @param {any} node
+ * @param {Set<string>} settlers
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @param {Set<any>} seen
+ * @returns {boolean}
  */
-function lookupPossibleFunctions(identifier, valuesByScope) {
-  const useAt = nodeStart(identifier);
-  /** @type {Set<any>} */
-  const seen = new Set();
-  let scope = parentLexicalScope(identifier);
-  while (scope && !seen.has(scope)) {
-    seen.add(scope);
-    const versions = valuesByScope.get(scope) && valuesByScope.get(scope).get(identifier.name);
-    if (versions) {
-      const possible = reduceEvents(localAssignmentEvents(versions, scopeFunction(scope), useAt));
-      if (versions.some((version) => version.at <= useAt)) {
-        return possible.filter((value) => value && FUNCTION_TYPES.has(value.type));
-      }
-    }
-    if (bindingsOf(scope).has(identifier.name)) {
-      return [];
-    }
-    const parent = parentLexicalScope(scope);
-    if (!parent || parent === scope) {
-      break;
-    }
-    scope = parent;
-  }
-  return [];
-}
-
 function nodeSettles(node, settlers, functions, seen) {
   if (!node || seen.has(node)) {
     return false;
@@ -1514,16 +811,12 @@ function nodeSettles(node, settlers, functions, seen) {
     if (settlers.has(identifierKey(node))) {
       return true;
     }
-    for (const fn of lookupPossibleFunctions(node, functions)) {
-      if (!fn || seen.has(fn)) {
-        continue;
-      }
-      seen.add(fn);
-      if (bodySettles(fn, settlers, functions, seen)) {
-        return true;
-      }
+    const fn = lookupValue(node, functions);
+    if (!fn || seen.has(fn)) {
+      return false;
     }
-    return false;
+    seen.add(fn);
+    return bodySettles(fn, settlers, functions, seen);
   }
   if (FUNCTION_TYPES.has(node.type)) {
     seen.add(node);
@@ -1629,12 +922,12 @@ function raceExecutors(race, initsByScope) {
     if (!element || element.type === 'SpreadElement') {
       continue;
     }
-    const arm = unwrap(element);
-    const promises = arm && arm.type === 'Identifier' ? lookupPromises(arm, initsByScope) : [arm];
-    for (const promise of promises) {
-      if (isNewPromise(promise) && !executors.includes(promise.arguments[0])) {
-        executors.push(promise.arguments[0]);
-      }
+    let arm = unwrap(element);
+    if (arm && arm.type === 'Identifier') {
+      arm = lookupPromise(arm, initsByScope);
+    }
+    if (isNewPromise(arm)) {
+      executors.push(arm.arguments[0]);
     }
   }
   return executors;
