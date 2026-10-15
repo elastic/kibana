@@ -346,6 +346,10 @@ export class AlertZeroPlugin
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
             // security_solution registers after this plugin starts; read lazily.
             getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getInference: () => plugins.inference,
+            getUiSettingsClient: (request) =>
+              core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request)),
           })
         : undefined;
 
@@ -369,11 +373,14 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
+    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
       getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+      mitreDataClient,
     };
 
     return this.alertZeroStartContract();
