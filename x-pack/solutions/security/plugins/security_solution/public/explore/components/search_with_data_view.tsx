@@ -14,10 +14,18 @@ import { PageScope } from '../../data_view_manager/constants';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../common/components/search_bar';
 
+interface SearchWithDataViewProps {
+  dataView: DataView;
+  scope?: PageScope;
+}
+
 /**
  * Data-view picker + KQL bar + date range, in its own subdued background
  */
-export const SearchWithDataView: React.FC<{ dataView: DataView }> = ({ dataView }) => {
+export const SearchWithDataView: React.FC<SearchWithDataViewProps> = ({
+  dataView,
+  scope = PageScope.explore,
+}) => {
   const { euiTheme } = useEuiTheme();
   const sectionStyles = css`
     margin-inline: -${euiTheme.size.l};
@@ -38,7 +46,7 @@ export const SearchWithDataView: React.FC<{ dataView: DataView }> = ({ dataView 
     <div css={sectionStyles}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false} css={dataViewPickerStyles}>
-          <DataViewPicker scope={PageScope.explore} />
+          <DataViewPicker scope={scope} />
         </EuiFlexItem>
         <EuiFlexItem css={searchBarItemStyles}>
           <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
