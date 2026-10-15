@@ -360,6 +360,9 @@ function bindingsOf(scope) {
       collectVarBindings(scope.body, names);
     }
   }
+  if (scope.type === 'Program') {
+    collectVarBindings(scope, names);
+  }
   if (scope.type === 'CatchClause' && scope.param) {
     collectPatternNames(scope.param, names);
   }
@@ -557,6 +560,7 @@ function promiseInitsByScope(scope) {
       at: nodeStart(identifier),
       ordered,
       fn: ordered ? null : writeFn,
+      anchor: identifier,
     });
   }
 
@@ -620,7 +624,7 @@ function lookupValue(identifier, valuesByScope) {
       /** @type {{ value: any, at: number } | undefined} */
       let chosen;
       for (const version of versions) {
-        if (version.at <= useAt) {
+        if (version.at <= useAt && (!chosen || version.at >= chosen.at)) {
           chosen = version;
         }
       }
@@ -654,17 +658,101 @@ function scopeFunction(scope) {
 }
 
 /**
- * Calls directly in `home` at or before `useAt`. Nested functions are separate.
+ * True when `node` might not run because a conditional or loop sits between it
+ * and `stop`. The test of an `if` still runs.
  *
- * @param {any} home
- * @param {number} useAt
- * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
- * @returns {Array<{ at: number, fn: any }>}
+ * @param {any} node
+ * @param {any} stop
+ * @returns {boolean}
  */
-function directCallsBefore(home, useAt, functions) {
-  /** @type {Array<{ at: number, fn: any }>} */
+function isConditional(node, stop) {
+  let child = node;
+  let current = node && node.parent;
+  while (current && current !== stop) {
+    if (current.type === 'IfStatement' && child !== current.test) {
+      return true;
+    }
+    if (current.type === 'ConditionalExpression' && child !== current.test) {
+      return true;
+    }
+    if (current.type === 'LogicalExpression' && child === current.right) {
+      return true;
+    }
+    if (
+      (current.type === 'WhileStatement' ||
+        current.type === 'DoWhileStatement' ||
+        current.type === 'ForStatement') &&
+      child !== current.test &&
+      child !== current.init
+    ) {
+      return true;
+    }
+    if (
+      (current.type === 'ForInStatement' || current.type === 'ForOfStatement') &&
+      child !== current.right &&
+      child !== current.left
+    ) {
+      return true;
+    }
+    if (current.type === 'SwitchStatement' && child !== current.discriminant) {
+      return true;
+    }
+    if (current.type === 'CatchClause') {
+      return true;
+    }
+    if (FUNCTION_TYPES.has(current.type)) {
+      break;
+    }
+    child = current;
+    current = current.parent;
+  }
+  return false;
+}
+
+/**
+ * Source offset of the first await or yield in `fn`, ignoring nested functions.
+ *
+ * @param {any} fn
+ * @returns {number}
+ */
+function firstSuspensionAt(fn) {
+  let at = Infinity;
+  const root = fn && (fn.body || fn);
+  if (!root || FUNCTION_TYPES.has(root.type)) {
+    return at;
+  }
+
+  /**
+   * @param {any} node
+   */
+  function visit(node) {
+    if (node.type === 'AwaitExpression' || node.type === 'YieldExpression') {
+      at = Math.min(at, nodeStart(node));
+    }
+    for (const child of childNodes(node)) {
+      if (FUNCTION_TYPES.has(child.type)) {
+        continue;
+      }
+      visit(child);
+    }
+  }
+
+  visit(root);
+  return at;
+}
+
+/**
+ * Direct calls in `fn` before `beforeAt`. Nested functions are separate.
+ *
+ * @param {any} fn
+ * @param {number} beforeAt
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @returns {Array<{ at: number, fn: any, conditional: boolean }>}
+ */
+function callsIn(fn, beforeAt, functions) {
+  /** @type {Array<{ at: number, fn: any, conditional: boolean }>} */
   const calls = [];
-  const root = home && home.type === 'Program' ? home : home && home.body;
+  const root = fn && fn.type === 'Program' ? fn : fn && fn.body;
   if (!root || FUNCTION_TYPES.has(root.type)) {
     return calls;
   }
@@ -677,11 +765,15 @@ function directCallsBefore(home, useAt, functions) {
       node.type === 'CallExpression' &&
       node.callee &&
       node.callee.type === 'Identifier' &&
-      nodeStart(node) <= useAt
+      nodeStart(node) < beforeAt
     ) {
-      const fn = lookupValue(node.callee, functions);
-      if (fn && FUNCTION_TYPES.has(fn.type)) {
-        calls.push({ at: nodeStart(node), fn });
+      const target = lookupValue(node.callee, functions);
+      if (target && FUNCTION_TYPES.has(target.type)) {
+        calls.push({
+          at: nodeStart(node),
+          fn: target,
+          conditional: isConditional(node, fn),
+        });
       }
     }
     for (const child of childNodes(node)) {
@@ -697,47 +789,126 @@ function directCallsBefore(home, useAt, functions) {
 }
 
 /**
- * Promise this binding holds at `useAt`. Source order applies only to writes in
- * the same function. A write inside a helper counts when that helper is called
- * before the read, even if the helper is declared later.
+ * Promises a synchronous run of `fn` may assign. Writes after the first await
+ * stay in the future. Conditional writes and calls keep the previous value too.
  *
- * @param {Array<{ value: any, at: number, ordered: boolean, fn: any }>} versions
+ * @param {any} fn
+ * @param {Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>} versions
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @param {Set<any>} seen
+ * @returns {{ values: any[], definite: boolean }}
+ */
+function syncInstalls(fn, versions, functions, seen) {
+  if (!fn || seen.has(fn)) {
+    return { values: [], definite: false };
+  }
+  seen.add(fn);
+
+  const suspendAt = firstSuspensionAt(fn);
+  /** @type {Array<{ at: number, kind: 'write' | 'call', value?: any, fn?: any, conditional: boolean }>} */
+  const events = [];
+  for (const version of versions) {
+    if (!version.ordered && version.fn === fn && version.at < suspendAt) {
+      events.push({
+        at: version.at,
+        kind: 'write',
+        value: version.value,
+        conditional: isConditional(version.anchor, fn),
+      });
+    }
+  }
+  for (const call of callsIn(fn, suspendAt, functions)) {
+    events.push({ at: call.at, kind: 'call', fn: call.fn, conditional: call.conditional });
+  }
+  events.sort((left, right) => left.at - right.at);
+
+  /** @type {any[]} */
+  let possible = [];
+  let definite = false;
+  for (const event of events) {
+    if (event.kind === 'write') {
+      if (event.conditional) {
+        possible = possible.concat(event.value);
+      } else {
+        possible = [event.value];
+        definite = true;
+      }
+      continue;
+    }
+    const inner = syncInstalls(event.fn, versions, functions, seen);
+    if (!inner.values.length) {
+      continue;
+    }
+    if (event.conditional || !inner.definite) {
+      possible = possible.concat(inner.values);
+    } else {
+      possible = inner.values.slice();
+      definite = true;
+    }
+  }
+  return { values: possible, definite };
+}
+
+/**
+ * Promises this binding may hold at `useAt`.
+ *
+ * @param {Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>} versions
  * @param {any} bindingScope
  * @param {number} useAt
- * @returns {any}
+ * @returns {any[]}
  */
-function promiseAt(versions, bindingScope, useAt) {
+function possiblePromises(versions, bindingScope, useAt) {
   const home = scopeFunction(bindingScope);
   const functions = functionValuesByScope(home);
-  /** @type {Array<{ at: number, value: any }>} */
+  /** @type {Array<{ at: number, values: any[], replace: boolean }>} */
   const events = [];
   for (const version of versions) {
     if (version.ordered && version.at <= useAt) {
-      events.push({ at: version.at, value: version.value });
+      const conditional = isConditional(version.anchor, home);
+      events.push({
+        at: version.at,
+        values: [version.value],
+        replace: !conditional,
+      });
     }
   }
-  for (const call of directCallsBefore(home, useAt, functions)) {
-    /** @type {{ value: any, at: number } | undefined} */
-    let installed;
-    for (const version of versions) {
-      if (!version.ordered && version.fn === call.fn) {
-        installed = version;
-      }
+  for (const call of callsIn(home, useAt + 1, functions)) {
+    const installed = syncInstalls(call.fn, versions, functions, new Set());
+    if (!installed.values.length) {
+      continue;
     }
-    if (installed) {
-      events.push({ at: call.at, value: installed.value });
-    }
+    events.push({
+      at: call.at,
+      values: installed.values,
+      replace: installed.definite && !call.conditional,
+    });
   }
   events.sort((left, right) => left.at - right.at);
-  return events.length ? events[events.length - 1].value : undefined;
+
+  /** @type {any[]} */
+  let possible = [];
+  for (const event of events) {
+    possible = event.replace ? event.values.slice() : possible.concat(event.values);
+  }
+
+  /** @type {any[]} */
+  const unique = [];
+  const seen = new Set();
+  for (const value of possible) {
+    if (value && !seen.has(value)) {
+      seen.add(value);
+      unique.push(value);
+    }
+  }
+  return unique;
 }
 
 /**
  * @param {any} identifier
- * @param {Map<any, Map<string, Array<{ value: any, at: number, ordered: boolean, fn: any }>>>} initsByScope
- * @returns {any}
+ * @param {Map<any, Map<string, Array<{ value: any, at: number, ordered: boolean, fn: any, anchor: any }>>>} initsByScope
+ * @returns {any[]}
  */
-function lookupPromise(identifier, initsByScope) {
+function lookupPromises(identifier, initsByScope) {
   const useAt = nodeStart(identifier);
   /** @type {Set<any>} */
   const seen = new Set();
@@ -746,13 +917,13 @@ function lookupPromise(identifier, initsByScope) {
     seen.add(scope);
     const versions = initsByScope.get(scope) && initsByScope.get(scope).get(identifier.name);
     if (versions) {
-      const value = promiseAt(versions, scope, useAt);
-      if (value) {
-        return value;
+      const values = possiblePromises(versions, scope, useAt);
+      if (values.length) {
+        return values;
       }
     }
     if (bindingsOf(scope).has(identifier.name)) {
-      return;
+      return [];
     }
     const parent = parentLexicalScope(scope);
     if (!parent || parent === scope) {
@@ -760,6 +931,7 @@ function lookupPromise(identifier, initsByScope) {
     }
     scope = parent;
   }
+  return [];
 }
 
 /**
@@ -892,9 +1064,8 @@ function functionValuesByScope(scope) {
       }
       if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init) {
         const init = unwrap(node.init);
-        if (init && FUNCTION_TYPES.has(init.type)) {
-          add(node.id, init, nodeStart(node.id));
-        }
+        const fn = init && FUNCTION_TYPES.has(init.type) ? init : null;
+        add(node.id, fn, nodeStart(node.id));
       }
       if (
         node.type === 'AssignmentExpression' &&
@@ -902,9 +1073,8 @@ function functionValuesByScope(scope) {
         node.left.type === 'Identifier'
       ) {
         const right = unwrap(node.right);
-        if (right && FUNCTION_TYPES.has(right.type)) {
-          add(node.left, right, nodeStart(node.left));
-        }
+        const fn = right && FUNCTION_TYPES.has(right.type) ? right : null;
+        add(node.left, fn, nodeStart(node.left));
       }
     },
     true
@@ -1040,12 +1210,12 @@ function raceExecutors(race, initsByScope) {
     if (!element || element.type === 'SpreadElement') {
       continue;
     }
-    let arm = unwrap(element);
-    if (arm && arm.type === 'Identifier') {
-      arm = lookupPromise(arm, initsByScope);
-    }
-    if (isNewPromise(arm)) {
-      executors.push(arm.arguments[0]);
+    const arm = unwrap(element);
+    const promises = arm && arm.type === 'Identifier' ? lookupPromises(arm, initsByScope) : [arm];
+    for (const promise of promises) {
+      if (isNewPromise(promise) && !executors.includes(promise.arguments[0])) {
+        executors.push(promise.arguments[0]);
+      }
     }
   }
   return executors;
