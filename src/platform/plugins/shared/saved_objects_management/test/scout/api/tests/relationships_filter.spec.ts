@@ -44,7 +44,7 @@ apiTest.describe(
             type: 'index-pattern',
             relationship: 'child',
             meta: {
-              icon: 'indexPatternApp',
+              icon: 'pattern',
               title: 'saved_objects*',
               namespaceType: 'multiple',
               hiddenType: false,
@@ -56,7 +56,7 @@ apiTest.describe(
             type: 'visualization',
             relationship: 'parent',
             meta: {
-              icon: 'visualizeApp',
+              icon: 'chartBarVertical',
               title: 'VisualizationFromSavedSearch',
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -81,7 +81,7 @@ apiTest.describe(
             type: 'visualization',
             relationship: 'child',
             meta: {
-              icon: 'visualizeApp',
+              icon: 'chartBarVertical',
               title: 'Visualization',
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -93,7 +93,7 @@ apiTest.describe(
             type: 'visualization',
             relationship: 'child',
             meta: {
-              icon: 'visualizeApp',
+              icon: 'chartBarVertical',
               title: 'VisualizationFromSavedSearch',
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -118,7 +118,7 @@ apiTest.describe(
             type: 'search',
             relationship: 'child',
             meta: {
-              icon: 'discoverApp',
+              icon: 'productDiscover',
               title: 'OneRecord',
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -143,7 +143,7 @@ apiTest.describe(
             type: 'search',
             relationship: 'parent',
             meta: {
-              icon: 'discoverApp',
+              icon: 'productDiscover',
               title: 'OneRecord',
               namespaceType: 'multiple-isolated',
               hiddenType: false,

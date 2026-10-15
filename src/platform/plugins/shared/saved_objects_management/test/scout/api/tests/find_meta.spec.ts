@@ -38,7 +38,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.saved_objects).toHaveLength(1);
       expect(response.body.saved_objects[0].meta).toStrictEqual({
-        icon: 'discoverApp',
+        icon: 'productDiscover',
         title: 'OneRecord',
         hiddenType: false,
         inAppUrl: {
@@ -57,7 +57,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.saved_objects).toHaveLength(1);
       expect(response.body.saved_objects[0].meta).toStrictEqual({
-        icon: 'dashboardApp',
+        icon: 'productDashboard',
         title: 'Dashboard',
         hiddenType: false,
         inAppUrl: {
@@ -77,13 +77,13 @@ apiTest.describe(
       expect(response.body.saved_objects).toHaveLength(2);
       // inAppUrl is present in stateful but absent in serverless for visualizations
       expect(response.body.saved_objects[0].meta).toMatchObject({
-        icon: 'visualizeApp',
+        icon: 'chartBarVertical',
         title: 'VisualizationFromSavedSearch',
         namespaceType: 'multiple-isolated',
         hiddenType: false,
       });
       expect(response.body.saved_objects[1].meta).toMatchObject({
-        icon: 'visualizeApp',
+        icon: 'chartBarVertical',
         title: 'Visualization',
         namespaceType: 'multiple-isolated',
         hiddenType: false,
@@ -98,7 +98,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.saved_objects).toHaveLength(1);
       expect(response.body.saved_objects[0].meta).toStrictEqual({
-        icon: 'indexPatternApp',
+        icon: 'pattern',
         title: 'saved_objects*',
         hiddenType: false,
         editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',

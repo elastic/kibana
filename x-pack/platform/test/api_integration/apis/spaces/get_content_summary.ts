@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
               count: 2,
               type: 'dashboard',
               displayName: 'Dashboard',
-              icon: 'dashboardApp',
+              icon: 'productDashboard',
             },
           ]);
           expect(total).to.eql(2);
@@ -122,12 +122,12 @@ export default function ({ getService }: FtrProviderContext) {
               count: 1,
               type: 'dashboard',
               displayName: 'Dashboard',
-              icon: 'dashboardApp',
+              icon: 'productDashboard',
             },
             {
               count: 1,
               displayName: 'data view',
-              icon: 'indexPatternApp',
+              icon: 'pattern',
               type: 'index-pattern',
             },
           ]);

@@ -37,7 +37,7 @@ export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): Sa
   },
   migrations: () => customElementMigrationsFactory(deps),
   management: {
-    icon: 'canvasApp',
+    icon: 'paintBucket',
     defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle(obj) {
