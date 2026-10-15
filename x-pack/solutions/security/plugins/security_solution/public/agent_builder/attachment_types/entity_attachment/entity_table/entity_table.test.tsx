@@ -24,6 +24,10 @@ jest.mock('../use_entity_for_attachment', () => ({
   useEntityForAttachment: jest.fn(),
 }));
 
+jest.mock('../../../../entity_analytics/hooks/use_new_entity_analytics_page', () => ({
+  useNewEntityAnalyticsPage: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('../../entity_explore_navigation', () => {
   const actual = jest.requireActual('../../entity_explore_navigation');
   return {

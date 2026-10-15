@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { CompactionTriggeredEvent } from '@kbn/agent-builder-server/telemetry';
 import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
@@ -21,6 +22,8 @@ import {
 import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
+  ReportCompactionTriggeredParams,
+  ReportConversationFieldsChangedParams,
   ReportPluginImportedParams,
   ReportExecutionCompleteParams,
   ReportRoundCompleteParams,
@@ -133,6 +136,22 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report AgentUpdated telemetry event', { error });
+    }
+  }
+
+  /**
+   * Reports the template fields, opted in with `report_changes`, that one write changed, after the
+   * write has landed. Never throws.
+   */
+  reportConversationFieldsChanged(params: ReportConversationFieldsChangedParams): void {
+    try {
+      this.analytics.reportEvent<ReportConversationFieldsChangedParams>(
+        AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+        params
+      );
+    } catch (error) {
+      // Do not fail the write if telemetry fails
+      this.logger.debug('Failed to report ConversationFieldsChanged telemetry event', { error });
     }
   }
 
@@ -300,6 +319,7 @@ export class AnalyticsService {
     round,
     roundCount,
     conversationAttachments,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -308,6 +328,8 @@ export class AnalyticsService {
     round: ConversationRound;
     roundCount: number;
     conversationAttachments: VersionedAttachment[];
+    /** The workflow execution whose `ai.agent` step started the round, or its parent round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -352,6 +374,7 @@ export class AnalyticsService {
           tools_invoked: toolsInvoked,
           tool_calls: toolCallSteps.length,
           tool_call_errors: toolCallErrors.length,
+          workflow_execution_id: workflowExecutionId,
         }
       );
     } catch (error) {
@@ -448,6 +471,7 @@ export class AnalyticsService {
     modelProvider,
     roundId,
     roundOrigin,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -456,6 +480,8 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     roundId?: string;
     roundOrigin?: TelemetryConversationOrigin;
+    /** The workflow execution whose `ai.agent` step started the round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -470,6 +496,7 @@ export class AnalyticsService {
         model_provider: modelProvider,
         error_message: errorMessage,
         error_type: errorType,
+        workflow_execution_id: workflowExecutionId,
       });
     } catch (err) {
       // Do not fail the request if telemetry fails
@@ -517,6 +544,33 @@ export class AnalyticsService {
       );
     } catch (error) {
       this.logger.debug('Failed to report ToolCallSuccess telemetry event', { error });
+    }
+  }
+
+  reportCompactionTriggered({
+    agentId,
+    executionId,
+    trigger,
+    tokenCountBefore,
+    tokenCountAfter,
+    summarizedCycleCount,
+    modelId,
+  }: CompactionTriggeredEvent): void {
+    try {
+      this.analytics.reportEvent<ReportCompactionTriggeredParams>(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        {
+          agent_id: normalizeAgentIdForTelemetry(agentId) ?? 'unknown',
+          execution_id: executionId,
+          trigger,
+          token_count_before: tokenCountBefore,
+          token_count_after: tokenCountAfter,
+          summarized_cycle_count: summarizedCycleCount,
+          model_id: modelId,
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report CompactionTriggered telemetry event', { error });
     }
   }
 

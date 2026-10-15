@@ -33,10 +33,10 @@ jest.mock('./resolvers/attachment_panel_resolver', () => ({
 }));
 jest.mock('./time_range', () => ({
   applyDefaultDashboardTimeRange: jest.fn(
-    async ({ dashboardData }: { dashboardData: DashboardAttachmentData }) => ({
-      ...dashboardData,
-      time_range: { from: 'now-7d', to: 'now' },
-    })
+    async ({ dashboardData }: { dashboardData: DashboardAttachmentData }) =>
+      dashboardData.time_range
+        ? dashboardData
+        : { ...dashboardData, time_range: { from: 'now-7d', to: 'now' } }
   ),
 }));
 jest.mock('@kbn/custom-content-server', () => ({
@@ -55,7 +55,9 @@ const mockHasValidCreateMetadataOperations =
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (dashboardAttachmentId?: string) => {
-  const tool = generateDashboardTool();
+  const tool = generateDashboardTool({
+    getDashboardValidator: jest.fn(),
+  });
   const sendUiEvent = jest.fn();
   const ctx = {
     logger: { info: jest.fn(), error: jest.fn() },
@@ -71,7 +73,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
-  return { results: ret.results, sendUiEvent };
+  return { results: ret.results, sendUiEvent, attachments: ctx.attachments };
 };
 
 describe('generateDashboardTool handler', () => {
@@ -82,7 +84,7 @@ describe('generateDashboardTool handler', () => {
       dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
-    } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
+    });
   });
 
   it.each([
@@ -90,7 +92,11 @@ describe('generateDashboardTool handler', () => {
     ['updated', 'dashboard-attachment-id', 'saved-id'],
   ])('sends a dashboard updated UI event with the %s attachment', async (_, id, origin) => {
     mockRetrieveLatestVersion.mockReturnValue(
-      id ? ({ data: generatedDashboard } as ReturnType<typeof retrieveLatestVersion>) : undefined
+      id
+        ? ({
+            data: { ...generatedDashboard, description: 'Before the update' },
+          } as ReturnType<typeof retrieveLatestVersion>)
+        : undefined
     );
 
     const { sendUiEvent } = await callHandler(id);
@@ -122,5 +128,80 @@ describe('generateDashboardTool handler', () => {
 
     expect(results[0].type).toBe(ToolResultType.error);
     expect(sendUiEvent).not.toHaveBeenCalled();
+  });
+
+  describe('when changes fail', () => {
+    const failures = [{ type: 'validate_dashboard', identifier: 'panel', error: 'Invalid' }];
+    const panel = {
+      id: 'panel',
+      type: 'markdown',
+      config: { content: '# Title' },
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+    };
+
+    const mockGeneratedDashboard = (dashboardData: DashboardAttachmentData) =>
+      mockExecuteDashboardOperations.mockResolvedValue({
+        dashboardData,
+        failures,
+        panelAuthoringNotes: [],
+      } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
+
+    it('does not create a new dashboard without panels or controls', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockGeneratedDashboard(generatedDashboard);
+
+      const { results, sendUiEvent, attachments } = await callHandler();
+
+      expect(results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: { message: expect.any(String), metadata: { failures } },
+        },
+      ]);
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('creates a new dashboard when some panels were added', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockGeneratedDashboard({ ...generatedDashboard, panels: [panel] });
+
+      const { results, sendUiEvent, attachments } = await callHandler();
+
+      expect(results[0]).toMatchObject({ type: ToolResultType.dashboard, data: { failures } });
+      expect(attachments.add).toHaveBeenCalled();
+      expect(sendUiEvent).toHaveBeenCalled();
+    });
+
+    it('does not update an existing dashboard that did not change', async () => {
+      const latestData: DashboardAttachmentData = { ...generatedDashboard, panels: [panel] };
+      mockRetrieveLatestVersion.mockReturnValue({
+        version: 3,
+        data: latestData,
+      } as ReturnType<typeof retrieveLatestVersion>);
+      mockGeneratedDashboard(structuredClone(latestData));
+
+      const { results, sendUiEvent, attachments } = await callHandler('dashboard-attachment-id');
+
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: { attachment_id: 'dashboard-attachment-id', version: 3, failures },
+      });
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('updates an existing dashboard that changed', async () => {
+      mockRetrieveLatestVersion.mockReturnValue({
+        version: 3,
+        data: generatedDashboard,
+      } as ReturnType<typeof retrieveLatestVersion>);
+      mockGeneratedDashboard({ ...generatedDashboard, panels: [panel] });
+
+      const { results, attachments } = await callHandler('dashboard-attachment-id');
+
+      expect(results[0]).toMatchObject({ data: { version: 2, failures } });
+      expect(attachments.update).toHaveBeenCalled();
+    });
   });
 });
