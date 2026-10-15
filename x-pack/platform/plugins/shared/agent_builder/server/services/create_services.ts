@@ -223,6 +223,7 @@ export class ServiceManager {
       eventBus: conversationEventBus,
       conversationEvents,
       auditLogService,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
