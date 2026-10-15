@@ -669,52 +669,52 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
             getService
           );
         });
-      });
 
-      describe('customized with an upgrade (-AB diff case)', () => {
-        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
-          installed: {
-            type: 'query',
-            interval: '60m',
-            from: 'now-24h',
-            to: 'now',
-          },
-          patch: {
-            interval: '1h',
-            from: 'now-2d',
-          },
-          upgrade: {
-            type: 'query',
-            interval: '60m',
-            from: 'now-24h',
-            to: 'now',
-          },
-          removeInstalledAssets: true,
-        };
-
-        testFieldUpgradeReview(
-          {
-            ruleUpgradeAssets,
-            diffableRuleFieldName: 'rule_schedule',
-            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            expectedFieldDiffValues: {
-              current: { interval: '1h', from: 'now-2d', to: 'now' },
-              target: { interval: '1h', from: 'now-1d', to: 'now' },
-              merged: { interval: '1h', from: 'now-1d', to: 'now' },
+        describe('customized with an upgrade (-AB diff case)', () => {
+          const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+            installed: {
+              type: 'query',
+              interval: '60m',
+              from: 'now-24h',
+              to: 'now',
             },
-          },
-          getService
-        );
+            patch: {
+              interval: '1h',
+              from: 'now-2d',
+            },
+            upgrade: {
+              type: 'query',
+              interval: '60m',
+              from: 'now-24h',
+              to: 'now',
+            },
+            removeInstalledAssets: true,
+          };
 
-        testFieldUpgradesToMergedValue(
-          {
-            ruleUpgradeAssets,
-            diffableRuleFieldName: 'rule_schedule',
-            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
-            expectedFieldsAfterUpgrade: { interval: '1h', from: 'now-1d', to: 'now' },
-          },
-          getService
-        );
+          testFieldUpgradeReview(
+            {
+              ruleUpgradeAssets,
+              diffableRuleFieldName: 'rule_schedule',
+              expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+              expectedFieldDiffValues: {
+                current: { interval: '1h', from: 'now-2d', to: 'now' },
+                target: { interval: '1h', from: 'now-1d', to: 'now' },
+                merged: { interval: '1h', from: 'now-1d', to: 'now' },
+              },
+            },
+            getService
+          );
+
+          testFieldUpgradesToMergedValue(
+            {
+              ruleUpgradeAssets,
+              diffableRuleFieldName: 'rule_schedule',
+              onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+              expectedFieldsAfterUpgrade: { interval: '1h', from: 'now-1d', to: 'now' },
+            },
+            getService
+          );
+        });
       });
     });
   });
