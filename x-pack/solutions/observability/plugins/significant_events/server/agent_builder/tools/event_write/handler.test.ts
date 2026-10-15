@@ -633,7 +633,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(results[0]).toMatchObject({ written: true, status: 'active' });
     const [written] = writtenDocs();
     expect(written.status).toBe('active');
-    expect(written.signals.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
+    expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
   });
 
   describe('a continuation onto a recovering event', () => {
