@@ -91,6 +91,20 @@ export interface GithubFixPullRequest {
   mergedAt: string | null;
 }
 
+/** Closed and merged PRs are only listed on request. */
+const CLOSING_PULL_REQUESTS_QUERY = `
+  query($owner: String!, $name: String!, $number: Int!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      issue(number: $number) {
+        closedByPullRequestsReferences(first: 100, after: $after, includeClosedPrs: true) {
+          nodes { number state mergedAt repository { nameWithOwner } }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    }
+  }
+`;
+
 interface ClosingPullRequestsResponse {
   data?: {
     repository: {
@@ -253,16 +267,7 @@ export class GithubApi {
             url: 'https://api.github.com/graphql',
             safeForDryRun: true,
             data: {
-              query: `query($owner: String!, $name: String!, $number: Int!, $after: String) {
-              repository(owner: $owner, name: $name) {
-                issue(number: $number) {
-                  closedByPullRequestsReferences(first: 100, after: $after, includeClosedPrs: true) {
-                    nodes { number state mergedAt repository { nameWithOwner } }
-                    pageInfo { hasNextPage endCursor }
-                  }
-                }
-              }
-            }`,
+              query: CLOSING_PULL_REQUESTS_QUERY,
               variables: { owner, name, number: issueNumber, after },
             },
           },

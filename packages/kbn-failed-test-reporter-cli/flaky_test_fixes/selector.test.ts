@@ -14,47 +14,19 @@ import {
   type GithubIssue,
   type GithubIssueEvent,
 } from '../failed_tests_reporter/github_api';
-import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import {
-  fileWideIssue,
-  flakyReport,
-  flakyTest,
-  githubIssue,
-  SUITE_PATH,
-} from '../flaky_test_issues/test_fixtures';
-import { buildFixGroups } from './groups';
-import { FIXABLE_LABEL, FIX_LABEL, requestFlakyTestFixes } from './selector';
+import { fileWideIssue, flakyReport, flakyTest } from '../flaky_test_issues/test_fixtures';
+import { FIXABLE_LABEL, FIX_LABEL } from './history';
+import { requestFlakyTestFixes } from './selector';
+import { LABELS, perTestIssue } from './test_fixtures';
 
 type Options = Parameters<typeof requestFlakyTestFixes>[0];
 const REPO = 'elastic/kibana';
-const LABELS = ['failed-test', FIXABLE_LABEL];
-const FTR_PATH = 'x-pack/platform/test/functional/apps/discover/group1/_discover.ts';
 
 const issue = (number: number, overrides: Partial<GithubIssue> = {}) =>
   fileWideIssue(number, { labels: [...LABELS], ...overrides });
 
 const closedIssue = (number: number, closedAt: string, overrides: Partial<GithubIssue> = {}) =>
   issue(number, { state: 'closed', closed_at: closedAt, ...overrides });
-
-const perTestIssue = (number: number, testId: string, filePath = SUITE_PATH) =>
-  githubIssue({
-    number,
-    labels: [...LABELS],
-    body: updateIssueMetadata(`| Location | ${filePath} |\n| Test ID | ${testId} |`, {
-      'test.name': testId,
-      'test.type': 'scout',
-    }),
-  });
-
-/** A per-test issue filed before the failed-test reporter recorded `test.type`. */
-const legacyIssue = (number: number, className: string, testName: string) =>
-  githubIssue({
-    number,
-    state: 'closed',
-    closed_at: '2025-01-01T12:00:00Z',
-    labels: ['failed-test'],
-    body: updateIssueMetadata('failure', { 'test.class': className, 'test.name': testName }),
-  });
 
 const event = (id: number, overrides: Partial<GithubIssueEvent> = {}): GithubIssueEvent => ({
   id,
@@ -117,60 +89,6 @@ const setup = (initialIssues: GithubIssue[]) => {
     github.addLabelsOnce.mock.calls.filter(([, labels]) => labels.includes(FIX_LABEL));
   return { github, histories, issues, pullRequests, run, triggerWrites };
 };
-
-describe('file-level association', () => {
-  it('includes sibling cases absent from the report, but targets only affected cases', () => {
-    const test = flakyTest({ testId: 'reported' });
-    const [group] = buildFixGroups(flakyReport([test]), [
-      perTestIssue(1, 'reported'),
-      perTestIssue(2, 'below-threshold'),
-    ]);
-    expect(group.siblings.map(({ number }) => number)).toEqual([1, 2]);
-    expect(group.targets.map(({ number }) => number)).toEqual([1]);
-  });
-
-  it('does not promote arbitrary mentions or another framework into the group', () => {
-    const [group] = buildFixGroups(flakyReport([flakyTest()]), [
-      githubIssue({ number: 1, body: `A stack frame mentions ${SUITE_PATH}` }),
-      fileWideIssue(2, { framework: 'jest', labels: LABELS }),
-      issue(3),
-    ]);
-    expect(group.targets.map(({ number }) => number)).toEqual([3]);
-    expect(group.ambiguous).toEqual([]);
-  });
-
-  it('associates older FTR issues that record no framework by their file', () => {
-    const report = flakyReport([flakyTest({ framework: 'ftr', filePath: FTR_PATH })]);
-    const className = `Chrome X-Pack UI Functional Tests.${FTR_PATH.replace(/\.ts$/, '·ts')}`;
-    const [group] = buildFixGroups(report, [
-      legacyIssue(1, className, 'an older flaky test'),
-      legacyIssue(2, className, flakyTest().title),
-    ]);
-    expect(group.siblings.map(({ number }) => number)).toEqual([1, 2]);
-    expect(group.targets.map(({ number }) => number)).toEqual([2]);
-    expect(group.ambiguous).toEqual([]);
-  });
-
-  it('places an older Jest issue that names a flaky test of its directory', () => {
-    const path = 'src/a/client.test.ts';
-    const [group] = buildFixGroups(
-      flakyReport([flakyTest({ filePath: path, framework: 'jest', title: 'connects' })]),
-      [legacyIssue(1, 'Jest Tests.src/a', 'connects')]
-    );
-    expect(group.targets.map(({ number }) => number)).toEqual([1]);
-    expect(group.ambiguous).toEqual([]);
-  });
-
-  it('holds directory-only Jest identity rather than guessing a file', () => {
-    const path = 'src/a/client.test.ts';
-    const [group] = buildFixGroups(
-      flakyReport([flakyTest({ filePath: path, framework: 'jest' })]),
-      [legacyIssue(1, 'Jest Tests.src/a', 'another test')]
-    );
-    expect(group.siblings).toEqual([]);
-    expect(group.ambiguous.map(({ number }) => number)).toEqual([1]);
-  });
-});
 
 describe('automatic requests', () => {
   it('requests once for multiple cases and nested describes, choosing a stable oldest target', async () => {

@@ -10,42 +10,52 @@
 import Fs from 'fs';
 import Path from 'path';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
-import { run } from '@kbn/dev-cli-runner';
+import { run, type FlagsReader } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutFlakyTests } from '@kbn/scout-reporting';
 import { DEFAULT_GITHUB_REPO, GithubApi } from '../failed_tests_reporter/github_api';
 import { requestFlakyTestFixes } from './selector';
 
+/** Live requests only run in the pipeline's serialized step, so two selectors never race. */
+const inSelectorStep = (repo: string): boolean =>
+  repo === DEFAULT_GITHUB_REPO &&
+  process.env.BUILDKITE_PIPELINE_SLUG === 'kibana-report-flaky-tests' &&
+  process.env.BUILDKITE_STEP_KEY === 'request-flaky-test-fixes';
+
+const readFlags = (flagsReader: FlagsReader) => {
+  const dryRun = flagsReader.boolean('dry-run');
+  const repo = flagsReader.requiredString('github-repo');
+  const maxRequests = flagsReader.requiredNumber('max-requests');
+  const token = process.env.GITHUB_TOKEN;
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+    throw createFlagError('--github-repo must be owner/name');
+  }
+  if (!Number.isSafeInteger(maxRequests) || maxRequests < 0) {
+    throw createFlagError('--max-requests must be a non-negative integer');
+  }
+  if (!token) throw createFlagError('GITHUB_TOKEN is required, including for dry-run reads');
+  if (!dryRun && !inSelectorStep(repo)) {
+    throw createFlagError(
+      'Live requests must run in the serialized report-flaky-tests selector step for elastic/kibana'
+    );
+  }
+  return {
+    dryRun,
+    repo,
+    maxRequests,
+    token,
+    input: Path.resolve(REPO_ROOT, flagsReader.requiredString('input')),
+    summaryPath: Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path')),
+  };
+};
+
 export const runRequestFlakyTestFixesCli = (): void => {
   run(
     async ({ log, flagsReader }) => {
-      const dryRun = flagsReader.boolean('dry-run');
-      const repo = flagsReader.requiredString('github-repo');
-      const maxRequests = flagsReader.requiredNumber('max-requests');
-      if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
-        throw createFlagError('--github-repo must be owner/name');
-      }
-      if (!Number.isSafeInteger(maxRequests) || maxRequests < 0) {
-        throw createFlagError('--max-requests must be a non-negative integer');
-      }
-      const token = process.env.GITHUB_TOKEN;
-      if (!token) throw createFlagError('GITHUB_TOKEN is required, including for dry-run reads');
-      if (
-        !dryRun &&
-        (repo !== DEFAULT_GITHUB_REPO ||
-          process.env.BUILDKITE_PIPELINE_SLUG !== 'kibana-report-flaky-tests' ||
-          process.env.BUILDKITE_STEP_KEY !== 'request-flaky-test-fixes')
-      ) {
-        throw createFlagError(
-          'Live requests must run in the serialized report-flaky-tests selector step for elastic/kibana'
-        );
-      }
-      const { data: report } = ScoutFlakyTests.fromFile(
-        Path.resolve(REPO_ROOT, flagsReader.requiredString('input'))
-      );
+      const { dryRun, repo, maxRequests, token, input, summaryPath } = readFlags(flagsReader);
       const summary = await requestFlakyTestFixes({
         github: new GithubApi({ log, token, dryRun, repo }),
-        report,
+        report: ScoutFlakyTests.fromFile(input).data,
         repo,
         dryRun,
         maxRequests,
@@ -53,7 +63,6 @@ export const runRequestFlakyTestFixesCli = (): void => {
         fileExists: (filePath) => Fs.existsSync(Path.resolve(REPO_ROOT, filePath)),
         log,
       });
-      const summaryPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path'));
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
       if (summary.actions.some(({ action }) => action === 'failed')) {
