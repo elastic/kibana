@@ -1671,6 +1671,7 @@ module.exports = {
         'react/no-render-return-value': 'off',
         'react/no-string-refs': 'off',
         'react/require-render-return': 'off',
+        'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/no-extra-non-null-assertion': 'off',
         '@typescript-eslint/no-misused-new': 'off',
         '@typescript-eslint/no-namespace': 'off',

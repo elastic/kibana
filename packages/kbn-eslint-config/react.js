@@ -22,7 +22,6 @@ module.exports = {
 
   rules: {
     'react/jsx-uses-react': 'error',
-    'react/react-in-jsx-scope': 'error',
     'react/jsx-uses-vars': 'error',
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks

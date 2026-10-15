@@ -54,7 +54,7 @@ export const reactRules: DummyRuleMap = {
   'react/no-unescaped-entities': 'error',
   'react/no-will-update-set-state': 'error',
   // 'react/prefer-stateless-function': ['error', { 'ignorePureComponents': true }],
-  // 'react/react-in-jsx-scope': 'error',
+  'react/react-in-jsx-scope': 'error',
   'react/self-closing-comp': 'error',
 };
 
