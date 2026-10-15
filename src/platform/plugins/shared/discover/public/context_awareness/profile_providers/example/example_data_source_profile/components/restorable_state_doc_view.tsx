@@ -42,7 +42,8 @@ const RestorableStateDocViewBase: React.FC<{
                 Declaring a <code>shareableStateSchema</code> on the <code>DocView</code>{' '}
                 additionally deep-links the schema-allowed subset of that state: it round-trips
                 through the URL, so a shared document link reopens on the same tab with this state
-                restored. Try incrementing the counter, then copy the URL into a new tab.
+                restored. Try incrementing the counter, then copy the URL into a new tab. (Deep
+                linking in ES|QL requires querying with META _id, _index).
               </p>
             </>
           }
