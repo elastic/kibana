@@ -177,47 +177,6 @@ function GraphWorkspace(options) {
 
   //======== Selection functions ========
 
-  this.selectAll = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      if (node.parent === undefined) {
-        node.isSelected = true;
-        self.selectedNodes.push(node);
-      } else {
-        node.isSelected = false;
-      }
-    });
-  };
-
-  this.selectNone = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      node.isSelected = false;
-    });
-  };
-
-  this.selectInvert = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      if (node.parent !== undefined) {
-        return;
-      }
-      node.isSelected = !node.isSelected;
-      if (node.isSelected) {
-        self.selectedNodes.push(node);
-      }
-    });
-  };
-
-  this.selectNodes = function (nodes) {
-    nodes.forEach((node) => {
-      node.isSelected = true;
-      if (self.selectedNodes.indexOf(node) < 0) {
-        self.selectedNodes.push(node);
-      }
-    });
-  };
-
   this.selectNode = function (node) {
     node.isSelected = true;
     if (self.selectedNodes.indexOf(node) < 0) {
@@ -275,30 +234,6 @@ function GraphWorkspace(options) {
     self.topologyChangeHandler?.();
   };
 
-  this.selectNeighbours = function () {
-    const newSelections = [];
-    self.edges.forEach((edge) => {
-      if (!edge.topSrc.isSelected) {
-        if (self.selectedNodes.indexOf(edge.topTarget) >= 0) {
-          if (newSelections.indexOf(edge.topSrc) < 0) {
-            newSelections.push(edge.topSrc);
-          }
-        }
-      }
-      if (!edge.topTarget.isSelected) {
-        if (self.selectedNodes.indexOf(edge.topSrc) >= 0) {
-          if (newSelections.indexOf(edge.topTarget) < 0) {
-            newSelections.push(edge.topTarget);
-          }
-        }
-      }
-    });
-    newSelections.forEach((newlySelectedNode) => {
-      self.selectedNodes.push(newlySelectedNode);
-      newlySelectedNode.isSelected = true;
-    });
-  };
-
   this.selectNone = function () {
     self.selectedNodes.forEach((node) => {
       node.isSelected = false;
@@ -313,12 +248,6 @@ function GraphWorkspace(options) {
 
   this.getAllSelectedNodes = function () {
     return this.returnUnpackedGroupeds(self.selectedNodes);
-  };
-
-  this.colorSelected = function (colorNum) {
-    self.getAllSelectedNodes().forEach((node) => {
-      node.color = colorNum;
-    });
   };
 
   this.getSelectionsThatAreGrouped = function () {
