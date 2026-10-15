@@ -24,18 +24,24 @@ jest.mock('../../application/breadcrumb_context', () => ({
 }));
 
 const mockCanReadRules = true;
+let mockCanAccessClassicRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'chrome') return { docTitle: { change: jest.fn() } };
     if (token === 'application') {
-      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+      return {
+        getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}`,
+        capabilities: {
+          management: { insightsAndAlerting: { triggersActionsRules: mockCanAccessClassicRules } },
+        },
+      };
     }
     if (token === 'settings') {
       return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
     }
     if (token === 'http') {
-      return {};
+      return { basePath: { prepend: (path: string) => path } };
     }
     if (typeof token === 'function') {
       return {
@@ -175,7 +181,6 @@ const buildItem = (
   alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
-  error: null,
   ...overrides,
 });
 
@@ -186,7 +191,6 @@ const buildResponse = (
   page: 1,
   per_page: 50,
   total: 0,
-  search_matches: null,
   ...overrides,
 });
 
@@ -259,6 +263,7 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanAccessClassicRules = true;
     mockNewEventsCount(0);
     mockRuleExecutionFetchResult();
   });
@@ -274,13 +279,6 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
   });
 
-  it('renders the experimental badge in the page header', () => {
-    mockFetchResult();
-    renderPage();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   describe('Rules tab (default)', () => {
     it('renders the rules execution history table by default', () => {
       // The grid (and its wrapper) only renders when there are rows — an empty result shows the
@@ -290,14 +288,12 @@ describe('ExecutionHistoryPage', () => {
           items: [
             {
               id: 'exec-1',
-              rule: { id: 'rule-1', version: null },
+              rule: { id: 'rule-1' },
               space_id: 'default',
               started_at: '2026-05-05T10:00:00.000Z',
               ended_at: '2026-05-05T10:00:01.000Z',
               timings: { duration_ms: 1000, scheduled_delay_ms: 0 },
               outcome: 'success',
-              reason: null,
-              error: null,
             },
           ],
           total: 1,
@@ -308,6 +304,23 @@ describe('ExecutionHistoryPage', () => {
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryTable')).toBeInTheDocument();
+    });
+
+    it('links the Rules tab description to the Classic rule logs', () => {
+      renderPage();
+
+      expect(screen.getByTestId('executionHistoryClassicRuleLogsLink')).toHaveAttribute(
+        'href',
+        '/app/management/insightsAndAlerting/triggersActions/logs'
+      );
+    });
+
+    it('omits the Classic rule logs link when the user cannot access Classic rules', () => {
+      mockCanAccessClassicRules = false;
+      renderPage();
+
+      expect(screen.queryByTestId('executionHistoryClassicRuleLogsLink')).not.toBeInTheDocument();
+      expect(screen.getByText('Review past runs for Universal rules.')).toBeInTheDocument();
     });
 
     it('shows the rules empty state when there are no items', () => {
@@ -371,7 +384,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         }),
       });
       renderPage();
@@ -388,7 +400,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -405,15 +416,14 @@ describe('ExecutionHistoryPage', () => {
         data: buildResponse({
           items: [
             buildItem({
-              policy: { id: 'policy-orphan', name: null },
-              rules: [{ id: 'rule-orphan', name: null }],
-              workflows: [{ id: 'wf-orphan', name: null }],
+              policy: { id: 'policy-orphan' },
+              rules: [{ id: 'rule-orphan' }],
+              workflows: [{ id: 'wf-orphan' }],
             }),
           ],
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         }),
       });
       renderPage();
@@ -450,7 +460,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -472,7 +481,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -494,7 +502,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();

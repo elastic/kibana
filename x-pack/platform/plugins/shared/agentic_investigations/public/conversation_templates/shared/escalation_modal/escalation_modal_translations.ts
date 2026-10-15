@@ -196,7 +196,7 @@ export const ESCALATION_ERRORS = Object.freeze({
   userProfileUnavailable: i18n.translate(
     'xpack.agenticInvestigations.escalation.userProfileUnavailable',
     {
-      defaultMessage: 'Your user profile is unavailable. Private escalations cannot be created.',
+      defaultMessage: 'Your user profile is unavailable. Escalations cannot be created.',
     }
   ),
   retryButton: i18n.translate('xpack.agenticInvestigations.escalation.retryButton', {

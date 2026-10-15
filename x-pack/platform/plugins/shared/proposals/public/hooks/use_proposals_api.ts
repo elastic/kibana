@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { UseInfiniteQueryResult } from '@kbn/react-query';
+import { useCallback } from 'react';
+import type { QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
   useIsMutating,
@@ -110,8 +111,9 @@ const nextConversationProposalsOffset = (
 /**
  * Every proposal on one conversation, decided or not — the investigation flyout's own proposal
  * history, as opposed to `usePendingProposals`'s cross-conversation "awaiting a human" queue.
- * Superseded rows are still dropped: a retried proposal's earlier attempts are not history worth
- * a card of their own, only the live head is.
+ * A failed attempt that a retry replaced stays, as a read-only row that shows how it ended;
+ * superseded rows that were never decided (earlier revisions) are dropped, since their
+ * successor carries the same ask.
  *
  * Paged rather than a single fixed-size read: the list API caps a page at
  * `MAX_PROPOSALS_PAGE_SIZE`, so an investigation with more proposals than that would otherwise
@@ -132,7 +134,8 @@ export const useConversationProposals = (
         version: PROPOSALS_API_VERSION,
         query: {
           conversationId,
-          excludeSuperseded: true,
+          excludeUndecidedSuperseded: true,
+          order: 'newest',
           size: MAX_PROPOSALS_PAGE_SIZE,
           from: pageParam ?? 0,
         },
@@ -274,6 +277,42 @@ export const useDismissProposal = () => {
       await invalidateProposals(queryClient);
     },
   });
+};
+
+/**
+ * Tracks a decline that was issued elsewhere — a bulk close of an investigation releases each
+ * pending proposal's gate server-side — until its decision lands. Shares the decline
+ * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
+ * Resolves once the decision is recorded or the bounded wait gives up; it never rejects.
+ *
+ * Takes the `QueryClient` to track it on, since the surface that closes (the flyout's status
+ * toggle) can run in a different client than the one the cards read `Declining` from. Defaults
+ * to the one in context.
+ */
+export const useSettleDeclinedProposal = () => {
+  const { services } = useKibana();
+  const contextClient = useQueryClient();
+
+  return useCallback(
+    async (id: string, queryClient: QueryClient = contextClient): Promise<void> => {
+      // Built on the cache rather than through a `MutationObserver`: an observer stays attached
+      // to the mutation it started, which keeps it out of garbage collection for the life of a
+      // long-lived shared client. Nothing observes this one, so it is removed once settled.
+      const mutationCache = queryClient.getMutationCache();
+      const mutation = mutationCache.build(queryClient, {
+        mutationKey: mutationKeys.proposals.decline,
+        mutationFn: ({ id: proposalId }: { id: string }): Promise<void> =>
+          waitForDecision(services.http!, proposalId),
+        variables: { id },
+      });
+      try {
+        await mutation.execute();
+      } finally {
+        mutationCache.remove(mutation);
+      }
+    },
+    [contextClient, services.http]
+  );
 };
 
 /**

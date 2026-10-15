@@ -20,6 +20,7 @@ export const sampleCommand = {
   name: Commands.SAMPLE,
   methods: sampleCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.sampleDoc', {
       defaultMessage:

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -20,6 +21,13 @@ import {
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  options: {
+    summary: 'Get monitors',
+    description:
+      'Get a list of monitors.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-synthetic-monitors',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_monitors.yaml'),
+  },
   validate: {},
   validation: {
     request: {

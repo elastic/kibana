@@ -17,6 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Sibling `fields_for_wildcard_route` is ported, this route is not. Tag
+  // `tags.deploymentAgnostic` (like the sibling route).
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/conflicts.spec.ts
   describe('conflicts', () => {
     before(() =>
       esArchiver.load(

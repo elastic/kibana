@@ -25,5 +25,5 @@ export type {
   RulePolicyEntry,
 } from './src/diff';
 export { formatFailure } from './src/report/format_failure';
-export { ESCALATION_LINK } from './src/report/links';
+export { README_LINK } from './src/report/links';
 export { loadAllowlist } from './src/allowlist/load_allowlist';

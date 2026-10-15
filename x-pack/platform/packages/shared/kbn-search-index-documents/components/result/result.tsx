@@ -39,6 +39,28 @@ export interface ResultProps {
   hasDeleteDocumentsPrivilege?: boolean;
 }
 
+const getExpandTooltipText = (isExpanded: boolean, hiddenFieldCount: number): string => {
+  if (hiddenFieldCount > 0) {
+    return isExpanded
+      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
+          defaultMessage: 'Show {amount} fewer fields',
+          values: { amount: hiddenFieldCount },
+        })
+      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
+          defaultMessage: 'Show {amount} more fields',
+          values: { amount: hiddenFieldCount },
+        });
+  }
+
+  return isExpanded
+    ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.collapse', {
+        defaultMessage: 'Collapse fields',
+      })
+    : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.expand', {
+        defaultMessage: 'Expand fields',
+      });
+};
+
 export const Result: React.FC<ResultProps> = ({
   metaData,
   fields,
@@ -50,21 +72,7 @@ export const Result: React.FC<ResultProps> = ({
   hasDeleteDocumentsPrivilege,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const tooltipText =
-    fields.length <= defaultVisibleFields
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.allVisible', {
-          defaultMessage: 'All fields are visible',
-        })
-      : isExpanded
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
-          defaultMessage: 'Show {amount} fewer fields',
-          values: { amount: fields.length - defaultVisibleFields },
-        })
-      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
-          defaultMessage: 'Show {amount} more fields',
-          values: { amount: fields.length - defaultVisibleFields },
-        });
-  const toolTipContent = <>{tooltipText}</>;
+  const tooltipText = getExpandTooltipText(isExpanded, fields.length - defaultVisibleFields);
 
   const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
 
@@ -108,7 +116,12 @@ export const Result: React.FC<ResultProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="left" content={toolTipContent} ref={tooltipRef}>
+              <EuiToolTip
+                position="left"
+                content={tooltipText}
+                ref={tooltipRef}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   size="xs"
                   iconType={isExpanded ? 'fold' : 'unfold'}

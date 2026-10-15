@@ -40,7 +40,7 @@ const CASE_STEPS = {
   covered_enabled: ['propose_confirm', 'report_unconfirmed_rule'],
 } as const;
 
-/** Every step that runs the proposal gate, in switch order. */
+/** Every step that proposes a fix through the proposal gate, in switch order. */
 const PROPOSAL_STEPS = [
   'propose_enable',
   'report_unresolved_rule',
@@ -51,6 +51,12 @@ const PROPOSAL_STEPS = [
   'report_unknown_verdict',
 ];
 
+/** The manual-autonomy gate that asks before any work on the gap. It proposes no fix. */
+const ENTRY_STEP = 'propose_entry';
+
+/** Every step that runs the proposal gate, in workflow order. */
+const GATE_STEPS = [ENTRY_STEP, ...PROPOSAL_STEPS];
+
 const REPORT_STEPS = PROPOSAL_STEPS.filter((name) => name.startsWith('report_'));
 
 const APPLIED_FLAGS = ['enable_approved_not_applied', 'install_approved_not_applied'] as const;
@@ -59,6 +65,7 @@ interface YamlStep {
   name: string;
   type: string;
   if?: string;
+  condition?: string;
   expression?: string;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
@@ -251,15 +258,15 @@ describe('Detection Coverage review', () => {
       ).toBe(expected);
     });
 
-    // Failing before the investigation exists leaves nothing open behind a review
-    // the next sweep will run again.
-    it('stops on a failed lookup before an investigation is opened', () => {
+    // Failing before any proposal keeps the unverified verdict away from the analyst;
+    // the next sweep runs the review again.
+    it('stops on a failed lookup before anything is proposed', () => {
       const fail = stepByName('fail_rule_lookup');
       expect(fail?.type).toBe('workflow.fail');
       expect(fail?.if).toContain('steps.resolve_rule_outcome.output.failed == true');
       expect(stepIndex('resolve_rule')).toBeLessThan(stepIndex('resolve_rule_outcome'));
       expect(stepIndex('resolve_rule_outcome')).toBeLessThan(stepIndex('fail_rule_lookup'));
-      expect(stepIndex('fail_rule_lookup')).toBeLessThan(stepIndex('create_investigation'));
+      expect(stepIndex('fail_rule_lookup')).toBeLessThan(stepIndex('handle_verdict'));
     });
 
     it('offers the install action only with a signature id and a package version', () => {
@@ -285,15 +292,16 @@ describe('Detection Coverage review', () => {
 
     // Without an investigation there is nowhere to propose, so a failed create must
     // fail the run rather than continue into a proposal with an empty conversation id.
-    // A check without a verdict asks nobody, so it opens nothing either.
-    it('opens an investigation from the template for every verdict', () => {
+    // It opens before the check, so the manual entry gate has somewhere to ask.
+    it('opens an investigation from the template before the coverage check', () => {
       const create = stepByName('create_investigation');
       expect(create?.type).toBe('ai.conversation.create');
       expect(create?.with?.template_id).toBe('investigation');
-      expect(create?.if).not.toContain('no_coverage');
-      expect(create?.if).toContain('verdict != null');
-      expect(create?.if).toContain("verdict != ''");
+      expect(create?.if).toContain('steps.read_ki.output.hits.total.value > 0');
+      expect(create?.if).not.toContain('verdict');
       expect(create).not.toHaveProperty('on-failure');
+      expect(stepIndex('gap')).toBeLessThan(stepIndex('create_investigation'));
+      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('coverage_check'));
     });
 
     it('describes the gap from the indicator, not from raw inputs', () => {
@@ -454,7 +462,7 @@ describe('Detection Coverage review', () => {
           type === 'workflow.execute' &&
           input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+      expect(proposals.map(({ name }) => name)).toEqual(GATE_STEPS);
 
       for (const proposal of proposals) {
         // A gate that fails outright must fail the run rather than read as a decision.
@@ -531,13 +539,119 @@ describe('Detection Coverage review', () => {
           type === 'workflow.execute' &&
           input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+      expect(proposals.map(({ name }) => name)).toEqual(GATE_STEPS);
       for (const proposal of proposals) {
         expect(inputsOf(proposal).expiresIn).toBeUndefined();
       }
 
       expect(String(reviewDefinition.settings?.timeout)).toMatch(/^\d+h$/);
       expect(hours(reviewDefinition.settings?.timeout)).toBeGreaterThan(72);
+    });
+  });
+
+  describe('manual autonomy entry gate', () => {
+    const gate = stepByName('entry_gate');
+    const decisionSwitch = stepByName('entry_decision');
+    const entryCaseOf = (match: string) =>
+      decisionSwitch?.cases?.find((c) => c.match === match)?.steps.map(({ name }) => name);
+
+    // Manual stops once for permission before any work on the gap. Assisted takes the
+    // false branch straight to the check.
+    it.each([
+      ['manual', { conversation_id: 'c1' }, true],
+      ['assisted', { conversation_id: 'c1' }, false],
+      ['manual', undefined, false],
+    ])(
+      'at %s autonomy with investigation %j, asks before the check: %s',
+      (autonomy, investigation, expected) => {
+        expect(gate?.type).toBe('if');
+        expect(
+          evaluateExpression(String(gate?.condition), {
+            inputs: { autonomy_level: autonomy },
+            steps: { create_investigation: investigation && { output: investigation } },
+          })
+        ).toBe(expected);
+      }
+    );
+
+    // Each outcome is its own branch, so the workflow graph draws it as a lane.
+    it('asks first, then branches on the decision before the check', () => {
+      expect((gate?.steps ?? []).map(({ name }) => name)).toEqual([ENTRY_STEP, 'entry_decision']);
+      expect(gate).not.toHaveProperty('else');
+      expect(decisionSwitch?.type).toBe('switch');
+      expect(entryCaseOf('dismissed')).toEqual([
+        'mark_declined',
+        'close_investigation_declined',
+        'stop_declined',
+      ]);
+      expect(entryCaseOf('expired')).toEqual(['stop_expired']);
+      // Approval has no case, so it falls through to the check.
+      expect(decisionSwitch?.default).toBeUndefined();
+      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('entry_gate'));
+      expect(stepIndex('stop_expired')).toBeLessThan(stepIndex('coverage_check'));
+    });
+
+    // Only an approval continues. An expired gate reports an empty decision and must not
+    // fall through into the check.
+    it.each([
+      ['approved', ''],
+      ['dismissed', 'dismissed'],
+      ['', 'expired'],
+    ])('routes the entry decision %j to the case %j', (decision, expected) => {
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(String(decisionSwitch?.expression), {
+          steps: { propose_entry: { output: { decision } } },
+        })
+      ).toBe(expected);
+    });
+
+    it.each(['stop_declined', 'stop_expired'])('%s ends the run', (name) => {
+      expect(stepByName(name)?.type).toBe('workflow.output');
+    });
+
+    it('asks on the investigation, without an action', () => {
+      const inputs = inputsOf(stepByName(ENTRY_STEP));
+      expect(inputs.conversationId).toBe('{{ steps.create_investigation.output.conversation_id }}');
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+      // No action, so no inherited category; the queue drops an uncategorised proposal.
+      expect(inputs.category).toBe('configure');
+      expect(String(inputs.comment)).toContain('steps.gap.output.description');
+      expect(String(inputs.comment)).toContain('steps.gap.output.evidence');
+    });
+
+    // A declined gap must leave the queue, or every sweep asks about it again.
+    it('marks a declined gap processed and closes its investigation', () => {
+      const mark = stepByName('mark_declined');
+      const close = stepByName('close_investigation_declined');
+
+      expect(mark?.type).toBe('context-engine.updateKi');
+      expect(mark?.with).toEqual(stepByName('mark_processed')?.with);
+
+      expect(close?.type).toBe('ai.conversation.metadata.patch');
+      expect(close?.with?.conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect((close?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    it('reports the entry decision from every exit', () => {
+      expect(reviewDefinition.outputs?.map(({ name }) => name)).toContain('entry_decision');
+      expect(withOf('stop_declined')?.entry_decision).toBe('dismissed');
+      expect(withOf('stop_declined')?.ki_processed).toBe(
+        '${{ steps.mark_declined.output.result != null }}'
+      );
+      expect(withOf('stop_expired')?.entry_decision).toBe('expired');
+      expect(stepByName('stop_expired')?.with?.ki_processed).toBe(false);
+      expect(withOf('emit_result')?.entry_decision).toBe(
+        '{{ steps.propose_entry.output.decision }}'
+      );
+    });
+
+    // Approving the entry gate permits the work; it does not approve a fix.
+    it('keeps the entry decision out of the fix decision', () => {
+      expect(JSON.stringify(withOf('record_decision'))).not.toContain(ENTRY_STEP);
+      expect(JSON.stringify(withOf('resolve_outcome'))).not.toContain(ENTRY_STEP);
     });
   });
 
@@ -562,6 +676,8 @@ describe('Detection Coverage review', () => {
       'attach_installed_rule',
       'close_investigation_resolved',
       'close_investigation_dismissed',
+      'mark_declined',
+      'close_investigation_declined',
       'mark_processed',
     ])('%s continues on failure so the run still reports', (name) => {
       expect(stepByName(name)?.['on-failure']?.continue).toBe(true);

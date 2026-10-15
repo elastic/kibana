@@ -18,10 +18,13 @@ import {
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
+import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
 }
 
 const formatList = (values: string[] | undefined): string => {
@@ -38,7 +41,7 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
     `Status: ${event.status}`,
     `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
-    `Streams: ${formatList(event.stream_names)}`,
+    `Sources: ${formatList(event.source_ids)}`,
     event.symptom_hypothesis ? `Symptom hypothesis: ${event.symptom_hypothesis}` : undefined,
     `Summary: ${event.summary}`,
   ]
@@ -49,6 +52,7 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
 export const createSignificantEventAttachmentType = ({
   logger,
   getScopedClients,
+  server,
 }: CreateSignificantEventAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SignificantEvent
@@ -57,6 +61,9 @@ export const createSignificantEventAttachmentType = ({
     eventId: string,
     context: AttachmentResolveContext
   ): Promise<SignificantEvent | undefined> => {
+    if (!(await canReadSignificantEvents({ request: context.request, server }))) {
+      return undefined;
+    }
     const { getEventSearchClient } = await getScopedClients({ request: context.request });
     const eventClient = await getEventSearchClient();
 
@@ -115,7 +122,7 @@ export const createSignificantEventAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected streams.',
+      'A significant event attachment represents a durable incident-level event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected sources.',
     getTools: () => [],
   };
 };

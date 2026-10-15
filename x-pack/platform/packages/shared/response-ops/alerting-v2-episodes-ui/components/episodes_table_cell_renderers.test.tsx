@@ -10,8 +10,13 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import { ELASTIC_SOURCE_ICON } from '../source_labels';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
+  EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -37,11 +42,91 @@ const baseCellProps = {
   setCellProps: jest.fn(),
   rowIndex: 0,
   colIndex: 0,
-  columnsMeta: undefined,
   isDetails: false,
   isExpanded: false,
   isExpandable: false,
 };
+
+describe('EpisodeSourceCell', () => {
+  const classicSource = createTestEpisodeSource({
+    id: CLASSIC_EPISODE_SOURCE_ID,
+    label: 'Classic',
+    icon: ELASTIC_SOURCE_ICON,
+  });
+
+  const renderSourceCell = (sourceId?: string) =>
+    renderWithI18n(
+      <EpisodeDataSourceProvider dataSource={classicSource}>
+        <EpisodeSourceCell
+          {...baseCellProps}
+          columnId="alerting_source"
+          row={makeRow({ source_id: sourceId })}
+        />
+      </EpisodeDataSourceProvider>
+    );
+
+  it('shows the icon the classic source declares, with Classic', () => {
+    renderSourceCell(CLASSIC_EPISODE_SOURCE_ID);
+
+    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Classic');
+    expect(screen.getByTestId('episodeSourceIcon')).toBeInTheDocument();
+  });
+
+  it('falls back to the Elastic logo for native ES|QL rows', () => {
+    renderSourceCell(undefined);
+
+    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Universal');
+    expect(screen.getByTestId('episodeSourceIcon')).toBeInTheDocument();
+  });
+
+  it('omits the icon for an unregistered external source', () => {
+    renderSourceCell('zabbix');
+
+    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('zabbix');
+    expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+  });
+
+  describe('alert ingested from an external connector', () => {
+    const renderWithConnector = (connector: unknown) =>
+      renderWithI18n(
+        <EpisodeSourceCell
+          {...baseCellProps}
+          columnId="alerting_source"
+          row={makeRow({ source: connector })}
+        />
+      );
+
+    it('shows only the connector icon followed by its name for a known connector', () => {
+      renderWithConnector('zabbix');
+
+      expect(screen.getByTestId('episodeConnectorSourceIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent('zabbix');
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows only the connector name when there is no icon for it', () => {
+      renderWithConnector('my-custom-source');
+
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent(
+        'my-custom-source'
+      );
+      expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+    });
+
+    it.each([['internal'], [''], [null], [undefined]])(
+      'falls back to the alerting system label when the source is %p',
+      (connector) => {
+        renderWithConnector(connector);
+
+        expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Universal');
+        expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('episodeConnectorSourceName')).not.toBeInTheDocument();
+      }
+    );
+  });
+});
 
 describe('EpisodeStatusCell', () => {
   it('renders the status label plus snooze + ack indicators when the row carries those action fields', () => {
