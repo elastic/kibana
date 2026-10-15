@@ -26,16 +26,10 @@ test.describe(
   'Infrastructure Inventory - Rule flyout pod schema selector',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Sequential project (`playwright.config.ts` / `testDir: './tests'`): beforeAll /
-    // afterAll are safe for the temporary pod Schema flag. Parallel Inventory stays
-    // flag-off. This suite also ingests its own fixtures — sequential specs do not
-    // run `parallel_tests/global.setup.ts`.
-    test.beforeAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': true,
-        },
-      });
+    // Sequential project (`playwright.config.ts` / `testDir: './tests'`). This suite
+    // ingests its own fixtures — sequential specs do not run
+    // `parallel_tests/global.setup.ts`.
+    test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: ingesting Inventory SemConv pod metrics for rule flyout');
       await ingestInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
     });
@@ -62,11 +56,6 @@ test.describe(
 
       log.info('Sequential suite: cleaning Inventory SemConv pod metrics for rule flyout');
       await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': false,
-        },
-      });
     });
 
     test('creating an inventory rule from the pods view prefills the schema selector', async ({

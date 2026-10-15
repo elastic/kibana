@@ -9,11 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
+  ConvergedProposal,
   PackageReportInput,
+  PackageReportMintPayload,
   PackageReportOutput,
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
+import type { AppendAlsoRaisedBy } from './converge_on_live_proposal';
+import { buildConvergenceNote } from './converge_on_live_proposal';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import {
   buildCleanInvestigationSummary,
@@ -25,7 +29,13 @@ import type { EsReportContextClient } from './load_report_hunt_context';
 import { loadReportHuntContext } from './load_report_hunt_context';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
-import type { CoordinatorInputs, CoverageSubject, CoverageWriteResult } from './types';
+import type { ResolveProposalSlot } from './resolve_proposal_slot';
+import type {
+  CoordinatorInputs,
+  CoverageSubject,
+  CoverageWriteResult,
+  UnresolvedMintPayload,
+} from './types';
 
 export class PackageReportIdentityError extends Error {
   constructor(message: string) {
@@ -44,15 +54,12 @@ type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['min
 
 /**
  * Count of Proposals the Investigation already carries (any status, including settled), before
- * this run's own proposals are minted. Used two ways: greater than zero means a rerun that reaches
- * the same Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise
- * mint a second, independent chain for what may be the very same finding -- `decidePackageReport`'s
- * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it yet,
- * so the guard here is coarse, suppressing every new Proposal this run would mint, not only ones
- * that collide with an existing `subjectKey`. It is also the baseline `expectedProposalCount` is
- * built on (see below), so the settlement barrier each gate checks accounts for proposals that
- * already existed before this run, not just the ones this run mints. See the implementation
- * (`check_existing_proposals.ts`) for which statuses count as "existing" and why.
+ * this run's own proposals are minted. It is the baseline `expectedProposalCount` is built on (see
+ * below), so the settlement barrier each gate checks accounts for proposals that already existed
+ * before this run, not just the ones this run mints. Not a guard: whether a finding gets a
+ * Proposal is decided per subject by {@link ResolveProposalSlot}, not by whether the Investigation
+ * has any. See the implementation (`check_existing_proposals.ts`) for which statuses count as
+ * "existing" and why.
  */
 export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
@@ -71,6 +78,10 @@ export interface RunPackageReportDeps {
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
   countExistingProposals: CountExistingProposals;
+  /** Where each finding's Proposal goes: a free id, or the live Proposal to converge onto. */
+  resolveProposalSlot: ResolveProposalSlot;
+  /** Adds this Investigation to the live Proposal's comment when a finding converges onto it. */
+  appendAlsoRaisedBy: AppendAlsoRaisedBy;
   /**
    * *Internal*-user ES client for the no-hit coverage `threat_summary` / severity preference
    * (`loadReportHuntContext`). Only read on the no-hit branch, which has no current-run SSE to
@@ -92,11 +103,11 @@ export interface RunPackageReportDeps {
  *
  * Closes the steady-state case only, not the create window: the packaging workflow dispatches
  * each gate with `workflow.executeAsync` and releases its concurrency slot before any gate has
- * actually created its Proposal (see `hunt_package_report.yaml`'s concurrency comment, which
- * describes the same gap for the mint-side lookup). A clean run that lands in that window sees no
- * open Proposal and still dismisses, stranding the decision the Proposal is about to carry.
- * Closing it for good needs atomic dedup on the Proposals side, the same follow-up as the mint
- * guard (elastic/security-team#19822); do not read this guard as having closed the invariant.
+ * actually created its Proposal. A clean run that lands in that window sees no open Proposal and
+ * still dismisses, stranding the decision the Proposal is about to carry. The per-subject ids
+ * that keep two runs from creating one Proposal twice do not help here: this asks a different
+ * question (is anything open on this Investigation), of a search that lags a write. Do not read
+ * this guard as having closed the invariant.
  */
 const resolveDismissHold = async (
   hasOpenProposal: HasOpenProposal,
@@ -110,6 +121,67 @@ const resolveDismissHold = async (
 };
 
 /**
+ * Turns what `decidePackageReport` wants to propose into what this run actually mints: each
+ * finding either gets a free id to be created under, or converges onto a live Proposal that
+ * already holds its subject, possibly one another Investigation raised.
+ *
+ * Throws if any lookup does, so the caller fails closed and mints nothing. A revision already
+ * made to a live Proposal by then is harmless to repeat: the comment already names this
+ * Investigation, and the next run skips it.
+ */
+const settleProposals = async ({
+  wanted,
+  investigationConversationId,
+  spaceId,
+  deps,
+}: {
+  wanted: UnresolvedMintPayload[];
+  investigationConversationId: string;
+  spaceId: string;
+  deps: Pick<RunPackageReportDeps, 'resolveProposalSlot' | 'appendAlsoRaisedBy'>;
+}): Promise<{
+  proposals: PackageReportMintPayload[];
+  converged: ConvergedProposal[];
+  alreadyOpenCount: number;
+}> => {
+  const proposals: PackageReportMintPayload[] = [];
+  const converged: ConvergedProposal[] = [];
+  let alreadyOpenCount = 0;
+
+  for (const proposal of wanted) {
+    const slot = await deps.resolveProposalSlot({
+      subjectKey: proposal.subjectKey,
+      actionInput: proposal.actionInput,
+    });
+    if (slot.kind === 'mint') {
+      proposals.push({ ...proposal, proposalId: slot.proposalId });
+      continue;
+    }
+
+    const outcome = await deps.appendAlsoRaisedBy({
+      live: slot.live,
+      investigationConversationId,
+    });
+    // This Investigation's own Proposal, found again by a rerun: nothing to add to it and no
+    // journal line to write, but the run still created nothing for this finding, which its
+    // summary has to be able to say.
+    if (outcome === 'same_investigation') {
+      alreadyOpenCount += 1;
+      continue;
+    }
+    converged.push({
+      title: proposal.title ?? slot.live.title,
+      proposalId: slot.live.proposalId,
+      ownerConversationId: slot.live.conversationId,
+      outcome,
+      note: buildConvergenceNote({ spaceId, live: slot.live, outcome }) ?? '',
+    });
+  }
+
+  return { proposals, converged, alreadyOpenCount };
+};
+
+/**
  * The settlement barrier threshold each gate checks before closing the Investigation
  * (`hunt_proposal_gate.yaml`'s `created_count >= expectedProposalCount`). Baselined on
  * `existingProposalCount` rather than just `newProposalCount`: nothing on a Proposal records
@@ -119,16 +191,15 @@ const resolveDismissHold = async (
  * own proposals exist. The baseline makes the barrier track what it actually means: the all-time
  * total has to reach "everything that existed before this run, plus everything this run adds."
  *
- * Exported and kept as a pure function, separate from the suppression decision above, specifically
- * so it can be tested with `existingProposalCount > 0` and `mintSuppression: 'none'` together --
- * a combination `runPackageReport` cannot currently produce (the existing-Proposals guard above
- * suppresses minting entirely whenever any Proposal already exists, so in every case this
- * actually runs today, `existingProposalCount` is 0 and this collapses to `newProposalCount`).
- * That makes it dead weight today, but load-bearing for elastic/security-team#19822: once that
- * phase replaces the coarse guard with real per-finding dedup, a new Proposal minting alongside
- * an Investigation's older ones becomes exactly the case this formula exists for. Do not simplify
- * this back to `newProposalCount` because it looks unreachable -- that is the bug this type was
- * fixing.
+ * Only what this run mints is added to the baseline. A finding that converges onto a live Proposal
+ * mints nothing, and that Proposal belongs to its owner's conversation, so it counts on neither
+ * side: not in this Investigation's all-time total, and not in what it expects. A Proposal this
+ * Investigation already holds (a rerun finding the same subject) is in the baseline already.
+ *
+ * Exported and kept as a pure function, separate from the decision above, so the arithmetic can
+ * be tested on its own. A rerun that mints a new Proposal beside an Investigation's older ones is
+ * exactly the case it exists for. Do not simplify it back to `newProposalCount` because that
+ * looks like the usual case -- that is the bug this baseline was fixing.
  */
 export const computeExpectedProposalCount = ({
   mintSuppression,
@@ -251,6 +322,8 @@ export const runPackageReport = async ({
         status: 'packaged',
         coverage,
         proposals: [],
+        converged: [],
+        alreadyOpenCount: 0,
         proposalBullets: [],
         omittedProposalCount: 0,
         dismiss: dismissHold === 'none',
@@ -315,22 +388,27 @@ export const runPackageReport = async ({
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
   let mintSuppression: MintSuppression = 'none';
   let existingProposalCount = 0;
+  let proposals: PackageReportMintPayload[] = [];
+  let converged: ConvergedProposal[] = [];
+  let alreadyOpenCount = 0;
   if (!decided.dismiss) {
     try {
       existingProposalCount = await deps.countExistingProposals(investigationConversationId);
-      mintSuppression = existingProposalCount > 0 ? 'existing_proposals' : 'none';
+      ({ proposals, converged, alreadyOpenCount } = await settleProposals({
+        wanted: decided.proposals,
+        investigationConversationId,
+        spaceId,
+        deps,
+      }));
     } catch {
-      // Fails closed: the guard's job is to never let a duplicate mint through, so the one case
-      // it must not mishandle is the one where it cannot tell. But a lookup failure is not "a
-      // Proposal already exists" -- kept distinguishable so the summary below never asserts a
-      // cause it never actually observed.
+      // Fails closed: the one case it must not mishandle is the one where it cannot tell what
+      // already exists, because minting then could duplicate a Proposal an analyst is deciding on.
+      // `proposals`, `converged` and `alreadyOpenCount` still hold their empty starting values:
+      // they are only assigned from a `settleProposals` that returned.
       mintSuppression = 'check_failed';
     }
   }
-  const proposals = mintSuppression === 'none' ? decided.proposals : [];
 
-  // Written once the proposal outcome is known, so the summary describes what was minted: a run
-  // the existing-Proposal guard suppressed proposed nothing, and one held open was not dismissed.
   const subjects = deriveCoverageSubjects({
     spaceId,
     state: {
@@ -341,6 +419,8 @@ export const runPackageReport = async ({
         decided: { dismiss: decided.dismiss, proposals },
         mintSuppression,
         dismissHold,
+        converged,
+        alreadyOpen: alreadyOpenCount,
       }),
       coordinator,
       reportContext,
@@ -367,18 +447,17 @@ export const runPackageReport = async ({
     status: 'packaged',
     coverage,
     proposals,
+    converged,
+    alreadyOpenCount,
     proposalBullets,
     omittedProposalCount,
-    // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
-    // consequence, not an oversight: `decidePackageReport` could not previously return
-    // `dismiss: false` with an empty `proposals` (it always filled at least the
-    // analyst-recommendation fallback), so every non-dismiss run had a gate that would eventually
-    // close the Investigation. A suppressed run has none -- if the Investigation's only existing
-    // Proposal already settled before this run, nothing here re-closes it, and it stays open until
-    // an analyst does so by hand. That is intentional for this guard, matching "reopen
-    // Investigations on rerun"'s own goal of keeping a possibly-new finding visible rather than
-    // silently closed; elastic/security-team#19822 (phase 3) resolves it as a side effect of real
-    // per-finding dedup, not as a standalone fix.
+    // Not forced to `true`: a confirmed hit is not benign, even when this run mints nothing for
+    // it. Accepted consequence, not an oversight: every finding may have converged onto a live
+    // Proposal (this Investigation's own, or another's), in which case no gate of this run exists
+    // to close the Investigation, and it stays open until an analyst does so by hand. The journal
+    // line written for each converged finding says where it went, which keeps the finding visible
+    // rather than silently closed. Whether such an Investigation should close itself, with a
+    // pointer to the Proposal, is a decision left for a follow-up.
     dismiss: decided.dismiss && dismissHold === 'none',
     dismissHold,
     closureSummary: decided.closureSummary,

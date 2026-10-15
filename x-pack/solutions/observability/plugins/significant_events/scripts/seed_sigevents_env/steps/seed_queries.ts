@@ -27,7 +27,7 @@ export async function seedQueries(
   const prepared = scenario.queries.map((q: SeedQuery) => ({
     q,
     queryId: deterministicId(ctx.scenarioName, q.title, 'query'),
-    esql: q.esql(ctx.streamName),
+    esql: q.esql(ctx.viewName),
   }));
 
   for (const { q, queryId, esql } of prepared) {
@@ -37,7 +37,7 @@ export async function seedQueries(
       esql: { query: esql },
       ...(q.severityScore !== undefined ? { severity_score: q.severityScore } : {}),
       description: q.description ?? '',
-      target_name: ctx.streamName,
+      source_id: ctx.sourceId,
     };
     const res = await kibanaRequest(config, 'PUT', path, body, ctx.space);
     if (res.status >= 300) {
@@ -67,7 +67,7 @@ export async function seedQueries(
 
   return prepared.map(({ q, queryId, esql }) => ({
     queryId,
-    ruleId: computeRuleId(ctx.streamName, queryId, esql),
+    ruleId: computeRuleId(ctx.space, ctx.sourceId, queryId, esql),
     title: q.title,
     esql,
     severityScore: q.severityScore,

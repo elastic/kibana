@@ -1,5 +1,5 @@
 {
-  "sha1": "971c8c00f693dfbb4f2cafbb6249af762dfd1654",
+  "sha1": "c9b602952d4de44846ba27256877cd27e5e9cfd0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -408,6 +408,19 @@
       }
     },
     {
+      "id": "684750a15c38442-eeb0f30d99dedb6",
+      "title": "Bulk series actions API precondition: reports INVALID_ALERT_STATE_TRANSITION for a series that is not snoozed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 142,
+        "column": 5
+      }
+    },
+    {
       "id": "684750a15c38442-45588f70113de12",
       "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
       "expectedStatus": "passed",
@@ -416,8 +429,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 132,
-        "column": 7
+        "line": 195,
+        "column": 17
       }
     },
     {
@@ -429,8 +442,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 181,
-        "column": 25
+        "line": 239,
+        "column": 71
       }
     },
     {
@@ -442,8 +455,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 210,
-        "column": 28
+        "line": 270,
+        "column": 22
       }
     },
     {
@@ -455,8 +468,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 220,
-        "column": 25
+        "line": 280,
+        "column": 40
       }
     },
     {
@@ -468,8 +481,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 228,
-        "column": 59
+        "line": 289,
+        "column": 12
       }
     },
     {
@@ -481,8 +494,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 242,
-        "column": 5
+        "line": 298,
+        "column": 7
       }
     },
     {
@@ -494,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 253,
-        "column": 22
+        "line": 311,
+        "column": 12
       }
     },
     {
@@ -507,8 +520,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 263,
-        "column": 5
+        "line": 319,
+        "column": 91
       }
     },
     {
@@ -520,8 +533,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 275,
-        "column": 5
+        "line": 331,
+        "column": 94
       }
     },
     {
@@ -533,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 289,
-        "column": 7
+        "line": 345,
+        "column": 99
       }
     },
     {
@@ -546,8 +559,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 302,
-        "column": 22
+        "line": 360,
+        "column": 12
       }
     },
     {
@@ -559,8 +572,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 314,
-        "column": 27
+        "line": 372,
+        "column": 16
       }
     },
     {
@@ -572,8 +585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 331,
-        "column": 39
+        "line": 393,
+        "column": 23
       }
     },
     {
@@ -585,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 347,
-        "column": 23
+        "line": 403,
+        "column": 14
       }
     },
     {
@@ -598,8 +611,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 361,
-        "column": 18
+        "line": 415,
+        "column": 9
       }
     },
     {
@@ -1326,7 +1339,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 23
       }
     },
@@ -1339,8 +1352,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 22
+      }
+    },
+    {
+      "id": "4142b94b18e5336-65b3b8e563a3146",
+      "title": "Create snooze series action API precondition: repeating the expiry in effect returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 101,
+        "column": 22
+      }
+    },
+    {
+      "id": "4142b94b18e5336-89a48b726e81366",
+      "title": "Create snooze series action API precondition: repeating an indefinite snooze returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 138,
+        "column": 29
+      }
+    },
+    {
+      "id": "4142b94b18e5336-bbcf557b19bfe67",
+      "title": "Create snooze series action API precondition: an indefinite snooze after a timed one is judged on its own, not the earlier expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 165,
+        "column": 24
+      }
+    },
+    {
+      "id": "4142b94b18e5336-bf1298078024803",
+      "title": "Create snooze series action API precondition: changing the expiry in effect returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 212,
+        "column": 9
       }
     },
     {
@@ -1352,8 +1417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 246,
+        "column": 23
       }
     },
     {
@@ -1365,8 +1430,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 255,
+        "column": 30
       }
     },
     {
@@ -1378,8 +1443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 121,
-        "column": 7
+        "line": 267,
+        "column": 18
       }
     },
     {
@@ -1391,8 +1456,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 297,
+        "column": 14
       }
     },
     {
@@ -1404,8 +1469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 297,
+        "column": 14
       }
     },
     {
@@ -1417,8 +1482,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 297,
+        "column": 14
       }
     },
     {
@@ -1430,8 +1495,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 297,
+        "column": 14
       }
     },
     {
@@ -1443,8 +1508,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 159,
-        "column": 85
+        "line": 305,
+        "column": 16
       }
     },
     {
@@ -1456,8 +1521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 171,
-        "column": 5
+        "line": 315,
+        "column": 43
       }
     },
     {
@@ -1469,8 +1534,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 182,
-        "column": 8
+        "line": 331,
+        "column": 5
       }
     },
     {
@@ -1794,8 +1859,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 23
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-41998895819eb41",
+      "title": "Create unsnooze series action API precondition: unsnoozing a series that was never snoozed returns 409 and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 75,
+        "column": 14
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-b22ab9202f66101",
+      "title": "Create unsnooze series action API precondition: a repeated unsnooze returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 109,
+        "column": 9
       }
     },
     {
@@ -1807,8 +1898,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 68,
-        "column": 14
+        "line": 152,
+        "column": 29
       }
     },
     {
@@ -1820,8 +1911,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 78,
-        "column": 98
+        "line": 162,
+        "column": 16
       }
     },
     {
@@ -1833,8 +1924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 171,
+        "column": 5
       }
     },
     {
@@ -1846,8 +1937,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 101,
-        "column": 11
+        "line": 183,
+        "column": 85
       }
     },
     {
@@ -1859,8 +1950,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 110,
-        "column": 63
+        "line": 193,
+        "column": 5
       }
     },
     {

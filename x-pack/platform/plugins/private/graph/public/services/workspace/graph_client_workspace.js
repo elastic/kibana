@@ -123,6 +123,7 @@ function GraphWorkspace(options) {
   this.lastRequest = null;
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
+  this.topologyChangeHandler = options.topologyChangeHandler;
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }
@@ -890,7 +891,9 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
+    // Layout must initialize edge.topSrc/topTarget before the topology callback snapshots their IDs.
     this.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.mergeIds = function (parentId, childId) {

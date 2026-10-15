@@ -28,8 +28,11 @@ jest.mock('./get_risk_inputs_index', () => ({
   getRiskInputsIndex: async () => ({ index: '.alerts-security.alerts-default' }),
 }));
 
+const ENGINE_ALERT_FILTER = { term: { 'kibana.alert.workflow_status': 'open' } };
+const ENTITY_IDENTITY_FILTER = { term: { 'user.name': 'alice' } };
+
 jest.mock('./maintainer/steps/build_alert_filters', () => ({
-  buildAlertFilters: () => [],
+  buildAlertFilters: () => [ENGINE_ALERT_FILTER],
 }));
 
 jest.mock('./maintainer/lookup/lookup_index', () => ({
@@ -52,9 +55,11 @@ jest.mock('./maintainer/steps/run_resolution_scoring_step', () => ({
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     dsl: {
-      getEuidFilterBasedOnDocument: () => ({ term: { 'user.name': 'alice' } }),
+      getEuidFilterBasedOnDocument: () => ENTITY_IDENTITY_FILTER,
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const ENTITY_ID = 'user:alice@okta';
@@ -109,6 +114,19 @@ describe('recalculateEntityRiskScore', () => {
 
     expect(mockPersistZeroBaseScore).toHaveBeenCalledWith(
       expect.objectContaining({ entityId: ENTITY_ID, entityType: EntityType.user })
+    );
+  });
+
+  it('scores the resolution group with the engine alert filters but not the entity filter', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity(70)] });
+
+    await run();
+
+    expect(mockScoreBaseEntities).toHaveBeenCalledWith(
+      expect.objectContaining({ alertFilters: [ENGINE_ALERT_FILTER, ENTITY_IDENTITY_FILTER] })
+    );
+    expect(mockRunResolutionScoringStep).toHaveBeenCalledWith(
+      expect.objectContaining({ alertFilters: [ENGINE_ALERT_FILTER] })
     );
   });
 
