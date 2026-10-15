@@ -47,6 +47,10 @@ const API_KEY = flag('--apiKey', process.env.API_KEY);
 const AUTH_HEADER = API_KEY
   ? `ApiKey ${API_KEY}`
   : 'Basic ' + Buffer.from(`${ES_USERNAME}:${ES_PASSWORD}`).toString('base64');
+// Printed curl hints reference $API_KEY instead of the secret; export it before pasting them.
+const CURL_AUTH = API_KEY
+  ? `-H "Authorization: ApiKey $API_KEY"`
+  : `-u ${ES_USERNAME}:${ES_PASSWORD}`;
 
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
@@ -506,7 +510,7 @@ async function indexAlerts() {
     }
     console.log(`\n  Poll for result:`);
     console.log(
-      `  curl -H 'Authorization: ${AUTH_HEADER}' '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
+      `  curl ${CURL_AUTH} '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
   } else {
     // Write payloads to temp files — avoids multiline -d quoting issues on paste.
@@ -523,7 +527,7 @@ async function indexAlerts() {
       console.log(`    API body:    ${payloadFile}`);
       console.log(`    UI Run body: ${uiPayloadFile}`);
     }
-    console.log(`\ncurl -u elastic:changeme -XPOST \\`);
+    console.log(`\ncurl ${CURL_AUTH} -XPOST \\`);
     console.log(`  '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/workflow/${WORKER_ID}/run' \\`);
     console.log(`  -H 'kbn-xsrf: true' \\`);
     console.log(`  -H 'elastic-api-version: 2023-10-31' \\`);
