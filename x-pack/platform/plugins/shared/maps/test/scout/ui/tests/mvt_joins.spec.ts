@@ -31,22 +31,25 @@ test.describe('Maps - vector tile layer with joins', { tag: '@local-stateful-cla
 
   test('legend and tooltip', async ({ page, pageObjects }) => {
     await test.step('should show dynamic data range in legend', async () => {
-      const split = (await pageObjects.maps.getLayerTOCDetails(LAYER_NAME)).trim().split('\n');
-
-      // field display name
-      expect(split[0]).toBe('max prop1');
-
-      // bands 1-8
-      expect(split.slice(1, 9)).toStrictEqual([
-        '< 4.13',
-        '4.13 up to 5.25',
-        '5.25 up to 6.38',
-        '6.38 up to 7.5',
-        '7.5 up to 8.63',
-        '8.63 up to 9.75',
-        '9.75 up to 11',
-        '>= 11',
-      ]);
+      await expect
+        .poll(
+          async () =>
+            (await pageObjects.maps.getLayerTOCDetails(LAYER_NAME)).trim().split('\n').slice(0, 9),
+          { timeout: 15_000 }
+        )
+        .toStrictEqual([
+          // field display name
+          'max prop1',
+          // bands 1-8
+          '< 4.13',
+          '4.13 up to 5.25',
+          '5.25 up to 6.38',
+          '6.38 up to 7.5',
+          '7.5 up to 8.63',
+          '8.63 up to 9.75',
+          '9.75 up to 11',
+          '>= 11',
+        ]);
     });
 
     await test.step('should show join metrics in tooltip', async () => {
@@ -65,22 +68,26 @@ test.describe('Maps - vector tile layer with joins', { tag: '@local-stateful-cla
     await pageObjects.maps.setAndSubmitQuery('prop1 < 10');
 
     await test.step('should update dynamic data range in legend', async () => {
-      const split = (await pageObjects.maps.getLayerTOCDetails(LAYER_NAME)).trim().split('\n');
-
-      // field display name
-      expect(split[0]).toBe('max prop1');
-
-      // bands 1-8
-      expect(split.slice(1, 9)).toStrictEqual([
-        '< 3.63',
-        '3.63 up to 4.25',
-        '4.25 up to 4.88',
-        '4.88 up to 5.5',
-        '5.5 up to 6.13',
-        '6.13 up to 6.75',
-        '6.75 up to 7.38',
-        '>= 7.38',
-      ]);
+      // join metrics load separately from the map; poll until the legend reflects the query
+      await expect
+        .poll(
+          async () =>
+            (await pageObjects.maps.getLayerTOCDetails(LAYER_NAME)).trim().split('\n').slice(0, 9),
+          { timeout: 15_000 }
+        )
+        .toStrictEqual([
+          // field display name
+          'max prop1',
+          // bands 1-8
+          '< 3.63',
+          '3.63 up to 4.25',
+          '4.25 up to 4.88',
+          '4.88 up to 5.5',
+          '5.5 up to 6.13',
+          '6.13 up to 6.75',
+          '6.75 up to 7.38',
+          '>= 7.38',
+        ]);
     });
 
     await test.step('fit to bounds should exclude source features without join matches', async () => {
