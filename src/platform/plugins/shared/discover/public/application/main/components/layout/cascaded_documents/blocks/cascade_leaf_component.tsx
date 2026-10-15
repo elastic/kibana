@@ -40,7 +40,10 @@ import {
   type HtmlPortalNode,
 } from 'react-reverse-portal';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
-import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
+import {
+  getCustomCascadeGridBodyStyle,
+  cascadeToolbarPortalNodeTestSubjAttribute,
+} from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
@@ -301,7 +304,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
       () =>
         createHtmlPortalNode({
           attributes: {
-            ['data-test-subj']: 'discoverCascadeToolbarPortal',
+            ['data-test-subj']: cascadeToolbarPortalNodeTestSubjAttribute,
           },
         }),
       []
