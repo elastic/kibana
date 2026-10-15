@@ -24,7 +24,7 @@ export const resolveMemoryUserScopeId = async ({
   const profileUid = await resolveUserProfileUid({
     request,
     security: coreStart.security,
-    esClient: esClient.asInternalUser,
+    esClient,
   });
   if (!profileUid) {
     throw new Error('Cannot store user memory without a user profile.');

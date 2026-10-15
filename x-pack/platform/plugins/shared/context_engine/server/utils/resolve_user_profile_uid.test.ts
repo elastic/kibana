@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { resolveUserProfileUid } from './resolve_user_profile_uid';
 
+// base64("key-id:secret")
+const API_KEY_AUTHORIZATION = 'ApiKey a2V5LWlkOnNlY3JldA==';
+
 describe('resolveUserProfileUid', () => {
-  const request = httpServerMock.createKibanaRequest();
   const getCurrentUser = jest.fn();
   const suggestUserProfiles = jest.fn();
+  const getApiKey = jest.fn();
   const security = { authc: { getCurrentUser } } as unknown as SecurityServiceStart;
-  const esClient = { security: { suggestUserProfiles } } as unknown as ElasticsearchClient;
+  const esClient = {
+    asInternalUser: { security: { suggestUserProfiles } },
+    asCurrentUser: { security: { getApiKey } },
+  } as unknown as IScopedClusterClient;
 
-  const run = () => resolveUserProfileUid({ request, security, esClient });
+  const run = (request: KibanaRequest = httpServerMock.createKibanaRequest()) =>
+    resolveUserProfileUid({ request, security, esClient });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,11 +65,33 @@ describe('resolveUserProfileUid', () => {
     await expect(run()).resolves.toBeUndefined();
   });
 
-  it('does not resolve API keys', async () => {
+  it("resolves an API key to its owner's profile", async () => {
+    getCurrentUser.mockReturnValue({ username: 'alice', authentication_type: 'api_key' });
+    getApiKey.mockResolvedValue({ api_keys: [{ id: 'key-id', profile_uid: 'u_owner' }] });
+
+    await expect(
+      run(httpServerMock.createKibanaRequest({ headers: { authorization: API_KEY_AUTHORIZATION } }))
+    ).resolves.toBe('u_owner');
+    expect(getApiKey).toHaveBeenCalledWith({ id: 'key-id', with_profile_uid: true });
+    expect(suggestUserProfiles).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined when the API key cannot read itself', async () => {
+    getCurrentUser.mockReturnValue({ username: 'alice', authentication_type: 'api_key' });
+    getApiKey.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 403, body: {}, warnings: null, meta: {} as never })
+    );
+
+    await expect(
+      run(httpServerMock.createKibanaRequest({ headers: { authorization: API_KEY_AUTHORIZATION } }))
+    ).resolves.toBeUndefined();
+  });
+
+  it('returns undefined for an API key without an authorization header', async () => {
     getCurrentUser.mockReturnValue({ username: 'alice', authentication_type: 'api_key' });
 
     await expect(run()).resolves.toBeUndefined();
-    expect(suggestUserProfiles).not.toHaveBeenCalled();
+    expect(getApiKey).not.toHaveBeenCalled();
   });
 
   it('returns undefined without a user', async () => {

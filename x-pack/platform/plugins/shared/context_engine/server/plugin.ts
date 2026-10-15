@@ -407,7 +407,7 @@ export class ContextEnginePlugin
             await resolveUserProfileUid({
               request,
               security: coreStart.security,
-              esClient: coreStart.elasticsearch.client.asInternalUser,
+              esClient: coreStart.elasticsearch.client.asScoped(request),
             })
           ),
         auditLogger: coreStart.security.audit.asScoped(request),
