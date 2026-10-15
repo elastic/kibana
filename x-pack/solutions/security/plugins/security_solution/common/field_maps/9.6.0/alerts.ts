@@ -6,10 +6,12 @@
  */
 
 import { alertsFieldMap931 } from '../9.3.1';
+import { endpointAgentExposureFieldMap } from './endpoint_agent_exposure';
 import { ALERT_ENTITY_ID } from '../field_names';
 
 export const alertsFieldMap960 = {
   ...alertsFieldMap931,
+  ...endpointAgentExposureFieldMap,
   [ALERT_ENTITY_ID]: {
     type: 'keyword',
     array: true,
