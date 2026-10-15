@@ -155,7 +155,15 @@ export {
   type AgentBuilderAttachmentInvalidError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName, type CurrentUser } from './base/users';
+export {
+  type UserIdAndName,
+  type CurrentUser,
+  type UserPrincipalType,
+  isUserProfileId,
+  SERVICE_ACCOUNT_ID_PREFIX,
+  REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
+} from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
@@ -534,6 +542,7 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export { SYSTEM_USER_ID } from './constants';
 export type {
   ConversationTemplate,
   ConversationTemplateInputType,
