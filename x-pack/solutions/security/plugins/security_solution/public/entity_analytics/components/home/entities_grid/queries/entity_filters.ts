@@ -29,11 +29,11 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   { key: 'dataSources', field: 'entity.source', isMultiValue: true },
 ];
 
-/** The risk level a resolved row shows: its resolved entity's, or its own when it has no resolution level. */
-const RESOLVED_RISK_LEVEL = `COALESCE(${RESOLUTION_RISK_LEVEL_FIELD}, ${RISK_LEVEL_FIELD})`;
-
-const getFilterField = (key: keyof EntityFilters, field: string, rowsMode: RowsMode): string =>
-  key === 'riskLevels' && rowsMode === 'resolved' ? RESOLVED_RISK_LEVEL : field;
+/** Not `COALESCE(…) IN (…)`: a computed filter makes Elasticsearch scan every entity (22s vs 1s at 10M). */
+const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
+  `(${RESOLUTION_RISK_LEVEL_FIELD} IN (${toList(
+    values
+  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${RISK_LEVEL_FIELD} IN (${toList(values)})))`;
 
 /** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
 export const buildEntityFiltersExpression = (
@@ -43,10 +43,12 @@ export const buildEntityFiltersExpression = (
   ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
-    const filterField = getFilterField(key, field, rowsMode);
+    if (key === 'riskLevels' && rowsMode === 'resolved') {
+      return [buildResolvedRiskLevelCondition(values)];
+    }
     return isMultiValue
-      ? [buildMvContainsExpression(filterField, values)]
-      : [`${filterField} IN (${toList(values)})`];
+      ? [buildMvContainsExpression(field, values)]
+      : [`${field} IN (${toList(values)})`];
   }).join(' AND ');
 
 export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>

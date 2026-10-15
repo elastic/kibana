@@ -63,7 +63,7 @@ describe('toEsql', () => {
     };
 
     expect(toEsql(filters).entityExpression).toBe(
-      'COALESCE(entity.relationships.resolution.risk.calculated_level, entity.risk.calculated_level) IN ("High")'
+      '(entity.relationships.resolution.risk.calculated_level IN ("High") OR (entity.relationships.resolution.risk.calculated_level IS NULL AND entity.risk.calculated_level IN ("High")))'
     );
     expect(toEsql({ ...filters, rowsMode: 'individual' }).entityExpression).toBe(
       'entity.risk.calculated_level IN ("High")'
