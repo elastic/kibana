@@ -446,3 +446,4 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
     }
   );
+});
