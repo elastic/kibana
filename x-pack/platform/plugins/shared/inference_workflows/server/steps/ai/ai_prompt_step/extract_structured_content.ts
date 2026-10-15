@@ -36,8 +36,9 @@ export const wrapStructuredOutputSchema = (schema: unknown) => ({
  *  2. unwrapped and valid: the arguments themselves validate against the schema. Arguments that
  *     carry a non-null `response` key the schema does not declare are never taken as unwrapped
  *     content;
- *  3. wrapped but out of schema: a non-null `response` is returned as is and a warning naming the
- *     failing paths is logged, so one out-of-bounds field does not discard the whole answer;
+ *  3. wrapped but out of schema: a warning naming the failing paths is logged, so one out-of-bounds
+ *     field does not discard the whole answer. The non-null `response` is returned as is, unless the
+ *     schema declares a `response` property itself, then the whole arguments object is returned;
  *  4. anything else (not an object, `{}`, missing or null `response` with non-matching arguments)
  *     throws, so a step can never complete with empty content.
  */
@@ -81,7 +82,8 @@ export const extractStructuredContent = ({
         `The model response does not match the step "schema"; returning it as is. ` +
           `Failing paths: ${failingPaths.join('; ')}`
       );
-      return wrapped;
+      // A schema that declares `response` itself means the arguments are the answer, not a wrapper.
+      return declaresResponseProperty ? parsed : wrapped;
     }
   }
 
