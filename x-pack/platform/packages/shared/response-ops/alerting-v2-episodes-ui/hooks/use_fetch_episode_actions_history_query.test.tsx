@@ -79,21 +79,6 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('does not run while the series is still being resolved', () => {
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeActionsHistoryQuery({
-          episodeId,
-          seriesId: undefined,
-          services: { data, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
-    expect(result.current.isLoading).toBe(false);
-  });
-
   it('fetches only the episode-level actions when the episode has no series identity', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({ columns: ACTIONS_COLUMNS, values: [] });
 

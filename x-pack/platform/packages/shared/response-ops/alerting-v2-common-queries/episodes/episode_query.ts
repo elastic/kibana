@@ -18,7 +18,8 @@ import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
  * Builds an ES|QL query that returns the single aggregated row for one episode,
  * reusing the same aggregation pipeline as the list query but narrowed to the
  * episode's `group_hash` so the aggregations don't scan the whole space; they
- * still key the rows by series, so another rule sharing the hash is not mixed in. Callers that don't know the `group_hash` can resolve it first with
+ * still key the rows by series, so another rule sharing the hash is not mixed in.
+ * Callers that don't know the `group_hash` can resolve it first with
  * `buildEpisodeGroupHashQuery`.
  */
 export const buildEpisodeQuery = (

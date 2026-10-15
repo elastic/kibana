@@ -79,16 +79,16 @@ export const buildEpisodeActionsHistoryQuery = (
     .where`space_id == ${spaceId}`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
-  if (before) {
-    query.where`@timestamp <= ${before}`;
-  }
-
   if (seriesId) {
     // The id is derived after the filters above so it is only computed for user actions.
     query.pipe(ACTIONS_SERIES_ID_EVAL)
       .where`alert_id == ${episodeId} OR (alert_id IS NULL AND series_id == ${seriesId})`;
   } else {
     query.where`alert_id == ${episodeId}`;
+  }
+
+  if (before) {
+    query.where`@timestamp <= ${before}`;
   }
 
   return asTypedEsqlQuery<RawEpisodeActionHistoryEntry>(

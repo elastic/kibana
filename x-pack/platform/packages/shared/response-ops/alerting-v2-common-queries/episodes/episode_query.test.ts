@@ -27,7 +27,7 @@ describe('buildEpisodeQuery', () => {
     expect(groupHashFilterIndex).toBeLessThan(firstInlineStatsIndex);
   });
 
-  it('keys the aggregations by series so a rule sharing the group hash is not mixed in', () => {
+  it('keys the aggregations by series ID', () => {
     const queryString = buildEpisodeQuery(SPACE_ID, 'ep-1', GROUP_HASH).print('basic');
     expect(queryString).toMatch(/INLINE STATS last_snooze_action[^|]*BY series_id/);
     expect(queryString).toMatch(/KEEP [^|]*\bseries_id\b/);

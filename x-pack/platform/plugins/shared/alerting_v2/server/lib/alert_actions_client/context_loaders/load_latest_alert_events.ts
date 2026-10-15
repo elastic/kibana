@@ -47,8 +47,6 @@ interface LoadLatestAlertEventsBySeriesParams {
 /**
  * Filters `.rule-events` to one decoded series: rule-backed series by the
  * rule that owns them, external ones by their source, both by `group_hash`.
- * The hash is repeated per branch rather than factored out because it is
- * only unique within an owner.
  */
 const buildSeriesCondition = (series: DecodedSeriesId) =>
   series.kind === 'rule'
@@ -57,12 +55,10 @@ const buildSeriesCondition = (series: DecodedSeriesId) =>
 
 /**
  * Resolves the latest `.rule-events` row per series in a single ES|QL
- * round-trip, keyed by the series' canonical id (`encodeSeriesId`). A series
- * is identified by its owner and `group_hash`, since the hash alone is shared
- * by every rule that groups the same values. The space is always the
- * request's: callers drop series whose own space differs before getting here.
- * Series that have no matching event don't appear in the result; callers that
- * need throw-on-empty semantics layer that on top
+ * round-trip, keyed by the series' id(`encodeSeriesId`). A series
+ * is identified by its owner and `group_hash`. The space is always the
+ * request's. Series that have no matching event don't appear in the result;
+ * callers that need throw-on-empty semantics layer that on top
  * ({@link loadLastSeriesAlertEventOrThrow}).
  */
 export const loadLatestAlertEventsBySeries = async ({
@@ -92,8 +88,10 @@ export const loadLatestAlertEventsBySeries = async ({
         status = LAST(status, @timestamp),
         source = LAST(source, @timestamp),
         rule_id = LAST(rule.id, @timestamp),
-        rule_version = LAST(rule.version, @timestamp)
-      BY series_id, group_hash, space_id`
+        rule_version = LAST(rule.version, @timestamp),
+        group_hash = LAST(group_hash, @timestamp),
+        space_id = LAST(space_id, @timestamp)
+      BY series_id`
     .keep(
       '@timestamp',
       'group_hash',

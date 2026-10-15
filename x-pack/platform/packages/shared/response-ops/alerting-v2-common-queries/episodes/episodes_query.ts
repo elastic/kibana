@@ -127,15 +127,12 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
 };
 
 const addSeriesActionStats = (query: ComposerQuery) => {
-  // `group_hash` is rule-local — rules with the same grouping values, and every
-  // ungrouped rule, share one — so the stats are keyed by the series id, which
-  // also carries the space and the owner.
   // prettier-ignore
   query
     .pipe(SERIES_ID_EVAL)
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
                        snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
+                       first_series_event_timestamp = MIN(@timestamp)     WHERE type == "alert"
           BY series_id`;
 };
 

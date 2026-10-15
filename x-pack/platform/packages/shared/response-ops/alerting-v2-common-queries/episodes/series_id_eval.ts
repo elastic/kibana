@@ -9,9 +9,14 @@
  * Builds the `series_id` expression for a given rule id column. The id is
  * base64url of `1::rule::{space_id}::{rule_id}::{group_hash}` for rule-backed
  * series (`source` null or `internal`) and `1::source::{space_id}::{source}::{group_hash}`
- * for external ones; it is null when the owner is missing. `TO_BASE64` emits
- * standard base64, so the `REPLACE`s turn it into base64url: `+` to `-`,
- * `/` to `_`, padding stripped.
+ * for external ones; it is null when the owner is missing.
+ *
+ * The leading `1` is the format version, not part of the identity: the `rule` / `source`
+ * segment  already tells the kinds apart. It lets the decoder reject an id of a layout
+ * it doesn't know instead of misparsing it.
+ *
+ * `TO_BASE64` emits standard base64, so the `REPLACE`s turn it into base64url:
+ * `+` to `-`, `/` to `_`, padding stripped.
  *
  * Must produce the same bytes as `encodeSeriesId` in `@kbn/alerting-v2-utils`,
  * which is what the server decodes.

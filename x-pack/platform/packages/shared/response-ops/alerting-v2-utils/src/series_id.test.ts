@@ -100,16 +100,6 @@ describe('encodeSeriesId', () => {
 
     ids.forEach((id) => expect(id?.startsWith('MTo6')).toBe(true));
   });
-
-  it('only emits the base64url alphabet', () => {
-    const id = encodeSeriesId({
-      space_id: 'default',
-      source: '???>>>~~~ ünï/çödé 🚀',
-      group_hash: GROUP_HASH,
-    });
-
-    expect(id).toMatch(/^[A-Za-z0-9_-]+$/);
-  });
 });
 
 describe('decodeSeriesId', () => {

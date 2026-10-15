@@ -87,7 +87,9 @@ describe('loadLatestAlertEventsBySeries', () => {
     );
     expect(query).toContain('EVAL series_id = ');
     expect(query).toContain('`rule.id`');
-    expect(query).toContain('BY series_id, group_hash, space_id');
+    expect(query).toContain('group_hash = LAST(group_hash, @timestamp)');
+    expect(query).toContain('space_id = LAST(space_id, @timestamp)');
+    expect(query).toMatch(/BY series_id`?\s*\|/);
     expect(query).not.toContain('rule_id, "::"');
   });
 

@@ -18,9 +18,7 @@ const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
 export interface SeriesRef {
   space_id: string;
   group_hash: string;
-  /** Owner of a rule-backed series. */
   rule_id?: string | null;
-  /** Owner of an external series; absent or `"internal"` means the series is rule-backed. */
   source?: string | null;
 }
 
