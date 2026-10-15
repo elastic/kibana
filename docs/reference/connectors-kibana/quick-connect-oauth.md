@@ -44,7 +44,7 @@ Google Workspace (Gmail, Google Calendar, Google Drive)
 :   Allow the Elastic app in the Google Workspace admin console if your organization restricts third-party app access.
 
 Microsoft 365 (Microsoft Teams, SharePoint Online)
-:   Grant tenant-wide admin consent for the Elastic app in Microsoft Entra ID if user consent is disabled. For SharePoint Online, an administrator might also need to grant the app access to specific sites.
+:   Grant tenant-wide admin consent for the Elastic app in Microsoft Entra ID if user consent is turned off. For SharePoint Online, an administrator might also need to grant the app access to specific sites.
 
 Slack
 :   Approve the app for the workspace if your workspace requires app approval.
