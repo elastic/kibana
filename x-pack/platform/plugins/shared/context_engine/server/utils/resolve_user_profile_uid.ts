@@ -16,8 +16,9 @@ const PROFILE_SUGGESTIONS = 10;
 
 /**
  * The profile uid Elasticsearch matches against `scope_id`. Sessions and enriched Task Manager
- * requests carry it. A basic-auth realm user is looked up by username and realm as the internal
- * user; an API key resolves to its owner's profile when the key may read itself.
+ * requests carry it. A request authenticated with an API key, including a Task Manager request
+ * running under the caller's key, resolves to the key owner's profile. A basic-auth realm user is
+ * looked up by username and realm as the internal user.
  */
 export const resolveUserProfileUid = async ({
   request,
@@ -29,16 +30,14 @@ export const resolveUserProfileUid = async ({
   esClient: IScopedClusterClient;
 }): Promise<string | undefined> => {
   const user = security.authc.getCurrentUser(request);
-  if (!user) {
-    return undefined;
-  }
-  if (user.profile_uid) {
+  if (user?.profile_uid) {
     return user.profile_uid;
   }
-  if (user.authentication_type === 'api_key') {
-    return resolveApiKeyOwnerProfileUid({ request, esClient });
+  const apiKeyId = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+  if (apiKeyId) {
+    return resolveApiKeyOwnerProfileUid({ apiKeyId, esClient });
   }
-  if (user.authentication_type !== 'realm' && user.authentication_type !== 'token') {
+  if (!user || (user.authentication_type !== 'realm' && user.authentication_type !== 'token')) {
     return undefined;
   }
 
@@ -54,19 +53,15 @@ export const resolveUserProfileUid = async ({
 };
 
 const resolveApiKeyOwnerProfileUid = async ({
-  request,
+  apiKeyId,
   esClient,
 }: {
-  request: KibanaRequest;
+  apiKeyId: string;
   esClient: IScopedClusterClient;
 }): Promise<string | undefined> => {
-  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-  if (!id) {
-    return undefined;
-  }
   try {
     const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
-      id,
+      id: apiKeyId,
       with_profile_uid: true,
     });
     return apiKeys?.[0]?.profile_uid;

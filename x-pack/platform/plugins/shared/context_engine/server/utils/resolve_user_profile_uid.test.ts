@@ -94,6 +94,15 @@ describe('resolveUserProfileUid', () => {
     expect(getApiKey).not.toHaveBeenCalled();
   });
 
+  it('resolves a task request that carries only the API key header', async () => {
+    getCurrentUser.mockReturnValue(null);
+    getApiKey.mockResolvedValue({ api_keys: [{ id: 'key-id', profile_uid: 'u_owner' }] });
+
+    await expect(
+      run(httpServerMock.createKibanaRequest({ headers: { authorization: API_KEY_AUTHORIZATION } }))
+    ).resolves.toBe('u_owner');
+  });
+
   it('returns undefined without a user', async () => {
     getCurrentUser.mockReturnValue(null);
 
