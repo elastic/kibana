@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { groupThreatsByFramework } from '@kbn/security-mitre-attack-common';
 import type { Threat } from '../../../../common/api/detection_engine/model/rule_schema';
-import { groupThreatsByFramework } from '../../../../common/detection_engine/mitre/group_threats_by_framework';
 import { UNKNOWN_FRAMEWORK_LABEL } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 /**

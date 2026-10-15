@@ -18,16 +18,15 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { MitreFramework } from '@kbn/security-mitre-attack-common';
+import type { MitreFramework, ThreatFrameworkGroup } from '@kbn/security-mitre-attack-common';
 import {
   DEFAULT_MITRE_FRAMEWORK,
   MITRE_FRAMEWORKS,
   THREAT_FRAMEWORK_NAME,
+  groupThreatsByFramework,
 } from '@kbn/security-mitre-attack-common';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
-import type { ThreatFrameworkGroup } from '../../../../../common/detection_engine/mitre/group_threats_by_framework';
-import { groupThreatsByFramework } from '../../../../../common/detection_engine/mitre/group_threats_by_framework';
 import * as i18n from './translations';
 import { MitreFrameworkThreatSection } from './framework_threat_section';
 import { UnknownFrameworkThreatSection } from './unknown_framework_threat_section';

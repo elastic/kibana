@@ -64,45 +64,44 @@ export const ThreatEntryList = ({ entries, resolve }: ThreatEntryListProps) => {
 
   return (
     <>
-      {entries.map((singleThreat, index) => {
-        const threatTactic = singleThreat?.tactic;
-        const tactic = threatTactic
-          ? resolve?.tactics.find((t) => t.id === threatTactic.id)
+      {entries.map((threat, index) => {
+        const tactic = threat?.tactic;
+        const resolvedTactic = tactic
+          ? resolve?.tactics.find((t) => t.id === tactic.id)
           : undefined;
-        const tacticUnsupported = showUnsupportedWarnings && threatTactic != null && tactic == null;
+        const isTacticUnsupported =
+          showUnsupportedWarnings && tactic != null && resolvedTactic == null;
         return (
-          <EuiFlexItem key={`${threatTactic?.name ?? 'threat'}-${index}`}>
-            {threatTactic ? (
+          <EuiFlexItem key={`${tactic?.name ?? 'threat'}-${index}`}>
+            {tactic ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
                 <EuiFlexItem grow={false}>
                   <EuiLink
                     data-test-subj="threatTacticLink"
-                    href={threatTactic.reference}
+                    href={tactic.reference}
                     target="_blank"
                   >
-                    {tactic != null
-                      ? getMitreEntityDisplayName(tactic)
-                      : getMitreEntityDisplayName(threatTactic)}
+                    {resolvedTactic != null
+                      ? getMitreEntityDisplayName(resolvedTactic)
+                      : getMitreEntityDisplayName(tactic)}
                   </EuiLink>
                 </EuiFlexItem>
-                {tacticUnsupported && (
+                {isTacticUnsupported && (
                   <EuiFlexItem grow={false}>
-                    <UnsupportedMitreIdWarning
-                      id={threatTactic.id}
-                      frameworkLabel={frameworkLabel}
-                    />
+                    <UnsupportedMitreIdWarning id={tactic.id} frameworkLabel={frameworkLabel} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
             ) : null}
             <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-              {singleThreat?.technique &&
-                singleThreat.technique.map((technique, techniqueIndex) => {
+              {threat?.technique &&
+                threat.technique.map((technique, techniqueIndex) => {
                   if (technique == null) {
                     return null;
                   }
-                  const myTechnique = resolve?.techniques.find((t) => t.id === technique.id);
-                  const techniqueUnsupported = showUnsupportedWarnings && myTechnique == null;
+                  const resolvedTechnique = resolve?.techniques.find((t) => t.id === technique.id);
+                  const isTechniqueUnsupported =
+                    showUnsupportedWarnings && resolvedTechnique == null;
                   return (
                     <EuiFlexItem key={`${technique.id}-${techniqueIndex}`}>
                       <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false}>
@@ -115,12 +114,12 @@ export const ThreatEntryList = ({ entries, resolve }: ThreatEntryListProps) => {
                             size="xs"
                             css={techniqueLinkItemStyles}
                           >
-                            {myTechnique != null
-                              ? getMitreEntityDisplayName(myTechnique)
+                            {resolvedTechnique != null
+                              ? getMitreEntityDisplayName(resolvedTechnique)
                               : getMitreEntityDisplayName(technique)}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
-                        {techniqueUnsupported && (
+                        {isTechniqueUnsupported && (
                           <EuiFlexItem grow={false}>
                             <UnsupportedMitreIdWarning
                               id={technique.id}
@@ -135,11 +134,11 @@ export const ThreatEntryList = ({ entries, resolve }: ThreatEntryListProps) => {
                             if (subtechnique == null) {
                               return null;
                             }
-                            const mySubtechnique = resolve?.subtechniques.find(
+                            const resolvedSubtechnique = resolve?.subtechniques.find(
                               (t) => t.id === subtechnique.id
                             );
-                            const subtechniqueUnsupported =
-                              showUnsupportedWarnings && mySubtechnique == null;
+                            const isSubtechniqueUnsupported =
+                              showUnsupportedWarnings && resolvedSubtechnique == null;
                             return (
                               <EuiFlexItem
                                 key={`${subtechnique.id}-${subtechniqueIndex}`}
@@ -155,12 +154,12 @@ export const ThreatEntryList = ({ entries, resolve }: ThreatEntryListProps) => {
                                       size="xs"
                                       css={techniqueLinkItemStyles}
                                     >
-                                      {mySubtechnique != null
-                                        ? getMitreEntityDisplayName(mySubtechnique)
+                                      {resolvedSubtechnique != null
+                                        ? getMitreEntityDisplayName(resolvedSubtechnique)
                                         : getMitreEntityDisplayName(subtechnique)}
                                     </EuiButtonEmpty>
                                   </EuiFlexItem>
-                                  {subtechniqueUnsupported && (
+                                  {isSubtechniqueUnsupported && (
                                     <EuiFlexItem grow={false}>
                                       <UnsupportedMitreIdWarning
                                         id={subtechnique.id}

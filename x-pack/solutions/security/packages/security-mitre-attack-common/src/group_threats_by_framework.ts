@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { MitreFramework } from '@kbn/security-mitre-attack-common';
-import {
-  DEFAULT_MITRE_FRAMEWORK,
-  MITRE_FRAMEWORKS,
-  THREAT_FRAMEWORK_NAME,
-  getMitreFrameworkByThreatName,
-} from '@kbn/security-mitre-attack-common';
+import { DEFAULT_MITRE_FRAMEWORK } from './constants';
+import type { MitreFramework } from './schema';
+import { MITRE_FRAMEWORKS } from './schema';
+import { THREAT_FRAMEWORK_NAME, getMitreFrameworkByThreatName } from './threat_framework';
 
 export interface ThreatFrameworkGroup<T> {
   /** Known framework, or undefined when `framework` string is not recognized. */

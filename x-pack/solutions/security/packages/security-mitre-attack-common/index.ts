@@ -51,6 +51,9 @@ export {
   MITRE_ATTACK_ENTITY_SO_TYPE,
 } from './src/constants';
 
+export { groupThreatsByFramework } from './src/group_threats_by_framework';
+export type { ThreatFrameworkGroup } from './src/group_threats_by_framework';
+
 export { buildSoId, getMitreEntityDisplayName } from './src/utils';
 
 export { GetMitreEntitiesRequestQuery } from './src/api';

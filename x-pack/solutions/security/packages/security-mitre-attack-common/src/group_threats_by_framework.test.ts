@@ -6,7 +6,7 @@
  */
 
 import { groupThreatsByFramework } from './group_threats_by_framework';
-import { MITRE_ATLAS_FRAMEWORK, MITRE_ATTACK_FRAMEWORK } from './iterate_mitre_threat_entities';
+import { MITRE_ATLAS_FRAMEWORK, MITRE_ATTACK_FRAMEWORK } from './threat_framework';
 
 const buildThreat = (framework?: string) => ({
   framework,

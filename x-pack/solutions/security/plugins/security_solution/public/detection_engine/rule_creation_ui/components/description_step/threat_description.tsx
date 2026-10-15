@@ -8,12 +8,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_NAME, groupThreatsByFramework } from '@kbn/security-mitre-attack-common';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { BuildThreatDescription } from './types';
 import * as i18n from './translations';
 import { ThreatEntryList } from './threat_entry_list';
-import { groupThreatsByFramework } from '../../../../../common/detection_engine/mitre/group_threats_by_framework';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 
