@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
@@ -132,6 +132,10 @@ describe('AgentForm', () => {
         };
       }
     );
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('displays owner name in edit mode when agent has created_by with username', () => {
@@ -261,16 +265,21 @@ describe('AgentForm', () => {
     expect(screen.getByRole('tab', { name: /Skills/ })).toHaveTextContent('1');
   });
 
-  it('shows no tooltip on an inherited skill when Elastic Capabilities is off', async () => {
+  it('shows no tooltip on an inherited skill when Elastic Capabilities is off', () => {
+    jest.useFakeTimers();
     mockAgentInheritingKiRetrieval();
 
     renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
     fireEvent.click(screen.getByRole('tab', { name: /Skills/ }));
     const checkbox = screen.getByRole('checkbox');
     fireEvent.mouseOver(checkbox);
+    // Let the tooltip's show delay elapse instead of polling for it.
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
 
     expect(checkbox).toBeChecked();
     expect(checkbox).toBeDisabled();
-    await expect(screen.findByRole('tooltip')).rejects.toThrow();
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 });
