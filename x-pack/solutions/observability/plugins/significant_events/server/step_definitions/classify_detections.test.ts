@@ -340,6 +340,17 @@ describe('classifyDetectionsStepDefinition', () => {
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('classifyDetections'));
   });
 
+  it('treats a missing rows input as an empty batch', async () => {
+    const { definition } = createDefinition();
+    const query = jest.fn();
+
+    expect(definition.inputSchema.safeParse(settings).success).toBe(true);
+    const output = await runHandler(definition, settings, { esql: { query } });
+
+    expect(query).not.toHaveBeenCalled();
+    expect(output).toMatchObject({ rows: [], row_count: 0, decisions: [] });
+  });
+
   it('issues no queries for an empty batch', async () => {
     const { definition } = createDefinition();
     const query = jest.fn();
