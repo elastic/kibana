@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HeatmapVisualizationState } from '@kbn/lens-common';
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS, type HeatmapVisualizationState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
@@ -89,5 +89,8 @@ export const normalizeHeatmap = mergeNormalizers([
   })),
   alignId,
   alignLegacyTypes,
-  getPaletteNormalizer<HeatmapAttributes>('state.visualization.palette'),
+  getPaletteNormalizer<HeatmapAttributes>(
+    'state.visualization.palette',
+    LENS_HEATMAP_DEFAULT_COLOR_STEPS
+  ),
 ]);
