@@ -9,6 +9,7 @@ export type AutomationType = 'custom' | 'managed';
 
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
+export type SlackTriggerEvent = 'message';
 export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
@@ -19,6 +20,7 @@ export type NightshiftTriggerRow =
   | {
       kind: 'alert';
       ruleNamePattern?: string;
+      ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       alertStatus?: AlertStatus;
       tags?: string[];
@@ -29,6 +31,13 @@ export type NightshiftTriggerRow =
       cronExpression?: string;
       timezone?: string;
       scopeQuery?: string;
+    }
+  | {
+      kind: 'slack';
+      event: SlackTriggerEvent;
+      channels?: string[];
+      users?: string[];
+      messageFilter?: string;
     };
 
 export interface NightshiftAutomationTrigger {
@@ -45,7 +54,10 @@ export interface NightshiftAutomationExecution {
 export interface NightshiftAutomationCompletion {
   action?: CompletionAction;
   targetMode?: CompletionTargetMode;
+  /** Slack channel id or `#name` for `channel` mode. */
   destination?: string;
+  /** Slack connector to post through; defaults to the Elastic Slack app connector. */
+  connectorId?: string;
 }
 
 export interface NightshiftAutomationRuntime {
@@ -58,12 +70,14 @@ export interface NightshiftAutomationRuntime {
 export interface NightshiftAutomationAttributes {
   name: string;
   description?: string;
+  tags?: string[];
+  author?: string;
   automationType: AutomationType;
   isEnabled: boolean;
   workflowId?: string;
   trigger: NightshiftAutomationTrigger;
   execution: NightshiftAutomationExecution;
-  completion: NightshiftAutomationCompletion;
+  completions: NightshiftAutomationCompletion[];
   runtime: NightshiftAutomationRuntime;
   createdAt: string;
   updatedAt: string;

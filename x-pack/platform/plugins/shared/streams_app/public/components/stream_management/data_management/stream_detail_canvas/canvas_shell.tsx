@@ -133,7 +133,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
  * rough estimate on the first render.
  */
 const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
-  if (nodes.length === 0) {
+  const visibleNodes = nodes.filter((node) => !node.hidden);
+  if (visibleNodes.length === 0) {
     return undefined;
   }
 
@@ -142,7 +143,7 @@ const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  for (const node of nodes) {
+  for (const node of visibleNodes) {
     const width = node.measured?.width ?? NODE_WIDTH_ESTIMATE;
     const height = node.measured?.height ?? NODE_HEIGHT_ESTIMATE;
     minX = Math.min(minX, node.position.x);

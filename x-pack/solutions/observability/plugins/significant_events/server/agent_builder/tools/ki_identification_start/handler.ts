@@ -18,7 +18,8 @@ import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
-  streamName: string;
+  sourceId: string;
+  sourceSlug: string;
   steps: KIsOnboardingStep[];
   connectors?: {
     features?: string;
@@ -34,7 +35,8 @@ interface StartKiIdentificationHandlerResult {
 }
 
 export async function startKiIdentificationToolHandler({
-  streamName,
+  sourceId,
+  sourceSlug,
   steps,
   connectors,
   streamsKIsOnboardingClient,
@@ -50,7 +52,8 @@ export async function startKiIdentificationToolHandler({
   const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
 
   const inputs: SignificantEventsKIsOnboardingInputs = {
-    streamName,
+    sourceId,
+    sourceSlug,
     features: {
       skip: skipFeatures,
       start: now - DEFAULT_LOOKBACK_MS,
@@ -66,8 +69,8 @@ export async function startKiIdentificationToolHandler({
   await streamsKIsOnboardingClient.run({ inputs, request });
 
   return {
-    kibanaPath: `${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=${encodeURIComponent(
-      streamName
+    kibanaPath: `${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?source=${encodeURIComponent(
+      sourceId
     )}`,
   };
 }

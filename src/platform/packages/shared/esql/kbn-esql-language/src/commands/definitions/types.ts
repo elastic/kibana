@@ -486,10 +486,6 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkNotAllowedWithSubqueries: {
-    message: string;
-    type: {};
-  };
   joinOnSingleExpression: {
     message: string;
     type: {};
@@ -518,9 +514,17 @@ export interface ValidationErrors {
     message: string;
     type: { paramName: string; value: string; allowedValues: string };
   };
-  highlightMissingOnClause: {
+  highlightInvalidOnPattern: {
+    message: string;
+    type: { pattern: string };
+  };
+  highlightWildcardWithFields: {
     message: string;
     type: {};
+  };
+  highlightQueryFieldNotInOn: {
+    message: string;
+    type: { field: string; fields: string };
   };
   highlightInvalidPrefixModifier: {
     message: string;

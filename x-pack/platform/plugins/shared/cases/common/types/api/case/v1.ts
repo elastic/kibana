@@ -26,6 +26,7 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -46,7 +47,6 @@ import {
   CaseSettingsSchema,
   CaseSeveritySchema,
   CaseStatusSchema,
-  CaseTemplateSchema,
   RelatedCaseSchema,
   SimilarCaseSchema,
 } from '../../domain/case/v1';
@@ -59,9 +59,22 @@ import {
 } from '../custom_field/v1';
 
 /**
- * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
- * PATCH request, where switching templates is an explicit versioned action), `version` may be
- * omitted here: the server resolves the template's latest version and pins it on the case.
+ * Template reference accepted on case UPDATE. Both `id` and `version` are required: switching a
+ * template on update is an explicit versioned action; the server does not resolve a latest version
+ * here. `version` must be a positive integer (≥ 1).
+ */
+export const CaseUpdateRequestTemplateSchema = z.object({
+  id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
+  version: z
+    .number()
+    .int({ message: 'The template version must be a positive integer.' })
+    .min(1, { message: 'The template version must be a positive integer.' }),
+});
+
+/**
+ * Template reference accepted on case CREATION. Unlike `CaseUpdateRequestTemplateSchema` (and the
+ * stored/domain `CaseTemplate`), `version` may be omitted here: the server resolves the
+ * template's latest version and pins it on the case.
  * `version` must be a positive integer (matches the `integer, minimum: 1` OpenAPI contract).
  */
 export const CaseRequestTemplateSchema = z.object({
@@ -94,6 +107,10 @@ const CustomFieldForRequestSchema = z.union([
   CaseCustomFieldNumberWithValidationSchema,
 ]);
 
+/**
+ * @deprecated Use `extended_fields` (CASE_EXTENDED_FIELDS) instead. Values written here still work
+ * during the migration to the field-library / extended-fields system.
+ */
 export const CaseRequestCustomFieldsSchema = limitedArraySchema({
   codec: CustomFieldForRequestSchema,
   fieldName: 'customFields',
@@ -157,7 +174,7 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
    * The alert sync settings
    */
   settings: CaseSettingsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseUpdateRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z
     .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
     .optional(),

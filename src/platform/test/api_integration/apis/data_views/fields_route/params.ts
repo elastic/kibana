@@ -17,6 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Query-param validation has no Scout/unit coverage; mirror
+  // fields_for_wildcard_route/params.spec.ts. Tag `tags.deploymentAgnostic`.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts
   describe('params', () => {
     before(() =>
       esArchiver.load(

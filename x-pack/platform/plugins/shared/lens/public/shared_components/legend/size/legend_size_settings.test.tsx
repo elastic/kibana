@@ -9,7 +9,7 @@ import React from 'react';
 import type { LegendSizeSettingsProps } from './legend_size_settings';
 import { LegendSizeSettings } from './legend_size_settings';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 
 describe('legend size settings', () => {
@@ -18,7 +18,6 @@ describe('legend size settings', () => {
       legendSize: undefined,
       onLegendSizeChange: () => {},
       isVerticalLegend: true,
-      showAutoOption: false,
     };
     return render(<LegendSizeSettings {...defaultProps} {...props} />);
   };
@@ -53,19 +52,11 @@ describe('legend size settings', () => {
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });
 
-  it('hides "auto" option if visualization not using it', async () => {
-    renderLegendSizeSettings({ showAutoOption: true });
+  it('always includes the auto option', async () => {
+    renderLegendSizeSettings();
     await openSelect();
     expect(
       screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
     ).toHaveLength(1);
-
-    cleanup();
-
-    renderLegendSizeSettings({ showAutoOption: false });
-    await openSelect();
-    expect(
-      screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
-    ).toHaveLength(0);
   });
 });

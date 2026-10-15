@@ -24,10 +24,15 @@ import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
+import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
-import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
+import {
+  ContextEngineSubPageHeader,
+  contextEngineBackDestinationLabel,
+} from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
@@ -36,10 +41,6 @@ import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_st
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { validateAiIndexId } from '../utils/ai_index_dest';
 import { validateTextInput } from '../utils/validate_text_input';
-
-const cancelLabel = i18n.translate('xpack.contextEngine.createAiIndex.cancel', {
-  defaultMessage: 'Cancel',
-});
 
 const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
   defaultMessage: "Name your AI index. You'll add sources and automations next.",
@@ -52,8 +53,10 @@ const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title'
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
+  const isMemoryFeatureEnabled = useMemoryEnabled();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
+  const [memoryEnabled, setMemoryEnabled] = useState(true);
   const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -68,6 +71,7 @@ export const CreateAiIndexPage = () => {
     const created = await createAiIndex({
       id,
       description,
+      memoryEnabled: isMemoryFeatureEnabled ? memoryEnabled : undefined,
       sources: [],
       trace,
     });
@@ -86,13 +90,12 @@ export const CreateAiIndexPage = () => {
       breadcrumbPageName={createPageTitle}
     >
       <ContextEngineSubPageHeader
-        backLabel={cancelLabel}
+        backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}
         onBackClick={(event) => {
           event.preventDefault();
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
-        element={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
         pageTitle={createPageTitle}
         description={createPageDescription}
       />
@@ -140,6 +143,18 @@ export const CreateAiIndexPage = () => {
             />
           </EuiFormRow>
         </EuiPanel>
+
+        {isMemoryFeatureEnabled && (
+          <>
+            <EuiSpacer size="l" />
+
+            <MemorySettingsPanel
+              checked={memoryEnabled}
+              onChange={({ target: { checked } }) => setMemoryEnabled(checked)}
+              toggleTestSubject="contextCreateAiIndexMemoryToggle"
+            />
+          </>
+        )}
 
         <EuiSpacer size="l" />
 

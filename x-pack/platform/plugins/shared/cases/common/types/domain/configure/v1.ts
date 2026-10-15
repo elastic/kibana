@@ -63,6 +63,8 @@ export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationS
 
 export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
 
+export const WorkflowTagsConfigurationSchema = z.array(z.string());
+
 export const TemplateConfigurationSchema = z.object({
   /**
    * key of template
@@ -113,6 +115,11 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
    * Whether to extract observables from the case
    */
   extractObservables: z.boolean(),
+  /**
+   * Tags used to filter workflows available in Cases workflow selectors.
+   * An empty array shows all workflows.
+   */
+  workflowTags: WorkflowTagsConfigurationSchema,
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
@@ -153,3 +160,4 @@ export type Configuration = z.infer<typeof ConfigurationSchema>;
 export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
 export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
+export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;

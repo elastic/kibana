@@ -48,7 +48,7 @@ const styledTextCss = css`
 interface CrowdstrikeRunscriptAccordionProps {
   content?: string;
   initialIsOpen?: boolean;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
   type: 'error' | 'output';
   'data-test-subj'?: string;
 }
@@ -91,7 +91,7 @@ export interface CrowdstrikeRunscriptOutputProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
   agentId: string;
   'data-test-subj'?: string;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
 }
 
 export const CrowdstrikeRunscriptOutput = memo<CrowdstrikeRunscriptOutputProps>(

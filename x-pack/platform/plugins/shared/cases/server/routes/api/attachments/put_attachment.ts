@@ -13,8 +13,8 @@ import {
 } from '../../../../common/constants';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import {
-  UnifiedAttachmentPutRequestSchema,
-  type UnifiedAttachmentPutRequest,
+  UnifiedAttachmentPutRouteRequestSchema,
+  type UnifiedAttachmentPutRouteRequest,
 } from '../../../../common/types/api/attachment/v2';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -25,7 +25,7 @@ import { toUnifiedAttachment } from '../../../services/attachments/operations/ut
 export const putAttachmentRoute = createCasesRoute<
   { case_id: string; id: string },
   unknown,
-  UnifiedAttachmentPutRequest
+  UnifiedAttachmentPutRouteRequest
 >({
   method: 'put',
   path: CASE_ATTACHMENT_DETAILS_URL,
@@ -35,7 +35,7 @@ export const putAttachmentRoute = createCasesRoute<
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
       id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
-    body: createZodRouteValidation(UnifiedAttachmentPutRequestSchema),
+    body: createZodRouteValidation(UnifiedAttachmentPutRouteRequestSchema),
   },
   routerOptions: {
     // TODO(security-team#15572): flip to 'public' once this API is ready to ship.

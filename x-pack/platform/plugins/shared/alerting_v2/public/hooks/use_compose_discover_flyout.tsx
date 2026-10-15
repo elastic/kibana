@@ -23,7 +23,9 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
+import { useAlertingLocators } from '../application/locator_context';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
@@ -66,6 +68,12 @@ export const useComposeDiscoverFlyout = ({
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
   const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const { actionPolicyLocators } = useAlertingLocators();
+  const getActionPolicyEditHref = useCallback(
+    (actionPolicyId: string) =>
+      actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
+    [actionPolicyLocators]
+  );
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -108,11 +116,13 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
       esqlMenu: ESQLMenu,
       esqlEditorActionsProvider: EsqlEditorActionsProvider,
       esqlEditorActionsRegister: EsqlEditorActionsRegister,
       createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
       createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     }),
     [
       http,
@@ -127,6 +137,7 @@ export const useComposeDiscoverFlyout = ({
       dashboard,
       cps,
       createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     ]
   );
 

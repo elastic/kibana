@@ -70,11 +70,15 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isAttackAttachmentType,
   isCommentAttachmentType,
   isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
   toStringArray,
 } from '../../common/utils/attachments';
+import { toUnifiedAttributes } from '../services/attachments/operations/utils';
+import { AttachmentTransformedAttributesSchema } from './types/attachments_v1';
+import { decodeOrThrowZod } from './runtime_types';
 
 /**
  * Default sort field for querying saved objects.
@@ -210,13 +214,24 @@ export const flattenAttachmentSavedObjects = (
     return acc;
   }, []);
 
+/**
+ * Folds mapped types to unified in memory (SO never rewritten); unrecognized types keep the
+ * legacy shape — no errors channel here, unlike bulkGet. Public routes re-project via `toLegacyCaseResponse`.
+ */
 export const flattenAttachmentSavedObject = (
   savedObject: SavedObject<AttachmentAttributesV2>
-): AttachmentV2 => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  ...savedObject.attributes,
-});
+): AttachmentV2 => {
+  const transformed = toUnifiedAttributes({ attributes: savedObject.attributes });
+  const attributes = transformed.isUnified
+    ? transformed.attributes
+    : decodeOrThrowZod(AttachmentTransformedAttributesSchema)(transformed.attributes);
+
+  return {
+    id: savedObject.id,
+    version: savedObject.version ?? '0',
+    ...attributes,
+  };
+};
 
 /**
  * Filters out alerts whose index belongs to a linked project (`cluster:index`),
@@ -318,6 +333,19 @@ export const getEventInfoFromComments = (
 ): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
     acc.push(...getAndValidateIndexedAttachmentInfo(comment, isEventAttachmentType, strict));
+    return acc;
+  }, []);
+
+/**
+ * Same as {@link getAlertInfoFromComments}, but for attacks (`security.attack`). Kept separate
+ * from the alert helper so attacks never inflate alert counts or the case alerts table.
+ */
+export const getAttackInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAttackAttachmentType, strict));
     return acc;
   }, []);
 
@@ -441,6 +469,25 @@ export function createAlertUpdateStatusRequest({
   closingReason?: string;
 }): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
+}
+
+/**
+ * Same as {@link createAlertUpdateStatusRequest}, but for attacks (`security.attack`).
+ */
+export function createAttackUpdateStatusRequest({
+  comment,
+  status,
+  closingReason,
+}: {
+  comment: AttachmentRequestV2;
+  status: CaseStatuses;
+  closingReason?: string;
+}): UpdateAlertStatusRequest[] {
+  return getAttackInfoFromComments([comment]).map((attack) => ({
+    ...attack,
+    status,
+    closingReason,
+  }));
 }
 
 /**

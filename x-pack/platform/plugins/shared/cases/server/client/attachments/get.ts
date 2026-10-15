@@ -69,6 +69,18 @@ const normalizeDocumentResponse = (
     return acc;
   }, []);
 
+const decodeUnifiedAttachment = (
+  attachment: { id: string },
+  logger: CasesClientArgs['logger']
+): UnifiedAttachment | undefined => {
+  try {
+    return decodeOrThrowZod(UnifiedAttachmentSchema)(attachment);
+  } catch (error) {
+    logger.warn(`Failed to decode attachment id ${attachment.id} as unified: ${error}`);
+    return undefined;
+  }
+};
+
 /**
  * Retrieves all documents attached to a specific case.
  */
@@ -172,8 +184,12 @@ export async function find(
       }))
     );
 
+    const data = flattenAttachmentSavedObjects(theAttachments.saved_objects).flatMap(
+      (attachment) => decodeUnifiedAttachment(attachment, logger) ?? []
+    );
+
     const res = {
-      data: flattenAttachmentSavedObjects(theAttachments.saved_objects),
+      data,
       page: theAttachments.page,
       per_page: theAttachments.per_page,
       total: theAttachments.total,
@@ -218,9 +234,12 @@ export async function get(
       throw Boom.notFound(`This attachment ${savedObjectId} does not exist in case ${caseID}.`);
     }
 
-    const res = flattenAttachmentSavedObject(attachment);
+    const decoded = decodeUnifiedAttachment(flattenAttachmentSavedObject(attachment), logger);
+    if (decoded == null) {
+      throw Boom.notFound(`Attachment ${savedObjectId} could not be read.`);
+    }
 
-    return decodeOrThrowZod(UnifiedAttachmentSchema)(res);
+    return decoded;
   } catch (error) {
     throw createCaseError({
       message: `Failed to get attachment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,

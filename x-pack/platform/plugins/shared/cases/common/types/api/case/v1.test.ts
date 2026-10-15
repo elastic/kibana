@@ -36,6 +36,7 @@ import {
   CasesFindRequestSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
+  CaseUpdateRequestTemplateSchema,
 } from './v1';
 
 const validPostRequest: CasePostRequest = {
@@ -240,6 +241,19 @@ describe('CasePatchRequestSchema', () => {
     title: 'Updated title',
   };
 
+  it('accepts a valid template on update', () => {
+    expect(
+      CasePatchRequestSchema.safeParse({ ...validPatch, template: { id: 'tmpl-1', version: 1 } })
+        .success
+    ).toBe(true);
+  });
+
+  it.each([0, -1, 1.5])('rejects a template with non-positive-integer version (%p)', (version) => {
+    expect(
+      parseErrors(CasePatchRequestSchema, { ...validPatch, template: { id: 'tmpl-1', version } })
+    ).toContain('The template version must be a positive integer.');
+  });
+
   it('accepts a valid partial update with id and version', () => {
     expect(CasePatchRequestSchema.safeParse(validPatch).success).toBe(true);
   });
@@ -434,5 +448,33 @@ describe('CasesSearchRequestSchema', () => {
     },
   ])('rejects extended field filters above the $field limit', ({ extendedFieldFilters }) => {
     expect(CasesSearchRequestSchema.safeParse({ extendedFieldFilters }).success).toBe(false);
+  });
+});
+
+describe('CaseUpdateRequestTemplateSchema', () => {
+  it('accepts a valid template reference', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 1 });
+  });
+
+  it('accepts version > 1', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 42 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 42 });
+  });
+
+  it.each([0, -1, 1.5])('rejects a non-positive-integer version (%p)', (version) => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a missing version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1' }).success).toBe(false);
+  });
+
+  it('rejects a missing id', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ version: 1 }).success).toBe(false);
   });
 });

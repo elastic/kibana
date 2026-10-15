@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { INVALID_SPAN_CONTEXT, TraceFlags, trace } from '@opentelemetry/api';
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 
 jest.mock('../utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn(),
@@ -18,12 +20,19 @@ jest.mock('../../../../common/steps/ai', () => ({
     inputSchema: {},
     outputSchema: {},
   },
+  // The real helper, so the handler tests cover how blank connector fields are treated.
+  normalizeOptionalConnectorParam: jest.requireActual('../../../../common/steps/ai/ai_prompt_step')
+    .normalizeOptionalConnectorParam,
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE: jest.requireActual(
+    '../../../../common/steps/ai/ai_prompt_step'
+  ).AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
 }));
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
+import { AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE } from '../../../../common/steps/ai';
 import { aiPromptStepDefinition } from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -316,6 +325,50 @@ describe('aiPromptStepDefinition', () => {
         expect(mockChatModel.invoke).not.toHaveBeenCalled();
       });
 
+      it('should report the token usage and connector under metadata.usage', async () => {
+        const contextWithSchema = {
+          ...mockContext,
+          input: { ...mockContext.input, schema: { type: 'object', properties: {} } },
+        };
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: { response: {} },
+          raw: {
+            response_metadata: { model: 'm' },
+            usage_metadata: {
+              input_tokens: 120,
+              output_tokens: 30,
+              input_token_details: { cache_read: 100 },
+            },
+          },
+        });
+
+        const result = await handler(contextWithSchema);
+
+        expect(result.output.metadata).toEqual({
+          model: 'm',
+          usage: {
+            inputTokens: 120,
+            outputTokens: 30,
+            cachedTokens: 100,
+            connectorId: 'resolved-connector-id',
+          },
+        });
+      });
+
+      it('should report the token usage of a plain response too', async () => {
+        mockChatModel.invoke.mockResolvedValue({
+          content: 'AI generated response',
+          response_metadata: {},
+          usage_metadata: { input_tokens: 10, output_tokens: 5 },
+        });
+
+        const result = await handler(mockContext);
+
+        expect(result.output.metadata).toEqual({
+          usage: { inputTokens: 10, outputTokens: 5, connectorId: 'resolved-connector-id' },
+        });
+      });
+
       it('should handle array output schema by wrapping in response object', async () => {
         const contextWithArraySchema = {
           ...mockContext,
@@ -366,6 +419,134 @@ describe('aiPromptStepDefinition', () => {
       });
     });
 
+    describe('telemetry attribution', () => {
+      const validSpanContext = {
+        traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+        spanId: '00f067aa0ba902b7',
+        traceFlags: TraceFlags.SAMPLED,
+      };
+      const getChatModelOptions = () =>
+        mockInference.getChatModel.mock.calls[0][0].chatModelOptions;
+
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok' });
+        mockContextManager.getContext.mockReturnValue({
+          execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
+          workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId: 'my-space' },
+          kibanaUrl: '',
+          consts: {},
+          variables: {},
+          steps: {},
+        });
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('sends no telemetry metadata without a plugin-id, so existing steps make the same call', async () => {
+        await handler(mockContext);
+
+        expect(getChatModelOptions()).not.toHaveProperty('telemetryMetadata');
+        expect(mockContextManager.getContext).not.toHaveBeenCalled();
+      });
+
+      it('attributes the call to plugin-id and aggregate-by, which become feature_id / parent_feature_id in token usage', async () => {
+        jest.spyOn(trace, 'getActiveSpan').mockReturnValue(trace.wrapSpanContext(validSpanContext));
+        mockContext.config = {
+          ...mockContext.config,
+          'plugin-id': 'alertzero_alert_triage',
+          'aggregate-by': 'alertzero_parent',
+          'product-solution': 'security',
+          'product-feature': 'alert_triage',
+        };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).toEqual({
+          pluginId: 'alertzero_alert_triage',
+          aggregateBy: 'alertzero_parent',
+          productSolution: 'security',
+          productFeature: 'alert_triage',
+          interactionId: 'exec-1',
+          spaceId: 'my-space',
+          traceId: validSpanContext.traceId,
+        });
+      });
+
+      it('leaves out the all-zero trace id of the no-op span used when tracing is off', async () => {
+        jest
+          .spyOn(trace, 'getActiveSpan')
+          .mockReturnValue(trace.wrapSpanContext(INVALID_SPAN_CONTEXT));
+        mockContext.config = { ...mockContext.config, 'plugin-id': 'my_feature' };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).not.toHaveProperty('traceId');
+      });
+
+      it('sends the request context without optional fields that are blank or absent', async () => {
+        jest.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined);
+        mockContext.config = {
+          ...mockContext.config,
+          'plugin-id': 'my_feature',
+          'aggregate-by': '',
+        };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions().telemetryMetadata).toEqual({
+          pluginId: 'my_feature',
+          interactionId: 'exec-1',
+          spaceId: 'my-space',
+        });
+      });
+
+      it('treats a blank plugin-id as unset, so a templated value that renders empty sends nothing', async () => {
+        mockContext.config = { ...mockContext.config, 'plugin-id': '  ' };
+
+        await handler(mockContext);
+
+        expect(getChatModelOptions()).not.toHaveProperty('telemetryMetadata');
+      });
+
+      it('rejects aggregate-by without plugin-id before calling the model, since the engine skips schema refinements', async () => {
+        mockContext.config = { ...mockContext.config, 'aggregate-by': 'alertzero_parent' };
+
+        await expect(handler(mockContext)).rejects.toThrow(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('max-step-size', () => {
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok' });
+      });
+
+      it('passes max-step-size as the response length limit, so large replies are not cut at the 1 MB default', async () => {
+        mockContext.config = { ...mockContext.config, 'max-step-size': '10mb' };
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions.maxContentLength).toBe(
+          10 * 1024 * 1024
+        );
+      });
+
+      it.each([undefined, '', 'not-a-size'])(
+        'keeps the default limit when max-step-size is %j',
+        async (value) => {
+          mockContext.config = { ...mockContext.config, 'max-step-size': value };
+
+          await handler(mockContext);
+
+          expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions).not.toHaveProperty(
+            'maxContentLength'
+          );
+        }
+      );
+    });
+
     describe('error handling', () => {
       it('should propagate errors from resolveConnectorId', async () => {
         const error = new Error('Connector resolution failed');
@@ -413,6 +594,85 @@ describe('aiPromptStepDefinition', () => {
         mockChatModel.invoke.mockRejectedValue(error);
 
         await expect(handler(mockContext)).rejects.toThrow('Aborted');
+      });
+    });
+
+    describe('reasoning-level validation', () => {
+      const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => ({
+        type: InferenceConnectorType.Inference,
+        name: 'Claude Haiku',
+        connectorId: '.anthropic-claude-haiku-chat_completion',
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: true,
+        isPreconfigured: true,
+        isEis: true,
+        ...parts,
+      });
+
+      const withReasoningLevel = (reasoningLevel: string) => ({
+        ...mockContext,
+        config: { ...mockContext.config, 'reasoning-level': reasoningLevel },
+      });
+
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'response', response_metadata: {} });
+      });
+
+      it('does not inspect the connector when no reasoning level is set', async () => {
+        mockChatModel.getConnector = jest.fn();
+
+        await handler(mockContext);
+
+        expect(mockChatModel.getConnector).not.toHaveBeenCalled();
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('invokes the model when the EIS endpoint supports the level', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { reasoning: { supported_effort_levels: ['high', 'low'] } } },
+          })
+        );
+
+        await handler(withReasoningLevel('high'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('invokes the model for non-EIS connectors', async () => {
+        mockChatModel.getConnector = jest
+          .fn()
+          .mockReturnValue(createConnector({ type: InferenceConnectorType.OpenAI, isEis: false }));
+
+        await handler(withReasoningLevel('xhigh'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('rejects a level the EIS endpoint does not support, before invoking the model', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { reasoning: { supported_effort_levels: ['high', 'low'] } } },
+          })
+        );
+
+        await expect(handler(withReasoningLevel('xhigh'))).rejects.toThrow(
+          'Reasoning level "xhigh" is not supported by model "Claude Haiku" (.anthropic-claude-haiku-chat_completion). Supported levels: high, low.'
+        );
+        expect(mockChatModel.invoke).not.toHaveBeenCalled();
+      });
+
+      it('invokes the model when the EIS endpoint advertises no reasoning control', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { context_window: { max_input_tokens: 1000 } } },
+          })
+        );
+
+        await handler(withReasoningLevel('low'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
       });
     });
 
@@ -520,6 +780,51 @@ describe('aiPromptStepDefinition', () => {
         );
         expect(mockResolveConnectorId).not.toHaveBeenCalled();
       });
+
+      it.each(['', '   '])(
+        'uses the feature when connector-id is blank (%j), as a templated value that is unset on this path renders',
+        async (blank) => {
+          const contextWithBlankConnector = {
+            ...mockContext,
+            config: { 'connector-id': blank, 'connector-id-by-feature': 'context_engine_prompt' },
+          };
+          mockSearchInferenceEndpoints.features.get.mockReturnValue({
+            taskType: 'chat_completion',
+          });
+          mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+            endpoints: [{ connectorId: 'gemini-flash-connector' }],
+          });
+          mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+          await handler(contextWithBlankConnector);
+
+          expect(mockResolveConnectorId).not.toHaveBeenCalled();
+          expect(mockInference.getChatModel).toHaveBeenCalledWith(
+            expect.objectContaining({ connectorId: 'gemini-flash-connector' })
+          );
+        }
+      );
+
+      it.each(['', '   '])(
+        'uses connector-id when connector-id-by-feature is blank (%j)',
+        async (blank) => {
+          const contextWithBlankFeature = {
+            ...mockContext,
+            config: { 'connector-id': 'explicit-connector', 'connector-id-by-feature': blank },
+          };
+          mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+          await handler(contextWithBlankFeature);
+
+          expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+          expect(mockResolveConnectorId).toHaveBeenCalledWith(
+            'explicit-connector',
+            expect.anything(),
+            expect.anything(),
+            expect.anything()
+          );
+        }
+      );
 
       it('throws when the feature resolves to no endpoints', async () => {
         const contextWithFeature = {

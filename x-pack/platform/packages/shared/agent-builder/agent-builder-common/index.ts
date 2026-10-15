@@ -6,16 +6,32 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
-export { apiTargets, type ApiTarget } from './apis';
+export {
+  apiTargets,
+  type ApiTarget,
+  allApisSelector,
+  toApiNamespace,
+  toNamespaceSelector,
+  isApiWildcardSelector,
+  matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
+} from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
+  conversationWriteSources,
+  conversationChangeKinds,
   type ConversationMetadataUpdatedEvent,
   type AttachmentAddedTriggerEvent,
   type AttachmentUpdatedTriggerEvent,
   type AttachmentDeletedTriggerEvent,
+  type ConversationUpdatedTriggerEvent,
+  type ConversationWriteSource,
+  type ConversationChangeKind,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,
@@ -64,6 +80,8 @@ export {
   type ResourceResult,
   type EsqlResults,
   type OtherResult,
+  NON_INTERACTIVE_DECLINED_REASON,
+  isNonInteractiveDeclinedResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
 } from './tools';
@@ -137,7 +155,15 @@ export {
   type AgentBuilderAttachmentInvalidError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName, type CurrentUser } from './base/users';
+export {
+  type UserIdAndName,
+  type CurrentUser,
+  type UserPrincipalType,
+  isUserProfileId,
+  SERVICE_ACCOUNT_ID_PREFIX,
+  REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
+} from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
@@ -158,11 +184,15 @@ export {
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,
+  agentApprovalsEqual,
+  normalizeAgentApprovals,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
   type AgentDefinition,
+  type AgentApprovals,
   type AgentConfiguration,
+  type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
   agentIdRegexp,
@@ -180,6 +210,7 @@ export {
   type AutoApprovedApi,
   type InteractivityConfig,
   type InteractivityConfigInput,
+  applyAgentApprovals,
   createNonInteractiveConfig,
   isApiAutoApproved,
   normalizeInteractive,
@@ -213,6 +244,7 @@ export {
   type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   DEFAULT_CONVERSATION_TITLE,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
@@ -258,6 +290,10 @@ export {
   type SubstitutionStepData,
   createSubstitutionStep,
   isSubstitutionStep,
+  type InjectedContextStep,
+  type InjectedContextStepData,
+  createInjectedContextStep,
+  isInjectedContextStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
   type SubagentEntry,
@@ -315,6 +351,8 @@ export {
   type ExecutionAbortedInterruption,
   type RoundInterruptedEventData,
   type RoundInterruptedEvent,
+  type SlackPayload,
+  type SurfacePayload,
   type ToolCallProgress,
   isToolCallEvent,
   isBrowserToolCallEvent,
@@ -355,6 +393,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type AskUserQuestionStep,
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
@@ -501,6 +542,7 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export { SYSTEM_USER_ID } from './constants';
 export type {
   ConversationTemplate,
   ConversationTemplateInputType,

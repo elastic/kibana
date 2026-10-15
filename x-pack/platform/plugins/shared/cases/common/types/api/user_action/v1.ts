@@ -23,7 +23,7 @@ import {
 } from '../../domain/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import { ActionSourceTypes } from '../../domain/user_action/source/v1';
-import type { AttachmentsV2 } from '../../domain';
+import type { UnifiedAttachment } from '../../domain/attachment/v2';
 
 const UserActionAdditionalFindRequestFilterTypes = {
   action: 'action',
@@ -136,5 +136,5 @@ export type UserActionWithResponse<T> = T & { id: string; version: string } & z.
   >;
 
 export interface UserActionInternalFindResponse extends UserActionFindResponse {
-  latestAttachments: AttachmentsV2;
+  latestAttachments: UnifiedAttachment[];
 }

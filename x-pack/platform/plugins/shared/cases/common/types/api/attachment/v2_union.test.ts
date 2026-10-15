@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType } from '../../domain/attachment/v1';
-import { AttachmentRequestSchemaV2, BulkCreateAttachmentsRequestSchemaV2 } from './v2_union';
+import { AttachmentRequestSchemaV2 } from './v2_union';
 
 describe('Unified Attachments', () => {
   describe('AttachmentRequestSchemaV2', () => {
@@ -64,50 +64,6 @@ describe('Unified Attachments', () => {
       const result = AttachmentRequestSchemaV2.safeParse({ ...v1Request, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(v1Request);
-    });
-  });
-
-  describe('BulkCreateAttachmentsRequestSchemaV2', () => {
-    it('accepts array of v1 attachment requests', () => {
-      const v1Requests = [{ comment: 'First comment', type: AttachmentType.user, owner: 'cases' }];
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(v1Requests);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(v1Requests);
-    });
-
-    it('accepts empty array', () => {
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse([]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual([]);
-    });
-
-    it('accepts array of v2 unified attachment requests', () => {
-      const v2Requests = [
-        { type: 'lens', attachmentId: 'attachment-1', owner: 'cases' },
-        { type: 'lens', attachmentId: 'attachment-2', owner: 'cases' },
-      ];
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(v2Requests);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(v2Requests);
-    });
-
-    it('accepts mixed array of v1 and v2 attachment requests', () => {
-      const mixedRequests = [
-        { comment: 'A v1 comment', type: AttachmentType.user, owner: 'cases' },
-        { type: 'lens', attachmentId: 'attachment-123', owner: 'cases' },
-      ];
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(mixedRequests);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(mixedRequests);
-    });
-
-    it('strips unknown fields from requests in array', () => {
-      const requests = [{ comment: 'First comment', type: AttachmentType.user, owner: 'cases' }];
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse([
-        { ...requests[0], foo: 'bar' },
-      ]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(requests);
     });
   });
 });

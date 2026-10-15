@@ -200,9 +200,6 @@ export class FeatureFlagsService {
 
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue,
-      getStringValue,
-      getNumberValue,
       getBooleanValue$,
       useBooleanValue,
       getStringValue$,

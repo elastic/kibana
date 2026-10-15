@@ -16,8 +16,12 @@ const mockGet = jest.fn();
 const getAutomationsSoClient = jest.fn().mockReturnValue({ get: mockGet });
 
 const mockGetWorkflowExecutions = jest.fn();
+const mockSearchStepExecutions = jest.fn();
 const getWorkflowsManagement = jest.fn().mockReturnValue({
-  management: { getWorkflowExecutions: mockGetWorkflowExecutions },
+  management: {
+    getWorkflowExecutions: mockGetWorkflowExecutions,
+    searchStepExecutions: mockSearchStepExecutions,
+  },
 });
 
 const mockContext = {
@@ -29,19 +33,33 @@ const mockContext = {
   resolve: jest.fn(),
 };
 
-const call = (id: string, query: { page?: number; size?: number } = {}) =>
+const call = (
+  id: string,
+  query: { page?: number; size?: number; startedAfter?: string; startedBefore?: string } = {}
+) =>
   handler({
     request: mockRequest,
-    params: { path: { id }, query: { page: query.page ?? 1, size: query.size ?? 20 } },
+    params: {
+      path: { id },
+      query: {
+        page: query.page ?? 1,
+        size: query.size ?? 20,
+        startedAfter: query.startedAfter,
+        startedBefore: query.startedBefore,
+      },
+    },
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: mockContext,
   } as never);
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockSearchStepExecutions.mockResolvedValue({ results: [] });
+});
 
 it('returns mapped runs when the automation has a workflowId', async () => {
-  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1' } });
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
   mockGetWorkflowExecutions.mockResolvedValue({
     results: [
       {
@@ -57,28 +75,89 @@ it('returns mapped runs when the automation has a workflowId', async () => {
     page: 1,
     size: 20,
   });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [
+      {
+        workflowRunId: 'exec-1',
+        input: { title: 'Alert triage', message: 'Investigate the alert' },
+        output: { investigation_id: 'investigation-1' },
+      },
+    ],
+  });
 
   const result = await call('auto-1');
 
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
-    { workflowId: 'wf-1', omitStepRuns: true, page: 1, size: 20, request: mockRequest },
+    {
+      workflowId: 'wf-1',
+      omitStepRuns: true,
+      page: 1,
+      size: 20,
+      startedAfter: undefined,
+      startedBefore: undefined,
+      request: mockRequest,
+    },
+    'default'
+  );
+  expect(mockSearchStepExecutions).toHaveBeenCalledWith(
+    {
+      workflowId: 'wf-1',
+      stepId: 'trigger_investigation',
+      workflowExecutionIds: ['exec-1'],
+      includeInput: true,
+      includeOutput: true,
+      startedAfter: undefined,
+      startedBefore: undefined,
+      page: 1,
+      size: 1,
+      sourceIncludes: ['workflowRunId', 'input', 'output'],
+      request: mockRequest,
+    },
     'default'
   );
   expect(result).toEqual({
     runs: [
       {
         id: 'exec-1',
-        status: 'completed',
+        status: 'succeeded',
         startedAt: '2026-09-01T00:00:00.000Z',
         finishedAt: '2026-09-01T00:01:00.000Z',
         duration: 60000,
         triggeredBy: 'schedule',
+        title: 'Alert triage',
+        message: 'Investigate the alert',
+        investigationId: 'investigation-1',
+        skipReason: null,
+        dailyLimit: undefined,
       },
     ],
     total: 1,
     page: 1,
     size: 20,
   });
+});
+
+it.each([
+  ['completed', 'succeeded'],
+  ['running', 'running'],
+  ['waiting_for_input', 'running'],
+  ['queued', 'running'],
+  ['failed', 'failed'],
+  ['cancelled', 'failed'],
+  ['timed_out', 'failed'],
+  ['skipped', 'skipped'],
+] as const)('maps workflow status %s to %s', async (status, expectedStatus) => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status, startedAt: '2026-09-01T00:00:00.000Z' }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+
+  const result = await call('auto-1');
+
+  expect(result.runs[0].status).toBe(expectedStatus);
 });
 
 it('returns an empty list when the automation has no workflowId yet', async () => {
@@ -98,6 +177,24 @@ it('passes custom pagination to getWorkflowExecutions', async () => {
 
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
     expect.objectContaining({ page: 2, size: 10 }),
+    'default'
+  );
+});
+
+it('passes the selected time range to the workflow execution query', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1' } });
+  mockGetWorkflowExecutions.mockResolvedValue({ results: [], total: 0, page: 1, size: 100 });
+
+  await call('auto-1', {
+    startedAfter: '2026-09-01T00:00:00.000Z',
+    startedBefore: '2026-09-03T00:00:00.000Z',
+  });
+
+  expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+    expect.objectContaining({
+      startedAfter: '2026-09-01T00:00:00.000Z',
+      startedBefore: '2026-09-03T00:00:00.000Z',
+    }),
     'default'
   );
 });

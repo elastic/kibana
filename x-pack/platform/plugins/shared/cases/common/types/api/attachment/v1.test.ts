@@ -6,8 +6,7 @@
  */
 
 import {
-  MAX_BULK_CREATE_ATTACHMENTS,
-  MAX_BULK_GET_ATTACHMENTS,
+  MAX_BULK_DELETE_ATTACHMENTS,
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
 } from '../../../constants';
@@ -17,9 +16,8 @@ import { AttachmentType, ExternalReferenceStorageType } from '../../domain/attac
 import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
-  BulkCreateAttachmentsRequestSchema,
+  BulkDeleteAttachmentsRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
-  BulkGetAttachmentsRequestSchema,
 } from './v1';
 
 const validUserComment = {
@@ -269,26 +267,6 @@ describe('AttachmentPatchRequestSchema', () => {
   });
 });
 
-describe('BulkCreateAttachmentsRequestSchema', () => {
-  it('accepts an empty array', () => {
-    expect(BulkCreateAttachmentsRequestSchema.safeParse([]).success).toBe(true);
-  });
-
-  it('accepts a mix of valid attachment variants', () => {
-    expect(
-      BulkCreateAttachmentsRequestSchema.safeParse([validUserComment, validAlert, validActions])
-        .success
-    ).toBe(true);
-  });
-
-  it(`rejects more than MAX_BULK_CREATE_ATTACHMENTS (${MAX_BULK_CREATE_ATTACHMENTS}) items`, () => {
-    const items = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(validUserComment);
-    expect(parseErrors(BulkCreateAttachmentsRequestSchema, items)).toContain(
-      `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
-    );
-  });
-});
-
 describe('BulkDeleteFileAttachmentsRequestSchema', () => {
   it('accepts a single non-empty id', () => {
     expect(BulkDeleteFileAttachmentsRequestSchema.safeParse({ ids: ['file-1'] }).success).toBe(
@@ -322,21 +300,32 @@ describe('BulkDeleteFileAttachmentsRequestSchema', () => {
   });
 });
 
-describe('BulkGetAttachmentsRequestSchema', () => {
-  it('accepts a single id', () => {
-    expect(BulkGetAttachmentsRequestSchema.safeParse({ ids: ['a'] }).success).toBe(true);
+describe('BulkDeleteAttachmentsRequestSchema', () => {
+  it('has expected attributes in request', () => {
+    const result = BulkDeleteAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
   });
 
-  it('rejects an empty ids array', () => {
-    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids: [] })).toContain(
-      'The length of the field ids is too short. Array must be of length >= 1.'
-    );
+  it('removes foo:bar attributes from request', () => {
+    const result = BulkDeleteAttachmentsRequestSchema.safeParse({
+      ids: ['abc', 'xyz'],
+      foo: 'bar',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
   });
 
-  it(`rejects more than MAX_BULK_GET_ATTACHMENTS (${MAX_BULK_GET_ATTACHMENTS}) ids`, () => {
-    const ids = Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('id');
-    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids })).toContain(
-      `The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
-    );
+  it(`fails with more than ${MAX_BULK_DELETE_ATTACHMENTS} ids`, () => {
+    const ids = new Array(MAX_BULK_DELETE_ATTACHMENTS + 1).fill('id');
+    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids }).success).toBe(false);
+  });
+
+  it('fails with an empty array of ids', () => {
+    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [] }).success).toBe(false);
+  });
+
+  it('fails with an empty string id', () => {
+    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [''] }).success).toBe(false);
   });
 });

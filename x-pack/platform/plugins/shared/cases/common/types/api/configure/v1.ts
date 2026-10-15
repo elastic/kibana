@@ -20,6 +20,8 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
@@ -74,6 +76,9 @@ export const NumberCustomFieldConfigurationSchema =
       .optional(),
   });
 
+/**
+ * @deprecated Custom fields are superseded by the field library and the case `extended_fields`.
+ */
 export const CustomFieldsConfigurationSchema = limitedArraySchema({
   codec: z.union([
     TextCustomFieldConfigurationSchema,
@@ -105,6 +110,17 @@ export const ObservableTypesConfigurationSchema = limitedArraySchema({
       max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
     }),
   }),
+});
+
+export const WorkflowTagsConfigurationSchema = limitedArraySchema({
+  codec: limitedStringSchema({
+    fieldName: 'workflow tag',
+    min: 1,
+    max: MAX_LENGTH_PER_WORKFLOW_TAG,
+  }),
+  min: 0,
+  max: MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  fieldName: 'workflow tags',
 });
 
 export const TemplateConfigurationSchema = z.object({
@@ -147,6 +163,10 @@ export const TemplateConfigurationSchema = z.object({
   }).optional(),
 });
 
+/**
+ * @deprecated Configuration-embedded templates are superseded by the case templates system
+ * (`GET /api/cases/templates`); their fields are applied via the case `extended_fields`.
+ */
 export const TemplatesConfigurationSchema = limitedArraySchema({
   codec: TemplateConfigurationSchema,
   min: 0,
@@ -171,6 +191,7 @@ export const ConfigurationRequestSchema = z.object({
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
+  workflowTags: WorkflowTagsConfigurationSchema.optional(),
 });
 
 export const GetConfigurationFindRequestSchema = z.object({
@@ -194,6 +215,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
+  workflowTags: WorkflowTagsConfigurationSchema.optional(),
   version: z.string().max(512),
 });
 
@@ -203,3 +225,4 @@ export type GetConfigurationFindRequest = z.infer<typeof GetConfigurationFindReq
 export type GetConfigureResponse = Configurations;
 export type CreateConfigureResponse = Configuration;
 export type UpdateConfigureResponse = Configuration;
+export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;

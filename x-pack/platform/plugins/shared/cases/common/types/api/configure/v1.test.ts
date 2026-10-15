@@ -16,6 +16,7 @@ import {
   MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -26,6 +27,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -154,6 +156,64 @@ describe('configure', () => {
       });
       const result = ConfigurationPatchRequestSchema.safeParse({ ...defaultRequest, templates });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('workflowTags', () => {
+    const requestSchemas = [
+      {
+        name: 'ConfigurationRequestSchema',
+        schema: ConfigurationRequestSchema,
+        defaultRequest: { connector: serviceNow, closure_type: 'close-by-user', owner: 'Cases' },
+      },
+      {
+        name: 'ConfigurationPatchRequestSchema',
+        schema: ConfigurationPatchRequestSchema,
+        defaultRequest: {
+          connector: serviceNow,
+          closure_type: 'close-by-user',
+          version: 'WzQ3LDFd',
+        },
+      },
+    ];
+
+    describe.each(requestSchemas)('$name', ({ schema, defaultRequest }) => {
+      it('accepts workflow tags', () => {
+        const request = { ...defaultRequest, workflowTags: ['soc-triage', 'enrichment'] };
+
+        expect(schema.safeParse(request).data).toStrictEqual(request);
+      });
+
+      it('accepts an empty list of workflow tags', () => {
+        const request = { ...defaultRequest, workflowTags: [] };
+
+        expect(schema.safeParse(request).success).toBe(true);
+      });
+
+      it(`limits workflow tags to ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION}`, () => {
+        const workflowTags = Array.from(
+          { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION + 1 },
+          (_, index) => `tag-${index}`
+        );
+
+        expect(schema.safeParse({ ...defaultRequest, workflowTags }).error?.message).toContain(
+          `The length of the field workflow tags is too long. Array must be of length <= ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION}.`
+        );
+      });
+
+      it(`limits each workflow tag to ${MAX_LENGTH_PER_WORKFLOW_TAG} characters`, () => {
+        const workflowTags = ['a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1)];
+
+        expect(schema.safeParse({ ...defaultRequest, workflowTags }).error?.message).toContain(
+          `The length of the workflow tag is too long. The maximum length is ${MAX_LENGTH_PER_WORKFLOW_TAG}.`
+        );
+      });
+
+      it('rejects empty workflow tags', () => {
+        expect(
+          schema.safeParse({ ...defaultRequest, workflowTags: ['   '] }).error?.message
+        ).toContain('The workflow tag field cannot be an empty string.');
+      });
     });
   });
 
