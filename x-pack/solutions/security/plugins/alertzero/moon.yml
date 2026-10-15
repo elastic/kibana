@@ -75,6 +75,7 @@ dependsOn:
   - '@kbn/proposals-common'
   - '@kbn/proposals-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-mocks'
   - '@kbn/inference-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/mitre-attack-plugin'
