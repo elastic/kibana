@@ -50,7 +50,7 @@ export const ActionHostStatusMessage = memo<ActionHostStatusMessageProps>(
       }
 
       return (
-        <EuiTextColor data-test-subj={getTestId('hostStatus')} color={hostStatusMessageColor}>
+        <EuiTextColor data-test-subj={getTestId()} color={hostStatusMessageColor}>
           {hostStatusMessage}
         </EuiTextColor>
       );
