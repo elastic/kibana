@@ -128,8 +128,8 @@ describe('TransactionFlyout', () => {
 
     renderFlyout();
 
-    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
-    expect(screen.getByTestId('transactionFlyoutHeader')).toHaveTextContent('Transaction details');
+    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
 
     expect(screen.getByTestId('transactionFlyoutTab-metadata')).toHaveAttribute(
@@ -156,7 +156,7 @@ describe('TransactionFlyout', () => {
   it('does not show the previous transaction while the next one loads', () => {
     setFetch(buildTransaction('tx-1', 'GET /api'), FETCH_STATUS.SUCCESS);
     const { rerender } = renderFlyout();
-    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
 
     // The fetcher preserves the previous document while the next request is pending.
     setFetch(buildTransaction('tx-1', 'GET /api'), FETCH_STATUS.LOADING);
@@ -171,7 +171,7 @@ describe('TransactionFlyout', () => {
       />
     );
 
-    expect(screen.queryByRole('heading', { name: 'GET /api' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('transactionFlyoutInfo-name')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.queryByTestId('mockTransactionMetadata')).not.toBeInTheDocument();

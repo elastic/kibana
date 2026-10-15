@@ -143,8 +143,8 @@ describe('SpanFlyout', () => {
 
     renderFlyout({ kuery: 'service.name: "a"' });
 
-    expect(screen.getByRole('heading', { name: 'SELECT * FROM orders' })).toBeInTheDocument();
-    expect(screen.getByTestId('spanFlyoutHeader')).toHaveTextContent('Span details');
+    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
+    expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT * FROM orders');
     expect(screen.getByTestId('spanFlyoutTab-metadata')).toHaveAttribute('aria-selected', 'true');
     const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
     expect(callout).toHaveTextContent('Database statement');
@@ -204,7 +204,7 @@ describe('SpanFlyout', () => {
   it('does not show the previous span while the next one loads', () => {
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
     const { rerender } = renderFlyout();
-    expect(screen.getByRole('heading', { name: 'SELECT * FROM orders' })).toBeInTheDocument();
+    expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT * FROM orders');
 
     // The fetcher preserves the previous document while the next request is pending.
     setFetch(buildSpan(), FETCH_STATUS.LOADING);
@@ -219,7 +219,7 @@ describe('SpanFlyout', () => {
       />
     );
 
-    expect(screen.queryByRole('heading', { name: 'SELECT * FROM orders' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('spanFlyoutInfo-name')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockSpanMetadata')).not.toBeInTheDocument();

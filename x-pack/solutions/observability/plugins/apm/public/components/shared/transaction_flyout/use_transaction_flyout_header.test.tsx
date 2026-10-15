@@ -59,12 +59,12 @@ const renderHeader = (
     { wrapper }
   ).result.current;
 
-/** Renders the title and the meta block and badge contents, which the template would place. */
-const renderParts = ({ title, metaBlocks, badges }: TransactionFlyoutHeaderParts) =>
+/** Renders the title and the info block and badge contents, which the template would place. */
+const renderParts = ({ title, infoBlocks, badges }: TransactionFlyoutHeaderParts) =>
   render(
     <>
       <h3>{title}</h3>
-      {[...metaBlocks, ...badges].map((part) => (
+      {[...infoBlocks, ...badges].map((part) => (
         <div key={part.key} data-test-subj={part.props['data-test-subj']}>
           {part.props.children}
         </div>
@@ -82,27 +82,28 @@ describe('useTransactionFlyoutHeader', () => {
 
     expect(parts.title).toBe('Transaction details');
     expect(parts.titleText).toBe('Transaction details');
-    expect(parts.description).toBeUndefined();
-    expect(parts.metaBlocks).toEqual([]);
+    expect(parts.infoBlocks).toEqual([]);
     expect(parts.badges).toEqual([]);
   });
 
   it('renders service and transaction links with complete data', () => {
     const parts = renderHeader(baseTransaction);
 
-    expect(parts.titleText).toBe('GET /api');
-    expect(parts.description).toBe('Transaction details');
-    expect(getTestSubjects(parts.metaBlocks)).toEqual([
-      'transactionFlyoutMeta-service',
-      'transactionFlyoutMeta-timestamp',
-      'transactionFlyoutMeta-duration',
+    expect(parts.title).toBe('Transaction details');
+    expect(parts.titleText).toBe('Transaction details');
+    expect(getTestSubjects(parts.infoBlocks)).toEqual([
+      'transactionFlyoutInfo-name',
+      'transactionFlyoutInfo-service',
+      'transactionFlyoutInfo-timestamp',
+      'transactionFlyoutInfo-duration',
     ]);
 
     renderParts(parts);
 
-    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.getByRole('link', { name: 'GET /api' })).toHaveAttribute('href', '/mock-link');
-    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
+    expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
   });
 
   it('does not crash when agent is missing', () => {
@@ -113,7 +114,7 @@ describe('useTransactionFlyoutHeader', () => {
 
     renderParts(renderHeader(txWithoutAgent));
 
-    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
+    expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
     expect(screen.getByRole('link', { name: 'GET /api' })).toBeInTheDocument();
   });
 
@@ -125,8 +126,9 @@ describe('useTransactionFlyoutHeader', () => {
 
     renderParts(renderHeader(txWithoutService));
 
-    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('N/A');
-    expect(screen.getByRole('heading', { name: 'GET /api' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('N/A');
+    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.queryByRole('link', { name: 'GET /api' })).not.toBeInTheDocument();
   });
 
@@ -139,10 +141,11 @@ describe('useTransactionFlyoutHeader', () => {
     const parts = renderHeader(txWithoutInner);
     renderParts(parts);
 
-    expect(parts.titleText).toBe('N/A');
-    expect(screen.getByRole('heading', { name: 'N/A' })).toBeInTheDocument();
-    expect(screen.getByTestId('transactionFlyoutMeta-service')).toHaveTextContent('my-service');
-    expect(screen.queryByTestId('transactionFlyoutMeta-duration')).not.toBeInTheDocument();
+    expect(parts.titleText).toBe('Transaction details');
+    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
+    expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('N/A');
+    expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
+    expect(screen.queryByTestId('transactionFlyoutInfo-duration')).not.toBeInTheDocument();
   });
 
   it('shows the result badge without a URL, and the request block and error count otherwise', () => {
@@ -163,7 +166,7 @@ describe('useTransactionFlyoutHeader', () => {
     } as unknown as Transaction;
 
     const urlParts = renderHeader(withUrlAndErrors, { errorCount: 2 });
-    expect(getTestSubjects(urlParts.metaBlocks)).toContain('transactionFlyoutMeta-request');
+    expect(getTestSubjects(urlParts.infoBlocks)).toContain('transactionFlyoutInfo-request');
     expect(getTestSubjects(urlParts.badges)).toEqual([
       'transactionFlyoutBadge-errorCount',
       'transactionFlyoutBadge-coldStart',

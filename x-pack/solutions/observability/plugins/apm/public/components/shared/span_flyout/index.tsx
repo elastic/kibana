@@ -70,7 +70,7 @@ export function SpanFlyout({
   const span = isLoading ? undefined : data?.span;
   const parentTransaction = isLoading ? undefined : data?.parentTransaction;
 
-  const { title, titleText, description, metaBlocks, badges } = useSpanFlyoutHeader({
+  const { title, titleText, infoBlocks, badges } = useSpanFlyoutHeader({
     span,
     parentTransaction,
     totalDuration,
@@ -98,13 +98,8 @@ export function SpanFlyout({
       defaultSelectedTabId={flyoutDetailTab}
       tabBarProps={{ 'data-test-subj': 'spanFlyoutTabs' }}
     >
-      <FlyoutTemplate.Header
-        title={title}
-        titleText={titleText}
-        description={description}
-        data-test-subj="spanFlyoutHeader"
-      >
-        {metaBlocks}
+      <FlyoutTemplate.Header title={title} titleText={titleText} data-test-subj="spanFlyoutHeader">
+        {infoBlocks}
         {badges}
       </FlyoutTemplate.Header>
       <FlyoutTemplate.Body>

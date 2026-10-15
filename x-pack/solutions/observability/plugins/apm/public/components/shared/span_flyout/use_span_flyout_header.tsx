@@ -32,13 +32,14 @@ import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_dura
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
 import {
   DURATION_LABEL,
+  NAME_LABEL,
   REQUEST_LABEL,
   SERVICE_LABEL,
   TIMESTAMP_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
 
-const { Badge, MetaBlock } = FlyoutTemplate.Header;
+const { Badge, InfoBlock } = FlyoutTemplate.Header;
 
 export const SPAN_DETAILS_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
@@ -75,15 +76,13 @@ function formatSubtype(subtype: string | undefined) {
 export interface SpanFlyoutHeaderParts {
   title: string;
   titleText: string;
-  description?: string;
-  metaBlocks: ReactElement[];
+  infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
- * Resolves the waterfall span flyout header for `FlyoutTemplate.Header`. Until the document loads,
- * the title is the generic "Span details" label; afterwards the title is the span name and the
- * generic label becomes the description.
+ * Resolves the waterfall span flyout header for `FlyoutTemplate.Header`. The title stays
+ * "Span details". The span name and the other summary fields are info blocks.
  */
 export function useSpanFlyoutHeader({
   span,
@@ -107,7 +106,7 @@ export function useSpanFlyoutHeader({
     return {
       title: SPAN_DETAILS_LABEL,
       titleText: SPAN_DETAILS_LABEL,
-      metaBlocks: [],
+      infoBlocks: [],
       badges: [],
     };
   }
@@ -130,17 +129,21 @@ export function useSpanFlyoutHeader({
   const duration = span.span?.duration?.us;
   const composite = span.span?.composite;
 
-  const metaBlocks: ReactElement[] = [];
+  const infoBlocks: ReactElement[] = [
+    <InfoBlock key="name" id="name" title={NAME_LABEL} data-test-subj="spanFlyoutInfo-name">
+      {spanName}
+    </InfoBlock>,
+  ];
 
   if (dependencyName) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="dependency"
         id="dependency"
         title={i18n.translate('xpack.apm.transactionDetails.spanFlyout.dependencyLabel', {
           defaultMessage: 'Dependency',
         })}
-        data-test-subj="spanFlyoutMeta-dependency"
+        data-test-subj="spanFlyoutInfo-dependency"
       >
         <DependencyLink
           query={{ ...query, dependencyName }}
@@ -154,17 +157,17 @@ export function useSpanFlyoutHeader({
             });
           }}
         />
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
   if (parentTransaction) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="service"
         id="service"
         title={SERVICE_LABEL}
-        data-test-subj="spanFlyoutMeta-service"
+        data-test-subj="spanFlyoutInfo-service"
       >
         {transactionServiceName ? (
           <ServiceLink
@@ -175,12 +178,12 @@ export function useSpanFlyoutHeader({
         ) : (
           NOT_AVAILABLE_LABEL
         )}
-      </MetaBlock>,
-      <MetaBlock
+      </InfoBlock>,
+      <InfoBlock
         key="transaction"
         id="transaction"
         title={TRANSACTION_LABEL}
-        data-test-subj="spanFlyoutMeta-transaction"
+        data-test-subj="spanFlyoutInfo-transaction"
       >
         {transactionName && transactionServiceName ? (
           <TransactionDetailLink
@@ -201,28 +204,28 @@ export function useSpanFlyoutHeader({
         ) : (
           transactionName ?? NOT_AVAILABLE_LABEL
         )}
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
-  metaBlocks.push(
-    <MetaBlock
+  infoBlocks.push(
+    <InfoBlock
       key="timestamp"
       id="timestamp"
       title={TIMESTAMP_LABEL}
-      data-test-subj="spanFlyoutMeta-timestamp"
+      data-test-subj="spanFlyoutInfo-timestamp"
     >
       <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />
-    </MetaBlock>
+    </InfoBlock>
   );
 
   if (duration !== undefined) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="duration"
         id="duration"
         title={DURATION_LABEL}
-        data-test-subj="spanFlyoutMeta-duration"
+        data-test-subj="spanFlyoutInfo-duration"
       >
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -240,24 +243,24 @@ export function useSpanFlyoutHeader({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
   if (spanHttpUrl) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="request"
         id="request"
         title={REQUEST_LABEL}
-        data-test-subj="spanFlyoutMeta-request"
+        data-test-subj="spanFlyoutInfo-request"
       >
         <HttpInfoSummaryItem
           method={span.http?.request?.method || span.span?.http?.method}
           url={spanHttpUrl}
           status={span.http?.response?.status_code || span.span?.http?.response?.status_code}
         />
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
@@ -345,10 +348,9 @@ export function useSpanFlyoutHeader({
   }
 
   return {
-    title: spanName,
-    titleText: spanName,
-    description: SPAN_DETAILS_LABEL,
-    metaBlocks,
+    title: SPAN_DETAILS_LABEL,
+    titleText: SPAN_DETAILS_LABEL,
+    infoBlocks,
     badges,
   };
 }

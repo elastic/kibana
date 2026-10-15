@@ -9,7 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import {
@@ -30,12 +30,13 @@ import { getTransactionResultBadgeDescriptor } from '../summary/transaction_resu
 import { getTransactionUrl } from '../summary/transaction_summary';
 import {
   DURATION_LABEL,
+  NAME_LABEL,
   REQUEST_LABEL,
   SERVICE_LABEL,
   TIMESTAMP_LABEL,
 } from '../waterfall_item_flyout/constants';
 
-const { Badge, MetaBlock } = FlyoutTemplate.Header;
+const { Badge, InfoBlock } = FlyoutTemplate.Header;
 
 export const TRANSACTION_DETAILS_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
@@ -53,17 +54,15 @@ const COLD_START_LABEL = i18n.translate('xpack.apm.transactionFlyout.coldStartBa
 });
 
 export interface TransactionFlyoutHeaderParts {
-  title: ReactNode;
+  title: string;
   titleText: string;
-  description?: string;
-  metaBlocks: ReactElement[];
+  infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
- * Resolves the waterfall transaction flyout header for `FlyoutTemplate.Header`. Until the document
- * loads, the title is the generic "Transaction details" label; afterwards the title links to the
- * transaction page and the generic label becomes the description.
+ * Resolves the waterfall transaction flyout header for `FlyoutTemplate.Header`. The title stays
+ * "Transaction details". The transaction name and the other summary fields are info blocks.
  */
 export function useTransactionFlyoutHeader({
   transaction,
@@ -86,7 +85,7 @@ export function useTransactionFlyoutHeader({
     return {
       title: TRANSACTION_DETAILS_LABEL,
       titleText: TRANSACTION_DETAILS_LABEL,
-      metaBlocks: [],
+      infoBlocks: [],
       badges: [],
     };
   }
@@ -106,7 +105,7 @@ export function useTransactionFlyoutHeader({
   const transactionName = transaction.transaction?.name;
   const transactionType = transaction.transaction?.type;
 
-  const title =
+  const name =
     transactionName && serviceName ? (
       <TransactionDetailLink
         transactionName={transactionName}
@@ -130,12 +129,15 @@ export function useTransactionFlyoutHeader({
   const userAgent = transaction.user_agent;
   const duration = transaction.transaction?.duration?.us;
 
-  const metaBlocks = [
-    <MetaBlock
+  const infoBlocks = [
+    <InfoBlock key="name" id="name" title={NAME_LABEL} data-test-subj="transactionFlyoutInfo-name">
+      {name}
+    </InfoBlock>,
+    <InfoBlock
       key="service"
       id="service"
       title={SERVICE_LABEL}
-      data-test-subj="transactionFlyoutMeta-service"
+      data-test-subj="transactionFlyoutInfo-service"
     >
       {serviceName ? (
         <ServiceLink
@@ -156,60 +158,60 @@ export function useTransactionFlyoutHeader({
       ) : (
         NOT_AVAILABLE_LABEL
       )}
-    </MetaBlock>,
-    <MetaBlock
+    </InfoBlock>,
+    <InfoBlock
       key="timestamp"
       id="timestamp"
       title={TIMESTAMP_LABEL}
-      data-test-subj="transactionFlyoutMeta-timestamp"
+      data-test-subj="transactionFlyoutInfo-timestamp"
     >
       <Timestamp timestamp={getTimestampUs(transaction) / 1000} renderMode="tooltip" />
-    </MetaBlock>,
+    </InfoBlock>,
   ];
 
   if (duration !== undefined) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="duration"
         id="duration"
         title={DURATION_LABEL}
-        data-test-subj="transactionFlyoutMeta-duration"
+        data-test-subj="transactionFlyoutInfo-duration"
       >
         <Duration
           duration={duration}
           parent={{ duration: rootTransactionDuration, type: 'trace' }}
         />
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
   if (url) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="request"
         id="request"
         title={REQUEST_LABEL}
-        data-test-subj="transactionFlyoutMeta-request"
+        data-test-subj="transactionFlyoutInfo-request"
       >
         <HttpInfoSummaryItem
           method={transaction.http?.request?.method}
           status={transaction.http?.response?.status_code}
           url={url}
         />
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
   if (userAgent) {
-    metaBlocks.push(
-      <MetaBlock
+    infoBlocks.push(
+      <InfoBlock
         key="userAgent"
         id="userAgent"
         title={USER_AGENT_LABEL}
-        data-test-subj="transactionFlyoutMeta-userAgent"
+        data-test-subj="transactionFlyoutInfo-userAgent"
       >
         {userAgent.version ? `${userAgent.name} (${userAgent.version})` : userAgent.name}
-      </MetaBlock>
+      </InfoBlock>
     );
   }
 
@@ -259,10 +261,9 @@ export function useTransactionFlyoutHeader({
   }
 
   return {
-    title,
-    titleText: transactionName ?? NOT_AVAILABLE_LABEL,
-    description: TRANSACTION_DETAILS_LABEL,
-    metaBlocks,
+    title: TRANSACTION_DETAILS_LABEL,
+    titleText: TRANSACTION_DETAILS_LABEL,
+    infoBlocks,
     badges,
   };
 }

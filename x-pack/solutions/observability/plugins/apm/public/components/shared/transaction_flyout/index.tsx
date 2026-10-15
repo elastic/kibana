@@ -59,7 +59,7 @@ export function TransactionFlyout({
   // switch between waterfall items never shows the previous transaction.
   const transaction = isPending(status) ? undefined : data;
 
-  const { title, titleText, description, metaBlocks, badges } = useTransactionFlyoutHeader({
+  const { title, titleText, infoBlocks, badges } = useTransactionFlyoutHeader({
     transaction,
     errorCount,
     rootTransactionDuration,
@@ -84,10 +84,9 @@ export function TransactionFlyout({
         <FlyoutTemplate.Header
           title={title}
           titleText={titleText}
-          description={description}
           data-test-subj="transactionFlyoutHeader"
         >
-          {metaBlocks}
+          {infoBlocks}
           {badges}
         </FlyoutTemplate.Header>
         <FlyoutTemplate.Body>
