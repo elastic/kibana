@@ -37,7 +37,13 @@ jest.mock('./lib/unit_config/config_distributor_client', () => {
   return { createConfigDistributorClient: jest.fn(actual.createConfigDistributorClient) };
 });
 
+jest.mock('./lib/unit_config/seal_credentials', () => {
+  const actual = jest.requireActual('./lib/unit_config/seal_credentials');
+  return { ...actual, createCredentialPreparer: jest.fn(actual.createCredentialPreparer) };
+});
+
 const { registerStreamsAgentBuilder } = jest.requireMock('./agent_builder/register');
+const { createCredentialPreparer } = jest.requireMock('./lib/unit_config/seal_credentials');
 const { createConfigDistributorClient } = jest.requireMock(
   './lib/unit_config/config_distributor_client'
 );
@@ -183,35 +189,66 @@ describe('StreamsPlugin credential sealing wiring', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  const registeredEncryptCredentials = (config: StreamsConfig) => {
+  const setupPlugin = (config: StreamsConfig, cloud?: StreamsPluginSetupDependencies['cloud']) => {
     const plugin = new StreamsPlugin(coreMock.createPluginInitializerContext(config));
-    plugin.setup(coreMock.createSetup(), createPluginsSetup());
-    return createConfigDistributorClient.mock.calls[0][0].hooks?.encryptCredentials;
+    plugin.setup(coreMock.createSetup(), { ...createPluginsSetup(), cloud });
+    return createConfigDistributorClient.mock.calls[0][0];
   };
+
+  const registeredPrepareCredentials = (
+    config: StreamsConfig,
+    cloud?: StreamsPluginSetupDependencies['cloud']
+  ) => {
+    setupPlugin(config, cloud);
+    return createCredentialPreparer.mock.results[0]?.value;
+  };
+
+  it('passes the serverless project id as the fallback target id', () => {
+    const { fallbackTargetId } = setupPlugin(getConfig(), {
+      serverless: { projectId: 'abcdef12' },
+    } as StreamsPluginSetupDependencies['cloud']);
+
+    expect(fallbackTargetId).toBe('abcdef12');
+  });
 
   it('seals with the mounted key when encryptionKey.path is set', async () => {
     const key = randomBytes(32);
     await writeFile(join(dir, 'current-kid'), KID);
     await writeFile(join(dir, `streams-encryption-key.${KID}`), key);
 
-    const encryptCredentials = registeredEncryptCredentials(
-      getConfig({ encryptionKey: { path: dir } })
+    const prepareCredentials = registeredPrepareCredentials(
+      getConfig({
+        encryptionKey: { path: dir },
+        distributor: { url: 'http://localhost:1', ssl: {} },
+      }),
+      { serverless: { projectId: 'abcdef12' } } as StreamsPluginSetupDependencies['cloud']
     );
     const {
       credentials: [{ name, ciphertext }],
-    } = await encryptCredentials({ es_api_key: 's3cret' });
+    } = await prepareCredentials({
+      secrets: { 'es-prod': 's3cret' },
+      previous: { secrets: {}, sealed: [] },
+    });
 
-    const blob = Buffer.from(ciphertext, 'base64');
-    const decipher = createDecipheriv('aes-256-gcm', key, blob.subarray(0, 12));
-    decipher.setAuthTag(blob.subarray(blob.length - 16));
+    const [version, kid, iv, ct] = ciphertext.split('.');
+    const sealed = Buffer.from(ct, 'base64url');
+    const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64url'));
+    decipher.setAAD(Buffer.from('abcdef12', 'utf8'));
+    decipher.setAuthTag(sealed.subarray(sealed.length - 16));
     const plaintext = Buffer.concat([
-      decipher.update(blob.subarray(12, blob.length - 16)),
+      decipher.update(sealed.subarray(0, sealed.length - 16)),
       decipher.final(),
     ]).toString('utf8');
-    expect({ name, plaintext }).toEqual({ name: 'es_api_key', plaintext: 's3cret' });
+    expect({ version, kid, name, plaintext }).toEqual({
+      version: 'v1',
+      kid: KID,
+      name: 'es-prod',
+      plaintext: 's3cret',
+    });
   });
 
-  it('registers no sealer when encryptionKey.path is unset', () => {
-    expect(registeredEncryptCredentials(getConfig())).toBeUndefined();
+  it('registers no preparer when encryptionKey.path is unset', () => {
+    expect(registeredPrepareCredentials(getConfig())).toBeUndefined();
+    expect(createCredentialPreparer).not.toHaveBeenCalled();
   });
 });

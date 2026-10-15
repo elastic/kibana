@@ -62,15 +62,15 @@ Important consequences:
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest; `unit_id` is in AAD. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document — do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
-- Unit PUT write order: configuration SO → config distributor → UI metadata. Distributor failure rolls back the configuration SO (including decrypted `secrets`).
+- Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - Without `xpack.streams.distributor.url`, validate and publish are no-ops.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
 ### Credentials
 
-Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. Authored YAML keeps a **name** that keys into that map.
+Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. The unit references a credential by name with a config value of exactly `{ "credential": "<name>" }`, as the streams-spec credential contract defines. A plain string value is never a reference.
 
-Secret names follow `secret:<nodeId>:<field>`, for example `secret:es-remote-1:api_key`. That string is the value of the secret-typed config entry in the unit YAML, the key of the plaintext in `secrets`, and the `credentials[].name` sent to the distributor. Sealing treats it as an opaque string.
+Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret.
 
 A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
 
@@ -82,27 +82,35 @@ A JSON envelope that stores a secret references it from the node and sends the v
         "id": "es-remote-1",
         "type": "elasticsearch",
         "supported_telemetry": ["logs"],
-        "config": [{ "name": "api_key", "value": "secret:es-remote-1:api_key" }]
+        "config": [{ "name": "api_key", "value": { "credential": "es-remote-1-api-key" } }]
       }
     ]
   },
-  "secrets": { "secret:es-remote-1:api_key": "<plaintext>" }
+  "secrets": { "es-remote-1-api-key": "<plaintext>" }
 }
 ```
 
-No streams-spec destination defines a secret field yet, so the shape above shows the contract, not a unit the distributor accepts today.
-
 | Layer | What is stored |
 | --- | --- |
-| Unit YAML / `unit` attribute | Credential **name** only |
+| Unit YAML / `unit` attribute | `{ credential: <name> }` reference only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
-| Distributor `PUT /v1/units/{id}` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]`, sealed with the project AES-256-GCM wrap key |
+| SO `sealed_credentials` (plain) | `{ name, target, ciphertext }` from the last save, reused while nothing changed |
+| Distributor `PUT /v1/units/{id}` and `POST /v1/validate` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` |
 
-`GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
+`GET /internal/streams/unit/{id}` omits `secrets` and `sealed_credentials`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values.
 
-A secret is referenced when a top-level string config value of a source, processor, or destination equals its name exactly. Nested values (objects and arrays inside `value`) are not scanned. A PUT whose `secrets` contains a name the unit does not reference fails with 400. Stored secrets that are no longer referenced are dropped on every PUT, so deleting a node, or pointing its secret entry at another name, removes the old secret from the saved object and from `credentials[]`.
+Only top-level config entries of sources, processors, and destinations are scanned for references. A PUT fails with 400 when its `secrets` contains a name nothing references, or when a reference has neither a request nor a stored secret. Stored secrets and their blobs that are no longer referenced are dropped on every PUT.
 
-Kibana seals each secret with the key named by `current-kid` in `xpack.streams.encryptionKey.path`, the mount of the project-controller `streams-encryption-key` Secret. Each `ciphertext` is `base64(nonce[12] || ciphertext || tag[16])` from AES-256-GCM with no AAD. The key is read from disk on every publish, so rotations apply without a restart. Publishing a **non-empty** secrets bag without the path, or with a missing or invalid key, fails with 503 and the saved object write is rolled back. Empty secrets publish `unit_yaml` + `config_hash` only and need no key.
+Each `ciphertext` is `v1.<kid>.<iv>.<ct>`. `kid` names the key from `current-kid` in `xpack.streams.encryptionKey.path` (the mount of the project-controller `streams-encryption-key` Secret). `iv` is 12 random bytes and `ct` is the AES-256-GCM ciphertext with its 16-byte tag, both base64url without padding. The AAD is the UTF-8 `target_id`, which Kibana reads from the DNS SAN of `xpack.streams.distributor.ssl.certificate` exactly as the distributor does, so a blob only opens for the target it was sealed for.
+
+Kibana seals once per save and sends the same `credentials` to validate and publish. It reuses a stored blob while its kid, target and plaintext are unchanged (re-sending the same value counts as unchanged), so a no-op save keeps `config_hash` and does not roll the collector. `config_hash` follows the distributor docs: SHA-256 of the YAML bytes, plus a newline and the JSON array of `[name, ciphertext]` pairs sorted by name when there are credentials.
+
+A save with secrets fails with 503, and nothing is written, when:
+
+- `xpack.streams.encryptionKey.path` is not set,
+- `current-kid` is unreadable or not in the kid grammar (`^[A-Za-z0-9_-]{1,64}$`),
+- something has to be sealed (new or changed value, new kid or target) and its key file is missing or not 32 bytes,
+- no `target_id` resolves: the client certificate has no supported SAN, or no certificate is configured and `xpack.cloud.serverless.project_id` is not set.
 
 To get a local key directory:
 
@@ -113,9 +121,11 @@ printf '%s' "$KID" > /tmp/streams-encryption-key/current-kid
 openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
 ```
 
-`config_hash` is SHA-256 of the authored YAML bytes, plus a keyed HMAC fingerprint of the plaintext secrets when there are any. Hashing the fingerprint, not the ciphertext, means re-sealing unchanged secrets does not roll the collector, while a changed secret or a new key does. The distributor stores the hash without recomputing it, so this differs harmlessly from the `[name, ciphertext]` description in the distributor API docs. Validate (`POST /v1/validate`) does not send credentials.
+Without a client certificate (a local fake distributor), set `xpack.cloud.serverless.project_id` explicitly in `kibana.dev.yml` (identifier grammar, at most 32 bytes). The UIAM dev path in `src/cli/serve/serve.js` defaults it to `abcdef12345678901234567890123456`, but not every local start goes through that path.
 
-Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps ciphertext under the previous key.
+The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
+
+Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps blobs under the previous kid, which the collector still accepts while that key stays in the Secret.
 
 ### Reset canvas saved objects
 

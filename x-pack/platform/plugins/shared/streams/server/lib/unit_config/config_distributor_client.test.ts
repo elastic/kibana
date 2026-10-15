@@ -41,11 +41,14 @@ const unit: StreamsUnit.Configuration = {
 
 const expectedYaml = YAML.stringify(unit);
 
-const hashPublishPayload = (unitYaml: string, fingerprint?: string): string => {
+// The recipe from the streams-config-distributor docs.
+const hashPublishPayload = (unitYaml: string, credentials: UnitCredential[] = []): string => {
   const hash = createHash('sha256').update(unitYaml, 'utf8');
-  if (fingerprint) {
-    hash.update('\n');
-    hash.update(fingerprint);
+  if (credentials.length > 0) {
+    const pairs = [...credentials]
+      .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+      .map(({ name, ciphertext }) => [name, ciphertext]);
+    hash.update(`\n${JSON.stringify(pairs)}`, 'utf8');
   }
   return hash.digest('hex');
 };
@@ -67,10 +70,10 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(publish({ unitId: 'default', unit, secrets: {} })).rejects.toMatchObject({
+    await expect(publish({ unitId: 'default', unit, credentials: [] })).rejects.toMatchObject({
       statusCode: 503,
     });
-    await expect(validate(unit)).rejects.toMatchObject({
+    await expect(validate({ unit, credentials: [] })).rejects.toMatchObject({
       statusCode: 503,
     });
 
@@ -90,7 +93,7 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await publish({ unitId: 'default', unit, secrets: {} });
+    await publish({ unitId: 'default', unit, credentials: [] });
 
     expect(fetchImpl).toHaveBeenCalledWith(
       'https://distributor.example:8443/v1/units/default',
@@ -104,72 +107,122 @@ describe('createConfigDistributorClient', () => {
     );
   });
 
-  it('sends sealed credentials as a sidecar and hashes the fingerprint', async () => {
+  it('publishes the given credentials without sealing', async () => {
     const fetchImpl = okFetch();
-    const secrets = { es_api_key: 's3cret', s3_secret: 'bucket' };
     const credentials: UnitCredential[] = [
-      { name: 'es_api_key', ciphertext: 'cipher-es' },
-      { name: 's3_secret', ciphertext: 'cipher-s3' },
+      { name: 'es-prod', ciphertext: 'cipher-es' },
+      { name: 's3-archive', ciphertext: 'cipher-s3' },
     ];
-    const encryptCredentials = jest.fn().mockResolvedValue({ credentials, fingerprint: 'fp-1' });
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
       logger: loggerMock.create(),
-      hooks: { encryptCredentials },
       fetchImpl,
     });
 
-    await publish({ unitId: 'default', unit, secrets });
+    await publish({ unitId: 'default', unit, credentials });
 
-    expect(encryptCredentials).toHaveBeenCalledWith(secrets);
     const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
-    expect(body.unit_yaml).toEqual(expectedYaml);
-    expect(body.credentials).toEqual(credentials);
-    expect(body.config_hash).toEqual(hashPublishPayload(expectedYaml, 'fp-1'));
-  });
-
-  it('keeps config_hash stable when unchanged secrets are sealed to new ciphertext', async () => {
-    const fetchImpl = okFetch();
-    const encryptCredentials = jest
-      .fn()
-      .mockResolvedValueOnce({
-        credentials: [{ name: 'es_api_key', ciphertext: 'first-seal' }],
-        fingerprint: 'fp-same',
-      })
-      .mockResolvedValueOnce({
-        credentials: [{ name: 'es_api_key', ciphertext: 'second-seal' }],
-        fingerprint: 'fp-same',
-      });
-    const { publish } = createConfigDistributorClient({
-      config: { url: 'https://distributor.example:8443', ssl: {} },
-      logger: loggerMock.create(),
-      hooks: { encryptCredentials },
-      fetchImpl,
+    expect(body).toEqual({
+      unit_yaml: expectedYaml,
+      config_hash: hashPublishPayload(expectedYaml, credentials),
+      credentials,
     });
-
-    await publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } });
-    await publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } });
-
-    const [first, second] = fetchImpl.mock.calls.map(([, init]) => JSON.parse(init.body));
-    expect(first.credentials).not.toEqual(second.credentials);
-    expect(first.config_hash).toEqual(second.config_hash);
   });
 
-  it('rejects with 503 and does not call the distributor when secrets exist but no encryption key is configured', async () => {
+  it('hashes credentials per the distributor doc, sorted by name', async () => {
     const fetchImpl = okFetch();
+    const sorted: UnitCredential[] = [
+      { name: 'a-first', ciphertext: 'cipher-a' },
+      { name: 'b-second', ciphertext: 'cipher-b' },
+    ];
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
       logger: loggerMock.create(),
       fetchImpl,
     });
 
-    await expect(
-      publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } })
-    ).rejects.toMatchObject({ statusCode: 503 });
-    expect(fetchImpl).not.toHaveBeenCalled();
+    await publish({ unitId: 'default', unit, credentials: [...sorted].reverse() });
+
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body).config_hash).toBe(
+      createHash('sha256')
+        .update(`${expectedYaml}\n[["a-first","cipher-a"],["b-second","cipher-b"]]`, 'utf8')
+        .digest('hex')
+    );
   });
 
-  it('POSTs unit YAML to /v1/validate without credentials', async () => {
+  it('keeps config_hash for the same credentials and changes it for a new ciphertext', async () => {
+    const fetchImpl = okFetch();
+    const { publish } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+    const credentials = [{ name: 'es-prod', ciphertext: 'first-seal' }];
+
+    await publish({ unitId: 'default', unit, credentials });
+    await publish({ unitId: 'default', unit, credentials: [...credentials] });
+    await publish({
+      unitId: 'default',
+      unit,
+      credentials: [{ name: 'es-prod', ciphertext: 'second-seal' }],
+    });
+
+    const [first, second, third] = fetchImpl.mock.calls.map(
+      ([, init]) => JSON.parse(init.body).config_hash
+    );
+    expect(second).toBe(first);
+    expect(third).not.toBe(first);
+  });
+
+  it('sends no credentials field and sha256(yaml) for a unit without secrets', async () => {
+    const fetchImpl = okFetch();
+    const { publish } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await publish({ unitId: 'default', unit, credentials: [] });
+
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({
+      unit_yaml: expectedYaml,
+      config_hash: createHash('sha256').update(expectedYaml, 'utf8').digest('hex'),
+    });
+  });
+
+  it('exposes the resolved target id', () => {
+    const { resolveTargetId } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443', ssl: {} },
+      logger: loggerMock.create(),
+      fallbackTargetId: 'abc',
+      fetchImpl: okFetch(),
+    });
+
+    expect(resolveTargetId()).toBe('abc');
+  });
+
+  it('POSTs credentials to /v1/validate when the unit has them', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ valid: true, diagnostics: [] }),
+    });
+    const credentials: UnitCredential[] = [{ name: 'es-prod', ciphertext: 'v1.k.i.c' }];
+    const { validate } = createConfigDistributorClient({
+      config: { url: 'https://distributor.example:8443/', ssl: {} },
+      logger: loggerMock.create(),
+      fetchImpl,
+    });
+
+    await expect(validate({ unit, credentials })).resolves.toEqual({});
+
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({
+      unit_yaml: expectedYaml,
+      credentials,
+    });
+  });
+
+  it('omits credentials from /v1/validate when there are none', async () => {
     const fetchImpl = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -181,7 +234,7 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(validate(unit)).resolves.toEqual({});
+    await expect(validate({ unit, credentials: [] })).resolves.toEqual({});
 
     expect(fetchImpl).toHaveBeenCalledWith(
       'https://distributor.example:8443/v1/validate',
@@ -209,7 +262,9 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(validate(unit)).resolves.toEqual({ compiled_config: 'receivers: {}' });
+    await expect(validate({ unit, credentials: [] })).resolves.toEqual({
+      compiled_config: 'receivers: {}',
+    });
   });
 
   it('rejects an invalid unit with distributor diagnostics', async () => {
@@ -233,7 +288,7 @@ describe('createConfigDistributorClient', () => {
       fetchImpl,
     });
 
-    await expect(validate(unit)).rejects.toMatchObject({
+    await expect(validate({ unit, credentials: [] })).rejects.toMatchObject({
       message: 'OTTL parse error',
       statusCode: 400,
       data: { valid: false, diagnostics },

@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { parseSealedBlob } from '../unit_config/seal_credentials';
+import type { StoredUnitCredential } from '../unit_config/types';
 import {
   STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
@@ -35,6 +37,26 @@ export const streamsConfigurationSavedObjectAttributesV1 = schema.object({
   secrets: schema.string({ defaultValue: '{}' }),
 });
 
+// Ciphertext is not secret, so the cache stays outside ESO and outside AAD.
+// 66_000 covers a 16384-char secret (at most 3 UTF-8 bytes per UTF-16 unit) after base64url and the v1 prefix.
+export const streamsConfigurationSavedObjectAttributesV2 =
+  streamsConfigurationSavedObjectAttributesV1.extends({
+    sealed_credentials: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string({ maxLength: 256 }),
+          target: schema.string({ maxLength: 32 }),
+          ciphertext: schema.string({
+            maxLength: 66_000,
+            validate: (value) =>
+              parseSealedBlob(value) ? undefined : 'must be a v1 sealed credential blob',
+          }),
+        }),
+        { maxSize: 500 }
+      )
+    ),
+  });
+
 export const streamsConfigurationEncryptedType: EncryptedSavedObjectTypeRegistration = {
   type: STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   attributesToEncrypt: new Set(STREAMS_CONFIGURATION_ATTRIBUTES_TO_ENCRYPT),
@@ -44,7 +66,10 @@ export const streamsConfigurationEncryptedType: EncryptedSavedObjectTypeRegistra
 };
 
 export type StreamsConfigurationSavedObjectAttributes =
-  StreamsUnit.ConfigurationSavedObjectAttributes;
+  StreamsUnit.ConfigurationSavedObjectAttributes & {
+    /** Blobs from the last save, reused while kid, target and value are unchanged. */
+    sealed_credentials?: StoredUnitCredential[];
+  };
 
 export const streamsUiMetadataSavedObjectAttributesV1 = schema.object({
   metadata: yamlCompatibleObject,
@@ -76,6 +101,16 @@ export const streamsConfigurationSavedObjectType: SavedObjectsType<StreamsConfig
             { unknowns: 'ignore' }
           ),
           create: streamsConfigurationSavedObjectAttributesV1,
+        },
+      },
+      '2': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: streamsConfigurationSavedObjectAttributesV2.extends(
+            {},
+            { unknowns: 'ignore' }
+          ),
+          create: streamsConfigurationSavedObjectAttributesV2,
         },
       },
     },

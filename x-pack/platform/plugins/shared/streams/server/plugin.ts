@@ -58,7 +58,7 @@ import type { AttachmentClient } from './lib/streams/attachments/attachment_clie
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
 import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
-import { createCredentialSealer } from './lib/unit_config/seal_credentials';
+import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -284,18 +284,22 @@ export class StreamsPlugin
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
     const { path: encryptionKeyPath } = this.config.encryptionKey;
-    const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
+    const distributorClient = createConfigDistributorClient({
       config: this.config.distributor,
       logger: this.logger.get('config-distributor'),
-      hooks: {
-        encryptCredentials: encryptionKeyPath
-          ? createCredentialSealer({
-              store: createEncryptionKeyStore({ path: encryptionKeyPath }),
-              logger: this.logger.get('credential-sealer'),
-            })
-          : undefined,
-      },
+      fallbackTargetId: plugins.cloud?.serverless.projectId,
     });
+    const unitConfigHooks: UnitConfigHooks = {
+      validate: distributorClient.validate,
+      publish: distributorClient.publish,
+      prepareCredentials: encryptionKeyPath
+        ? createCredentialPreparer({
+            store: createEncryptionKeyStore({ path: encryptionKeyPath }),
+            resolveTargetId: distributorClient.resolveTargetId,
+            logger: this.logger.get('credential-sealer'),
+          })
+        : undefined,
+    };
 
     const routeRegistrationOptions = {
       dependencies: {

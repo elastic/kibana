@@ -81,6 +81,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/core-spaces-common",
+    "@kbn/core-test-helpers-model-versions",
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",

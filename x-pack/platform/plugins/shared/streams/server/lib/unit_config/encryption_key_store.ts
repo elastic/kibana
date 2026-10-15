@@ -9,18 +9,17 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { StatusError } from '../streams/errors/status_error';
 
-export interface EncryptionKeyMaterial {
-  kid: string;
-  /** Raw AES-256 key. Callers zero it when done. */
-  key: Buffer;
+export interface EncryptionKeyStore {
+  /** The kid new blobs are sealed under. Throws a 503 `StatusError` when unreadable or malformed. */
+  readCurrentKid: () => Promise<string>;
+  /** Raw AES-256 key for `kid`. Callers zero it when done. */
+  readKey: (kid: string) => Promise<Buffer>;
 }
 
-export interface EncryptionKeyStore {
-  readCurrent: () => Promise<EncryptionKeyMaterial>;
-}
+/** Key id grammar from the credential contract. Dots are excluded because they delimit the sealed blob. */
+export const KID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 const AES_256_KEY_BYTES = 32;
-const KID_PATTERN = /^[0-9]{8}_[0-9]{6}_[a-f0-9]{8}$/;
 const CURRENT_KID_FILE = 'current-kid';
 const KEY_FILE_PREFIX = 'streams-encryption-key.';
 
@@ -48,6 +47,10 @@ export const createEncryptionKeyStore = ({ path }: { path: string }): Encryption
   };
 
   const readKey = async (kid: string): Promise<Buffer> => {
+    if (!KID_PATTERN.test(kid)) {
+      throw keyUnavailable('the requested kid is not well-formed');
+    }
+
     const keyFile = join(path, `${KEY_FILE_PREFIX}${kid}`);
     const key = await readFile(keyFile).catch((error) => {
       throw keyUnavailable(`key ${kid} is missing (${errorCode(error)})`);
@@ -63,10 +66,5 @@ export const createEncryptionKeyStore = ({ path }: { path: string }): Encryption
     return key;
   };
 
-  return {
-    readCurrent: async () => {
-      const kid = await readCurrentKid();
-      return { kid, key: await readKey(kid) };
-    },
-  };
+  return { readCurrentKid, readKey };
 };

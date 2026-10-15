@@ -43,16 +43,46 @@ describe('createEncryptionKeyStore', () => {
       [`streams-encryption-key.${KID}`]: key,
     });
 
-    await expect(createEncryptionKeyStore({ path: dir }).readCurrent()).resolves.toEqual({
-      kid: KID,
-      key,
-    });
+    const store = createEncryptionKeyStore({ path: dir });
+
+    await expect(store.readCurrentKid()).resolves.toBe(KID);
+    await expect(store.readKey(KID)).resolves.toEqual(key);
   });
 
-  it('rejects a malformed kid before using it in a file path', async () => {
-    await writeMount(dir, { 'current-kid': '../../etc/passwd' });
+  it('reads current-kid without needing the key file', async () => {
+    await writeMount(dir, { 'current-kid': KID });
 
-    await expect(createEncryptionKeyStore({ path: dir }).readCurrent()).rejects.toMatchObject({
+    await expect(createEncryptionKeyStore({ path: dir }).readCurrentKid()).resolves.toBe(KID);
+  });
+
+  it('rejects a kid outside KID_PATTERN in readKey without touching the file system', async () => {
+    await expect(
+      createEncryptionKeyStore({ path: join(dir, 'does-not-exist') }).readKey('../x')
+    ).rejects.toMatchObject({ statusCode: 503 });
+  });
+
+  it('accepts any kid in the contract grammar, not only the project-controller timestamp shape', async () => {
+    const kid = 'kid-2026_10';
+    const key = randomBytes(32);
+    await writeMount(dir, {
+      'current-kid': kid,
+      [`streams-encryption-key.${kid}`]: key,
+    });
+
+    const store = createEncryptionKeyStore({ path: dir });
+
+    await expect(store.readCurrentKid()).resolves.toBe(kid);
+    await expect(store.readKey(kid)).resolves.toEqual(key);
+  });
+
+  it.each([
+    ['a path', '../../etc/passwd'],
+    ['a dot, which delimits the sealed blob', 'a.b'],
+    ['more than 64 characters', 'k'.repeat(65)],
+  ])('rejects a kid with %s before using it in a file path', async (_, kid) => {
+    await writeMount(dir, { 'current-kid': kid });
+
+    await expect(createEncryptionKeyStore({ path: dir }).readCurrentKid()).rejects.toMatchObject({
       statusCode: 503,
       message: 'Cannot seal Streams unit credentials: current-kid does not hold a well-formed kid',
     });
@@ -70,8 +100,10 @@ describe('createEncryptionKeyStore', () => {
     async (_, files: Record<string, string | Buffer>) => {
       await writeMount(dir, files);
 
-      const error = await createEncryptionKeyStore({ path: dir })
-        .readCurrent()
+      const store = createEncryptionKeyStore({ path: dir });
+      const error = await store
+        .readCurrentKid()
+        .then((kid) => store.readKey(kid))
         .catch((e: Error) => e);
 
       expect(error).toMatchObject({ statusCode: 503 });
