@@ -28,7 +28,7 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/eb
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../hooks/use_significant_events_maintenance';
+} from '../../data/maintenance/use_significant_events_maintenance';
 import { DetectionPausedCallout } from './detection_paused_callout';
 import { SettingsSectionRow } from './settings_section';
 

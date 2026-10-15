@@ -69,6 +69,7 @@ const parityTests = {
   no_wrapped_error_in_logger: () => require('../no_wrapped_error_in_logger.test.js'),
   require_include_in_check_a11y: () => require('../require_include_in_check_a11y.test.js'),
   require_kbn_fs: () => require('../require_kbn_fs.test.js'),
+  require_lazy_zod_schema: () => require('../require_lazy_zod_schema.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
   scout_expect_import: () => require('../scout_expect_import.test.js'),
@@ -85,6 +86,7 @@ const parityTests = {
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
   scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
+  scout_prefer_both_arch_tags: () => require('../scout_prefer_both_arch_tags.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),
   scout_require_global_setup_hook_in_parallel_tests: () =>

@@ -32,7 +32,29 @@ export class ServiceAccountsTestPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
-    core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
+    // Resolves jobs by the prefix of their ID, so tests can pick what the management page gets
+    // back: no details, a path Core must refuse, a title alone, or a title and a path.
+    core.security.serviceAccounts.registerWorkloadType({
+      type: 'job',
+      name: 'Test job',
+      resolveWorkloads: async (workloads) =>
+        workloads.map(({ workloadId }) => {
+          if (workloadId.startsWith('unresolved-')) {
+            return undefined;
+          }
+          const title = `Test job ${workloadId}`;
+          if (workloadId.startsWith('bad-path-')) {
+            return { title, path: '/app/../api/status' };
+          }
+          if (workloadId.startsWith('title-only-')) {
+            return { title };
+          }
+          return {
+            title,
+            path: `/app/service_accounts_test/jobs/${encodeURIComponent(workloadId)}`,
+          };
+        }),
+    });
     const router = core.http.createRouter();
     taskManager.registerTaskDefinitions({
       [NOOP_TASK_TYPE]: {
@@ -134,6 +156,7 @@ export class ServiceAccountsTestPlugin
                 schema.literal('authenticate'),
                 schema.literal('read_role'),
                 schema.literal('create_rule'),
+                schema.literal('schedule_task'),
               ],
               { defaultValue: 'authenticate' }
             ),
@@ -176,19 +199,29 @@ export class ServiceAccountsTestPlugin
             async (fakeRequest) => {
               // A nested caller: the workload calls a Kibana API as the account through the self
               // client, and that API mints the workload's own credential.
-              if (action === 'create_rule') {
+              if (action === 'create_rule' || action === 'schedule_task') {
                 try {
-                  const { response: ruleResponse, body } = await start.http.selfClient
+                  const { response: nestedResponse, body } = await start.http.selfClient
                     .asScoped(fakeRequest)
-                    .fetch('/api/alerting/rule', { method: 'POST', body: rule, asResponse: true });
-                  return { status: ruleResponse.status, body };
+                    .fetch(
+                      action === 'create_rule'
+                        ? '/api/alerting/rule'
+                        : '/internal/service_accounts_test/_tasks',
+                      {
+                        method: 'POST',
+                        body: action === 'create_rule' ? rule : undefined,
+                        access: action === 'create_rule' ? 'public' : 'internal',
+                        asResponse: true,
+                      }
+                    );
+                  return { status: nestedResponse.status, body };
                 } catch (error) {
                   if (error instanceof Error && 'response' in error && 'body' in error) {
-                    const { response: ruleResponse, body } = error as Error & {
+                    const { response: nestedResponse, body } = error as Error & {
                       response?: Response;
                       body?: unknown;
                     };
-                    if (ruleResponse) return { status: ruleResponse.status, body };
+                    if (nestedResponse) return { status: nestedResponse.status, body };
                   }
                   throw error;
                 }
