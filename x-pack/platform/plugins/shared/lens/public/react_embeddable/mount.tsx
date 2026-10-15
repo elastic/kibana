@@ -80,6 +80,10 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
       pointer-events: auto;
     }
   }
+
+  [data-test-subj='euiFlyoutContent'] {
+    overflow: visible !important;
+  }
 `;
 
 export const lensFlyoutProps: OverlayFlyoutOpenOptions = {

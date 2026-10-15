@@ -579,7 +579,7 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* Don't clip DnD extras here — gutter/scroll live on .euiFlyoutBody__overflow. */
+              /* overflow-y: auto leaves overflow-x hidden, which clips drag-drop extras. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
                 overflow: visible !important;

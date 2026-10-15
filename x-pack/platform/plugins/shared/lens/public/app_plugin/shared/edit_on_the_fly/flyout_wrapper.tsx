@@ -31,24 +31,15 @@ import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '
 import type { FlyoutWrapperProps } from './types';
 
 /**
- * Nested Emotion `css` on EuiFlyout loses to chrome-layout clip-path and EUI overflow.
- * Global + !important scoped to Lens inline flyouts restores visible ancestors +
- * one guttered scrollport for DnD extras.
+ * Framed right flyouts clip to half their width. Drag-drop extras sit to the
+ * left of the drop zones, so that clip has to be cleared on customizeLens.
  */
 const inlineFlyoutDndOverflowFix = css`
-  /* Must beat chrome-layout grid_global_app_style.tsx:
-     body .euiFlyout[class*='right']:not([data-managed-flyout-layout-mode=…][data-managed-flyout-level=child])
-     { clip-path: inset(0 0 0 -50% …) !important }
-     That -50% only allows half the flyout width (~250px); DnD extras need ~296px. */
   body
     .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
       [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
     ) {
     clip-path: none !important;
-  }
-
-  .euiFlyout[data-test-subj='customizeLens'] [data-test-subj='euiFlyoutContent'] {
-    overflow: visible !important;
   }
 `;
 
