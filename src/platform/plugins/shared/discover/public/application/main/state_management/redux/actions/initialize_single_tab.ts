@@ -37,7 +37,7 @@ import { ProfileStateType, type ProfileStateMap } from '../../../../../../common
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
-import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
+import { fromSavedObjectTabToSearchSource, readStoredAppStateDefaults } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
@@ -273,6 +273,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     // Get the initial app state based on a combo of the URL and persisted tab saved search
+    const storedAppStateDefaults = readStoredAppStateDefaults();
     const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
       hasGlobalState,
@@ -281,6 +282,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       services,
       defaultProfileEsqlQuery,
       query: openingQuery,
+      storedDefaults: storedAppStateDefaults,
     });
 
     const initialGlobalState: TabStateGlobalState = {
@@ -393,6 +395,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         tabId,
         initialAppState,
         initialProfileState,
+        storedAppStateDefaults,
       })
     );
 

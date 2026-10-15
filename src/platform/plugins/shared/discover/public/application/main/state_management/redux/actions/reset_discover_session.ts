@@ -15,6 +15,7 @@ import {
   fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
+  readStoredAppStateDefaults,
 } from '../tab_mapping_utils';
 import {
   createInternalStateAsyncThunk,
@@ -61,6 +62,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         const existingTab = selectTab(state, tab.id);
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabDataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
+        const storedDefaults = readStoredAppStateDefaults();
         let initialAppState: DiscoverAppState | undefined;
 
         if (tabDataStateContainer) {
@@ -90,6 +92,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
             persistedTab: tab,
             dataView,
             services,
+            storedDefaults,
           });
 
           // Sidebar visibility is not saved tab state, so keep the current value when resetting.
@@ -101,6 +104,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           existingTab,
           initialAppState,
           profileStateRegistry: services.profileStateRegistry,
+          storedDefaults,
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.

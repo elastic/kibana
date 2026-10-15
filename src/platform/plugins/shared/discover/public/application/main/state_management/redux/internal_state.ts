@@ -385,11 +385,13 @@ const internalStateSliceDef = createSlice({
       action: TabAction<{
         initialAppState: TabState['appState'];
         initialProfileState: TabState['profileState'];
+        storedAppStateDefaults?: TabState['storedAppStateDefaults'];
       }>
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.previousAppState = action.payload.initialAppState;
         tab.appState = action.payload.initialAppState;
+        tab.storedAppStateDefaults = action.payload.storedAppStateDefaults;
         tab.profileState = action.payload.initialProfileState;
       }),
 

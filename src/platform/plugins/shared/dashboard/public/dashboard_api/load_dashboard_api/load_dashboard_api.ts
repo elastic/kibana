@@ -22,6 +22,7 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
+import { getDefaultApproximation } from '../approximation_manager';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
@@ -88,16 +89,22 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const lastSavedState = {
+    ...getDefaultApproximation(),
+    ...getLastSavedState(readResult),
+  };
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     panelFlyoutType,
     incomingEmbeddables,
     initialState: {
-      ...getLastSavedState(readResult),
+      ...lastSavedState,
       ...unsavedChanges,
       ...overrideState,
     },
     readResult,
+    lastSavedState,
     savedObjectId,
     user,
     isAccessControlEnabled,

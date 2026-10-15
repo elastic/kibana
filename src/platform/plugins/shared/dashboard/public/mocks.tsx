@@ -14,7 +14,7 @@ import type { DashboardStart } from './plugin';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
-import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE, getLastSavedState } from '../common/default_dashboard_state';
 import type { DashboardApi, DashboardInternalApi } from './dashboard_api/types';
 import { DashboardContext } from './dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from './dashboard_api/use_dashboard_internal_api';
@@ -81,19 +81,21 @@ export function buildMockDashboardApi({
   savedObjectId?: string;
 } = {}) {
   const initialState = getSampleDashboardState(overrides);
+  const readResult = savedObjectId
+    ? ({
+        id: savedObjectId,
+        data: initialState,
+        meta: {
+          managed: false,
+        },
+      } as unknown as DashboardReadResponseBody)
+    : undefined;
   const results = getDashboardApi({
     initialState,
     incomingEmbeddables: undefined,
     savedObjectId,
-    readResult: savedObjectId
-      ? ({
-          id: savedObjectId,
-          data: initialState,
-          meta: {
-            managed: false,
-          },
-        } as unknown as DashboardReadResponseBody)
-      : undefined,
+    readResult,
+    lastSavedState: getLastSavedState(readResult),
   });
   return results;
 }

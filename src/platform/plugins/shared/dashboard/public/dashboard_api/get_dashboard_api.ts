@@ -15,7 +15,6 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -57,6 +56,7 @@ export function getDashboardApi({
   incomingEmbeddables,
   initialState,
   readResult,
+  lastSavedState,
   savedObjectId,
   user,
   isAccessControlEnabled,
@@ -66,6 +66,7 @@ export function getDashboardApi({
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
+  lastSavedState: DashboardState;
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
@@ -180,7 +181,6 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
 
-  const lastSavedState = getLastSavedState(readResult);
   const anyStateChange$ = merge(
     settingsManager.internalApi.anyStateChange$,
     unifiedSearchManager.internalApi.anyStateChange$,

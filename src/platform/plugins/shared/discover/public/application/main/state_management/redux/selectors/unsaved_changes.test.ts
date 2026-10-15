@@ -13,6 +13,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
@@ -236,6 +237,64 @@ describe('selectHasUnsavedChanges', () => {
     const result = selectHasUnsavedChanges(state, { runtimeStateManager, services });
 
     expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+  });
+
+  describe('stored Fast mode preference', () => {
+    afterEach(() => localStorage.clear());
+
+    const setupEsqlTab = async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab } =
+        getDiscoverInternalStateMock({
+          services,
+          persistedDataViews: [dataViewWithTimefieldMock],
+        });
+      const persistedTab = getPersistedTabMock({
+        tabId: 'persisted-tab',
+        dataView: dataViewWithTimefieldMock,
+        services,
+        appStateOverrides: { query: { esql: 'FROM logs | STATS count = COUNT(*)' } },
+      });
+      await initializeTabs({
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-id',
+          tabs: [persistedTab],
+        }),
+      });
+      // The preference is read when the tab is loaded
+      return {
+        internalState,
+        runtimeStateManager,
+        services,
+        load: () => initializeSingleTab({ tabId: persistedTab.id }),
+        tabId: persistedTab.id,
+      };
+    };
+
+    it('does not flag the seeded default as a change', async () => {
+      const { internalState, runtimeStateManager, services, load } = await setupEsqlTab();
+      esqlApproximationStorage.set(true);
+      await load();
+
+      expect(
+        selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+      ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+    });
+
+    it('detects turning Fast mode on after load, even though it updates the stored preference', async () => {
+      const { internalState, runtimeStateManager, services, load, tabId } = await setupEsqlTab();
+      esqlApproximationStorage.set(false);
+      await load();
+
+      esqlApproximationStorage.set(true);
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { esqlApproximation: true } })
+      );
+
+      expect(
+        selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+      ).toEqual({ hasUnsavedChanges: true, unsavedTabIds: [tabId] });
+    });
   });
 
   it('detects unsaved changes when the active saved search diverges from the persisted tab', async () => {

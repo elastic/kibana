@@ -205,6 +205,9 @@ describe('tab mapping utils', () => {
           },
           "profileState": Object {},
           "renderDocumentViewMeta": undefined,
+          "storedAppStateDefaults": Object {
+            "esqlApproximation": false,
+          },
           "uiState": Object {},
         }
       `);
@@ -295,6 +298,9 @@ describe('tab mapping utils', () => {
           },
           "profileState": Object {},
           "renderDocumentViewMeta": undefined,
+          "storedAppStateDefaults": Object {
+            "esqlApproximation": false,
+          },
           "uiState": Object {},
         }
       `);

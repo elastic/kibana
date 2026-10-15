@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql-browser', () => ({
+  ...jest.requireActual('@kbn/esql-browser'),
+  esqlApproximationStorage: { get: jest.fn(), set: jest.fn() },
+}));
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +20,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
 
 const startMock = coreMock.createStart();
@@ -77,6 +83,14 @@ describe('EsqlApproximationToggle', () => {
     await waitFor(() => screen.getByRole('switch'));
     await userEvent.click(screen.getByRole('switch'));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it('persists the new value to storage when the switch is toggled', async () => {
+    renderToggle({ isApproximate: false, onChange });
+    await userEvent.click(screen.getByTestId('esqlApproximationToggleButton'));
+    await waitFor(() => screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
+    expect(esqlApproximationStorage.set).toHaveBeenCalledWith(true);
   });
 
   it('renders additionalText inside the popover when provided', async () => {

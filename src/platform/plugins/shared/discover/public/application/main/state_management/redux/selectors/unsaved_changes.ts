@@ -91,6 +91,8 @@ export const selectHasUnsavedChanges = (
 
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
+    // Use the defaults the tab was loaded with, not the live preference, which can change later
+    const storedDefaults = tabState.storedAppStateDefaults ?? { esqlApproximation: false };
     const initialAppState = getInitialAppState({
       initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
       persistedTab,
@@ -100,6 +102,7 @@ export const selectHasUnsavedChanges = (
       ),
       services,
       defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
+      storedDefaults,
     });
 
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
@@ -107,6 +110,7 @@ export const selectHasUnsavedChanges = (
         tab: persistedTab,
         profileStateRegistry: services.profileStateRegistry,
         initialAppState,
+        storedDefaults,
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,

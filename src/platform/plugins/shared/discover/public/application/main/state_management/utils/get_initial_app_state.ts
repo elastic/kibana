@@ -32,6 +32,8 @@ import {
 } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
+import { withStoredAppStateDefaults } from '../redux/tab_mapping_utils';
+import type { StoredAppStateDefaults } from '../redux/types';
 import {
   isEsqlSource,
   createEsqlDataSource,
@@ -49,6 +51,7 @@ export function getInitialAppState({
   services,
   defaultProfileEsqlQuery,
   query,
+  storedDefaults,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState?: boolean;
@@ -58,6 +61,8 @@ export function getInitialAppState({
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
   /** The query the tab opens with, when already decided; otherwise the default is derived. */
   query?: Query | AggregateQuery;
+  /** Stored preferences to seed from; read live when omitted. */
+  storedDefaults?: StoredAppStateDefaults;
 }) {
   const defaultAppState = getDefaultAppState({
     persistedTab,
@@ -92,7 +97,11 @@ export function getInitialAppState({
     mergedState.dataSource = createEsqlDataSource();
   }
 
-  return handleSourceColumnState(mergedState, services.uiSettings);
+  // Apply stored preferences last, once the final query (URL, saved tab or default) is known
+  return handleSourceColumnState(
+    withStoredAppStateDefaults(mergedState, storedDefaults),
+    services.uiSettings
+  );
 }
 
 function getDefaultColumns(

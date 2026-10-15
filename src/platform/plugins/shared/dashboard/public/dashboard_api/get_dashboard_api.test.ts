@@ -16,6 +16,7 @@ describe('initializeSettingsManager', () => {
       const { api } = getDashboardApi({
         incomingEmbeddables: [],
         initialState: DEFAULT_DASHBOARD_STATE,
+        lastSavedState: DEFAULT_DASHBOARD_STATE,
       });
       api.anyStateChange$.subscribe(() => {
         try {

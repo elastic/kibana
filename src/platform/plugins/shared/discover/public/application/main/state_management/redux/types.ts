@@ -59,6 +59,10 @@ export interface InternalStateDataRequestParams {
   isSearchSessionRestored: boolean;
 }
 
+export interface StoredAppStateDefaults {
+  esqlApproximation: boolean;
+}
+
 export interface TabStateGlobalState {
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
@@ -246,6 +250,9 @@ export interface TabState extends TabItem {
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
+  // Stored preferences read when the tab was loaded. In-memory only: lets the saved-state baseline
+  // be rebuilt with the same defaults the tab was seeded with, regardless of later preference writes.
+  storedAppStateDefaults?: StoredAppStateDefaults;
   cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
