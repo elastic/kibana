@@ -175,51 +175,50 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
         <EuiFlexItem grow={false}>
-          {addFilter ? (
-            <div>
-              <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconSize="s"
-                  iconType="plusCircle"
-                  onClick={() => addFilter({ negate: false })}
-                  aria-label={filterForLabel}
-                  data-test-subj={`plus-${fieldLabel}-${filterValueTestSubj}`}
-                  style={{
-                    minHeight: 'auto',
-                    minWidth: 'auto',
-                    paddingRight: 2,
-                    paddingLeft: 2,
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                  }}
-                />
-              </EuiToolTip>
-              <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconSize="s"
-                  iconType="minusCircle"
-                  onClick={() => addFilter({ negate: true })}
-                  aria-label={filterOutLabel}
-                  data-test-subj={`minus-${fieldLabel}-${filterValueTestSubj}`}
-                  style={{
-                    minHeight: 'auto',
-                    minWidth: 'auto',
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                    paddingRight: 2,
-                    paddingLeft: 2,
-                  }}
-                />
-              </EuiToolTip>
-            </div>
-          ) : (
-            <div
-              data-test-subj={`${dataTestSubject}-filterActions-placeholder`}
-              css={css`
-                width: 48px;
-              `}
-            />
-          )}
+          {/* buttons stay rendered when the bucket can't be filtered on, so all rows keep the same width */}
+          <div
+            css={
+              !addFilter &&
+              css`
+                visibility: hidden;
+              `
+            }
+          >
+            <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="plusCircle"
+                onClick={() => addFilter?.({ negate: false })}
+                aria-label={filterForLabel}
+                data-test-subj={`plus-${fieldLabel}-${filterValueTestSubj}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+              />
+            </EuiToolTip>
+            <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="minusCircle"
+                onClick={() => addFilter?.({ negate: true })}
+                aria-label={filterOutLabel}
+                data-test-subj={`minus-${fieldLabel}-${filterValueTestSubj}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                }}
+              />
+            </EuiToolTip>
+          </div>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

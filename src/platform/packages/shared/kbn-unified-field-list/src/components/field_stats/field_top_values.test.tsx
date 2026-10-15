@@ -97,6 +97,19 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
     expect(mockAddFilter).not.toHaveBeenCalled();
   });
 
+  it('should not allow filtering on Other for scripted fields', () => {
+    renderWithI18n(
+      <FieldTopValues
+        {...defaultProps}
+        field={dataViewMock.getFieldByName('scripted')!}
+        onAddFilter={jest.fn()}
+        onAddOtherFilter={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole('button')).toHaveLength(4);
+  });
+
   it('should render correctly without Other section', () => {
     renderWithI18n(
       <FieldTopValues

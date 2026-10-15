@@ -52,9 +52,9 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   const digitsRequired = buckets.some(
     (bucket) => !Number.isInteger(bucket.count / sampledValuesCount)
   );
-  // examples are not real top values, so "Other" can't be filtered on
+  // examples are not real top values, and scripted fields can't be queried with "exists"
   const addOtherFilter =
-    onAddOtherFilter && !areExamples
+    onAddOtherFilter && !areExamples && !field.scripted
       ? (options: { negate: boolean }) =>
           onAddOtherFilter(
             field,
