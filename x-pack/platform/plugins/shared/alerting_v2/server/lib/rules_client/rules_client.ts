@@ -1890,14 +1890,6 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    if (nextEnabled !== prevEnabled) {
-      const eventRule = { ruleId: rule.id, spaceId: this.spaceId, rule };
-      if (nextEnabled) {
-        this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [eventRule]);
-      } else {
-        this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [eventRule]);
-      }
-    }
     return { rule, created: false };
   }
 }

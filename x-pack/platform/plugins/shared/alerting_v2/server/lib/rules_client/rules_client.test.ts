@@ -4274,7 +4274,7 @@ describe('RulesClient', () => {
         );
       });
 
-      it('emits both ruleUpdated and ruleEnabled when the replace body enables a disabled rule', async () => {
+      it('emits only ruleUpdated, not ruleEnabled, when the replace body enables a disabled rule', async () => {
         const client = createClient();
         const existingDoc = {
           id: 'rule-id-wf-upsert-enable',
@@ -4296,13 +4296,11 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith({ request, origin: 'user' }, [
           expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
         ]);
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith({ request, origin: 'user' }, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
-        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits both ruleUpdated and ruleDisabled when the replace body disables an enabled rule', async () => {
+      it('emits only ruleUpdated, not ruleDisabled, when the replace body disables an enabled rule', async () => {
         const client = createClient();
         const existingDoc = {
           id: 'rule-id-wf-upsert-disable',
@@ -4324,9 +4322,7 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith({request, origin: 'user'}, [
           expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
         ]);
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith({request, origin: 'user'}, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
-        ]);
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
 
