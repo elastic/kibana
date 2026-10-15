@@ -61,7 +61,6 @@ export async function create(
   const snapshot = getHistorySnapshot({
     attributes: soAttributes,
     references: soReferences,
-    accessControl,
     strictValidationSchema,
   });
   if (snapshot) {

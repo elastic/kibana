@@ -136,7 +136,7 @@ describe('getHistorySnapshot', () => {
       dashboardState: { title: 'New' },
       warnings: [],
     });
-    const snapshot = getHistorySnapshot({ ...args, accessControl: { access_mode: 'default' } });
+    const snapshot = getHistorySnapshot(args);
 
     expect(transformDashboardOut).toHaveBeenCalledWith(
       args.attributes,
@@ -144,7 +144,7 @@ describe('getHistorySnapshot', () => {
       true,
       args.strictValidationSchema
     );
-    expect(snapshot).toEqual({ title: 'New', access_control: { access_mode: 'default' } });
+    expect(snapshot).toEqual({ title: 'New' });
   });
 
   it('returns undefined when the state cannot be transformed', () => {

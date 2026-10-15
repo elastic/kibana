@@ -29,12 +29,10 @@ import { getChangeHistoryClient } from './change_history_service';
 export const getHistorySnapshot = ({
   attributes,
   references,
-  accessControl,
   strictValidationSchema,
 }: {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
-  accessControl?: DashboardState['access_control'];
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>;
 }): DashboardState | undefined => {
   try {
@@ -44,7 +42,7 @@ export const getHistorySnapshot = ({
       true,
       strictValidationSchema
     );
-    return { ...dashboardState, ...(accessControl && { access_control: accessControl }) };
+    return dashboardState;
   } catch {
     return undefined;
   }

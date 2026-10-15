@@ -152,7 +152,6 @@ export async function update(
     const snapshot = getHistorySnapshot({
       attributes: soAttributes,
       references: soReferences,
-      accessControl,
       strictValidationSchema,
     });
     if (snapshot) {
