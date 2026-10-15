@@ -26,6 +26,7 @@ import {
   deleteFeature,
   getFeaturesEndpoint,
   deleteSignificantEvent,
+  retryOnWriteLease,
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
 
@@ -118,20 +119,21 @@ for (const role of ['editor', 'admin'] as const) {
       });
 
       apiTest('creates and deletes a knowledge indicator', async ({ apiClient }) => {
-        const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
-          headers,
-          body: buildFeature(featureId),
-          responseType: 'json',
-        });
+        const createResponse = await retryOnWriteLease(() =>
+          apiClient.post(getFeaturesEndpoint(sourceId), {
+            headers,
+            body: buildFeature(featureId),
+            responseType: 'json',
+          })
+        );
         expect(createResponse).toHaveStatusCode(200);
         expect(createResponse.body).toStrictEqual({ acknowledged: true });
 
-        const deleteResponse = await apiClient.delete(
-          `${getFeaturesEndpoint(sourceId)}/${featureId}`,
-          {
+        const deleteResponse = await retryOnWriteLease(() =>
+          apiClient.delete(`${getFeaturesEndpoint(sourceId)}/${featureId}`, {
             headers,
             responseType: 'json',
-          }
+          })
         );
         expect(deleteResponse).toHaveStatusCode(200);
       });
