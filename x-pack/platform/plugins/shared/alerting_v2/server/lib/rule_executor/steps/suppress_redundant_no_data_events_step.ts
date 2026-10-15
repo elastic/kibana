@@ -67,6 +67,17 @@ export const isRedundantNoDataEvent = (
  * Runs after `DirectorStep`, which stays a pure 1:1 state function and threads
  * the prior state it loaded onto `state.previousAlertStateByGroupHash`. When no
  * prior state was threaded the batch passes through unchanged.
+ *
+ * This relies on `ClassifyAbsentGroupsStep` being an end-of-stream classifier:
+ * `no_data` events are emitted only in its single final batch, after the
+ * full-run breach set is known. Two guarantees follow. A `no_data` group had no
+ * event written earlier in the same run (it is in the final batch precisely
+ * because it was absent from the breach set), so the prior state the director
+ * loads for it is the previous run's last event — the correct baseline. And the
+ * streamed breach batches carry only `breached` events, which this step never
+ * touches, so streaming is unaffected. The comparison is purely per event
+ * against persisted state and needs no cross-batch knowledge, which is why it
+ * belongs downstream of the classifier rather than inside it.
  */
 @injectable()
 export class SuppressRedundantNoDataEventsStep implements RuleExecutionStep {
