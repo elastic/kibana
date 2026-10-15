@@ -72,13 +72,35 @@ Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<val
 
 Secret names follow `secret:<nodeId>:<field>`, for example `secret:es-remote-1:api_key`. That string is the value of the secret-typed config entry in the unit YAML, the key of the plaintext in `secrets`, and the `credentials[].name` sent to the distributor. Sealing treats it as an opaque string.
 
+A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
+
+```json
+{
+  "unit": {
+    "destinations": [
+      {
+        "id": "es-remote-1",
+        "type": "elasticsearch",
+        "supported_telemetry": ["logs"],
+        "config": [{ "name": "api_key", "value": "secret:es-remote-1:api_key" }]
+      }
+    ]
+  },
+  "secrets": { "secret:es-remote-1:api_key": "<plaintext>" }
+}
+```
+
+No streams-spec destination defines a secret field yet, so the shape above shows the contract, not a unit the distributor accepts today.
+
 | Layer | What is stored |
 | --- | --- |
 | Unit YAML / `unit` attribute | Credential **name** only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
 | Distributor `PUT /v1/units/{id}` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]`, sealed with the project AES-256-GCM wrap key |
 
-`GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored — it does not replace the secrets — because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
+`GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
+
+A secret is referenced when a top-level string config value of a source, processor, or destination equals its name exactly. Nested values (objects and arrays inside `value`) are not scanned. A PUT whose `secrets` contains a name the unit does not reference fails with 400. Stored secrets that are no longer referenced are dropped on every PUT, so deleting a node, or pointing its secret entry at another name, removes the old secret from the saved object and from `credentials[]`.
 
 Kibana seals each secret with the key named by `current-kid` in `xpack.streams.encryptionKey.path`, the mount of the project-controller `streams-encryption-key` Secret. Each `ciphertext` is `base64(nonce[12] || ciphertext || tag[16])` from AES-256-GCM with no AAD. The key is read from disk on every publish, so rotations apply without a restart. Publishing a **non-empty** secrets bag without the path, or with a missing or invalid key, fails with 503 and the saved object write is rolled back. Empty secrets publish `unit_yaml` + `config_hash` only and need no key.
 
@@ -93,7 +115,7 @@ openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
 
 `config_hash` is SHA-256 of the authored YAML bytes, plus a keyed HMAC fingerprint of the plaintext secrets when there are any. Hashing the fingerprint, not the ciphertext, means re-sealing unchanged secrets does not roll the collector, while a changed secret or a new key does. The distributor stores the hash without recomputing it, so this differs harmlessly from the `[name, ciphertext]` description in the distributor API docs. Validate (`POST /v1/validate`) does not send credentials.
 
-Not handled yet: re-sealing units that are not saved again before the previous key expires, and agreeing AAD and kid selection with the collector unwrap (ingest-dev#9550).
+Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps ciphertext under the previous key.
 
 ### Reset canvas saved objects
 
@@ -168,9 +190,6 @@ Content-Type: application/json
       "debug-out": { "x": 480, "y": 0 },
       "stale-node": { "x": 999, "y": 999 }
     }
-  },
-  "secrets": {
-    "es_api_key": "<plaintext; Encrypted Saved Objects at rest>"
   }
 }
 

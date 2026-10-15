@@ -174,6 +174,8 @@ export const streamsUnitUpsertRequestSchema = z.object({
   ui_metadata: streamsUnitUiMetadataSchema,
   // Omitted on PUT means keep the stored secrets. Provided keys merge with the
   // stored keys (the UI only sends newly entered values; GET does not return them).
+  // Every provided key must equal a component config value (400 otherwise).
+  // Stored secrets no config value references any more are dropped.
   secrets: streamsUnitSecretsSchema.optional(),
 });
 

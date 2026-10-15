@@ -31,6 +31,7 @@ const unit: StreamsUnit.Configuration = {
       id: 'es-prod',
       type: 'debug',
       supported_telemetry: ['logs'],
+      config: [{ name: 'api_key', value: 'es_api_key' }],
     },
   ],
   pipelines: [
@@ -250,19 +251,102 @@ describe('StreamsUnitService', () => {
     const publishUnit = jest.fn().mockResolvedValue(undefined);
 
     const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
+    const unitWithS3: StreamsUnit.Configuration = {
+      ...unit,
+      destinations: [
+        ...unit.destinations,
+        {
+          id: 's3-archive',
+          type: 's3',
+          supported_telemetry: ['logs'],
+          config: [{ name: 'secret', value: 's3_secret' }],
+        },
+      ],
+    };
 
     await service.upsertUnit({
       unitId: 'default',
-      unit,
+      unit: unitWithS3,
       ui_metadata: {},
       secrets: { s3_secret: 'bucket' },
     });
 
     expect(soClient.create).toHaveBeenCalledWith(
       'streams-configuration',
-      { unit_id: 'default', unit, secrets: { es_api_key: 's3cret', s3_secret: 'bucket' } },
+      {
+        unit_id: 'default',
+        unit: unitWithS3,
+        secrets: { es_api_key: 's3cret', s3_secret: 'bucket' },
+      },
       expect.anything()
     );
+  });
+
+  it('prunes a stored secret after the node that referenced it is deleted', async () => {
+    const soClient = createSoClient();
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+    const encryptedSavedObjectsClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        ...storedConfiguration,
+        attributes: {
+          ...storedConfiguration.attributes,
+          secrets: { ...secrets, 'secret:deleted-dest:api_key': 'stale' },
+        },
+      }),
+    } as unknown as EncryptedSavedObjectsClient;
+    const publishUnit = jest.fn().mockResolvedValue(undefined);
+
+    const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
+
+    await service.upsertUnit({ unitId: 'default', unit, ui_metadata: {} });
+
+    expect(soClient.create).toHaveBeenCalledWith(
+      'streams-configuration',
+      { unit_id: 'default', unit, secrets },
+      expect.anything()
+    );
+    expect(publishUnit).toHaveBeenCalledWith({ unitId: 'default', unit, secrets });
+  });
+
+  it('rejects a request secret that no config value references with 400', async () => {
+    const soClient = createSoClient();
+    const encryptedSavedObjectsClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
+    } as unknown as EncryptedSavedObjectsClient;
+    const publishUnit = jest.fn().mockResolvedValue(undefined);
+
+    const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
+
+    await expect(
+      service.upsertUnit({
+        unitId: 'default',
+        unit,
+        ui_metadata: {},
+        secrets: { es_api_key: 'new', 'secret:unknown:api_key': 'typed-value' },
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'Streams unit secrets must be referenced by a source, processor, or destination config value: secret:unknown:api_key',
+    });
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(publishUnit).not.toHaveBeenCalled();
+  });
+
+  it('drops all secrets from a unit without component lists', async () => {
+    const soClient = createSoClient();
+    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+    const encryptedSavedObjectsClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
+    } as unknown as EncryptedSavedObjectsClient;
+    const publishUnit = jest.fn().mockResolvedValue(undefined);
+    const bareUnit = { pipelines: [] } as unknown as StreamsUnit.Configuration;
+
+    const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
+
+    await service.upsertUnit({ unitId: 'default', unit: bareUnit, ui_metadata: {} });
+
+    expect(publishUnit).toHaveBeenCalledWith({ unitId: 'default', unit: bareUnit, secrets: {} });
   });
 
   it('rejects upsert when encrypted saved objects cannot encrypt', async () => {

@@ -64,6 +64,25 @@ const mergeUnitSecrets = (
   };
 };
 
+// A secret is referenced when a top-level string config value of a source,
+// processor, or destination equals its name. Nested values are not scanned.
+const collectReferencedSecretNames = (unit: StreamsUnit.Configuration): Set<string> => {
+  const components = [unit.sources, unit.processors, unit.destinations].flatMap((list) =>
+    Array.isArray(list) ? list : []
+  );
+  return new Set(
+    components
+      .flatMap((component) => (Array.isArray(component?.config) ? component.config : []))
+      .flatMap((entry) => (typeof entry?.value === 'string' ? [entry.value] : []))
+  );
+};
+
+const pickReferencedSecrets = (
+  secrets: StreamsUnit.Secrets,
+  referencedNames: Set<string>
+): StreamsUnit.Secrets =>
+  Object.fromEntries(Object.entries(secrets).filter(([name]) => referencedNames.has(name)));
+
 export class StreamsUnitService {
   private readonly soClient: SavedObjectsClientContract;
   private readonly logger: Logger;
@@ -124,10 +143,27 @@ export class StreamsUnitService {
       );
     }
 
+    const referencedNames = collectReferencedSecretNames(unit);
+    const unreferencedNames = Object.keys(secrets ?? {}).filter(
+      (name) => !referencedNames.has(name)
+    );
+    if (unreferencedNames.length > 0) {
+      throw new StatusError(
+        `Streams unit secrets must be referenced by a source, processor, or destination config value: ${unreferencedNames.join(
+          ', '
+        )}`,
+        400
+      );
+    }
+
     const existingConfiguration = await this.getDecryptedConfigurationSavedObject(unitId);
     // GET omits secrets, and the UI only sends newly entered ones. Merge
-    // those secrets with the stored secrets, do not replace them.
-    const secretsToStore = mergeUnitSecrets(secrets, existingConfiguration?.attributes.secrets);
+    // those secrets with the stored secrets, do not replace them. Stored
+    // secrets of deleted nodes are dropped.
+    const secretsToStore = pickReferencedSecrets(
+      mergeUnitSecrets(secrets, existingConfiguration?.attributes.secrets),
+      referencedNames
+    );
 
     // Always overwrite the full document. Partial `soClient.update` must not
     // touch `secrets` or `unit_id` (ESO encrypted / AAD attributes).
