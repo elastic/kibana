@@ -27,6 +27,8 @@ import {
   ATTACK_STATUS_ACTION_IDS,
   ATTACK_TAG_ACTION_ID,
 } from '../../../../common/constants/action_ids';
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
+import { buildAttackAttachments } from '../../../../cases/attachments/attack';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
@@ -330,6 +332,62 @@ describe('AttacksGroupTakeActionItems', () => {
 
       const { queryByText } = renderAttack(mockAttack);
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('attack case attachment', () => {
+    it('passes the attack to attach to the cases hook', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attackToAttach: {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+            riskScore: attack.riskScore,
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          },
+        })
+      );
+    });
+
+    it('builds a de-anonymised narrative snapshot from what it passes', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      const { attackToAttach } = mockUseAttackCaseContextMenuItems.mock.calls[0][0];
+      const [attackAttachment] = buildAttackAttachments({
+        ...(attackToAttach as Omit<AttackToAttach, 'alertsIndex'>),
+        alertsIndex: '.alerts-security.alerts-default',
+      }).attachments;
+
+      expect(attackAttachment).toEqual(
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            detailsMarkdown: expect.stringContaining('SRVMAC08'),
+            entitySummaryMarkdown: expect.stringContaining('SRVMAC08'),
+            summaryMarkdown: expect.stringContaining('SRVMAC08'),
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+          }),
+        })
+      );
+    });
+
+    it('omits the attack to attach when the source index is unknown', () => {
+      renderAttack({ ...mockAttack, index: undefined });
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ attackToAttach: undefined })
+      );
     });
   });
 

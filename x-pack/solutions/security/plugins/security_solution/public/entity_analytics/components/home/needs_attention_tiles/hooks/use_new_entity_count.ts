@@ -19,6 +19,7 @@ import { buildNewEntityCountQuery } from '../queries/new_entity_query';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -42,7 +43,9 @@ export const useNewEntityCount = ({
 
   const query = useMemo(
     () =>
-      index ? buildNewEntityCountQuery(index, timeRange, buildEntityFilterClauses(entityFilters)) : null,
+      index
+        ? buildNewEntityCountQuery(index, timeRange, buildEntityFilterClauses(entityFilters))
+        : null,
     [index, timeRange, entityFilters]
   );
 
@@ -86,7 +89,7 @@ export const useNewEntityCount = ({
     },
     {
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       enabled: isEnabled,
       retry: 1,

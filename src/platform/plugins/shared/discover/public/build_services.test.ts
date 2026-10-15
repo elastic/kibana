@@ -54,13 +54,13 @@ describe('discoverFeatureFlags', () => {
         flagName === CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY
           ? false
           : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
-          ? true
+          ? false
           : fallback
       )
     );
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
   });
 
   it('returns the fallback when the observable emits after subscribe returns', () => {

@@ -9,7 +9,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useSearchApi } from '@kbn/presentation-publishing';
+import {
+  apiHasDisableTriggers,
+  apiPublishesViewMode,
+  useSearchApi,
+} from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
@@ -70,6 +74,7 @@ export function LensRenderer({
   hidePanelTitles,
   lastReloadRequestTime,
   titleHighlight,
+  parentApi,
   onApiAvailable,
   ...props
 }: LensRendererProps) {
@@ -82,11 +87,12 @@ export function LensRenderer({
     };
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
-  const viewMode$ = useObservableVariable(viewMode);
+  const viewMode$ = useObservableVariable(viewMode ?? 'view');
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
   const isApproximate$ = useObservableVariable(props.isApproximate);
+  const disableTriggers$ = useObservableVariable(props.disableTriggers ?? false);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -170,7 +176,6 @@ export function LensRenderer({
       },
     };
   }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
-
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
@@ -184,7 +189,10 @@ export function LensRenderer({
           searchSessionId$,
           disabledActionIds$,
           setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-          viewMode$,
+          viewMode$: apiPublishesViewMode(parentApi) ? parentApi.viewMode$ : viewMode$, // parent API takes precedence for this value
+          disableTriggers$: apiHasDisableTriggers(parentApi)
+            ? parentApi.disableTriggers$ // parent API takes precedence for this value
+            : disableTriggers$,
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)
