@@ -77,6 +77,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
       spaceId: rawInput.spaceId,
+      executionId: rawInput.executionUuid,
       scheduledAt: rawInput.scheduledAt,
       executionContext,
     };
