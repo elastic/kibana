@@ -317,7 +317,9 @@ describe('Hunt Watch worker chain', () => {
       expect(
         evaluateExpression(resultVariables().result_report_intent_targets as string, {
           steps: {
-            run_hunt_coordinator: { output: value ? { report_intent_targets: value } : undefined },
+            read_hunt_result: value
+              ? { output: { data: { result: { report_intent_targets: value } } } }
+              : undefined,
           },
         })
       ).toEqual(expected);
@@ -326,14 +328,16 @@ describe('Hunt Watch worker chain', () => {
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
       expect(
         evaluateExpression(resultVariables().result_behaviors as string, {
-          steps: { run_hunt_coordinator: { output: { report_intent_targets: [] } } },
+          steps: {
+            read_hunt_result: { output: { data: { result: { report_intent_targets: [] } } } },
+          },
         })
       ).toEqual([]);
     });
 
     const behaviorsOutput = (behaviors: unknown[]) =>
       evaluateExpression(resultVariables().result_behaviors as string, {
-        steps: { run_hunt_coordinator: { output: { tier2: { behaviors } } } },
+        steps: { read_hunt_result: { output: { data: { result: { tier2: { behaviors } } } } } },
       });
     const executedBehavior = (technique_id: string) => ({
       technique_id,
@@ -582,10 +586,95 @@ describe('Hunt Watch worker chain', () => {
     });
   });
 
+  // The start call answers before the run finishes, so "the coordinator answered" is no longer
+  // the sentinel: the polled envelope's `state` is. A run the poll gave up on (still `running`,
+  // or never read) and a run that reported failure both have to render `failed` with a reason
+  // the Investigation can carry, and neither may render `partial`.
+  describe('hunt — result status from the polled envelope', () => {
+    const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
+    const liquid = createWorkflowLiquidEngine();
+    const render = (template: string, readOutput: unknown): string =>
+      liquid
+        .parseAndRenderSync(template, {
+          inputs: { investigationConversationId: 'conv-1' },
+          execution: { id: 'exec-1' },
+          steps: {
+            run_hunt_coordinator: {
+              output: { run_id: 'run-1', state: 'running', result_attachment_id: 'att-1' },
+            },
+            ...(readOutput === undefined ? {} : { read_hunt_result: { output: readOutput } }),
+          },
+        })
+        .trim();
+    const status = (readOutput: unknown) => render(variables.result_status, readOutput);
+    const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
+
+    const LIMIT_REASON =
+      'Hunt coordinator did not finish within 10 minutes; see hunt execution exec-1.';
+
+    it('is success with no reason for a completed, complete run', () => {
+      const completed = { data: { state: 'completed', result: { completeness: 'complete' } } };
+      expect(status(completed)).toBe('success');
+      expect(reason(completed)).toBe('');
+    });
+
+    it('is partial for a completed run that was incomplete but retryable', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'Tier 2 timed out' },
+        },
+      };
+      expect(status(completed)).toBe('partial');
+      expect(reason(completed)).toContain('incomplete but retryable (Tier 2 timed out)');
+    });
+
+    it('is failed with the fixed limit reason when the poll ends on a run still running', () => {
+      const running = { data: { state: 'running' } };
+      expect(status(running)).toBe('failed');
+      expect(reason(running)).toBe(LIMIT_REASON);
+    });
+
+    it('is failed with the fixed limit reason when every read failed and nothing was ever read', () => {
+      expect(status(undefined)).toBe('failed');
+      expect(reason(undefined)).toBe(LIMIT_REASON);
+    });
+
+    it('is failed with the envelope message when the run reported failure', () => {
+      const failed = { data: { state: 'failed', error: { message: 'Hunt coordinator failed' } } };
+      expect(status(failed)).toBe('failed');
+      expect(reason(failed)).toBe('Hunt coordinator failed');
+    });
+
+    it('still names the missing Investigation first, before any envelope state', () => {
+      const rendered = liquid
+        .parseAndRenderSync(variables.result_reason, {
+          inputs: { investigationConversationId: '' },
+          execution: { id: 'exec-1' },
+          steps: {},
+        })
+        .trim();
+      expect(rendered).toContain('no Investigation available');
+    });
+
+    it('still quotes the start error when the start call itself failed', () => {
+      const rendered = liquid
+        .parseAndRenderSync(variables.result_reason, {
+          inputs: { investigationConversationId: 'conv-1' },
+          execution: { id: 'exec-1' },
+          steps: { run_hunt_coordinator: { error: { message: 'HTTP 500: {"message":"x"}' } } },
+        })
+        .trim();
+      expect(rendered).toBe('HTTP 500: {"message":"x"}');
+    });
+  });
+
   describe('hunt — attach_impact', () => {
     const attachImpact = stepIn(huntSteps, 'attach_impact');
     const coordinatorOutput = (impactedEntities: unknown) => ({
-      steps: { run_hunt_coordinator: { output: { impacted_entities: impactedEntities } } },
+      steps: {
+        read_hunt_result: { output: { data: { result: { impacted_entities: impactedEntities } } } },
+      },
     });
 
     // Over HTTP, not the `investigations.attachImpact` step: impact is owner-only, and the
@@ -599,7 +688,7 @@ describe('Hunt Watch worker chain', () => {
       );
       expect(attachImpact?.with?.body).toEqual({
         conversationId: '{{ inputs.investigationConversationId }}',
-        entities: '${{ steps.run_hunt_coordinator.output.impacted_entities }}',
+        entities: '${{ steps.read_hunt_result.output.data.result.impacted_entities }}',
       });
       expect(JSON.stringify(hunt)).not.toContain('investigations.attachImpact');
     });
@@ -648,7 +737,7 @@ describe('Hunt Watch worker chain', () => {
       it('counts the entities this run recorded', () => {
         const message = render({
           steps: {
-            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            read_hunt_result: { output: { data: { result: hitOutput(twoEntities) } } },
             attach_impact: { output: { id: 'impact-1', entities: twoEntities } },
           },
         });
@@ -665,7 +754,7 @@ describe('Hunt Watch worker chain', () => {
       ])('explains an HTTP %s by its status', (status, expected) => {
         const message = render({
           steps: {
-            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            read_hunt_result: { output: { data: { result: hitOutput(twoEntities) } } },
             attach_impact: {
               error: { type: 'Error', message: `HTTP ${status}: {"message":"internal detail"}` },
             },
@@ -679,14 +768,16 @@ describe('Hunt Watch worker chain', () => {
 
       it('says why nothing was recorded when the hit named no host or user', () => {
         const message = render({
-          steps: { run_hunt_coordinator: { output: hitOutput([]) } },
+          steps: { read_hunt_result: { output: { data: { result: hitOutput([]) } } } },
         });
         expect(message).toContain('_No impact recorded: the confirmed hits name no host or user._');
       });
 
       it('adds no impact line to a run that confirmed nothing', () => {
         const message = render({
-          steps: { run_hunt_coordinator: { output: { narrative: 'Narrative.' } } },
+          steps: {
+            read_hunt_result: { output: { data: { result: { narrative: 'Narrative.' } } } },
+          },
         });
         expect(message.trim()).toBe('Narrative.');
       });
