@@ -20,10 +20,7 @@ import {
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import type {
-  EmbeddableStateTransfer,
-  EmbeddableEditorBreadcrumb,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer, EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
 import { SearchSelection } from './search_selection';
@@ -78,9 +75,7 @@ export interface TypeSelectionProps {
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
-  originatingApp?: string;
-  originatingPath?: string;
-  breadcrumbs?: EmbeddableEditorBreadcrumb[];
+  embeddableState?: EmbeddableEditorState;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
 }
@@ -224,14 +219,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   }
 
   private navigate(appId: string, params: string) {
-    if (this.props.stateTransfer && this.props.originatingApp) {
+    if (this.props.stateTransfer && this.props.embeddableState) {
       this.props.stateTransfer.navigateToEditor(appId, {
         path: params,
-        state: {
-          originatingApp: this.props.originatingApp,
-          originatingPath: this.props.originatingPath,
-          breadcrumbs: this.props.breadcrumbs,
-        },
+        state: this.props.embeddableState,
       });
     } else {
       this.props.application.navigateToApp(appId, {

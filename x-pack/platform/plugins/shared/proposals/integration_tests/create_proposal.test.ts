@@ -112,6 +112,71 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('a caller-supplied proposalId', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+
+    it('should create the proposal under that id and park on it', async () => {
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().id).toBe(ID);
+    });
+
+    it.each([
+      ['live', undefined],
+      ['dismissed', false],
+    ])(
+      'should fail the run, gate nothing and touch nothing when the id belongs to a %s proposal',
+      async (_label, answer) => {
+        // The service refuses a duplicate id and says nothing more, and the
+        // workflow does not interpret it. It fails at the create step, before any
+        // proposal id is held, so the failure handler has nothing to settle and
+        // no gate is ever parked.
+        await fixture.start({ proposalId: ID });
+        if (answer !== undefined) {
+          await fixture.resume(answer);
+        }
+        const existing = fixture.onlyProposal();
+        const cardsBefore = fixture.attachedProposalIds().length;
+
+        await fixture.start({ proposalId: ID });
+
+        expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+        expect(fixture.proposals()).toHaveLength(1);
+        expect(fixture.onlyProposal()).toEqual(existing);
+        expect(fixture.attachedProposalIds()).toHaveLength(cardsBefore);
+      }
+    );
+
+    it('should refuse an id another execution already created, without parking', async () => {
+      await fixture.seedProposal({ id: ID });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+      expect(fixture.stepExecutions('await_decision')).toHaveLength(0);
+      expect(fixture.onlyProposal().status).toBe('pending');
+    });
+
+    it('should create and park normally under a different id', async () => {
+      await fixture.seedProposal({ id: '0c5d1b9e-3a47-5f2b-8d61-9e4a7c2b1f08' });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+
+    it('should leave a proposal with no id unaffected: every run mints its own', async () => {
+      await fixture.seedProposal({});
+
+      await fixture.start({});
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+  });
+
   describe('dismissal', () => {
     it('should settle as dismissed with no action and complete', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });

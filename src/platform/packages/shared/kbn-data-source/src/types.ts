@@ -10,6 +10,7 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { HttpStart } from '@kbn/core/public';
 
 export type DataSourceKind = 'index-pattern' | 'esql';
 
@@ -74,6 +75,13 @@ export interface DataSourceBase extends DataViewBase {
 
   getColumns(): readonly Column[];
   getColumn(name: string): Column | undefined;
+
+  /**
+   * Fields that filters and KQL can target. Same as {@link getColumns} for `DataViewSource`;
+   * for `EsqlSource`, the fields of the FROM target rather than the query result columns,
+   * resolved with `http`.
+   */
+  getFilterableFields(http?: HttpStart): Promise<readonly Column[]>;
 
   /**
    * True iff this source is time-based.

@@ -96,7 +96,7 @@ describe('runDeductiveAgent', () => {
     // session id persisted
     expect(ctx.conversationClient.update).toHaveBeenCalledWith(
       { id: 'conv-1', metadata: { deductive_session_id: 'sess-1' } },
-      { access: 'owner', retryOnConflict: true }
+      { access: 'owner', retryOnConflict: true, source: 'execution' }
     );
 
     // events emitted: roundStarted -> messageComplete -> roundComplete (snake_case values)
@@ -155,7 +155,7 @@ describe('runDeductiveAgent', () => {
     // persisted session id should now point at the fresh session
     expect(ctx.conversationClient.update).toHaveBeenCalledWith(
       { id: 'conv-1', metadata: { deductive_session_id: 'sess-1' } },
-      { access: 'owner', retryOnConflict: true }
+      { access: 'owner', retryOnConflict: true, source: 'execution' }
     );
   });
 

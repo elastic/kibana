@@ -7,8 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LandingLinksImages } from '@kbn/security-solution-navigation/landing_links';
+import { EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '../app/types';
-import { HeaderPage } from '../common/components/header_page';
+import { SecurityAppHeader } from '../common/components/app_header';
+import { useKibana } from '../common/lib/kibana';
 import { useRootNavLink } from '../common/links/nav_links';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -22,10 +24,16 @@ const EXPLORE_PAGE_TITLE = i18n.translate('xpack.securitySolution.explore.landin
 export const ExploreLandingPage = () => {
   const { links = [] } = useRootNavLink(SecurityPageName.exploreLanding) ?? {};
   const urlState = useGlobalQueryString();
+  const { docLinks } = useKibana().services;
 
   return (
     <SecuritySolutionPageWrapper>
-      <HeaderPage title={EXPLORE_PAGE_TITLE} />
+      <SecurityAppHeader
+        title={EXPLORE_PAGE_TITLE}
+        spacing="largeBleed"
+        docLink={docLinks.links.securitySolution.entityAnalytics.explore.landing}
+      />
+      <EuiSpacer size="l" />
       <LandingLinksImages items={links} urlState={urlState} onLinkClick={trackLandingLinkClick} />
       <SpyRoute pageName={SecurityPageName.exploreLanding} />
     </SecuritySolutionPageWrapper>

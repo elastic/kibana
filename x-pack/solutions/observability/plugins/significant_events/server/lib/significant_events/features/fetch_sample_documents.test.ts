@@ -43,7 +43,7 @@ const createFeature = ({
 }): FeatureWithFilter =>
   ({
     id,
-    stream_name: 'logs.test-default',
+    source_id: 'logs.test-default',
     type: 'system',
     description: id,
     properties: {},
@@ -178,7 +178,7 @@ describe('fetchSampleDocuments', () => {
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
-      'NOT COALESCE(`service.name` == "checkout", FALSE)'
+      '(`service.name` != "checkout" OR `service.name` IS NULL)'
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({

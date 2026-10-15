@@ -8,7 +8,8 @@
  */
 
 import { isFunction, isEqual } from 'lodash';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
@@ -654,13 +655,13 @@ export const fetchData: InternalStateThunkActionCreator<
   };
 
 /**
- * Pause auto refresh interval if the data view is not time-based or is a rollup
+ * Pause auto refresh interval if the data source is not time-based or is a rollup
  */
 export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
+  [TabActionPayload<{ dataSource: DataSource }>]
+> = ({ tabId, dataSource }) =>
   function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+    if (!dataSource.isTimeBased() || dataSource.isRollup()) {
       const currentState = getState();
       const globalState = selectTab(currentState, tabId).globalState;
       if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {

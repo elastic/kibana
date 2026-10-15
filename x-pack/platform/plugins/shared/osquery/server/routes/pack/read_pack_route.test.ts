@@ -79,6 +79,30 @@ describe('readPackRoute', () => {
     routeHandler = routeVersion.handler;
   };
 
+  describe('read path: stored queries with legacy version strings pass through unchanged', () => {
+    it('returns a stored query with version: "latest" without modification', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue(
+        makePack({
+          queries: {
+            q1: { query: 'SELECT 1', version: 'latest', interval: 3600, snapshot: true },
+          },
+        })
+      );
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'pack-1' } });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const body = mockResponse.ok.mock.calls[0][0]?.body as { data: Record<string, unknown> };
+      const queries = body.data.queries as Record<string, Record<string, unknown>>;
+      expect(queries.q1.version).toBe('latest');
+    });
+  });
+
   describe('V5: pack-level execution defaults', () => {
     it('returns min_osquery_version, result_type, and platform when set', async () => {
       mockSavedObjectsClient.get.mockResolvedValue(

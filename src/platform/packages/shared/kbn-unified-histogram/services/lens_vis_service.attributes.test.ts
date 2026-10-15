@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewSource } from '@kbn/data-source';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -16,8 +16,8 @@ import {
   dataViewWithTimefieldMock,
   dataViewWithAtTimefieldMock,
 } from '../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../__mocks__/suggestions';
-import { getLensVisMock } from '../__mocks__/lens_vis';
+import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
+import { getDefaultDataSource, getLensVisMock } from '../__mocks__/lens_vis';
 import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService attributes', () => {
@@ -61,7 +61,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField,
       columns: [],
-      isPlainRecord: false,
     });
 
     expect(lensVis.visContext).toMatchInlineSnapshot(`
@@ -218,7 +217,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField,
       columns: [],
-      isPlainRecord: false,
     });
     expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
@@ -394,7 +392,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField,
       columns: [],
-      isPlainRecord: false,
     });
     expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
@@ -547,7 +544,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
     });
     expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
@@ -733,7 +729,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
     });
     expect(lensVis.visContext?.attributes).toEqual({
       state: expect.objectContaining({
@@ -756,7 +751,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: false,
       getModifiedVisAttributes: (attributes) => ({
         ...attributes,
         title: 'Modified title',
@@ -779,7 +773,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: false,
     });
     const lensVis2 = await getLensVisMock({
       filters,
@@ -788,7 +781,6 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: false,
       externalVisContext: lensVis.visContext,
       getModifiedVisAttributes: (attributes) => ({
         ...attributes,
@@ -812,9 +804,35 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
     });
     expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
+  });
+
+  it('fingerprints an ES|QL chart with its data view, not with the per-query source id', async () => {
+    const esqlSource = await EsqlSource.create({
+      query: queryEsql.esql,
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const dataViews = {
+      create: jest.fn(async ({ id }: { id: string }) => ({ ...dataViewWithAtTimefieldMock, id })),
+      clearInstanceCache: jest.fn(),
+    } as unknown as Parameters<typeof registerEsqlSourceInDataViewsCache>[0];
+    const chartDataView = await registerEsqlSourceInDataViewsCache(dataViews, esqlSource);
+
+    const { visContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      dataSource: esqlSource,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [],
+    });
+
+    expect(chartDataView.id).not.toBe(esqlSource.id);
+    expect(visContext?.requestData.dataViewId).toBe(chartDataView.id);
   });
 
   it('should reuse an unchanged ES|QL histogram whose query is stored only in Lens layers', async () => {
@@ -830,7 +848,6 @@ describe('LensVisService attributes', () => {
       timeRange,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
     });
 
@@ -851,12 +868,15 @@ describe('LensVisService attributes', () => {
     const onVisContextChanged = jest.fn();
     lensService.update({
       queryParams: {
-        dataSource: new DataViewSource(dataViewWithAtTimefieldMock),
+        dataSource: await getDefaultDataSource({
+          query: queryEsql,
+          dataView: dataViewWithAtTimefieldMock,
+          columns: [],
+        }),
         query: queryEsql,
         filters: [],
         timeRange,
         columns: [],
-        isPlainRecord: true,
       },
       timeInterval,
       breakdownField: undefined,
@@ -883,10 +903,93 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [], // none available
       isTransformationalESQL: false,
     });
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+  });
+
+  it('should inject table with approximationApplied:true into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: true },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.lensSuggestion
+    );
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(true);
+    }
+  });
+
+  it('should inject table with approximationApplied:false into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: false },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(false);
+    }
+  });
+
+  it('should not inject table into Lens layers when table is not provided', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table: undefined,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    for (const layer of layerValues) {
+      expect((layer as { table?: unknown }).table).toBeUndefined();
+    }
   });
 });

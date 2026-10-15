@@ -1,0 +1,36 @@
+{
+  "sha1": "75bd556adf58e36fc65f90b7e5a7500fc29f2e08",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1e63e4c416fb8d2-83e039b82992336",
+      "title": "Endpoint isolation metadata returns only hosts whose isolation state matches the KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/isolation_metadata_filter.spec.ts",
+        "line": 85,
+        "column": 26
+      }
+    },
+    {
+      "id": "1e63e4c416fb8d2-a07cba96c1ba55a",
+      "title": "Endpoint isolation metadata reports agent status isolation from endpoint metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/isolation_metadata_filter.spec.ts",
+        "line": 127,
+        "column": 16
+      }
+    }
+  ]
+}

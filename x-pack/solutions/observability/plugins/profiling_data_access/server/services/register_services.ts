@@ -9,6 +9,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { BuildFlavor } from '@kbn/config';
 import type { Logger } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { createGetAvailableSchemasService } from './available_schemas';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetProfilingStatusService } from './status';
 import { createGetOtelStatusService } from '../otel/services/status';
@@ -35,6 +36,7 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetProfilingStatusService(params),
+    getAvailableSchemas: createGetAvailableSchemasService(params),
     otel: {
       getStatus: createGetOtelStatusService(params),
     },
