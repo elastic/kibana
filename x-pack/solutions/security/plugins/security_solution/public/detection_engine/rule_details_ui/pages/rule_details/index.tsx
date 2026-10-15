@@ -126,6 +126,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -605,17 +606,6 @@ export const RuleDetailsPage = connector(
                 showManualRuleRunConfirmation={showManualRuleRunConfirmation}
                 confirmDeletion={confirmDeletion}
               />
-              {canReadAlerts && (
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
-                  <EuiSpacer size="s" />
-                  <SiemSearchBar
-                    dataView={dataView}
-                    displayStyle="inPage"
-                    id={InputsModelId.global}
-                  />
-                  <EuiSpacer size="s" />
-                </Route>
-              )}
             </RuleDetailsStickyHeader>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <NeedAdminForUpdateRulesCallOut />
@@ -709,6 +699,9 @@ export const RuleDetailsPage = connector(
                   {canReadAlerts && (
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
+                        <FiltersGlobal>
+                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
+                        </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>

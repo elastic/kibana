@@ -95,7 +95,7 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
           menu={menu}
           docLink={docLinks.links.securitySolution.manageDetectionRules}
           spacing="largeBleed"
-          // Pinned by RuleDetailsStickyHeader together with the alerts search bar.
+          // Pinned by RuleDetailsStickyHeader, below the global KQL bar on the Alerts tab.
           sticky={false}
         />
         {snooze.modal}
