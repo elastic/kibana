@@ -511,23 +511,23 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.maintenanceWindows.searc
   defaultMessage: 'Search',
 });
 
-export const SAVE_WITHOUT_FILTERS_MODAL_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.title',
+export const SAVE_WITHOUT_SCOPES_MODAL_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.title',
   {
     defaultMessage: 'Save maintenance window without a scope?',
   }
 );
 
-export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
+export const SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.subtitle',
   {
     defaultMessage:
       'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
   }
 );
 
-export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.confirm',
+export const SAVE_WITHOUT_SCOPES_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.confirm',
   {
     defaultMessage: 'Save without scope',
   }

@@ -298,7 +298,7 @@ describe('CreateMaintenanceWindowForm', () => {
           scope: { alerting: { enabled: true } },
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
 
     it('calls create when user toggles Alerts off then confirms save without filters modal', async () => {
@@ -310,7 +310,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
       await user.click(screen.getByTestId('create-submit'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
 
       await waitFor(() => {
@@ -320,7 +320,7 @@ describe('CreateMaintenanceWindowForm', () => {
           scope: {},
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
 
     it('does not call create when user cancels save without filters modal', async () => {
@@ -331,11 +331,11 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
       await user.click(screen.getByTestId('create-submit'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
       });
       expect(createMutate).not.toHaveBeenCalled();
     });
@@ -346,7 +346,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(await screen.findByTestId('create-submit'));
 
       await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
   });
 

@@ -457,7 +457,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         {isSaveWithoutScopeModalVisible && (
           <EuiConfirmModal
             aria-labelledby={saveWithoutScopeModalTitleId}
-            title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
+            title={i18n.SAVE_WITHOUT_SCOPES_MODAL_TITLE}
             titleProps={{ id: saveWithoutScopeModalTitleId }}
             onCancel={() => setIsSaveWithoutScopeModalVisible(false)}
             onConfirm={() => {
@@ -466,10 +466,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               form.submit();
             }}
             cancelButtonText={i18n.CANCEL}
-            confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
-            data-test-subj="saveWithoutFiltersConfirmModal"
+            confirmButtonText={i18n.SAVE_WITHOUT_SCOPES_MODAL_CONFIRM}
+            data-test-subj="saveWithoutScopesConfirmModal"
           >
-            <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
+            <p>{i18n.SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE}</p>
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>
