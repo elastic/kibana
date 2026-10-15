@@ -30,10 +30,12 @@ if ! "$NODE" --version >/dev/null 2>&1; then
   NODE="${DIR}/node/glibc-217/bin/node"
 fi
 {{/linux}}
-{{#serverless}}
+{{#pointerCompression}}
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi
+{{/pointerCompression}}
+{{#serverless}}
 if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
   export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
   if [ ! -f "$LD_PRELOAD" ]; then

@@ -11,6 +11,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import type { BuildOptions } from './build_distributables';
 import { buildDistributables } from './build_distributables';
+import { readCliArgs } from './args';
+import type { GlobalTask, Task } from './lib';
+import * as BuildRunner from './lib/runner';
 import * as Tasks from './tasks';
 
 jest.mock('./lib/version_info', () => ({
@@ -81,6 +84,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   versionQualifier: undefined,
   targetAllPlatforms: false,
   targetServerlessPlatforms: false,
+  targetCloudPlatforms: false,
   skipFipsProvider: false,
   skipServerless: false,
   tarZstd: false,
@@ -92,6 +96,10 @@ const minimalGenericFoldersOptions: BuildOptions = {
 describe('buildDistributables', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('runs BuildBundles once when creating generic folders', async () => {
@@ -126,4 +134,34 @@ describe('buildDistributables', () => {
     expect(Tasks.CreateArchivesSources.run).toHaveBeenCalledTimes(1);
     expect(Tasks.CreateArchives.run).toHaveBeenCalledTimes(1);
   });
+
+  it.each([false, true])(
+    'schedules only cloud artifact tasks with --cloud --all-platforms and cross-compilation = %s',
+    async (dockerCrossCompile) => {
+      const globalRun = jest.fn<Promise<void>, [GlobalTask | Task]>().mockResolvedValue(undefined);
+      const artifactRun = jest
+        .fn<Promise<void>, [GlobalTask | Task]>()
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(BuildRunner, 'createRunner')
+        .mockImplementation(({ bufferLogs }) => (bufferLogs ? artifactRun : globalRun));
+      const { buildOptions } = readCliArgs([
+        'node',
+        'scripts/build',
+        '--cloud',
+        '--all-platforms',
+        ...(dockerCrossCompile ? ['--docker-cross-compile'] : []),
+      ]);
+      if (!buildOptions) {
+        throw new Error('Expected cloud build options');
+      }
+
+      await buildDistributables(log, buildOptions);
+
+      expect(artifactRun.mock.calls.map(([task]) => task)).toEqual([
+        Tasks.CreateDockerCloudX64,
+        Tasks.CreateDockerCloudARM64,
+      ]);
+    }
+  );
 });

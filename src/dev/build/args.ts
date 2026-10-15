@@ -51,6 +51,7 @@ export function readCliArgs(argv: string[]) {
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
+      'cloud',
       'tar-zstd',
     ],
     string: ['docker-namespace', 'epr-registry'],
@@ -100,7 +101,7 @@ export function readCliArgs(argv: string[]) {
   }
 
   function isOsPackageDesired(name: string) {
-    if (flags['skip-os-packages'] || !flags['all-platforms']) {
+    if (flags.cloud || flags['skip-os-packages'] || !flags['all-platforms']) {
       return false;
     }
 
@@ -143,7 +144,9 @@ export function readCliArgs(argv: string[]) {
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
-    createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloud:
+      (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud'])) ||
+      Boolean(flags.cloud),
     createDockerCloudFIPS:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
@@ -151,10 +154,11 @@ export function readCliArgs(argv: string[]) {
       ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
         Boolean(flags.serverless)),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
-    createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerContexts: !Boolean(flags.cloud) && !Boolean(flags['skip-docker-contexts']),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),
+    targetCloudPlatforms: Boolean(flags.cloud),
     skipFipsProvider: Boolean(flags['skip-fips-provider']),
     skipServerless: Boolean(flags['skip-serverless']),
     eprRegistry: flags['epr-registry'],

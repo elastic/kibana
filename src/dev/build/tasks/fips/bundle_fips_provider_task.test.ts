@@ -53,6 +53,7 @@ beforeEach(async () => {
     .mockReturnValue([
       config.getPlatform('linux', 'x64'),
       config.getPlatform('linux', 'x64', 'serverless'),
+      config.getPlatform('linux', 'x64', 'cloud'),
       config.getPlatform('linux', 'arm64'),
       config.getPlatform('darwin', 'arm64'),
       config.getPlatform('win32', 'x64'),
@@ -89,13 +90,14 @@ afterEach(async () => {
   await rm(temporaryDir, { recursive: true, force: true });
 });
 
-it('does not download or build a provider when only macOS, Windows, or serverless platforms are selected', async () => {
+it('does not download or build a provider when only macOS, Windows, cloud, or serverless platforms are selected', async () => {
   jest
     .spyOn(config, 'getTargetPlatforms')
     .mockReturnValue([
       config.getPlatform('darwin', 'x64'),
       config.getPlatform('win32', 'x64'),
       config.getPlatform('linux', 'x64', 'serverless'),
+      config.getPlatform('linux', 'x64', 'cloud'),
     ]);
   await BundleFipsProvider.run(config, log, build);
   expect(exec).not.toHaveBeenCalled();
@@ -165,7 +167,7 @@ it('builds both architectures from verified upstream sources and bundles provena
       ],
     });
   }
-  for (const platform of ['linux-x64-serverless', 'darwin-arm64', 'win32-x64']) {
+  for (const platform of ['linux-x64-serverless', 'linux-x64-cloud', 'darwin-arm64', 'win32-x64']) {
     await expect(
       readFile(join(temporaryDir, platform, 'node/fips/modules/fips.so'))
     ).rejects.toMatchObject({

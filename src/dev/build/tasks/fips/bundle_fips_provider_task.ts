@@ -27,7 +27,7 @@ export const BundleFipsProvider: Task = {
   async run(config, log, build) {
     const linuxPlatforms = config
       .getTargetPlatforms()
-      .filter((target) => target.isLinux() && !target.isServerless());
+      .filter((target) => target.isLinux() && target.getVariant() === undefined);
     if (!linuxPlatforms.length) return;
 
     const temporaryDir = await mkdtemp(join(tmpdir(), 'kibana-fips-provider-'));

@@ -34,7 +34,7 @@ NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 
 ## Building the FIPS provider
 
-Standard Linux x64 and arm64 archives, RPMs, and Debian packages bundle the OpenSSL FIPS provider in `node/fips`. `BundleFipsProvider` builds it from checksum-pinned sources using Docker and Buildx for the target architecture. Source and toolchain versions are defined in `lib/fips_config.ts`. macOS, Windows, and serverless builds skip this task.
+Standard Linux x64 and arm64 archives, RPMs, and Debian packages bundle the OpenSSL FIPS provider in `node/fips`. `BundleFipsProvider` builds it from checksum-pinned sources using Docker and Buildx for the target architecture. Source and toolchain versions are defined in `lib/fips_config.ts`. macOS, Windows, cloud, and serverless builds skip this task.
 
 Use `--skip-fips-provider` to skip building and bundling the provider. For an archive-only build without Docker:
 
