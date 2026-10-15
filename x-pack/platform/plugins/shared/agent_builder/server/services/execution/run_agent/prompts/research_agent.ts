@@ -190,7 +190,6 @@ ${conversationMetadataSection}
 ${getAiIndicesInstructions({
   enabled: experimentalFeatures.aiIndices,
   catalog: aiIndexCatalog ?? [],
-  skills,
   spaceId,
 })}
 

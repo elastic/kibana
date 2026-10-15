@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
 import type { AiIndexCatalogEntry } from '../../types';
 import { getAiIndicesInstructions } from './ai_indices';
 
@@ -17,17 +16,10 @@ const defaultCatalog: AiIndexCatalogEntry[] = [
   },
 ];
 
-const kiRetrievalSkill = {
-  id: kiRetrievalSkillId,
-  name: kiRetrievalSkillId,
-  basePath: 'skills/platform/context-engine',
-};
-
 const render = (overrides: Partial<Parameters<typeof getAiIndicesInstructions>[0]> = {}) =>
   getAiIndicesInstructions({
     enabled: true,
     catalog: defaultCatalog,
-    skills: [kiRetrievalSkill],
     spaceId: 'default',
     ...overrides,
   });
@@ -110,21 +102,11 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('bare-target —');
   });
 
-  it("points at the ki-retrieval skill by name and by the path derived from the skill's definition", () => {
-    const instructions = render({
-      skills: [{ ...kiRetrievalSkill, basePath: 'skills/platform/moved' }],
-    });
-
-    expect(instructions).toContain(
-      'Load the `ki-retrieval` skill (`/skills/platform/moved/ki-retrieval/SKILL.md`)'
-    );
-    expect(instructions).toContain('carries the AI Index tools');
-  });
-
-  it('points at the ki-retrieval skill by name alone when the agent does not have it', () => {
-    const instructions = render({ skills: [] });
+  it('points at the ki-retrieval skill by name, leaving the path to the SKILLS section', () => {
+    const instructions = render();
 
     expect(instructions).toContain('Load the `ki-retrieval` skill before');
+    expect(instructions).toContain('carries the AI Index tools');
     expect(instructions).not.toContain('/skills/');
   });
 

@@ -7,8 +7,6 @@
 
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
-import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { getSkillAbsolutePath } from '../../../runner/store/volumes/skills/utils';
 import type { AiIndexCatalogEntry } from '../../types';
 
 /**
@@ -18,13 +16,10 @@ import type { AiIndexCatalogEntry } from '../../types';
 export const getAiIndicesInstructions = ({
   enabled,
   catalog,
-  skills,
   spaceId,
 }: {
   enabled: boolean;
   catalog: AiIndexCatalogEntry[];
-  /** The agent's resolved skills, used to point at the `ki-retrieval` skill by its path. */
-  skills: Array<Pick<InternalSkillDefinition, 'id' | 'basePath' | 'name'>>;
   spaceId: string;
 }): string => {
   if (!enabled || catalog.length === 0) {
@@ -43,13 +38,8 @@ export const getAiIndicesInstructions = ({
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
-  // The skill is named either way; its path is only known when the agent actually has it.
-  const kiRetrievalSkill = skills.find(({ id }) => id === kiRetrievalSkillId);
-  const kiRetrievalSkillRef = kiRetrievalSkill
-    ? `\`${kiRetrievalSkillId}\` skill (\`${getSkillAbsolutePath({ skill: kiRetrievalSkill })}\`)`
-    : `\`${kiRetrievalSkillId}\` skill`;
-
   // Using AI Indices is the `ki-retrieval` skill's job; this section only says they exist.
+  // The skill is named, not pathed: `load_skill` resolves a name, and the SKILLS section lists the path.
   return cleanPrompt(`
 ## AI INDICES
 
@@ -59,7 +49,7 @@ Search relevant AI Indices before broader retrieval when their KIs may help. If 
 
 ${catalogSection}
 
-Load the ${kiRetrievalSkillRef} before you work with an AI Index: it carries the AI Index tools and the guidance for using them.
+Load the \`${kiRetrievalSkillId}\` skill before you work with an AI Index: it carries the AI Index tools and the guidance for using them.
 
 Query everything else, including a source a KI points you to, with your other data tools, such as \`generate_esql\` and \`execute_esql\`, as you would without AI Indices.
 
