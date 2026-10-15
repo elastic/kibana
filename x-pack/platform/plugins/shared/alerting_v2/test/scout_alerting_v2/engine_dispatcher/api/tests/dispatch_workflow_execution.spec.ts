@@ -42,7 +42,7 @@ apiTest.describe(
   () => {
     let workflowId: string;
 
-    apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
@@ -60,23 +60,10 @@ apiTest.describe(
         buildWorkflowYaml('scout-dispatch-workflow-execution')
       );
       workflowId = workflow.id;
+    });
 
-      // The policy stores an API key minted from the request credential. With UIAM (serverless)
-      // that must be a UIAM credential, which basic auth used by `apiServices` is not, so the
-      // policy is created with an interactive user session, like the UI does.
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      const createPolicyResponse = await apiClient.put(
-        `${testData.ACTION_POLICY_API_PATH}/${ACTION_POLICY_ID}`,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: buildCreateActionPolicyData({
-            name: 'Dispatch workflow policy',
-            description: 'Catch-all policy whose destination is a real workflow',
-            destinations: [{ type: 'workflow', id: workflowId }],
-          }),
-        }
-      );
-      expect(createPolicyResponse).toHaveStatusCode(201);
+    apiTest.beforeEach(async ({ apiServices }) => {
+      await apiServices.alertingV2.actionPolicies.cleanUp();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -90,8 +77,25 @@ apiTest.describe(
 
     apiTest(
       'a breaching rule fires the policy and its workflow runs to completion',
-      async ({ apiServices }) => {
+      async ({ apiClient, apiServices, samlAuth }) => {
         const host = 'host-dispatch-workflow';
+
+        // The policy stores an API key minted from the request credential. With UIAM (serverless)
+        // that must be a UIAM credential, which basic auth used by `apiServices` is not, so the
+        // policy is created with an interactive user session, like the UI does.
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const createPolicyResponse = await apiClient.put(
+          `${testData.ACTION_POLICY_API_PATH}/${ACTION_POLICY_ID}`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+            body: buildCreateActionPolicyData({
+              name: 'Dispatch workflow policy',
+              description: 'Catch-all policy whose destination is a real workflow',
+              destinations: [{ type: 'workflow', id: workflowId }],
+            }),
+          }
+        );
+        expect(createPolicyResponse).toHaveStatusCode(201);
 
         await apiServices.alertingV2.sourceIndex.indexDocs({
           index: SOURCE_INDEX,
