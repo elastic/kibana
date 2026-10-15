@@ -26,6 +26,8 @@ export {
   getMitreFrameworkByThreatName,
   getMitreFrameworkById,
   buildMitreReferenceUrl,
+  MITRE_ATTACK_FRAMEWORK,
+  MITRE_ATLAS_FRAMEWORK,
 } from './src/threat_framework';
 
 export type {
