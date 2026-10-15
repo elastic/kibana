@@ -9,7 +9,7 @@
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { BooleanRelation, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   appendFilteringWhereClauseForCascadeLayout,
@@ -125,7 +125,12 @@ const addClassicFilter = ({
   value: Parameters<DocViewFilterFn>[1];
   mode: Parameters<DocViewFilterFn>[2];
 }) => {
-  const newFilters = generateFilters(services.filterManager, field, value, mode, dataView);
+  const newFilters = generateFilters(services.filterManager, field, value, mode, dataView, {
+    // Filtering on an array field adds a single combined filter instead of one pill per value.
+    // The query is unchanged, but the relation between the values is now explicit and can be
+    // switched to OR in the filter bar. See https://github.com/elastic/kibana/issues/39433
+    multiValueRelation: BooleanRelation.AND,
+  });
 
   void popularizeField(dataView, fieldName, services.dataViews, services.capabilities);
   services.filterManager.addFilters(newFilters);
