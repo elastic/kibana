@@ -19,6 +19,30 @@ import type {
 } from '@kbn/core-security-common';
 
 /**
+ * A platform service, outside Kibana, that can also assume a service account a plugin creates.
+ * The security plugin maps each name to that service's identity, so a caller never names a
+ * principal directly. Adding a name here needs a matching entry in the security plugin.
+ *
+ * @public
+ */
+export type ServiceAccountPlatformAssumer = 'relay' | 'sandbox';
+
+/**
+ * Create parameters for server-side callers. Only the server contract accepts
+ * `platformAssumers`. The HTTP route and the browser contract take {@link CreateServiceAccountParams}.
+ *
+ * @public
+ */
+export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
+  /**
+   * Platform services that may exchange the account for a token, in addition to this Kibana
+   * project. Only supported when service accounts are backed by UIAM. Elasticsearch service
+   * accounts reject a create that names any.
+   */
+  platformAssumers?: readonly ServiceAccountPlatformAssumer[];
+}
+
+/**
  * Core's service accounts service.
  *
  * The workload methods are scoped to the calling plugin: Core supplies the plugin's id from its
@@ -39,9 +63,10 @@ export interface CoreServiceAccountsService {
    * the provided request. Requires the `manage_security` cluster privilege.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name and roles for the new service account.
+   * @param params The name and roles for the new service account, and any platform services that
+   * may also assume it.
    */
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is
