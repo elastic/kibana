@@ -35,6 +35,7 @@ import {
   ActionsMenu,
   ActionsMenuPopover,
   getActionOptions,
+  getActionsMenuListboxId,
   ConfigureAndAddModal,
 } from './actions_menu';
 import type { ActionOptionData, ConfigurableFieldAction } from './actions_menu';
@@ -90,7 +91,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   const toasts = useToasts();
   const [isOpen, setIsOpen] = useState(false);
   const [configureAction, setConfigureAction] = useState<ConfigurableFieldAction | null>(null);
-  const configureButtonSubjRef = useRef<string | null>(null);
   const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
   const cursorLineRef = useRef<number | undefined>(undefined);
@@ -136,65 +136,82 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   }, [editor, openMenu]);
 
   // Prefetch library fields while the menu can be opened (template mode only).
-  const { data: libraryData, isLoading: isLibraryLoading } = useGetFieldDefinitions({
+  const {
+    data: libraryData,
+    isLoading: isLibraryLoading,
+    isError: isLibraryError,
+  } = useGetFieldDefinitions({
     owner: mode === 'template' ? owner : undefined,
     staleTime: Infinity,
   });
 
+  // Parsing the whole template is only needed while the menu is open, not on every keystroke.
   const alreadyLinked = useMemo(() => {
-    if (mode !== 'template') return new Set<string>();
+    if (!isOpen || mode !== 'template') return new Set<string>();
     const doc = parseTemplateDocument(value);
     return doc ? getDefinedFieldNames(getFieldItemMaps(doc)) : new Set<string>();
-  }, [mode, value]);
+  }, [isOpen, mode, value]);
 
   const siblingFieldNames = useMemo(() => Array.from(alreadyLinked), [alreadyLinked]);
 
   const catalog = useMemo(
     () =>
-      getActionOptions({
-        mode,
-        bufferHasErrors,
-        hasTargetField: targetField != null,
-        targetControl: targetField?.control,
-        libraryFields: libraryData?.fieldDefinitions ?? [],
-        alreadyLinked,
-        isLibraryLoading: mode === 'template' && isLibraryLoading,
-      }),
+      isOpen
+        ? getActionOptions({
+            mode,
+            bufferHasErrors,
+            hasTargetField: targetField != null,
+            targetControl: targetField?.control,
+            libraryFields: libraryData?.fieldDefinitions ?? [],
+            alreadyLinked,
+            isLibraryLoading: mode === 'template' && isLibraryLoading,
+            isLibraryError: mode === 'template' && isLibraryError,
+          })
+        : [],
     [
+      isOpen,
       mode,
       bufferHasErrors,
       targetField,
       libraryData?.fieldDefinitions,
       alreadyLinked,
       isLibraryLoading,
+      isLibraryError,
     ]
   );
 
+  /** Returns whether the field was written; the caller decides what to close. */
   const insertField = useCallback(
-    (fieldObject: Record<string, unknown>, displayName: string) => {
+    (fieldObject: Record<string, unknown>, displayName: string): boolean => {
       if (mode === 'fieldDefinition') {
         const rootResult = replaceRootField(valueRef.current, fieldObject);
-        if (rootResult.status === 'applied') {
-          onChangeRef.current(rootResult.yaml);
-          toasts.addSuccess(i18n.ACTIONS_MENU_FIELD_ADDED(displayName));
-        } else {
+        if (rootResult.status !== 'applied') {
           toasts.addWarning(i18n.ACTIONS_MENU_INVALID_YAML);
+          return false;
         }
-        closeAndFocusEditor();
-        return;
+        onChangeRef.current(rootResult.yaml);
+        // With a field already in the buffer this replaces it ("Change field type").
+        toasts.addSuccess(
+          targetField != null
+            ? i18n.ACTIONS_MENU_FIELD_TYPE_CHANGED(displayName)
+            : i18n.ACTIONS_MENU_FIELD_ADDED(displayName)
+        );
+        return true;
       }
       const result = insertTemplateField(valueRef.current, fieldObject, cursorLineRef.current);
       if (result.changed) {
         onChangeRef.current(result.yaml);
         toasts.addSuccess(i18n.ACTIONS_MENU_FIELD_ADDED(displayName));
-      } else if (result.reason === 'invalid') {
-        toasts.addWarning(i18n.ACTIONS_MENU_INVALID_YAML);
-      } else {
-        toasts.addWarning(i18n.ACTIONS_MENU_FIELD_EXISTS(displayName));
+        return true;
       }
-      closeAndFocusEditor();
+      toasts.addWarning(
+        result.reason === 'invalid'
+          ? i18n.ACTIONS_MENU_INVALID_YAML
+          : i18n.ACTIONS_MENU_FIELD_EXISTS(displayName)
+      );
+      return false;
     },
-    [closeAndFocusEditor, toasts, mode]
+    [toasts, mode, targetField]
   );
 
   const applyRule = useCallback(
@@ -233,53 +250,33 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       if (action.kind === 'fieldType') {
         const scaffold = buildFieldScaffold(action.control) ?? action.scaffold;
         insertField(scaffold, action.label);
+        closeAndFocusEditor();
         return;
       }
       if (action.kind === 'libraryField') {
         insertField({ $ref: action.fieldName }, action.label);
+        closeAndFocusEditor();
         return;
       }
       if (action.kind === 'rule') {
         applyRule(action.rule);
       }
     },
-    [insertField, applyRule]
-  );
-
-  const handleConfigure = useCallback(
-    (action: ConfigurableFieldAction) => {
-      configureButtonSubjRef.current = action.testSubj
-        ? `${testSubjPrefix}-${action.testSubj}-configure`
-        : null;
-      setConfigureAction(action);
-    },
-    [testSubjPrefix]
+    [insertField, applyRule, closeAndFocusEditor]
   );
 
   const handleConfigureCancel = useCallback(() => {
     setConfigureAction(null);
-    const restoreFocus = () => {
-      const testSubj = configureButtonSubjRef.current;
-      if (!testSubj) {
-        return;
-      }
-      const button = document.querySelector(`[data-test-subj="${testSubj}"]`);
-      if (button instanceof HTMLElement) {
-        button.focus();
-      }
-    };
-    // Wait until the Actions menu is visible again (display:none is cleared after paint).
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(restoreFocus);
-    });
   }, []);
 
+  // Keep the modal (and the user's input) open when the insert is rejected.
   const handleConfigureConfirm = useCallback(
     (result: { fieldObject: Record<string, unknown>; displayName: string }) => {
-      setConfigureAction(null);
-      insertField(result.fieldObject, result.displayName);
+      if (insertField(result.fieldObject, result.displayName)) {
+        closeAndFocusEditor();
+      }
     },
-    [insertField]
+    [closeAndFocusEditor, insertField]
   );
 
   const triggerButton = (
@@ -345,6 +342,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             panelPaddingSize="none"
             anchorPosition="upRight"
             ownFocus
+            initialFocus={`#${getActionsMenuListboxId(testSubjPrefix)}`}
             repositionOnScroll
             aria-label={i18n.ACTIONS_MENU_ARIA}
             panelStyle={{ width: 360, maxWidth: 'calc(100vw - 32px)' }}
@@ -370,7 +368,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           options={catalog}
           testSubjPrefix={testSubjPrefix}
           onActionSelected={handleActionSelected}
-          onConfigure={handleConfigure}
+          onConfigure={setConfigureAction}
           presentation="full"
         />
       ) : null}

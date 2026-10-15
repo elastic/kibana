@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,7 +32,24 @@ import {
 import { css } from '@emotion/react';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { FieldType, InlineFieldSchema } from '../../../../../common/types/domain/template/fields';
-import type { InlineField } from '../../../../../common/types/domain/template/fields';
+import type {
+  Condition,
+  ConditionRule,
+  Display,
+  InlineField,
+  Validation,
+} from '../../../../../common/types/domain/template/fields';
+import {
+  FIELD_OPTIONS_MAX_ITEMS,
+  FIELD_OPTIONS_MIN_ITEMS,
+} from '../../../../../common/types/domain/template/translations';
+import { MAX_SNAKE_KEY_LENGTH } from '../../../../../common/constants';
+import {
+  applyRefFieldOverride,
+  getAuthorableFieldNameViolation,
+  getFieldSnakeKey,
+  getFoldedFieldName,
+} from '../../../../../common/utils/template_fields';
 import { FieldDefinitionPreview } from '../../../field_library/components/field_definition_preview';
 import { FIELD_TYPE_TITLES } from '../../utils/field_type_titles';
 import { buildFieldScaffold } from '../../utils/template_field_actions';
@@ -52,32 +69,28 @@ interface ConfigureAndAddModalProps {
   onConfirm: (result: ConfigureAndAddResult) => void;
 }
 
-type ConditionOperator = 'eq' | 'neq' | 'contains' | 'empty' | 'not_empty';
+type ConditionOperator = ConditionRule['operator'];
 
-interface ConditionDraft {
+export interface ConditionDraft {
   id: string;
   field: string;
   operator: ConditionOperator;
   value: string;
 }
 
-type ValidationRuleType = 'required' | 'required_on_close' | 'required_when';
+type RequirementType = 'required' | 'required_on_close' | 'required_when';
 
-interface ValidationDraft {
-  id: string;
-  type: ValidationRuleType;
-  field: string;
-  operator: ConditionOperator;
-  value: string;
+export interface RequirementDraft extends ConditionDraft {
+  type: RequirementType;
 }
 
-const OPTIONS_CONTROLS = new Set<string>([
-  FieldType.SELECT_BASIC,
-  FieldType.RADIO_GROUP,
-  FieldType.CHECKBOX_GROUP,
-]);
+const OPTIONS_LIMITS: Readonly<Record<string, { min: number; max: number }>> = {
+  [FieldType.SELECT_BASIC]: { min: 1, max: Infinity },
+  [FieldType.RADIO_GROUP]: { min: 2, max: 20 },
+  [FieldType.CHECKBOX_GROUP]: { min: 1, max: 30 },
+};
 
-const OPERATOR_OPTIONS = [
+const OPERATOR_OPTIONS: Array<{ value: ConditionOperator; text: string }> = [
   { value: 'eq', text: i18n.ACTIONS_MENU_CONFIGURE_OPERATOR_EQ },
   { value: 'neq', text: i18n.ACTIONS_MENU_CONFIGURE_OPERATOR_NEQ },
   { value: 'contains', text: i18n.ACTIONS_MENU_CONFIGURE_OPERATOR_CONTAINS },
@@ -85,13 +98,10 @@ const OPERATOR_OPTIONS = [
   { value: 'not_empty', text: i18n.ACTIONS_MENU_CONFIGURE_OPERATOR_NOT_EMPTY },
 ];
 
-const VALIDATION_TYPE_OPTIONS = [
-  { value: 'required', text: i18n.VALIDATION_RULE_REQUIRED },
-  { value: 'required_when', text: i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_WHEN },
-  { value: 'required_on_close', text: i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_ON_CLOSE },
-];
-
 const MODAL_WIDTH = 640;
+
+// Room kept for the `_N` suffix appended when the slug is already taken.
+const UNIQUE_SUFFIX_RESERVE = 4;
 
 let draftId = 0;
 const nextDraftId = (): string => {
@@ -99,27 +109,95 @@ const nextDraftId = (): string => {
   return `draft-${draftId}`;
 };
 
-const toSentenceCase = (value: string): string =>
-  value.length === 0 ? value : `${value.charAt(0)}${value.slice(1).toLowerCase()}`;
+const isValuelessOperator = (operator: ConditionOperator): boolean =>
+  operator === 'empty' || operator === 'not_empty';
 
-export const slugifyFieldName = (label: string): string => {
+/**
+ * Derives an authorable field name from a label: only `[a-z0-9_]`, and short enough that the
+ * `${name}_as_${type}` storage key stays within `MAX_SNAKE_KEY_LENGTH` even after a uniqueness
+ * suffix is appended.
+ */
+export const slugifyFieldName = (label: string, type: string): string => {
+  const maxLength =
+    MAX_SNAKE_KEY_LENGTH - getFieldSnakeKey('', type).length - UNIQUE_SUFFIX_RESERVE;
   const slug = label
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
+    .slice(0, maxLength)
     .replace(/^_+|_+$/g, '');
   return slug.length > 0 ? slug : 'field';
 };
 
-export const uniquifyFieldName = (base: string, existing: ReadonlySet<string>): string => {
-  if (!existing.has(base)) {
+/**
+ * Maps each existing name's camelCase fold to the name, so a new name that folds onto an existing
+ * one (`my_field` vs `myField`) can be rejected — Kibana reads both through the same key.
+ */
+const buildFoldedNameIndex = (names: ReadonlySet<string>): ReadonlyMap<string, string> =>
+  new Map(Array.from(names, (name) => [getFoldedFieldName(name), name] as const));
+
+const isNameTaken = (
+  name: string,
+  existing: ReadonlySet<string>,
+  foldedIndex: ReadonlyMap<string, string>
+): boolean => existing.has(name) || foldedIndex.has(getFoldedFieldName(name));
+
+export const getAvailableFieldName = (base: string, existing: ReadonlySet<string>): string => {
+  const foldedIndex = buildFoldedNameIndex(existing);
+  if (!isNameTaken(base, existing, foldedIndex)) {
     return base;
   }
   let counter = 2;
-  while (existing.has(`${base}_${counter}`)) {
+  while (isNameTaken(`${base}_${counter}`, existing, foldedIndex)) {
     counter += 1;
   }
   return `${base}_${counter}`;
+};
+
+export const getFieldNameError = (
+  name: string,
+  type: string,
+  existing: ReadonlySet<string>
+): string | undefined => {
+  if (!name) {
+    return undefined;
+  }
+  const violation = getAuthorableFieldNameViolation(name, type);
+  if (violation === 'charset') {
+    return i18n.ACTIONS_MENU_CONFIGURE_NAME_CHARSET(name);
+  }
+  if (violation === 'length') {
+    return i18n.ACTIONS_MENU_CONFIGURE_NAME_TOO_LONG(name, MAX_SNAKE_KEY_LENGTH);
+  }
+  if (existing.has(name)) {
+    return i18n.ACTIONS_MENU_CONFIGURE_NAME_TAKEN(name);
+  }
+  const twin = buildFoldedNameIndex(existing).get(getFoldedFieldName(name));
+  return twin !== undefined ? i18n.ACTIONS_MENU_CONFIGURE_NAME_FOLDED_TWIN(name, twin) : undefined;
+};
+
+const parseOptions = (text: string): string[] =>
+  Array.from(
+    new Set(
+      text
+        .split(',')
+        .map((option) => option.trim())
+        .filter((option) => option.length > 0)
+    )
+  );
+
+const getOptionsError = (control: string, options: string[]): string | undefined => {
+  const limits = OPTIONS_LIMITS[control];
+  if (!limits) {
+    return undefined;
+  }
+  if (options.length < limits.min) {
+    return FIELD_OPTIONS_MIN_ITEMS(limits.min);
+  }
+  if (options.length > limits.max) {
+    return FIELD_OPTIONS_MAX_ITEMS(limits.max);
+  }
+  return undefined;
 };
 
 const parseLibraryInlineField = (definition?: string): InlineField | null => {
@@ -134,73 +212,116 @@ const parseLibraryInlineField = (definition?: string): InlineField | null => {
   }
 };
 
-const toCondition = (draft: ConditionDraft | ValidationDraft): Record<string, unknown> | null => {
+const toConditionRule = (draft: ConditionDraft): ConditionRule | null => {
   if (!draft.field) {
     return null;
   }
-  if (draft.operator === 'empty' || draft.operator === 'not_empty') {
-    return { field: draft.field, operator: draft.operator };
-  }
-  return { field: draft.field, operator: draft.operator, value: draft.value };
+  return isValuelessOperator(draft.operator)
+    ? { field: draft.field, operator: draft.operator }
+    : { field: draft.field, operator: draft.operator, value: draft.value };
 };
 
-const omitEmptyBlocks = (field: Record<string, unknown>): Record<string, unknown> => {
-  const next = { ...field };
-  const display = next.display as Record<string, unknown> | undefined;
-  const validation = next.validation as Record<string, unknown> | undefined;
-  const metadata = next.metadata as Record<string, unknown> | undefined;
-  if (display && Object.keys(display).length === 0) {
-    delete next.display;
+const combineConditions = (drafts: ConditionDraft[]): Condition | undefined => {
+  const rules = drafts.map(toConditionRule).filter((rule): rule is ConditionRule => rule != null);
+  if (rules.length === 0) {
+    return undefined;
   }
-  if (validation && Object.keys(validation).length === 0) {
-    delete next.validation;
-  }
-  if (metadata && Object.keys(metadata).length === 0) {
-    delete next.metadata;
-  }
-  return next;
+  return rules.length === 1 ? rules[0] : { combine: 'all', rules };
 };
 
-const operatorLabel = (operator: ConditionOperator): string =>
-  OPERATOR_OPTIONS.find((option) => option.value === operator)?.text ?? operator;
+export interface ConfiguredRules {
+  validation?: Validation;
+  display?: Display;
+}
 
-const formatConditionPhrase = (
-  field: string,
-  operator: ConditionOperator,
-  value: string
-): string => {
-  const fieldText = field || i18n.ACTIONS_MENU_CONFIGURE_CONDITION_PLACEHOLDER;
-  const operatorText = operatorLabel(operator);
-  if (operator === 'empty' || operator === 'not_empty') {
-    return i18n.ACTIONS_MENU_CONFIGURE_CONDITION_PHRASE({
-      field: fieldText,
-      operator: operatorText,
-    });
+/**
+ * The single source for what Configure and add writes: the inserted YAML, the preview and the
+ * requirement badge are all derived from this, so they cannot disagree.
+ */
+export const buildConfiguredRules = (
+  requirements: RequirementDraft[],
+  conditions: ConditionDraft[]
+): ConfiguredRules => {
+  let validation: Validation | undefined;
+  if (requirements.some((rule) => rule.type === 'required')) {
+    validation = { required: true };
+  } else if (requirements.some((rule) => rule.type === 'required_on_close')) {
+    validation = { required_on_close: true };
+  } else {
+    const requiredWhen = combineConditions(
+      requirements.filter((rule) => rule.type === 'required_when')
+    );
+    validation = requiredWhen ? { required_when: requiredWhen } : undefined;
   }
-  return i18n.ACTIONS_MENU_CONFIGURE_CONDITION_PHRASE({
-    field: fieldText,
-    operator: operatorText,
-    value: value.trim() || i18n.ACTIONS_MENU_CONFIGURE_CONDITION_PLACEHOLDER,
+  const showWhen = combineConditions(conditions);
+  return {
+    ...(validation ? { validation } : {}),
+    ...(showWhen ? { display: { show_when: showWhen } } : {}),
+  };
+};
+
+const describeRule = (rule: ConditionRule): string =>
+  i18n.ACTIONS_MENU_CONFIGURE_CONDITION_PHRASE({
+    field: rule.field,
+    operator: rule.operator,
+    value: rule.value === undefined ? '' : String(rule.value),
   });
+
+const describeCondition = (condition: Condition): string =>
+  'rules' in condition
+    ? i18n.ACTIONS_MENU_CONFIGURE_CONDITIONS_JOINED(
+        describeRule(condition.rules[0]),
+        condition.rules.length - 1
+      )
+    : describeRule(condition);
+
+export const describeRequirement = (validation?: Validation): string | undefined => {
+  if (validation?.required) {
+    return i18n.VALIDATION_RULE_REQUIRED;
+  }
+  if (validation?.required_when) {
+    return i18n.ACTIONS_MENU_CONFIGURE_BADGE_REQUIRED_WHEN(
+      describeCondition(validation.required_when)
+    );
+  }
+  if (validation?.required_on_close) {
+    return i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_ON_CLOSE;
+  }
+  return undefined;
 };
+
+const omitEmptyBlocks = (field: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(field).filter(
+      ([, value]) =>
+        value !== undefined &&
+        !(
+          typeof value === 'object' &&
+          value !== null &&
+          !Array.isArray(value) &&
+          Object.keys(value).length === 0
+        )
+    )
+  );
 
 interface ConditionInputsProps {
   field: string;
   operator: ConditionOperator;
   value: string;
   fieldOptions: Array<{ value: string; text: string }>;
-  fieldDisabled?: boolean;
   onFieldChange: (field: string) => void;
   onOperatorChange: (operator: ConditionOperator) => void;
   onValueChange: (value: string) => void;
 }
+
+const isConditionOperator = (value: string): value is ConditionOperator =>
+  OPERATOR_OPTIONS.some((option) => option.value === value);
 
 function ConditionInputs({
   field,
   operator,
   value,
   fieldOptions,
-  fieldDisabled,
   onFieldChange,
   onOperatorChange,
   onValueChange,
@@ -212,7 +333,6 @@ function ConditionInputs({
           compressed
           options={fieldOptions}
           value={field}
-          disabled={fieldDisabled}
           onChange={(event) => onFieldChange(event.target.value)}
           aria-label={i18n.ACTIONS_MENU_CONFIGURE_CONDITION_FIELD}
         />
@@ -222,11 +342,15 @@ function ConditionInputs({
           compressed
           options={OPERATOR_OPTIONS}
           value={operator}
-          onChange={(event) => onOperatorChange(event.target.value as ConditionOperator)}
+          onChange={(event) => {
+            if (isConditionOperator(event.target.value)) {
+              onOperatorChange(event.target.value);
+            }
+          }}
           aria-label={i18n.ACTIONS_MENU_CONFIGURE_CONDITION_OPERATOR}
         />
       </EuiFlexItem>
-      {operator !== 'empty' && operator !== 'not_empty' ? (
+      {!isValuelessOperator(operator) ? (
         <EuiFlexItem grow={false}>
           <EuiFieldText
             compressed
@@ -243,6 +367,17 @@ function ConditionInputs({
 
 ConditionInputs.displayName = 'ConditionInputs';
 
+const REQUIREMENT_TYPES: RequirementType[] = ['required', 'required_when', 'required_on_close'];
+
+const isRequirementType = (value: string): value is RequirementType =>
+  REQUIREMENT_TYPES.some((type) => type === value);
+
+const REQUIREMENT_LABELS: Record<RequirementType, string> = {
+  required: i18n.VALIDATION_RULE_REQUIRED,
+  required_when: i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_WHEN,
+  required_on_close: i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_ON_CLOSE,
+};
+
 export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
   action,
   existingFieldNames,
@@ -252,13 +387,16 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isFieldType = action.kind === 'fieldType';
-  const libraryField =
-    action.kind === 'libraryField' ? parseLibraryInlineField(action.definition) : null;
-  const control = isFieldType ? action.control : libraryField?.control ?? 'INPUT_TEXT';
+  const libraryField = useMemo(
+    () => (action.kind === 'libraryField' ? parseLibraryInlineField(action.definition) : null),
+    [action]
+  );
+  const control = isFieldType ? action.control : libraryField?.control ?? FieldType.INPUT_TEXT;
   const scaffold = useMemo(
     () => (isFieldType ? buildFieldScaffold(action.control) ?? { ...action.scaffold } : {}),
     [action, isFieldType]
   );
+  const storageType = typeof scaffold.type === 'string' ? scaffold.type : 'keyword';
 
   const [label, setLabel] = useState(isFieldType ? '' : libraryField?.label ?? action.label);
   const [showLabelError, setShowLabelError] = useState(false);
@@ -271,17 +409,26 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
   const [toggleDefault, setToggleDefault] = useState(
     (scaffold.metadata as { default?: boolean } | undefined)?.default === true
   );
-  const [validationRules, setValidationRules] = useState<ValidationDraft[]>([]);
+  const [requirements, setRequirements] = useState<RequirementDraft[]>([]);
   const [conditions, setConditions] = useState<ConditionDraft[]>([]);
   const labelInputRef = useRef<HTMLInputElement | null>(null);
 
   const hasLabel = label.trim().length > 0;
   const generatedName = hasLabel
-    ? uniquifyFieldName(slugifyFieldName(label), existingFieldNames)
+    ? getAvailableFieldName(slugifyFieldName(label, storageType), existingFieldNames)
     : '';
   const effectiveName = nameOverridden ? name.trim() : generatedName;
-  const keyIsTaken = Boolean(effectiveName) && existingFieldNames.has(effectiveName);
-  const canSubmit = isFieldType ? hasLabel && effectiveName.length > 0 && !keyIsTaken : true;
+  const nameError = isFieldType
+    ? getFieldNameError(effectiveName, storageType, existingFieldNames)
+    : undefined;
+
+  const hasOptions = isFieldType && OPTIONS_LIMITS[control] != null;
+  const options = useMemo(() => parseOptions(optionsText), [optionsText]);
+  const optionsError = hasOptions ? getOptionsError(control, options) : undefined;
+
+  const canSubmit = isFieldType
+    ? hasLabel && effectiveName.length > 0 && !nameError && !optionsError
+    : true;
 
   const fieldSelectOptions = useMemo(
     () => siblingFieldNames.map((fieldName) => ({ value: fieldName, text: fieldName })),
@@ -290,120 +437,75 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
   const canUseConditions = siblingFieldNames.length > 0;
   const modalTitleId = useGeneratedHtmlId();
 
-  const handleLabelChange = (value: string) => {
-    setLabel(value);
-    if (showLabelError && value.trim()) {
-      setShowLabelError(false);
-    }
-    if (!nameOverridden) {
-      setName(value.trim() ? uniquifyFieldName(slugifyFieldName(value), existingFieldNames) : '');
-    }
-  };
+  const rules = useMemo(
+    () => buildConfiguredRules(requirements, conditions),
+    [requirements, conditions]
+  );
 
-  const previewField = useMemo((): Record<string, unknown> | null => {
-    const validation: Record<string, unknown> = {};
-    for (const rule of validationRules) {
-      if (rule.type === 'required') {
-        validation.required = true;
-      } else if (rule.type === 'required_on_close') {
-        validation.required_on_close = true;
-      } else {
-        const condition = toCondition(rule);
-        if (condition) {
-          validation.required_when = condition;
-        }
-      }
-    }
-    const display: Record<string, unknown> = {};
-    const showWhen = conditions.map(toCondition).find((condition) => condition != null);
-    if (showWhen) {
-      display.show_when = showWhen;
-    }
-
+  const fieldObject = useMemo((): Record<string, unknown> | null => {
     if (isFieldType) {
       const metadata = {
         ...((scaffold.metadata as Record<string, unknown> | undefined) ?? {}),
       };
-      if (OPTIONS_CONTROLS.has(control)) {
-        const options = optionsText
-          .split(',')
-          .map((option) => option.trim())
-          .filter((option) => option.length > 0);
-        if (options.length > 0) {
-          metadata.options = options;
-        } else {
-          delete metadata.options;
-        }
+      if (hasOptions) {
+        metadata.options = options;
       }
       if (control === FieldType.TOGGLE) {
         metadata.default = toggleDefault;
       }
       return omitEmptyBlocks({
         ...scaffold,
-        name: effectiveName || 'field',
-        label: label.trim() || i18n.ACTIONS_MENU_CONFIGURE_UNTITLED,
+        name: effectiveName,
+        label: label.trim(),
         metadata,
-        ...(Object.keys(display).length > 0 ? { display } : {}),
-        ...(Object.keys(validation).length > 0 ? { validation } : {}),
+        display: rules.display,
+        validation: rules.validation,
       });
     }
-
-    if (!libraryField) {
+    if (action.kind !== 'libraryField') {
       return null;
     }
     return omitEmptyBlocks({
-      ...libraryField,
-      ...(Object.keys(display).length > 0 ? { display } : {}),
-      ...(Object.keys(validation).length > 0
-        ? { validation: { ...(libraryField.validation ?? {}), ...validation } }
-        : {}),
+      $ref: action.fieldName,
+      display: rules.display,
+      validation: rules.validation,
     });
   }, [
-    conditions,
+    action,
     control,
     effectiveName,
+    hasOptions,
     isFieldType,
     label,
-    libraryField,
-    optionsText,
+    options,
+    rules,
     scaffold,
     toggleDefault,
-    validationRules,
   ]);
 
-  const previewYaml = useMemo(
-    () => (previewField ? stringifyYaml(previewField) : ''),
-    [previewField]
-  );
-
-  const requirementBadge = useMemo(() => {
-    const requiredWhen = validationRules.find((rule) => rule.type === 'required_when');
-    if (requiredWhen) {
-      return i18n.ACTIONS_MENU_CONFIGURE_BADGE_REQUIRED_WHEN(
-        formatConditionPhrase(requiredWhen.field, requiredWhen.operator, requiredWhen.value)
+  const previewYaml = useMemo(() => {
+    if (isFieldType && fieldObject) {
+      return stringifyYaml({
+        ...fieldObject,
+        name: effectiveName || 'field',
+        label: label.trim() || i18n.ACTIONS_MENU_CONFIGURE_UNTITLED,
+      });
+    }
+    if (libraryField && action.kind === 'libraryField') {
+      return stringifyYaml(
+        applyRefFieldOverride(libraryField, { $ref: action.fieldName, ...rules })
       );
     }
-    if (validationRules.some((rule) => rule.type === 'required')) {
-      return i18n.VALIDATION_RULE_REQUIRED;
-    }
-    if (validationRules.some((rule) => rule.type === 'required_on_close')) {
-      return i18n.ACTIONS_MENU_CONFIGURE_REQUIRED_ON_CLOSE;
-    }
-    return undefined;
-  }, [validationRules]);
+    return '';
+  }, [action, effectiveName, fieldObject, isFieldType, label, libraryField, rules]);
 
-  const hiddenNote = useMemo(() => {
-    const condition = conditions[0];
-    if (!condition) {
-      return undefined;
-    }
-    return i18n.ACTIONS_MENU_CONFIGURE_HIDDEN_UNTIL(
-      formatConditionPhrase(condition.field, condition.operator, condition.value)
-    );
-  }, [conditions]);
+  const requirementBadge = describeRequirement(rules.validation);
+  const hiddenNote = rules.display?.show_when
+    ? i18n.ACTIONS_MENU_CONFIGURE_HIDDEN_UNTIL(describeCondition(rules.display.show_when))
+    : undefined;
 
   const subtitle = isFieldType
-    ? toSentenceCase(FIELD_TYPE_TITLES[control] ?? action.label)
+    ? FIELD_TYPE_TITLES[control] ?? action.label
     : i18n.ACTIONS_MENU_CONFIGURE_LIBRARY_SUBTITLE(libraryField?.label ?? action.fieldName);
 
   const focusLabel = () => {
@@ -411,76 +513,65 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
     labelInputRef.current?.focus();
   };
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     if (isFieldType && !hasLabel) {
       focusLabel();
       return;
     }
-    if (!canSubmit) {
-      if (isFieldType && !hasLabel) {
-        focusLabel();
-      }
+    if (!canSubmit || !fieldObject) {
       return;
-    }
-    if (isFieldType) {
-      onConfirm({
-        fieldObject: omitEmptyBlocks({
-          ...(previewField ?? {}),
-          name: effectiveName,
-          label: label.trim(),
-        }),
-        displayName: label.trim(),
-      });
-      return;
-    }
-    const validation: Record<string, unknown> = {};
-    for (const rule of validationRules) {
-      if (rule.type === 'required') {
-        validation.required = true;
-      } else if (rule.type === 'required_on_close') {
-        validation.required_on_close = true;
-      } else {
-        const condition = toCondition(rule);
-        if (condition) {
-          validation.required_when = condition;
-        }
-      }
-    }
-    const display: Record<string, unknown> = {};
-    const showWhen = conditions.map(toCondition).find((condition) => condition != null);
-    if (showWhen) {
-      display.show_when = showWhen;
     }
     onConfirm({
-      fieldObject: omitEmptyBlocks({
-        $ref: action.kind === 'libraryField' ? action.fieldName : effectiveName,
-        ...(Object.keys(display).length > 0 ? { display } : {}),
-        ...(Object.keys(validation).length > 0 ? { validation } : {}),
-      }),
-      displayName:
-        action.kind === 'libraryField' ? libraryField?.label ?? action.label : effectiveName,
+      fieldObject,
+      displayName: isFieldType
+        ? label.trim()
+        : libraryField?.label ?? (action.kind === 'libraryField' ? action.label : effectiveName),
     });
-  }, [
-    action,
-    canSubmit,
-    conditions,
-    effectiveName,
-    hasLabel,
-    isFieldType,
-    label,
-    libraryField,
-    onConfirm,
-    previewField,
-    validationRules,
-  ]);
+  };
 
-  const addValidationRule = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const requirementType = requirements[0]?.type;
+  const isExclusiveRequirement =
+    requirementType === 'required' || requirementType === 'required_on_close';
+  const canAddRequirement =
+    requirements.length === 0 || (!isExclusiveRequirement && canUseConditions);
+
+  const addRequirement = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.currentTarget.blur();
-    setValidationRules((prev) => [
+    setRequirements((prev) => [
       ...prev,
-      { id: nextDraftId(), type: 'required', field: '', operator: 'eq', value: '' },
+      {
+        id: nextDraftId(),
+        type: prev.length === 0 ? 'required' : 'required_when',
+        field: siblingFieldNames[0] ?? '',
+        operator: 'eq',
+        value: '',
+      },
     ]);
   };
+
+  const changeRequirementType = (id: string, type: RequirementType) =>
+    setRequirements((prev) => {
+      const changed = prev.find((item) => item.id === id);
+      if (!changed) {
+        return prev;
+      }
+      const next = { ...changed, type, field: changed.field || siblingFieldNames[0] || '' };
+      // Required, Required when and Required on close are mutually exclusive, so picking a plain
+      // requirement replaces every other row; only Required when rows combine (all must match).
+      return type === 'required_when' ? prev.map((item) => (item.id === id ? next : item)) : [next];
+    });
+
+  const updateRequirement = (id: string, patch: Partial<ConditionDraft>) =>
+    setRequirements((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+
+  const updateCondition = (id: string, patch: Partial<ConditionDraft>) =>
+    setConditions((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+
+  const requirementTypeOptions = REQUIREMENT_TYPES.map((type) => ({
+    value: type,
+    text: REQUIREMENT_LABELS[type],
+    disabled: type === 'required_when' && !canUseConditions,
+  }));
 
   const addCondition = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.currentTarget.blur();
@@ -516,13 +607,10 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
   return (
     <EuiModal
       onClose={onCancel}
-      maxWidth={MODAL_WIDTH}
-      style={{ width: MODAL_WIDTH }}
       aria-labelledby={modalTitleId}
       data-test-subj="configureAndAddModal"
       css={css({
-        width: MODAL_WIDTH,
-        maxWidth: MODAL_WIDTH,
+        width: `min(${MODAL_WIDTH}px, calc(100vw - ${euiTheme.size.xl}))`,
         alignSelf: 'flex-start',
         marginTop: euiTheme.size.xxl,
         display: 'flex',
@@ -559,8 +647,14 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
             <>
               <EuiFormRow
                 label={i18n.ACTIONS_MENU_CONFIGURE_LABEL_LABEL}
-                isInvalid={showLabelError}
-                error={showLabelError ? i18n.ACTIONS_MENU_CONFIGURE_LABEL_REQUIRED : undefined}
+                isInvalid={showLabelError || (!nameOverridden && nameError !== undefined)}
+                error={
+                  showLabelError
+                    ? i18n.ACTIONS_MENU_CONFIGURE_LABEL_REQUIRED
+                    : !nameOverridden
+                    ? nameError
+                    : undefined
+                }
                 helpText={
                   nameOverridden ? undefined : (
                     <span>
@@ -585,12 +679,17 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
                 }
               >
                 <EuiFieldText
-                  isInvalid={showLabelError}
+                  isInvalid={showLabelError || (!nameOverridden && nameError !== undefined)}
                   autoFocus
                   compressed
                   value={label}
                   placeholder={i18n.ACTIONS_MENU_CONFIGURE_LABEL_PLACEHOLDER}
-                  onChange={(event) => handleLabelChange(event.target.value)}
+                  onChange={(event) => {
+                    setLabel(event.target.value);
+                    if (event.target.value.trim()) {
+                      setShowLabelError(false);
+                    }
+                  }}
                   inputRef={(node) => {
                     labelInputRef.current = node;
                   }}
@@ -600,13 +699,11 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
               {nameOverridden ? (
                 <EuiFormRow
                   label={i18n.ACTIONS_MENU_CONFIGURE_NAME_LABEL}
-                  isInvalid={keyIsTaken}
-                  error={
-                    keyIsTaken ? i18n.ACTIONS_MENU_CONFIGURE_NAME_TAKEN(effectiveName) : undefined
-                  }
+                  isInvalid={nameError !== undefined}
+                  error={nameError}
                 >
                   <EuiFieldText
-                    isInvalid={keyIsTaken}
+                    isInvalid={nameError !== undefined}
                     compressed
                     value={name}
                     onChange={(event) => setName(event.target.value)}
@@ -614,14 +711,17 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
                   />
                 </EuiFormRow>
               ) : null}
-              {OPTIONS_CONTROLS.has(control) ? (
+              {hasOptions ? (
                 <EuiFormRow
                   label={i18n.ACTIONS_MENU_CONFIGURE_OPTIONS_LABEL}
                   helpText={i18n.ACTIONS_MENU_CONFIGURE_OPTIONS_HELP}
+                  isInvalid={optionsError !== undefined}
+                  error={optionsError}
                 >
                   <EuiFieldText
                     compressed
                     value={optionsText}
+                    isInvalid={optionsError !== undefined}
                     onChange={(event) => setOptionsText(event.target.value)}
                     data-test-subj="configureAndAdd-options"
                   />
@@ -675,30 +775,19 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
           )}
 
           {sectionHeading(i18n.ACTION_VALIDATION_TITLE)}
-          {validationRules.map((rule) => (
+          {requirements.map((rule) => (
             <div key={rule.id} css={rowMotion}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
                 <EuiFlexItem grow={false}>
                   <EuiSelect
                     compressed
-                    options={VALIDATION_TYPE_OPTIONS}
+                    options={requirementTypeOptions}
                     value={rule.type}
-                    onChange={(event) =>
-                      setValidationRules((prev) =>
-                        prev.map((item) =>
-                          item.id === rule.id
-                            ? {
-                                ...item,
-                                type: event.target.value as ValidationRuleType,
-                                field:
-                                  event.target.value === 'required_when' && !item.field
-                                    ? siblingFieldNames[0] ?? ''
-                                    : item.field,
-                              }
-                            : item
-                        )
-                      )
-                    }
+                    onChange={(event) => {
+                      if (isRequirementType(event.target.value)) {
+                        changeRequirementType(rule.id, event.target.value);
+                      }
+                    }}
                     aria-label={i18n.ACTION_VALIDATION_TITLE}
                     data-test-subj={`configureAndAdd-validationType-${rule.id}`}
                   />
@@ -709,22 +798,9 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
                     operator={rule.operator}
                     value={rule.value}
                     fieldOptions={fieldSelectOptions}
-                    fieldDisabled={!canUseConditions}
-                    onFieldChange={(field) =>
-                      setValidationRules((prev) =>
-                        prev.map((item) => (item.id === rule.id ? { ...item, field } : item))
-                      )
-                    }
-                    onOperatorChange={(operator) =>
-                      setValidationRules((prev) =>
-                        prev.map((item) => (item.id === rule.id ? { ...item, operator } : item))
-                      )
-                    }
-                    onValueChange={(value) =>
-                      setValidationRules((prev) =>
-                        prev.map((item) => (item.id === rule.id ? { ...item, value } : item))
-                      )
-                    }
+                    onFieldChange={(field) => updateRequirement(rule.id, { field })}
+                    onOperatorChange={(operator) => updateRequirement(rule.id, { operator })}
+                    onValueChange={(value) => updateRequirement(rule.id, { value })}
                   />
                 ) : null}
                 <EuiFlexItem grow={false}>
@@ -738,7 +814,7 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
                       display="empty"
                       aria-label={i18n.ACTIONS_MENU_CONFIGURE_REMOVE_RULE}
                       onClick={() =>
-                        setValidationRules((prev) => prev.filter((item) => item.id !== rule.id))
+                        setRequirements((prev) => prev.filter((item) => item.id !== rule.id))
                       }
                     />
                   </EuiToolTip>
@@ -747,10 +823,16 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
               <EuiSpacer size="s" />
             </div>
           ))}
+          {!canUseConditions && requirements.length > 0 ? (
+            <EuiText size="xs" color="subdued">
+              <p>{i18n.ACTIONS_MENU_CONFIGURE_NO_FIELDS_FOR_REQUIRED_WHEN}</p>
+            </EuiText>
+          ) : null}
           <EuiButtonEmpty
             size="s"
             iconType="plusCircle"
-            onClick={addValidationRule}
+            onClick={addRequirement}
+            isDisabled={!canAddRequirement}
             autoFocus={!isFieldType}
             data-test-subj="configureAndAdd-addRule"
           >
@@ -771,23 +853,9 @@ export const ConfigureAndAddModal: React.FC<ConfigureAndAddModalProps> = ({
                     operator={condition.operator}
                     value={condition.value}
                     fieldOptions={fieldSelectOptions}
-                    onFieldChange={(field) =>
-                      setConditions((prev) =>
-                        prev.map((item) => (item.id === condition.id ? { ...item, field } : item))
-                      )
-                    }
-                    onOperatorChange={(operator) =>
-                      setConditions((prev) =>
-                        prev.map((item) =>
-                          item.id === condition.id ? { ...item, operator } : item
-                        )
-                      )
-                    }
-                    onValueChange={(value) =>
-                      setConditions((prev) =>
-                        prev.map((item) => (item.id === condition.id ? { ...item, value } : item))
-                      )
-                    }
+                    onFieldChange={(field) => updateCondition(condition.id, { field })}
+                    onOperatorChange={(operator) => updateCondition(condition.id, { operator })}
+                    onValueChange={(value) => updateCondition(condition.id, { value })}
                   />
                   <EuiFlexItem grow={false}>
                     <EuiToolTip

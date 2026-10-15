@@ -55,7 +55,7 @@ FieldDefinitionPreviewInner.displayName = 'FieldDefinitionPreviewInner';
 interface FieldDefinitionPreviewProps {
   definition: string;
   onDefaultChange: (fieldName: string, value: string, control: string) => void;
-  /** When set, replaces the control's native Optional/Required append. */
+  /** When set, shown above the control to summarize its requirement rule. */
   requirementBadge?: string;
   /** When set, the control is shown subdued with this visibility note. */
   hiddenNote?: string;
@@ -84,15 +84,15 @@ export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
     if (!parsedField) {
       return null;
     }
+    if (!hiddenNote) {
+      return parsedField;
+    }
+    // The note replaces `show_when`: the preview has no sibling values, so evaluating the
+    // condition would always hide the control being previewed.
     const next: InlineField = { ...parsedField };
-    if (hiddenNote) {
-      delete next.display;
-    }
-    if (requirementBadge) {
-      next.validation = { required: true };
-    }
+    delete next.display;
     return next;
-  }, [hiddenNote, parsedField, requirementBadge]);
+  }, [hiddenNote, parsedField]);
 
   if (!fieldForRender) {
     return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption, IconType, UseEuiTheme } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -14,30 +14,37 @@ import {
   EuiFlexItem,
   EuiHighlight,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiSelectable,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCasesFieldLibraryNavigation } from '../../../../common/navigation';
-import { flattenOptions } from './get_action_options';
-import type { ActionOptionData, ConfigurableFieldAction } from './types';
+import { CATEGORY_IDS, flattenOptions } from './get_action_options';
+import type {
+  ActionCategory,
+  ActionOptionData,
+  ConfigurableFieldAction,
+  MenuOptionFields,
+  MenuSelectableOption,
+} from './types';
 import { getOptionAction, isActionCategory, isConfigurableFieldAction } from './types';
 import { useDisplayOptions } from './use_display_options';
 import * as i18nStrings from '../../translations';
 
-const SEARCH_INPUT_NAME = 'cases-actions-menu-search';
+export const ACTIONS_MENU_SEARCH_INPUT_NAME = 'cases-actions-menu-search';
 const LIST_SLIDE_MS = 220;
-const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
 const QUICK_ACTIONS_CLASS = 'actionsMenu-quickActions';
 
-type PendingListFocus = 'first' | 'none' | { optionId: string };
+type NavDirection = 'forward' | 'back';
 
 export type ActionsMenuPresentation = 'full' | 'compact';
 
@@ -59,22 +66,34 @@ export interface ActionsMenuProps {
   presentation?: ActionsMenuPresentation;
 }
 
-const getActionableDisplayOptions = (options: EuiSelectableOption[]): EuiSelectableOption[] =>
-  options.filter((option) => !option.isGroupLabel && !option.disabled);
+/** Id of the listbox EuiSelectable renders for this menu (`${id}_listbox`). */
+export const getActionsMenuListboxId = (testSubjPrefix: string): string =>
+  `${testSubjPrefix}-selectable_listbox`;
 
-const getOptionId = (option: EuiSelectableOption): string | undefined =>
-  getOptionAction(option)?.id ?? (option as { id?: string }).id ?? option.key;
-
-const getNavDirection = (fromPath: string[], toPath: string[]): 'forward' | 'back' => {
-  const isPrefix = fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
-  if (isPrefix) return 'forward';
-  const isAncestor = toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
-  if (isAncestor) return 'back';
-  return toPath.length >= fromPath.length ? 'forward' : 'back';
+const getOptionsAtPath = (rootOptions: ActionOptionData[], path: string[]): ActionOptionData[] => {
+  let options = rootOptions;
+  for (const id of path) {
+    const option = options.find((item) => item.id === id);
+    if (!option || !isActionCategory(option)) {
+      return [];
+    }
+    options = option.options;
+  }
+  return options;
 };
 
-const prefersReducedMotion = (): boolean =>
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const findCategoryAtPath = (
+  rootOptions: ActionOptionData[],
+  path: string[]
+): ActionCategory | undefined => {
+  if (path.length === 0) {
+    return undefined;
+  }
+  const option = getOptionsAtPath(rootOptions, path.slice(0, -1)).find(
+    (item) => item.id === path[path.length - 1]
+  );
+  return option && isActionCategory(option) ? option : undefined;
+};
 
 const resolvePathLabels = (
   path: string[],
@@ -105,72 +124,59 @@ export function ActionsMenu({
   presentation = 'full',
 }: ActionsMenuProps) {
   const isFull = presentation === 'full';
-  const isHiddenRef = useRef(isHidden);
-  isHiddenRef.current = isHidden;
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPath, setCurrentPath] = useState<string[]>([]);
+  // Bumped on every drill-in / back so EuiSelectable remounts: its active option is internal
+  // state keyed by index, which would otherwise point at an unrelated row of the new level.
+  const [navigation, setNavigation] = useState<{ count: number; direction?: NavDirection }>({
+    count: 0,
+  });
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-  const listViewportRef = useRef<HTMLDivElement | null>(null);
-  const listPaneRef = useRef<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
+  const activeActionRef = useRef<ActionOptionData | null>(null);
+  const wasHiddenRef = useRef(isHidden);
   const [lockedBodyHeight, setLockedBodyHeight] = useState<number | null>(null);
-  const isSlidingRef = useRef(false);
-  const pendingListFocusRef = useRef<PendingListFocus | null>(null);
-  const keyboardIndexRef = useRef<number | null>(null);
 
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
-
-  const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
-  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
-  keyboardIndexRef.current = keyboardIndex;
-
-  const focusSearch = useCallback(() => {
-    searchInputRef.current?.focus({ preventScroll: true });
-  }, []);
+  const options = useMemo(
+    () => getOptionsAtPath(defaultOptions, currentPath),
+    [defaultOptions, currentPath]
+  );
 
   const focusMenu = useCallback(() => {
-    menuContainerRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  const clearKeyboardSelection = useCallback(() => {
-    setKeyboardIndex(null);
-  }, []);
+    if (isFull) {
+      searchInputRef.current?.focus({ preventScroll: true });
+      return;
+    }
+    menuContainerRef.current
+      ?.querySelector<HTMLElement>('[role="listbox"]')
+      ?.focus({ preventScroll: true });
+  }, [isFull]);
 
   useEffect(() => {
-    if (isFull) {
-      focusSearch();
-    } else {
-      focusMenu();
+    focusMenu();
+  }, [focusMenu, navigation.count]);
+
+  useEffect(() => {
+    if (wasHiddenRef.current && !isHidden) {
+      // Wait for the configure modal's focus trap to release before reclaiming focus.
+      const id = window.requestAnimationFrame(focusMenu);
+      wasHiddenRef.current = isHidden;
+      return () => window.cancelAnimationFrame(id);
     }
-  }, [focusSearch, focusMenu, isFull]);
+    wasHiddenRef.current = isHidden;
+  }, [focusMenu, isHidden]);
 
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`) || target.closest('button')) {
+    if (target.closest(`input[name="${ACTIONS_MENU_SEARCH_INPUT_NAME}"]`)) {
       return;
     }
     e.preventDefault();
   }, []);
-
-  useEffect(() => {
-    if (currentPath.length === 0) {
-      setOptions(defaultOptions);
-      return;
-    }
-    let nextOptions = defaultOptions;
-    for (const id of currentPath) {
-      const next = nextOptions.find((o) => o.id === id);
-      if (next && isActionCategory(next)) {
-        nextOptions = next.options;
-      } else {
-        nextOptions = [];
-      }
-    }
-    setOptions(nextOptions);
-  }, [defaultOptions, currentPath]);
 
   const displayOptions = useDisplayOptions({
     options,
@@ -181,47 +187,15 @@ export function ActionsMenu({
     showSectionLabels: isFull,
   });
 
-  const actionableDisplayOptions = useMemo(
-    () => getActionableDisplayOptions(displayOptions),
-    [displayOptions]
-  );
-  const actionableDisplayOptionsRef = useRef(actionableDisplayOptions);
-  actionableDisplayOptionsRef.current = actionableDisplayOptions;
-  const currentPathRef = useRef(currentPath);
-  currentPathRef.current = currentPath;
-
-  const setKeyboardIndexAndPreview = useCallback((index: number | null) => {
-    setKeyboardIndex(index);
-  }, []);
-
-  useEffect(() => {
-    const pending = pendingListFocusRef.current;
-    if (pending == null || pending === 'none') {
-      if (pending === 'none') pendingListFocusRef.current = null;
-      return;
-    }
-    pendingListFocusRef.current = null;
-    const actionable = getActionableDisplayOptions(displayOptions);
-    if (pending === 'first') {
-      setKeyboardIndexAndPreview(actionable.length === 0 ? null : 0);
-      return;
-    }
-    const idx = actionable.findIndex((option) => getOptionId(option) === pending.optionId);
-    setKeyboardIndexAndPreview(idx >= 0 ? idx : null);
-  }, [displayOptions, currentPath, setKeyboardIndexAndPreview]);
-
-  useEffect(() => {
-    if (keyboardIndex == null) return;
-    const active = menuContainerRef.current?.querySelector(`.${KEYBOARD_ACTIVE_CLASS}`);
-    active?.closest('.euiSelectableListItem')?.scrollIntoView({ block: 'nearest' });
-  }, [keyboardIndex, currentPath]);
-
   const isSearching = isFull && searchTerm.trim().length > 0;
   const hasActionableItems = displayOptions.some((o) => !o.isGroupLabel);
+  const currentCategory = isSearching ? undefined : findCategoryAtPath(defaultOptions, currentPath);
+  const childrenStatus = currentCategory?.childrenStatus;
   const showNoResults = isSearching && !hasActionableItems;
-  const showEmptyCategory = !isSearching && currentPath.length > 0 && options.length === 0;
+  const showEmptyCategory =
+    !isSearching && currentPath.length > 0 && options.length === 0 && !childrenStatus;
   const showBack = currentPath.length > 0 && !isSearching;
-  const isFieldLibraryDrillIn = currentPath[0] === 'fieldLibrary' && !isSearching;
+  const isFieldLibraryDrillIn = currentCategory?.id === CATEGORY_IDS.fieldLibrary;
 
   useLayoutEffect(() => {
     if (!isFull || currentPath.length > 0 || isSearching || lockedBodyHeight != null) {
@@ -233,114 +207,82 @@ export function ActionsMenu({
     }
   }, [isFull, currentPath.length, isSearching, lockedBodyHeight, displayOptions]);
 
-  const handleListMouseMove = useCallback(() => {
-    if (keyboardIndexRef.current != null) {
-      setKeyboardIndex(null);
-    }
+  const navigateToPath = useCallback((nextPath: string[], direction: NavDirection) => {
+    activeActionRef.current = null;
+    setCurrentPath(nextPath);
+    setNavigation((prev) => ({ count: prev.count + 1, direction }));
   }, []);
 
-  const navigateToPath = useCallback(
-    (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
-      pendingListFocusRef.current = pendingFocus;
-      const applyNavigation = () => {
-        let nextOptions: ActionOptionData[] = defaultOptions;
-        for (const id of nextPath) {
-          const nextOption = nextOptions.find((option) => option.id === id);
-          if (nextOption && isActionCategory(nextOption)) {
-            nextOptions = nextOption.options;
-          } else {
-            nextOptions = [];
-          }
-        }
-        setCurrentPath(nextPath);
-        setOptions(nextOptions);
-        setKeyboardIndex(null);
-      };
-
-      const pathUnchanged =
-        nextPath.length === currentPath.length && nextPath.every((id, i) => id === currentPath[i]);
-      if (pathUnchanged) {
-        applyNavigation();
-        return;
-      }
-
-      const viewport = listViewportRef.current;
-      const pane = listPaneRef.current;
-      if (
-        !viewport ||
-        !pane ||
-        prefersReducedMotion() ||
-        isSlidingRef.current ||
-        viewport.clientWidth === 0
-      ) {
-        applyNavigation();
-        return;
-      }
-
-      const direction = getNavDirection(currentPath, nextPath);
-      isSlidingRef.current = true;
-
-      const outgoing = pane.cloneNode(true) as HTMLElement;
-      outgoing.setAttribute('aria-hidden', 'true');
-      outgoing.style.position = 'absolute';
-      outgoing.style.inset = '0';
-      outgoing.style.width = '100%';
-      outgoing.style.height = '100%';
-      outgoing.style.zIndex = '1';
-      outgoing.style.pointerEvents = 'none';
-      outgoing.style.backgroundColor = euiTheme.colors.backgroundBasePlain;
-      viewport.appendChild(outgoing);
-
-      pane.style.transition = 'none';
-      pane.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
-      applyNavigation();
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const transition = `transform ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
-          outgoing.style.transition = transition;
-          pane.style.transition = transition;
-          outgoing.style.transform =
-            direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)';
-          pane.style.transform = 'translateX(0)';
-
-          let cleaned = false;
-          const cleanup = () => {
-            if (cleaned) return;
-            cleaned = true;
-            outgoing.remove();
-            pane.style.transition = '';
-            pane.style.transform = '';
-            isSlidingRef.current = false;
-          };
-          outgoing.addEventListener('transitionend', cleanup, { once: true });
-          window.setTimeout(cleanup, LIST_SLIDE_MS + 80);
-        });
-      });
-    },
-    [currentPath, defaultOptions, euiTheme.colors.backgroundBasePlain]
-  );
-
   const goBack = useCallback(() => {
-    const path = currentPathRef.current;
-    if (path.length === 0) return;
-    const exitedId = path[path.length - 1];
-    navigateToPath(path.slice(0, -1), { optionId: exitedId });
-  }, [navigateToPath]);
+    if (currentPath.length === 0) return;
+    navigateToPath(currentPath.slice(0, -1), 'back');
+  }, [currentPath, navigateToPath]);
 
-  const handleStepOrGroupSelected = useCallback(
-    (action: ActionOptionData) => {
+  const selectAction = useCallback(
+    (action: ActionOptionData, { configure = false }: { configure?: boolean } = {}) => {
       if (action.disabled) return;
       if (isActionCategory(action)) {
-        const nextPath = action.pathIds ?? [...currentPath, action.id];
         setSearchTerm('');
-        navigateToPath([...nextPath], 'none');
-      } else {
-        onActionSelected(action);
+        navigateToPath([...(action.pathIds ?? [...currentPath, action.id])], 'forward');
+        return;
       }
+      if (configure && onConfigure && isConfigurableFieldAction(action)) {
+        onConfigure(action);
+        return;
+      }
+      onActionSelected(action);
     },
-    [currentPath, navigateToPath, onActionSelected]
+    [currentPath, navigateToPath, onActionSelected, onConfigure]
   );
+
+  const handleSearchChange = (searchValue: string) => {
+    setSearchTerm(searchValue);
+    // Search spans the whole catalog, so drop the drill-in; clearing returns to the root.
+    if (searchValue.length > 0 && currentPath.length > 0) {
+      setCurrentPath([]);
+    }
+  };
+
+  // EuiSelectable owns ArrowUp/ArrowDown/Enter (and aria-activedescendant). Only the
+  // hierarchy keys live here; they stop propagation so EuiSelectable doesn't reset its
+  // active option on keys it doesn't handle.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isHidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    const stop = () => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    if (e.key === 'Escape') {
+      stop();
+      if (currentPath.length > 0) {
+        goBack();
+      } else {
+        onClose?.();
+      }
+      return;
+    }
+    if (e.key === 'ArrowLeft' && currentPath.length > 0) {
+      stop();
+      goBack();
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      const active = activeActionRef.current;
+      if (active && isActionCategory(active) && !active.disabled) {
+        stop();
+        selectAction(active);
+      }
+      return;
+    }
+
+    const input = searchInputRef.current;
+    if (isFull && input && e.target !== input && e.key.length === 1 && e.key !== ' ') {
+      stop();
+      handleSearchChange(`${searchTerm}${e.key}`);
+      input.focus({ preventScroll: true });
+    }
+  };
 
   const resolveRowIcon = useCallback(
     (action: ActionOptionData): IconType => {
@@ -354,20 +296,13 @@ export function ActionsMenu({
     [flatOptions]
   );
 
-  const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
+  const renderActionOption = (rawOption: MenuSelectableOption, searchValue: string) => {
     const action = getOptionAction(rawOption);
     const effectiveSearch = (searchTerm || searchValue).trim();
-    const keyboardOption =
-      keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;
-    const isKeyboardActive =
-      keyboardOption != null &&
-      getOptionId(keyboardOption) != null &&
-      getOptionId(keyboardOption) === getOptionId(rawOption);
-    const keyboardActiveClassName = isKeyboardActive ? KEYBOARD_ACTIVE_CLASS : undefined;
 
     if (!action) {
       return (
-        <div css={styles.actionOptionWrapper} className={keyboardActiveClassName}>
+        <div css={styles.actionOptionWrapper}>
           <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
         </div>
       );
@@ -386,11 +321,7 @@ export function ActionsMenu({
     };
 
     return (
-      <div
-        css={styles.actionOptionWrapper}
-        className={keyboardActiveClassName}
-        data-option-id={action.id}
-      >
+      <div css={styles.actionOptionWrapper} data-option-id={action.id}>
         <EuiFlexGroup
           alignItems="center"
           css={styles.actionOption}
@@ -442,15 +373,20 @@ export function ActionsMenu({
           ) : null}
           {showQuickActions ? (
             <EuiFlexItem grow={false}>
-              <div className={QUICK_ACTIONS_CLASS} css={styles.quickActions}>
+              {/* Pointer shortcuts only: an option can't contain interactive content, so these
+                  stay out of the tab order and the a11y tree. Enter / Shift+Enter on the row
+                  cover the same actions from the keyboard. */}
+              <div className={QUICK_ACTIONS_CLASS} css={styles.quickActions} aria-hidden>
                 <EuiToolTip
                   content={i18nStrings.ACTIONS_MENU_CONFIGURE_AND_ADD}
                   disableScreenReaderOutput
                 >
+                  {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element -- pointer-only duplicate of Shift+Enter on the row; a tab stop inside role="option" is invalid */}
                   <EuiButtonIcon
                     color="text"
                     iconType="controls"
                     size="s"
+                    tabIndex={-1}
                     aria-label={i18nStrings.ACTIONS_MENU_CONFIGURE_AND_ADD}
                     onMouseDown={stopRowActivation}
                     onClick={(event: React.MouseEvent) => {
@@ -463,11 +399,13 @@ export function ActionsMenu({
                   />
                 </EuiToolTip>
                 <EuiToolTip content={i18nStrings.ACTIONS_MENU_QUICK_ADD} disableScreenReaderOutput>
+                  {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element -- pointer-only duplicate of Enter on the row */}
                   <EuiButtonIcon
                     color="text"
                     display="base"
                     iconType="plusCircle"
                     size="s"
+                    tabIndex={-1}
                     aria-label={i18nStrings.ACTIONS_MENU_QUICK_ADD}
                     onMouseDown={stopRowActivation}
                     onClick={(event: React.MouseEvent) => {
@@ -486,169 +424,6 @@ export function ActionsMenu({
       </div>
     );
   };
-
-  const handleChange = (
-    _updatedOptions: EuiSelectableOption[],
-    _event: React.BaseSyntheticEvent,
-    selectedOption: EuiSelectableOption
-  ) => {
-    const action = getOptionAction(selectedOption);
-    if (action) {
-      handleStepOrGroupSelected(action);
-    }
-  };
-
-  const handleChangeRef = useRef(handleChange);
-  handleChangeRef.current = handleChange;
-
-  const enterCategoryFromKeyboard = useCallback(() => {
-    const index = keyboardIndexRef.current;
-    if (index == null) return;
-    const option = actionableDisplayOptionsRef.current[index];
-    const action = option ? getOptionAction(option) : undefined;
-    if (!action || !isActionCategory(action) || action.disabled) return;
-    const nextPath = action.pathIds ?? [...currentPathRef.current, action.id];
-    setSearchTerm('');
-    navigateToPath([...nextPath], 'first');
-  }, [navigateToPath]);
-
-  const activateKeyboardOption = useCallback(() => {
-    const index = keyboardIndexRef.current;
-    if (index == null) return;
-    const option = actionableDisplayOptionsRef.current[index];
-    if (!option) return;
-    const action = getOptionAction(option);
-    if (action && isActionCategory(action)) {
-      enterCategoryFromKeyboard();
-      return;
-    }
-    handleChangeRef.current([], {} as React.BaseSyntheticEvent, option);
-  }, [enterCategoryFromKeyboard]);
-
-  const handleSearchChange = (searchValue: string) => {
-    setSearchTerm(searchValue);
-    setKeyboardIndex(null);
-    if (searchValue.length > 0) {
-      setCurrentPath([]);
-    }
-    if (searchValue.length === 0) {
-      setOptions(defaultOptions);
-    }
-  };
-
-  const handleSearchChangeRef = useRef(handleSearchChange);
-  handleSearchChangeRef.current = handleSearchChange;
-  const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
-  setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
-  const goBackRef = useRef(goBack);
-  goBackRef.current = goBack;
-
-  useEffect(() => {
-    if (isHidden) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      const menuEl = menuContainerRef.current;
-      if (!menuEl || !document.body.contains(menuEl)) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-      const activeEl = document.activeElement;
-      if (
-        (e.key === 'Enter' || e.key === ' ') &&
-        activeEl instanceof HTMLElement &&
-        menuEl.contains(activeEl) &&
-        activeEl.closest('button')
-      ) {
-        return;
-      }
-
-      const input = searchInputRef.current;
-      if (!menuEl.contains(document.activeElement) && document.activeElement !== input) {
-        if (!menuEl.contains(e.target as Node)) return;
-      }
-
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        if (currentPathRef.current.length > 0) {
-          goBackRef.current();
-          return;
-        }
-        onClose?.();
-        return;
-      }
-
-      const actionable = actionableDisplayOptionsRef.current;
-      const isSearchFocused = Boolean(input) && document.activeElement === input;
-      const keyboardIdx = keyboardIndexRef.current;
-      const inListNavMode = keyboardIdx != null;
-
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        if (actionable.length === 0) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if (!inListNavMode) {
-          setKeyboardIndexAndPreviewRef.current(e.key === 'ArrowDown' ? 0 : actionable.length - 1);
-          return;
-        }
-        const delta = e.key === 'ArrowDown' ? 1 : -1;
-        const next = (keyboardIdx + delta + actionable.length) % actionable.length;
-        setKeyboardIndexAndPreviewRef.current(next);
-        return;
-      }
-
-      if (e.key === 'ArrowRight') {
-        if (!inListNavMode) return;
-        e.preventDefault();
-        e.stopPropagation();
-        enterCategoryFromKeyboard();
-        return;
-      }
-
-      if (e.key === 'ArrowLeft') {
-        if (!inListNavMode && currentPathRef.current.length === 0) return;
-        e.preventDefault();
-        e.stopPropagation();
-        goBackRef.current();
-        return;
-      }
-
-      if (e.key === 'Enter' && inListNavMode) {
-        e.preventDefault();
-        e.stopPropagation();
-        activateKeyboardOption();
-        return;
-      }
-
-      if (!isFull || !input) return;
-      if (isSearchFocused && !inListNavMode) return;
-
-      const isPrintable = e.key.length === 1;
-      if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
-
-      e.preventDefault();
-      e.stopPropagation();
-      clearKeyboardSelection();
-      focusSearch();
-
-      if (isPrintable) {
-        handleSearchChangeRef.current(`${input.value}${e.key}`);
-      } else if (e.key === 'Backspace') {
-        handleSearchChangeRef.current(input.value.slice(0, -1));
-      } else if (e.key === 'Delete') {
-        handleSearchChangeRef.current('');
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [
-    activateKeyboardOption,
-    clearKeyboardSelection,
-    enterCategoryFromKeyboard,
-    focusSearch,
-    isFull,
-    isHidden,
-    onClose,
-  ]);
 
   const pathLabels = useMemo(
     () => resolvePathLabels(currentPath, defaultOptions),
@@ -686,48 +461,50 @@ export function ActionsMenu({
     backButton
   ) : null;
 
+  const searchableProps = isFull
+    ? {
+        searchable: true as const,
+        searchProps: {
+          id: `${testSubjPrefix}-search`,
+          name: ACTIONS_MENU_SEARCH_INPUT_NAME,
+          placeholder: i18nStrings.ACTIONS_MENU_SEARCH_PLACEHOLDER,
+          value: searchTerm,
+          onChange: handleSearchChange,
+          compressed: true,
+          isClearable: true,
+          'data-test-subj': `${testSubjPrefix}-search`,
+          inputRef: (node: HTMLInputElement | null) => {
+            searchInputRef.current = node;
+          },
+        },
+      }
+    : { searchable: false as const };
+
+  const listPaneAnimation =
+    navigation.direction === 'forward'
+      ? styles.listPaneForward
+      : navigation.direction === 'back'
+      ? styles.listPaneBack
+      : undefined;
+
   return (
-    <EuiSelectable
+    <EuiSelectable<MenuOptionFields>
+      key={navigation.count}
+      id={`${testSubjPrefix}-selectable`}
       aria-label={headerTitle}
-      searchable
+      {...searchableProps}
       options={displayOptions}
-      onChange={handleChange}
-      optionMatcher={() => true}
-      searchProps={{
-        id: 'cases-actions-menu-search',
-        name: SEARCH_INPUT_NAME,
-        placeholder: i18nStrings.ACTIONS_MENU_SEARCH_PLACEHOLDER,
-        value: searchTerm,
-        onChange: handleSearchChange,
-        compressed: true,
-        isClearable: true,
-        'data-test-subj': `${testSubjPrefix}-search`,
-        inputRef: (node: HTMLInputElement | null) => {
-          searchInputRef.current = node;
-        },
-        onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-          if (isHiddenRef.current) {
-            return;
-          }
-          const next = e.relatedTarget as Node | null;
-          const menuEl = menuContainerRef.current;
-          if (menuEl && next && menuEl.contains(next)) {
-            return;
-          }
-          requestAnimationFrame(() => {
-            if (isHiddenRef.current) {
-              return;
-            }
-            if (searchInputRef.current && document.body.contains(searchInputRef.current)) {
-              const active = document.activeElement;
-              if (menuContainerRef.current?.contains(active)) {
-                return;
-              }
-              focusSearch();
-            }
-          });
-        },
+      onChange={(_options, event, selectedOption) => {
+        const action = getOptionAction(selectedOption);
+        if (action) {
+          selectAction(action, { configure: event.shiftKey });
+        }
       }}
+      onActiveOptionChange={(option) => {
+        activeActionRef.current = option ? getOptionAction(option) ?? null : null;
+      }}
+      isPreFiltered
+      selectableScreenReaderText={onConfigure ? i18nStrings.ACTIONS_MENU_KEYBOARD_HINT : undefined}
       listProps={{
         showIcons: false,
         paddingSize: 'none',
@@ -745,8 +522,8 @@ export function ActionsMenu({
           ref={menuContainerRef}
           css={[styles.container, !isFull && styles.containerCompact]}
           onMouseDown={isFull ? keepSearchFocused : undefined}
+          onKeyDown={handleKeyDown}
           data-test-subj={`${testSubjPrefix}Content`}
-          tabIndex={isFull ? undefined : -1}
         >
           <div css={styles.header}>
             <div css={styles.titleRow}>
@@ -782,35 +559,46 @@ export function ActionsMenu({
             ref={bodyRef}
             css={[styles.body, isFull ? styles.bodyFull : styles.bodyCompact]}
             style={isFull && lockedBodyHeight != null ? { height: lockedBodyHeight } : undefined}
-            onMouseMove={handleListMouseMove}
           >
-            <div ref={listViewportRef} css={styles.listViewport}>
-              <div ref={listPaneRef} css={styles.listPane}>
-                {showNoResults ? (
-                  <div css={styles.noResults}>
-                    <EuiText size="s" color="subdued" textAlign="center">
-                      <FormattedMessage
-                        id="xpack.cases.templates.actionsMenu.noResults"
-                        defaultMessage="{query} doesn't match any options."
-                        values={{ query: searchTerm.trim() }}
-                      />
-                    </EuiText>
-                  </div>
-                ) : showEmptyCategory ? (
-                  <div css={styles.noResults}>
-                    <EuiText size="s" color="subdued" textAlign="center">
-                      {isFieldLibraryDrillIn
-                        ? i18nStrings.ACTIONS_MENU_NO_LIBRARY_FIELDS
-                        : i18n.translate('xpack.cases.templates.actionsMenu.emptyCategory', {
-                            defaultMessage: 'No items in this category.',
-                          })}
-                    </EuiText>
-                    {isFieldLibraryDrillIn ? <FieldLibraryOpenLink /> : null}
-                  </div>
-                ) : (
-                  list
-                )}
-              </div>
+            <div css={[styles.listPane, listPaneAnimation]}>
+              {showNoResults ? (
+                <div css={styles.noResults}>
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    <FormattedMessage
+                      id="xpack.cases.templates.actionsMenu.noResults"
+                      defaultMessage="{query} doesn't match any options."
+                      values={{ query: searchTerm.trim() }}
+                    />
+                  </EuiText>
+                </div>
+              ) : childrenStatus === 'loading' ? (
+                <div css={styles.noResults} data-test-subj={`${testSubjPrefix}-childrenLoading`}>
+                  <EuiLoadingSpinner size="m" />
+                  <EuiText size="s" color="subdued" aria-live="polite">
+                    {i18nStrings.ACTIONS_MENU_LOADING_LIBRARY}
+                  </EuiText>
+                </div>
+              ) : childrenStatus === 'error' ? (
+                <div css={styles.noResults} data-test-subj={`${testSubjPrefix}-childrenError`}>
+                  <EuiIcon type="warning" color="danger" aria-hidden />
+                  <EuiText size="s" color="danger" role="alert">
+                    {i18nStrings.ACTIONS_MENU_LIBRARY_ERROR}
+                  </EuiText>
+                </div>
+              ) : showEmptyCategory ? (
+                <div css={styles.noResults}>
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    {isFieldLibraryDrillIn
+                      ? i18nStrings.ACTIONS_MENU_NO_LIBRARY_FIELDS
+                      : i18n.translate('xpack.cases.templates.actionsMenu.emptyCategory', {
+                          defaultMessage: 'No items in this category.',
+                        })}
+                  </EuiText>
+                  {isFieldLibraryDrillIn ? <FieldLibraryOpenLink /> : null}
+                </div>
+              ) : (
+                list
+              )}
             </div>
           </div>
         </div>
@@ -842,6 +630,16 @@ function FieldLibraryOpenLink() {
 }
 
 FieldLibraryOpenLink.displayName = 'FieldLibraryOpenLink';
+
+const slideFromRight = keyframes({
+  from: { transform: 'translateX(24px)', opacity: 0 },
+  to: { transform: 'translateX(0)', opacity: 1 },
+});
+
+const slideFromLeft = keyframes({
+  from: { transform: 'translateX(-24px)', opacity: 0 },
+  to: { transform: 'translateX(0)', opacity: 1 },
+});
 
 const componentStyles = {
   container: css({
@@ -878,8 +676,6 @@ const componentStyles = {
   }),
   title: css({
     margin: 0,
-    fontSize: '12.25px',
-    lineHeight: '20px',
   }),
   searchRow: css({
     display: 'grid',
@@ -934,25 +730,29 @@ const componentStyles = {
   bodyCompact: css({
     maxHeight: 'min(360px, calc(100vh - 220px))',
   }),
-  listViewport: css({
-    flex: 1,
-    minHeight: 0,
-    position: 'relative',
-    overflow: 'hidden',
-  }),
   listPane: ({ euiTheme }: UseEuiTheme) =>
     css({
-      height: '100%',
+      flex: 1,
+      minHeight: 0,
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      willChange: 'transform',
       '& > *': {
         flex: 1,
         minHeight: 0,
       },
     }),
+  listPaneForward: css({
+    '@media (prefers-reduced-motion: no-preference)': {
+      animation: `${slideFromRight} ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+    },
+  }),
+  listPaneBack: css({
+    '@media (prefers-reduced-motion: no-preference)': {
+      animation: `${slideFromLeft} ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+    },
+  }),
   noResults: css({
     flex: 1,
     display: 'flex',
@@ -962,8 +762,9 @@ const componentStyles = {
     gap: '16px',
     padding: '24px',
   }),
-  selectable: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  selectable: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return css({
       flex: 1,
       minHeight: 0,
       display: 'flex',
@@ -1000,8 +801,8 @@ const componentStyles = {
         position: 'sticky',
         top: 0,
         zIndex: 2,
-        padding: `6px 12px 6px 16px`,
-        fontSize: '12.25px',
+        padding: `${euiTheme.size.xs} ${euiTheme.size.m} ${euiTheme.size.xs} ${euiTheme.size.base}`,
+        fontSize: euiFontSize(euiThemeContext, 'xs').fontSize,
         fontWeight: euiTheme.font.weight.medium,
         color: euiTheme.colors.textSubdued,
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
@@ -1027,17 +828,11 @@ const componentStyles = {
       '& .euiListItemLayout': {
         borderRadius: 0,
       },
-      '& .euiSelectableListItem.euiSelectableListItem-isFocused:not(:hover):not(:has(.actionsMenu-keyboardActive)), & .euiSelectableListItem[aria-selected="true"]:not(:hover):not(:has(.actionsMenu-keyboardActive))':
-        {
-          backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
-          color: 'inherit',
-        },
-      '& .euiSelectableListItem:hover:not([aria-disabled="true"]), & .euiSelectableListItem:has(.actionsMenu-keyboardActive):not([aria-disabled="true"])':
-        {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          color: 'inherit',
-        },
-      '& .euiSelectableListItem:hover:not([aria-disabled="true"]) .actionsMenu-quickActions, & .euiSelectableListItem:focus-within:not([aria-disabled="true"]) .actionsMenu-quickActions':
+      '& .euiSelectableListItem:hover:not([aria-disabled="true"])': {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        color: 'inherit',
+      },
+      [`& .euiSelectableListItem:hover:not([aria-disabled="true"]) .${QUICK_ACTIONS_CLASS}, & .euiSelectableListItem-isFocused:not([aria-disabled="true"]) .${QUICK_ACTIONS_CLASS}`]:
         {
           opacity: 1,
           pointerEvents: 'auto',
@@ -1046,14 +841,17 @@ const componentStyles = {
         cursor: 'not-allowed',
         opacity: 0.55,
       },
+    });
+  },
+  actionOptionWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
     }),
-  actionOptionWrapper: css({
-    width: '100%',
-    padding: `12px 16px`,
-  }),
-  actionOption: css({
-    gap: '11px',
-  }),
+  actionOption: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      gap: euiTheme.size.m,
+    }),
   actionInfo: css({
     flex: 1,
     minWidth: 0,
@@ -1061,28 +859,30 @@ const componentStyles = {
     flexDirection: 'column',
     gap: '2px',
   }),
-  iconOuter: css({
-    width: '38px',
-    height: '38px',
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    boxSizing: 'border-box',
-  }),
+  iconOuter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.size.xxl,
+      height: euiTheme.size.xxl,
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: euiTheme.border.radius.medium,
+      boxSizing: 'border-box',
+    }),
   iconOuterNeutral: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       border: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  actionIconInner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-  }),
+  actionIconInner: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: euiTheme.size.base,
+      height: euiTheme.size.base,
+    }),
   arrowContainer: css({
     flexShrink: 0,
     display: 'flex',
@@ -1102,14 +902,13 @@ const componentStyles = {
     opacity: 0,
     pointerEvents: 'none',
   }),
-  actionTitle: ({ euiTheme }: UseEuiTheme) =>
+  actionTitle: (euiThemeContext: UseEuiTheme) =>
     css({
       margin: 0,
       display: 'block',
-      fontSize: '14px',
-      lineHeight: '20px',
-      fontWeight: euiTheme.font.weight.semiBold,
-      color: euiTheme.colors.textParagraph,
+      ...euiFontSize(euiThemeContext, 's'),
+      fontWeight: euiThemeContext.euiTheme.font.weight.semiBold,
+      color: euiThemeContext.euiTheme.colors.textParagraph,
     }),
   actionDescription: css({
     overflow: 'hidden',

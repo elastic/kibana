@@ -17,7 +17,7 @@ export const DETECTIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-al
 export const CSP_FINDINGS =
   '[data-test-subj="solutionSideNavItemLink-cloud_security_posture-findings"]';
 
-export const CASES = '[data-test-subj="solutionSideNavItemLink-cases"]';
+export const CASES_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-cases"]';
 
 export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 
@@ -57,6 +57,8 @@ export const INDICATORS = '[data-test-subj="solutionSideNavItemLink-threat_intel
 export const RULES = '[data-test-subj="solutionSideNavPanelLink-rules"]';
 
 export const EXCEPTIONS = '[data-test-subj="solutionSideNavPanelLink-exceptions"]';
+
+export const CASES = '[data-test-subj="solutionSideNavPanelLink-cases"]';
 
 // other
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
@@ -129,6 +131,10 @@ export const openNavigationPanelFor = (page: string) => {
     case POLICIES:
     case ARTIFACTS: {
       panel = SETTINGS;
+      break;
+    }
+    case CASES: {
+      panel = CASES_PANEL_BTN;
       break;
     }
   }

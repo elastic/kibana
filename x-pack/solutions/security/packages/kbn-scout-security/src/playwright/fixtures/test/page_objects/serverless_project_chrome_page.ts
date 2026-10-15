@@ -54,6 +54,21 @@ export class ServerlessProjectChromePage {
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
   }
 
+  /** Item with `nav-item-isActive` in test-subj (current route), matched by node id — for panel openers without a deep link. */
+  activeNavItemInBodyById(id: string): Locator {
+    const selector = `[data-test-subj~="nav-item-id-${id}"][data-test-subj~="nav-item-isActive"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
+  }
+
+  /** Child of a panel opener — a side panel, or a nested panel when the opener overflows into "More". */
+  navItemInPanelByDeepLinkId(panelId: string, deepLinkId: string): Locator {
+    const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
+    return this.page.testSubj
+      .locator(`~kbnChromeNav-sidePanel_${panelId}`)
+      .or(this.morePopover.locator(`[data-test-subj="kbnChromeNav-nestedPanel-${panelId}"]`))
+      .locator(selector);
+  }
+
   /** Agent Builder nav item when present (deep link id `agent_builder`). */
   getAgentBuilderNavItemInProjectChrome(): Locator {
     return this.navItemInBodyById('agent_builder');

@@ -10,9 +10,6 @@ import type { FieldRuleAction } from '../../utils/field_action_catalog';
 
 export type ActionKind = 'category' | 'fieldType' | 'libraryField' | 'rule';
 
-/** Colored tile variants for root category icons (Workflows-style). */
-export type IconVariant = 'platform' | 'library' | 'validation' | 'conditional';
-
 interface ActionBase {
   id: string;
   label: string;
@@ -29,12 +26,13 @@ interface ActionBase {
   testSubj?: string;
   /** Root-category icon glyph (home page only). */
   iconType?: IconType;
-  iconVariant?: IconVariant;
 }
 
 export interface ActionCategory extends ActionBase {
   kind: 'category';
   options: ActionOptionData[];
+  /** Set while the children come from a request that is still pending or has failed. */
+  childrenStatus?: 'loading' | 'error';
 }
 
 export interface FieldTypeAction extends ActionBase {
@@ -71,28 +69,24 @@ export type ConfigurableFieldAction = FieldTypeAction | LibraryFieldAction;
 export const isActionCategory = (option: ActionOptionData): option is ActionCategory =>
   option.kind === 'category';
 
-export const isLeafAction = (option: ActionOptionData): boolean => option.kind !== 'category';
-
 export const isConfigurableFieldAction = (
   option: ActionOptionData
 ): option is ConfigurableFieldAction =>
   option.kind === 'fieldType' || option.kind === 'libraryField';
 
 /**
- * Options passed to EuiSelectable carry ActionOptionData inside the standard `data` bag. EUI strips
- * `data` from DOM props and spreads its contents into the object handed to `renderOption`, so:
- *   - in renderOption:  (option as any).action   ← spread from data
- *   - in onChange:       (option as any).data.action  ← original object
- * Use {@link getOptionAction} to abstract over both contexts.
+ * EuiSelectable options carry the action in the standard `data` bag. EUI strips `data` from DOM
+ * props and spreads its contents into the object handed to `renderOption`, so the action is at
+ * `option.action` there and at `option.data.action` everywhere else.
  */
-export type MenuSelectableOption = EuiSelectableOption & {
+export interface MenuOptionFields {
+  action?: ActionOptionData;
   data?: { action: ActionOptionData };
-};
+}
 
-export const getOptionAction = (option: EuiSelectableOption): ActionOptionData | undefined => {
-  const o = option as unknown as Record<string, unknown>;
-  return (
-    (o.action as ActionOptionData | undefined) ??
-    ((o.data as Record<string, unknown> | undefined)?.action as ActionOptionData | undefined)
-  );
-};
+export type MenuSelectableOption = EuiSelectableOption<MenuOptionFields>;
+
+export const getOptionAction = (option: {
+  action?: ActionOptionData;
+  data?: { action?: ActionOptionData };
+}): ActionOptionData | undefined => option.action ?? option.data?.action;

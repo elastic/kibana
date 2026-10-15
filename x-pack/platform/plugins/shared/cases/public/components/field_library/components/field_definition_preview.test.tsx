@@ -35,4 +35,30 @@ describe('FieldDefinitionPreview', () => {
     );
     expect(screen.getByText('Untitled field')).toBeInTheDocument();
   });
+
+  it('renders required_on_close as such instead of forcing Required', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionPreview
+        definition={`${DEFINITION}validation:\n  required_on_close: true\n`}
+        onDefaultChange={() => undefined}
+        requirementBadge="Required on close"
+      />
+    );
+
+    expect(screen.getByTestId('form-required-on-close-field-label')).toBeInTheDocument();
+    expect(screen.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
+
+  it('keeps an unconditional requirement as Required', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionPreview
+        definition={`${DEFINITION}validation:\n  required: true\n`}
+        onDefaultChange={() => undefined}
+        requirementBadge="Required"
+      />
+    );
+
+    expect(screen.queryByTestId('form-required-on-close-field-label')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
 });

@@ -8,7 +8,11 @@
 import { useMemo } from 'react';
 import type { ActionOptionData, MenuSelectableOption } from './types';
 import { isActionCategory } from './types';
+import { CATEGORY_IDS } from './get_action_options';
 import * as i18n from '../../translations';
+
+const FIELD_CATEGORY_IDS: readonly string[] = [CATEGORY_IDS.newField, CATEGORY_IDS.fieldLibrary];
+const RULE_CATEGORY_IDS: readonly string[] = [CATEGORY_IDS.validation, CATEGORY_IDS.conditional];
 
 interface UseDisplayOptionsArgs {
   /** Current browse-level options (root categories or a subgroup). */
@@ -24,20 +28,18 @@ interface UseDisplayOptionsArgs {
   showSectionLabels?: boolean;
 }
 
-const MAX_ACTION_MATCH_RANK = 5;
+const MAX_ACTION_MATCH_RANK = 3;
 
+// Ids (`fieldType:…`, `library:<uuid>`) are internal, so only user-visible text is matched.
 const getActionMatchRank = (option: ActionOptionData, normalizedTerm: string): number => {
   if (!normalizedTerm) return 0;
-  const id = option.id.toLowerCase();
   const label = option.label.toLowerCase();
   const description = option.description?.toLowerCase() ?? '';
 
-  if (id === normalizedTerm) return 0;
-  if (label === normalizedTerm) return 1;
-  if (description === normalizedTerm) return 2;
-  if (id.includes(normalizedTerm)) return 3;
-  if (label.includes(normalizedTerm)) return 4;
-  if (description.includes(normalizedTerm)) return 5;
+  if (label === normalizedTerm) return 0;
+  if (description === normalizedTerm) return 1;
+  if (label.includes(normalizedTerm)) return 2;
+  if (description.includes(normalizedTerm)) return 3;
   return MAX_ACTION_MATCH_RANK + 1;
 };
 
@@ -50,7 +52,7 @@ const toSelectableOption = (
 ): MenuSelectableOption => ({
   label: action.label,
   key: action.id,
-  disabled: action.disabled || (action.kind === 'libraryField' && action.alreadyLinked),
+  disabled: action.disabled,
   'data-test-subj': action.testSubj
     ? `${testSubjPrefix}-${action.testSubj}`
     : `${testSubjPrefix}-${action.id}`,
@@ -74,7 +76,10 @@ const collectCategoryMatches = (
       parent
         ? {
             ...node,
-            description: `${parent.label} — ${node.description ?? node.label}`,
+            description: i18n.ACTIONS_MENU_SEARCH_RESULT_DESCRIPTION({
+              parent: parent.label,
+              description: node.description ?? node.label,
+            }),
           }
         : node
     );
@@ -98,8 +103,8 @@ const buildBrowseOptions = (
   const result: MenuSelectableOption[] = [];
 
   if (atRoot && showSectionLabels) {
-    const fields = options.filter((o) => o.id === 'newField' || o.id === 'fieldLibrary');
-    const rules = options.filter((o) => o.id === 'validation' || o.id === 'conditional');
+    const fields = options.filter((o) => FIELD_CATEGORY_IDS.includes(o.id));
+    const rules = options.filter((o) => RULE_CATEGORY_IDS.includes(o.id));
 
     if (fields.length > 0) {
       result.push({

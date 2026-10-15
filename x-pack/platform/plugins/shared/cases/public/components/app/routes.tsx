@@ -117,9 +117,19 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           )}
 
           {isTemplatesEnabled && (
-            <Route exact path={`${getCasesConfigurePath(basePath)}/field_library`}>
-              <Redirect to={getCasesConfigureFieldLibraryPath(basePath)} />
-            </Route>
+            <Route
+              exact
+              path={`${getCasesConfigurePath(basePath)}/field_library`}
+              render={({ location }) => (
+                <Redirect
+                  to={{
+                    pathname: getCasesConfigureFieldLibraryPath(basePath),
+                    search: location.search,
+                    hash: location.hash,
+                  }}
+                />
+              )}
+            />
           )}
 
           {isTemplatesEnabled && (

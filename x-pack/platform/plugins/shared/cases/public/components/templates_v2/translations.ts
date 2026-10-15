@@ -904,7 +904,7 @@ export const TEMPLATE_VALIDATION_ERROR = (fileName: string, index: number, issue
     defaultMessage: '{fileName}, template {index}: validation failed. {issues}',
   });
 
-export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
+export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.libraryTitle', {
   defaultMessage: 'Template library',
 });
 
@@ -1149,16 +1149,6 @@ export const ACTIONS_MENU_NO_FIELD_YET = i18n.translate(
   { defaultMessage: 'Create a field to enable this action' }
 );
 
-export const ACTIONS_MENU_SEARCH_FIELDS = i18n.translate(
-  'xpack.cases.templates.actionsMenu.searchFields',
-  { defaultMessage: 'Search library fields' }
-);
-
-export const ACTIONS_MENU_NO_LIBRARY_FIELDS_TITLE = i18n.translate(
-  'xpack.cases.templates.actionsMenu.noLibraryFieldsTitle',
-  { defaultMessage: 'No library fields yet' }
-);
-
 export const ACTIONS_MENU_NO_LIBRARY_FIELDS = i18n.translate(
   'xpack.cases.templates.actionsMenu.noLibraryFields',
   {
@@ -1171,6 +1161,36 @@ export const ACTIONS_MENU_LOADING_LIBRARY = i18n.translate(
   'xpack.cases.templates.actionsMenu.loadingLibrary',
   { defaultMessage: 'Loading library fields…' }
 );
+
+export const ACTIONS_MENU_LIBRARY_ERROR = i18n.translate(
+  'xpack.cases.templates.actionsMenu.libraryError',
+  { defaultMessage: "Library fields couldn't be loaded. Close the menu and try again." }
+);
+
+export const ACTIONS_MENU_DIALOG_ARIA = i18n.translate(
+  'xpack.cases.templates.actionsMenu.dialogAriaLabel',
+  { defaultMessage: 'Template actions menu' }
+);
+
+export const ACTIONS_MENU_KEYBOARD_HINT = i18n.translate(
+  'xpack.cases.templates.actionsMenu.keyboardHint',
+  {
+    defaultMessage:
+      'Press Enter to add the highlighted item, or Shift+Enter to configure a field before adding it. Press Right arrow to open a category, and Left arrow or Escape to go back.',
+  }
+);
+
+export const ACTIONS_MENU_SEARCH_RESULT_DESCRIPTION = ({
+  parent,
+  description,
+}: {
+  parent: string;
+  description: string;
+}) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.searchResultDescription', {
+    defaultMessage: '{parent} — {description}',
+    values: { parent, description },
+  });
 
 export const ACTIONS_MENU_LIBRARY_GLOBAL_BADGE = i18n.translate(
   'xpack.cases.templates.actionsMenu.libraryGlobalBadge',
@@ -1223,21 +1243,6 @@ export const ACTIONS_MENU_BACK = i18n.translate('xpack.cases.templates.actionsMe
   defaultMessage: 'Back',
 });
 
-export const ACTIONS_MENU_BREADCRUMB_ALL = i18n.translate(
-  'xpack.cases.templates.actionsMenu.breadcrumb.allActions',
-  { defaultMessage: 'All actions' }
-);
-
-export const ACTIONS_MENU_BREADCRUMB_SEARCH = i18n.translate(
-  'xpack.cases.templates.actionsMenu.breadcrumb.searchResults',
-  { defaultMessage: 'Search results' }
-);
-
-export const ACTIONS_MENU_BREADCRUMB_ARIA = i18n.translate(
-  'xpack.cases.templates.actionsMenu.breadcrumb.ariaLabel',
-  { defaultMessage: 'Actions menu navigation' }
-);
-
 export const ACTIONS_MENU_CONFIGURE_AND_ADD = i18n.translate(
   'xpack.cases.templates.actionsMenu.configureAndAdd',
   { defaultMessage: 'Configure and add' }
@@ -1251,6 +1256,12 @@ export const ACTIONS_MENU_FIELD_ADDED = (label: string) =>
   i18n.translate('xpack.cases.templates.actionsMenu.fieldAdded', {
     defaultMessage: '"{label}" added',
     values: { label },
+  });
+
+export const ACTIONS_MENU_FIELD_TYPE_CHANGED = (type: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.fieldTypeChanged', {
+    defaultMessage: 'Field type changed to {type}',
+    values: { type },
   });
 
 export const ACTIONS_MENU_CONFIGURE_TITLE = i18n.translate(
@@ -1406,6 +1417,32 @@ export const ACTIONS_MENU_CONFIGURE_NAME_TAKEN = (key: string) =>
     values: { key },
   });
 
+export const ACTIONS_MENU_CONFIGURE_NAME_CHARSET = (key: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.nameCharset', {
+    defaultMessage:
+      'The field name "{key}" can only contain letters (A-Z, a-z), digits, and underscores.',
+    values: { key },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_NAME_TOO_LONG = (key: string, maxLength: number) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.nameTooLong', {
+    defaultMessage:
+      'The field name "{key}" is too long. The storage key built from the name and field type can\'t exceed {maxLength} characters.',
+    values: { key, maxLength },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_NAME_FOLDED_TWIN = (key: string, existingKey: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.nameFoldedTwin', {
+    defaultMessage:
+      'The field name "{key}" conflicts with the existing field "{existingKey}". Use a name that differs by more than underscores or capitalization.',
+    values: { key, existingKey },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_NO_FIELDS_FOR_REQUIRED_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.noFieldsForRequiredWhen',
+  { defaultMessage: 'Add another field to the template to make this field conditionally required.' }
+);
+
 export const ACTIONS_MENU_CONFIGURE_UNTITLED = i18n.translate(
   'xpack.cases.templates.actionsMenu.configureAndAdd.untitledField',
   { defaultMessage: 'Untitled field' }
@@ -1438,17 +1475,20 @@ export const ACTIONS_MENU_CONFIGURE_CONDITION_PHRASE = ({
 }: {
   field: string;
   operator: string;
-  value?: string;
+  value: string;
 }) =>
-  value
-    ? i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionPhraseWithValue', {
-        defaultMessage: '{field} {operator} {value}',
-        values: { field, operator, value },
-      })
-    : i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionPhrase', {
-        defaultMessage: '{field} {operator}',
-        values: { field, operator },
-      });
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionPhrase', {
+    defaultMessage:
+      '{operator, select, eq {{field} equals {value}} neq {{field} is not {value}} contains {{field} contains {value}} empty {{field} is empty} not_empty {{field} is not empty} other {{field} {value}}}',
+    values: { field, operator, value },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_CONDITIONS_JOINED = (first: string, otherCount: number) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionsJoined', {
+    defaultMessage:
+      '{otherCount, plural, =0 {{first}} one {{first} and # other condition} other {{first} and # other conditions}}',
+    values: { first, otherCount },
+  });
 
 export const ACTIONS_MENU_CONFIGURE_BADGE_REQUIRED_WHEN = (phrase: string) =>
   i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.badgeRequiredWhen', {
@@ -1461,11 +1501,6 @@ export const ACTIONS_MENU_CONFIGURE_HIDDEN_UNTIL = (phrase: string) =>
     defaultMessage: 'Hidden until {phrase}',
     values: { phrase },
   });
-
-export const ACTIONS_MENU_CONFIGURE_CONDITION_PLACEHOLDER = i18n.translate(
-  'xpack.cases.templates.actionsMenu.configureAndAdd.conditionPlaceholder',
-  { defaultMessage: '…' }
-);
 
 // Validation rule labels
 export const VALIDATION_RULE_REQUIRED = i18n.translate(

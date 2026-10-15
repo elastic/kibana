@@ -239,6 +239,50 @@ describe('updateGlobalNavigation', () => {
       });
     });
 
+    describe('template library deep link', () => {
+      const templatesRoute = {
+        id: 'cases_templates',
+        title: 'Template library',
+        path: '/cases/configure/templates',
+      };
+      const casesRoute = {
+        id: 'cases',
+        title: 'Cases',
+        order: 8003,
+        path: '/cases',
+        deepLinks: [{ id: 'cases_create', title: 'Create', path: '/cases/create' }, templatesRoute],
+      };
+
+      const getUpdatedCasesLink = (casesCapabilities: Record<string, boolean>) => {
+        const capabilities = {
+          [casesFeatureId]: casesCapabilities,
+          logs: { show: true },
+          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks: [casesRoute], updater$, pricing });
+
+        return callback.mock.calls[0][0].deepLinks[0];
+      };
+
+      it('keeps the template library link when the user can manage templates', () => {
+        const casesLink = getUpdatedCasesLink({ read_cases: true, cases_manage_templates: true });
+
+        expect(casesLink.deepLinks).toEqual(casesRoute.deepLinks);
+      });
+
+      it('removes the template library link when the user cannot manage templates', () => {
+        const casesLink = getUpdatedCasesLink({ read_cases: true, cases_manage_templates: false });
+
+        expect(casesLink.deepLinks).toEqual([casesRoute.deepLinks[0]]);
+      });
+    });
+
     describe('with no case read capabilities', () => {
       it('hides the cases deep link', () => {
         const capabilities = {

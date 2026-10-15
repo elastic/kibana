@@ -9,7 +9,7 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import {
   buildCasesPermissions,
   noCasesSettingsPermission,
@@ -216,6 +216,29 @@ describe('Cases routes', () => {
     it('redirects the legacy field library path to the templates nested path', async () => {
       renderWithRouter(['/cases/configure/field_library']);
       expect(await screen.findByText('Field library')).toBeInTheDocument();
+    });
+
+    it('keeps the query string and hash when redirecting the legacy field library path', async () => {
+      const LocationDisplay = () => {
+        const location = useLocation();
+        return (
+          <div data-test-subj="location">{`${location.pathname}${location.search}${location.hash}`}</div>
+        );
+      };
+
+      render(
+        <TestProviders>
+          <MemoryRouter initialEntries={['/cases/configure/field_library?search=foo#bar']}>
+            <CasesRoutes />
+            <LocationDisplay />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(await screen.findByText('Field library')).toBeInTheDocument();
+      expect(screen.getByTestId('location')).toHaveTextContent(
+        '/cases/configure/templates/field_library?search=foo#bar'
+      );
     });
 
     it('navigates to the create template page', async () => {

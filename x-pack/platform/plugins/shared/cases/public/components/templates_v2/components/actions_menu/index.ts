@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ActionsMenu } from './actions_menu';
+export { ActionsMenu, getActionsMenuListboxId } from './actions_menu';
 export type { ActionsMenuProps, ActionsMenuPresentation } from './actions_menu';
 export { ActionsMenuPopover } from './actions_menu_popover';
 export { ConfigureAndAddModal } from './configure_and_add_modal';

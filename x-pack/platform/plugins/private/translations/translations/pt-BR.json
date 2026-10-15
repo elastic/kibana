@@ -17347,7 +17347,6 @@
     "xpack.cases.templates.validation.noErrors": "Sem erros de validação",
     "xpack.cases.templates.validation.warningCount": "{warningCount} aviso{warningCount, plural, one {} other {s}}",
     "xpack.cases.templates.validationErrorsTitle": "Alguns arquivos não puderam ser validados",
-    "xpack.cases.templatesButton": "Modelos",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription": "Define o número máximo de casos que o conector Cases pode abrir durante uma única execução de regra.",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel": "Máximo de casos criado por execução de regra",
     "xpack.cases.userActions.attachment": "Anexo",

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { normalizeFieldDefinitionName } from '../../../../../common/utils/template_fields';
 import { FIELD_DEFAULT_SNIPPETS } from '../../utils/template_field_snippets';
 import { buildFieldScaffold } from '../../utils/template_field_actions';
 import { getConditionalLogicActions, getValidationActions } from '../../utils/field_action_catalog';
@@ -31,21 +32,19 @@ export interface GetActionOptionsParams {
   hasTargetField: boolean;
   targetControl?: string;
   libraryFields: LibraryFieldEntry[];
-  alreadyLinked: Set<string>;
+  alreadyLinked: ReadonlySet<string>;
   isLibraryLoading: boolean;
+  isLibraryError?: boolean;
 }
 
-const CATEGORY_IDS = {
+export const CATEGORY_IDS = {
   newField: 'newField',
   fieldLibrary: 'fieldLibrary',
   validation: 'validation',
   conditional: 'conditional',
 } as const;
 
-const withPath = <T extends ActionOptionData>(
-  option: T,
-  parentPath: readonly string[]
-): T => ({
+const withPath = <T extends ActionOptionData>(option: T, parentPath: readonly string[]): T => ({
   ...option,
   pathIds: [...parentPath, option.id],
 });
@@ -73,10 +72,13 @@ const buildFieldTypeOptions = (parentPath: readonly string[]): FieldTypeAction[]
 const buildLibraryOptions = (
   parentPath: readonly string[],
   libraryFields: LibraryFieldEntry[],
-  alreadyLinked: Set<string>
-): LibraryFieldAction[] =>
-  libraryFields.map((field) => {
-    const linked = alreadyLinked.has(field.name);
+  alreadyLinked: ReadonlySet<string>
+): LibraryFieldAction[] => {
+  // Case-insensitive so a `$ref` re-cased after a case-only rename of the definition still counts
+  // as linked, matching how `insertTemplateField` detects an existing reference.
+  const linkedNames = new Set(Array.from(alreadyLinked, normalizeFieldDefinitionName));
+  return libraryFields.map((field) => {
+    const linked = linkedNames.has(normalizeFieldDefinitionName(field.name));
     return withPath(
       {
         kind: 'libraryField' as const,
@@ -95,6 +97,7 @@ const buildLibraryOptions = (
       parentPath
     );
   });
+};
 
 const buildRuleOptions = (
   parentPath: readonly string[],
@@ -115,6 +118,27 @@ const buildRuleOptions = (
   );
 
 /**
+ * Search lists leaves without their category, so a disabled category's leaves must carry the
+ * category's disabled state themselves.
+ */
+const propagateDisabled = (category: ActionCategory): ActionCategory => {
+  if (!category.disabled) {
+    return category;
+  }
+  const disableTree = (option: ActionOptionData): ActionOptionData => {
+    const disabled = {
+      ...option,
+      disabled: true,
+      disabledReason: category.disabledReason ?? option.disabledReason,
+    };
+    return disabled.kind === 'category'
+      ? { ...disabled, options: disabled.options.map(disableTree) }
+      : disabled;
+  };
+  return { ...category, options: category.options.map(disableTree) };
+};
+
+/**
  * Builds the hierarchical Actions catalog for the template / field-definition editors.
  * Categories mirror the previous EuiContextMenu panels; leaves map 1:1 onto insert/apply actions.
  */
@@ -126,6 +150,7 @@ export const getActionOptions = ({
   libraryFields,
   alreadyLinked,
   isLibraryLoading,
+  isLibraryError = false,
 }: GetActionOptionsParams): ActionOptionData[] => {
   const isFieldDefinition = mode === 'fieldDefinition';
   const insertDisabled = bufferHasErrors;
@@ -157,15 +182,15 @@ export const getActionOptions = ({
     pathIds: newFieldPath,
     testSubj: CATEGORY_IDS.newField,
     iconType: 'plusCircle',
-    iconVariant: 'platform',
     options: buildFieldTypeOptions(newFieldPath),
   };
 
-  const options: ActionOptionData[] = [newFieldCategory];
+  const options: ActionCategory[] = [newFieldCategory];
 
   if (!isFieldDefinition) {
     const libraryPath = [CATEGORY_IDS.fieldLibrary] as const;
-    const libraryChildren = isLibraryLoading
+    const libraryStatus = isLibraryLoading ? 'loading' : isLibraryError ? 'error' : undefined;
+    const libraryChildren = libraryStatus
       ? []
       : buildLibraryOptions(libraryPath, libraryFields, alreadyLinked);
     options.push({
@@ -177,14 +202,15 @@ export const getActionOptions = ({
       disabledReason: insertDisabledReason,
       pathIds: libraryPath,
       testSubj: CATEGORY_IDS.fieldLibrary,
-      iconType: 'indexOpen',
-      iconVariant: 'library',
+      iconType: 'tablePlus',
       options: libraryChildren,
+      childrenStatus: libraryStatus,
     });
   }
 
   const validationPath = [CATEGORY_IDS.validation] as const;
-  const validationRules = hasTargetField && targetControl ? getValidationActions(targetControl) : [];
+  const validationRules =
+    hasTargetField && targetControl ? getValidationActions(targetControl) : [];
   options.push({
     kind: 'category',
     id: CATEGORY_IDS.validation,
@@ -195,7 +221,6 @@ export const getActionOptions = ({
     pathIds: validationPath,
     testSubj: CATEGORY_IDS.validation,
     iconType: 'checkCircleFill',
-    iconVariant: 'validation',
     options: buildRuleOptions(validationPath, validationRules, 'validation'),
   });
 
@@ -211,12 +236,11 @@ export const getActionOptions = ({
       pathIds: conditionalPath,
       testSubj: CATEGORY_IDS.conditional,
       iconType: 'branch',
-      iconVariant: 'conditional',
       options: buildRuleOptions(conditionalPath, getConditionalLogicActions(), 'conditional'),
     });
   }
 
-  return options;
+  return options.map(propagateDisabled);
 };
 
 /** Depth-first flatten of every actionable node (categories + leaves). */
@@ -233,5 +257,3 @@ export const flattenOptions = (options: ActionOptionData[]): ActionOptionData[] 
   walk(options);
   return result;
 };
-
-export { CATEGORY_IDS };

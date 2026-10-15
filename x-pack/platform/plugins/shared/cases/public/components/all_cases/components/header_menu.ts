@@ -13,9 +13,12 @@ import * as listI18n from '../translations';
 
 interface GetListMenuArgs {
   permissions: CasesPermissions;
+  showTemplatesButton: boolean;
   actionLicense: ActionLicense | null;
   navigateToCreateCase: () => void;
   navigateToConfigureCases: () => void;
+  navigateToCasesTemplates: () => void;
+  getCasesTemplatesUrl: () => string;
 }
 
 const getActionLicenseTooltip = (actionLicense: ActionLicense | null): string | undefined => {
@@ -30,13 +33,29 @@ const getActionLicenseTooltip = (actionLicense: ActionLicense | null): string | 
 
 export const getListMenu = ({
   permissions,
+  showTemplatesButton,
   actionLicense,
   navigateToCreateCase,
   navigateToConfigureCases,
+  navigateToCasesTemplates,
+  getCasesTemplatesUrl,
 }: GetListMenuArgs): AppHeaderMenu => {
   const licenseTooltip = getActionLicenseTooltip(actionLicense);
 
   const items = [
+    ...(showTemplatesButton
+      ? [
+          {
+            id: 'casesTemplates',
+            label: i18n.TEMPLATES_BUTTON,
+            iconType: 'documents' as const,
+            href: getCasesTemplatesUrl(),
+            run: () => navigateToCasesTemplates(),
+            testId: 'cases-templates-button',
+            order: 50,
+          },
+        ]
+      : []),
     ...(permissions.settings
       ? [
           {
