@@ -6,123 +6,112 @@
  */
 
 import { Subject } from 'rxjs';
-import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import { ChatEventType, EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 
 const buildActionsMock = (): jest.Mocked<ConversationActions> =>
   ({
     invalidateConversation: jest.fn(),
-    addOptimisticRound: jest.fn(),
-    removeOptimisticRound: jest.fn(),
-    clearLastRoundResponse: jest.fn(),
-    addReasoningStep: jest.fn(),
-    addToolCall: jest.fn(),
-    setToolCallProgress: jest.fn(),
-    setToolCallResult: jest.fn(),
-    setAssistantMessage: jest.fn(),
-    addAssistantMessageChunk: jest.fn(),
-    setTimeToFirstToken: jest.fn(),
-    addPendingPrompt: jest.fn(),
-    clearPendingPrompts: jest.fn(),
-    setAskUserQuestionAnswers: jest.fn(),
-    onConversationCreated: jest.fn(),
-    addBackgroundExecutionCompleteStep: jest.fn(),
-    addOrUpdateTodosStep: jest.fn(),
-    setAttachments: jest.fn(),
-    addCompactionStep: jest.fn(),
-    setCompactionStepComplete: jest.fn(),
+    onExecutionStarted: jest.fn(),
+    onExecutionTerminated: jest.fn(),
     deleteConversation: jest.fn(),
     renameConversation: jest.fn(),
   } as unknown as jest.Mocked<ConversationActions>);
 
-const buildRound = (): ConversationRound => ({
-  id: 'round-1',
-  status: ConversationRoundStatus.completed,
-  input: { message: 'hi' },
-  response: { message: 'done' },
-  steps: [],
-  started_at: '2024-01-01T00:00:00.000Z',
-  time_to_first_token: 1,
-  time_to_last_token: 2,
-  model_usage: {
-    connector_id: 'c',
-    input_tokens: 0,
-    output_tokens: 0,
-    llm_calls: 0,
-  },
-});
+const run = async (events: ChatEvent[]) => {
+  const events$ = new Subject<ChatEvent>();
+  const conversationActions = buildActionsMock();
+  const done = subscribeToChatEvents({ events$, conversationActions, isAborted: () => false });
+  events.forEach((event) => events$.next(event));
+  events$.complete();
+  await done;
+  return conversationActions;
+};
 
-const attachmentFixture: VersionedAttachment[] = [
-  {
-    id: 'att-1',
-    type: 'dashboard',
-    current_version: 2,
-    versions: [
+const agent = { type: EventActorType.agent, id: 'agent' };
+
+describe('subscribeToChatEvents', () => {
+  it('calls onExecutionStarted for execution_started', async () => {
+    const actions = await run([
       {
-        version: 1,
-        data: { revision: 1 },
-        created_at: '2024-01-01T00:00:00.000Z',
-        content_hash: 'h1',
-      },
-      {
-        version: 2,
-        data: { revision: 2 },
-        created_at: '2024-01-02T00:00:00.000Z',
-        content_hash: 'h2',
-      },
-    ],
-  },
-];
+        type: TimelineEventType.executionStarted,
+        id: 'r1::execution_started',
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: agent,
+        execution_id: 'r1::execution',
+        data: { trigger_type: 'user_message' },
+      } as ChatEvent,
+    ]);
 
-describe('subscribeToChatEvents — roundComplete', () => {
-  it('forwards canonical attachments to conversationActions.setAttachments', async () => {
-    const events$ = new Subject<ChatEvent>();
-    const conversationActions = buildActionsMock();
-
-    const done = subscribeToChatEvents({
-      events$,
-      conversationActions,
-      isAborted: () => false,
-    });
-
-    events$.next({
-      type: ChatEventType.roundComplete,
-      data: {
-        round: buildRound(),
-        attachments: attachmentFixture,
-      },
-    });
-    events$.complete();
-
-    await done;
-
-    expect(conversationActions.setAttachments).toHaveBeenCalledTimes(1);
-    expect(conversationActions.setAttachments).toHaveBeenCalledWith({
-      attachments: attachmentFixture,
-    });
+    expect(actions.onExecutionStarted).toHaveBeenCalledTimes(1);
+    expect(actions.onExecutionTerminated).not.toHaveBeenCalled();
   });
 
-  it('does not call setAttachments when the event omits the attachments field', async () => {
-    const events$ = new Subject<ChatEvent>();
-    const conversationActions = buildActionsMock();
+  it('calls onExecutionTerminated for execution_terminated', async () => {
+    const actions = await run([
+      {
+        type: TimelineEventType.executionTerminated,
+        id: 'r1::execution_terminated',
+        created_at: '2026-01-01T00:00:01.000Z',
+        actor: agent,
+        execution_id: 'r1::execution',
+        data: {
+          model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+          outcome: { type: 'responded', response: { message: 'done' } },
+        },
+      } as ChatEvent,
+    ]);
 
-    const done = subscribeToChatEvents({
-      events$,
-      conversationActions,
+    expect(actions.onExecutionTerminated).toHaveBeenCalledTimes(1);
+    expect(actions.onExecutionStarted).not.toHaveBeenCalled();
+  });
+
+  it('does not touch the cache for content events', async () => {
+    const actions = await run([
+      {
+        type: ChatEventType.messageChunk,
+        data: { message_id: 'm', text_chunk: 'hi' },
+      } as ChatEvent,
+      {
+        type: ChatEventType.toolCall,
+        data: { tool_call_id: 't', tool_id: 'x', params: {} },
+      } as ChatEvent,
+      { type: ChatEventType.reasoning, data: { reasoning: 'hmm' } } as ChatEvent,
+      {
+        type: ChatEventType.conversationCreated,
+        data: {
+          conversation_id: 'c',
+          title: 'T',
+          access_control: {},
+          user: { id: 'u', username: 'u' },
+        },
+      } as ChatEvent,
+    ]);
+
+    Object.values(actions).forEach((action) => expect(action).not.toHaveBeenCalled());
+  });
+
+  it('rejects on a stream error and resolves when aborted', async () => {
+    const failing$ = new Subject<ChatEvent>();
+    const failing = subscribeToChatEvents({
+      events$: failing$,
+      conversationActions: buildActionsMock(),
       isAborted: () => false,
     });
+    failing$.error(new Error('boom'));
+    await expect(failing).rejects.toThrow('boom');
 
-    events$.next({
-      type: ChatEventType.roundComplete,
-      data: { round: buildRound() },
+    const aborted$ = new Subject<ChatEvent>();
+    const aborted = subscribeToChatEvents({
+      events$: aborted$,
+      conversationActions: buildActionsMock(),
+      isAborted: () => true,
     });
-    events$.complete();
-
-    await done;
-
-    expect(conversationActions.setAttachments).not.toHaveBeenCalled();
+    aborted$.error(new Error('aborted'));
+    await expect(aborted).resolves.toBeUndefined();
   });
 });

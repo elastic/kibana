@@ -10,19 +10,9 @@
 import type { z } from '@kbn/zod';
 import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 
-import type {
-  legacySearchRequestParamsSchema,
-  legacySearchResponseBodySchema,
-  searchResponseBodySchema,
-} from './schemas';
+import type { searchResponseBodySchema } from './schemas';
 
 /** The request parameters for searching dashboards */
 export type DashboardSearchRequestParams = z.output<typeof asCodeSearchRequestSchema>;
 /** The response body type for searching dashboards. */
 export type DashboardSearchResponseBody = z.output<typeof searchResponseBodySchema>;
-
-/** LEGACY **/
-/** The request parameters for searching dashboards */
-export type LegacyDashboardSearchRequestParams = z.output<typeof legacySearchRequestParamsSchema>;
-/** The response body type for searching dashboards. */
-export type LegacyDashboardSearchResponseBody = z.output<typeof legacySearchResponseBodySchema>;

@@ -165,26 +165,26 @@ describe('parseRRule', () => {
 
   describe('error handling', () => {
     it('throws when the string is empty', () => {
-      expect(() => parseRRule('')).toThrowError(/empty/);
-      expect(() => parseRRule('   ')).toThrowError(/empty/);
+      expect(() => parseRRule('')).toThrow(/empty/);
+      expect(() => parseRRule('   ')).toThrow(/empty/);
     });
 
     it('throws when FREQ is missing', () => {
-      expect(() => parseRRule('INTERVAL=2')).toThrowError(/missing required FREQ/);
+      expect(() => parseRRule('INTERVAL=2')).toThrow(/missing required FREQ/);
     });
 
     it('throws when FREQ value is unknown', () => {
-      expect(() => parseRRule('FREQ=BOGUS')).toThrowError(/Invalid RRULE FREQ/);
+      expect(() => parseRRule('FREQ=BOGUS')).toThrow(/Invalid RRULE FREQ/);
     });
 
     it('throws on FREQ=SECONDLY (not in the supported subset)', () => {
-      expect(() => parseRRule('FREQ=SECONDLY')).toThrowError(/Invalid RRULE FREQ/);
+      expect(() => parseRRule('FREQ=SECONDLY')).toThrow(/Invalid RRULE FREQ/);
     });
 
     it('throws when BYMONTH is out of [1,12]', () => {
-      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=0')).toThrowError(/out of range/);
-      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=13')).toThrowError(/out of range/);
-      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=-1')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=0')).toThrow(/out of range/);
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=13')).toThrow(/out of range/);
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=-1')).toThrow(/out of range/);
     });
 
     it('accepts BYMONTH boundary values 1 and 12', () => {
@@ -193,9 +193,9 @@ describe('parseRRule', () => {
     });
 
     it('throws when BYMONTHDAY is out of [-31,-1] ∪ [1,31]', () => {
-      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=0')).toThrowError(/out of range/);
-      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=32')).toThrowError(/out of range/);
-      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=-32')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=0')).toThrow(/out of range/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=32')).toThrow(/out of range/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=-32')).toThrow(/out of range/);
     });
 
     it('accepts BYMONTHDAY boundary values 1, 31, -1, -31', () => {
@@ -206,27 +206,27 @@ describe('parseRRule', () => {
     });
 
     it('throws when a part is missing the "=" separator', () => {
-      expect(() => parseRRule('FREQ=DAILY;BYDAY')).toThrowError(/missing "="/);
+      expect(() => parseRRule('FREQ=DAILY;BYDAY')).toThrow(/missing "="/);
     });
 
     it('throws when INTERVAL is not a positive integer', () => {
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=0')).toThrowError(/positive integer/);
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=-1')).toThrowError(/positive integer/);
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=1.5')).toThrowError(/positive integer/);
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=abc')).toThrowError(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=0')).toThrow(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=-1')).toThrow(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=1.5')).toThrow(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=abc')).toThrow(/positive integer/);
     });
 
     it('throws when BYDAY contains an invalid weekday', () => {
-      expect(() => parseRRule('FREQ=WEEKLY;BYDAY=MO,XX')).toThrowError(/Invalid RRULE BYDAY/);
+      expect(() => parseRRule('FREQ=WEEKLY;BYDAY=MO,XX')).toThrow(/Invalid RRULE BYDAY/);
     });
 
     it('throws when BYMONTHDAY contains a non-integer', () => {
-      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,abc')).toThrowError(/Invalid integer/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,abc')).toThrow(/Invalid integer/);
     });
 
     it('throws when input is not a string', () => {
       // @ts-expect-error -- exercising runtime guard
-      expect(() => parseRRule(undefined)).toThrowError(/must be a string/);
+      expect(() => parseRRule(undefined)).toThrow(/must be a string/);
     });
   });
 });

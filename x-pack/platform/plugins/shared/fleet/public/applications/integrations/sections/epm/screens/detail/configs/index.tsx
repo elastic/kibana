@@ -12,10 +12,10 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiSkeletonText,
-  EuiCallOut,
   EuiLink,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,7 +51,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
       <SideBarColumn grow={1} />
       {error ? (
         <EuiFlexItem grow={7}>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             data-test-subj="configsTab.errorCallout"
             title={
@@ -60,16 +60,13 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 defaultMessage="Unsupported"
               />
             }
-            color="warning"
-            iconType="warning"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.fleet.epm.InputTemplates.error"
                 defaultMessage="This integration doesn't support automatic generation of sample configurations."
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={7}>
@@ -112,7 +109,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
               {notInstalled && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     data-test-subj="configsTab.notInstalled"
                     title={
@@ -121,8 +118,6 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                         defaultMessage="Install the integration to use the following configs."
                       />
                     }
-                    color="warning"
-                    iconType="warning"
                   />
                 </>
               )}

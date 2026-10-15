@@ -14,50 +14,57 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString, NonEmptyTimestamp } from '../common_attributes.gen';
 
+export const AnonymizationFieldResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the anonymization field.
+     */
+    id: NonEmptyString.describe('The ID of the anonymization field.'),
+    /**
+     * Timestamp when the anonymization field was initially created.
+     */
+    timestamp: NonEmptyTimestamp.optional().describe(
+      'Timestamp when the anonymization field was initially created.'
+    ),
+    /**
+     * Name of the anonymization field.
+     */
+    field: z.string().describe('Name of the anonymization field.'),
+    /**
+     * Whether this field is allowed to be sent to the model.
+     */
+    allowed: z
+      .boolean()
+      .optional()
+      .describe('Whether this field is allowed to be sent to the model.'),
+    /**
+     * Whether this field should be anonymized.
+     */
+    anonymized: z.boolean().optional().describe('Whether this field should be anonymized.'),
+    /**
+     * Timestamp of the last update.
+     */
+    updatedAt: z.string().optional().describe('Timestamp of the last update.'),
+    /**
+     * Username of the person who last updated the field.
+     */
+    updatedBy: z.string().optional().describe('Username of the person who last updated the field.'),
+    /**
+     * Timestamp of when the field was created.
+     */
+    createdAt: z.string().optional().describe('Timestamp of when the field was created.'),
+    /**
+     * Username of the person who created the field.
+     */
+    createdBy: z.string().optional().describe('Username of the person who created the field.'),
+    /**
+     * Kibana namespace (space id).
+     */
+    namespace: z.string().optional().describe('Kibana namespace (space id).'),
+  })
+);
 export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
-export const AnonymizationFieldResponse = z.object({
-  /**
-   * The ID of the anonymization field.
-   */
-  id: NonEmptyString,
-  /**
-   * Timestamp when the anonymization field was initially created.
-   */
-  timestamp: NonEmptyTimestamp.optional(),
-  /**
-   * Name of the anonymization field.
-   */
-  field: z.string(),
-  /**
-   * Whether this field is allowed to be sent to the model.
-   */
-  allowed: z.boolean().optional(),
-  /**
-   * Whether this field should be anonymized.
-   */
-  anonymized: z.boolean().optional(),
-  /**
-   * Timestamp of the last update.
-   */
-  updatedAt: z.string().optional(),
-  /**
-   * Username of the person who last updated the field.
-   */
-  updatedBy: z.string().optional(),
-  /**
-   * Timestamp of when the field was created.
-   */
-  createdAt: z.string().optional(),
-  /**
-   * Username of the person who created the field.
-   */
-  createdBy: z.string().optional(),
-  /**
-   * Kibana namespace (space id).
-   */
-  namespace: z.string().optional(),
-});

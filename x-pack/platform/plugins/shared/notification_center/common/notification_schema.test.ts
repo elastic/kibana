@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { notificationWriteSchema, notificationReadSchema } from './notification_schema';
+import {
+  notificationWriteSchema,
+  notificationReadSchema,
+  notificationQueryParamsSchema,
+} from './notification_schema';
 import type { Notification, NotificationInput, NotificationDocument } from './types';
 
 /** A producer submission — no `@timestamp` (NC stamps it on ingest). */
@@ -217,5 +221,27 @@ describe('NotificationDocument typing', () => {
     // @ts-expect-error — write payload lacks @timestamp, so it is not a NotificationDocument
     const unstamped: NotificationDocument = notificationWriteSchema.parse(validInput);
     expect(unstamped).toBeDefined();
+  });
+});
+
+describe('notificationQueryParamsSchema', () => {
+  it('accepts the document-level filters', () => {
+    expect(
+      notificationQueryParamsSchema.parse({
+        namespace: 'inference',
+        type: 'modelStatus',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-20T00:00:00.000Z',
+      })
+    ).toEqual({
+      namespace: 'inference',
+      type: 'modelStatus',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
+    });
+  });
+
+  it('rejects unknown params (strict)', () => {
+    expect(() => notificationQueryParamsSchema.parse({ nope: 'value' })).toThrow();
   });
 });

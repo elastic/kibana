@@ -25,7 +25,7 @@ export const sampleData: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
-    extractObservables: false,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],

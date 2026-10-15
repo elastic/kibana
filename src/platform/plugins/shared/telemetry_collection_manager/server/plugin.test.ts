@@ -69,7 +69,7 @@ describe('Telemetry Collection Manager', () => {
         expect(telemetryCollectionManager['usageGetterMethodPriority']).toBe(1);
       });
       test('fails to register the collection strategy with the same priority', () => {
-        expect(() => setupApi.setCollectionStrategy(createCollectionStrategy(1))).toThrowError(
+        expect(() => setupApi.setCollectionStrategy(createCollectionStrategy(1))).toThrow(
           `A Usage Getter with the same priority is already set.`
         );
       });
@@ -153,7 +153,7 @@ describe('Telemetry Collection Manager', () => {
             await setupApi.getStats({ ...config, refreshCache: false });
             await setupApi.getStats({ ...config, refreshCache: true });
 
-            expect(getStatsCollectionConfig).toBeCalledTimes(3);
+            expect(getStatsCollectionConfig).toHaveBeenCalledTimes(3);
             expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(1, config, usageCollection);
             expect(getStatsCollectionConfig).toHaveNthReturnedWith(
               1,
@@ -265,12 +265,12 @@ describe('Telemetry Collection Manager', () => {
             > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
 
-            expect(getStatsCollectionConfig).toBeCalledTimes(1);
-            expect(getStatsCollectionConfig).toBeCalledWith(
+            expect(getStatsCollectionConfig).toHaveBeenCalledTimes(1);
+            expect(getStatsCollectionConfig).toHaveBeenCalledWith(
               expect.not.objectContaining({ refreshCache: true }),
               usageCollection
             );
-            expect(getStatsCollectionConfig).toReturnWith(
+            expect(getStatsCollectionConfig).toHaveReturnedWith(
               expect.objectContaining({
                 refreshCache: true,
               })

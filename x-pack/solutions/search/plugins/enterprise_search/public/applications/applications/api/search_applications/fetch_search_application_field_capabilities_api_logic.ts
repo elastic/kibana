@@ -20,7 +20,9 @@ export type FetchSearchApplicationFieldCapabilitiesApiResponse =
 export const fetchSearchApplicationFieldCapabilities = async ({
   name,
 }: FetchSearchApplicationFieldCapabilitiesApiParams): Promise<FetchSearchApplicationFieldCapabilitiesApiResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${name}/field_capabilities`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(
+    name
+  )}/field_capabilities`;
 
   return await HttpLogic.values.http.get<EnterpriseSearchApplicationFieldCapabilities>(route);
 };

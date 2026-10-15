@@ -101,19 +101,27 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.visualizationActions.addToNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.visualizationActions.addToExistingCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
+export const ATTACK_ALERTS_TRUNCATED = ({
+  alertCount,
+  attachedAlertCount,
+  maxAlertsPerCase,
+}: {
+  alertCount: number;
+  attachedAlertCount: number;
+  maxAlertsPerCase: number;
+}) =>
+  i18n.translate(
+    'xpack.securitySolution.detections.hooks.attacks.bulkActions.attackAlertsTruncatedWarningTitle',
+    {
+      defaultMessage:
+        'Only {attachedAlertCount} of the {alertCount} alerts in this attack will be added. A case holds at most {maxAlertsPerCase} alerts.',
+      values: {
+        alertCount,
+        attachedAlertCount,
+        maxAlertsPerCase,
+      },
+    }
+  );
 
 export const ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.alertTagsContextMenuItemTitle',

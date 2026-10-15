@@ -17,6 +17,14 @@ import { convertTool } from './converter';
 import { ToolAvailabilityCache } from './availability_cache';
 import type { BuiltinToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 
+const defaultAnnotations = {
+  title: 'Test Tool',
+  readOnlyHint: true as const,
+  destructiveHint: false as const,
+  idempotentHint: true as const,
+  openWorldHint: false as const,
+};
+
 const makeBuiltinRegistration = (
   overrides: Partial<BuiltinToolDefinition> = {}
 ): BuiltinToolDefinition => ({
@@ -24,6 +32,7 @@ const makeBuiltinRegistration = (
   type: ToolType.builtin,
   description: 'A test tool',
   tags: [],
+  annotations: defaultAnnotations,
   schema: z.object({}),
   handler: (async () => ({ results: [] })) as any,
   ...overrides,
@@ -131,7 +140,7 @@ describe('convertTool (builtin)', () => {
     expect(result.annotations).toEqual(annotations);
   });
 
-  it('leaves annotations undefined when not set on builtin tool', () => {
+  it('propagates annotations from builtin tool', () => {
     const tool = makeBuiltinRegistration();
     const result = convertTool({
       tool,
@@ -139,7 +148,7 @@ describe('convertTool (builtin)', () => {
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
-    expect(result.annotations).toBeUndefined();
+    expect(result.annotations).toEqual(defaultAnnotations);
   });
 });
 
@@ -191,7 +200,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
       readOnlyHint: false,
       destructiveHint: true,
       idempotentHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
     });
   });
 

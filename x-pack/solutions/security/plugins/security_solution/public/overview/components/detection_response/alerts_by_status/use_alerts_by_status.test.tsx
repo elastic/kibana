@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -112,7 +113,7 @@ describe('useAlertsByStatus', () => {
       isLoading: false,
       updatedAt: dateNow,
     });
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: false,
@@ -158,7 +159,7 @@ describe('useAlertsByStatus', () => {
   it('should skip the query', () => {
     const { result } = renderUseAlertsByStatus({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: true,
@@ -194,6 +195,7 @@ describe('useAlertsByStatus', () => {
     mockUseUiSetting.mockReturnValue(false);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
 
     renderUseAlertsByStatus({
@@ -202,7 +204,7 @@ describe('useAlertsByStatus', () => {
     });
 
     expect(mockGetEuidFilterBasedOnDocument).not.toHaveBeenCalled();
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           query: {
@@ -224,6 +226,7 @@ describe('useAlertsByStatus', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
 
     renderUseAlertsByStatus({
@@ -232,8 +235,11 @@ describe('useAlertsByStatus', () => {
       identityFields: { 'host.name': 'my-host' },
     });
 
-    expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('host', mockEntityRecord);
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      mockEntityRecord
+    );
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
           query: {
@@ -255,7 +261,7 @@ describe('useAlertsByStatus', () => {
 
     renderUseAlertsByStatus({ runtimeMappings: customRuntimeMappings });
 
-    expect(mockUseQueryAlerts).toBeCalledWith(
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           ...alertsByStatusQuery,

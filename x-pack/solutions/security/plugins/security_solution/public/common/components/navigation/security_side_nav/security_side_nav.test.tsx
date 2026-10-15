@@ -120,13 +120,6 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  ...jest.requireActual('../../../hooks/use_experimental_features'),
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
-}));
-
 const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
     wrapper: ({ children }) => <TestProviders store={options?.store}>{children}</TestProviders>,
@@ -164,7 +157,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, false, false),
         tracker: track,
       })
     );
@@ -387,17 +380,12 @@ describe('SecuritySideNav', () => {
   });
 
   describe('enableAlertsAndAttacksAlignment setting', () => {
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (feature: string) => feature === 'enableAlertsAndAttacksAlignment'
-      );
-    });
     it('should call getNavCategories with true when setting is enabled', () => {
       useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, true, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, true, false),
         })
       );
     });
@@ -407,31 +395,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
-        })
-      );
-    });
-  });
-
-  describe('isNewEAHomePageEnabled feature flag', () => {
-    it('should call getNavCategories with true when feature flag is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (feature: string) => feature === 'entityAnalyticsNewHomePageEnabled'
-      );
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, true, false),
-        })
-      );
-    });
-
-    it('should call getNavCategories with false when feature flag is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(() => false);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false),
         })
       );
     });
@@ -461,7 +425,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, false, false),
       })
     );
   });
@@ -470,7 +434,7 @@ describe('SecuritySideNav', () => {
     (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
-    (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+    (useKibana().services.featureFlags.useBooleanValue as jest.Mock).mockImplementation(
       (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
@@ -501,7 +465,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Agent, false, false, true),
+        categories: getNavCategories(AIChatExperience.Agent, false, true),
       })
     );
   });

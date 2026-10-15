@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useInvestigationState } from '@kbn/investigation-output';
+import { useInvestigation } from '@kbn/investigation-output';
 import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
@@ -42,11 +42,9 @@ import { useFormatTimestamp } from '../common/format_timestamp';
 import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
-import {
-  isNeedsActionStatus,
-  rememberInvestigationTerminalFailure,
-} from './significant_event_status';
+import { isNeedsActionStatus } from './significant_event_status';
 import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
@@ -62,39 +60,48 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const queryClient = useQueryClient();
   const { agentBuilder, http } = useKibana().services;
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
-  const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
+  const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
 
+  const investigationExecutionIds = useMemo(
+    () => (latestInvestigation ? [latestInvestigation.workflow_execution_id] : []),
+    [latestInvestigation]
+  );
+  const { data: investigationRunStatuses } =
+    useFetchInvestigationStatuses(investigationExecutionIds);
+  const latestRunStatus = latestInvestigation
+    ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
+    : undefined;
+  const investigationNotFound =
+    latestInvestigation != null &&
+    investigationRunStatuses != null &&
+    latestRunStatus === undefined;
+  const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
+
+  // The recorded id is the investigation (Agent Builder conversation) id.
   const {
-    conversationId,
+    investigation: investigationDetails,
     error: investigationError,
-    state: investigationState,
     status: investigationStatus,
-  } = useInvestigationState({
+  } = useInvestigation({
     http,
-    workflowExecutionId: latestInvestigation?.workflow_execution_id,
-    isRunning: latestInvestigation != null && latestInvestigation.completed_at == null,
+    investigationId: availableInvestigation?.workflow_execution_id,
   });
+  const conversationId = investigationDetails?.id;
 
   useEffect(() => {
     if (latestInvestigation == null || latestInvestigation.completed_at != null) {
       return;
     }
 
-    if (isInvestigationInvestigated(investigationStatus)) {
-      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
-      return;
+    if (
+      isInvestigationInvestigated(investigationStatus) ||
+      isInvestigationTerminalFailure(investigationStatus)
+    ) {
+      markEventInvestigationCompleteInCache(queryClient, event.event_id);
     }
-
-    if (isInvestigationTerminalFailure(investigationStatus)) {
-      rememberInvestigationTerminalFailure(
-        latestInvestigation.workflow_execution_id,
-        investigationStatus
-      );
-      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
-    }
-  }, [event.event_uuid, investigationStatus, latestInvestigation, queryClient]);
+  }, [event.event_id, investigationStatus, latestInvestigation, queryClient]);
 
   useEffect(() => {
     if (
@@ -131,8 +138,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_uuid, event.event_id),
-    [event.event_uuid, event.event_id]
+    () => buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [event.event_id]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
@@ -204,7 +211,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
           <EuiFlexItem grow={false}>
             <InvestigationStatusBadge
               event={event}
-              investigationStatus={latestInvestigation ? investigationStatus : undefined}
+              investigationStatus={
+                investigationNotFound ? null : latestInvestigation ? investigationStatus : undefined
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -227,7 +236,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
         <DetectionsList
           event={event}
-          eventUuid={event.event_uuid}
+          eventId={event.event_id}
           lifecycleQuery={lifecycleQuery}
           occurrencesByRuleUuid={occurrencesQuery.data}
           isLoadingOccurrences={occurrencesQuery.isLoading}
@@ -238,12 +247,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         <EuiSpacer size="l" />
 
         <EventInvestigation
-          event={event}
-          investigation={latestInvestigation}
+          investigation={availableInvestigation}
           status={investigationStatus}
-          state={investigationState}
+          details={investigationDetails}
           error={investigationError}
-          conversationId={conversationId}
         />
       </EuiFlyoutBody>
 
@@ -257,7 +264,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         />
       )}
 
-      {agentBuilder && latestInvestigation && (
+      {agentBuilder && availableInvestigation && (
         <EuiFlyoutFooter
           css={css`
             /* The design uses a plain footer instead of EUI's shaded one. */
@@ -267,7 +274,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         >
           <EventFlyoutChatFooter
             event={event}
-            investigation={latestInvestigation}
+            investigation={availableInvestigation}
             conversationId={conversationId}
             status={investigationStatus}
           />

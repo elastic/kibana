@@ -29,12 +29,21 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 import { OverviewCardView } from './overview_cards_view/overview_card_view';
+import { OverviewTableColumnSelector } from './compact_view/components/overview_table_column_selector';
 
 export const OverviewGrid = memo(
-  ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
+  ({
+    view,
+    isEmbeddable,
+    isInteractive = true,
+  }: {
+    view: OverviewView;
+    isEmbeddable?: boolean;
+    isInteractive?: boolean;
+  }) => {
     const dispatch = useDispatch();
 
-    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
+    const { status, loaded: isInitialized, loading, total } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(
@@ -55,7 +64,7 @@ export const OverviewGrid = memo(
 
     // Display no monitors found when down, up, or disabled filter produces no results
     if (status && !monitorsSortedByStatus.length && isInitialized) {
-      return <NoMonitorsFound />;
+      return <NoMonitorsFound isInteractive={isInteractive} />;
     }
 
     return (
@@ -70,39 +79,44 @@ export const OverviewGrid = memo(
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <OverviewPaginationInfo
-                  total={status ? monitorsSortedByStatus.length : undefined}
+                  total={status ? total ?? monitorsSortedByStatus.length : undefined}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ShowLastRunToggle />
-          </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <ShowAllSpaces />
-          </EuiFlexItem>
+          {isInteractive && (
+            <>
+              <EuiFlexItem grow={false}>
+                <ShowLastRunToggle />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ShowAllSpaces />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SortFields />
+              </EuiFlexItem>
+              {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
+              <EuiFlexItem grow={false}>
+                <GroupFields />
+              </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
-          </EuiFlexItem>
+              {!isEmbeddable ? (
+                <EuiFlexItem grow={false}>
+                  <ViewButtons />
+                </EuiFlexItem>
+              ) : null}
 
-          <EuiFlexItem grow={false}>
-            <SortFields />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <GroupFields />
-          </EuiFlexItem>
-          {!isEmbeddable ? (
-            <EuiFlexItem grow={false}>
-              <ViewButtons />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <AutodiscoveredMonitorsTour>
-              <DisplayOptionsPopover />
-            </AutodiscoveredMonitorsTour>
-          </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AutodiscoveredMonitorsTour>
+                  <DisplayOptionsPopover />
+                </AutodiscoveredMonitorsTour>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
         {/*
           Card view has no built-in refresh indicator, so we surface a thin
@@ -128,9 +142,13 @@ export const OverviewGrid = memo(
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             loaded={isInitialized}
+            isInteractive={isInteractive}
           />
         ) : view === 'compactView' ? (
-          <OverviewGridCompactView setFlyoutConfigCallback={setFlyoutConfigCallback} />
+          <OverviewGridCompactView
+            setFlyoutConfigCallback={setFlyoutConfigCallback}
+            isInteractive={isInteractive}
+          />
         ) : null}
         <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
       </>

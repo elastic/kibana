@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import React from 'react';
+import '@testing-library/jest-dom';
+import { BehaviorSubject } from 'rxjs';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { ESQLMenu } from '.';
+import { EsqlEditorActionsProvider } from '../editor_actions_context';
+import { EsqlEditorActionsRegister } from '../editor_actions_register';
+
+jest.mock('./help_popover', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    HelpPopover: (props: { hideRecommendedQueries?: boolean }) =>
+      ReactActual.createElement('button', {
+        type: 'button',
+        'data-test-subj': 'esql-help-popover-button',
+        'data-hide-recommended': String(Boolean(props.hideRecommendedQueries)),
+      }),
+  };
+});
+
+const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
+startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
+startMock.notifications = notificationServiceMock.createStartContract();
+
+const setCanCreateView = (canCreate: boolean) => {
+  startMock.application.capabilities = {
+    ...startMock.application.capabilities,
+    esqlViews: { create: canCreate },
+  };
+};
+
+const services = { core: startMock, data: { dataViews: {} } };
+
+const renderMenu = async (
+  props: React.ComponentProps<typeof ESQLMenu> = {},
+  {
+    editorIsInline = false,
+    currentQuery = '',
+  }: { editorIsInline?: boolean; currentQuery?: string } = {}
+) =>
+  act(async () => {
+    render(
+      <KibanaContextProvider services={services as any}>
+        <EsqlEditorActionsProvider>
+          <EsqlEditorActionsRegister editorIsInline={editorIsInline} currentQuery={currentQuery} />
+          <ESQLMenu {...props} />
+        </EsqlEditorActionsProvider>
+      </KibanaContextProvider>
+    );
+  });
+
+describe('ESQLMenu', () => {
+  beforeEach(() => {
+    setCanCreateView(true);
+  });
+
+  it('does not render the visor (search) button by default when the editor is not inline', async () => {
+    await renderMenu();
+    expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+  });
+
+  it('renders the visor (search) button when the editor is inline', async () => {
+    await renderMenu({}, { editorIsInline: true });
+    expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+  });
+
+  it('hides the visor (search) button when hideVisor is set, even if inline', async () => {
+    await renderMenu({ hideVisor: true }, { editorIsInline: true });
+    expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('esql-help-popover-button')).toBeInTheDocument();
+  });
+
+  it('forwards hideRecommendedQueries to the help popover', async () => {
+    await renderMenu({ hideRecommendedQueries: true });
+    expect(screen.getByTestId('esql-help-popover-button')).toHaveAttribute(
+      'data-hide-recommended',
+      'true'
+    );
+  });
+
+  it('does not hide recommended queries by default', async () => {
+    await renderMenu();
+    expect(screen.getByTestId('esql-help-popover-button')).toHaveAttribute(
+      'data-hide-recommended',
+      'false'
+    );
+  });
+
+  it('hides create view unless the host opts in', async () => {
+    await renderMenu({}, { currentQuery: 'FROM logs-*' });
+    expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ESQLEditor-create-view-dot')).not.toBeInTheDocument();
+  });
+
+  it('marks create view with a primary dot', async () => {
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+    expect(screen.getByTestId('ESQLEditor-create-view-dot')).toBeInTheDocument();
+  });
+
+  it('hides create view when the user lacks the create privilege, even if the host opts in', async () => {
+    setCanCreateView(false);
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+    expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
+  });
+
+  it('disables create view when the query is empty', async () => {
+    await renderMenu({ enableCreateView: true });
+    expect(screen.getByRole('button', { name: 'Create view' })).toBeDisabled();
+  });
+
+  it('opens the create view modal for the current query', async () => {
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+    const createButton = screen.getByRole('button', { name: 'Create view' });
+    expect(createButton).toBeEnabled();
+
+    fireEvent.click(createButton);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Create view' });
+    expect(dialog).toHaveTextContent('FROM logs-*');
+  });
+
+  it('keeps create view available when history is hidden', async () => {
+    await renderMenu(
+      { hideHistory: true, enableCreateView: true },
+      { currentQuery: 'FROM logs-*' }
+    );
+    expect(screen.getByRole('button', { name: 'Create view' })).toBeEnabled();
+    expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
+  });
+});

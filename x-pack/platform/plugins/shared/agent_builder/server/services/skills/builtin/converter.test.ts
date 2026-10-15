@@ -6,9 +6,15 @@
  */
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { AvailabilityCache } from '../../common/availability_cache';
 import { convertBuiltinSkill } from './converter';
 
 describe('convertBuiltinSkill', () => {
+  const cache = new AvailabilityCache();
+
   const createMockSkillDefinition = (
     overrides: Partial<SkillDefinition> = {}
   ): SkillDefinition => ({
@@ -22,7 +28,7 @@ describe('convertBuiltinSkill', () => {
 
   it('converts basic skill fields', () => {
     const skill = createMockSkillDefinition();
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.id).toBe('test-skill');
     expect(result.name).toBe('test-skill-name');
@@ -33,7 +39,7 @@ describe('convertBuiltinSkill', () => {
 
   it('sets readonly to true', () => {
     const skill = createMockSkillDefinition();
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.readonly).toBe(true);
   });
@@ -45,7 +51,7 @@ describe('convertBuiltinSkill', () => {
         { name: 'ref-2', relativePath: './queries', content: 'Content 2' },
       ],
     });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.referencedContent).toEqual([
       { name: 'ref-1', relativePath: '.', content: 'Content 1' },
@@ -55,7 +61,7 @@ describe('convertBuiltinSkill', () => {
 
   it('returns empty array from getRegistryTools when skill has no getRegistryTools', () => {
     const skill = createMockSkillDefinition({ getRegistryTools: undefined });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.getRegistryTools()).toEqual([]);
   });
@@ -64,7 +70,7 @@ describe('convertBuiltinSkill', () => {
     const skill = createMockSkillDefinition({
       getRegistryTools: () => ['tool-a', 'tool-b'] as any,
     });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.getRegistryTools()).toEqual(['tool-a', 'tool-b']);
   });
@@ -74,42 +80,42 @@ describe('convertBuiltinSkill', () => {
     const skill = createMockSkillDefinition({
       getInlineTools: inlineToolsFn,
     });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.getInlineTools).toBe(inlineToolsFn);
   });
 
   it('sets getInlineTools to undefined when not provided', () => {
     const skill = createMockSkillDefinition({ getInlineTools: undefined });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.getInlineTools).toBeUndefined();
   });
 
   it('handles undefined referencedContent', () => {
     const skill = createMockSkillDefinition({ referencedContent: undefined });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.referencedContent).toBeUndefined();
   });
 
   it('sets experimental to false when not provided', () => {
     const skill = createMockSkillDefinition();
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.experimental).toBe(false);
   });
 
   it('carries experimental: true when set on the skill definition', () => {
     const skill = createMockSkillDefinition({ experimental: true });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.experimental).toBe(true);
   });
 
   it('carries experimental: false when explicitly set to false', () => {
     const skill = createMockSkillDefinition({ experimental: false });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.experimental).toBe(false);
   });
@@ -118,8 +124,51 @@ describe('convertBuiltinSkill', () => {
     const skill = createMockSkillDefinition({
       uiSettingRequired: 'agentBuilder:tracing:enabled',
     });
-    const result = convertBuiltinSkill(skill);
+    const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.uiSettingRequired).toBe('agentBuilder:tracing:enabled');
+  });
+
+  it('sets isAvailable to undefined when no availability config is provided', () => {
+    const skill = createMockSkillDefinition();
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.isAvailable).toBeUndefined();
+  });
+
+  it('wires availability config to isAvailable via the cache', async () => {
+    const handler = jest.fn().mockResolvedValue({ status: 'unavailable', reason: 'gated' });
+    const skill = createMockSkillDefinition({
+      availability: { cacheMode: 'space', handler },
+    });
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.isAvailable).toBeDefined();
+    const context: AvailabilityContext = {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'test-space',
+      uiSettings: uiSettingsServiceMock.createClient(),
+    };
+    const availabilityResult = await result.isAvailable!(context);
+    expect(availabilityResult).toEqual({ status: 'unavailable', reason: 'gated' });
+    expect(handler).toHaveBeenCalledWith(context);
+  });
+
+  it('caches availability results for the same skill and space', async () => {
+    const handler = jest.fn().mockResolvedValue({ status: 'available' });
+    const testCache = new AvailabilityCache();
+    const skill = createMockSkillDefinition({
+      availability: { cacheMode: 'space', handler },
+    });
+    const result = convertBuiltinSkill({ skill, cache: testCache });
+
+    const context: AvailabilityContext = {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'cached-space',
+      uiSettings: uiSettingsServiceMock.createClient(),
+    };
+    await result.isAvailable!(context);
+    await result.isAvailable!(context);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });

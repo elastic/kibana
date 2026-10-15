@@ -18,7 +18,6 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
-  AttachmentMode,
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
@@ -61,7 +60,6 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   savedObjectId: string;
-  mode: AttachmentMode;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
@@ -104,6 +102,14 @@ export interface AlertIdsAggsResult {
   };
 }
 
+export interface AttackIdsAggsResult {
+  attackIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
 export interface EventIdsAggsResult {
   legacyEventIds: {
     buckets: Array<{
@@ -117,7 +123,14 @@ export interface EventIdsAggsResult {
   };
 }
 
-export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
+export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+  /**
+   * Excludes alerts whose index belongs to a linked project
+   * default to true
+   */
+  originOnly?: boolean;
+};
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   attachmentType: AttachmentType;

@@ -26,7 +26,7 @@ tags:
   - package
   - prod
   - group-platform
-  - shared
+  - private
   - jest-unit-tests
 fileGroups:
   src:

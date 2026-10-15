@@ -7,7 +7,7 @@
 
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
-import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_REASON, ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -21,6 +21,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID,
@@ -38,6 +39,24 @@ import {
   ALERT_ATTACK_IDS,
 } from '@kbn/elastic-assistant-common';
 
+/**
+ * Field map for attack discovery alerts - defines the Elasticsearch mappings
+ * for fields stored in attack discovery alert documents.
+ *
+ * CANONICAL COPY. A deliberate fork of this map lives at
+ * `x-pack/solutions/security/packages/kbn-discoveries/impl/attack_discovery/alert_fields/alert_field_map.ts`,
+ * kept so that `@kbn/discoveries` can eventually become a standalone package. Do NOT
+ * de-duplicate the two copies.
+ *
+ * Both copies are installed into the SAME component template
+ * (`.adhoc.alerts-security.attack.discovery.alerts-mappings`) — `elastic_assistant` installs
+ * this one, the `discoveries` plugin installs the fork — so if they drift, the installed
+ * mappings depend on plugin install order. Every change here MUST be mirrored in the fork,
+ * and vice versa.
+ *
+ * Parity is enforced by
+ * `x-pack/solutions/security/plugins/discoveries/server/attack_discovery_index_parity.test.ts`.
+ */
 export const attackDiscoveryAlertFieldMap: FieldMap = {
   ...alertFieldMap,
 
@@ -47,6 +66,11 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
 
   [ALERT_RISK_SCORE]: {
     type: 'float',
+    array: false,
+    required: false,
+  },
+  [ALERT_WORKFLOW_REASON]: {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -121,6 +145,12 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   },
   [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]: {
     type: 'text',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]: {
+    // identifies the producer of the attack, and contributes to the attack hash
+    type: 'keyword',
     array: false,
     required: false,
   },

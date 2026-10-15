@@ -21,7 +21,7 @@ export const LinkInfo: {
   };
 } = {
   [DASHBOARD_LINK_TYPE]: {
-    icon: 'dashboardApp',
+    icon: 'productDashboard',
     type: DashboardLinkStrings.getType(),
     displayName: DashboardLinkStrings.getDisplayName(),
     description: DashboardLinkStrings.getDescription(),

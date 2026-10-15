@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
 import type { InfraBackendLibs } from '../../../lib/infra_types';
@@ -18,7 +17,8 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 export const initGetLogEntryCategoryExamplesRoute = ({
   framework,
   getStartServices,
-}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  isCpsPlatformGateEnabled,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices' | 'isCpsPlatformGateEnabled'>) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -64,7 +64,7 @@ export const initGetLogEntryCategoryExamplesRoute = ({
             categoryId,
             exampleCount,
             resolvedLogView,
-            getProjectRoutingFromRequest(request)
+            isCpsPlatformGateEnabled
           );
 
           return response.ok({

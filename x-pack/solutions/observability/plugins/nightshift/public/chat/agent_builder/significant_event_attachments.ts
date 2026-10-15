@@ -26,7 +26,7 @@ const significantEventDetectionAttachmentDefinition: AttachmentUIDefinition<Sign
     getHeader: () => ({
       icon: 'bell',
       subtitle: i18n.translate('xpack.nightshift.detectionAttachment.subtitle', {
-        defaultMessage: 'Significant Events detection',
+        defaultMessage: 'Significant events detection',
       }),
     }),
   };
@@ -38,9 +38,9 @@ const kiFeatureAttachmentDefinition: AttachmentUIDefinition<KiFeatureAttachment>
     i18n.translate('xpack.nightshift.featureAttachment.fallbackLabel', {
       defaultMessage: 'Entity',
     }),
-  getIcon: () => 'node',
+  getIcon: () => 'vectorTriangle',
   getHeader: () => ({
-    icon: 'node',
+    icon: 'vectorTriangle',
     subtitle: i18n.translate('xpack.nightshift.featureAttachment.subtitle', {
       defaultMessage: 'Knowledge indicator feature',
     }),

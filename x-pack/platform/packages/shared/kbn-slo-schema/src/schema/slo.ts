@@ -11,6 +11,15 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import {
+  MAX_PROJECT_ROUTINGS_LENGTH,
+  MAX_SLO_ID_LENGTH,
+  MIN_SLO_ID_LENGTH,
+  PROJECT_ROUTINGS_EMPTY_MESSAGE,
+  PROJECT_ROUTINGS_TOO_LONG_MESSAGE,
+  SLO_ID_INVALID_MESSAGE,
+  SLO_ID_REGEX,
+} from './validation_constants';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -27,14 +36,39 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
+const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
+  'boundedProjectRoutingSchema',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (typeof input !== 'string') {
+      return t.failure(input, context);
+    }
+
+    if (input.trim().length === 0) {
+      return t.failure(input, context, PROJECT_ROUTINGS_EMPTY_MESSAGE);
+    }
+
+    if (input.length > MAX_PROJECT_ROUTINGS_LENGTH) {
+      return t.failure(input, context, PROJECT_ROUTINGS_TOO_LONG_MESSAGE);
+    }
+
+    return t.success(input);
+  },
+  t.identity
+);
+
 const settingsSchema = t.intersection([
   t.type({
     syncDelay: durationType,
     frequency: durationType,
     preventInitialBackfill: t.boolean,
-    preventCrossProjectSearch: t.boolean,
   }),
-  t.partial({ syncField: t.union([t.string, t.null]) }),
+  t.partial({
+    syncField: t.union([t.string, t.null]),
+    /** @deprecated use projectRoutings */
+    preventCrossProjectSearch: t.boolean,
+    projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
+  }),
 ]);
 
 const groupBySchema = allOrAnyStringOrArray;
@@ -43,7 +77,9 @@ const optionalSettingsSchema = t.partial({
   syncDelay: durationType,
   frequency: durationType,
   preventInitialBackfill: t.boolean,
+  /** @deprecated use projectRoutings */
   preventCrossProjectSearch: t.boolean,
+  projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
   syncField: t.union([t.string, t.null]),
 });
 
@@ -57,11 +93,7 @@ const sloIdSchema = new t.Type<string, string, unknown>(
     if (typeof input === 'string') {
       const valid = isValidId(input);
       if (!valid) {
-        return t.failure(
-          input,
-          context,
-          'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
-        );
+        return t.failure(input, context, SLO_ID_INVALID_MESSAGE);
       }
 
       return t.success(input);
@@ -73,10 +105,8 @@ const sloIdSchema = new t.Type<string, string, unknown>(
 );
 
 function isValidId(id: string): boolean {
-  const MIN_ID_LENGTH = 8;
-  const MAX_ID_LENGTH = 48;
-  const validLength = MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
-  return validLength && /^[a-z0-9-_]+$/.test(id);
+  const validLength = MIN_SLO_ID_LENGTH <= id.length && id.length <= MAX_SLO_ID_LENGTH;
+  return validLength && SLO_ID_REGEX.test(id);
 }
 
 const requiredSloFields = t.type({
@@ -114,6 +144,7 @@ const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
 
 export {
+  boundedProjectRoutingSchema,
   budgetingMethodSchema,
   dashboardsWithIdSchema,
   groupBySchema,

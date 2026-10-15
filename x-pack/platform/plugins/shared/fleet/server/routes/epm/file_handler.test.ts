@@ -85,7 +85,7 @@ describe('getFileHandler', () => {
     const context = mockContext();
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 200,
         body: buffer,
@@ -129,7 +129,7 @@ describe('getFileHandler', () => {
     const context = mockContext();
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 200,
         headers: expect.objectContaining({
@@ -189,7 +189,7 @@ describe('getFileHandler', () => {
     const context = mockContext();
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 404,
         body: 'bundled package file not found: idonotexists.md',
@@ -220,7 +220,7 @@ describe('getFileHandler', () => {
 
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 200,
         body: 'test',
@@ -254,7 +254,7 @@ describe('getFileHandler', () => {
 
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 404,
         body: 'not found',
@@ -289,7 +289,7 @@ describe('getFileHandler', () => {
 
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 200,
         headers: expect.objectContaining({
@@ -332,7 +332,7 @@ describe('getFileHandler', () => {
 
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 200,
         headers: expect.objectContaining({
@@ -387,7 +387,7 @@ describe('getFileHandler', () => {
     mockedGetInstallation.mockResolvedValue({ version: '1.0.0' } as any);
     await getFileHandler(context, request, response);
 
-    expect(response.custom).toBeCalledWith(
+    expect(response.custom).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 404,
         body: 'installed package file not found: README.md',

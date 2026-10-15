@@ -14,7 +14,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +29,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import type {
   SystemIndicesMigrationStatus,
@@ -270,11 +270,9 @@ export const SystemIndicesFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         {migrationStatus === 'NO_MIGRATION_NEEDED' && (
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount={false}
             title={i18nTexts.migrationNotNeeded}
-            iconType="popper"
-            color="success"
             data-test-subj="noMigrationNeededCallout"
           />
         )}

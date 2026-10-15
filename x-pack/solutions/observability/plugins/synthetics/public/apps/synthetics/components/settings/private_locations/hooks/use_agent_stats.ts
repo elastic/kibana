@@ -20,7 +20,7 @@ import { useSyntheticsRefreshContext } from '../../../../contexts';
  */
 export const useAgentStats = () => {
   const dispatch = useDispatch();
-  const { data, loading } = useSelector(selectAgentStats);
+  const { data, loading, error } = useSelector(selectAgentStats);
   const { lastRefresh } = useSyntheticsRefreshContext();
   const lastRefreshRef = useRef(lastRefresh);
 
@@ -38,5 +38,5 @@ export const useAgentStats = () => {
     return map;
   }, [data]);
 
-  return { byLocation, loading };
+  return { byLocation, loading, error };
 };

@@ -33,6 +33,7 @@ import {
   type AttachmentFiltersState,
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 const flyoutTitleLabel = i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
   defaultMessage: 'Add attachments',
@@ -56,6 +57,9 @@ export function AddAttachmentFlyout({
       },
     },
   } = useKibana();
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const { euiTheme } = useEuiTheme();
 
@@ -99,7 +103,12 @@ export function AddAttachmentFlyout({
   }, [attachmentSuggestionsFetch.value]);
 
   return (
-    <EuiFlyout onClose={onClose} aria-label={flyoutTitleLabel}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-label={flyoutTitleLabel}
+      size={canvas.enabled ? 'm' : undefined}
+      hasChildBackground
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>{flyoutTitleLabel}</h2>

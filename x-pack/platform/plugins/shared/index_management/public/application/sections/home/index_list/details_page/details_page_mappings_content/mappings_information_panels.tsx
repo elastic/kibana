@@ -86,7 +86,6 @@ export const MappingsInformationPanels = ({
                 promoId="indexDetailsMappings"
                 shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
                 handleOnClick={() => setIsUpdatingElserMappings(true)}
-                direction="column"
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
               />
             ) : (
@@ -94,7 +93,6 @@ export const MappingsInformationPanels = ({
                 promoId="indexDetailsMappings"
                 isCloudEnabled={cloud?.isCloudEnabled ?? false}
                 ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
-                direction="column"
               />
             )}
             {isUpdatingElserMappings && (
@@ -112,7 +110,6 @@ export const MappingsInformationPanels = ({
           <EisCloudConnectPromoCallout
             promoId="indexDetailsMappings"
             isSelfManaged={!cloud?.isCloudEnabled}
-            direction="column"
             navigateToApp={() =>
               application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
             }
