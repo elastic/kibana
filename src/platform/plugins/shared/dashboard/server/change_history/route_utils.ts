@@ -17,6 +17,7 @@ import type {
 
 import { getChangeHistoryClient } from './change_history_service';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { securityService, spacesService } from '../kibana_services';
 
 export const CHANGE_HISTORY_ROUTE_SECURITY = {
@@ -28,7 +29,7 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 
 /**
  * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
- * request. Returns the error response to send when the request cannot be served.
+ * request, along with the saved dashboard's current history sequence. Returns the error response to send when the request cannot be served.
  */
 export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   ctx: RequestHandlerContext,
@@ -55,8 +56,13 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   }
 
   // history is read with an internally privileged client, so access to the dashboard must be verified
+  let currentSequence: number | undefined;
   try {
-    await core.savedObjects.client.get(DASHBOARD_SAVED_OBJECT_TYPE, dashboardId);
+    const dashboard = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      dashboardId
+    );
+    currentSequence = dashboard.attributes?.historySequence;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) return { error: res.notFound() };
     if (SavedObjectsErrorHelpers.isForbiddenError(e)) return { error: res.forbidden() };
@@ -71,5 +77,5 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
     };
   }
-  return { client, spaceId };
+  return { client, spaceId, currentSequence };
 };

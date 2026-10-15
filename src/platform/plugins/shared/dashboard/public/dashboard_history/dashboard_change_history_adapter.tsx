@@ -8,7 +8,7 @@
  */
 
 import { mapChangeHistoryHttpError, type ChangeHistoryAdapter } from '@kbn/change-history-ui';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { RestoreChangeResponse } from '../../server/change_history/register_restore_route';
@@ -23,10 +23,13 @@ export const createDashboardChangeHistoryAdapter = (
 ): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }) => {
     try {
-      const response = await http.get<HistoryListResponse>(`${BASE_HISTORY_PATH}/${objectId}`, {
-        query: { page: page.index + 1, per_page: page.size },
-        signal,
-      });
+      const response = await http.get<HistoryListResponse>(
+        buildPath(`${BASE_HISTORY_PATH}/{objectId}`, { objectId }),
+        {
+          query: { page: page.index + 1, per_page: page.size },
+          signal,
+        }
+      );
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
@@ -35,7 +38,7 @@ export const createDashboardChangeHistoryAdapter = (
   getChange: async ({ objectId, changeId, signal }) => {
     try {
       const response = await http.get<ChangeDetailsResponse>(
-        `${BASE_HISTORY_PATH}/${objectId}/${changeId}`,
+        buildPath(`${BASE_HISTORY_PATH}/{objectId}/{changeId}`, { objectId, changeId }),
         {
           signal,
         }
@@ -49,7 +52,10 @@ export const createDashboardChangeHistoryAdapter = (
     ? async ({ objectId, changeId, signal }) => {
         try {
           const response = await http.post<RestoreChangeResponse>(
-            `${BASE_HISTORY_PATH}/${objectId}/${changeId}/_restore`,
+            buildPath(`${BASE_HISTORY_PATH}/{objectId}/{changeId}/_restore`, {
+              objectId,
+              changeId,
+            }),
             {
               signal,
             }

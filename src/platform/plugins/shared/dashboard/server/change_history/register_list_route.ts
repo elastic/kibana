@@ -62,7 +62,7 @@ export const registerHistoryListRoute = (
     async (ctx, req, res) => {
       const context = await getChangeHistoryContext(ctx, req, res, req.params.id);
       if (context.error) return context.error;
-      const { client, spaceId } = context;
+      const { client, spaceId, currentSequence } = context;
 
       const { page = 1, per_page: perPage } = req.query;
       const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
@@ -80,14 +80,14 @@ export const registerHistoryListRoute = (
       return res.ok({
         body: {
           total,
-          items: items.map((item, index) => {
+          items: items.map((item) => {
             const user = item.user;
             const profile = user.id ? profileByUid.get(user.id) : undefined;
             const changeCount = item.metadata?.changeCount;
             return {
               id: item.event.id,
               action: item.event.action,
-              isCurrent: page === 1 && index === 0,
+              isCurrent: currentSequence !== undefined && item.object.sequence === currentSequence,
               timestamp: item['@timestamp'],
               actor: {
                 name: profile?.user.full_name || user.name,

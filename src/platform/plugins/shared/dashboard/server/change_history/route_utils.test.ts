@@ -52,11 +52,12 @@ describe('getChangeHistoryContext', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     mockUseRbacForRequest.mockReturnValue(true);
+    getSavedObject.mockResolvedValue({ attributes: { historySequence: 3 } });
   });
 
   it('skips the privileges check when security is disabled', async () => {
     mockUseRbacForRequest.mockReturnValue(false);
-    getSavedObject.mockResolvedValue({});
+    getSavedObject.mockResolvedValue({ attributes: {} });
     mockedGetClient.mockReturnValue({} as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getContext(false), req, res, 'dash-1');
@@ -139,6 +140,6 @@ describe('getChangeHistoryContext', () => {
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
 
-    expect(result).toEqual({ client, spaceId: 'space-for-req-1' });
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: 3 });
   });
 });

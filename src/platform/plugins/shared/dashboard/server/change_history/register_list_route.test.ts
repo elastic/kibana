@@ -48,11 +48,12 @@ const setup = () => {
 const run = async (
   items: unknown[],
   query: { page?: number; per_page?: number } = {},
-  total = items.length
+  total = items.length,
+  currentSequence: number | undefined = 2
 ) => {
   const { handler, bulkGet } = setup();
   const client = { getHistory: jest.fn().mockResolvedValue({ total, items }) };
-  mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space' });
+  mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space', currentSequence });
   const res = httpServerMock.createResponseFactory();
   await handler(
     {} as never,
@@ -110,7 +111,7 @@ describe('list route', () => {
         items: [getItem('c2', { metadata: { changeCount: 3, restoredFrom: 1 } }), getItem('c1')],
       }),
     };
-    mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space' });
+    mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space', currentSequence: 2 });
     const res = httpServerMock.createResponseFactory();
     await handler(
       {} as never,
@@ -142,8 +143,14 @@ describe('list route', () => {
     expect(body.items[1]).not.toHaveProperty('comment');
   });
 
-  it('only flags the first item of the first page as current', async () => {
-    const { res } = await run([getItem('c2'), getItem('c1')], { page: 2, per_page: 2 }, 4);
+  it('flags the item matching the saved dashboard sequence as current', async () => {
+    const { res } = await run([getItem('c3'), getItem('c2'), getItem('c1')], {}, 3, 2);
+    const { body } = res.ok.mock.calls[0][0] as { body: { items: Array<{ isCurrent: boolean }> } };
+    expect(body.items.map((item) => item.isCurrent)).toEqual([false, true, false]);
+  });
+
+  it('flags nothing as current when history is behind the saved dashboard', async () => {
+    const { res } = await run([getItem('c2'), getItem('c1')], {}, 2, 3);
     const { body } = res.ok.mock.calls[0][0] as { body: { items: Array<{ isCurrent: boolean }> } };
     expect(body.items.map((item) => item.isCurrent)).toEqual([false, false]);
   });

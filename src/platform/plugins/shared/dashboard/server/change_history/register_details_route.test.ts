@@ -33,11 +33,11 @@ const getItem = (id: string) => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   user: { name: 'Hannah', id: 'u_1' },
   event: { id, action: 'dashboard_update' },
-  object: { snapshot: { title: `Snapshot ${id}` } },
+  object: { sequence: Number(id.replace('c', '')), snapshot: { title: `Snapshot ${id}` } },
 });
 
-const runHandler = async (client: unknown) => {
-  mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space' });
+const runHandler = async (client: unknown, currentSequence: number | undefined = 2) => {
+  mockedGetContext.mockResolvedValue({ client, spaceId: 'my-space', currentSequence });
   const res = httpServerMock.createResponseFactory();
   await getHandler()(
     {} as never,
@@ -68,13 +68,9 @@ describe('details route', () => {
     expect(res.ok).not.toHaveBeenCalled();
   });
 
-  it('returns the change and flags the latest change as current', async () => {
+  it('returns the change and flags it as current when it matches the saved sequence', async () => {
     const client = {
-      getHistory: jest
-        .fn()
-        // requested change, then the latest change
-        .mockResolvedValueOnce({ items: [getItem('c2')] })
-        .mockResolvedValueOnce({ items: [getItem('c2')] }),
+      getHistory: jest.fn().mockResolvedValue({ items: [getItem('c2')] }),
     };
     const res = await runHandler(client);
 
@@ -82,7 +78,6 @@ describe('details route', () => {
       additionalFilters: [{ term: { 'event.id': 'c2' } }],
       size: 1,
     });
-    expect(client.getHistory).toHaveBeenCalledWith('my-space', 'dashboard', 'dash-1', { size: 1 });
     expect(res.ok).toHaveBeenCalledWith({
       body: {
         id: 'c2',
@@ -95,14 +90,10 @@ describe('details route', () => {
     });
   });
 
-  it('does not flag older changes as current', async () => {
-    const client = {
-      getHistory: jest
-        .fn()
-        .mockResolvedValueOnce({ items: [getItem('c1')] })
-        .mockResolvedValueOnce({ items: [getItem('c2')] }),
-    };
-    const res = await runHandler(client);
+  it('does not flag changes that differ from the saved sequence as current', async () => {
+    const client = { getHistory: jest.fn().mockResolvedValue({ items: [getItem('c2')] }) };
+    // history is best-effort: the dashboard can be ahead of the newest recorded event
+    const res = await runHandler(client, 3);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expect.objectContaining({ isCurrent: false }),

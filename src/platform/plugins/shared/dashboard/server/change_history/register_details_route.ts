@@ -51,20 +51,16 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
     async (ctx, req, res) => {
       const context = await getChangeHistoryContext(ctx, req, res, req.params.id);
       if (context.error) return context.error;
-      const { client, spaceId } = context;
+      const { client, spaceId, currentSequence } = context;
 
-      const [{ items }, { items: currentHistoryItem }] = await Promise.all([
-        client.getHistory(spaceId, 'dashboard', req.params.id, {
-          additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
-          size: 1,
-        }),
-        client.getHistory(spaceId, 'dashboard', req.params.id, { size: 1 }),
-      ]);
+      const { items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
+        additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
+        size: 1,
+      });
       const item = items[0];
       if (!item) {
         return res.notFound();
       }
-      const currentHistoryId = currentHistoryItem[0]?.event.id;
 
       return res.ok({
         body: {
@@ -73,7 +69,7 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
           actor: item.user,
           action: item.event.action,
           snapshot: item.object.snapshot,
-          isCurrent: item.event.id === currentHistoryId,
+          isCurrent: currentSequence !== undefined && item.object.sequence === currentSequence,
         },
       });
     }
