@@ -3,7 +3,7 @@ info:
   contact:
     name: Kibana Team
   description: |
-    The Kibana REST APIs for Elastic serverless enable you to manage resources
+    The Kibana REST API for Elastic serverless enables you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
     and must include all of the necessary information for Kibana to fulfill the
