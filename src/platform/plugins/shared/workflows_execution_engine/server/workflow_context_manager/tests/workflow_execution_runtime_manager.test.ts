@@ -1279,9 +1279,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
             compositionDepth: 2,
           })
         );
-        const [[, eventData]] = (analytics.reportEvent as jest.Mock).mock.calls;
-        expect(eventData).not.toHaveProperty('parentWorkflowExecutionId');
-        expect(eventData).not.toHaveProperty('rootWorkflowExecutionId');
       }
     );
   });

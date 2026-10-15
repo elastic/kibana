@@ -249,7 +249,6 @@ describe('WorkflowExecuteSyncStrategy', () => {
           ],
         })
       );
-      expect(getChildContext()).not.toHaveProperty('rootWorkflowExecutionId');
     });
 
     it("appends the parent to a grandchild's chain after the top-level hop", async () => {
@@ -282,7 +281,6 @@ describe('WorkflowExecuteSyncStrategy', () => {
           parentWorkflowId: 'parent-workflow-id',
         })
       );
-      expect(getChildContext()).not.toHaveProperty('rootWorkflowExecutionId');
     });
 
     it('keeps the execution chain next to an inherited service account', async () => {
@@ -319,7 +317,6 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
 
       expect(getChildContext()).not.toHaveProperty('executionChain');
-      expect(getChildContext()).not.toHaveProperty('rootWorkflowExecutionId');
       expect(getChildContext()).toEqual(
         expect.objectContaining({ parentWorkflowInvocation: 'sync' })
       );

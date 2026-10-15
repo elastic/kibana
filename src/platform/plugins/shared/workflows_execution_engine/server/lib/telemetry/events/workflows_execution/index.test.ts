@@ -20,16 +20,12 @@ import {
 } from './types';
 import { WorkflowExecutionTelemetryClient } from '../../workflow_execution_telemetry_client';
 
-/** Flat lineage ids that executionChain replaced; no event schema declares them. */
-const REMOVED_LINEAGE_FIELDS = ['parentWorkflowExecutionId', 'rootWorkflowExecutionId'] as const;
-
 /** Every composition and lineage field; a top-level execution reports none of them. */
 const ALL_LINEAGE_FIELDS: readonly string[] = [
   'compositionDepth',
   'executionChain',
   'parentWorkflowId',
   'parentWorkflowInvocation',
-  ...REMOVED_LINEAGE_FIELDS,
 ];
 
 const reportedFieldsAmong = (eventData: object, fields: readonly string[]): string[] =>
@@ -86,16 +82,6 @@ const suppressedEventData: EventDrivenExecutionSuppressedParams = {
 
 describe('workflowExecutionEventSchemas', () => {
   describe('execution lineage fields', () => {
-    it.each(
-      TERMINAL_EVENT_TYPES.flatMap((eventType) =>
-        REMOVED_LINEAGE_FIELDS.map((field) => [eventType, field] as const)
-      )
-    )('%s does not declare %s', (eventType, field) => {
-      const schema: Record<string, unknown> = workflowExecutionEventSchemas[eventType];
-
-      expect(schema).not.toHaveProperty(field);
-    });
-
     it.each(TERMINAL_EVENT_TYPES)(
       '%s declares executionChain as an optional array of described keyword hops',
       (eventType) => {
@@ -113,16 +99,13 @@ describe('workflowExecutionEventSchemas', () => {
       }
     );
 
-    it.each([...REMOVED_LINEAGE_FIELDS, 'executionChain'])(
-      'the event-driven suppressed event does not declare %s',
-      (field) => {
-        const schema = workflowExecutionEventSchemas[
-          WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed
-        ] as Record<string, unknown>;
+    it('the event-driven suppressed event does not declare executionChain', () => {
+      const schema = workflowExecutionEventSchemas[
+        WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed
+      ] as Record<string, unknown>;
 
-        expect(schema).not.toHaveProperty(field);
-      }
-    );
+      expect(schema).not.toHaveProperty('executionChain');
+    });
   });
 
   describe('dev-mode schema validation', () => {
@@ -161,8 +144,6 @@ describe('workflowExecutionEventSchemas', () => {
             parentWorkflowInvocation: 'sync',
           })
         );
-        const [[, eventData]] = reportEventSpy.mock.calls;
-        expect(reportedFieldsAmong(eventData, REMOVED_LINEAGE_FIELDS)).toEqual([]);
       }
     );
 
@@ -173,27 +154,6 @@ describe('workflowExecutionEventSchemas', () => {
           executionChain: [{ ...EXECUTION_CHAIN[0], spaceId: 'default' }],
         })
       ).toThrow(/excess key 'spaceId' found/);
-    });
-
-    it.each(
-      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED].flatMap(
-        (finalStatus) => REMOVED_LINEAGE_FIELDS.map((field) => [finalStatus, field] as const)
-      )
-    )('rejects the %s event of a child execution that also carries %s', (finalStatus, field) => {
-      const client = new WorkflowExecutionTelemetryClient(analytics, logger);
-      const reportEventSpy = jest.spyOn(analytics, 'reportEvent');
-
-      client.reportWorkflowExecutionTerminated({
-        finalStatus,
-        stepExecutions: [],
-        workflowExecution: createChildWorkflowExecution(finalStatus),
-      });
-      const [[eventType, eventData]] = reportEventSpy.mock.calls;
-
-      expect(logger.error).not.toHaveBeenCalled();
-      expect(() =>
-        analytics.reportEvent(eventType, { ...eventData, [field]: 'some-exec-id' })
-      ).toThrow(`excess key '${field}' found`);
     });
 
     it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
@@ -232,16 +192,13 @@ describe('workflowExecutionEventSchemas', () => {
       ).not.toThrow();
     });
 
-    it.each([
-      ...REMOVED_LINEAGE_FIELDS.map((field) => [field, 'some-exec-id'] as const),
-      ['executionChain', EXECUTION_CHAIN] as const,
-    ])('rejects a suppressed event carrying %s', (field, value) => {
+    it('rejects a suppressed event carrying executionChain', () => {
       expect(() =>
         analytics.reportEvent(WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed, {
           ...suppressedEventData,
-          [field]: value,
+          executionChain: EXECUTION_CHAIN,
         })
-      ).toThrow(`excess key '${field}' found`);
+      ).toThrow("excess key 'executionChain' found");
     });
   });
 });

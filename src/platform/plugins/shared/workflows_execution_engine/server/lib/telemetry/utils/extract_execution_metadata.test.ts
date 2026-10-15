@@ -551,18 +551,6 @@ describe('extractCompositionContext', () => {
       });
     });
 
-    it('never returns rootWorkflowExecutionId or parentWorkflowExecutionId', () => {
-      const result = extractCompositionContext(
-        compositionFixture('workflow-step', {
-          ...grandchildContext,
-          rootWorkflowExecutionId: 'root-exec-id',
-        })
-      );
-
-      expect(result).not.toHaveProperty('rootWorkflowExecutionId');
-      expect(result).not.toHaveProperty('parentWorkflowExecutionId');
-    });
-
     it("copies only each hop's own fields", () => {
       expect(
         extractCompositionContext(

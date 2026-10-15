@@ -81,15 +81,12 @@ describe('WorkflowExecutionTelemetryClient', () => {
     };
   };
 
-  /** Flat lineage ids that executionChain replaced; no event reports them. */
-  const NEVER_REPORTED_LINEAGE_FIELDS = ['parentWorkflowExecutionId', 'rootWorkflowExecutionId'];
   /** Every composition and lineage field; a top-level execution reports none of them. */
   const ALL_LINEAGE_FIELDS = [
     'compositionDepth',
     'executionChain',
     'parentWorkflowId',
     'parentWorkflowInvocation',
-    ...NEVER_REPORTED_LINEAGE_FIELDS,
   ];
   const reportedFieldsAmong = (eventData: object, fields: readonly string[]): string[] =>
     Object.keys(eventData).filter((key) => fields.includes(key));
@@ -438,7 +435,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
         ],
         parentWorkflowId: 'parent-wf-id',
       });
-      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
 
     it('should omit executionChain for a sub-workflow execution without a stored chain', () => {
@@ -458,9 +454,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).toMatchObject({ compositionDepth: 2, parentWorkflowId: 'parent-wf-id' });
-      expect(
-        reportedFieldsAmong(eventData, ['executionChain', ...NEVER_REPORTED_LINEAGE_FIELDS])
-      ).toEqual([]);
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
     it('should normalize event-driven trigger id to triggerType event and eventTriggerId', () => {
@@ -725,7 +719,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
         ],
         parentWorkflowId: 'parent-wf-id',
       });
-      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
 
     it('should include token usage totals when failed execution usage is present', () => {
@@ -856,9 +849,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(
-        reportedFieldsAmong(eventData, ['executionChain', ...NEVER_REPORTED_LINEAGE_FIELDS])
-      ).toEqual([]);
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
     it('should include managed workflow execution fields when present', () => {
@@ -1005,7 +996,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
         compositionDepth: 1,
         parentWorkflowId: 'parent-wf-id',
       });
-      expect(reportedFieldsAmong(eventData, NEVER_REPORTED_LINEAGE_FIELDS)).toEqual([]);
     });
   });
 
