@@ -16,21 +16,20 @@ import { expect } from '@kbn/scout/api';
 import {
   COMMON_HEADERS,
   DATA_VIEW_PATH_LEGACY,
-  ES_ARCHIVE_BASIC_INDEX,
   SERVICE_KEY_LEGACY,
 } from '../../fixtures/constants';
 
 const DEPRECATIONS_PATH = 'api/deprecations/';
 
 // Scripted fields are disabled on serverless, so this only runs on stateful classic.
+// The deprecations provider searches the data views of all the spaces, so the test only looks for the
+// data view it creates: the "no deprecations" branch is covered by a Jest test of the provider.
 apiTest.describe('scripted field deprecations', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let createdId: string | undefined;
 
-  apiTest.beforeAll(async ({ esArchiver, kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
-    await kbnClient.savedObjects.cleanStandardList();
-    await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -39,19 +38,10 @@ apiTest.describe('scripted field deprecations', { tag: tags.stateful.classic }, 
     }
   });
 
-  apiTest('no scripted fields deprecations', async ({ apiClient }) => {
-    const response = await apiClient.get(DEPRECATIONS_PATH, {
-      headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const { deprecations } = response.body as DeprecationsGetResponse;
-    expect(deprecations.filter(({ domainId }) => domainId === 'dataViews')).toHaveLength(0);
-  });
-
   apiTest('scripted field deprecation', async ({ apiClient }) => {
-    const title = 'basic_index';
+    const title = `scripted-fields-deprecation-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}`;
     const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
       headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
       responseType: 'json',

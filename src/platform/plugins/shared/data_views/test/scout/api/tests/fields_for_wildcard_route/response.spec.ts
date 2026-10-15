@@ -78,6 +78,7 @@ apiTest.describe(
     // Tracks the temporary index created by the "returns empty set" test so cleanup runs
     // from a hook even if the test times out before reaching its inline cleanup.
     let tempIndexName: string | undefined;
+    // The closed-index tests are stateful only: serverless does not expose the close index API.
     // Dedicated indices closed by the closed-index tests (basic_index is shared, so never close it).
     const closedIndexNames: string[] = [];
 
@@ -334,6 +335,7 @@ apiTest.describe(
 
     apiTest(
       'returns 200 when index is closed and allow_no_index is true',
+      { tag: tags.stateful.classic },
       async ({ apiClient, esClient }) => {
         const indexName = `fields-for-wildcard-closed-${Date.now()}-${Math.random()
           .toString(36)
@@ -360,6 +362,7 @@ apiTest.describe(
 
     apiTest(
       'returns 404 when index is closed and allow_no_index is false',
+      { tag: tags.stateful.classic },
       async ({ apiClient, esClient }) => {
         const indexName = `fields-for-wildcard-closed-${Date.now()}-${Math.random()
           .toString(36)
