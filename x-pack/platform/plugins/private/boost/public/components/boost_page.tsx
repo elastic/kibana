@@ -5,21 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader, AppHeaderLoading, type AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../common/constants';
+import type { ModeSwitchRuleChanges } from '../../common/mode_switch';
+import { getModeSwitchChanges } from '../../common/mode_switch';
+import type { BoostMode } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
 import { BOOST_DOCS_URL } from '../doc_links';
 import { BOOST_APP_TITLE } from '../translations';
+import { formatDataSourceCount } from './format';
+import { ModeSwitchModal } from './mode_switch/mode_switch_modal';
+import {
+  isModeSwitchConfirmationSkipped,
+  skipModeSwitchConfirmation,
+} from './mode_switch/mode_switch_preferences';
 import { ProfilesTab } from './profiles/profiles_tab';
 import { RulesTab } from './rules/rules_tab';
 import { SimpleModeSettings } from './simple_mode_settings';
 
 type AdvancedTab = 'profiles' | 'rules';
+
+/** A mode switch waiting for confirmation, with what it changes when it was asked for. */
+interface PendingModeSwitch {
+  mode: BoostMode;
+  changes: ModeSwitchRuleChanges[];
+}
+
+/** Says how many indices and data streams a mode switch changed. */
+const getChangedTargetsMessage = (changes: readonly ModeSwitchRuleChanges[]): string => {
+  const targets = changes.flatMap(({ changes: ruleChanges }) => ruleChanges);
+  const indexCount = targets.filter(({ type }) => type === 'indices').length;
+  const dataStreamCount = targets.length - indexCount;
+  const indices = formatDataSourceCount('indices', indexCount);
+  const dataStreams = formatDataSourceCount('data_streams', dataStreamCount);
+  return indexCount > 0 && dataStreamCount > 0
+    ? i18n.translate('xpack.boost.page.modeSwitchedBothText', {
+        defaultMessage: '{indices} and {dataStreams} changed boost profile.',
+        values: { indices, dataStreams },
+      })
+    : i18n.translate('xpack.boost.page.modeSwitchedText', {
+        defaultMessage: '{targets} changed boost profile.',
+        values: { targets: indexCount > 0 ? indices : dataStreams },
+      });
+};
 
 const BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.boost.page.description', {
   defaultMessage:
@@ -31,6 +64,7 @@ export const BoostPage = () => {
     application: { capabilities },
     chrome,
     appParams,
+    notifications,
   } = useBoostServices();
   const canEdit = capabilities[PLUGIN_ID]?.save === true;
   const history = useHistory();
@@ -38,6 +72,7 @@ export const BoostPage = () => {
 
   const { data: state, error, refetch } = useBoostState();
   const { mutate: updateMode, isLoading: isUpdatingMode } = useUpdateMode();
+  const [pendingModeSwitch, setPendingModeSwitch] = useState<PendingModeSwitch>();
 
   useEffect(() => {
     appParams.setBreadcrumbs([{ text: BOOST_APP_TITLE }]);
@@ -95,10 +130,46 @@ export const BoostPage = () => {
       ]
     : undefined;
 
-  const onModeChange = (checked: boolean) =>
-    updateMode(checked ? 'advanced' : 'simple', {
-      onSuccess: () => history.push(checked ? '/rules' : '/'),
+  const switchMode = (
+    mode: BoostMode,
+    options?: { onSuccess?: () => void; onSettled?: () => void }
+  ) =>
+    updateMode(mode, {
+      onSuccess: () => {
+        history.push(mode === 'advanced' ? '/rules' : '/');
+        options?.onSuccess?.();
+      },
+      onSettled: options?.onSettled,
     });
+
+  // A switch that changes any index or data stream's profile is confirmed first, unless the user
+  // chose to skip that, in which case a toast says what changed.
+  const onModeChange = (checked: boolean) => {
+    const mode: BoostMode = checked ? 'advanced' : 'simple';
+    const changes = getModeSwitchChanges(state, mode);
+    if (changes.length === 0) {
+      switchMode(mode);
+      return;
+    }
+    if (!isModeSwitchConfirmationSkipped(mode)) {
+      setPendingModeSwitch({ mode, changes });
+      return;
+    }
+    switchMode(mode, {
+      onSuccess: () =>
+        notifications.toasts.addSuccess({
+          title:
+            mode === 'simple'
+              ? i18n.translate('xpack.boost.page.turnedOffAdvancedModeToast', {
+                  defaultMessage: 'Turned off advanced mode',
+                })
+              : i18n.translate('xpack.boost.page.turnedOnAdvancedModeToast', {
+                  defaultMessage: 'Turned on advanced mode',
+                }),
+          text: getChangedTargetsMessage(changes),
+        }),
+    });
+  };
 
   return (
     <>
@@ -152,6 +223,27 @@ export const BoostPage = () => {
           />
         )}
       </EuiPageSection>
+
+      {pendingModeSwitch && (
+        <ModeSwitchModal
+          mode={pendingModeSwitch.mode}
+          changes={pendingModeSwitch.changes}
+          isSwitching={isUpdatingMode}
+          onCancel={() => setPendingModeSwitch(undefined)}
+          onConfirm={(shouldSkipNextTime) => {
+            const { mode } = pendingModeSwitch;
+            switchMode(mode, {
+              // Only a switch that happens remembers the choice, so cancelling doesn't count.
+              onSuccess: () => {
+                if (shouldSkipNextTime) {
+                  skipModeSwitchConfirmation(mode);
+                }
+              },
+              onSettled: () => setPendingModeSwitch(undefined),
+            });
+          }}
+        />
+      )}
     </>
   );
 };

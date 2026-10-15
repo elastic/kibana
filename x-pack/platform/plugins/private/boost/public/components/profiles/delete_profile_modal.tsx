@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 import {
-  EuiAccordion,
-  EuiCode,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormLabel,
-  EuiHorizontalRule,
-  EuiNotificationBadge,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiOverflowScroll,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +19,7 @@ import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/t
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
 import { formatDataSourceCount } from '../format';
+import { RuleChangeList, RuleChangeTable } from '../rule_change_list';
 
 interface DeleteProfileModalProps {
   profile: BoostProfile;
@@ -60,11 +51,8 @@ export const DeleteProfileModal = ({
   dataSources,
   onClose,
 }: DeleteProfileModalProps) => {
-  const { euiTheme } = useEuiTheme();
-  const scrollStyles = useEuiOverflowScroll('y', true);
   const { notifications } = useBoostServices();
   const titleId = useGeneratedHtmlId();
-  const accordionIdPrefix = useGeneratedHtmlId({ prefix: 'deletedRule' });
   const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfile();
   const { name, type } = profile;
 
@@ -92,8 +80,6 @@ export const DeleteProfileModal = ({
   }, [name, rules, profiles, dataSources]);
 
   const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
-  // Only one rule is open at a time, so the list stays short.
-  const [openRuleName, setOpenRuleName] = useState<string>();
 
   const listTitleId = useGeneratedHtmlId({ prefix: 'deletedRulesTitle' });
 
@@ -177,149 +163,41 @@ export const DeleteProfileModal = ({
             })}
           </EuiFormLabel>
           <EuiSpacer size="xs" />
-          <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-            {/* Long lists scroll inside the panel, keeping the modal's buttons in view. The panel
-                draws its border with a pseudo-element, so an inner element scrolls instead, or the
-                border would scroll away with the content. */}
-            <div
-              role="region"
-              aria-labelledby={listTitleId}
-              tabIndex={0}
-              css={css`
-                ${scrollStyles}
-                max-block-size: ${euiTheme.base * 15}px;
-                /* Clips rows and dividers to the panel's rounded corners. */
-                border-radius: inherit;
-              `}
-            >
-              {deletedRules.map(({ name: ruleName, affected }, index) => (
-                <Fragment key={ruleName}>
-                  {index > 0 && <EuiHorizontalRule margin="none" />}
-                  {affected.length > 0 ? (
-                    <EuiAccordion
-                      id={`${accordionIdPrefix}-${ruleName}`}
-                      forceState={openRuleName === ruleName ? 'open' : 'closed'}
-                      onToggle={(isOpen) => setOpenRuleName(isOpen ? ruleName : undefined)}
-                      buttonContent={<EuiText size="s">{ruleName}</EuiText>}
-                      buttonProps={{ paddingSize: 's' }}
-                      extraAction={<AffectedCountBadge count={affected.length} type={type} />}
-                      css={{ paddingInline: euiTheme.size.s }}
-                      data-test-subj={`deletedRule-${ruleName}`}
-                    >
-                      {/* Indented by the accordion arrow's width and gap, so the content lines up
-                        with the rule name above it. */}
-                      <div
-                        css={{
-                          paddingBlock: euiTheme.size.s,
-                          paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                        }}
-                      >
-                        <AffectedTable ruleName={ruleName} affected={affected} type={type} />
-                      </div>
-                    </EuiAccordion>
-                  ) : (
-                    // Matches an accordion's padding, line height, and chevron indent, so rule
-                    // names line up whether or not the rule expands.
-                    <EuiText
-                      size="s"
-                      css={{
-                        paddingBlock: euiTheme.size.s,
-                        paddingInlineStart: `calc(${euiTheme.size.s} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                        paddingInlineEnd: euiTheme.size.s,
-                        lineHeight: euiTheme.size.l,
-                      }}
-                      data-test-subj={`deletedRule-${ruleName}`}
-                    >
-                      {ruleName}
-                    </EuiText>
-                  )}
-                </Fragment>
-              ))}
-            </div>
-          </EuiPanel>
+          <RuleChangeList
+            titleId={listTitleId}
+            items={deletedRules.map(({ name: ruleName, affected }) => ({
+              name: ruleName,
+              count: affected.length > 0 ? formatDataSourceCount(type, affected.length) : undefined,
+              details: affected.length > 0 && (
+                <RuleChangeTable
+                  aria-label={i18n.translate('xpack.boost.deleteProfileModal.affectedTableLabel', {
+                    defaultMessage:
+                      'Data sources that {ruleName} applies to, and the rule each will now use',
+                    values: { ruleName },
+                  })}
+                  nameHeader={
+                    type === 'indices'
+                      ? i18n.translate('xpack.boost.deleteProfileModal.affectedIndexColumn', {
+                          defaultMessage: 'Affected index',
+                        })
+                      : i18n.translate('xpack.boost.deleteProfileModal.affectedDataStreamColumn', {
+                          defaultMessage: 'Affected data stream',
+                        })
+                  }
+                  valueHeader={i18n.translate('xpack.boost.deleteProfileModal.nextRuleColumn', {
+                    defaultMessage: 'Will now use rule',
+                  })}
+                  rows={affected.map(({ name: dataSourceName, nextRule }) => ({
+                    name: dataSourceName,
+                    value: nextRule,
+                  }))}
+                />
+              ),
+              'data-test-subj': `deletedRule-${ruleName}`,
+            }))}
+          />
         </>
       )}
     </EuiConfirmModal>
-  );
-};
-
-interface AffectedCountBadgeProps {
-  count: number;
-  type: BoostProfile['type'];
-}
-
-const AffectedCountBadge = ({ count, type }: AffectedCountBadgeProps) => {
-  return (
-    <EuiNotificationBadge color="subdued">
-      {formatDataSourceCount(type, count)}
-    </EuiNotificationBadge>
-  );
-};
-
-interface AffectedTableProps {
-  ruleName: string;
-  affected: AffectedDataSource[];
-  type: BoostProfile['type'];
-}
-
-/**
- * The affected data sources and the rule each will now use. Built from flex layout with table
- * roles, so the borders sit only between rows.
- */
-const AffectedTable = ({ ruleName, affected, type }: AffectedTableProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <div
-      role="table"
-      aria-label={i18n.translate('xpack.boost.deleteProfileModal.affectedTableLabel', {
-        defaultMessage: 'Data sources that {ruleName} applies to, and the rule each will now use',
-        values: { ruleName },
-      })}
-    >
-      <EuiFlexGroup
-        role="row"
-        gutterSize="s"
-        responsive={false}
-        css={{ paddingBlockEnd: euiTheme.size.xs }}
-      >
-        <EuiFlexItem role="columnheader">
-          <EuiFormLabel>
-            {type === 'indices'
-              ? i18n.translate('xpack.boost.deleteProfileModal.affectedIndexColumn', {
-                  defaultMessage: 'Affected index',
-                })
-              : i18n.translate('xpack.boost.deleteProfileModal.affectedDataStreamColumn', {
-                  defaultMessage: 'Affected data stream',
-                })}
-          </EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem role="columnheader">
-          <EuiFormLabel>
-            {i18n.translate('xpack.boost.deleteProfileModal.nextRuleColumn', {
-              defaultMessage: 'Will now use rule',
-            })}
-          </EuiFormLabel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {affected.map(({ name, nextRule }) => (
-        <EuiFlexGroup
-          key={name}
-          role="row"
-          gutterSize="s"
-          responsive={false}
-          css={{ paddingBlock: euiTheme.size.xs }}
-        >
-          <EuiFlexItem role="cell">
-            <EuiText size="xs">
-              <EuiCode>{name}</EuiCode>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem role="cell">
-            <EuiText size="xs">{nextRule}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </div>
   );
 };

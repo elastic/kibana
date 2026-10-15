@@ -136,7 +136,7 @@ const getCustomRules = async (client: SavedObjectsClientContract): Promise<Boost
 
 /**
  * Returns the settings, the profiles and rules in effect, and the project's data sources. Custom
- * rules only apply in advanced mode; simple mode suspends them.
+ * rules only apply in advanced mode; simple mode suspends them, and returns them separately.
  */
 export const getState = async (
   client: SavedObjectsClientContract,
@@ -149,11 +149,13 @@ export const getState = async (
     getDataSources(esClient),
   ]);
   const defaultRules = createDefaultRules(getEffectiveDefaults(settings));
+  const isAdvanced = settings.mode === 'advanced';
 
   return {
     settings,
     profiles: [...BUILTIN_PROFILES, ...customProfiles],
-    rules: settings.mode === 'advanced' ? [...customRules, ...defaultRules] : defaultRules,
+    rules: isAdvanced ? [...customRules, ...defaultRules] : defaultRules,
+    suspended_rules: isAdvanced ? [] : customRules,
     data_sources: dataSources,
   };
 };

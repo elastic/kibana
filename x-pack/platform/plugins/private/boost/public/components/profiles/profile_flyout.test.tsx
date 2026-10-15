@@ -50,6 +50,7 @@ const state: BoostState = {
       is_builtin: false,
     },
   ],
+  suspended_rules: [],
   data_sources: [
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },

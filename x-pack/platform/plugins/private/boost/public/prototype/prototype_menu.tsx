@@ -20,6 +20,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { BOOST_RESTORE_API_PATH } from '../../common/constants';
+import { resetModeSwitchConfirmations } from '../components/mode_switch/mode_switch_preferences';
 
 interface PrototypeMenuProps {
   http: HttpStart;
@@ -43,6 +44,8 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
     setIsRestoring(true);
     try {
       await http.post(BOOST_RESTORE_API_PATH);
+      // The choices to skip confirming mode switches are per browser, so they're reset here.
+      resetModeSwitchConfirmations();
       onRestored();
     } catch (error) {
       notifications.toasts.addError(error, {

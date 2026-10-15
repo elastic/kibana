@@ -48,6 +48,7 @@ const state: BoostState = {
   },
   profiles: [...BUILTIN_PROFILES, customProfile('zeta-search'), customProfile('alpha-search')],
   rules: [...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)), rule],
+  suspended_rules: [],
   data_sources: [
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },

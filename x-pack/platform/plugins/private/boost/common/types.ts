@@ -119,6 +119,9 @@ export interface BoostDataSource {
 export interface BoostState {
   settings: BoostSettings;
   profiles: BoostProfile[];
+  /** The rules in effect: custom rules in advanced mode only, and the two default rules. */
   rules: BoostRule[];
+  /** Custom rules that simple mode suspends, which apply again in advanced mode. */
+  suspended_rules: BoostRule[];
   data_sources: BoostDataSource[];
 }
