@@ -1076,6 +1076,12 @@ describe('STATS Autocomplete', () => {
 
         expect(suggestions.map(({ label }) => label)).not.toContain('abc');
       });
+
+      it('does not suggest an input field shadowed by a BY column of a different type', async () => {
+        const suggestions = await suggest('FROM a | STATS AVG(^) BY doubleField = keywordField');
+
+        expect(suggestions.map(({ label }) => label)).not.toContain('doubleField');
+      });
     });
   });
 });

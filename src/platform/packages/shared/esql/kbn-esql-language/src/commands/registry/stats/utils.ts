@@ -331,11 +331,12 @@ const suggestWithByColumns =
       isFieldsBrowserEnabled: false,
     });
 
-    // BY columns shadow input fields of the same name, so drop the shadowed base suggestions.
-    const byColumnNames = new Set(matchingColumns.map((column) => column.name));
+    // BY columns shadow input fields of the same name, including aliases whose type
+    // does not match the requested type, so drop every shadowed base suggestion.
+    const shadowedNames = new Set(byColumns.keys());
     return [
       ...byColumnSuggestions,
-      ...baseSuggestions.filter((suggestion) => !byColumnNames.has(suggestion.label)),
+      ...baseSuggestions.filter((suggestion) => !shadowedNames.has(suggestion.label)),
     ];
   };
 
