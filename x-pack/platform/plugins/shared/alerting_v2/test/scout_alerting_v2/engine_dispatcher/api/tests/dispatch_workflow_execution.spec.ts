@@ -123,23 +123,9 @@ apiTest.describe(
         });
         log.info(`Dispatcher recorded a fire action for rule [${rule.id}]`);
 
-        // The policy destination was started as a workflow execution that finished.
-        log.info(`Waiting for a finished execution of workflow [${workflowId}]`);
-        const execution = await apiServices.alertingV2.workflows.waitForFinishedExecution(
-          workflowId
-        );
-        log.info(
-          `Workflow execution [${execution.id}] finished: status=${execution.status}, ` +
-            `triggeredBy=${execution.triggeredBy}, executedBy=${execution.executedBy}, ` +
-            `error=${JSON.stringify(execution.error)}`
-        );
-
-        expect(execution.status).toBe('completed');
-        expect(execution.error).toBeNull();
-        expect(execution.triggeredBy).toBe(ACTION_POLICY_TRIGGER);
-        // An execution without a resolved identity is stored as `unknown`.
-        expect(execution.executedBy).toBeDefined();
-        expect(execution.executedBy).not.toBe('unknown');
+        await apiServices.alertingV2.workflows.waitForSuccessfulExecution(workflowId, {
+          triggeredBy: ACTION_POLICY_TRIGGER,
+        });
       }
     );
   }

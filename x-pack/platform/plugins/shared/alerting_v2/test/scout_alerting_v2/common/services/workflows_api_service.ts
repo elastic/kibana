@@ -12,24 +12,21 @@ import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants'
 
 const WORKFLOWS_API_PATH = '/api/workflows';
 
-/** Execution statuses after which a workflow execution no longer changes. */
-const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
+/** Largest page the executions route accepts. */
+const EXECUTIONS_MAX_PAGE_SIZE = 100;
 
 export interface WorkflowSummary {
   id: string;
   name: string;
 }
 
-export interface WorkflowExecutionSummary {
-  id: string;
-  status: string;
-  triggeredBy?: string;
-  executedBy?: string;
-  error: unknown;
+interface WorkflowExecutionListResponse {
+  results: Array<{ triggeredBy?: string }>;
 }
 
-interface WorkflowExecutionListResponse {
-  results: WorkflowExecutionSummary[];
+interface WaitForSuccessfulExecutionFilter {
+  /** What started the execution, e.g. `action_policy` for the dispatcher. */
+  triggeredBy: string;
 }
 
 /**
@@ -42,20 +39,12 @@ interface WorkflowExecutionListResponse {
 export interface WorkflowsApiService {
   create: (yaml: string) => Promise<WorkflowSummary>;
   bulkDelete: (ids: string[]) => Promise<void>;
-  /** Polls until the workflow has an execution in a terminal status, and returns it. */
-  waitForFinishedExecution: (workflowId: string) => Promise<WorkflowExecutionSummary>;
+  /** Polls until the workflow has at least one completed execution started by `triggeredBy`. */
+  waitForSuccessfulExecution: (
+    workflowId: string,
+    filter: WaitForSuccessfulExecutionFilter
+  ) => Promise<void>;
 }
-
-const describeExecutions = (executions: WorkflowExecutionSummary[]): string =>
-  executions.length === 0
-    ? 'none'
-    : executions
-        .map(
-          ({ id, status, triggeredBy, executedBy, error }) =>
-            `${id}(status=${status}, triggeredBy=${triggeredBy}, executedBy=${executedBy}, ` +
-            `error=${JSON.stringify(error)})`
-        )
-        .join('; ');
 
 export const getWorkflowsApiService = ({
   log,
@@ -89,48 +78,25 @@ export const getWorkflowsApiService = ({
       });
     }),
 
-  waitForFinishedExecution: (workflowId) =>
-    measurePerformanceAsync(log, 'workflows.waitForFinishedExecution', async () => {
-      let seen: WorkflowExecutionSummary[] = [];
-      let lastLogged = '';
-
-      const findFinished = async (): Promise<WorkflowExecutionSummary | undefined> => {
+  waitForSuccessfulExecution: (workflowId, { triggeredBy }) =>
+    measurePerformanceAsync(log, 'workflows.waitForSuccessfulExecution', async () => {
+      const countSuccessfulExecutions = async (): Promise<number> => {
         const response = await kbnClient.request<WorkflowExecutionListResponse>({
           method: 'GET',
           path: `${WORKFLOWS_API_PATH}/workflow/${encodeURIComponent(workflowId)}/executions`,
           headers: COMMON_HEADERS,
+          query: { statuses: 'completed', size: EXECUTIONS_MAX_PAGE_SIZE },
           retries: 0,
         });
-        seen = response.data.results;
-
-        const summary = describeExecutions(seen);
-        if (summary !== lastLogged) {
-          lastLogged = summary;
-          log.info(`Executions of workflow [${workflowId}]: ${summary}`);
-        }
-
-        return seen.find(({ status }) => TERMINAL_EXECUTION_STATUSES.includes(status));
+        return response.data.results.filter((execution) => execution.triggeredBy === triggeredBy)
+          .length;
       };
 
-      try {
-        await expect
-          .poll(async () => (await findFinished())?.id, {
-            timeout: POLL_TIMEOUT_MS,
-            intervals: [POLL_INTERVAL_MS],
-          })
-          .toBeDefined();
-      } catch (error) {
-        throw new Error(
-          `Workflow [${workflowId}] has no finished execution after ${POLL_TIMEOUT_MS}ms. ` +
-            `Executions seen: ${describeExecutions(seen)}`,
-          { cause: error }
-        );
-      }
-
-      const execution = await findFinished();
-      if (!execution) {
-        throw new Error(`Workflow ${workflowId} has no finished execution`);
-      }
-      return execution;
+      await expect
+        .poll(() => countSuccessfulExecutions(), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(1);
     }),
 });
