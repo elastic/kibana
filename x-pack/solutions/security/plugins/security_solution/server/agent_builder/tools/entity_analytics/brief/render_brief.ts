@@ -9,7 +9,7 @@ import { compact, dropRightWhile } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
-import type { BriefPriority, EntityFacts } from './brief_types';
+import type { BriefPriority, EntityFacts } from './types';
 import {
   BRIEF_PERIOD_LABELS,
   describeDelta,
@@ -29,9 +29,9 @@ export const QUIET_LINE =
 export const UNAVAILABLE_TILES_LINE =
   "Nothing is flagged in what could be read, and the rest couldn't be checked. That does not mean the environment is safe.";
 export const NO_MATCH_LINE =
-  'The search query excludes every flagged entity, so there is nothing to prioritise. Clear or change the search to brief on them.';
+  'The search query excludes every flagged entity, so there is nothing to prioritize. Clear or change the search to brief on them.';
 export const NO_PRIORITIES_LINE =
-  'No entity in this view has enough evidence to prioritise. That does not mean the environment is safe.';
+  'No entity in this view has enough evidence to prioritize. That does not mean the environment is safe.';
 
 const ENTITY_TABLE_INTRO =
   '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';

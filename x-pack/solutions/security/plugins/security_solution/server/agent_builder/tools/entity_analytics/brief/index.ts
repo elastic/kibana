@@ -15,7 +15,7 @@
  * 4. `verify_draft`: checks the draft against the facts and the view, and trims it.
  * 5. `render_brief`: the markdown, with the entity table and a risk-history chart.
  *
- * `describe_scope` holds the wording the steps share, and `brief_types` the types.
+ * `describe_scope` holds the wording the steps share, and `types` the types.
  */
 export { generateBrief } from './generate_brief';
 export { describeScopeForAgent } from './describe_scope';

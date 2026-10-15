@@ -6,8 +6,8 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefDraft, BriefPriority, EntityFacts } from './brief_types';
-import { BRIEF_WORD_LIMITS, MAX_PRIORITIES } from './brief_types';
+import type { BriefDraft, BriefPriority, EntityFacts } from './types';
+import { BRIEF_WORD_LIMITS, MAX_PRIORITIES } from './types';
 import { BRIEF_PERIOD_LABELS, BRIEF_TILE_DEFINITIONS } from './describe_scope';
 
 export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
@@ -58,7 +58,7 @@ export const verifyDraft = (
     }
   }
 
-  // Without a priority the brief says there is nothing to prioritise, so there is nothing to introduce.
+  // Without a priority the brief says there is nothing to prioritize, so there is nothing to introduce.
   const cleanProse = (text: string, max: number): string | undefined => {
     const kept = stripToolMarkup(text)
       .split(SENTENCE_END)

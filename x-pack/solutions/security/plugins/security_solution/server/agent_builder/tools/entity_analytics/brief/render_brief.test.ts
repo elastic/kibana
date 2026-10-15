@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefPriority, EntityFacts } from './brief_types';
+import type { BriefPriority, EntityFacts } from './types';
 import type { CandidateEntities } from './read_entities';
 import {
   NO_MATCH_LINE,

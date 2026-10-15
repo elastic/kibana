@@ -14,7 +14,7 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { getPrivilegedUserWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
-import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/brief_types';
+import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/types';
 import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
 
 const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';

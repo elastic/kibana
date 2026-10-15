@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefDraft, BriefPriority, EntityFacts } from './brief_types';
+import type { BriefDraft, BriefPriority, EntityFacts } from './types';
 import type { VerifiedBrief } from './verify_draft';
 import { verifyDraft } from './verify_draft';
 

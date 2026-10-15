@@ -65,7 +65,7 @@ export const BriefDraft = lazySchema(() =>
     priorities: z
       .array(
         z.object({
-          entityId: z.string().describe('The EUID of the entity, exactly as given in the facts'),
+          entityId: z.string().describe('The entityId, exactly as given in <entities>'),
           observed: z
             .string()
             .describe(
@@ -74,7 +74,7 @@ export const BriefDraft = lazySchema(() =>
           whyItMatters: z
             .string()
             .describe(
-              `Why it matters, at most ${priorityText} words: criticality and risk where the facts support it`
+              `Why it matters, at most ${priorityText} words: criticality and risk where the data supports it`
             ),
           nextStep: z
             .string()
@@ -82,18 +82,14 @@ export const BriefDraft = lazySchema(() =>
         })
       )
       .describe(
-        `Always present. At most ${MAX_PRIORITIES} entities to look at first, most important first. Fewer when the facts don't support more; never pad.`
+        `At most ${MAX_PRIORITIES} entities to look at first, most important first. Never pad.`
       ),
     attention: z
       .string()
-      .describe(
-        `One or two sentences, at most ${attention} words, on what needs attention in this view. Mention entities only as {{ entity.id <euid> }}. No overall threat verdict.`
-      ),
+      .describe(`One or two sentences, at most ${attention} words, on what needs attention.`),
     recommendation: z
       .string()
-      .describe(
-        `The one next step for this view, at most ${recommendation} words, drawing on all the priorities and the changes in the view. Mention entities only as {{ entity.id <euid> }}.`
-      ),
+      .describe(`The one step to take first across the view, at most ${recommendation} words.`),
   })
 );
 export type BriefDraft = z.infer<typeof BriefDraft>;

@@ -15,7 +15,7 @@ import {
   buildRiskScoreHistoryAttachmentId,
   ensureRiskScoreHistoryAttachment,
 } from '../risk_score_history/risk_score_history_attachment_utils';
-import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
+import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './types';
 import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
 import { draftBrief } from './draft_brief';
@@ -110,7 +110,7 @@ const createEntityTable = async (
     attachments,
     id: buildListEntityAttachmentId(entities),
     data: { entities, attachmentLabel: 'AI brief priorities' },
-    description: 'Entities prioritised by the Entity Analytics AI brief',
+    description: 'Entities prioritized by the Entity Analytics AI brief',
     logger,
   });
   return attachment ? buildRenderAttachmentTag(attachment) : undefined;

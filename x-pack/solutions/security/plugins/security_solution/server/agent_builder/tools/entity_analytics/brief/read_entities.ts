@@ -20,8 +20,8 @@ import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
-import type { BriefCandidate, BriefEntityType } from './brief_types';
-import { MAX_BRIEF_CANDIDATES } from './brief_types';
+import type { BriefCandidate, BriefEntityType } from './types';
+import { MAX_BRIEF_CANDIDATES } from './types';
 import { getPeriodStart, getScopeFilters } from './describe_scope';
 
 /** Display names come from source logs, so an attacker can choose them. */

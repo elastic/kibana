@@ -7,7 +7,7 @@
 
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefCandidate } from './brief_types';
+import type { BriefCandidate } from './types';
 import { foldAliases, rankCandidates, selectCandidateTiles } from './read_entities';
 
 const scopeWith = (

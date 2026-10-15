@@ -7,7 +7,7 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefCandidate, EntityFacts } from './brief_types';
+import type { BriefCandidate, EntityFacts } from './types';
 import { buildFacts } from './build_facts';
 
 const scope: EntityAnalyticsScope = {

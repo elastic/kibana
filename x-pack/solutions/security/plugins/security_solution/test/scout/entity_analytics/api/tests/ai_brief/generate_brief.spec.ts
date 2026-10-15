@@ -211,7 +211,7 @@ apiTest.describe(
 
       expect(getSubmitBriefRequests(llmProxy)).toHaveLength(1);
       expect(brief).not.toContain(PRIORITY_LINE);
-      expect(brief).toContain('No entity in this view has enough evidence to prioritise');
+      expect(brief).toContain('No entity in this view has enough evidence to prioritize');
     });
   }
 );

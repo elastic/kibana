@@ -14,7 +14,7 @@ import {
   getEntityLifecycle,
   matchesPrivilegedWatchlist,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type { BriefCandidate, EntityFacts } from './brief_types';
+import type { BriefCandidate, EntityFacts } from './types';
 import { formatStoredValue } from './describe_scope';
 import { getCandidateRisk } from './read_entities';
 
