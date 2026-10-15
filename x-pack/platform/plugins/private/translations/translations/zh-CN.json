@@ -3534,7 +3534,6 @@
     "esqlEditor.query.warningsTitle": "警告",
     "esqlEditor.queryStats.documentsProcessed": "已处理 {count} 个文档",
     "esqlEditor.starred.searchPlaceholder": "搜索带星标的查询",
-    "esqlEditor.suggestFix.acceptLabel": "保留 AI 修复结果",
     "esqlEditor.suggestFix.error": "无法为查询生成 AI 修复",
     "esqlEditor.suggestFix.rejectLabel": "撤消 AI 修复",
     "esqlEditor.visor.nlError": "无法生成 ES|QL 查询",

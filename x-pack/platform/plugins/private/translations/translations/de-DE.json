@@ -3515,7 +3515,6 @@
     "esqlEditor.query.warningsTitle": "Warnungen",
     "esqlEditor.queryStats.documentsProcessed": "{count} Dokumente verarbeitet",
     "esqlEditor.starred.searchPlaceholder": "Suche nach markierten Suchabfragen",
-    "esqlEditor.suggestFix.acceptLabel": "KI-Fix beibehalten",
     "esqlEditor.suggestFix.error": "Es konnte kein KI-Fix für die Abfrage generiert werden.",
     "esqlEditor.suggestFix.rejectLabel": "KI-Korrektur rückgängig machen",
     "esqlEditor.visor.nlError": "Fehler beim Generieren der ES|QL-Abfrage",
