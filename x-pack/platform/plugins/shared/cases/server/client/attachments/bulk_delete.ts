@@ -164,9 +164,34 @@ export const bulkDeleteAttachments = async (
     });
 
     // Core's bulk delete reports per-object failures instead of throwing, and only confirmed
-    // deletes come back. Surface anything that did not before stats or user actions are written,
-    // so the case is never recorded as having lost attachments that are in fact still there.
-    const notDeletedIds = uniqueIds.filter((id) => !deletedIds.includes(id));
+    // deletes come back, so a partial failure is possible here.
+    const deletedIdsSet = new Set(deletedIds);
+    const notDeletedIds = uniqueIds.filter((id) => !deletedIdsSet.has(id));
+    const deletedAttachments = attachmentsInCase.filter(({ id }) => deletedIdsSet.has(id));
+
+    // Record the attachments that did delete before surfacing the ones that did not. Everything
+    // below is scoped to the confirmed deletes, so the case is never recorded as having lost an
+    // attachment that is in fact still there; skipping it instead would leave a case the caller
+    // cannot repair by retrying, since the deleted ids are genuinely gone and the retry fails the
+    // missing-id check. The stats are recomputed from the index rather than decremented, so they
+    // are correct whichever subset survived.
+    if (deletedAttachments.length > 0) {
+      await updateCaseAttachmentStats({ caseService, attachmentService, caseId, user });
+
+      await userActionService.creator.bulkCreateAttachmentDeletion({
+        caseId,
+        attachments: attachmentDeletions.filter(({ id }) => deletedIdsSet.has(id)),
+        user,
+      });
+
+      await handleAlerts({
+        alertsService,
+        attachments: deletedAttachments.map((attachment) => attachment.attributes),
+        caseId,
+      });
+
+      emitAttachmentsDeletedEvents(clientArgs, caseId, deletedAttachments);
+    }
 
     if (notDeletedIds.length > 0) {
       throw Boom.internal(
@@ -175,22 +200,6 @@ export const bulkDeleteAttachments = async (
         } ${notDeletedIds.join(', ')} on case ${caseId}.`
       );
     }
-
-    await updateCaseAttachmentStats({ caseService, attachmentService, caseId, user });
-
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId,
-      attachments: attachmentDeletions,
-      user,
-    });
-
-    await handleAlerts({
-      alertsService,
-      attachments: attachmentsInCase.map((attachment) => attachment.attributes),
-      caseId,
-    });
-
-    emitAttachmentsDeletedEvents(clientArgs, caseId, attachmentsInCase);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk delete attachments for case: ${caseId}: ${error}`,
