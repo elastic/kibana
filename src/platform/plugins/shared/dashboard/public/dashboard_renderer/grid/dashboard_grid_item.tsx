@@ -397,8 +397,6 @@ const dashboardGridItemStyles = {
       borderRadius: '50%',
       border: `1.5px solid ${euiTheme.colors.borderBaseProminent}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      // a plain halo keeps it legible over busy chart content
-      boxShadow: `0 0 0 ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBasePlain}`,
       pointerEvents: 'none',
       [euiCanAnimate]: {
         transition: `border-color ${euiTheme.animation.fast} ease-out, background-color ${euiTheme.animation.fast} ease-out`,
@@ -406,8 +404,6 @@ const dashboardGridItemStyles = {
       '&.dshDashboardGrid__selectionIndicator--checked': {
         borderColor: euiTheme.colors.backgroundFilledPrimary,
         backgroundColor: euiTheme.colors.backgroundFilledPrimary,
-        // the filled disc stands out on its own, and a halo would show on colored panels
-        boxShadow: 'none',
       },
     }),
   selectionCheck: ({ euiTheme }: UseEuiTheme) => {
