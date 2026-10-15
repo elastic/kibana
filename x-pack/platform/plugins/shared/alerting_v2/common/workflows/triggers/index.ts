@@ -71,6 +71,13 @@ export {
 } from './alert_deactivated';
 export type { AlertDeactivatedPayload } from './alert_deactivated';
 
+export {
+  AlertStatusChangedTriggerId,
+  alertStatusChangedEventSchema,
+  alertStatusChangedTriggerCommonDefinition,
+} from './alert_status_changed';
+export type { AlertStatusChangedTriggerPayload } from './alert_status_changed';
+
 export { RuleCreatedTriggerId, ruleCreatedTriggerCommonDefinition } from './rule_created';
 export { RuleUpdatedTriggerId, ruleUpdatedTriggerCommonDefinition } from './rule_updated';
 export { RuleDeletedTriggerId, ruleDeletedTriggerCommonDefinition } from './rule_deleted';
