@@ -59,9 +59,19 @@ describe('DatastreamInitializer', () => {
   });
 
   describe('data stream lifecycle', () => {
+    const managedDefinition: ResourceDefinition = { ...resourceDefinition, manageLifecycle: true };
+
+    it('does not touch the lifecycle of a data stream that does not manage it', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).not.toHaveBeenCalled();
+    });
+
     it('applies the retention to the data stream', async () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, {
-        ...resourceDefinition,
+        ...managedDefinition,
         lifecycle: { data_retention: '90d' },
       });
 
@@ -75,7 +85,7 @@ describe('DatastreamInitializer', () => {
     });
 
     it('applies a lifecycle without retention, removing a previously applied one', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
 
       await initializer.initialize();
 
@@ -91,7 +101,7 @@ describe('DatastreamInitializer', () => {
       );
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, {
-        ...resourceDefinition,
+        ...managedDefinition,
         lifecycle: { data_retention: '30d' },
       });
       await initializer.initialize();
@@ -108,7 +118,7 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
 
       await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
     });
@@ -116,7 +126,7 @@ describe('DatastreamInitializer', () => {
     it('fails initialization with a retryable error when applying the lifecycle is not acknowledged', async () => {
       esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: false });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
 
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
     });
@@ -126,7 +136,7 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 404, body: {} } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
 
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsConcurrentModificationError);
     });

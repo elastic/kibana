@@ -130,6 +130,7 @@ export const getAlertEventsResourceDefinition = ({
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: dataRetention ? { data_retention: dataRetention } : {},
+  manageLifecycle: true,
   finalPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
   // Data streams created from v7 or below map `episode.*` as concrete fields, which cannot be
   // turned into aliases in place. Keep this at 7 when bumping the version.

@@ -307,7 +307,11 @@ export class DatastreamInitializer implements IResourceInitializer {
    * initialization so a previous, retention is not kept. `enabled` avoids an empty body.
    */
   private async updateDataStreamLifecycle(): Promise<void> {
-    const { dataStreamName, lifecycle } = this.resourceDefinition;
+    const { dataStreamName, lifecycle, manageLifecycle } = this.resourceDefinition;
+    if (!manageLifecycle) {
+      return;
+    }
+
     const { acknowledged } = await this.esClient.indices.putDataLifecycle({
       name: dataStreamName,
       enabled: true,

@@ -16,6 +16,10 @@ describe('getAlertEventsResourceDefinition', () => {
     expect(getAlertEventsResourceDefinition().lifecycle).toEqual({});
   });
 
+  it('manages its lifecycle so retention changes reach existing data streams', () => {
+    expect(getAlertEventsResourceDefinition().manageLifecycle).toBe(true);
+  });
+
   it('sets data_retention when a retention is provided', () => {
     expect(getAlertEventsResourceDefinition({ dataRetention: '90d' }).lifecycle).toEqual({
       data_retention: '90d',

@@ -23,6 +23,7 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
+  manageLifecycle?: boolean;
   finalPipeline: IngestPipelineDefinition;
   /**
    * Deletes the existing data stream on startup when it was created from an index template at or
