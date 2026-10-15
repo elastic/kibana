@@ -10,9 +10,9 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ExecutionStatus } from '@kbn/workflows';
-import { spaceTest as test } from '../../fixtures';
-import { seedHistoricalServiceAccountIdentity } from '../../fixtures/service_account_ui';
-import { getListTestWorkflowYaml } from '../../fixtures/workflows';
+import { spaceTest as test } from '../../../scout/ui/fixtures';
+import { getListTestWorkflowYaml } from '../../../scout/ui/fixtures/workflows';
+import { seedHistoricalServiceAccountIdentity } from '../fixtures/service_account_ui';
 
 const ACCOUNT_ID = 'qa_saved_service_account';
 const yaml = getListTestWorkflowYaml({

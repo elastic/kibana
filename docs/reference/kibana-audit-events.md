@@ -120,15 +120,13 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `space_update` | `unknown` | User is updating a space. |
 | | `failure` | User is not authorized to update a space. |
 | `alert_update` | `unknown` | User is updating an alert. |
-| | `failure` | User is not authorized to update an alert. |
+| | `failure` | User is not authorized to update an alert, or the update request failed. |
 | `rule_snooze` | `unknown` | User is snoozing a rule. |
 | | `failure` | User is not authorized to snooze a rule. |
 | `rule_unsnooze` | `unknown` | User is unsnoozing a rule. |
 | | `failure` | User is not authorized to unsnooze a rule. |
-| `alert_acknowledge` {applies_to}`stack: ga 9.4+` | `unknown` | User is acknowledging an alert (updating workflow status). |
-| | `failure` | User is not authorized to acknowledge an alert. |
-| `alert_unacknowledge` {applies_to}`stack: ga 9.4+` | `success` | User has unacknowledged an alert (reverted workflow status to open). |
-| | `failure` | User is not authorized to unacknowledge an alert. |
+| `alert_acknowledge` {applies_to}`stack: ga 9.4+` | `success` | User has acknowledged an alert (workflow status set to acknowledged). |
+| `alert_unacknowledge` {applies_to}`stack: ga 9.4+` | `success` | User has unacknowledged an alert (workflow status set to open). |
 | `case_update` | `unknown` | User is updating a case. |
 | | `failure` | User is not authorized to update a case. |
 | `case_push` | `unknown` | User is pushing a case to an external service. |
@@ -197,6 +195,14 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | Failed attempt to resume a workflow execution [executionId=x]. |
 | `workflow_hitl_waiting` {applies_to}`stack: preview 9.5+` | `success` | A workflow execution is waiting for human input or approval [executionId=x]. |
 | `workflow_hitl_timed_out` {applies_to}`stack: preview 9.5+` | `success` | A workflow human-input or approval wait has timed out [executionId=x]. |
+
+::::{note}
+`alert_update` is written for alert workflow status changes made through:
+  * The RAC bulk update API (`/internal/rac/alerts/*`)
+  * {applies_to}`stack: ga 9.6+` The Security Solution status routes (`/api/detection_engine/signals/status`, `/api/detection_engine/attacks/status`, and the internal unified alerts status route)
+
+Intent is logged per requested alert ID, or once for query-based updates. Handler validation failures, unavailable alert targets, and Elasticsearch update failures are logged as failures.
+::::
 
 #### Type: deletion
 
