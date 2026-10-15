@@ -13,7 +13,6 @@ import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public'
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -101,46 +100,4 @@ export function useTransactionActionMenuSections(
       metricsIndices,
     ]
   );
-}
-
-export interface ExternalTransactionAction {
-  id: string;
-  name: string;
-  href?: string;
-  onClick: () => void;
-}
-
-/**
- * Resolves the actions other plugins register on `O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER` with
- * string names, which flyout footer menu items require. The action popover renders the same actions
- * through `getContextMenuItemsFromActions`, whose labels are elements.
- */
-export function useExternalTransactionActions(
-  transaction: Transaction | undefined
-): ExternalTransactionAction[] {
-  const { uiActions } = useApmPluginContext();
-
-  const { value = [] } = useAsync(async () => {
-    if (!transaction) {
-      return [];
-    }
-
-    const trigger = { id: O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER };
-    const actions = await uiActions.getTriggerCompatibleActions(trigger.id, transaction);
-    // The ECS `event` field collides with the action context's `event` (a mouse event), so the
-    // document is passed untyped, as `getContextMenuItemsFromActions` does.
-    const documentContext: Record<string, any> = transaction;
-    const context = { ...documentContext, trigger };
-
-    return Promise.all(
-      actions.map(async (action) => ({
-        id: action.id,
-        name: action.getDisplayName(context),
-        href: action.getHref ? await action.getHref(context) : undefined,
-        onClick: () => action.execute(context),
-      }))
-    );
-  }, [transaction, uiActions]);
-
-  return value;
 }

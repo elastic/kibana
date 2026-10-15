@@ -90,14 +90,38 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           />
         }
       >
-        <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
-        {hasGoldLicense && (
-          <CustomLinkMenuSection
-            transaction={transaction}
-            openCreateCustomLinkFlyout={openCustomLinkFlyout}
-          />
-        )}
+        <TransactionActionMenuContent
+          transaction={transaction}
+          profilingLocators={profilingLocators}
+          hasGoldLicense={!!hasGoldLicense}
+          onCreateCustomLink={openCustomLinkFlyout}
+        />
       </ActionMenu>
+    </>
+  );
+}
+
+/** Section list and custom links shared by the page popover and the transaction flyout footer. */
+export function TransactionActionMenuContent({
+  transaction,
+  profilingLocators,
+  hasGoldLicense,
+  onCreateCustomLink,
+}: {
+  transaction?: Transaction;
+  profilingLocators?: ProfilingLocators;
+  hasGoldLicense: boolean;
+  onCreateCustomLink: () => void;
+}) {
+  return (
+    <>
+      <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
+      {hasGoldLicense && (
+        <CustomLinkMenuSection
+          transaction={transaction}
+          openCreateCustomLinkFlyout={onCreateCustomLink}
+        />
+      )}
     </>
   );
 }
