@@ -10,6 +10,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   hasIssueLabel,
+  type GithubFixPullRequest,
   type GithubIssue,
   type GithubIssueEvent,
 } from '../failed_tests_reporter/github_api';
@@ -27,9 +28,13 @@ import { FIXABLE_LABEL, FIX_LABEL, requestFlakyTestFixes } from './selector';
 type Options = Parameters<typeof requestFlakyTestFixes>[0];
 const REPO = 'elastic/kibana';
 const LABELS = ['failed-test', FIXABLE_LABEL];
+const FTR_PATH = 'x-pack/platform/test/functional/apps/discover/group1/_discover.ts';
 
 const issue = (number: number, overrides: Partial<GithubIssue> = {}) =>
   fileWideIssue(number, { labels: [...LABELS], ...overrides });
+
+const closedIssue = (number: number, closedAt: string, overrides: Partial<GithubIssue> = {}) =>
+  issue(number, { state: 'closed', closed_at: closedAt, ...overrides });
 
 const perTestIssue = (number: number, testId: string, filePath = SUITE_PATH) =>
   githubIssue({
@@ -41,6 +46,16 @@ const perTestIssue = (number: number, testId: string, filePath = SUITE_PATH) =>
     }),
   });
 
+/** A per-test issue filed before the failed-test reporter recorded `test.type`. */
+const legacyIssue = (number: number, className: string, testName: string) =>
+  githubIssue({
+    number,
+    state: 'closed',
+    closed_at: '2025-01-01T12:00:00Z',
+    labels: ['failed-test'],
+    body: updateIssueMetadata('failure', { 'test.class': className, 'test.name': testName }),
+  });
+
 const event = (id: number, overrides: Partial<GithubIssueEvent> = {}): GithubIssueEvent => ({
   id,
   event: 'labeled',
@@ -49,20 +64,15 @@ const event = (id: number, overrides: Partial<GithubIssueEvent> = {}): GithubIss
   ...overrides,
 });
 
-const linkedPr = (id: number, number = 99) =>
-  event(id, {
-    event: 'cross-referenced',
-    source: {
-      issue: {
-        html_url: `https://github.com/${REPO}/pull/${number}`,
-        pull_request: { url: 'api' },
-      },
-    },
-  });
+const fixPr = (
+  state: GithubFixPullRequest['state'],
+  mergedAt: string | null = null
+): GithubFixPullRequest => ({ number: 99, state, mergedAt });
 
 const setup = (initialIssues: GithubIssue[]) => {
   const issues = new Map(initialIssues.map((item) => [item.number, structuredClone(item)]));
   const histories = new Map<number, GithubIssueEvent[]>();
+  const pullRequests = new Map<number, GithubFixPullRequest[]>();
   let nextId = 1000;
   const github: jest.Mocked<Options['github']> = {
     getAuthenticatedLogin: jest.fn(async () => 'kibanamachine'),
@@ -75,9 +85,7 @@ const setup = (initialIssues: GithubIssue[]) => {
       return structuredClone(found);
     }),
     getIssueTimeline: jest.fn(async (number) => [...(histories.get(number) ?? [])]),
-    getFixPullRequest: jest
-      .fn<ReturnType<Options['github']['getFixPullRequest']>, [number]>()
-      .mockResolvedValue({ state: 'CLOSED', mergedAt: null, closingIssues: [] }),
+    getIssueFixPullRequests: jest.fn(async (number) => [...(pullRequests.get(number) ?? [])]),
     checkLabel: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
     addLabelsOnce: jest.fn(async (number, labels) => {
       const found = issues.get(number);
@@ -107,7 +115,7 @@ const setup = (initialIssues: GithubIssue[]) => {
     });
   const triggerWrites = () =>
     github.addLabelsOnce.mock.calls.filter(([, labels]) => labels.includes(FIX_LABEL));
-  return { github, histories, issues, run, triggerWrites };
+  return { github, histories, issues, pullRequests, run, triggerWrites };
 };
 
 describe('file-level association', () => {
@@ -131,21 +139,36 @@ describe('file-level association', () => {
     expect(group.ambiguous).toEqual([]);
   });
 
+  it('associates older FTR issues that record no framework by their file', () => {
+    const report = flakyReport([flakyTest({ framework: 'ftr', filePath: FTR_PATH })]);
+    const className = `Chrome X-Pack UI Functional Tests.${FTR_PATH.replace(/\.ts$/, '·ts')}`;
+    const [group] = buildFixGroups(report, [
+      legacyIssue(1, className, 'an older flaky test'),
+      legacyIssue(2, className, flakyTest().title),
+    ]);
+    expect(group.siblings.map(({ number }) => number)).toEqual([1, 2]);
+    expect(group.targets.map(({ number }) => number)).toEqual([2]);
+    expect(group.ambiguous).toEqual([]);
+  });
+
+  it('places an older Jest issue that names a flaky test of its directory', () => {
+    const path = 'src/a/client.test.ts';
+    const [group] = buildFixGroups(
+      flakyReport([flakyTest({ filePath: path, framework: 'jest', title: 'connects' })]),
+      [legacyIssue(1, 'Jest Tests.src/a', 'connects')]
+    );
+    expect(group.targets.map(({ number }) => number)).toEqual([1]);
+    expect(group.ambiguous).toEqual([]);
+  });
+
   it('holds directory-only Jest identity rather than guessing a file', () => {
     const path = 'src/a/client.test.ts';
     const [group] = buildFixGroups(
       flakyReport([flakyTest({ filePath: path, framework: 'jest' })]),
-      [
-        githubIssue({
-          number: 1,
-          body: updateIssueMetadata('failure', {
-            'test.class': 'Jest Tests.src/a',
-            'test.name': 'another test',
-          }),
-        }),
-      ]
+      [legacyIssue(1, 'Jest Tests.src/a', 'another test')]
     );
-    expect(group.ambiguous).toEqual([1]);
+    expect(group.siblings).toEqual([]);
+    expect(group.ambiguous.map(({ number }) => number)).toEqual([1]);
   });
 });
 
@@ -201,9 +224,9 @@ describe('automatic requests', () => {
     expect(triggerWrites()).toHaveLength(0);
   });
 
-  it('reads historical closed siblings without adding bookkeeping', async () => {
+  it('reads closed siblings of the current episode without adding bookkeeping', async () => {
     const { run, histories, triggerWrites, github } = setup([
-      issue(1, { state: 'closed' }),
+      closedIssue(1, '2026-09-05T12:00:00Z'),
       issue(2),
     ]);
     histories.set(1, [event(1)]);
@@ -226,10 +249,35 @@ describe('automatic requests', () => {
     expect(triggerWrites()).toHaveLength(0);
   });
 
-  it('does not rotate a closed representative to an eligible sibling', async () => {
-    const { run, histories } = setup([issue(1, { state: 'closed' }), issue(2)]);
-    histories.set(1, [event(1), event(2, { event: 'unlabeled' })]);
+  it('does not rotate a closed representative to a sibling open during its episode', async () => {
+    const { run, histories } = setup([closedIssue(1, '2026-09-03T12:00:00Z'), issue(2)]);
+    histories.set(1, [event(1), event(2, { event: 'unlabeled' }), event(3, { event: 'closed' })]);
     expect((await run()).actions[0]).toMatchObject({ issue: 1, reason: 'already-requested' });
+  });
+
+  it('starts a new episode once every earlier issue of the file was closed', async () => {
+    const { run, histories, pullRequests, github, triggerWrites } = setup([
+      closedIssue(1, '2026-09-03T12:00:00Z'),
+      closedIssue(2, '2026-09-04T12:00:00Z'),
+      issue(3, { created_at: '2026-09-10T12:00:00Z' }),
+    ]);
+    histories.set(1, [event(1), event(3, { event: 'closed' })]);
+    pullRequests.set(2, [fixPr('MERGED', event(4).created_at)]);
+    expect((await run()).actions[0]).toMatchObject({ issue: 3, action: 'requested' });
+    expect(triggerWrites()).toEqual([[3, [FIX_LABEL]]]);
+    // Issues closed before the episode began are not read at all
+    expect(github.getIssueTimeline.mock.calls.map(([number]) => number)).toEqual([3, 3]);
+  });
+
+  it('extends the episode back through overlapping closed issues', async () => {
+    const { run, histories, triggerWrites } = setup([
+      closedIssue(1, '2026-09-05T12:00:00Z', { created_at: '2026-08-01T12:00:00Z' }),
+      closedIssue(2, '2026-09-12T12:00:00Z', { created_at: '2026-09-04T12:00:00Z' }),
+      issue(3, { created_at: '2026-09-10T12:00:00Z' }),
+    ]);
+    histories.set(1, [event(2)]);
+    expect((await run()).actions[0]).toMatchObject({ issue: 1, reason: 'already-requested' });
+    expect(triggerWrites()).toHaveLength(0);
   });
 
   it('uses the earliest request rather than the oldest issue number', async () => {
@@ -272,18 +320,13 @@ describe('automatic requests', () => {
   });
 
   it('checks current linked PR state, including human PRs, before a reopen retry', async () => {
-    const { run, histories, github, triggerWrites } = setup([issue(1)]);
+    const { run, histories, pullRequests, triggerWrites } = setup([issue(1)]);
     histories.set(1, [
       event(1),
       event(2, { event: 'reopened' }),
       event(3, { label: { name: FIXABLE_LABEL } }),
-      linkedPr(4),
     ]);
-    github.getFixPullRequest.mockResolvedValue({
-      state: 'OPEN',
-      mergedAt: null,
-      closingIssues: [1],
-    });
+    pullRequests.set(1, [fixPr('OPEN')]);
     expect((await run()).actions[0].reason).toBe('existing-fix-pr');
     expect(triggerWrites()).toHaveLength(0);
   });
@@ -321,64 +364,36 @@ describe('automatic requests', () => {
     expect(triggerWrites()).toHaveLength(0);
   });
 
-  it('ignores ordinary PR mentions that do not close a sibling issue', async () => {
-    const { run, histories, github, triggerWrites } = setup([issue(1)]);
-    histories.set(1, [linkedPr(1)]);
-    github.getFixPullRequest.mockResolvedValue({
-      state: 'OPEN',
-      mergedAt: null,
-      closingIssues: [999],
-    });
-    expect((await run()).actions[0].action).toBe('requested');
-    expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
-  });
-
   it('skips a merged human fix without requiring an AI request label', async () => {
-    const { run, histories, github, triggerWrites } = setup([
-      issue(1, { state: 'closed' }),
+    const { run, pullRequests, triggerWrites } = setup([
+      closedIssue(1, '2026-09-03T12:00:00Z'),
       issue(2),
     ]);
-    histories.set(1, [linkedPr(1)]);
-    github.getFixPullRequest.mockResolvedValue({
-      state: 'MERGED',
-      mergedAt: event(2).created_at,
-      closingIssues: [1],
-    });
+    pullRequests.set(1, [fixPr('MERGED', event(2).created_at)]);
     expect((await run()).actions[0]).toMatchObject({ issue: 1, reason: 'already-fixed' });
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('allows a freshly investigated recurrence after a human fix', async () => {
-    const { run, histories, github, triggerWrites } = setup([issue(1), issue(2)]);
+    const { run, histories, pullRequests, triggerWrites } = setup([issue(1), issue(2)]);
     histories.set(1, [
-      linkedPr(1),
       event(3, { event: 'reopened' }),
       event(4, { label: { name: FIXABLE_LABEL } }),
     ]);
-    github.getFixPullRequest.mockResolvedValue({
-      state: 'MERGED',
-      mergedAt: event(2).created_at,
-      closingIssues: [1],
-    });
+    pullRequests.set(1, [fixPr('MERGED', event(2).created_at)]);
     expect((await run()).actions[0]).toMatchObject({ issue: 1, action: 'requested' });
     expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
   });
 
   it('does not treat an unmerged closed PR as a delivered fix', async () => {
-    const { run, histories, github } = setup([issue(1)]);
-    histories.set(1, [linkedPr(1)]);
-    github.getFixPullRequest.mockResolvedValue({
-      state: 'CLOSED',
-      mergedAt: null,
-      closingIssues: [1],
-    });
+    const { run, pullRequests } = setup([issue(1)]);
+    pullRequests.set(1, [fixPr('CLOSED')]);
     expect((await run()).actions[0].action).toBe('requested');
   });
 
   it('holds when a native fix relationship cannot be read', async () => {
-    const { run, histories, github, triggerWrites } = setup([issue(1)]);
-    histories.set(1, [linkedPr(1)]);
-    github.getFixPullRequest.mockRejectedValue(new Error('GraphQL unavailable'));
+    const { run, github, triggerWrites } = setup([issue(1)]);
+    github.getIssueFixPullRequests.mockRejectedValue(new Error('GraphQL unavailable'));
     expect((await run()).actions[0].action).toBe('failed');
     expect(triggerWrites()).toHaveLength(0);
   });
@@ -395,6 +410,22 @@ describe('automatic requests', () => {
     github.getIssueTimeline.mockRejectedValue(new Error('GitHub unavailable'));
     expect((await run()).actions[0].action).toBe('failed');
     expect(triggerWrites()).toHaveLength(0);
+  });
+
+  it('reads issue history one request at a time', async () => {
+    const { run, github } = setup([issue(1), issue(2), issue(3)]);
+    const read = github.getIssueTimeline.getMockImplementation();
+    if (!read) throw new Error('Missing mock implementation');
+    let inFlight = 0;
+    let peak = 0;
+    github.getIssueTimeline.mockImplementation(async (number) => {
+      peak = Math.max(peak, ++inFlight);
+      await new Promise((resolve) => setImmediate(resolve));
+      inFlight -= 1;
+      return read(number);
+    });
+    expect((await run()).actions[0].action).toBe('requested');
+    expect(peak).toBe(1);
   });
 
   it('makes real history reads but zero writes in dry run', async () => {
@@ -440,6 +471,19 @@ describe('automatic requests', () => {
     expect(triggerWrites()).toHaveLength(0);
   });
 
+  it('holds ambiguous issues that could belong to the current episode only', async () => {
+    const report = flakyReport([flakyTest({ testId: 'reported' })]);
+    const moved = perTestIssue(2, 'reported', 'old/location/default_status_alert.spec.ts');
+    const earlier = setup([
+      issue(1),
+      { ...moved, state: 'closed', closed_at: '2026-07-01T12:00:00Z' },
+    ]);
+    expect((await earlier.run({ report })).actions[0].action).toBe('requested');
+    const current = setup([issue(1), moved]);
+    expect((await current.run({ report })).actions[0].reason).toBe('ambiguous-identity: 2');
+    expect(current.triggerWrites()).toHaveLength(0);
+  });
+
   it('does not request a version-only failure or a missing file', async () => {
     const { run, triggerWrites } = setup([issue(1)]);
     expect((await run({ fileExists: () => false })).actions[0].reason).toBe(
@@ -463,24 +507,24 @@ describe('automatic requests', () => {
     const { run, triggerWrites } = setup([
       fileWideIssue(1, { filePath: 'other.spec.ts', labels: LABELS }),
     ]);
-    expect((await run()).outsideReport).toEqual([1]);
+    const summary = await run();
+    expect(summary.outsideReport).toEqual([1]);
+    expect(summary.actions[0].reason).toBe('no-open-issue');
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('rechecks a representative that closes during selection', async () => {
     const { run, github, triggerWrites } = setup([issue(1)]);
-    github.getIssue
-      .mockResolvedValueOnce(issue(1))
-      .mockResolvedValueOnce(issue(1, { state: 'closed' }));
+    github.getIssue.mockResolvedValueOnce(closedIssue(1, '2026-09-20T12:00:00Z'));
     expect((await run()).actions[0].reason).toBe('changed-during-selection');
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('rechecks a representative whose file identity changed during selection', async () => {
     const { run, github, triggerWrites } = setup([issue(1)]);
-    github.getIssue
-      .mockResolvedValueOnce(issue(1))
-      .mockResolvedValueOnce(fileWideIssue(1, { filePath: 'other.spec.ts', labels: LABELS }));
+    github.getIssue.mockResolvedValueOnce(
+      fileWideIssue(1, { filePath: 'other.spec.ts', labels: LABELS })
+    );
     expect((await run()).actions[0].reason).toBe('changed-during-selection');
     expect(triggerWrites()).toHaveLength(0);
   });

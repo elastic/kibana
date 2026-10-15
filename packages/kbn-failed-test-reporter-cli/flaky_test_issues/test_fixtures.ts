@@ -166,6 +166,8 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   labels: [],
   body: '',
   state: 'open',
+  created_at: '2026-08-01T12:00:00Z',
+  closed_at: null,
   ...overrides,
 });
 

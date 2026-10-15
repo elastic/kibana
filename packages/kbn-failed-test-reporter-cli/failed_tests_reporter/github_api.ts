@@ -37,6 +37,8 @@ export interface GithubIssue {
   labels: unknown[];
   body: string;
   state: GithubIssueState;
+  created_at: string;
+  closed_at: string | null;
 }
 
 export interface ListIssuesOptions {
@@ -81,26 +83,23 @@ export interface GithubIssueEvent {
   label?: { name: string };
   body?: string;
   user?: { login: string } | null;
-  source?: { issue: { html_url: string; pull_request?: { url: string } } };
 }
 
 export interface GithubFixPullRequest {
+  number: number;
   state: 'OPEN' | 'CLOSED' | 'MERGED';
   mergedAt: string | null;
-  closingIssues: number[];
 }
 
-interface PullRequestQueryResponse {
+interface ClosingPullRequestsResponse {
   data?: {
     repository: {
-      pullRequest:
-        | (Omit<GithubFixPullRequest, 'closingIssues'> & {
-            closingIssuesReferences: {
-              nodes: Array<{ number: number; repository: { nameWithOwner: string } }>;
-              pageInfo: { hasNextPage: boolean; endCursor: string | null };
-            };
-          })
-        | null;
+      issue: {
+        closedByPullRequestsReferences: {
+          nodes: Array<GithubFixPullRequest & { repository: { nameWithOwner: string } }>;
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        };
+      } | null;
     } | null;
   };
   errors?: Array<{ message: string }>;
@@ -238,14 +237,17 @@ export class GithubApi {
     return events;
   }
 
-  /** Read GitHub's closing relationships rather than guessing whether a PR mention is a fix. */
-  async getFixPullRequest(prNumber: number): Promise<GithubFixPullRequest> {
+  /**
+   * Pull requests of this repository that GitHub links as closing the issue, by closing keyword
+   * or a manual Development link, whatever their state. An ordinary mention is not such a link.
+   */
+  async getIssueFixPullRequests(issueNumber: number): Promise<GithubFixPullRequest[]> {
     const [owner, name] = this.repo.split('/');
-    const closingIssues = new Set<number>();
+    const pullRequests = new Map<number, GithubFixPullRequest>();
     let after: string | null = null;
     while (true) {
-      const response: PullRequestQueryResponse = (
-        await this.request<PullRequestQueryResponse>(
+      const response: ClosingPullRequestsResponse = (
+        await this.request<ClosingPullRequestsResponse>(
           {
             method: 'POST',
             url: 'https://api.github.com/graphql',
@@ -253,44 +255,41 @@ export class GithubApi {
             data: {
               query: `query($owner: String!, $name: String!, $number: Int!, $after: String) {
               repository(owner: $owner, name: $name) {
-                pullRequest(number: $number) {
-                  state mergedAt
-                  closingIssuesReferences(first: 100, after: $after) {
-                    nodes { number repository { nameWithOwner } }
+                issue(number: $number) {
+                  closedByPullRequestsReferences(first: 100, after: $after, includeClosedPrs: true) {
+                    nodes { number state mergedAt repository { nameWithOwner } }
                     pageInfo { hasNextPage endCursor }
                   }
                 }
               }
             }`,
-              variables: { owner, name, number: prNumber, after },
+              variables: { owner, name, number: issueNumber, after },
             },
           },
           {}
         )
       ).data;
-      const pr = response.data?.repository?.pullRequest;
-      if (response.errors?.length || !pr) {
+      const issue = response.data?.repository?.issue;
+      if (response.errors?.length || !issue) {
         throw new Error(
-          `Unable to read fix PR #${prNumber}: ${
+          `Unable to read fix PRs of #${issueNumber}: ${
             response.errors?.map(({ message }) => message).join('; ') || 'not found'
           }`
         );
       }
-      if (
-        !['OPEN', 'CLOSED', 'MERGED'].includes(pr.state) ||
-        (pr.state === 'MERGED' && !pr.mergedAt)
-      ) {
-        throw new Error(`GitHub returned an invalid state for fix PR #${prNumber}`);
-      }
-      const { nodes, pageInfo } = pr.closingIssuesReferences;
-      for (const issue of nodes) {
-        if (issue.repository.nameWithOwner === this.repo) closingIssues.add(issue.number);
+      const { nodes, pageInfo } = issue.closedByPullRequestsReferences;
+      for (const { number, state, mergedAt, repository } of nodes) {
+        if (repository.nameWithOwner !== this.repo) continue;
+        if (!['OPEN', 'CLOSED', 'MERGED'].includes(state) || (state === 'MERGED' && !mergedAt)) {
+          throw new Error(`GitHub returned an invalid state for fix PR #${number}`);
+        }
+        pullRequests.set(number, { number, state, mergedAt });
       }
       if (!pageInfo.hasNextPage) {
-        return { state: pr.state, mergedAt: pr.mergedAt, closingIssues: [...closingIssues] };
+        return [...pullRequests.values()];
       }
       if (!pageInfo.endCursor || pageInfo.endCursor === after) {
-        throw new Error(`Incomplete closing-issue history for fix PR #${prNumber}`);
+        throw new Error(`Incomplete fix PR history for #${issueNumber}`);
       }
       after = pageInfo.endCursor;
     }

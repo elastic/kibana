@@ -16,19 +16,27 @@ The summary lists eligible issues outside the report. Missing/ambiguous file ide
 unsupported classifications, team opt-outs (`Team:Kibana Management`), existing requests
 and existing fix PRs hold a group rather than guessing.
 
+Issues filed before the failed-test reporter recorded `test.type` name no framework; they
+join the group by their file path. Older Jest issues name only their directory: one that
+names a flaky test of that directory joins the group, any other one is ambiguous.
+
 Deduplication uses existing GitHub history, with no extra labels, comments or state store:
 
-- The earliest recorded `ai:fix-flaky` application or trusted fixer comment in the file
-  group identifies its representative. Removing the trigger does not remove the label
-  event from the timeline. Closed `failed-test` issues are included without a time cutoff.
-- GitHub's native closing-issue relationships distinguish fix PRs from ordinary mentions.
-  An open fix PR blocks another request. Merged fixes count as delivered fixes; a closed,
-  unmerged PR does not. If there was no AI request, the earliest merged fix identifies the
-  representative instead.
-- Only the representative's latest `reopened` event resets the automatic budget.
-  Reopening another sibling, adding another test issue or removing the trigger does not.
-  A retry requires fresh `failure:ai-fixable` after reopening and no open fix PR. A request
-  or merged fix on any sibling during that episode holds the group.
+- History counts per **episode** of the file: the stretch, up to now, during which at
+  least one of its issues has been open. Requests and fixes from before it, e.g. on an
+  issue closed before today's issue was opened, do not hold the group, and the history of
+  issues closed before the episode is not read at all.
+- The earliest recorded `ai:fix-flaky` application or trusted fixer comment in the
+  episode identifies the group's representative. Removing the trigger does not remove the
+  label event from the timeline.
+- GitHub's closing-issue links (closing keywords or a manual Development link) distinguish
+  fix PRs from ordinary mentions. An open fix PR blocks another request. Merged fixes count
+  as delivered fixes; a closed, unmerged PR does not. If there was no AI request, the
+  earliest merged fix identifies the representative instead.
+- Within an episode, only the representative's latest `reopened` event resets the
+  automatic budget. Reopening another sibling, adding another test issue or removing the
+  trigger does not. A retry requires fresh `failure:ai-fixable` after reopening and no open
+  fix PR. A request or merged fix on any sibling since then holds the group.
 - Trusted fixer comments also record manual dispatches and outcomes that produced no PR.
   The selector does not rotate to a sibling just because the representative is closed.
 - An uncertain trigger write fails the step without retrying the write. A later run reads
@@ -37,9 +45,12 @@ Deduplication uses existing GitHub history, with no extra labels, comments or st
 
 This is practical deduplication, not exactly-once delivery: it depends on issue discovery
 and GitHub history visibility. Removing `failed-test`, deleting history, or moving tests
-can prevent the selector from reconstructing a group. Ambiguous identity is held, but
-entirely undiscoverable issues cannot contribute history. Decisions and sibling mappings
-live in Buildkite artifacts/logs rather than issue bookkeeping.
+can prevent the selector from reconstructing a group. Ambiguous issues that are open, or
+that closed during the episode, hold the group; entirely undiscoverable issues cannot
+contribute history. A fix PR still open for an issue closed before the episode is not
+seen. Issue histories are read one at a time to stay clear of GitHub's secondary rate
+limits. Decisions and sibling mappings live in Buildkite artifacts/logs rather than issue
+bookkeeping.
 
 Automatic writes run only in the pipeline's serialized `request-flaky-test-fixes` step,
 using `kibanamachine`, with at most **five requests per run** by default. The request budget
@@ -62,8 +73,12 @@ Before enabling writes:
 2. Ensure the existing `ai:fix-flaky` label exists and `kibanamachine` can apply it.
    Live preflight checks the account/label, and writes verify the returned label.
 3. Reconcile in-flight fixes from the old automation. Enable `FLAKY_FIXES_ENABLED=true`
-   only after the investigator no longer requests fixes. Set `FLAKY_FIXES_MAX_REQUESTS`
+   only after the investigator no longer requests fixes, ideally right after the
+   investigator change deploys so the pause stays short. Set `FLAKY_FIXES_MAX_REQUESTS`
    separately if changing the request budget.
+4. Issues reopened before the investigator cleared stale `failure:ai-fixable` keep their old
+   label and are held as `awaiting-fresh-investigation`. Dispatch the investigator for the
+   ones the dry run lists to get a fresh verdict.
 
 ```bash
 GITHUB_TOKEN=... node scripts/request_flaky_test_fixes \

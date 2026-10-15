@@ -13,11 +13,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   hasIssueLabel,
   type GithubApi,
+  type GithubFixPullRequest,
   type GithubIssue,
   type GithubIssueEvent,
 } from '../failed_tests_reporter/github_api';
 import { describeIssue } from '../flaky_test_issues/match_issues';
-import { buildFixGroups, isTestFilePath, issueFramework } from './groups';
+import { associateIssue, buildFixGroups, isTestFilePath } from './groups';
 
 export const FIX_LABEL = 'ai:fix-flaky';
 export const FIXABLE_LABEL = 'failure:ai-fixable';
@@ -30,7 +31,7 @@ type SelectorGithub = Pick<
   | 'getAuthenticatedLogin'
   | 'getIssue'
   | 'getIssueTimeline'
-  | 'getFixPullRequest'
+  | 'getIssueFixPullRequests'
   | 'checkLabel'
   | 'addLabelsOnce'
 >;
@@ -64,6 +65,17 @@ interface Options {
   log: ToolingLog;
 }
 
+interface Member {
+  issue: GithubIssue;
+  events: GithubIssueEvent[];
+}
+
+/** A stretch of time an issue was open; `to` is absent while it still is. */
+interface OpenPeriod {
+  from: string;
+  to?: string;
+}
+
 const latestReopen = (events: GithubIssueEvent[]): GithubIssueEvent | undefined =>
   events
     .filter((event) => event.event === 'reopened')
@@ -83,6 +95,48 @@ const eligible = (issue: GithubIssue): boolean =>
   !hasIssueLabel(issue, 'failure:insufficient-data') &&
   !hasIssueLabel(issue, 'failure:test-needs-migration');
 
+const openPeriods = ({ issue, events }: Member): OpenPeriod[] => {
+  const periods: OpenPeriod[] = [{ from: issue.created_at }];
+  const transitions = events
+    .filter(({ event }) => event === 'closed' || event === 'reopened')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id - b.id);
+  for (const { event, created_at: at } of transitions) {
+    const last = periods[periods.length - 1];
+    if (event === 'closed' && last.to === undefined) last.to = at;
+    if (event === 'reopened' && last.to !== undefined) periods.push({ from: at });
+  }
+  // The issue's current state wins over a timeline that lags behind it
+  const last = periods[periods.length - 1];
+  if (issue.state === 'open') {
+    last.to = undefined;
+  } else if (last.to === undefined) {
+    last.to = issue.closed_at ?? undefined;
+  }
+  return periods;
+};
+
+/**
+ * Start of the file's current episode: the stretch, up to now, during which at least one of its
+ * issues has been open. Requests and fixes from before it belong to an earlier episode.
+ */
+const episodeStart = (periods: OpenPeriod[]): string | undefined => {
+  let start = periods
+    .filter(({ to }) => to === undefined)
+    .map(({ from }) => from)
+    .sort()[0];
+  if (start === undefined) return undefined;
+  for (let extended = true; extended; ) {
+    extended = false;
+    for (const { from, to } of periods) {
+      if (to !== undefined && from < start && to >= start) {
+        start = from;
+        extended = true;
+      }
+    }
+  }
+  return start;
+};
+
 /** Select one automatic fix per file and representative open episode using existing GitHub history. */
 export const requestFlakyTestFixes = async ({
   github,
@@ -97,20 +151,37 @@ export const requestFlakyTestFixes = async ({
   log.info(`Loading open and closed failed-test issues in ${repo}`);
   const issues = await github.listIssues({ state: 'all', labels: ['failed-test'] });
   log.info(`Loaded ${issues.length} failed-test issues`);
-  const readGroup = (numbers: number[]) =>
-    Promise.all(
-      numbers.map(async (number) => {
-        const [issue, events] = await Promise.all([
-          github.getIssue(number),
-          github.getIssueTimeline(number),
-        ]);
-        return { issue, events };
-      })
-    );
+
+  /**
+   * The file's current episode and the history of its issues: every open one, and each closed
+   * one that was still open once the episode began. Issues are read one at a time, so a file
+   * with a long history stays clear of GitHub's secondary rate limits.
+   */
+  const readEpisode = async (siblings: GithubIssue[]) => {
+    const members: Member[] = [];
+    let start: string | undefined;
+    let pending = siblings.filter((issue) => issue.state === 'open');
+    while (pending.length) {
+      for (const issue of pending) {
+        members.push({ issue, events: await github.getIssueTimeline(issue.number) });
+      }
+      const from = episodeStart(members.flatMap(openPeriods));
+      start = from;
+      pending = siblings.filter(
+        (issue) =>
+          from !== undefined &&
+          issue.state === 'closed' &&
+          issue.closed_at !== null &&
+          issue.closed_at >= from &&
+          !members.some((member) => member.issue.number === issue.number)
+      );
+    }
+    return start === undefined ? undefined : { start, members };
+  };
 
   const groups = buildFixGroups(report, issues);
   const associated = new Set(
-    groups.flatMap((group) => [...group.siblings.map(({ number }) => number), ...group.ambiguous])
+    groups.flatMap((group) => [...group.siblings, ...group.ambiguous].map(({ number }) => number))
   );
   const summary: FixSummary = {
     githubRepo: repo,
@@ -146,10 +217,6 @@ export const requestFlakyTestFixes = async ({
         hold('unknown-or-moved-file');
         continue;
       }
-      if (group.ambiguous.length) {
-        hold(`ambiguous-identity: ${group.ambiguous.join(', ')}`);
-        continue;
-      }
       const tests = group.suites.flatMap((suite) => suite.tests);
       if (
         !tests.some((test) =>
@@ -159,13 +226,29 @@ export const requestFlakyTestFixes = async ({
         hold('no-active-main-failure');
         continue;
       }
-      const members = await readGroup(action.siblings);
       if (
-        members.some(({ issue }) => hasIssueLabel(issue, OPTED_OUT_TEAM)) ||
         tests.some((test) =>
           test.owners.some((owner) => getTeamByGithubHandle(owner)?.github.label === OPTED_OUT_TEAM)
         )
       ) {
+        hold('team-opted-out');
+        continue;
+      }
+      const episode = await readEpisode(group.siblings);
+      if (!episode) {
+        hold('no-open-issue');
+        continue;
+      }
+      const { start, members } = episode;
+      // An issue we cannot place only matters if it could belong to the current episode.
+      const ambiguous = group.ambiguous.filter(
+        (issue) => issue.state === 'open' || (issue.closed_at !== null && issue.closed_at >= start)
+      );
+      if (ambiguous.length) {
+        hold(`ambiguous-identity: ${ambiguous.map(({ number }) => number).join(', ')}`);
+        continue;
+      }
+      if (members.some(({ issue }) => hasIssueLabel(issue, OPTED_OUT_TEAM))) {
         hold('team-opted-out');
         continue;
       }
@@ -175,41 +258,26 @@ export const requestFlakyTestFixes = async ({
       }
       const attempts = members
         .flatMap(({ issue, events }) =>
-          events.filter(isFixAttempt).map((event) => ({ issue, at: event.created_at }))
+          events
+            .filter((event) => isFixAttempt(event) && event.created_at >= start)
+            .map((event) => ({ issue, at: event.created_at }))
         )
         .sort((a, b) => a.at.localeCompare(b.at) || a.issue.number - b.issue.number);
 
-      const relatedPrs = new Set<number>();
-      const prPrefix = `https://github.com/${repo}/pull/`;
-      for (const { events } of members) {
-        for (const event of events) {
-          const source = event.source?.issue;
-          if (source?.pull_request && source.html_url.startsWith(prPrefix)) {
-            const number = Number(source.html_url.slice(prPrefix.length));
-            if (!Number.isSafeInteger(number) || number <= 0) {
-              throw new Error(`Invalid linked PR URL: ${source.html_url}`);
-            }
-            relatedPrs.add(number);
-          }
+      const fixes: Array<{ issue: GithubIssue; pr: GithubFixPullRequest }> = [];
+      for (const { issue } of members) {
+        for (const pr of await github.getIssueFixPullRequests(issue.number)) {
+          fixes.push({ issue, pr });
         }
       }
-      const prs = await Promise.all([...relatedPrs].map((pr) => github.getFixPullRequest(pr)));
-      const fixes = prs.filter((pr) =>
-        pr.closingIssues.some((number) => action.siblings.includes(number))
-      );
-      if (fixes.some((pr) => pr.state === 'OPEN')) {
+      if (fixes.some(({ pr }) => pr.state === 'OPEN')) {
         hold('existing-fix-pr');
         continue;
       }
       const merges = fixes
-        .flatMap((pr) => {
-          const at = pr.mergedAt;
-          return pr.state === 'MERGED' && at
-            ? members
-                .filter(({ issue }) => pr.closingIssues.includes(issue.number))
-                .map(({ issue }) => ({ issue, at }))
-            : [];
-        })
+        .flatMap(({ issue, pr: { state, mergedAt } }) =>
+          state === 'MERGED' && mergedAt && mergedAt >= start ? [{ issue, at: mergedAt }] : []
+        )
         .sort((a, b) => a.at.localeCompare(b.at) || a.issue.number - b.issue.number);
 
       // The first request, not the oldest issue number, anchors the representative across runs.
@@ -256,23 +324,31 @@ export const requestFlakyTestFixes = async ({
         continue;
       }
 
-      // Recheck siblings too: a manual request may have arrived while we read PRs/history.
-      const currentMembers = await readGroup(action.siblings);
-      const current = currentMembers.find(({ issue }) => issue.number === representative.number);
-      if (!current) throw new Error(`Missing representative #${representative.number}`);
-      const currentDetails = describeIssue(current.issue);
+      // Recheck from fresh reads: a manual request, a reopen or a close may have arrived since.
+      const fresh: GithubIssue[] = [];
+      for (const { number } of group.siblings) {
+        fresh.push(await github.getIssue(number));
+      }
+      const currentEpisode = await readEpisode(fresh);
+      const current = currentEpisode?.members.find(
+        ({ issue }) => issue.number === representative.number
+      );
+      const association = current && associateIssue(group, describeIssue(current.issue));
       if (
+        !currentEpisode ||
+        !current ||
+        currentEpisode.start !== start ||
         !eligible(current.issue) ||
-        currentMembers.some(
+        (association !== 'target' && association !== 'sibling') ||
+        currentEpisode.members.some(
           ({ issue }) => hasIssueLabel(issue, FIX_LABEL) || hasIssueLabel(issue, OPTED_OUT_TEAM)
         ) ||
-        (currentDetails.suiteFilePath ?? currentDetails.filePath) !== group.filePath ||
-        issueFramework(currentDetails) !== group.framework ||
         latestReopen(current.events)?.id !== reopen?.id ||
-        currentMembers.some(({ issue, events }) =>
+        currentEpisode.members.some(({ issue, events }) =>
           events.some(
             (event) =>
               isFixAttempt(event) &&
+              event.created_at >= start &&
               !members
                 .find((previous) => previous.issue.number === issue.number)
                 ?.events.some((old) => old.id === event.id)

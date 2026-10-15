@@ -26,10 +26,13 @@ export interface FixGroup {
   suites: FlakySuite[];
   siblings: GithubIssue[];
   targets: GithubIssue[];
-  ambiguous: number[];
+  ambiguous: GithubIssue[];
 }
 
-export const issueFramework = (details: IssueDetails): string | undefined =>
+/** A request target, an issue whose history counts, or one whose identity cannot be told. */
+export type IssueAssociation = 'target' | 'sibling' | 'ambiguous';
+
+const issueFramework = (details: IssueDetails): string | undefined =>
   details.suiteFramework ??
   details.testFramework ??
   (details.scoutTestId ? 'playwright' : details.jestDirectory ? 'jest' : undefined);
@@ -40,6 +43,34 @@ export const isTestFilePath = (filePath: string): boolean =>
   !filePath.startsWith('../') &&
   !filePath.includes('\\') &&
   /\.[cm]?[jt]sx?$/.test(filePath);
+
+/**
+ * How an issue relates to a file group: a `suite` or `test` match is a target, any other issue
+ * about the file a sibling. Issues filed before `test.type` was recorded name no framework, and
+ * older Jest issues only their directory; the file path, or a flaky test named in that
+ * directory, identifies them as the issue reporter does.
+ */
+export const associateIssue = (
+  group: Pick<FixGroup, 'framework' | 'filePath' | 'suites'>,
+  details: IssueDetails
+): IssueAssociation | undefined => {
+  const framework = issueFramework(details);
+  if (framework && framework !== group.framework) return undefined;
+  const matches = new Set(
+    group.suites.flatMap((suite) => findMatchingIssues(suite, [details]).map(({ match }) => match))
+  );
+  const namesTest = matches.has('suite') || matches.has('test');
+  const directory = Path.posix.dirname(group.filePath);
+  const ownFile =
+    details.suiteFilePath ??
+    details.filePath ??
+    (namesTest && details.jestDirectory === directory ? group.filePath : undefined);
+  if (ownFile === group.filePath) return namesTest ? 'target' : 'sibling';
+  if (namesTest || matches.has('moved') || (!ownFile && details.jestDirectory === directory)) {
+    return 'ambiguous';
+  }
+  return undefined;
+};
 
 /** Group report candidates by file, but associate sibling issues independently of report admission. */
 export const buildFixGroups = (report: FlakyTestReport, issues: GithubIssue[]): FixGroup[] => {
@@ -65,29 +96,13 @@ export const buildFixGroups = (report: FlakyTestReport, issues: GithubIssue[]): 
         candidateIssues(suite, index).map((details) => [details.issue.number, details] as const)
       )
     );
-    const targetMatches = new Set(
-      group.suites.flatMap((suite) =>
-        findMatchingIssues(suite, [...candidates.values()])
-          .filter(({ match }) => match === 'suite' || match === 'test')
-          .map(({ issue }) => issue.number)
-      )
-    );
     for (const details of candidates.values()) {
-      const framework = issueFramework(details);
-      if (framework && framework !== group.framework) continue;
-      const ownFile = details.suiteFilePath ?? details.filePath;
-      if (ownFile === group.filePath && framework === group.framework) {
+      const association = associateIssue(group, details);
+      if (association === 'ambiguous') {
+        group.ambiguous.push(details.issue);
+      } else if (association) {
         group.siblings.push(details.issue);
-        if (targetMatches.has(details.issue.number)) group.targets.push(details.issue);
-      } else if (
-        ownFile === group.filePath ||
-        targetMatches.has(details.issue.number) ||
-        (!ownFile && details.jestDirectory === Path.posix.dirname(group.filePath)) ||
-        group.suites.some((suite) =>
-          findMatchingIssues(suite, [details]).some(({ match }) => match === 'moved')
-        )
-      ) {
-        group.ambiguous.push(details.issue.number);
+        if (association === 'target') group.targets.push(details.issue);
       }
     }
     group.targets.sort(

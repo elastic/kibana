@@ -99,44 +99,56 @@ describe('GithubApi writes', () => {
       expect(fetchMock.mock.calls[1][0]).toBe(next);
     });
 
-    it('reads and paginates native closing relationships in dry run, excluding other repositories', async () => {
-      jest.useFakeTimers();
-      const page = (numbers: number[], hasNextPage: boolean) =>
-        jsonResponse({
-          data: {
-            repository: {
-              pullRequest: {
-                state: 'MERGED',
-                mergedAt: '2026-09-09T12:00:00Z',
-                closingIssuesReferences: {
-                  nodes: [
-                    ...numbers.map((number) => ({
-                      number,
-                      repository: { nameWithOwner: 'elastic/kibana' },
-                    })),
-                    { number: 99, repository: { nameWithOwner: 'other/repo' } },
-                  ],
-                  pageInfo: { hasNextPage, endCursor: hasNextPage ? 'next' : null },
-                },
+    const closingPage = (
+      nodes: Array<{ number: number; state: string; mergedAt: string | null; repo?: string }>,
+      endCursor: string | null = null
+    ) =>
+      jsonResponse({
+        data: {
+          repository: {
+            issue: {
+              closedByPullRequestsReferences: {
+                nodes: nodes.map(({ repo = 'elastic/kibana', ...pr }) => ({
+                  ...pr,
+                  repository: { nameWithOwner: repo },
+                })),
+                pageInfo: { hasNextPage: endCursor !== null, endCursor },
               },
             },
           },
-        });
+        },
+      });
+
+    it('reads and paginates the PRs linked as closing an issue in dry run, excluding other repositories', async () => {
+      jest.useFakeTimers();
       const fetchMock = jest
         .spyOn(global, 'fetch')
-        .mockResolvedValueOnce(page([1], true))
-        .mockResolvedValueOnce(page([2], false));
+        .mockResolvedValueOnce(
+          closingPage(
+            [
+              { number: 10, state: 'MERGED', mergedAt: '2026-09-09T12:00:00Z' },
+              { number: 99, state: 'OPEN', mergedAt: null, repo: 'other/repo' },
+            ],
+            'next'
+          )
+        )
+        .mockResolvedValueOnce(closingPage([{ number: 11, state: 'OPEN', mergedAt: null }]));
       const api = new GithubApi({ log, token: 'secret', dryRun: true });
-      const result = api.getFixPullRequest(42);
+      const result = api.getIssueFixPullRequests(42);
       await jest.runAllTimersAsync();
-      expect(await result).toEqual({
-        state: 'MERGED',
-        mergedAt: '2026-09-09T12:00:00Z',
-        closingIssues: [1, 2],
-      });
+      expect(await result).toEqual([
+        { number: 10, state: 'MERGED', mergedAt: '2026-09-09T12:00:00Z' },
+        { number: 11, state: 'OPEN', mergedAt: null },
+      ]);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/graphql');
-      expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body)).variables.after).toBe('next');
+      const [first, second] = fetchMock.mock.calls.map(([, init]) =>
+        JSON.parse(String(init?.body))
+      );
+      // Closed and merged PRs are only listed on request
+      expect(first.query).toContain('includeClosedPrs: true');
+      expect(first.variables).toMatchObject({ owner: 'elastic', name: 'kibana', number: 42 });
+      expect(second.variables.after).toBe('next');
     });
 
     it('rejects GraphQL errors rather than treating unreadable links as no fix', async () => {
@@ -147,18 +159,24 @@ describe('GithubApi writes', () => {
         })
       );
       const api = new GithubApi({ log, token: 'secret', dryRun: true });
-      await expect(api.getFixPullRequest(42)).rejects.toThrow('Access denied');
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('Access denied');
     });
 
-    it('rejects incomplete closing-issue pagination', async () => {
+    it('rejects a merged PR without a merge time', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(closingPage([{ number: 10, state: 'MERGED', mergedAt: null }]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('invalid state');
+    });
+
+    it('rejects incomplete fix PR pagination', async () => {
       jest.spyOn(global, 'fetch').mockResolvedValue(
         jsonResponse({
           data: {
             repository: {
-              pullRequest: {
-                state: 'OPEN',
-                mergedAt: null,
-                closingIssuesReferences: {
+              issue: {
+                closedByPullRequestsReferences: {
                   nodes: [],
                   pageInfo: { hasNextPage: true, endCursor: null },
                 },
@@ -168,7 +186,7 @@ describe('GithubApi writes', () => {
         })
       );
       const api = new GithubApi({ log, token: 'secret', dryRun: true });
-      await expect(api.getFixPullRequest(42)).rejects.toThrow('Incomplete closing-issue history');
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('Incomplete fix PR history');
     });
 
     it.each(['network', 'server'])(
