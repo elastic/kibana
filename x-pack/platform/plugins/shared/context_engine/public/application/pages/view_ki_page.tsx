@@ -18,6 +18,8 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ViewKiContentLayout } from '../components/ki/view/view_ki_content_layout';
 import { ViewKiRawJsonPanel } from '../components/ki/view/content/view_ki_raw_json_panel';
 import { getViewKiHeaderBadges } from '../components/ki/view/metadata/view_ki_header_badges';
+import { useAiIndex } from '../hooks/use_ai_index';
+import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useKi } from '../hooks/use_ki';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
@@ -25,7 +27,11 @@ import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
-import { decodeRouteParam, getAiIndexDetailPath } from '../paths';
+import {
+  decodeRouteParam,
+  getAiIndexDetailPath,
+  getAiIndexKnowledgeIndicatorsPath,
+} from '../paths';
 
 type ViewKiTabId = 'details' | 'document';
 
@@ -45,12 +51,13 @@ export const ViewKiPage = () => {
     id: string;
     kiId: string;
   }>();
-  const aiIndexId = aiIndexIdParam;
-  const kiId = decodeRouteParam(kiIdParam);
+  const aiIndexId = useMemo(() => decodeRouteParam(aiIndexIdParam), [aiIndexIdParam]);
+  const kiId = useMemo(() => decodeRouteParam(kiIdParam), [kiIdParam]);
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const index = searchParams.get('index') ?? '';
 
+  const { aiIndex } = useAiIndex(aiIndexId);
   const { ki, isLoading, error } = useKi({
     aiIndexId,
     kiId,
@@ -64,6 +71,11 @@ export const ViewKiPage = () => {
 
   const pageTitle = getPageTitle(ki, kiId);
   const backHref = createContextEngineUrl(getAiIndexDetailPath(aiIndexId));
+
+  useContextEngineBreadcrumbs([
+    { text: aiIndex?.id ?? aiIndexId, path: getAiIndexKnowledgeIndicatorsPath(aiIndexId) },
+    { text: pageTitle },
+  ]);
 
   const lifecycleStatus = ki ? readKiDocumentLifecycleStatus(ki.document) : undefined;
 
@@ -112,7 +124,7 @@ export const ViewKiPage = () => {
   const handleBackClick = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
-      navigateToContextEngine(getAiIndexDetailPath(aiIndexId));
+      navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(aiIndexId));
     },
     [aiIndexId, navigateToContextEngine]
   );
@@ -121,7 +133,7 @@ export const ViewKiPage = () => {
   const showKiContent = index.length > 0 && !error && (isLoading || ki);
 
   return (
-    <ContextEnginePageTemplate data-test-subj="contextViewKiPage" breadcrumbPageName={pageTitle}>
+    <ContextEnginePageTemplate data-test-subj="contextViewKiPage">
       <ContextEngineSubPageHeader
         backDestinationLabel={i18n.translate('xpack.contextEngine.viewKi.backDestination', {
           defaultMessage: 'AI index',

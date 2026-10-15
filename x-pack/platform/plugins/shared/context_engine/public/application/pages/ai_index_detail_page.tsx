@@ -133,7 +133,7 @@ export const AiIndexDetailPage = () => {
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
-  useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : undefined);
+  useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
 
   const headerBadges = useMemo<AppHeaderBadge[] | undefined>(
     () =>
