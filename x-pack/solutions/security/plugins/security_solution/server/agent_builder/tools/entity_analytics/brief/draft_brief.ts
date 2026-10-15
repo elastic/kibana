@@ -66,20 +66,20 @@ const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security a
 - firstSeen is when the Entity Store first saw the entity, relative to now.
 
 ## Output
-- attention: one or two sentences on what needs attention.
+- attention: one or two sentences on what needs attention. Never comment on which or how many entities are listed: the brief states its coverage itself.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own.
 - Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or "this account".
 - Keep to the word limits in the schema. The brief is read in about a minute.
 
 ## Accuracy
-- Use only the view and the entities. A priority quotes only numbers from its own entity or the view. Never calculate, add up, estimate or round.
+- Use only the view and the entities. A priority quotes only numbers from its own entity or the view. Never calculate, add up, estimate or round, including previous values (the view gives the change, not the old count) and ratios such as "doubled".
 - Counts of entities come only from the view, never from how many entities are listed.
 - Alerts, anomalies and risk changes are reasons to investigate, not proof: never claim compromise, attack, lateral movement or exfiltration.
 - Be proportionate. With little evidence, say so. Never call something critical or widespread without data showing it, give an overall threat verdict, or say the environment is safe.
 
 ## Style
-Plain words, short sentences, no markdown, no filler. Never mention tiles, cards, the page layout or field names: say what the entity did, e.g. "risk rose by at least 10 points", not "riskMovers".`;
+Plain words, short sentences, no markdown, no filler. Never mention tiles, cards, signals, the page layout or field names: say what the entity did, e.g. "risk rose by at least 10 points", not "riskMovers".`;
 
 /** The period, the page's counts, what each flag means, then one JSON object per entity. */
 const buildUserMessage = ({
