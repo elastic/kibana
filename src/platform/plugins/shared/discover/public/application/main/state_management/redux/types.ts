@@ -13,7 +13,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLEditorRestorableState, QuickSearchVisorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
@@ -35,7 +35,7 @@ import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type { DocViewerRestorableState, DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
@@ -158,6 +158,11 @@ export interface DiscoverAppState {
    * The expanded document reference
    */
   expandedDoc?: ExpandedDocRef;
+  /**
+   * The URL-shareable doc viewer state (selected tab + per-tab shareable slices) restored alongside
+   * the expanded document from a shared link.
+   */
+  docViewerState?: DocViewerShareableState;
 }
 
 export interface CascadedDocumentsState {
@@ -252,6 +257,8 @@ export interface TabState extends TabItem {
   profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
+    // Unlike the editor state, the visor mode is also persisted locally
+    visor?: Partial<QuickSearchVisorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
