@@ -36,7 +36,7 @@ export const reactRules: DummyRuleMap = {
   'jsx-a11y/no-noninteractive-element-to-interactive-role': 'error',
   // 'jsx-a11y/no-onchange': 'error',
   'jsx-a11y/no-redundant-roles': 'error',
-  // 'jsx-a11y/role-has-required-aria-props': 'error',
+  'jsx-a11y/role-has-required-aria-props': 'error',
   // 'jsx-a11y/role-supports-aria-props': 'error',
   'jsx-a11y/scope': 'error',
   'jsx-a11y/tabindex-no-positive': 'error',

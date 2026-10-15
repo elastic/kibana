@@ -28,7 +28,6 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
     'jsx-a11y/accessible-emoji': 'error',
     'jsx-a11y/no-noninteractive-element-interactions': 'error',
-    'jsx-a11y/role-has-required-aria-props': 'error',
     'jsx-a11y/role-supports-aria-props': 'error',
     'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
   },
