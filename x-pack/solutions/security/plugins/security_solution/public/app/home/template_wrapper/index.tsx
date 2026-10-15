@@ -64,6 +64,13 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
       overflow: hidden;
     }
 
+    /* At the m breakpoint Dashboard sets min-height to 100vh minus the sticky header.
+       That is taller than the space under the search bar, title, and toolbar, so
+       overflow: hidden clips the panel. The slot already has a definite height. */
+    .dshLayout-isMaximizedPanel {
+      min-height: 0;
+    }
+
     .securityPageWrapper {
       display: flex;
       flex-direction: column;
