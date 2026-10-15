@@ -147,6 +147,7 @@ function GraphWorkspace(options) {
       this.redoLog.push(lastOps);
       lastOps.forEach((ops) => ops.undo());
       this.runLayout();
+      self.topologyChangeHandler?.();
     }
   };
   this.redo = function () {
@@ -156,6 +157,7 @@ function GraphWorkspace(options) {
       this.undoLog.push(lastOps);
       lastOps.forEach((ops) => ops.redo());
       this.runLayout();
+      self.topologyChangeHandler?.();
     }
   };
 
@@ -270,6 +272,7 @@ function GraphWorkspace(options) {
     self.addUndoLogEntry(undoOperations);
     self.arrRemoveAll(self.edges, danglingEdges);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.selectNeighbours = function () {
@@ -605,6 +608,7 @@ function GraphWorkspace(options) {
     self.selectNode(node);
     self.addUndoLogEntry(ops);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.mergeNeighbours = function (node) {
@@ -620,6 +624,7 @@ function GraphWorkspace(options) {
     });
     self.addUndoLogEntry(ops);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.mergeSelections = function (targetNode) {
@@ -639,6 +644,7 @@ function GraphWorkspace(options) {
     });
     self.addUndoLogEntry(ops);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.ungroup = function (node) {
@@ -651,14 +657,17 @@ function GraphWorkspace(options) {
     });
     self.addUndoLogEntry(ops);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.unblockNode = function (node) {
     self.arrRemove(self.blocklistedNodes, node);
+    self.topologyChangeHandler?.();
   };
 
   this.unblockAll = function () {
     self.arrRemoveAll(self.blocklistedNodes, self.blocklistedNodes);
+    self.topologyChangeHandler?.();
   };
 
   this.blocklistSelection = function () {
@@ -679,6 +688,7 @@ function GraphWorkspace(options) {
     self.arrRemoveAll(self.edges, danglingEdges);
     self.selectedNodes = [];
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   // A "simple search" operation that requires no parameters from the client.
@@ -906,6 +916,7 @@ function GraphWorkspace(options) {
     child.parent = parent;
     self.addUndoLogEntry([new GroupOperation(parent, child)]);
     self.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.getNode = function (nodeId) {

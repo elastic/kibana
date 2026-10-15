@@ -226,8 +226,12 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
     edgeIds: Object.keys(edgesById),
     blocklistedNodesById,
     blocklistedNodeIds: Object.keys(blocklistedNodesById),
-    selectedNodeIds: (workspace.selectedNodes ?? []).map(({ id }) => id),
-    selectedEdgeIds: (workspace.getEdgeSelection?.() ?? []).map(getEdgeId),
+    selectedNodeIds: (workspace.selectedNodes ?? [])
+      .map(({ id }) => id)
+      .filter((id) => nodesById[id]),
+    selectedEdgeIds: (workspace.getEdgeSelection?.() ?? [])
+      .map(getEdgeId)
+      .filter((id) => edgesById[id]),
   };
 };
 
