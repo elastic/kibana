@@ -51,13 +51,19 @@ import type { Entity } from '../../../../../common/api/entity_analytics';
 import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
   entityRecord?: Entity | null;
   refetchEntityRecord?: () => void;
-}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord }) => {
+  /**
+   * `resolved` summarizes the entity's whole resolution group (v2 flyout group view) and
+   * reads/writes a persisted summary separate from the single-entity one. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
+}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord, mode = 'single' }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -130,16 +136,19 @@ export const EntityHighlightsAccordion: React.FC<{
   } = useFetchPersistedAiSummary({
     entityType,
     entityIdentifier,
+    mode,
   });
 
   // Snapshot of current entity signals — passed to the hook so they are persisted
-  // alongside the summary at generation time for future staleness detection.
+  // alongside the summary at generation time for future staleness detection. In resolved
+  // mode the summary is built from the resolution-group risk score, so track that instead.
   const entitySnapshot = useMemo(
     () =>
       buildEntitySummaryStalenessEntitySnapshot(
-        entityRecord ? (entityRecord as EntityStoreRecord) : null
+        entityRecord ? (entityRecord as EntityStoreRecord) : null,
+        { preferResolutionRisk: mode === 'resolved' }
       ),
-    [entityRecord]
+    [entityRecord, mode]
   );
 
   const {
@@ -153,6 +162,7 @@ export const EntityHighlightsAccordion: React.FC<{
     anonymizationFields: anonymizationFields?.data ?? [],
     entityType,
     entityIdentifier,
+    mode,
     storedSummary,
     entitySnapshot,
     refetchEntityRecord,
@@ -189,10 +199,11 @@ export const EntityHighlightsAccordion: React.FC<{
 
   // Dismiss state — stored per-entity per-space so dismiss is local to this browser session
   // and does not affect other users. The stored value is the risk score at dismissal time;
-  // if the score changes again the callout re-appears automatically.
+  // if the score changes again the callout re-appears automatically. Single mode keeps the
+  // historical key shape; the resolved-mode summary tracks a different score, so it gets its own.
   const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
     spaceId ?? 'default'
-  }.${entityType}.${entityIdentifier}`;
+  }.${entityType}.${entityIdentifier}${mode === 'resolved' ? `.${mode}` : ''}`;
   const [dismissedAtScore, setDismissedAtScore, removeDismissedAtScore] =
     useLocalStorage<number>(staleDismissKey);
 

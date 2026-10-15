@@ -25,6 +25,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getRiskScoreData, getAnomalyData, getVulnerabilityData } from './utils';
 import type { AnomalyRecord } from './utils/get_anomaly_data';
+import type { RiskScoreType } from '../../risk_score/score_type_filter';
 
 interface GetEnrichedEntitiesParams {
   anomalyFromDate: number;
@@ -34,6 +35,8 @@ interface GetEnrichedEntitiesParams {
   size?: number;
   searchAfter?: Array<string | number>;
   getAlertInputsForRiskScore?: boolean;
+  /** Restrict each entity's risk score to one `score_type`; any type (latest first) when omitted. */
+  riskScoreType?: RiskScoreType;
 }
 
 export interface EnrichedEntity {
@@ -72,6 +75,7 @@ export class EnrichEntityService {
     size,
     searchAfter,
     getAlertInputsForRiskScore = true,
+    riskScoreType,
   }: GetEnrichedEntitiesParams): Promise<EnrichedEntityResult> {
     // Proxies a call to the entity store to get the entities matching the input filter
     const { entities, fields: entityFields } = await this.opts.entityStoreClient.listEntities({
@@ -97,6 +101,7 @@ export class EnrichEntityService {
         ...sharedOpts,
         spaceId: this.opts.spaceId,
         getAlerts: getAlertInputsForRiskScore,
+        scoreType: riskScoreType,
       }),
       getAnomalyData({
         ...sharedOpts,

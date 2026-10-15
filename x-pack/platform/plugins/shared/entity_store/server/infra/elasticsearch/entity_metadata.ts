@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { BulkDropAggregator } from './bulk_drop_aggregator';
 import type { BulkDropTypeSummary } from './bulk_drop_aggregator';
 
@@ -90,6 +91,8 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     index: string;
     entityId: string;
     eventAction: string;
+    /** Extra clauses AND-ed with the entity id / event action, e.g. a doc-type variant. */
+    filter?: QueryDslQueryContainer[];
   }
 ): Promise<TDoc | null> => {
   try {
@@ -105,6 +108,7 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
           filter: [
             { term: { 'event.action': params.eventAction } },
             { term: { 'entity.id': params.entityId } },
+            ...(params.filter ?? []),
           ],
         },
       },

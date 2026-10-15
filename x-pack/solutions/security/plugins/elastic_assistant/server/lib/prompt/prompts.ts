@@ -188,6 +188,8 @@ Only include a highlight when that signal is present and non-empty in the contex
   - Anomalies: Include only when anomalies are present. Identify the most significant pattern across anomalies rather than listing them. Only if one or more ML job results clearly correspond to a known attack technique, map it to the relevant MITRE ATT&CK tactic (e.g. \`Execution\`, \`Lateral Movement\`) or Lockheed Martin Kill Chain phase (e.g. \`Exploitation\`, \`Command & Control\`) in the same highlight. If the anomalies are ambiguous or look benign, omit the mapping rather than guessing.
   - Vulnerabilities: Include only when vulnerabilities are present. State the most critical vulnerability present and why it matters.
 
+When a \`resolutionGroup\` is present, the context combines the signals of several entity records that resolve to the same real-world entity; its \`members\` are listed target first. Treat them as one entity: do not produce a highlight per member or list the members, but say that the signals span the group's identities and, when \`truncated\` is true, that not every member was included.
+
 If risk score, criticality, anomalies, and vulnerabilities are all missing or empty, return an empty highlights list and omit recommended actions. Do not invent filler such as "no risk score", "no criticality", or "no anomalies detected".
 
 When signals are present, provide up to 3 actionable recommendations for the security analyst, prioritised by urgency. Each must be 1 sentence. Omit recommended actions when there is nothing concrete to recommend from the available signals.

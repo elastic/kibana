@@ -19,7 +19,7 @@ import {
 import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
-import { omit } from 'lodash';
+import { get, omit } from 'lodash';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
 import { transformRawDataToRecord } from '@kbn/elastic-assistant-common/impl/data_anonymization/transform_raw_data';
@@ -35,7 +35,12 @@ import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
-import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type {
+  EntityDetailsHighlightsRequestBody,
+  EntityDetailsHighlightsResponse,
+} from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
+import { RESOLVED_TO_FIELD } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
 import {
@@ -51,6 +56,7 @@ import { buildCriticalitiesQuery } from '../asset_criticality';
 import type { AggregationBucket } from '../../asset_inventory/telemetry/type';
 import type { EnrichedEntity } from '../enriched_entity';
 import { EnrichEntityService } from '../enriched_entity';
+import type { AnomalyRecord } from '../enriched_entity/service/utils/get_anomaly_data';
 
 /**
  * Rounds a score to 2 decimal places for the LLM payload. The generated summary echoes
@@ -143,6 +149,52 @@ const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
   [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
 });
 
+/**
+ * Maximum number of resolution-group members (target included) whose signals are folded into a
+ * `mode: resolved` summary. Keeps the LLM payload bounded; larger groups are reported as truncated.
+ */
+export const HIGHLIGHTS_MAX_GROUP_MEMBERS = 50;
+
+type ResolutionGroupSummary = NonNullable<
+  EntityDetailsHighlightsResponse['summary']['resolutionGroup']
+>;
+
+const sumVulnerabilitiesTotals = (members: EnrichedEntity[]): Record<string, number> =>
+  members.reduce<Record<string, number>>((totals, { vulnerabilitiesTotal }) => {
+    for (const [key, count] of Object.entries(vulnerabilitiesTotal ?? {})) {
+      totals[key] = (totals[key] ?? 0) + count;
+    }
+    return totals;
+  }, getEmptyVulnerabilitiesTotal());
+
+/** Anomalies of every member, dropping repeats of the same ML record. */
+const collectAnomalies = (members: EnrichedEntity[]): AnomalyRecord[] => {
+  const seenIds = new Set<string>();
+  return members.flatMap(({ anomalies }) =>
+    (anomalies ?? []).filter(({ source }) => {
+      const id = source._id;
+      if (typeof id !== 'string') {
+        return true;
+      }
+      if (seenIds.has(id)) {
+        return false;
+      }
+      seenIds.add(id);
+      return true;
+    })
+  );
+};
+
+/** Identity values (`user.name`, `host.name`, …) of the members that carry one, in member order. */
+const getMemberIdentityValues = (members: EnrichedEntity[], entityField: string): string[] =>
+  members.flatMap(({ entity }) => {
+    const value: unknown = get(entity, entityField);
+    if (typeof value === 'string') {
+      return [value];
+    }
+    return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+  });
+
 interface EntityDetailsHighlightsServiceFactoryOptions {
   riskEngineClient: RiskEngineDataClient;
   entityStoreClient: EntityStoreCRUDClient;
@@ -164,6 +216,8 @@ interface GetDataFnOpts {
   entityIdentifier: string;
   anomalyFromDate: number;
   anomalyToDate: number;
+  /** `resolved` combines the signals of the target's whole resolution group (Entity Store v2 only). */
+  mode?: EntityViewMode;
 }
 
 export const entityDetailsHighlightsServiceFactory = ({
@@ -411,42 +465,58 @@ export const entityDetailsHighlightsServiceFactory = ({
     return localReplacements;
   };
 
-  const applyAnonymizationToData = (enrichedEntity: EnrichedEntity, entityType: EntityType) => {
-    const anonymizedRiskScore = enrichedEntity.riskScore
+  /**
+   * Anonymise the signals of `members` (target first) into the LLM payload. With one member this
+   * is the single-entity summary; with several, their criticality, vulnerabilities and anomalies
+   * are combined while the risk score is the target's (the group's resolution score).
+   */
+  const applyAnonymizationToData = (
+    members: EnrichedEntity[],
+    entityType: EntityType,
+    resolutionGroup?: { truncated: boolean }
+  ) => {
+    const [target] = members;
+    const anonymizedRiskScore = target.riskScore
       ? [
           {
-            score: [formatScoreForSummary(enrichedEntity.riskScore.calculated_score_norm)],
-            id_field: [enrichedEntity.riskScore.id_field],
-            alert_inputs: enrichedEntity.riskScore.inputs.map((input) => ({
+            score: [formatScoreForSummary(target.riskScore.calculated_score_norm)],
+            id_field: [target.riskScore.id_field],
+            alert_inputs: target.riskScore.inputs.map((input) => ({
               risk_score: [formatScoreForSummary(input.risk_score)],
               contribution_score: [formatScoreForSummary(input.contribution_score)],
               description: [input.description ?? ''],
               timestamp: [input.timestamp ?? ''],
             })),
             asset_criticality_contribution_score:
-              enrichedEntity.riskScore.category_2_score != null
-                ? formatScoreForSummary(enrichedEntity.riskScore.category_2_score)
+              target.riskScore.category_2_score != null
+                ? formatScoreForSummary(target.riskScore.category_2_score)
                 : '0',
           },
         ]
       : [];
 
-    const criticalityRawData = getAssignedCriticalityRawData(
-      getRawDataOrDefault(enrichedEntity.fields)
-    );
-    const assetCriticalityAnonymized = criticalityRawData
-      ? [
-          formatCriticalityLevelsInRecord(
-            transformRawDataToRecord({
-              anonymizationFields,
-              currentReplacements: localReplacements,
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements,
-              rawData: criticalityRawData,
-            })
-          ),
-        ]
-      : [];
+    const seenCriticality = new Set<string>();
+    const assetCriticalityAnonymized = members.flatMap(({ fields: memberFields }) => {
+      const criticalityRawData = getAssignedCriticalityRawData(getRawDataOrDefault(memberFields));
+      if (!criticalityRawData) {
+        return [];
+      }
+      const record = formatCriticalityLevelsInRecord(
+        transformRawDataToRecord({
+          anonymizationFields,
+          currentReplacements: localReplacements,
+          getAnonymizedValue,
+          onNewReplacements: localOnNewReplacements,
+          rawData: criticalityRawData,
+        })
+      );
+      const key = JSON.stringify(record);
+      if (seenCriticality.has(key)) {
+        return [];
+      }
+      seenCriticality.add(key);
+      return [record];
+    });
 
     // Vulnerabilities only apply to hosts (enrichment only queries findings when
     // entityType === EntityType.host — see enriched_entity/service/utils/get_vulnerability_data.ts).
@@ -454,18 +524,20 @@ export const entityDetailsHighlightsServiceFactory = ({
     // Vulnerabilities section in the flyout summary.
     const vulnerabilitiesAnonymized =
       entityType === EntityType.host
-        ? (enrichedEntity.vulnerabilities ?? []).map((hit) =>
-            transformRawDataToRecord({
-              anonymizationFields,
-              currentReplacements: localReplacements,
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements,
-              rawData: getRawDataOrDefault(hit.fields),
-            })
-          )
+        ? members
+            .flatMap(({ vulnerabilities }) => vulnerabilities ?? [])
+            .map((hit) =>
+              transformRawDataToRecord({
+                anonymizationFields,
+                currentReplacements: localReplacements,
+                getAnonymizedValue,
+                onNewReplacements: localOnNewReplacements,
+                rawData: getRawDataOrDefault(hit.fields),
+              })
+            )
         : undefined;
 
-    const anomaliesAnonymized = (enrichedEntity.anomalies ?? []).map((anomaly) => {
+    const anomaliesAnonymized = collectAnomalies(members).map((anomaly) => {
       // remove fields that could leak user data
       const formattedAnomaly = omit(anomaly.source, [
         'partition_field_value',
@@ -492,6 +564,24 @@ export const entityDetailsHighlightsServiceFactory = ({
       });
     });
 
+    let resolutionGroupAnonymized: ResolutionGroupSummary | undefined;
+    if (resolutionGroup) {
+      const entityField = EntityTypeToIdentifierField[entityType];
+      const anonymizedMembers = getAnonymizedData({
+        anonymizationFields,
+        currentReplacements: localReplacements,
+        rawData: { [entityField]: getMemberIdentityValues(members, entityField) },
+        getAnonymizedValue,
+        getAnonymizedValues,
+      });
+      localOnNewReplacements(anonymizedMembers.replacements);
+      resolutionGroupAnonymized = {
+        member_count: members.length,
+        truncated: resolutionGroup.truncated,
+        members: anonymizedMembers.anonymizedData[entityField] ?? [],
+      };
+    }
+
     return {
       riskScore: anonymizedRiskScore ?? undefined,
       assetCriticality: assetCriticalityAnonymized,
@@ -499,12 +589,13 @@ export const entityDetailsHighlightsServiceFactory = ({
         ? {
             vulnerabilities: vulnerabilitiesAnonymized,
             // Prevents the UI from displaying the wrong number of vulnerabilities
-            vulnerabilitiesTotal: enrichedEntity.vulnerabilitiesTotal,
+            vulnerabilitiesTotal: sumVulnerabilitiesTotals(members),
           }
         : {}),
       // Null when empty so the model gets an explicit "no ML anomalies" signal
       // (clearer than [] or omitting the key).
       anomalies: anomaliesAnonymized.length > 0 ? anomaliesAnonymized : null,
+      ...(resolutionGroupAnonymized ? { resolutionGroup: resolutionGroupAnonymized } : {}),
     };
   };
 
@@ -558,8 +649,10 @@ export const entityDetailsHighlightsServiceFactory = ({
     entityIdentifier,
     anomalyFromDate,
     anomalyToDate,
+    mode = 'single',
   }: GetDataFnOpts) => {
     const typedEntityType = entityType as EntityType;
+    const isResolved = mode === 'resolved';
     const enrichedEntityService = new EnrichEntityService({
       entityStoreClient,
       esClient,
@@ -572,17 +665,35 @@ export const entityDetailsHighlightsServiceFactory = ({
       spaceId,
       uiSettingsClient,
     });
-
-    const { entities: enrichedEntities } = await enrichedEntityService.getEnrichedEntities({
+    const sharedOpts = {
       anomalyFromDate,
       anomalyToDate,
-      filter: { term: { 'entity.id': entityIdentifier } },
-      size: 1,
       fields,
       getAlertInputsForRiskScore: false,
-    });
+    };
 
-    if (!enrichedEntities || enrichedEntities.length === 0) {
+    // The target is fetched on its own so it is always present (and first) regardless of how
+    // many aliases the group has. Its risk score is the base score in single mode and the
+    // group's resolution score in resolved mode — matching the gauge the flyout shows.
+    const [{ entities: targetEntities }, { entities: aliasEntities }] = await Promise.all([
+      enrichedEntityService.getEnrichedEntities({
+        ...sharedOpts,
+        filter: { term: { 'entity.id': entityIdentifier } },
+        size: 1,
+        riskScoreType: isResolved ? 'resolution' : 'base',
+      }),
+      isResolved
+        ? enrichedEntityService.getEnrichedEntities({
+            ...sharedOpts,
+            filter: { term: { [RESOLVED_TO_FIELD]: entityIdentifier } },
+            // One more than will be kept, so truncation is detectable without a count query.
+            size: HIGHLIGHTS_MAX_GROUP_MEMBERS,
+          })
+        : Promise.resolve({ entities: [] as EnrichedEntity[] }),
+    ]);
+
+    const [target] = targetEntities;
+    if (!target) {
       // No entity → omit vulnerabilities; anomalies are explicitly null (no ML findings).
       return {
         riskScore: [],
@@ -591,7 +702,22 @@ export const entityDetailsHighlightsServiceFactory = ({
       };
     }
 
-    return applyAnonymizationToData(enrichedEntities[0], typedEntityType);
+    if (!isResolved) {
+      return applyAnonymizationToData([target], typedEntityType);
+    }
+
+    const maxAliases = HIGHLIGHTS_MAX_GROUP_MEMBERS - 1;
+    const truncated = aliasEntities.length > maxAliases;
+    if (truncated) {
+      logger.debug(
+        `Entity highlights for "${entityIdentifier}" (${entityType}) cover ${HIGHLIGHTS_MAX_GROUP_MEMBERS} of its resolution-group members; the rest were truncated`
+      );
+    }
+    return applyAnonymizationToData(
+      [target, ...aliasEntities.slice(0, maxAliases)],
+      typedEntityType,
+      { truncated }
+    );
   };
 
   return {

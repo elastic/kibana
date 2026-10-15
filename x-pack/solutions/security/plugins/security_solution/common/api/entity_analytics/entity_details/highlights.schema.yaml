@@ -25,7 +25,10 @@ paths:
                   description: The type of entity.
                 entityIdentifier:
                   type: string
-                  description: The identifier of the entity.
+                  description: The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).
+                mode:
+                  $ref: '../common/common.schema.yaml#/components/schemas/EntityViewMode'
+                  default: single
                 anonymizationFields:
                   type: array
                   items:
@@ -84,6 +87,25 @@ paths:
                         items:
                           type: object
                           additionalProperties: true
+                      resolutionGroup:
+                        type: object
+                        description: Present only when `mode` is `resolved`. Describes the resolution group whose signals were combined into the summary.
+                        properties:
+                          member_count:
+                            type: integer
+                            description: Number of group members (target included) whose signals are in the summary.
+                          truncated:
+                            type: boolean
+                            description: True when the group has more members than were included.
+                          members:
+                            type: array
+                            description: Anonymized identifiers of the included members, target first.
+                            items:
+                              type: string
+                        required:
+                          - member_count
+                          - truncated
+                          - members
                     description: The highlights of the entity.
                   replacements:
                     $ref: '../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
