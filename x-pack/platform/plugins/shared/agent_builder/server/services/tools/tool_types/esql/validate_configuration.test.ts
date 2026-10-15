@@ -182,9 +182,7 @@ describe('validateConfig', () => {
 
       await expect(validateConfig(config)).rejects.toThrow();
 
-      expect(mockCreateBadRequestError).toHaveBeenCalledWith(
-        'Validation error: \nUnknown error'
-      );
+      expect(mockCreateBadRequestError).toHaveBeenCalledWith('Validation error: \nUnknown error');
     });
   });
 
