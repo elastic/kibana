@@ -60,7 +60,7 @@ describe('ModeSwitchModal', () => {
 
     expect(screen.getByText('Turn off advanced mode?')).toBeInTheDocument();
     expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
-      'Simple mode suspends custom boost rules, and default rules go back to the profiles chosen in simple mode.'
+      'Turning off advanced mode suspends custom boost rules and profiles, and default rules go back to the profiles chosen in simple mode.'
     );
     expect(screen.getByTestId('boostModeSwitchModal')).toHaveTextContent(
       'Nothing is deleted, and turning advanced mode back on restores them.'

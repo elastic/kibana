@@ -10,7 +10,6 @@ import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -167,9 +166,7 @@ export const RuleChangeTable = ({
           css={{ paddingBlock: euiTheme.size.xs }}
         >
           <EuiFlexItem role="cell">
-            <EuiText size="xs">
-              <EuiCode>{name}</EuiCode>
-            </EuiText>
+            <EuiText size="xs">{name}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem role="cell">
             <EuiText size="xs">{value}</EuiText>

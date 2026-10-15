@@ -49,11 +49,11 @@ const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: b
       hasCustomRules && hasDefaultRules
         ? i18n.translate('xpack.boost.modeSwitchModal.suspendBoth', {
             defaultMessage:
-              'Simple mode suspends custom boost rules, and default rules go back to the profiles chosen in simple mode.',
+              'Turning off advanced mode suspends custom boost rules and profiles, and default rules go back to the profiles chosen in simple mode.',
           })
         : hasCustomRules
         ? i18n.translate('xpack.boost.modeSwitchModal.suspendRules', {
-            defaultMessage: 'Simple mode suspends custom boost rules.',
+            defaultMessage: 'Turning off advanced mode suspends custom boost rules and profiles.',
           })
         : i18n.translate('xpack.boost.modeSwitchModal.suspendDefaults', {
             defaultMessage: 'Default rules go back to the profiles chosen in simple mode.',

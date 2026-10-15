@@ -149,6 +149,7 @@ const getProfileHelpText = (defaultRuleType: BoostProfileType | undefined) => {
   });
 };
 
+/** Passed to each option's renderer through EUI's `data`, which keeps it out of the page's HTML. */
 interface PickOptionData {
   /** A higher-ranked rule that keeps the data source if this rule targets it. */
   supersededBy?: string;
@@ -448,7 +449,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
       return {
         label: dataSource.name,
         checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
-        supersededBy,
+        data: { supersededBy },
         // A list option can't hold a focusable tooltip, so the option shows the explanation in its
         // own, on hover and when it's reached with the keyboard. EUI places it to the left.
         append: supersededBy && (
