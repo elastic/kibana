@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
@@ -26,6 +26,7 @@ import {
   childRowAttribute,
 } from './cascade_row.styles';
 import { CascadeRowHeaderPrimitive } from './components/cascade_row_header';
+import { StickyHeaderExtensionPointProvider } from './components/cascade_row_header_extension_point';
 
 export { CascadeRowHeaderPrimitive };
 
@@ -61,6 +62,11 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   });
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
+
+  // Held in state (not a ref) so that descendant cells re-render once the sticky header
+  // extension point has been committed to the DOM and can be used as a portal target.
+  const [stickyHeaderExtensionElement, setStickyHeaderExtensionElement] =
+    useState<HTMLDivElement | null>(null);
 
   const cellId = useMemo(() => {
     if (isGroupNode) return null;
@@ -126,16 +132,35 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     >
       <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
         <React.Fragment>
+          {/**
+           * `isActiveSticky` is true when the user's scroll position exceeds the row header's Y position, when this happens
+           * we portal the entire sticky header into a designated area within the grid container that stays sticky on scroll,
+           * given the actual rendered header might be so far way keeping it sticky would be visually jarring.
+           */}
           {isActiveSticky && activeStickyRenderSlotRef.current
             ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
+                <EuiFlexGroup
+                  css={styles.rowStickyHeaderInner}
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>{rowHeader}</EuiFlexItem>
+                  <EuiFlexItem
+                    data-test-subj="sticky-header-extension-point"
+                    ref={setStickyHeaderExtensionElement}
+                    css={styles.rowStickyHeaderExtensionPointWrapper}
+                  />
+                </EuiFlexGroup>,
                 activeStickyRenderSlotRef.current,
                 `${rowId}-sticky-header`
               )
             : null}
         </React.Fragment>
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
-        <React.Fragment>
+        <StickyHeaderExtensionPointProvider
+          extensionPointElement={stickyHeaderExtensionElement}
+          isActiveSticky={isActiveSticky}
+        >
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
               {rowVisibleCells.map((cell) => (
@@ -143,7 +168,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
               ))}
             </EuiFlexItem>
           )}
-        </React.Fragment>
+        </StickyHeaderExtensionPointProvider>
       </EuiFlexGroup>
     </div>
   );

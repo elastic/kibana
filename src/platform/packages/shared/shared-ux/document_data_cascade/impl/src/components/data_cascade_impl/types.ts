@@ -19,6 +19,7 @@ import type {
 import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
 import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
+import type { StickyHeaderExtensionPointContextValue } from './data_cascade_row/components/cascade_row_header_extension_point';
 
 /**
  * Sizing options for the cascade components, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
@@ -64,6 +65,13 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;
   rowIndex: number;
+  /**
+   * Portal information for the sticky header. When `isActiveSticky` is true and `extensionPointElement`
+   * is available, the child can use `createPortal` to render content into the sticky header.
+   * This allows the child to maintain its React tree relationship with the portaled content,
+   * ensuring state updates trigger proper re-renders.
+   */
+  stickyHeaderExtensionPoint: StickyHeaderExtensionPointContextValue | null;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
