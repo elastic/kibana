@@ -62,7 +62,20 @@ export const formatMitreMapping = (
     ];
   });
 
-  for (const tacticId of response.tactics || []) {
+  // A valid technique picked under the wrong tactic is re-homed under its own first
+  // tactic instead of being dropped, so a mis-paired pick still yields a correct mapping.
+  const tacticIds = new Set(response.tactics ?? []);
+  for (const { id } of response.techniques ?? []) {
+    const techData = lookups
+      .find(({ techniquesMap }) => techniquesMap.has(id))
+      ?.techniquesMap.get(id);
+    const [firstTacticId] = techData?.tactic_ids ?? [];
+    if (firstTacticId && !techData?.tactic_ids.some((tacticId) => tacticIds.has(tacticId))) {
+      tacticIds.add(firstTacticId);
+    }
+  }
+
+  for (const tacticId of tacticIds) {
     const lookup = lookups.find(({ tacticsMap }) => tacticsMap.has(tacticId));
     const tacticData = lookup?.tacticsMap.get(tacticId);
     if (lookup && tacticData) {

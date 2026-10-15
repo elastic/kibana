@@ -190,9 +190,9 @@ describe('formatMitreMapping', () => {
     ]);
   });
 
-  it('outputs an empty technique array when no selected technique belongs to the tactic', () => {
-    // T1078 is not an Execution technique, so the TA0002 mapping keeps the
-    // tactic but drops the technique — `technique: []` must still be valid output.
+  it('re-homes a technique under its own tactic when it does not belong to the selected tactic', () => {
+    // T1078 is not an Execution technique, so TA0002 keeps `technique: []` and the
+    // technique is re-homed under its own tactic (TA0001).
     const result = formatMitreMapping(
       { tactics: ['TA0002'], techniques: [{ id: 'T1078' }] },
       { enterprise: testBuckets }
@@ -208,6 +208,67 @@ describe('formatMitreMapping', () => {
         },
         technique: [],
       },
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+        },
+        technique: [
+          {
+            id: 'T1078',
+            name: 'Valid Accounts',
+            reference: 'https://attack.mitre.org/techniques/T1078/',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('adds no extra tactic entry for a technique already under a selected tactic', () => {
+    const result = formatMitreMapping(
+      { tactics: ['TA0001', 'TA0002'], techniques: [{ id: 'T1078' }] },
+      { enterprise: testBuckets }
+    );
+
+    expect(result.map(({ tactic }) => tactic.id)).toEqual(['TA0001', 'TA0002']);
+    expect(result[0].technique).toEqual([expect.objectContaining({ id: 'T1078' })]);
+    expect(result[1].technique).toEqual([]);
+  });
+
+  it('drops a technique with an unknown id without adding a tactic entry', () => {
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9999' }] },
+      { enterprise: testBuckets }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
+    ]);
+  });
+
+  it('drops a technique with empty tactic_ids without throwing', () => {
+    const bucketsWithOrphan = buildMockMitreEntitySummaryBuckets({
+      ...testBuckets,
+      techniques: [
+        ...testBuckets.techniques,
+        buildMockMitreTechniqueSummary({
+          id: 'T9000',
+          name: 'Orphan Technique',
+          reference: 'https://attack.mitre.org/techniques/T9000/',
+          tactic_ids: [],
+        }),
+      ],
+    });
+
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9000' }] },
+      { enterprise: bucketsWithOrphan }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
     ]);
   });
 
@@ -239,13 +300,24 @@ describe('formatMitreMapping', () => {
     ]);
   });
 
-  it('drops an ATLAS technique selected under an ATT&CK tactic', () => {
+  it('re-homes an ATLAS technique selected under an ATT&CK tactic to its ATLAS tactic', () => {
     const result = formatMitreMapping(
       { tactics: ['TA0001'], techniques: [{ id: 'AML.T0044' }] },
       { enterprise: testBuckets, atlas: atlasBuckets }
     );
 
-    expect(result).toEqual([expect.objectContaining({ technique: [] })]);
+    expect(result).toEqual([
+      expect.objectContaining({
+        framework: 'MITRE ATT&CK',
+        tactic: expect.objectContaining({ id: 'TA0001' }),
+        technique: [],
+      }),
+      expect.objectContaining({
+        framework: 'MITRE ATLAS',
+        tactic: expect.objectContaining({ id: 'AML.TA0000' }),
+        technique: [expect.objectContaining({ id: 'AML.T0044' })],
+      }),
+    ]);
   });
 
   it('tolerates missing arrays in a malformed model response', () => {
