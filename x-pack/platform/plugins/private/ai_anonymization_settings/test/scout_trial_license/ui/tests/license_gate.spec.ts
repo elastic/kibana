@@ -52,8 +52,10 @@ test.describe.serial(
       await page.context().setExtraHTTPHeaders({ Authorization: basicAuthHeader(config) });
       await page.gotoApp('management/ai/aiAnonymizationSettings');
 
-      // Proves the browser is signed in and Kibana rendered, so a hidden page is not a login screen.
-      await page.testSubj.waitForSelector('kibanaChrome', { state: 'visible' });
+      // With the app disabled, Management falls through to its landing page. Waiting for it proves the
+      // browser is signed in and the router has resolved, so a hidden page is not just one that has
+      // not mounted yet.
+      await page.testSubj.waitForSelector('cards-navigation-page', { state: 'visible' });
       await expect(page.testSubj.locator('aiAnonymizationSettingsPage')).toBeHidden();
     });
   }
