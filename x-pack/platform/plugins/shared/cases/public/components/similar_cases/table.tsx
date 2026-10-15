@@ -9,25 +9,14 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiBasicTable,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 
 import type { SimilarCaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from '../all_cases/types';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { ColumnsPopover } from '../all_cases/components/columns_popover';
-import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
 
 import * as i18n from './translations';
-
-const NAME_FIELD = 'title';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
 export interface SimilarCasesTableProps {
@@ -36,7 +25,6 @@ export interface SimilarCasesTableProps {
   onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
   pagination: Pagination;
   selectedColumns: CasesColumnSelection[];
-  onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
 }
 
 export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
@@ -45,40 +33,12 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   onChange,
   pagination,
   selectedColumns,
-  onSelectedColumnsChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
-
-  // The name column is always visible and first, so it is not offered in the column picker.
-  const nameColumn = useMemo(
-    () => ({
-      ...(selectedColumns.find(({ field }) => field === NAME_FIELD) ?? {
-        field: NAME_FIELD,
-        name: '',
-      }),
-      isChecked: true,
-    }),
-    [selectedColumns]
-  );
-
-  const optionalColumns = useMemo(
-    () => selectedColumns.filter(({ field }) => field !== NAME_FIELD),
-    [selectedColumns]
-  );
-
-  const tableColumnsSelection = useMemo(
-    () => [nameColumn, ...optionalColumns],
-    [nameColumn, optionalColumns]
-  );
-
-  const onOptionalColumnsChange = useCallback(
-    (newColumns: CasesColumnSelection[]) => onSelectedColumnsChange([nameColumn, ...newColumns]),
-    [nameColumn, onSelectedColumnsChange]
-  );
 
   const assigneeUids = useMemo(
     () => Array.from(new Set(cases.flatMap(({ assignees }) => assignees.map(({ uid }) => uid)))),
@@ -87,7 +47,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   const { data: userProfiles } = useBulkGetUserProfiles({ uids: assigneeUids });
 
   const { columns } = useSimilarCasesColumns({
-    selectedColumns: tableColumnsSelection,
+    selectedColumns,
     customFields,
     userProfiles,
   });
@@ -100,28 +60,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   );
 
   return (
-    // A plain block wrapper stops the parent column flex item from stretching the toolbar
-    // and the table vertically when the sidebar is taller than the table content.
-    <div>
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        alignItems="center"
-        css={css`
-          padding-top: ${euiTheme.size.s};
-        `}
-        data-test-subj="similar-cases-table-toolbar"
-      >
-        <EuiFlexItem grow={false}>
-          <ColumnsPopover
-            selectedColumns={optionalColumns}
-            onSelectedColumnsChange={onOptionalColumnsChange}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SidebarToggleButton />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <>
       {isLoading ? (
         <div
           css={css`
@@ -152,7 +91,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
           responsiveBreakpoint={false}
         />
       )}
-    </div>
+    </>
   );
 };
 SimilarCasesTable.displayName = 'SimilarCasesTable';
