@@ -64,6 +64,11 @@ import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_invest
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { useKibana } from '../../common/lib/kibana';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
+import { useReportAddToChat } from '../../agent_builder/hooks/use_report_add_to_chat';
 import {
   useAlertBasedTiles,
   useAlertBasedTilesDelta,
@@ -180,6 +185,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   } = useFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const euidApi = useEntityStoreEuidApi();
+  const { agentBuilder } = useKibana().services;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const reportAddToChat = useReportAddToChat();
   const {
     timeRange,
     setTimeRange,
@@ -302,8 +310,43 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           },
         });
       },
+      onAddToChat: isAgentChatExperienceEnabled
+        ? (row) => {
+            const entityType = row[ENTITY_TYPE_FIELD];
+            const entityId = getEntityId(row);
+            const entityName = getString(row, 'entity.name');
+            if (!entityId || !entityName || !isStoreEntityType(entityType)) return;
+            reportAddToChat({ pathway: 'entities_grid_row_actions', attachments: ['entity'] });
+            agentBuilder?.openChat({
+              newConversation: true,
+              initialMessage: ENTITY_PROMPT,
+              sessionTag: 'security',
+              attachments: [
+                {
+                  id: `${SecurityAgentBuilderAttachments.entity}-${entityId}`,
+                  type: SecurityAgentBuilderAttachments.entity,
+                  data: {
+                    identifierType: entityType,
+                    identifier: entityName,
+                    entityStoreId: entityId,
+                    attachmentLabel: `${entityType}: ${entityName}`,
+                  },
+                },
+              ],
+            });
+          }
+        : undefined,
     }),
-    [euidApi, investigateInTimeline, openEntityGraphView, openEntityFlyout, scopeId]
+    [
+      agentBuilder,
+      euidApi,
+      investigateInTimeline,
+      isAgentChatExperienceEnabled,
+      openEntityGraphView,
+      openEntityFlyout,
+      reportAddToChat,
+      scopeId,
+    ]
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
