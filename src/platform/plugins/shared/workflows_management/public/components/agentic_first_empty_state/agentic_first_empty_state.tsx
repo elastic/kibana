@@ -133,6 +133,7 @@ export function AgenticFirstEmptyState({
         padding: ${euiTheme.size.xl} ${euiTheme.size.l};
       `
     : css`
+        width: 100%;
         padding: ${euiTheme.size.xl} ${euiTheme.size.l};
       `;
 

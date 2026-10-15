@@ -389,7 +389,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           showAddIntegrations
           spacing="compact"
         />
-        <EuiPageTemplate.Section restrictWidth={false} grow>
+        {/* Center the landing vertically, like the Agent Builder new-chat screen. */}
+        <EuiPageTemplate.Section restrictWidth={false} grow alignment="center">
           <AgenticFirstEmptyStateLive
             onSubmitPrompt={handleLandingSubmit}
             onStartManually={() => setShowAgenticLanding(false)}
