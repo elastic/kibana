@@ -47,7 +47,10 @@ const API_KEY = flag('--apiKey', process.env.API_KEY);
 const AUTH_HEADER = API_KEY
   ? `ApiKey ${API_KEY}`
   : 'Basic ' + Buffer.from(`${ES_USERNAME}:${ES_PASSWORD}`).toString('base64');
-// Printed curl hints reference $API_KEY instead of the secret; export it before pasting them.
+// Printed curl hints reference $API_KEY instead of the secret, so tell the user to export it first.
+const CURL_AUTH_NOTE = API_KEY
+  ? 'Before running the curl below: export API_KEY=<your API key> (--apiKey does not set it in your shell)'
+  : '';
 const CURL_AUTH = API_KEY
   ? `-H "Authorization: ApiKey $API_KEY"`
   : `-u ${ES_USERNAME}:${ES_PASSWORD}`;
@@ -509,6 +512,7 @@ async function indexAlerts() {
       console.log(`  ✓ ${label}: ${KB_URL}${SPACE_PATH_PREFIX}/app/workflows/executions/${execId}`);
     }
     console.log(`\n  Poll for result:`);
+    if (CURL_AUTH_NOTE) console.log(`  ${CURL_AUTH_NOTE}`);
     console.log(
       `  curl ${CURL_AUTH} '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
@@ -527,6 +531,7 @@ async function indexAlerts() {
       console.log(`    API body:    ${payloadFile}`);
       console.log(`    UI Run body: ${uiPayloadFile}`);
     }
+    if (CURL_AUTH_NOTE) console.log(`\n${CURL_AUTH_NOTE}`);
     console.log(`\ncurl ${CURL_AUTH} -XPOST \\`);
     console.log(`  '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/workflow/${WORKER_ID}/run' \\`);
     console.log(`  -H 'kbn-xsrf: true' \\`);
