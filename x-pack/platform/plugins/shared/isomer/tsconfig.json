@@ -11,9 +11,12 @@
     "@kbn/core",
     "@kbn/isomer",
     "@kbn/isomer-charts-elastic",
+    "@kbn/isomer-charts-elastic-node",
     "@kbn/isomer-components",
     "@kbn/isomer-primitives-charts",
     "@kbn/isomer-primitives-vega",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-render",
+    "@kbn/repo-info"
   ]
 }

@@ -164,7 +164,19 @@ export const chartReact =
         'data-chart-state': Live ? 'live' : artifact ? 'artifact' : 'fallback',
         ...nodeAnchor(context, node),
       },
-      title !== undefined && h('figcaption', { className: cls(context, figure.caption) }, title),
+      title !== undefined &&
+        h(
+          'figcaption',
+          {
+            className: cls(
+              context,
+              drawn && seam.engine?.supports[node.type]?.drawsTitle
+                ? figure.visuallyHidden
+                : figure.caption
+            ),
+          },
+          title
+        ),
       description !== undefined &&
         h('p', { className: cls(context, figure.description) }, description),
       h(

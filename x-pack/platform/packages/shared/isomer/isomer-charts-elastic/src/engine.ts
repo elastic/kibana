@@ -54,9 +54,9 @@ export const defineElasticChartsEngine = ({
     version: ELASTIC_CHARTS_VERSION,
     supports: {
       donut: { fidelity: 'native', selection: live },
-      gauge: { fidelity: 'native', selection: live },
+      gauge: { fidelity: 'native', selection: live, drawsTitle: true },
       heatmap: { fidelity: 'native', selection: live },
-      metricTrend: { fidelity: 'native', selection: live },
+      metricTrend: { fidelity: 'native', selection: live, drawsTitle: true },
       treemap: { fidelity: 'native', selection: live },
       xyChart: { fidelity: 'native', selection: live },
     },

@@ -23,4 +23,4 @@ const pack = defineChartsPack(defineElasticChartsEngine({ hints }), {
 - Tests use Jest's globals instead of importing from `vitest`.
 - Formatting follows Kibana's Prettier settings.
 
-The copy is of `packages/isomer-charts-elastic/src` at elastic/isomer `984f5a3d`.
+This package is the source of truth. It was ported from `packages/isomer-charts-elastic/src` on elastic/isomer's `claude/charts-primitive-pack-spike-d86fe8` at `aca0a25f`, which is kept as a record and will not be merged; the differences above are from that port.

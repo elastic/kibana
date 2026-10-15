@@ -19,6 +19,8 @@ export interface ChartSupport {
   reduction?: string;
   /** Whether a click resolves to a target, per mode. */
   selection: { live: boolean; static: boolean; reactNative?: boolean };
+  /** The drawing prints the node's `title` itself, so the figure keeps its caption for assistive tech only. */
+  drawsTitle?: boolean;
 }
 
 export interface LiveChartProps<TNode extends ChartNode = ChartNode> {
