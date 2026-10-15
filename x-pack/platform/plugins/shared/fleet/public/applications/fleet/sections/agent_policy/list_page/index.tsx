@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
@@ -122,6 +123,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       visiblePolicies.map(({ id }) => id),
       { enabled: visiblePolicies.length > 0 }
     );
+
+  // Reloading the list must also reload the summaries, their query key only depends on the ids
+  const queryClient = useQueryClient();
+  const reloadAgentPolicies = useCallback(() => {
+    resendRequest();
+    queryClient.invalidateQueries(['agentPolicies', 'packagePoliciesSummary']);
+  }, [resendRequest, queryClient]);
 
   const policies = useMemo(
     () =>
@@ -267,18 +275,12 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         }),
         actions: [
           {
-            // The actions depend on the package policies, wait for their summary
-            render: (agentPolicy: AgentPolicy) =>
-              agentPolicy.package_policies_summary ? (
-                <AgentPolicyActionMenu
-                  agentPolicy={agentPolicy}
-                  onCopySuccess={() => resendRequest()}
-                />
-              ) : isLoadingPackagePoliciesSummaries ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <></>
-              ),
+            render: (agentPolicy: AgentPolicy) => (
+              <AgentPolicyActionMenu
+                agentPolicy={agentPolicy}
+                onCopySuccess={() => reloadAgentPolicies()}
+              />
+            ),
           },
         ],
       },
@@ -290,7 +292,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [isFleetEnabled, resendRequest, isLoadingPackagePoliciesSummaries]);
+  }, [isFleetEnabled, reloadAgentPolicies, isLoadingPackagePoliciesSummaries]);
 
   const createAgentPolicyButton = useMemo(
     () => (
@@ -361,7 +363,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <CreateAgentPolicyFlyout
           onClose={() => {
             setIsCreateAgentPolicyFlyoutOpen(false);
-            resendRequest();
+            reloadAgentPolicies();
           }}
         />
       ) : null}
@@ -382,7 +384,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" iconType="refresh" onClick={() => resendRequest()}>
+          <EuiButton color="primary" iconType="refresh" onClick={() => reloadAgentPolicies()}>
             <FormattedMessage
               id="xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText"
               defaultMessage="Reload"
