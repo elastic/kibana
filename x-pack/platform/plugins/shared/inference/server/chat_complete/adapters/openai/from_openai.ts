@@ -13,13 +13,31 @@ import type {
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import type { OpenAIChatCompletionChunkDelta, OpenAIChatCompletionMessage } from './types';
 
+/**
+ * Set as the chunk's `refusal` when the provider ends a response with `finish_reason:
+ * content_filter` and no refusal text. Anthropic's `stop_reason: refusal`, for one, arrives this
+ * way through the Elasticsearch inference API: no content, no tool calls, and nothing but the
+ * finish reason to say the response was filtered rather than empty.
+ */
+export const CONTENT_FILTER_REFUSAL =
+  'The response was stopped by the provider content filter (finish_reason: content_filter).';
+
+const refusalFromFinishReason = (
+  refusal: string | null | undefined,
+  finishReason: string | null | undefined
+): string | undefined => {
+  if (refusal) return refusal;
+  return finishReason === 'content_filter' ? CONTENT_FILTER_REFUSAL : undefined;
+};
+
 export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompletionChunkEvent {
-  const delta: OpenAIChatCompletionChunkDelta = chunk.choices[0].delta;
+  const choice = chunk.choices[0];
+  const delta: OpenAIChatCompletionChunkDelta = choice.delta;
 
   return {
     type: ChatCompletionEventType.ChatCompletionChunk,
     content: delta.content ?? '',
-    refusal: delta.refusal ?? undefined,
+    refusal: refusalFromFinishReason(delta.refusal, choice.finish_reason),
     reasoning: delta.reasoning ?? undefined,
     tool_calls:
       delta.tool_calls?.map((toolCall) => {
@@ -56,11 +74,12 @@ export function tokenCountFromOpenAI(
 export function chunkFromCompletionResponse(
   completion: OpenAI.ChatCompletion
 ): ChatCompletionChunkEvent {
-  const message: OpenAIChatCompletionMessage = completion.choices[0].message;
+  const choice = completion.choices[0];
+  const message: OpenAIChatCompletionMessage = choice.message;
   return {
     type: ChatCompletionEventType.ChatCompletionChunk,
     content: message.content ?? '',
-    refusal: message.refusal ?? undefined,
+    refusal: refusalFromFinishReason(message.refusal, choice.finish_reason),
     reasoning: message.reasoning ?? undefined,
     tool_calls:
       message.tool_calls?.map((toolCall, i) => {
