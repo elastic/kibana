@@ -326,7 +326,7 @@ describe('buildInterruptedRound', () => {
 describe('getModelUsage', () => {
   const call = (
     connectorId: string,
-    tokens?: { prompt: number; completion: number; cached?: number },
+    tokens?: { prompt: number; completion: number; cached?: number; thinking?: number },
     model?: string
   ) => ({
     connectorId,
@@ -396,6 +396,22 @@ describe('getModelUsage', () => {
     expect(connectors).toEqual([
       { connector_id: 'main', llm_calls: 2, input_tokens: 0, output_tokens: 0 },
     ]);
+  });
+
+  it('counts the thinking tokens as output tokens, as they are not part of the completion', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 8, thinking: 12 }),
+          call('main', { prompt: 100, completion: 5 }),
+          call('fast', { prompt: 10, completion: 1, thinking: 4 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(usage.output_tokens).toBe(30);
+    expect(usage.connectors?.map((connector) => connector.output_tokens)).toEqual([25, 5]);
   });
 
   it('omits the breakdown when there was no call', () => {

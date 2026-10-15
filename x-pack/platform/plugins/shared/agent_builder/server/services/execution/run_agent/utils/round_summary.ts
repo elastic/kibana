@@ -23,6 +23,10 @@ import type {
 import { getCurrentTraceId } from '../../../../tracing';
 import type { RunTracker } from '../run_tracker';
 
+/** Output tokens of a call: the thinking tokens are not part of `completion`. */
+const getOutputTokens = (tokens: ModelCallInfo['tokens']): number =>
+  (tokens?.completion ?? 0) + (tokens?.thinking ?? 0);
+
 /**
  * Groups the calls by connector: the main connector first (when it made calls), then the others
  * in order of first call.
@@ -41,7 +45,7 @@ const getConnectorsUsage = (
     };
     usage.llm_calls += 1;
     usage.input_tokens += tokens?.prompt ?? 0;
-    usage.output_tokens += tokens?.completion ?? 0;
+    usage.output_tokens += getOutputTokens(tokens);
     if (tokens?.cached !== undefined) {
       usage.cached_input_tokens = (usage.cached_input_tokens ?? 0) + tokens.cached;
     }
@@ -70,7 +74,7 @@ export const getModelUsage = (
   let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
-    outputTokens += call.tokens?.completion ?? 0;
+    outputTokens += getOutputTokens(call.tokens);
     if (call.tokens?.cached !== undefined) {
       cachedInputTokens += call.tokens.cached;
       hasCachedInputTokens = true;
