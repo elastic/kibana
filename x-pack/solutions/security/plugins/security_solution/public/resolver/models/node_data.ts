@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import { entityIDSafeVersion, timestampSafeVersion } from '../../../common/endpoint/models/event';
 import type { SafeResolverEvent } from '../../../common/endpoint/types';
 import type { FetchedNodeData, NodeData } from '../types';
 import { isTerminatedProcess } from './process_event';
@@ -138,6 +138,38 @@ export function updateWithReceivedNodes({
   }
 
   return copiedMap;
+}
+
+function eventTimestampMs(event: SafeResolverEvent): number | undefined {
+  const value = timestampSafeVersion(event);
+  if (value === undefined) {
+    return undefined;
+  }
+  const ms = typeof value === 'number' ? value : new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : undefined;
+}
+
+/**
+ * Newest process event at or before originTimestampMs.
+ * Node data events from `/events` are descending by `@timestamp`.
+ * When originTimestampMs is missing, or no event is at or before it (e.g. a descendant of the origin,
+ * whose events all postdate it), this matches firstEvent (newest), preserving pre-existing behavior.
+ */
+export function eventAtOrBefore(
+  data: NodeData | undefined,
+  originTimestampMs: number | undefined
+): SafeResolverEvent | undefined {
+  if (!data || data.status === 'loading' || data.status === 'error' || data.events.length <= 0) {
+    return undefined;
+  }
+  if (originTimestampMs === undefined) {
+    return data.events[0];
+  }
+  const match = data.events.find((event) => {
+    const ms = eventTimestampMs(event);
+    return ms !== undefined && ms <= originTimestampMs;
+  });
+  return match ?? data.events[0];
 }
 
 /**

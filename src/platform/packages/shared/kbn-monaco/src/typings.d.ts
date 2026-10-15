@@ -23,3 +23,23 @@ declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneService
 declare module 'monaco-editor/esm/vs/platform/undoRedo/common/undoRedo' {
   export const IUndoRedoService: symbol;
 }
+
+declare module 'monaco-editor/esm/vs/platform/actions/common/actions.js' {
+  export interface MenuItem {
+    command?: {
+      id: string;
+      title: string | { value: string; original: string };
+    };
+    when?: {
+      serialize(): string;
+    };
+  }
+
+  export const MenuId: {
+    EditorContext: unknown;
+  };
+
+  export const MenuRegistry: {
+    getMenuItems(menuId: unknown): MenuItem[];
+  };
+}

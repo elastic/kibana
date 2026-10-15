@@ -15,6 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
+    afterEach(async () => {
+      // A failed test can leave the layer settings flyout open, covering the buttons the next test clicks.
+      await lens.closeFlyoutWithBackButton();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -68,9 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 

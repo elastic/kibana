@@ -871,7 +871,7 @@ describe.skip('query tab with unified timeline', () => {
         });
 
         // column exists in the table
-        expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
+        expect(await screen.findByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
 
         fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
 
@@ -1115,6 +1115,9 @@ describe.skip('query tab with unified timeline', () => {
             rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
             inspect: { dsl: [], response: [] },
             totalCount: 1,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadNextBatch: jest.fn(),
             refreshedAt: 0,
             refetch: jest.fn(),

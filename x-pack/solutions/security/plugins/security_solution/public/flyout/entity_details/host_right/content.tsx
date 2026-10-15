@@ -40,8 +40,10 @@ interface HostPanelContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
-  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
-  skipRiskAndCriticality?: boolean;
+  /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
+  noEntityInStore?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
@@ -59,7 +61,8 @@ export const HostPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
-  skipRiskAndCriticality = false,
+  noEntityInStore = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
 }: HostPanelContentProps) => {
@@ -72,13 +75,13 @@ export const HostPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && (
+      {!noEntityInStore && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
           entityType={EntityType.host}
         />
       )}
-      {!skipRiskAndCriticality &&
+      {!noEntityInStore &&
         riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
@@ -118,7 +121,7 @@ export const HostPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!skipRiskAndCriticality && !entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: hostName, type: EntityType.host }}
           onChange={onAssetCriticalityChange}

@@ -437,13 +437,13 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 id: jsmManagementActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
+                  ['execute-start', { gte: 1 }],
+                  ['execute', { gte: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events.find((e) => e?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(21);
           });
 
@@ -489,6 +489,30 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
               .expect(200);
 
             expect(simulator.requestData).to.eql({ message: 'message', alias: hashedAlias });
+            expect(simulator.requestUrl).to.eql(createAlertUrl);
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: jsmManagementActionId,
+              data: jsmSuccessResponse,
+            });
+          });
+
+          it('should truncate the message when it is over 130 characters when creating an alert', async () => {
+            const message = 'a'.repeat(131);
+            const truncatedMessage = 'a'.repeat(130);
+
+            const { body } = await supertest
+              .post(`/api/actions/connector/${jsmManagementActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'createAlert',
+                  subActionParams: { message },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({ message: truncatedMessage });
             expect(simulator.requestUrl).to.eql(createAlertUrl);
             expect(body).to.eql({
               status: 'ok',

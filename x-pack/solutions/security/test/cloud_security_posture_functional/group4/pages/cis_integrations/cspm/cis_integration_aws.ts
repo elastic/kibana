@@ -26,7 +26,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const browser = getService('browser');
   const retry = getService('retry');
-  const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
@@ -129,7 +128,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
 
         /*
@@ -137,17 +136,13 @@ export default function (providerContext: FtrProviderContext) {
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          const modal = await cisIntegration.getPostInstallModal();
-          if (!modal) {
-            logger.debug('Post install modal not found');
-          }
-          expect(modal !== undefined).to.be(true);
+          expect(await cisIntegration.getPostInstallModal()).to.be(true);
         });
 
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickPolicyToBeEdited(integrationName);
         expect(
-          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-            roleArn
+          (await cisIntegration.getValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) === roleArn
         ).to.be(true);
       });
     });
@@ -212,13 +207,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN,
           tempAccessSessionToken
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
@@ -255,13 +250,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME,
           sharedCredentialProfileName
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
@@ -359,13 +354,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN,
           tempAccessSessionToken
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
@@ -403,13 +398,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME,
           sharedCredentialProfileName
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE

@@ -9,27 +9,27 @@ tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
 
 ### Bootstrap failures
 
-If `yarn kbn bootstrap` fails, try the following in order:
+If `pnpm kbn bootstrap` fails, try the following in order:
 
 1. Clear caches and force reinstall dependencies:
 
 ```bash
-yarn cache clean && yarn kbn clean
-yarn kbn bootstrap --force-install
+pnpm store prune && pnpm kbn clean
+pnpm kbn bootstrap --force-install
 ```
 
 2. If running as root (e.g. in a container):
 
 ```bash
-yarn kbn bootstrap --allow-root
+pnpm kbn bootstrap --allow-root
 ```
 
 3. Full repository reset (last resort):
 
 ```bash
 git clean -fdx
-yarn kbn reset
-yarn kbn bootstrap --force-install
+pnpm kbn reset
+pnpm kbn bootstrap --force-install
 ```
 
 ### Typescript issues
@@ -68,7 +68,7 @@ Please reach out to the [Kibana Operations team](https://github.com/orgs/elastic
 
 ### Minified React errors
 
-If you experience minified React errors and want to expand them to their full error messages you will currently need to rebuild the `@kbn/ui-shared-deps-npm` package using "development" mode instead of "production", which can be done by modifying the corresponding line in `packages/kbn-ui-shared-deps-npm/webpack.config.js` and make sure to run `yarn kbn bootstrap` afterwards:
+If you experience minified React errors and want to expand them to their full error messages you will currently need to rebuild the `@kbn/ui-shared-deps-npm` package using "development" mode instead of "production", which can be done by modifying the corresponding line in `packages/kbn-ui-shared-deps-npm/webpack.config.js` and make sure to run `pnpm kbn bootstrap` afterwards:
 
 ```diff
 -    mode: 'production',

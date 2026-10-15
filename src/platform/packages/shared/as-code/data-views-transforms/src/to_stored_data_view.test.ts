@@ -69,6 +69,31 @@ describe('toStoredDataView', () => {
     });
   });
 
+  it('preserves name on an inline (adhoc) data view spec', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    });
+  });
+
+  it('omits name on an inline data view spec when not provided', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).not.toHaveProperty('name');
+  });
+
   it('converts index-pattern data_source without runtime fields', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,

@@ -71,17 +71,20 @@ export const createNlToEsqlGraph = ({
   esClient,
   docBase,
   esqlCallbacks,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
+  includeFrozen?: boolean;
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
+      includeFrozen,
       esClient,
     });
 
@@ -271,6 +274,7 @@ export const createNlToEsqlGraph = ({
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
+        includeFrozen,
         esClient,
       });
       action = {

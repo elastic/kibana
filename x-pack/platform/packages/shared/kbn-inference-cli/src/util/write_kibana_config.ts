@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Path from 'path';
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { writeFile } from './file_utils';
 
@@ -14,11 +14,11 @@ export async function writeKibanaConfig(
 ): Promise<void> {
   const configFilePath = Path.join(REPO_ROOT, 'config/kibana.dev.yml');
 
-  const config = (await load(configFilePath)) as Record<string, string>;
+  const config = (await parse(configFilePath)) as Record<string, string>;
 
   const result = await cb(config);
 
-  const fileContent = dump(result);
+  const fileContent = stringify(result);
 
   await writeFile(configFilePath, fileContent);
 }

@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/transpose-utils'
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

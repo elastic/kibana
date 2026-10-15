@@ -6,6 +6,8 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
@@ -143,18 +145,80 @@ export async function deleteDuplicatePackagePolicies(
   const BATCH_SIZE = 100;
   const total = packagePoliciesToDelete.length;
   const totalBatches = Math.ceil(total / BATCH_SIZE);
-  for (let i = 0; i < total; i += BATCH_SIZE) {
-    const batch = packagePoliciesToDelete.slice(i, i + BATCH_SIZE);
-    const batchIndex = Math.floor(i / BATCH_SIZE) + 1;
-    logger.info(
-      `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
-        batch.length
-      }), with ids [${batch.join(`, `)}]`
+  const agentPolicyIds = new Set<string>();
+
+  try {
+    for (let i = 0; i < total; i += BATCH_SIZE) {
+      const batch = packagePoliciesToDelete.slice(i, i + BATCH_SIZE);
+      const batchIndex = Math.floor(i / BATCH_SIZE) + 1;
+      logger.info(
+        `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
+          batch.length
+        }), with ids [${batch.join(`, `)}]`
+      );
+      // Fleet's default bumps (recompiles and redeploys) the agent policy on every
+      // batch; collect the ids and bump each agent policy once at the end instead.
+      const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+        force: true,
+        spaceIds: ['*'],
+        ignoreMissing: true,
+        bumpRevision: false,
+      });
+      for (const result of results ?? []) {
+        if (result.success) {
+          result.policy_ids?.forEach((policyId) => agentPolicyIds.add(policyId));
+          if (result.policy_id) {
+            agentPolicyIds.add(result.policy_id);
+          }
+        }
+      }
+    }
+  } finally {
+    // Deletes that already landed must not be left undeployed by a failed batch.
+    // The cache makes Fleet's per-package-policy package lookup once per run.
+    await serverSetup.fleet.runWithCache(() =>
+      bumpAgentPolicyRevisions([...agentPolicyIds], serverSetup)
     );
-    await fleet.packagePolicyService.delete(soClient, esClient, batch, {
-      force: true,
-      spaceIds: ['*'],
-      ignoreMissing: true,
-    });
   }
 }
+
+export const bumpAgentPolicyRevisions = async (
+  agentPolicyIds: string[],
+  server: SyntheticsServerSetup
+): Promise<void> => {
+  for (const policyId of agentPolicyIds) {
+    try {
+      await bumpAgentPolicyRevision(server, policyId);
+    } catch (error) {
+      server.logger.error(
+        `[PrivateLocationCleanUpTask] Failed to bump agent policy [${policyId}] after deleting its package policies`,
+        { error }
+      );
+    }
+  }
+};
+
+// A bump through the default-space client 404s for an agent policy that lives in another space.
+const bumpAgentPolicyRevision = async (
+  server: SyntheticsServerSetup,
+  policyId: string
+): Promise<void> => {
+  const { savedObjects, elasticsearch } = server.coreStart;
+  const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
+    savedObjects.createInternalRepository(),
+    [{ id: policyId, spaceId: ALL_SPACES_ID }],
+    { ignoreMissing: true, fields: ['name'] }
+  );
+  const spaceIds = agentPolicy?.space_ids ?? [];
+  const spaceId =
+    spaceIds.length === 0 || spaceIds.includes(DEFAULT_SPACE_ID) || spaceIds.includes(ALL_SPACES_ID)
+      ? DEFAULT_SPACE_ID
+      : spaceIds[0];
+
+  await server.fleet.agentPolicyService.bumpRevision(
+    savedObjects.getUnsafeInternalClient().asScopedToNamespace(spaceId),
+    elasticsearch.client.asInternalUser,
+    policyId,
+    { asyncDeploy: true }
+  );
+};

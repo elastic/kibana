@@ -35,7 +35,7 @@ spec:
           cronline: 0 22 * * * America/New_York
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
       tags:

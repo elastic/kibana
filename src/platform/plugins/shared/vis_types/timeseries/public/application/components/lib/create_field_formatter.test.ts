@@ -27,6 +27,7 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
   );
   const value = 1234567890;
   const stringValue = 'some string';
+  const base64Value = 'w6l0w6k=';
   const fieldFormatMap = {
     bytesField: {
       id: 'bytes',
@@ -69,7 +70,7 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
   it('should return base64 formatted value for stringField', () => {
     const formatter = createFieldFormatter('stringField', fieldFormatMap);
 
-    expect(formatter(value)).toBe('×møç®ü÷');
+    expect(formatter(base64Value)).toBe('été');
   });
 
   it('should return color formatted value for colorField', () => {

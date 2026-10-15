@@ -31,7 +31,11 @@ export interface BaseToolFormData {
   labels: string[];
 }
 
-export interface EsqlToolFormData extends BaseToolFormData {
+export interface IncludeFrozenFormData {
+  includeFrozen: boolean;
+}
+
+export interface EsqlToolFormData extends BaseToolFormData, IncludeFrozenFormData {
   type: ToolType.esql;
   esql: string;
   params: EsqlParamFormData[];
@@ -45,7 +49,7 @@ export interface McpToolFormData extends BaseToolFormData {
   type: ToolType.mcp;
 }
 
-export interface IndexSearchToolFormData extends BaseToolFormData {
+export interface IndexSearchToolFormData extends BaseToolFormData, IncludeFrozenFormData {
   type: ToolType.index_search;
   pattern: string;
   rowLimit?: number;

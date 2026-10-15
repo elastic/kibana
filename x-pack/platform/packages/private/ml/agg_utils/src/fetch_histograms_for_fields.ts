@@ -205,7 +205,8 @@ interface FetchHistogramsForFieldsParams {
  * @returns A promise that resolves with the fetched histograms.
  */
 export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsParams) => {
-  const { esClient, abortSignal, arguments: args } = params;
+  const { esClient, abortSignal } = params;
+  const args = params.arguments;
   const {
     indexPattern,
     query,

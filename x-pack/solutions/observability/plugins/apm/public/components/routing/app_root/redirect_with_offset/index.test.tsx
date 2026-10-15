@@ -53,10 +53,10 @@ describe('RedirectWithOffset', () => {
   it('eventually renders the child element', async () => {
     const element = renderUrl({ pathname: '/services', search: location.search, hash: '' }, false);
 
-    await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
+    expect(await element.findByText('Foo')).toBeInTheDocument();
 
-    // assertion to make sure our element test actually works
-    await expect(element.findByText('Bar')).rejects.not.toBeUndefined();
+    // assertion to make sure our element test actually works (sync, no waitFor budget)
+    expect(element.queryByText('Bar')).not.toBeInTheDocument();
   });
 
   it('redirects with comparisonEnabled=false when comparison is disabled in advanced settings', async () => {

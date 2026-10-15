@@ -224,6 +224,7 @@ export const ServicePanel = memo(function ServicePanel({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
           />
         )}

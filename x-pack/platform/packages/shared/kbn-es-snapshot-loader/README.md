@@ -29,7 +29,7 @@ For URL repositories, Elasticsearch must be started with `path.repo` configured 
 When starting Elasticsearch for development, configure snapshot repository path:
 
 ```bash
-yarn es snapshot --E path.repo="/tmp/es-snapshots"
+pnpm es snapshot --E path.repo="/tmp/es-snapshots"
 ```
 
 ### GCS Repository

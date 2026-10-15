@@ -103,6 +103,19 @@ export function isLiquidRangeLiteral(collectionPath: string): boolean {
   return LIQUID_RANGE_LITERAL_REGEX.test(collectionPath.trim());
 }
 
+/** Liquid string literal, e.g. the `""` left behind by `{% assign acc = "" | split: "" %}`. */
+const LIQUID_STRING_LITERAL_REGEX = /^(?:"[^"]*"|'[^']*')$/;
+
+/**
+ * True when an expression is a quoted string literal rather than a context path.
+ * {@link resolveAssignChain} strips filters, so an assign whose value comes from a
+ * literal plus filters (`"" | split: ""`, `"a,b" | split: ","`) resolves to the bare
+ * literal — the real type comes from the filter chain and is only known at runtime.
+ */
+export function isLiquidStringLiteral(collectionPath: string): boolean {
+  return LIQUID_STRING_LITERAL_REGEX.test(collectionPath.trim());
+}
+
 /**
  * Follows assign aliases until a dotted path or unknown identifier is reached.
  * Used to validate `{% for item in rows %}` when `rows` was assigned from `consts.items`.

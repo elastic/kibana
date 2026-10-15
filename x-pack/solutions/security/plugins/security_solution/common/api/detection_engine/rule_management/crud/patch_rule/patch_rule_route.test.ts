@@ -355,14 +355,14 @@ describe('Patch rule request schema', () => {
     expect(result.data.interval).toEqual(undefined);
   });
 
-  test('defaults max_signals to 100 when omitted (Zod v4 applies defaults within optional fields)', () => {
+  test('does not default max_signals when omitted', () => {
     const payload: PatchRuleRequestBody = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
     };
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data.max_signals).toEqual(100);
+    expect(result.data.max_signals).toEqual(undefined);
   });
 
   test('references cannot be numbers', () => {

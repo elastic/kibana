@@ -232,6 +232,35 @@ export function toCompiledSecretRef(id: string) {
 }
 
 /**
+ * Inverse of {@link toCompiledSecretRef}: scans an already-compiled policy fragment for inline
+ * `$co.elastic.secret{<id>}` placeholders and returns the set of ids found.
+ *
+ * Pass the compiled `inputs` and `otelcolConfig` — "appears in the JSON" is exactly the criterion
+ * Fleet Server uses when performing placeholder substitution. Never pass an object that carries
+ * `secret_references` itself, or every id will trivially match.
+ *
+ * Returns `undefined` if the fragment cannot be serialized so callers can fail open (keep the
+ * unpruned array) rather than silently dropping valid references.
+ */
+export function collectCompiledSecretRefIds(compiled: unknown): Set<string> | undefined {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(compiled ?? null);
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn(`Unable to scan compiled policy fragment for secret references: ${err}`);
+    return undefined;
+  }
+  const ids = new Set<string>();
+  // Regex is constructed per call: a shared /g regex carries lastIndex state across calls.
+  for (const [, id] of serialized.matchAll(/\$co\.elastic\.secret\{([^}]+)\}/g)) {
+    ids.add(id);
+  }
+  return ids;
+}
+
+/**
  * Given an array of secret paths, deletes the corresponding secrets
  */
 export async function deleteSOSecrets(

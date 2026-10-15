@@ -454,7 +454,8 @@ export function MachineLearningCommonUIProvider({
 
     /** Set value for OptionListWithFieldStats component */
     async setOptionsListWithFieldStatsValue(selector: string, value: string) {
-      await testSubjects.click(selector);
+      // Keep room below the trigger so the downward-opening options popover isn't rendered off the viewport bottom.
+      await testSubjects.click(selector, undefined, { bottomOffset: 400 });
       await testSubjects.existOrFail('optionsListControlAvailableOptions');
 
       await retry.tryForTime(1000, async () => {

@@ -9,6 +9,18 @@ import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
+import {
+  CASES_ATTACHMENT_CHANGE_POINT_CHART,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '@kbn/aiops-change-point-detection/constants';
+import {
+  CASES_ATTACHMENT_LOG_PATTERN,
+  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+} from '@kbn/aiops-log-pattern-analysis/constants';
+import {
+  CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+  EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+} from '@kbn/aiops-log-rate-analysis/constants';
 import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -30,6 +42,12 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
     : T extends EmbeddableLogRateAnalysisType
     ? LogRateAnalysisEmbeddableState
     : never;
+
+const attachmentTypeByEmbeddableType: Record<SupportedEmbeddableTypes, string> = {
+  [EMBEDDABLE_CHANGE_POINT_CHART_TYPE]: CASES_ATTACHMENT_CHANGE_POINT_CHART,
+  [EMBEDDABLE_PATTERN_ANALYSIS_TYPE]: CASES_ATTACHMENT_LOG_PATTERN,
+  [EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE]: CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+};
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.
@@ -69,7 +87,7 @@ export const useCasesModal = <EmbeddableType extends SupportedEmbeddableTypes>(
         getAttachments: () => [
           {
             type: AttachmentType.persistableState,
-            persistableStateAttachmentTypeId: embeddableType,
+            persistableStateAttachmentTypeId: attachmentTypeByEmbeddableType[embeddableType],
             persistableStateAttachmentState: JSON.parse(
               JSON.stringify(persistableStateAttachmentState)
             ),

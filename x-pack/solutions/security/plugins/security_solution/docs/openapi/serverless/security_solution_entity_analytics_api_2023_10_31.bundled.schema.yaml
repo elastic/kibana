@@ -324,6 +324,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -350,6 +352,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -363,6 +367,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -382,6 +388,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -409,6 +417,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: PrivMonHealth
       responses:
         '200':
@@ -447,8 +457,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: Check if the current user has all required permissions for
-        Privilege Monitoring
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+
+        Check if the current user has all required permissions for Privilege
+        Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -469,6 +484,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: CreatePrivMonUser
       requestBody:
         content:
@@ -488,6 +506,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
@@ -535,6 +556,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
     delete:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: DeletePrivMonUser
       parameters:
         - in: path
@@ -563,6 +587,9 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: UpdatePrivMonUser
       parameters:
         - in: path
@@ -588,6 +615,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/list:
     get:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: ListPrivMonUsers
       parameters:
         - description: KQL query to filter the list of monitored users

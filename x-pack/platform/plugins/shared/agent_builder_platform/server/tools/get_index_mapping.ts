@@ -7,10 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { MappingField } from '@kbn/agent-builder-genai-utils';
+import type { IndexFieldsResult, MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const getIndexMappingsSchema = z.object({
   indices: z
@@ -21,11 +22,29 @@ const getIndexMappingsSchema = z.object({
     .boolean()
     .default(false)
     .describe('Whether to return the raw mapping tree instead of the summarized fields.'),
+  include_frozen: includeFrozenSchema,
 });
 
 const formatField = (field: MappingField): string => {
   const description = field.meta.description ? ` ${field.meta.description}` : '';
   return `- ${field.path} [${field.type}]${description}`;
+};
+
+const NO_FIELDS_FROZEN_EXCLUDED_NOTE =
+  'No fields found. Frozen tier indices are excluded from alias and index pattern mappings by default, so this can happen when every index the target resolves to is on the frozen tier. Retry with include_frozen set to true to include them.';
+
+const NO_FIELDS_NOTE = 'No fields found.';
+
+// Only alias and index pattern fields come from `_field_caps`, the one mapping source that excludes
+// the frozen tier. Index and data stream fields come from `_mapping` / `_data_stream/_mappings`.
+const noFieldsNote = (
+  { type, fields }: IndexFieldsResult,
+  includeFrozen: boolean
+): string | undefined => {
+  if (fields.length > 0 || (type !== 'alias' && type !== 'indexPattern')) {
+    return undefined;
+  }
+  return includeFrozen ? NO_FIELDS_NOTE : NO_FIELDS_FROZEN_EXCLUDED_NOTE;
 };
 
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
@@ -34,12 +53,13 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
     type: ToolType.builtin,
     description: 'Retrieve mappings for indices, aliases or datastreams.',
     schema: getIndexMappingsSchema,
-    handler: async ({ indices, raw }, { esClient }) => {
+    handler: async ({ indices, raw, include_frozen: includeFrozen = false }, { esClient }) => {
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
       const indexFields = await getIndexFields({
         indices,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
       });
 
@@ -48,13 +68,19 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           if (raw && v.rawMapping) {
             return [name, { type: v.type, mappings: v.rawMapping }];
           }
+          const note = noFieldsNote(v, includeFrozen);
           if (raw) {
             return [
               name,
-              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
+              {
+                type: v.type,
+                fields: v.fields.map(({ path, type }) => ({ path, type })),
+                ...(note ? { warning: note } : {}),
+              },
             ];
           }
-          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
+          const fieldString = note ? `[${note}]` : v.fields.map(formatField).join('\n');
+          return [name, { type: v.type, fields: fieldString }];
         })
       );
 

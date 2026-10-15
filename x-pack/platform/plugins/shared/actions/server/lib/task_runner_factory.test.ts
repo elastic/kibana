@@ -35,6 +35,8 @@ import {
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ConnectorRateLimiter } from './connector_rate_limiter';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const executeParamsFields = [
   'actionId',
   'params',
@@ -517,7 +519,15 @@ describe('Task Runner Factory', () => {
     expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
 
     expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
-      `Cancelling action task for action with id 2 - execution error due to timeout.`
+      `Cancelling action task for action with id 2 - execution error due to timeout.`,
+      {
+        labels: {
+          actionExecutionId: expect.stringMatching(UUID_REGEX),
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+      }
     );
   });
 
@@ -539,7 +549,8 @@ describe('Task Runner Factory', () => {
       { refresh: false }
     );
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      'Failed to cleanup action_task_params object [id="3"]: Fail'
+      'Failed to cleanup action_task_params object [id="3"]: Fail',
+      { labels: { actionExecutionId: expect.stringMatching(UUID_REGEX) } }
     );
   });
 
@@ -934,7 +945,15 @@ describe('Task Runner Factory', () => {
     expect(isRetryableError(err)).toEqual(false);
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: expect.stringMatching(UUID_REGEX),
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
@@ -985,7 +1004,15 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message: Service message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: expect.stringMatching(UUID_REGEX),
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
   });
 
@@ -1088,7 +1115,15 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Fail`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: expect.stringMatching(UUID_REGEX),
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(thrownError).toEqual(err);
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
@@ -1207,7 +1242,12 @@ describe('Task Runner Factory', () => {
 
       expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
         `Failed to load action task params ${mockedTaskInstance.params.actionTaskParamsId}: test`,
-        { tags: ['connector-run-failed', 'framework-error'] }
+        {
+          labels: {
+            spaceId: 'test',
+          },
+          tags: ['connector-run-failed', 'framework-error'],
+        }
       );
     }
   });

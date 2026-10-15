@@ -58,7 +58,7 @@ To avoid alerts appearing in large grouped blocks per rule (a common artifact of
 ## Requirements / Prereqs
 
 - **Kibana + Elasticsearch running**
-- **Dependencies installed** in the repo (e.g. `yarn kbn bootstrap`)
+- **Dependencies installed** in the repo (e.g. `pnpm kbn bootstrap`)
 - **Security Solution detections initialized** (recommended)
   - The script will initialize detections by calling `POST /api/detection_engine/index`.
   - If `.alerts-security.alerts-<spaceId>` does not exist yet, the script will **still index raw events/endpoint alerts**, but will **skip generating/copying Security alerts** and log a warning.
@@ -206,7 +206,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 ## Troubleshooting
 
 - **“Cannot find module @babel/…”**:
-  - Your `node_modules` are incomplete/out of date. Run `yarn kbn bootstrap`.
+  - Your `node_modules` are incomplete/out of date. Run `pnpm kbn bootstrap`.
 - **Prebuilt rule install fails**:
   - This usually means Kibana can’t reach EPR or Fleet isn’t ready. Install prebuilt rules manually in the Security app and re-run.
 - **Security alerts destination missing (`.alerts-security.alerts-<spaceId>`)**:

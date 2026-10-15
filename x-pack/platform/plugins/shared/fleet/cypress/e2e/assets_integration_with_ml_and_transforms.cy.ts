@@ -94,24 +94,19 @@ describe('Assets - Real API for integration with ML and transforms', () => {
     // lmd 3.3.0+ changed the transform source from `logs-*` to
     // `logs-endpoint.events.process-*`. Without a matching index, Fleet silently
     // skips starting the transform and the destination index is never created.
-    // Create a minimal index here so the transform can start during installation.
-    request({
-      method: 'POST',
-      url: `/api/console/proxy?method=PUT&path=${encodeURIComponent(
-        '/logs-endpoint.events.process-default'
-      )}`,
-      body: {},
-      failOnStatusCode: false,
+    // Insert a document into a matching index so the transform can start.
+    cy.task('insertDoc', {
+      index: 'logs-endpoint.events.process-default',
+      doc: { '@timestamp': new Date().toISOString() },
+      id: 'lmd-transform-source-doc',
     });
   });
 
   after(() => {
-    request({
-      method: 'POST',
-      url: `/api/console/proxy?method=DELETE&path=${encodeURIComponent(
-        '/logs-endpoint.events.process-default'
-      )}`,
-      failOnStatusCode: false,
+    cy.task('deleteDocsByQuery', {
+      index: 'logs-endpoint.events.process-default',
+      query: { match_all: {} },
+      ignoreUnavailable: true,
     });
   });
 

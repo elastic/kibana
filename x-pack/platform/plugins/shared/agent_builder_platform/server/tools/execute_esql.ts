@@ -17,6 +17,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -35,6 +36,7 @@ const executeEsqlToolSchema = z.object({
     .describe(
       '(optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -51,10 +53,21 @@ You **must** get the query from one of two sources before calling this tool:
 2.  A verbatim query provided directly by the user.
 
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
+If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+
+### Data tiers
+
+Indices on the frozen tier are excluded by default, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
+Set \`include_frozen\` to true only when the user or your instructions explicitly ask for frozen tier data, and expect the query to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and \`include_frozen\` was not set, tell the user that frozen tier data was not searched.`,
     schema: executeEsqlToolSchema,
     handler: async (
-      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange },
+      {
+        query: esqlQuery,
+        params: esqlParams = {},
+        time_range: explicitTimeRange,
+        include_frozen: includeFrozen = false,
+      },
       { esClient, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
@@ -70,6 +83,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
         query: esqlQuery,
         params,
         esClient: esClient.asCurrentUser,
+        includeFrozen,
       });
 
       // need the interpolated query to return in the results / to display in the UI

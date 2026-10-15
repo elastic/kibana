@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ALERTS_API_ALL,
@@ -34,6 +35,11 @@ import {
   getUpdateSignalStatusScript,
   setWorkflowStatusHandler,
 } from '../common/set_workflow_status_handler';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  mergeBulkCloseRuntimeMappings,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -128,7 +134,50 @@ export const setSignalsStatusRoute = (
               getIndexPattern,
             });
           } else {
-            const { conflicts, query } = request.body;
+            const {
+              conflicts,
+              query: rawQuery,
+              runtime_fields: runtimeFields,
+              runtime_mappings: passthroughRuntimeMappings,
+            } = request.body;
+
+            // The schema documents `maxProperties: 100` on both runtime_fields
+            // and runtime_mappings, but the generated Zod schema doesn't carry
+            // that constraint — enforce the combined count here so one request
+            // can't schedule unbounded runtime-script work on the
+            // `_update_by_query`. Use the union of keys (a Set) rather than
+            // summing the two counts so a key present in both params is counted
+            // once — the merge step lets passthrough win on collision, so the
+            // effective number of runtime mappings sent to ES is the union size.
+            const runtimeFieldUnion = new Set([
+              ...Object.keys(runtimeFields ?? {}),
+              ...Object.keys(passthroughRuntimeMappings ?? {}),
+            ]);
+            if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
+              });
+            }
+
+            // The schema validates `query` only as an open object (the route
+            // is intentionally permissive about DSL shape); narrow it to the
+            // ES DSL type once at the boundary so internal helpers stay
+            // strictly typed against `QueryDslQueryContainer`.
+            const query = rawQuery as estypes.QueryDslQueryContainer;
+
+            // Merge the two runtime-field inputs:
+            //   runtime_fields: name → type map; server synthesises a _source reader per entry.
+            //     Used by the exceptions flyout when closing by a rule-source runtime field.
+            //   runtime_mappings: full mapping (type + script + format) forwarded verbatim.
+            //     Used by the alerts table when closing with a data-view runtime field, so the
+            //     caller's Painless script is preserved and ES evaluates it at query time rather
+            //     than falling back to a _source read.
+            // Passthrough entries win on key collision (they carry real semantics).
+            const runtimeMappings = mergeBulkCloseRuntimeMappings(
+              buildRuntimeMappingsFromFieldTypes(runtimeFields),
+              passthroughRuntimeMappings
+            );
 
             const body = await updateSignalsStatusByQuery(
               status,
@@ -137,7 +186,8 @@ export const setSignalsStatusRoute = (
               spaceId,
               esClient,
               user,
-              reason
+              reason,
+              runtimeMappings
             );
 
             return response.ok({ body });
@@ -158,6 +208,10 @@ export const setSignalsStatusRoute = (
  * Please avoid using `updateSignalsStatusByQuery` when possible, use the common handler with "by IDs" instead.
  *
  * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ *
+ * When `runtimeMappings` are provided, they are attached to the `_update_by_query`
+ * request alongside the filter so the query can reference fields not natively mapped
+ * on the alerts index.
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
@@ -166,9 +220,14 @@ const updateSignalsStatusByQuery = async (
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
-  reason?: string
-) =>
-  esClient.updateByQuery({
+  reason?: string,
+  runtimeMappings?: estypes.MappingRuntimeFields
+) => {
+  const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
+
+  const esRequest: estypes.UpdateByQueryRequest & {
+    runtime_mappings?: estypes.MappingRuntimeFields;
+  } = {
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
@@ -179,4 +238,8 @@ const updateSignalsStatusByQuery = async (
       },
     },
     ignore_unavailable: true,
-  });
+    ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
+
+  return esClient.updateByQuery(esRequest);
+};

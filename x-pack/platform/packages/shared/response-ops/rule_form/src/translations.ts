@@ -324,6 +324,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const RULE_TAG_COPY_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsCopyLabel',
+  {
+    defaultMessage: 'Copy tags',
+  }
+);
+
 export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
   {

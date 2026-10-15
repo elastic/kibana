@@ -1,5 +1,8 @@
 {
-  "sha1": "38aee82328e96160e33eb9ccade9dea3afed6f0f",
+  "sha1": "2d2836fd6cd4275506763f74b1438b79eadc8613",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "1927b5fbbdf0acf-9f84f21350dbcbe",
@@ -380,6 +383,44 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
         "line": 137,
+        "column": 12
+      }
+    },
+    {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 23,
+        "column": 12
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 54,
         "column": 12
       }
     },

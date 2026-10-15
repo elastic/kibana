@@ -49,7 +49,8 @@ export function registerRefreshTokenRoute({
           ]),
         }),
         body: schema.object({
-          refresh_token: schema.string(),
+          // Refresh tokens are provider-defined; Microsoft's can exceed 1k chars.
+          refresh_token: schema.string({ maxLength: 8192 }),
         }),
       },
     },

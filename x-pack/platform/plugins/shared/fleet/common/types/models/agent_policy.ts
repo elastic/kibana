@@ -321,6 +321,10 @@ export interface FleetServerPolicy {
    */
   policy_id: string;
   /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
+  /**
    * The revision index of the policy
    */
   revision_idx: number;

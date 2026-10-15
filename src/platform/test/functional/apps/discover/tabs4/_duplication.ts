@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHistogramHeight()).to.be(height);
       };
 
-      const initialSidebarFieldCount = 48;
+      const initialSidebarFieldCount = 49;
       const updatedSidebarSearchTerm = 'geo';
       const updatedSidebarFieldCount = 4;
       await expectSidebarFieldCount(initialSidebarFieldCount);
