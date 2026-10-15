@@ -8,6 +8,7 @@
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 /** Default width for ES|QL inline flyouts. DSL panels keep `openLazyFlyout`'s 500px. */
@@ -65,20 +66,46 @@ export const mountInlinePanel = async ({
   });
 };
 
-// styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
-const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
-  clip-path: none;
+/**
+ * Flyout-root styles so drag-drop extra targets / ghosts can paint left of the panel.
+ * Use Emotion `css` (not a raw string) so nested selectors are processed.
+ * Ancestors above the body scroll node must not clip horizontally.
+ */
+const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => css`
+  /* EUI styles.right ends with clip-path: polygon(-50%…); force clear */
+  clip-path: none !important;
+  overflow: visible !important;
   max-inline-size: 800px;
   min-inline-size: 256px;
-  background:${euiTheme.colors.backgroundBaseSubdued};
+  background: ${euiTheme.colors.backgroundBaseSubdued};
+
+  /* EUI: .content:has(.euiFlyoutBody) { overflow-y/block: auto } — match + override longhands */
+  .euiFlyout__content:has(.euiFlyoutBody),
+  [data-test-subj='euiFlyoutContent']:has(.euiFlyoutBody) {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    overflow-block: visible !important;
+    overflow-inline: visible !important;
+  }
 
   .kbnOverlayMountWrapper {
+    overflow: visible !important;
     padding-left: 400px;
     margin-left: -400px;
     pointer-events: none;
     .euiFlyoutFooter {
       pointer-events: auto;
     }
+  }
+
+  .lnsEditFlyoutBody {
+    overflow: visible !important;
+  }
+
+  .euiFlyoutBody__overflow {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
   }
 `;
 

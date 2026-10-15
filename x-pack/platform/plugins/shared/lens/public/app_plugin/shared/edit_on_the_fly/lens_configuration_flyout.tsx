@@ -26,7 +26,11 @@ import type {
   TypedLensSerializedState,
   LensDatasourceId,
 } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
+import {
+  LENS_DATASOURCE_ID,
+  isTextBasedAttributes,
+  DRAG_DROP_EXTRA_TARGETS_WIDTH,
+} from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -579,15 +583,17 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* Scrollable accordion content area with custom scrollbar styling.
-                 pointer-events handling allows drag-drop to work outside content bounds. */
+              /* Do not clip horizontally here — EUI overflow:hidden / overflow-y:auto on the
+                 accordion was the nearest clipper. Let extras paint into the flyout body
+                 __overflow gutter; vertical scroll stays on .euiFlyoutBody__overflow. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
-                overflow-y: auto !important;
+                overflow: visible !important;
                 pointer-events: none;
 
-                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
-                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
+                .domDroppable__extraTargets {
+                  width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
+                }
                 > * {
                   pointer-events: auto;
                 }
@@ -623,6 +629,8 @@ export function LensEditConfigurationFlyout({
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
                 }
+                // DnD extras use the flyout __overflow left gutter; content still needs
+                // normal horizontal padding so fields aren't flush to the panel edge.
                 padding: 0 ${euiTheme.euiTheme.size.base};
               `}
             >

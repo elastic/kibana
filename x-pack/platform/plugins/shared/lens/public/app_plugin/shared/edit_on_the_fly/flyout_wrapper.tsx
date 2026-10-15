@@ -24,11 +24,93 @@ import {
   EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import type { FlyoutWrapperProps } from './types';
+
+/**
+ * Nested Emotion `css` on EuiFlyout often loses to EUI's own classes on
+ * `.euiFlyout__content` / body overflow. Global + !important scoped to Lens
+ * inline flyouts forces the classic "visible ancestors + one guttered scrollport" model.
+ */
+const inlineFlyoutDndOverflowFix = css`
+  /* Must beat chrome-layout grid_global_app_style.tsx:
+     body .euiFlyout[class*='right']:not([data-managed-flyout-layout-mode=…][data-managed-flyout-level=child])
+     { clip-path: inset(0 0 0 -50% …) !important }
+     That -50% only allows half the flyout width (~250px); DnD extras need ~296px. */
+  body .euiFlyout[class*='right'][data-test-subj='customizeLens'],
+  body .euiFlyout[class*='right'][data-test-subj='lnsEditOnFlyFlyout'],
+  body .euiFlyout[class*='right'].kbnPresentationLazyFlyout,
+  body
+    .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
+      [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+    ),
+  body
+    .euiFlyout[class*='right'].kbnPresentationLazyFlyout:not(
+      [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+    ),
+  .euiOverlayMask[data-relative-to-header='above']
+    + [data-euiportal='true']
+    .euiFlyout[class*='right'][data-test-subj='customizeLens'],
+  .euiOverlayMask[data-relative-to-header='above']
+    + [data-euiportal='true']
+    .euiFlyout[class*='right'].kbnPresentationLazyFlyout {
+    clip-path: none !important;
+    overflow: visible !important;
+  }
+
+  .euiFlyout[data-test-subj='customizeLens'] [data-test-subj='euiFlyoutContent'],
+  .euiFlyout[data-test-subj='customizeLens'] .euiFlyout__content,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] [data-test-subj='euiFlyoutContent'],
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyout__content,
+  .euiFlyout.kbnPresentationLazyFlyout [data-test-subj='euiFlyoutContent'],
+  .euiFlyout.kbnPresentationLazyFlyout .euiFlyout__content,
+  .euiFlyout[data-test-subj='customizeLens'] .kbnOverlayMountWrapper,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .kbnOverlayMountWrapper,
+  .euiFlyout.kbnPresentationLazyFlyout .kbnOverlayMountWrapper,
+  .euiFlyout[data-test-subj='customizeLens'] .lnsEditFlyoutBody,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .lnsEditFlyoutBody,
+  .euiFlyout.kbnPresentationLazyFlyout .lnsEditFlyoutBody,
+  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflowContent,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyoutBody__overflowContent,
+  .euiFlyout.kbnPresentationLazyFlyout .euiFlyoutBody__overflowContent,
+  .euiFlyout[data-test-subj='customizeLens'] .euiAccordion__childWrapper,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiAccordion__childWrapper,
+  .euiFlyout.kbnPresentationLazyFlyout .euiAccordion__childWrapper {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    overflow-block: visible !important;
+    overflow-inline: visible !important;
+  }
+
+  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflow,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyoutBody__overflow,
+  .euiFlyout.kbnPresentationLazyFlyout .euiFlyoutBody__overflow {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    transform: none !important;
+    padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
+    margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
+  }
+
+  .euiFlyout[data-test-subj='customizeLens'] .kbnOverlayMountWrapper,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .kbnOverlayMountWrapper,
+  .euiFlyout.kbnPresentationLazyFlyout .kbnOverlayMountWrapper {
+    padding-left: 400px !important;
+    margin-left: -400px !important;
+  }
+
+  .euiFlyout[data-test-subj='customizeLens'] .domDroppable__extraTargets,
+  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .domDroppable__extraTargets,
+  .euiFlyout.kbnPresentationLazyFlyout .domDroppable__extraTargets {
+    width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px !important;
+  }
+`;
 
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
   defaultMessage: 'Apply and close',
@@ -56,6 +138,7 @@ export const FlyoutWrapper = ({
   const { euiTheme } = useEuiTheme();
   return (
     <>
+      <Global styles={inlineFlyoutDndOverflowFix} />
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder={false}
@@ -175,25 +258,23 @@ export const FlyoutWrapper = ({
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
-          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          // Visible on the body so extras can reach the __overflow gutter. Scrolling lives
+          // on __overflow only (classic Lens: one scrollport with a left gutter).
+          overflow: visible !important;
           pointer-events: none;
-          // Override the default max-width of drag-drop extra targets to reduce
-          // horizontal overflow space requirements
           .domDroppable__extraTargets {
             width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
           }
           .euiFlyoutBody__overflow {
-            transform: initial;
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            ${!isScrollable &&
-            `
-                overflow-y: hidden;
-              `}
+            // Override euiYScroll (overflow-x: hidden + mask). Keep y-scroll; reserve left
+            // gutter so absolute DnD UI stays inside this clipport.
+            transform: none !important;
+            mask-image: none !important;
+            -webkit-mask-image: none !important;
+            padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
+            margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px !important;
+            overflow-x: hidden !important;
+            overflow-y: ${isScrollable ? 'auto' : 'hidden'} !important;
             > * {
               pointer-events: auto;
             }
@@ -201,6 +282,7 @@ export const FlyoutWrapper = ({
           .euiFlyoutBody__overflowContent {
             background-color: ${euiTheme.colors.emptyShade};
             padding: 0;
+            overflow: visible !important;
           }
         `}
       >
