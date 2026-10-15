@@ -248,6 +248,12 @@ export const translations = {
       defaultMessage: 'Reserved views cannot be deleted.',
     }
   ),
+  reservedViewActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewActionsDisabled',
+    {
+      defaultMessage: 'Reserved views cannot be edited or deleted.',
+    }
+  ),
   openInDiscoverButtonLabel: i18n.translate(
     'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
     {

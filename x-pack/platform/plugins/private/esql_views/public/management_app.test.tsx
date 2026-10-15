@@ -292,6 +292,9 @@ describe('ManagementApp', () => {
     expect(within(reservedRow).getByRole('checkbox')).toBeDisabled();
     const reservedActionsButton = within(reservedRow).getByTestId('esqlViewsActionsButton');
     expect(reservedActionsButton).toHaveAttribute('aria-disabled', 'true');
+    expect(reservedActionsButton).toHaveAccessibleName(
+      'Reserved views cannot be edited or deleted.'
+    );
     fireEvent.click(reservedActionsButton);
     expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();

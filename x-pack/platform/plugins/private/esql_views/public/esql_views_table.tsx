@@ -130,7 +130,9 @@ const ViewActions: FunctionComponent<ViewActionsProps> = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
-  const actionsLabel = translations.actionsForViewAriaLabel(view.name);
+  const actionsLabel = view.reserved
+    ? translations.reservedViewActionsDisabled
+    : translations.actionsForViewAriaLabel(view.name);
 
   return (
     <EuiPopover
