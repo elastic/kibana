@@ -87,6 +87,16 @@ describe('wrapMiddlewares', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it('should return 403 and skip the handler when the entity store v2 feature flag is disabled', async () => {
+    mockIsEntityStoreV2Enabled.mockResolvedValue(false);
+    const handler = jest.fn().mockResolvedValue({ status: 200 } as unknown as IKibanaResponse);
+
+    const result = await wrapMiddlewares(handler)(mockContext, mockReq, mockRes);
+
+    expect(result.status).toBe(403);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
   it('should run registered middlewares before custom middleware and handler', async () => {
     const callOrder: string[] = [];
     (runWithSpan as jest.Mock).mockImplementation(async ({ cb }) => {
