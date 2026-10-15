@@ -28,20 +28,22 @@ describe('normalizeSingleEsqlExpression', () => {
     ['`to_lower`(user.name)', 'TO_LOWER(user.name)'],
     ['user.uid == 9007199254740991', 'user.uid == 9007199254740991'],
   ])('accepts %s', (source, expected) => {
-    expect(normalizeSingleEsqlExpression('match_value', source)).toBe(expected);
+    expect(normalizeSingleEsqlExpression('match_value', source).expression).toBe(expected);
   });
 
   it('keeps the author’s parentheses so precedence cannot change the meaning', () => {
-    expect(normalizeSingleEsqlExpression('match_value', 'a * (b / c)')).toBe('a * (b / c)');
+    expect(normalizeSingleEsqlExpression('match_value', 'a * (b / c)').expression).toBe(
+      'a * (b / c)'
+    );
   });
 
   it('strips comments so they cannot swallow the rest of the composed query', () => {
-    expect(normalizeSingleEsqlExpression('filter', 'user.name IS NOT NULL // trailing')).toBe(
-      'user.name IS NOT NULL'
-    );
-    expect(normalizeSingleEsqlExpression('filter', 'user.name /* x */ IS NOT NULL')).toBe(
-      'user.name IS NOT NULL'
-    );
+    expect(
+      normalizeSingleEsqlExpression('filter', 'user.name IS NOT NULL // trailing').expression
+    ).toBe('user.name IS NOT NULL');
+    expect(
+      normalizeSingleEsqlExpression('filter', 'user.name /* x */ IS NOT NULL').expression
+    ).toBe('user.name IS NOT NULL');
   });
 
   it.each([
@@ -88,10 +90,24 @@ describe('normalizeSingleEsqlExpression', () => {
   });
 
   it('is stable when its output is parsed again', () => {
-    const once = normalizeSingleEsqlExpression(
+    const { expression: once } = normalizeSingleEsqlExpression(
       'filter',
       'NOT user.name IN ("a")  AND   user.id::keyword == "x"'
     );
-    expect(normalizeSingleEsqlExpression('filter', once)).toBe(once);
+    expect(normalizeSingleEsqlExpression('filter', once).expression).toBe(once);
+  });
+
+  it.each([
+    ['a field', 'TO_LOWER(user.name)', true],
+    ['a quoted field', '`user.name`', true],
+    ['only constants', 'CONCAT("a", "b")', false],
+  ])('reports whether the expression reads %s', (_case, source, readsAField) => {
+    expect(normalizeSingleEsqlExpression('match_value', source).readsAField).toBe(readsAField);
+  });
+
+  it('says a valid expression that cannot be re-printed exactly must be rewritten', () => {
+    expect(() => normalizeSingleEsqlExpression('filter', 'user.score > 1e21')).toThrow(
+      "numeric literals such as 1e21 aren't supported"
+    );
   });
 });

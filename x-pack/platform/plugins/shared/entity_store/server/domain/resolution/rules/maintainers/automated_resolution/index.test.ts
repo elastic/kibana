@@ -16,6 +16,8 @@ import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import { runEsqlMatcherRule } from '../../matcher';
 import { AUTOMATED_RESOLUTION_STATE_VERSION, type AutomatedResolutionState } from './types';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
+import * as customRules from './custom_rules';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
@@ -161,6 +163,7 @@ describe('automatedResolutionMaintainerConfig', () => {
   });
 
   it('gives every rule the index resolved once for the run, custom rules included', async () => {
+    (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce('.entities.v2.latest.run');
     await runConfig(
       createEsClient(),
       { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: watermarkedRules },
@@ -187,7 +190,8 @@ describe('automatedResolutionMaintainerConfig', () => {
       ...(runRelatedUserAliasResolution as jest.Mock).mock.calls.map(([deps]) => deps.index),
     ];
     expect(indexes.length).toBeGreaterThan(1);
-    expect(new Set(indexes)).toEqual(new Set(['.entities.v2.latest.default']));
+    expect(new Set(indexes)).toEqual(new Set(['.entities.v2.latest.run']));
+    expect(resolveLatestEntitiesIndexName).toHaveBeenCalledTimes(1);
   });
 
   it('serializes one null-watermark backfill per tick', async () => {
@@ -377,8 +381,29 @@ describe('automatedResolutionMaintainerConfig', () => {
 
         expect(abortedAfterMs).toBe(4 * 60 * 1000);
         expect(result.rules['custom:rule-1']).toMatchObject({ deferredByDeadline: true });
+        expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
       } finally {
         jest.useRealTimers();
+      }
+    });
+
+    it('keeps the OOTB results when the custom-rule phase throws', async () => {
+      const spy = jest
+        .spyOn(customRules, 'runCustomResolutionRules')
+        .mockRejectedValueOnce(new Error('unexpected'));
+      try {
+        const result = await runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          undefined,
+          jest.fn().mockResolvedValue([customRule])
+        );
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+      } finally {
+        spy.mockRestore();
       }
     });
 

@@ -23,8 +23,8 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  CustomResolutionRuleLimitError,
-  MissingEntityIndexWritePrivilegeError,
+  TooManyCustomResolutionRulesError,
+  MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -60,17 +60,17 @@ const toErrorResponseOrThrow = (
   ) {
     return res.notFound({ body: { message: error.message } });
   }
-  if (error instanceof MissingEntityIndexWritePrivilegeError) {
+  if (error instanceof MissingEntityIndexPrivilegeError) {
     return res.forbidden({ body: { message: error.message } });
   }
   if (error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error)) {
     return res.forbidden({
       body: {
-        message: 'Not authorized to manage custom resolution rules in this space',
+        message: 'Not authorized to access custom resolution rules in this space',
       },
     });
   }
-  if (error instanceof CustomResolutionRuleLimitError) {
+  if (error instanceof TooManyCustomResolutionRulesError) {
     return res.conflict({ body: { message: error.message } });
   }
   if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
@@ -91,14 +91,21 @@ const abortSignalFor = (req: KibanaRequest): AbortSignal => {
   return controller.signal;
 };
 
+const CLIENT_CLOSED_REQUEST_STATUS = 499;
+
+/**
+ * With `abortOnDisconnect`, the handler gets a signal that fires when the client
+ * disconnects, and the resulting error is not logged as a server error.
+ */
 const withCustomRulesClient =
   <P, Q, B>(
     handler: (
       client: CustomResolutionRulesClient,
       req: KibanaRequest<P, Q, B>,
       res: KibanaResponseFactory,
-      signal: AbortSignal
-    ) => Promise<IKibanaResponse>
+      signal?: AbortSignal
+    ) => Promise<IKibanaResponse>,
+    { abortOnDisconnect = false } = {}
   ) =>
   async (
     ctx: EntityStoreRequestHandlerContext,
@@ -106,15 +113,18 @@ const withCustomRulesClient =
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> => {
     const { logger, customResolutionRulesClient } = await ctx.entityStore;
-    const signal = abortSignalFor(req);
+    const signal = abortOnDisconnect ? abortSignalFor(req) : undefined;
     try {
       return await handler(customResolutionRulesClient, req, res, signal);
     } catch (error) {
-      if (signal.aborted) {
+      if (signal?.aborted) {
         logger.debug(
           `Custom resolution rules request aborted by the client: ${getErrorMessage(error)}`
         );
-        return res.customError({ statusCode: 499, body: { message: 'Request aborted' } });
+        return res.customError({
+          statusCode: CLIENT_CLOSED_REQUEST_STATUS,
+          body: { message: 'Request aborted' },
+        });
       }
       return toErrorResponseOrThrow(error, res, logger);
     }
@@ -184,7 +194,8 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
             req: KibanaRequest<unknown, unknown, CustomResolutionRulePreviewRequest>,
             res,
             signal
-          ) => res.ok({ body: await client.preview(req.body, signal) })
+          ) => res.ok({ body: await client.preview(req.body, signal) }),
+          { abortOnDisconnect: true }
         ),
         CUSTOM_RULES_ROUTE_MIDDLEWARES
       )

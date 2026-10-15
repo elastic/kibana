@@ -18,8 +18,8 @@ import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  CustomResolutionRuleLimitError,
-  MissingEntityIndexWritePrivilegeError,
+  TooManyCustomResolutionRulesError,
+  MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -141,8 +141,12 @@ describe('custom resolution rules routes', () => {
       ['an invalid rule', 400, new InvalidCustomResolutionRuleError('bad')],
       ['a missing rule', 404, new CustomResolutionRuleNotFoundError('x')],
       ['a missing entity store', 404, new EntityStoreNotInstalledError()],
-      ['no write access to the entity index', 403, new MissingEntityIndexWritePrivilegeError('i')],
-      ['the per-space rule limit', 409, new CustomResolutionRuleLimitError(20)],
+      [
+        'no write access to the entity index',
+        403,
+        new MissingEntityIndexPrivilegeError('i', 'write'),
+      ],
+      ['the per-space rule limit', 409, new TooManyCustomResolutionRulesError(20)],
       [
         'a saved-objects authorization error',
         403,
@@ -199,22 +203,27 @@ describe('custom resolution rules routes', () => {
       expect(result.body).toEqual({ message: 'missing view_index_metadata' });
     });
 
-    it('does not log a request the client closed as a server error', async () => {
+    it('does not log a preview the client closed as a server error', async () => {
       const aborted$ = new Subject<void>();
       const logger = loggerMock.create();
       const ctx = {
         entityStore: Promise.resolve({
           logger,
           customResolutionRulesClient: {
-            create: jest.fn().mockImplementation(async () => {
+            preview: jest.fn().mockImplementation(async (_body, signal: AbortSignal) => {
               aborted$.next();
-              throw new Error('Request aborted');
+              expect(signal.aborted).toBe(true);
+              throw new Error('Custom rule preview aborted');
             }),
           },
         }),
       };
+      const previewRoute = registerAll().find(
+        ({ method, routeConfig }) =>
+          method === 'post' && routeConfig.path === RESOLUTION_CUSTOM_RULES_PREVIEW
+      )!;
 
-      const result = await createRoute().handler(ctx, request(aborted$), createResponse());
+      const result = await previewRoute.handler(ctx, request(aborted$), createResponse());
 
       expect(result.status).toBe(499);
       expect(logger.error).not.toHaveBeenCalled();

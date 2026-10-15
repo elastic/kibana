@@ -24,22 +24,17 @@ import type { EsqlExpressionMatchSpec } from '../../rule_registry';
 import { EMPTY_RULE_STATE, type CustomRuleState, type PerRuleState } from './types';
 
 /**
- * The soft deadline: how long before the maintainer's task timeout custom rules
- * stop. A run that ends on its own saves every rule's state; a run Task Manager
- * cancels at the timeout saves none, OOTB rules included.
+ * How long before the task timeout custom rules stop (the soft deadline); a run
+ * Task Manager cancels at the timeout saves no rule's state, OOTB included.
  */
 export const CUSTOM_RULES_DEADLINE_MARGIN_MS = 60 * 1000;
 
-/** Telemetry scope value for every custom rule. */
 const CUSTOM_RULE_TELEMETRY_ID = 'custom';
 
 const MAX_LAST_ERROR_LENGTH = 500;
 
 export interface RunCustomRulesDeps {
-  /**
-   * Per-rule state for this run, starting as the state read at the start of
-   * the run. Custom-rule entries are read, written and pruned here.
-   */
+  /** Mutated in place: custom-rule entries are written and pruned. */
   ruleStates: Record<string, PerRuleState>;
   resolutionRulesClient: ResolutionRulesClient;
   index: string;
@@ -146,21 +141,10 @@ const pruneDeletedRules = async (
   }
 };
 
-const compileRule = (
-  rule: CustomResolutionRule
-): { spec: EsqlExpressionMatchSpec; definitionFingerprint: string } => ({
-  spec: toExpressionMatchSpec(rule),
-  definitionFingerprint: fingerprintDefinition(rule),
-});
-
 /**
  * Applies saved custom rules after the OOTB rules. Each rule is isolated: an
  * invalid or failing rule is logged, recorded as `lastError` in its state, and
  * skipped.
- *
- * A rule cut off mid-scan keeps its previous watermark and repeats its query
- * next run; the matcher skips groups it already linked, so the links it made
- * still count as progress.
  */
 export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promise<void> {
   const { resolutionRulesClient, logger, signal } = deps;
@@ -248,15 +232,15 @@ async function runEnabledRulesUntilAborted(
       continue;
     }
 
-    let compiled: ReturnType<typeof compileRule>;
+    let spec: EsqlExpressionMatchSpec;
     try {
-      compiled = compileRule(currentRule);
+      spec = toExpressionMatchSpec(currentRule);
     } catch (error) {
       logger.warn(`${stateKey} failed: ${getErrorMessage(error)}`);
       recordFailure(ruleStates, stateKey, error);
       continue;
     }
-    const { spec, definitionFingerprint } = compiled;
+    const definitionFingerprint = fingerprintDefinition(currentRule);
 
     const ruleState = priorStateIfDefinitionUnchanged(ruleStates[stateKey], definitionFingerprint);
     const lastAttemptAt = new Date().toISOString();
@@ -265,6 +249,7 @@ async function runEnabledRulesUntilAborted(
       : lastAttemptAt;
     anyRuleStartedThisRun = true;
     let matcherResultState: PerRuleState = ruleState;
+    let matcherFinished = false;
     let lastError: string | null = null;
     try {
       matcherResultState = await runEsqlMatcherRule({
@@ -280,6 +265,8 @@ async function runEnabledRulesUntilAborted(
         mutatedIds: deps.mutatedIds,
         index,
       });
+      // The matcher returns, rather than throws, when it is aborted mid-scan.
+      matcherFinished = !deadlineOrAbortSignal.aborted;
       await esClient.indices.refresh({ index });
     } catch (error) {
       if (!reachedDeadline()) {
@@ -288,14 +275,13 @@ async function runEnabledRulesUntilAborted(
       }
     }
 
-    const deferredByDeadline = reachedDeadline();
+    // A deadline that fires during the final refresh doesn't defer a rule that finished.
+    const deferredByDeadline = !matcherFinished && reachedDeadline();
     if (deferredByDeadline) {
       logger.info(`${stateKey}: stopped at the soft deadline; continues next run`);
     }
 
-    // Written even when the rule failed or stopped early: the state still holds
-    // the previous watermark, and `deferredByDeadline` and `lastStartedFirstAt`
-    // order the next run.
+    // Written even on failure or early stop so the next run's order sees it.
     const nextState: CustomRuleState = {
       ...matcherResultState,
       definitionFingerprint,

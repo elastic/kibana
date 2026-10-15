@@ -59,15 +59,20 @@ interface RunOptions {
   deadline?: number;
   /** What a re-read just before running returns; defaults to the listed rule. */
   reread?: (id: string) => CustomResolutionRule | undefined;
+  refresh?: jest.Mock;
 }
 
 const run = async (
   customRules: CustomResolutionRule[] | Error,
-  { previous = {}, signal = new AbortController().signal, deadline, reread }: RunOptions = {}
+  {
+    previous = {},
+    signal = new AbortController().signal,
+    deadline,
+    reread,
+    refresh = jest.fn().mockResolvedValue({}),
+  }: RunOptions = {}
 ) => {
-  const esClient = {
-    indices: { refresh: jest.fn().mockResolvedValue({}) },
-  } as unknown as ElasticsearchClient;
+  const esClient = { indices: { refresh } } as unknown as ElasticsearchClient;
   const logger = loggerMock.create();
   const rules: Record<string, PerRuleState> = { ...previous };
   const listed = customRules instanceof Error ? [] : customRules;
@@ -367,6 +372,18 @@ describe('runCustomResolutionRules', () => {
       );
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('1 rule(s) continue next run')
+      );
+    });
+
+    it('does not defer a rule that finished when the deadline fires during the final refresh', async () => {
+      const refresh = jest.fn(() => new Promise((resolve) => setTimeout(resolve, 2_000)));
+      const pending = run([rule('a')], { deadline: Date.now() + 1_000, refresh });
+      await jest.advanceTimersByTimeAsync(2_000);
+      const { rules, logger } = await pending;
+
+      expect(rules['custom:a']).toMatchObject({ ...WATERMARKED, deferredByDeadline: false });
+      expect(logger.info).not.toHaveBeenCalledWith(
+        expect.stringContaining('stopped at the soft deadline')
       );
     });
 

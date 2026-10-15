@@ -38,8 +38,7 @@ interface ResolutionClientOpts {
   namespace: string;
   /**
    * Latest-entities index already resolved by the caller; reads by the caller
-   * and writes here must use the same one. Without it every operation
-   * re-resolves the name.
+   * and writes here must use the same one.
    */
   latestIndex?: string;
 }

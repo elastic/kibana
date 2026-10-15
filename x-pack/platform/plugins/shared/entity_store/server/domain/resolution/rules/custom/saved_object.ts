@@ -7,7 +7,7 @@
 
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import {
   CustomResolutionRuleTypeName,
   MAX_CUSTOM_RULE_EXPRESSION_LENGTH,
@@ -16,18 +16,9 @@ import {
   MAX_CUSTOM_RULE_NAMESPACE_LENGTH,
 } from './constants';
 
-export interface CustomResolutionRuleAttributes {
-  name: string;
-  // Not `namespaces`: that name is the saved object's own spaces field.
-  entityNamespaces: string[];
-  filter?: string;
-  matchValue: string;
-  declineSameNamespaceDuplicates: boolean;
-  enabled: boolean;
-}
-
 const customResolutionRuleAttributesSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAME_LENGTH }),
+  // Not `namespaces`: that name is the saved object's own spaces field.
   entityNamespaces: schema.arrayOf(
     schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAMESPACE_LENGTH }),
     { minSize: 1, maxSize: MAX_CUSTOM_RULE_NAMESPACES }
@@ -39,6 +30,8 @@ const customResolutionRuleAttributesSchemaV1 = schema.object({
   declineSameNamespaceDuplicates: schema.boolean(),
   enabled: schema.boolean(),
 });
+
+export type CustomResolutionRuleAttributes = TypeOf<typeof customResolutionRuleAttributesSchemaV1>;
 
 const version1: SavedObjectsFullModelVersion = {
   changes: [],

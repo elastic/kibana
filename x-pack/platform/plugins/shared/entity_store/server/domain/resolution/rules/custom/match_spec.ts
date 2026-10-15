@@ -10,7 +10,7 @@ import { InvalidCustomResolutionRuleError } from '../../../errors';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import type { CustomResolutionRule } from './client';
 import { CUSTOM_RULE_NAMESPACE_PATTERN } from './constants';
-import { normalizeSingleEsqlExpression, referencesAField } from './expression';
+import { normalizeSingleEsqlExpression } from './expression';
 
 /** The parts of a custom rule that decide what it links. */
 export type CustomResolutionRuleDefinition = Pick<
@@ -47,8 +47,11 @@ export const toExpressionMatchSpec = (
     throw new InvalidCustomResolutionRuleError('must not repeat a namespace', 'namespaces');
   }
 
-  const matchValueExpression = normalizeSingleEsqlExpression('match_value', matchValue);
-  if (!referencesAField(matchValueExpression)) {
+  const { expression: matchValueExpression, readsAField } = normalizeSingleEsqlExpression(
+    'match_value',
+    matchValue
+  );
+  if (!readsAField) {
     throw new InvalidCustomResolutionRuleError(
       'must read at least one field: a constant key puts every entity in one group',
       'match_value'
@@ -58,7 +61,7 @@ export const toExpressionMatchSpec = (
   return {
     namespaces: [...namespaces],
     ...(filter !== undefined && {
-      filterExpression: normalizeSingleEsqlExpression('filter', filter),
+      filterExpression: normalizeSingleEsqlExpression('filter', filter).expression,
     }),
     matchValueExpression,
     declineSameNamespaceDuplicates,

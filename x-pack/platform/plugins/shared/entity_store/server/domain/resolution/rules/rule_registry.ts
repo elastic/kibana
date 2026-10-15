@@ -75,7 +75,6 @@ export interface EsqlExpressionMatchSpec {
   declineSameNamespaceDuplicates: boolean;
 }
 
-/** Any matcher spec: a built-in field rule or a custom expression rule. */
 export type MatcherSpec = EsqlFieldMatchSpec | EsqlExpressionMatchSpec;
 
 export const isExpressionMatchSpec = (spec: MatcherSpec): spec is EsqlExpressionMatchSpec =>

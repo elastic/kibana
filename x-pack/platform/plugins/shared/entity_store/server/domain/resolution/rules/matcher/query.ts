@@ -124,8 +124,7 @@ const expressionSpecParts = (spec: EsqlExpressionMatchSpec): QueryParts => {
     // TO_STRING keeps the page cursor (`match_value > "<last>"`) a string
     // comparison whatever type the customer's key has.
     matchValueEval: `TO_STRING(${spec.matchValueExpression})`,
-    // No MV_COUNT in the entity filters: an expression has no single source field, so
-    // the computed key is checked instead.
+    // An expression has no single source field, so the single-value check runs on the computed key.
     matchValueFilters: [
       `${MATCH_GROUP_COLUMNS.matchValue} IS NOT NULL`,
       `MV_COUNT(${MATCH_GROUP_COLUMNS.matchValue}) == 1`,
@@ -251,34 +250,28 @@ export const buildWatermarkQuery = ({
   ].join('\n');
 };
 
-/**
- * The rule's filter and key, returning no rows. Leaves out
- * `SET unmapped_fields="nullify"` so Elasticsearch rejects an unknown field
- * instead of silently matching nothing.
- */
+/** The custom rule's key before `TO_STRING`, so validation can see its real type. */
 export const RAW_MATCH_VALUE_COLUMN = 'raw_match_value';
 
+/**
+ * Runs the rule's filter and key with `LIMIT 0` and without
+ * `unmapped_fields="nullify"`, so Elasticsearch rejects an unknown field.
+ */
 export const buildMatcherValidationQuery = ({
   index,
   spec,
 }: {
   index: string;
-  spec: MatcherSpec;
+  spec: EsqlExpressionMatchSpec;
 }): string => {
-  const { entityFilters, matchValueEval, matchValueFilters } = queryPartsFor(spec);
-  // The key before TO_STRING, so validation can see its real type.
-  const rawMatchValue = isExpressionMatchSpec(spec)
-    ? [`| EVAL ${RAW_MATCH_VALUE_COLUMN} = (${spec.matchValueExpression})`]
-    : [];
+  const { entityFilters, matchValueEval, matchValueFilters } = expressionSpecParts(spec);
   return [
     `FROM ${quote(index)}`,
     `| WHERE ${entityFilters.join('\n    AND ')}`,
-    ...rawMatchValue,
+    `| EVAL ${RAW_MATCH_VALUE_COLUMN} = (${spec.matchValueExpression})`,
     `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
     `| WHERE ${matchValueFilters.join('\n    AND ')}`,
-    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}${
-      rawMatchValue.length > 0 ? `, ${RAW_MATCH_VALUE_COLUMN}` : ''
-    }`,
+    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}, ${RAW_MATCH_VALUE_COLUMN}`,
     `| LIMIT 0`,
   ].join('\n');
 };

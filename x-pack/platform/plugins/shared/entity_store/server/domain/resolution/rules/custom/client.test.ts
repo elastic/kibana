@@ -10,8 +10,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  CustomResolutionRuleLimitError,
-  MissingEntityIndexWritePrivilegeError,
+  TooManyCustomResolutionRulesError,
+  MissingEntityIndexPrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -164,7 +164,7 @@ describe('CustomResolutionRulesClient', () => {
       } as never);
 
       await expect(client.create(LOCAL_USERS_TO_AD)).rejects.toBeInstanceOf(
-        CustomResolutionRuleLimitError
+        TooManyCustomResolutionRulesError
       );
       expect(soClient.create).not.toHaveBeenCalled();
     });
@@ -204,6 +204,26 @@ describe('CustomResolutionRulesClient', () => {
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
 
+    it('names the missing privilege when checking the index is forbidden', async () => {
+      const { client, soClient, esClient } = setup();
+      // A HEAD response carries no body, so Elasticsearch's message is empty.
+      esClient.indices.exists.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: '',
+          headers: {},
+          warnings: [],
+          meta: {} as never,
+        })
+      );
+
+      const error = await client.create(LOCAL_USERS_TO_AD).catch((e) => e);
+      expect(error).toBeInstanceOf(MissingEntityIndexPrivilegeError);
+      expect(error.message).toContain("'.entities.v2.latest.default'");
+      expect(error.message).toContain("requires the 'view_index_metadata' index privilege");
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
     it('creates a disabled rule without checking write access to the entity index', async () => {
       const { client, esClient } = setup();
       await client.create(LOCAL_USERS_TO_AD);
@@ -226,7 +246,7 @@ describe('CustomResolutionRulesClient', () => {
       esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
 
       await expect(client.create({ ...LOCAL_USERS_TO_AD, enabled: true })).rejects.toBeInstanceOf(
-        MissingEntityIndexWritePrivilegeError
+        MissingEntityIndexPrivilegeError
       );
       expect(soClient.create).not.toHaveBeenCalled();
     });
@@ -277,7 +297,7 @@ describe('CustomResolutionRulesClient', () => {
       esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
 
       await expect(client.update('a', { enabled: true })).rejects.toBeInstanceOf(
-        MissingEntityIndexWritePrivilegeError
+        MissingEntityIndexPrivilegeError
       );
       expect(soClient.update).not.toHaveBeenCalled();
     });
@@ -289,9 +309,26 @@ describe('CustomResolutionRulesClient', () => {
 
       await expect(
         client.update('a', { match_value: 'TO_UPPER(user.name)' })
-      ).rejects.toBeInstanceOf(MissingEntityIndexWritePrivilegeError);
+      ).rejects.toBeInstanceOf(MissingEntityIndexPrivilegeError);
       expect(soClient.update).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['only the same-namespace check', { decline_same_namespace_duplicates: false }],
+      ['removing the filter', { filter: null }],
+    ])(
+      'treats %s on an enabled rule as a definition change that needs write access',
+      async (_case, patch) => {
+        const { client, soClient, esClient } = setup();
+        soClient.get.mockResolvedValue(savedObject('a', { ...ATTRIBUTES, enabled: true }));
+        esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
+
+        await expect(client.update('a', patch)).rejects.toBeInstanceOf(
+          MissingEntityIndexPrivilegeError
+        );
+        expect(soClient.update).not.toHaveBeenCalled();
+      }
+    );
 
     it('changes a disabled rule without checking write access to the entity index', async () => {
       const { client, soClient, esClient } = setup();

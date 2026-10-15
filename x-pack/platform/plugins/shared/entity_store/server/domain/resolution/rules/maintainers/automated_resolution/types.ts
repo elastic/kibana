@@ -33,7 +33,6 @@ export interface CustomRuleState extends PerRuleState {
   lastAttemptAt: string;
   /** The last run in which this rule went first; rotates deferred rules. */
   lastStartedFirstAt: string | null;
-  /** The soft deadline stopped this rule, or kept it from starting, on its last run. */
   deferredByDeadline: boolean;
   /** Why the last attempt failed; null after a run that didn't fail. */
   lastError: string | null;

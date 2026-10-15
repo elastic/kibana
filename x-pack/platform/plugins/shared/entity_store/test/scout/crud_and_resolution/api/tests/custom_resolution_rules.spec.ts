@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 import type { GetEntityMaintainersResponse } from '../../../../../common';
 import {
   INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
@@ -30,6 +31,9 @@ const LOCAL_USERS_TO_AD_RULE = {
     'NOT ENDS_WITH(user.name, "$") AND NOT TO_LOWER(user.name) IN ("administrator", "admin", "guest", "defaultaccount")',
   match_value: 'TO_LOWER(user.name)',
 };
+
+const MAX_EXPRESSION_LENGTH = 2048;
+const MANAGE_PRIVILEGE = 'securitySolution-entity-analytics-manage';
 
 const AD_USER = 'user:Jane.Doe@example.com@active_directory';
 const LAPTOP_USER = 'user:jd12345@HOST-ABC123@local';
@@ -125,6 +129,15 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       // redefines it, so the same session takes on whichever role was set last.
       const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
       const customRoleHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+      const customRolePublicHeaders = { ...cookieHeader, ...PUBLIC_HEADERS };
+      const toggleBuiltInRule = (action: 'ENABLE' | 'DISABLE') =>
+        apiClient.put(
+          ENTITY_STORE_ROUTES.public[`RESOLUTION_RULES_${action}`]('email_exact_match'),
+          {
+            headers: customRolePublicHeaders,
+            responseType: 'json',
+          }
+        );
       let ruleId = '';
 
       await apiTest.step('Security all creates a disabled rule', async () => {
@@ -157,6 +170,11 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         expect(enabledWithWrite.body.enabled).toBe(true);
       });
 
+      await apiTest.step('Security all toggles a built-in rule', async () => {
+        expect((await toggleBuiltInRule('DISABLE')).statusCode).toBe(200);
+        expect((await toggleBuiltInRule('ENABLE')).statusCode).toBe(200);
+      });
+
       await apiTest.step('Security read lists rules but cannot create or delete', async () => {
         await samlAuth.asInteractiveUser(securityRole('read'));
 
@@ -175,12 +193,26 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
           body: { name: 'Security read rule', ...LOCAL_USERS_TO_AD_RULE },
         });
         expect(created.statusCode).toBe(403);
+        // Refused by route authorization, not only by the saved-objects layer.
+        expect(created.body.message).toContain(MANAGE_PRIVILEGE);
+
+        const enabled = await apiClient.put(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers: customRoleHeaders, responseType: 'json', body: { enabled: true } }
+        );
+        expect(enabled.statusCode).toBe(403);
+        expect(enabled.body.message).toContain(MANAGE_PRIVILEGE);
 
         const deleted = await apiClient.delete(
           ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
           { headers: customRoleHeaders, responseType: 'json' }
         );
         expect(deleted.statusCode).toBe(403);
+        expect(deleted.body.message).toContain(MANAGE_PRIVILEGE);
+
+        const builtInDisabled = await toggleBuiltInRule('DISABLE');
+        expect(builtInDisabled.statusCode).toBe(403);
+        expect(builtInDisabled.body.message).toContain(MANAGE_PRIVILEGE);
       });
 
       await apiTest.step('Security all deletes it', async () => {
@@ -203,10 +235,11 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       ['malformed namespace', { namespaces: ['Active Directory'] }, "Invalid 'namespaces'"],
       [
         'oversized expression',
-        { match_value: `TO_LOWER(user.name)${' '.repeat(2049)}` },
+        { match_value: 'a'.repeat(MAX_EXPRESSION_LENGTH + 1) },
         'match_value',
       ],
       ['unknown request field', { lookup: { index: 'x' } }, 'Excess keys'],
+      ['boolean key', { match_value: 'user.name IS NOT NULL' }, 'must not be a boolean'],
     ];
 
     for (const [name, override, expectedMessage] of cases) {
@@ -271,6 +304,15 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         await waitForResolution(esClient, LAPTOP_USER, AD_USER);
         await waitForResolution(esClient, SECOND_HOST_USER, AD_USER);
         await assertNotResolved(esClient, LOCAL_ADMIN, 1_000);
+
+        // Linked groups are dropped by the query itself, not returned as no-ops.
+        const previewAfterLink = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES_PREVIEW,
+          { headers, responseType: 'json', body: LOCAL_USERS_TO_AD_RULE }
+        );
+        expect(previewAfterLink.statusCode).toBe(200);
+        expect(previewAfterLink.body.scanned_groups).toBe(0);
+
         const ruleState = await readCustomRuleState(apiClient, ruleId);
         expect(typeof ruleState?.definitionFingerprint).toBe('string');
         expect(typeof ruleState?.lastProcessedTimestamp).toBe('string');

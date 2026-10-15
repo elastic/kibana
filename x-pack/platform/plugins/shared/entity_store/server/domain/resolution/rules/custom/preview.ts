@@ -28,7 +28,7 @@ export interface CustomRulePreviewSample {
   group_size: number;
   target: string;
   aliases: string[];
-  /** Targets of group members that are already aliases elsewhere. */
+  /** Targets that group members already resolve to. */
   existing_targets: string[];
   /** Existing aliases of `aliases` that cascade would move onto `target`. */
   cascade_alias_count: number;

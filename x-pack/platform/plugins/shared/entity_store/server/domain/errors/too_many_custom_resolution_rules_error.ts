@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export class CustomResolutionRuleLimitError extends Error {
+export class TooManyCustomResolutionRulesError extends Error {
   constructor(limit: number) {
     super(`A space can hold at most ${limit} custom resolution rules; delete one first`);
   }

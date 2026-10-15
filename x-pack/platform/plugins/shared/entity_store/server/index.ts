@@ -76,7 +76,10 @@ export { EntityResolutionRuleTypeName } from './domain/resolution/rules/saved_ob
 export { CustomResolutionRuleTypeName } from './domain/resolution/rules/custom/constants';
 export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 export { checkEntityStoreIndexPrivileges } from './routes/apis/utils/check_and_format_privileges';
-export { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from './routes/constants';
+export {
+  ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
+  ENTITY_ANALYTICS_MANAGE_KIBANA_FEATURE_PRIVILEGES,
+} from './routes/constants';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');

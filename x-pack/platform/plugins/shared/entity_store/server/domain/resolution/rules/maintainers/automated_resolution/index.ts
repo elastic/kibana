@@ -34,7 +34,7 @@ const createInitialState = (): AutomatedResolutionState => ({
 
 export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
-  description: 'Automatically resolves entities using field-matching rules',
+  description: 'Automatically resolves entities using built-in and custom resolution rules',
   interval: '5m',
   timeout: `${MAINTAINER_TIMEOUT_MINUTES}m`,
   initialState: createInitialState(),
@@ -51,7 +51,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       namespace,
       latestIndex: index,
     });
-    const rules: Record<string, PerRuleState> = { ...state.rules };
+    const ruleStates: Record<string, PerRuleState> = { ...state.rules };
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
@@ -85,7 +85,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
       try {
         if (ruleConfig.matcher) {
-          rules[ruleConfig.id] = await runEsqlMatcherRule({
+          ruleStates[ruleConfig.id] = await runEsqlMatcherRule({
             state: ruleState,
             esClient,
             logger,
@@ -98,7 +98,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
-          rules[ruleConfig.id] = await runRelatedUserAliasResolution({
+          ruleStates[ruleConfig.id] = await runRelatedUserAliasResolution({
             state: ruleState,
             esClient,
             logger,
@@ -124,7 +124,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       // A throw here would reject the run and lose the OOTB watermarks advanced above.
       try {
         await runCustomResolutionRules({
-          ruleStates: rules,
+          ruleStates,
           resolutionRulesClient,
           index,
           esClient,
@@ -140,6 +140,6 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
     }
 
-    return { ...state, rules };
+    return { ...state, rules: ruleStates };
   },
 };

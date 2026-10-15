@@ -18,11 +18,11 @@ import {
 } from '../../../../infra/elasticsearch/es_errors';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import {
-  CustomResolutionRuleLimitError,
+  TooManyCustomResolutionRulesError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
-  MissingEntityIndexWritePrivilegeError,
+  MissingEntityIndexPrivilegeError,
 } from '../../../errors';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import { RAW_MATCH_VALUE_COLUMN, buildMatcherValidationQuery } from '../matcher';
@@ -87,11 +87,20 @@ const toAttributes = (rule: CustomResolutionRuleFields): CustomResolutionRuleAtt
   enabled: rule.enabled,
 });
 
-/** Oldest first; ties broken by id so the order is stable. */
+const asInvalidRuleOnBadRequest = async <T>(query: () => Promise<T>): Promise<T> => {
+  try {
+    return await query();
+  } catch (error) {
+    if (isEsResponseErrorWithStatus(error, 400)) {
+      throw new InvalidCustomResolutionRuleError(getEsErrorReason(error));
+    }
+    throw error;
+  }
+};
+
 export const compareByCreation = (a: CustomResolutionRule, b: CustomResolutionRule): number =>
   (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id);
 
-/** Saved custom rules in the SO client's space, oldest first. */
 export const findCustomResolutionRules = async (
   soClient: SavedObjectsClientContract
 ): Promise<CustomResolutionRule[]> => {
@@ -160,7 +169,7 @@ export class CustomResolutionRulesClient {
 
     const existing = await this.list();
     if (existing.length >= MAX_CUSTOM_RULES_PER_SPACE) {
-      throw new CustomResolutionRuleLimitError(MAX_CUSTOM_RULES_PER_SPACE);
+      throw new TooManyCustomResolutionRulesError(MAX_CUSTOM_RULES_PER_SPACE);
     }
 
     const created = await this.deps.soClient.create<CustomResolutionRuleAttributes>(
@@ -245,14 +254,9 @@ export class CustomResolutionRulesClient {
       decline_same_namespace_duplicates:
         request.decline_same_namespace_duplicates ?? DEFAULT_DECLINE_SAME_NAMESPACE_DUPLICATES,
     });
-    try {
-      return await previewCustomRule({ esClient: this.deps.esClient, index, spec, signal });
-    } catch (error) {
-      if (isEsResponseErrorWithStatus(error, 400)) {
-        throw new InvalidCustomResolutionRuleError(getEsErrorReason(error));
-      }
-      throw error;
-    }
+    return asInvalidRuleOnBadRequest(() =>
+      previewCustomRule({ esClient: this.deps.esClient, index, spec, signal })
+    );
   }
 
   private async getSavedObject(id: string): Promise<SavedObject<CustomResolutionRuleAttributes>> {
@@ -266,22 +270,43 @@ export class CustomResolutionRulesClient {
   /**
    * The maintainer applies an enabled rule's links with the entity store
    * owner's credentials, so whoever enables or changes one must be able to
-   * write those links themselves, as with the link API.
+   * write those links themselves.
    *
-   * @throws MissingEntityIndexWritePrivilegeError
+   * @throws MissingEntityIndexPrivilegeError
    */
   private async assertCanWriteLinks(index: string): Promise<void> {
     const { has_all_requested: canWrite } = await this.deps.esClient.security.hasPrivileges({
       index: [{ names: [index], privileges: ['write'] }],
     });
     if (!canWrite) {
-      throw new MissingEntityIndexWritePrivilegeError(index);
+      throw new MissingEntityIndexPrivilegeError(index, 'write');
+    }
+  }
+
+  /**
+   * @throws EntityStoreNotInstalledError
+   * @throws MissingEntityIndexPrivilegeError
+   */
+  private async assertIndexExists(index: string): Promise<void> {
+    let exists: boolean;
+    try {
+      exists = await this.deps.esClient.indices.exists({ index });
+    } catch (error) {
+      // A HEAD 403 has no body, so Elasticsearch's own message would be empty.
+      if (isEsResponseErrorWithStatus(error, 403)) {
+        throw new MissingEntityIndexPrivilegeError(index, 'view_index_metadata');
+      }
+      throw error;
+    }
+    if (!exists) {
+      throw new EntityStoreNotInstalledError();
     }
   }
 
   /**
    * @throws InvalidCustomResolutionRuleError
    * @throws EntityStoreNotInstalledError
+   * @throws MissingEntityIndexPrivilegeError
    */
   private async validate(
     definition: CustomResolutionRuleDefinition
@@ -289,21 +314,10 @@ export class CustomResolutionRulesClient {
     const spec = toExpressionMatchSpec(definition);
     const { esClient, spaceId } = this.deps;
     const index = await resolveLatestEntitiesIndexName(esClient, spaceId);
-    if (!(await esClient.indices.exists({ index }))) {
-      throw new EntityStoreNotInstalledError();
-    }
-    let columns: Array<{ name: string; type: string }>;
-    try {
-      ({ columns } = await executeEsqlQuery({
-        esClient,
-        query: buildMatcherValidationQuery({ index, spec }),
-      }));
-    } catch (error) {
-      if (isEsResponseErrorWithStatus(error, 400)) {
-        throw new InvalidCustomResolutionRuleError(getEsErrorReason(error));
-      }
-      throw error;
-    }
+    await this.assertIndexExists(index);
+    const { columns } = await asInvalidRuleOnBadRequest(() =>
+      executeEsqlQuery({ esClient, query: buildMatcherValidationQuery({ index, spec }) })
+    );
     if (columns.find(({ name }) => name === RAW_MATCH_VALUE_COLUMN)?.type === 'boolean') {
       throw new InvalidCustomResolutionRuleError(
         'must not be a boolean: every entity would share the key "true" or "false"',

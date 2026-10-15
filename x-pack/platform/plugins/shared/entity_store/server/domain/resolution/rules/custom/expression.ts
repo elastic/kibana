@@ -9,6 +9,7 @@ import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
 import { InvalidCustomResolutionRuleError } from '../../../errors';
 
 const SYNTAX_ERROR_PREFIX = 'SyntaxError: ';
+const NOT_A_SINGLE_EXPRESSION = 'must be a single ES|QL expression';
 
 // `parseExpression` only says "Invalid command: EVAL …" on a syntax error, so
 // the reason comes from parsing the expression inside a throwaway query.
@@ -18,7 +19,7 @@ const describeParseFailure = (source: string): string => {
   );
   return syntaxError
     ? `ES|QL syntax error: ${syntaxError.message.slice(SYNTAX_ERROR_PREFIX.length)}`
-    : 'must be a single ES|QL expression';
+    : NOT_A_SINGLE_EXPRESSION;
 };
 
 type ExpressionRoot = ReturnType<typeof Parser.parseExpression>['root'];
@@ -38,13 +39,17 @@ const reprintsUnchanged = (printed: string): boolean => {
 
 /**
  * Parses `source` as exactly one ES|QL expression and returns it re-printed
- * from the parsed tree. The re-printed text must itself parse back to the same
- * text, so comments, pipes and extra commands in the input can never reach the
- * query, even through a printer that writes a name unescaped.
+ * from the parsed tree, plus whether it reads any field. The re-printed text
+ * must itself parse back to the same text, so comments, pipes and extra
+ * commands in the input can never reach the query, even through a printer that
+ * writes a name unescaped.
  *
  * @throws InvalidCustomResolutionRuleError naming `attribute`
  */
-export const normalizeSingleEsqlExpression = (attribute: string, source: string): string => {
+export const normalizeSingleEsqlExpression = (
+  attribute: string,
+  source: string
+): { expression: string; readsAField: boolean } => {
   let root: ExpressionRoot;
   try {
     root = parseExpression(source);
@@ -65,7 +70,11 @@ export const normalizeSingleEsqlExpression = (attribute: string, source: string)
 
   let hasParam = false;
   let hasUnsafeInteger = false;
+  let readsAField = false;
   Walker.walk(root, {
+    visitColumn: () => {
+      readsAField = true;
+    },
     visitLiteral: (node) => {
       if (node.literalType === 'param') {
         hasParam = true;
@@ -92,18 +101,10 @@ export const normalizeSingleEsqlExpression = (attribute: string, source: string)
 
   const printed = BasicPrettyPrinter.expression(root);
   if (!reprintsUnchanged(printed)) {
-    throw new InvalidCustomResolutionRuleError('must be a single ES|QL expression', attribute);
+    throw new InvalidCustomResolutionRuleError(
+      `${NOT_A_SINGLE_EXPRESSION} that re-prints exactly; rewrite it (numeric literals such as 1e21 aren't supported)`,
+      attribute
+    );
   }
-  return printed;
-};
-
-/** True when a normalized expression reads at least one field. */
-export const referencesAField = (normalized: string): boolean => {
-  let found = false;
-  Walker.walk(parseExpression(normalized), {
-    visitColumn: () => {
-      found = true;
-    },
-  });
-  return found;
+  return { expression: printed, readsAField };
 };
