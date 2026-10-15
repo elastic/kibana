@@ -68,13 +68,13 @@ describe('getCreateHistorySequence', () => {
 describe('addToHistory', () => {
   beforeEach(() => jest.resetAllMocks());
 
-  it('logs as the system user when there is no authenticated user (security disabled)', async () => {
+  it('logs without an actor when there is no authenticated user (security disabled)', async () => {
     const client = getClient();
     mockedGetClient.mockReturnValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(null), sequence: { current: 1 } });
     expect(client.log).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ username: 'elastic/kibana', userProfileId: undefined })
+      expect.objectContaining({ username: '', userProfileId: undefined })
     );
   });
 
