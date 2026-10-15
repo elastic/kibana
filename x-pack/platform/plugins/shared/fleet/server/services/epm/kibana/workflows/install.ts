@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 import { isMap, parseDocument } from 'yaml';
@@ -22,6 +23,11 @@ const MAX_CONCURRENT_WORKFLOW_OPERATIONS = 5;
 
 const WORKFLOW_FILE_EXTENSION = '.yml';
 
+const SPACE_HASH_LENGTH = 16;
+
+const hashSpaceId = (spaceId: string) =>
+  createHash('sha256').update(spaceId).digest('hex').slice(0, SPACE_HASH_LENGTH);
+
 const normalizeIdSegment = (value: string) => value.toLowerCase().replace(/_/g, '-');
 
 const isYamlMapping = (yaml: string) => {
@@ -34,26 +40,26 @@ export const isWorkflowAssetPath = (path: string) => {
   return service === 'kibana' && type === 'workflow' && path.endsWith(WORKFLOW_FILE_EXTENSION);
 };
 
-/** Returns undefined when the file name cannot produce a valid workflow id. */
+/**
+ * Builds `<definition id>-<space hash>-<file name>`. The file name already carries the
+ * `{PACKAGE_NAME}-` prefix required by package-spec. The space is hashed because space ids
+ * are uncapped and allow hyphens, so appending them as-is could collide with the file name part.
+ * Returns undefined when the file name cannot produce a valid workflow id.
+ */
 export const getPackageWorkflowId = ({
   spaceId,
-  pkgName,
   path,
 }: {
   spaceId: string;
-  pkgName: string;
   path: string;
 }): string | undefined => {
   const fileName = path.split('/').pop() ?? '';
   const fileBase = fileName.slice(0, -WORKFLOW_FILE_EXTENSION.length);
-  const pkgPrefix = `${pkgName}-`;
-  const name = fileBase.startsWith(pkgPrefix) ? fileBase.slice(pkgPrefix.length) : fileBase;
 
   const workflowId = [
     FLEET_PACKAGE_WORKFLOW_ID,
-    normalizeIdSegment(spaceId),
-    normalizeIdSegment(pkgName),
-    normalizeIdSegment(name),
+    hashSpaceId(spaceId),
+    normalizeIdSegment(fileBase),
   ].join('-');
 
   return isValidId(workflowId) ? workflowId : undefined;
@@ -97,8 +103,6 @@ export const installWorkflows = async ({
   logger: Logger;
   previousRefs?: KibanaAssetReference[];
 }): Promise<KibanaAssetReference[]> => {
-  const { name: pkgName } = packageInstallContext.packageInfo;
-
   const workflows: Array<{ workflowId: string; yaml: string }> = [];
   await packageInstallContext.archiveIterator.traverseEntries(async ({ path, buffer }) => {
     if (!buffer) {
@@ -111,7 +115,7 @@ export const installWorkflows = async ({
       );
     }
 
-    const workflowId = getPackageWorkflowId({ spaceId, pkgName, path });
+    const workflowId = getPackageWorkflowId({ spaceId, path });
     if (!workflowId) {
       logger.warn(`Skipping workflow asset ${path}: it cannot be mapped to a valid workflow id`);
       return;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import { FLEET_PACKAGE_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -46,6 +48,9 @@ const createClient = (status: ManagedWorkflowStatus = 'disabled') =>
     getWorkflowStatus: jest.fn().mockResolvedValue({ status }),
   } as unknown as jest.Mocked<ManagedWorkflowsClient>);
 
+const hashSpace = (spaceId: string) =>
+  createHash('sha256').update(spaceId).digest('hex').slice(0, 16);
+
 const WORKFLOW_PATH = 'my_pkg-1.0.0/kibana/workflow/my_pkg-hello.yml';
 
 describe('workflow assets', () => {
@@ -60,30 +65,40 @@ describe('workflow assets', () => {
   });
 
   describe('getPackageWorkflowId', () => {
-    it('builds a space and package scoped id without the redundant package prefix', () => {
-      expect(
-        getPackageWorkflowId({ spaceId: 'My_Space', pkgName: 'my_pkg', path: WORKFLOW_PATH })
-      ).toBe(`${FLEET_PACKAGE_WORKFLOW_ID}-my-space-my-pkg-hello`);
+    const idFor = (spaceId: string, fileName = 'my_pkg-hello') =>
+      getPackageWorkflowId({
+        spaceId,
+        path: `my_pkg-1.0.0/kibana/workflow/${fileName}.yml`,
+      });
+
+    it('builds an id from a hashed space and the package-prefixed file name', () => {
+      expect(idFor('My_Space')).toBe(
+        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('My_Space')}-my-pkg-hello`
+      );
     });
 
-    it('normalizes the file name part of the id', () => {
-      expect(
-        getPackageWorkflowId({
-          spaceId: 'default',
-          pkgName: 'my_pkg',
-          path: 'my_pkg-1.0.0/kibana/workflow/my_pkg-Hello_World.yml',
-        })
-      ).toBe(`${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-hello-world`);
+    it('normalizes the file name', () => {
+      expect(idFor('default', 'my_pkg-Hello_World')).toBe(
+        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello-world`
+      );
+    });
+
+    it('does not collide when a hyphenated space shifts into the file name part', () => {
+      expect(idFor('a-b', 'c-hello')).not.toBe(idFor('a', 'b-c-hello'));
+    });
+
+    it('produces the same id length for any space id', () => {
+      const short = idFor('a') as string;
+      const long = idFor('s'.repeat(500)) as string;
+      expect(long).toHaveLength(short.length);
     });
 
     it('returns undefined when the generated id is invalid', () => {
-      expect(
-        getPackageWorkflowId({
-          spaceId: 'default',
-          pkgName: 'my_pkg',
-          path: 'my_pkg-1.0.0/kibana/workflow/my_pkg-bad.name.yml',
-        })
-      ).toBeUndefined();
+      expect(idFor('default', 'my_pkg-bad.name')).toBeUndefined();
+    });
+
+    it('returns undefined when the file name makes the id exceed the max length', () => {
+      expect(idFor('default', `my_pkg-${'a'.repeat(300)}`)).toBeUndefined();
     });
   });
 
@@ -97,7 +112,7 @@ describe('workflow assets', () => {
         logger,
       });
 
-      const workflowId = `${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-hello`;
+      const workflowId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello`;
       expect(client.install).toHaveBeenCalledWith(FLEET_PACKAGE_WORKFLOW_ID, {
         spaceId: 'default',
         workflowId,
@@ -215,7 +230,7 @@ describe('workflow assets', () => {
           logger,
           previousRefs: [
             {
-              id: `${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-kept`,
+              id: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-kept`,
               type: KibanaSavedObjectType.workflow,
             },
           ],
@@ -225,7 +240,7 @@ describe('workflow assets', () => {
       expect(client.uninstall).toHaveBeenCalledTimes(1);
       expect(client.uninstall).toHaveBeenCalledWith(FLEET_PACKAGE_WORKFLOW_ID, {
         spaceId: 'default',
-        workflowId: `${FLEET_PACKAGE_WORKFLOW_ID}-default-my-pkg-hello`,
+        workflowId: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello`,
       });
     });
   });

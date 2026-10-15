@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -16,7 +17,10 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'workflow_assets';
-  const workflowIdPrefix = 'system-fleet-package-workflow-default-workflow-assets';
+  const workflowIdPrefix = `system-fleet-package-workflow-${createHash('sha256')
+    .update('default')
+    .digest('hex')
+    .slice(0, 16)}-${pkgName.replace(/_/g, '-')}`;
   const workflowId = (name: string) => `${workflowIdPrefix}-${name}`;
 
   const installPackage = (version: string) =>
