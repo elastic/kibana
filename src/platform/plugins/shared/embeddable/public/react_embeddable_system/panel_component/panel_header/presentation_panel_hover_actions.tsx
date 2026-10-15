@@ -353,95 +353,62 @@ export const PresentationPanelHoverActions = ({
 
   const isSelected = Boolean(api?.uuid && selectedPanelIds.includes(api.uuid));
   const canSelect = Boolean(selectionApi && api?.uuid && viewMode === 'edit');
-  // While any panel is selected, the hover bar of every panel only offers the checkbox
+  // While any panel is selected, every panel only offers the select checkbox
   const isSelectionMode = canSelect && selectedPanelIds.length > 0;
+  // The checkbox only exists in selection mode and lives in the panel's top right corner (see
+  // `.embPanel__selectPanel` styles) rather than in the floating hover bar, which is gone in that mode
   const selectCheckbox =
-    selectionApi && api?.uuid && canSelect ? (
-      <EuiToolTip
-        content={
-          isSelected
-            ? i18n.translate('embeddableApi.deselectPanel', {
-                defaultMessage: 'Deselect panel',
-              })
-            : i18n.translate('embeddableApi.selectPanel', {
-                defaultMessage: 'Select panel. Shift + click a panel to select multiple panels.',
-              })
-        }
-        disableScreenReaderOutput
-      >
-        <EuiCheckbox
-          id={`embeddablePanelSelect-${api.uuid}`}
-          className="embPanel--selectPanel"
-          css={css`
-            margin: 0 ${euiTheme.size.xs};
-          `}
-          checked={isSelected}
-          aria-label={
+    selectionApi && api?.uuid && isSelectionMode ? (
+      <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
+        <EuiToolTip
+          content={
             isSelected
-              ? i18n.translate('embeddableApi.deselectPanelAriaLabel', {
+              ? i18n.translate('embeddableApi.deselectPanel', {
                   defaultMessage: 'Deselect panel',
                 })
-              : i18n.translate('embeddableApi.selectPanelAriaLabel', {
-                  defaultMessage: 'Select panel',
+              : i18n.translate('embeddableApi.selectPanel', {
+                  defaultMessage: 'Select panel. Shift + click a panel to select multiple panels.',
                 })
           }
-          data-test-subj="embeddablePanelSelectToggle"
-          onChange={() => selectionApi.togglePanelSelection(api.uuid)}
-        />
-      </EuiToolTip>
+          disableScreenReaderOutput
+        >
+          <EuiCheckbox
+            id={`embeddablePanelSelect-${api.uuid}`}
+            className="embPanel--selectPanel"
+            checked={isSelected}
+            aria-label={
+              isSelected
+                ? i18n.translate('embeddableApi.deselectPanelAriaLabel', {
+                    defaultMessage: 'Deselect panel',
+                  })
+                : i18n.translate('embeddableApi.selectPanelAriaLabel', {
+                    defaultMessage: 'Select panel',
+                  })
+            }
+            data-test-subj="embeddablePanelSelectToggle"
+            onChange={() => selectionApi.togglePanelSelection(api.uuid)}
+          />
+        </EuiToolTip>
+      </div>
     ) : null;
-
-  // Group the select checkbox and the drag handle in a single floating pill so they sit side by side
-  const leftActions = selectCheckbox ? (
-    <span
-      css={css`
-        align-items: center;
-        // follow the drag handle's visibility so the pill stays around it when the bar itself is hidden
-        // (e.g. the focused panel while an editor flyout is open)
-        visibility: hidden;
-
-        .embPanel__hoverActionsAnchor--editMode & {
-          visibility: visible;
-        }
-      `}
-    >
-      {selectCheckbox}
-      {dragHandle}
-    </span>
-  ) : (
-    dragHandle
-  );
 
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
 
-  // The two branches below use different keys so the bar is remounted when selection mode toggles:
-  // reusing the same element would animate it from "forced visible" to hidden through the delayed
-  // hover-out transition and briefly flash the full set of actions on every panel.
   if (isSelectionMode) {
     return (
-      <div
-        key="selectionMode"
-        className={classNames('embPanel__hoverActions', className)}
-        data-test-subj={`hover-actions-${api.uuid}`}
-      >
+      <>
+        {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
         <span
           css={css`
-            align-items: center;
+            display: none;
           `}
         >
-          {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
-          <span
-            css={css`
-              display: none;
-            `}
-          >
-            {dragHandle}
-          </span>
-          {selectCheckbox}
+          {dragHandle}
         </span>
-      </div>
+        {selectCheckbox}
+      </>
     );
   }
 
@@ -449,11 +416,10 @@ export const PresentationPanelHoverActions = ({
     <>
       {api && (quickActionElements.length || showContextMenu) && (
         <div
-          key="default"
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
         >
-          {leftActions}
+          {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
             {quickActionElements.map(

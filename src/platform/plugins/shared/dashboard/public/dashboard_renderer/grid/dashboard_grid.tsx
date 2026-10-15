@@ -270,7 +270,7 @@ const dashboardGridStyles = {
         visibility: 'hidden !important' as 'hidden',
       },
       // ... and do not offer selection on a panel that is being edited in a flyout (the drag handle stays)
-      '.dshDashboardGrid__item--hideHoverActions .embPanel--selectPanel': {
+      '.dshDashboardGrid__item--hideHoverActions .embPanel__selectPanel': {
         display: 'none',
       },
       // While panels are selected, every panel acts as a selection item

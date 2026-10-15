@@ -30,6 +30,7 @@ const MARQUEE_THRESHOLD_PX = 4;
  */
 const IGNORED_TARGET_SELECTOR = [
   '.embPanel__hoverActions',
+  '.embPanel__selectPanel',
   '[data-euiportal]',
   'a[href]',
   'button',
@@ -42,15 +43,17 @@ const IGNORED_TARGET_SELECTOR = [
  * In selection mode (at least one panel selected) every click inside the grid is a selection gesture,
  * except on the checkbox itself and on content rendered in portals.
  */
-const SELECTION_MODE_IGNORED_TARGET_SELECTOR = ['.embPanel__hoverActions', '[data-euiportal]'].join(
-  ', '
-);
+const SELECTION_MODE_IGNORED_TARGET_SELECTOR = [
+  '.embPanel__hoverActions',
+  '.embPanel__selectPanel',
+  '[data-euiportal]',
+].join(', ');
 
 /** Clicks on these elements never clear the current selection */
 const KEEP_SELECTION_SELECTOR = [
   '[data-euiportal]',
   '[data-test-subj="dashboardSelectedPanelsToolbar"]',
-  '.embPanel--selectPanel',
+  '.embPanel__selectPanel',
 ].join(', ');
 
 /** Escape pressed while focus is here belongs to that element (close a menu / flyout, leave an input) */

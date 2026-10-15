@@ -46,8 +46,9 @@ export const PresentationPanelHoverActionsWrapper = (
       selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
-  // While any panel is selected, every panel keeps its (checkbox-only) hover bar visible
-  const isSelectionMode = props.viewMode === 'edit' && selectedPanelIds.length > 0;
+  const canSelect = Boolean(selectionApi) && props.viewMode === 'edit';
+  // While any panel is selected, every panel keeps its select checkbox visible
+  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
 
   let OverriddenHoverActionsComponent = null;
   if (canOverrideHoverActions(props.api) && overrideHoverActions) {

@@ -164,7 +164,6 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       &:hover .embPanel__hoverActions,
       &:has(:focus-visible) .embPanel__hoverActions,
       &.embPanel__hoverActionsAnchor--lockHoverActions .embPanel__hoverActions,
-      &.embPanel__hoverActionsAnchor--selectionMode .embPanel__hoverActions,
       .embPanel__hoverActions:hover,
       .embPanel__hoverActions:has(:focus-visible) {
         z-index: ${euiTheme.levels.menu};
@@ -175,6 +174,14 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         .kbnGridPanel--expanded & {
           z-index: ${euiTheme.levels.toast};
         }
+      }
+
+      // select checkbox: only rendered in selection mode, pinned inside the panel's top right corner
+      .embPanel__selectPanel {
+        position: absolute;
+        top: ${euiTheme.size.xs};
+        right: ${euiTheme.size.xs};
+        z-index: ${euiTheme.levels.menu};
       }
     `;
   }, [euiTheme, showBorder, isEditMode, euiThemeContext, hoverActionStyles]);
