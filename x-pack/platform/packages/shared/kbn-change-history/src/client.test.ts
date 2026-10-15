@@ -220,6 +220,51 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
+  describe('getEvent', () => {
+    it('searches by event.id scoped to the space, module and dataset, without object filters', async () => {
+      const client = await createInitializedClient();
+
+      await client.getEvent('default', 'event-1', { spanLabels: { solution: 'security' } });
+
+      expect(withSpanMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'change_history.get_event.es_search',
+          type: 'db',
+          subtype: 'elasticsearch',
+          labels: { solution: 'security' },
+        }),
+        expect.any(Function)
+      );
+      expect(dataStreamClientMock.search).toHaveBeenCalledWith({
+        space: 'default',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.module': 'workflows' } },
+              { term: { 'event.dataset': 'definitions' } },
+              { term: { 'event.id': 'event-1' } },
+            ],
+          },
+        },
+        size: 1,
+      });
+    });
+
+    it('returns undefined when no event matches', async () => {
+      const client = await createInitializedClient();
+
+      await expect(client.getEvent('default', 'missing')).resolves.toBeUndefined();
+    });
+
+    it('throws when the data stream is not initialized', async () => {
+      const client = new ChangeHistoryClient(defaultConstructorOpts);
+
+      await expect(client.getEvent('default', 'event-1')).rejects.toThrow(
+        /Change history data stream not initialized/
+      );
+    });
+  });
+
   describe('getHistoryByFields', () => {
     it('builds a terms aggregation and returns parsed buckets for a single field', async () => {
       dataStreamClientMock.search.mockResolvedValueOnce({

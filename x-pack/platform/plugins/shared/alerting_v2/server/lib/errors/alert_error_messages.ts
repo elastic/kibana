@@ -19,3 +19,31 @@ export const getCannotActivateEpisodeMessage = (episodeId: string): string =>
 
 export const getCannotDeactivateEpisodeMessage = (episodeId: string): string =>
   `Cannot deactivate alert [${episodeId}]. It is already inactive`;
+
+export const getAlertAlreadyAcknowledgedMessage = (episodeId: string): string =>
+  `[${episodeId}] is already acknowledged.`;
+
+export const getAlertNotAcknowledgedMessage = (episodeId: string): string =>
+  `[${episodeId}] must be acknowledged first before it can be unacknowledged.`;
+
+export const getAssigneeUnchangedMessage = (
+  episodeId: string,
+  assigneeUid: string | null
+): string =>
+  assigneeUid == null
+    ? `[${episodeId}] has no assignee.`
+    : `[${episodeId}] is already assigned to [${assigneeUid}].`;
+
+export const getTagsUnchangedMessage = (episodeId: string): string =>
+  `[${episodeId}] already has these tags.`;
+
+export const getSeriesAlreadySnoozedMessage = (
+  groupHash: string,
+  snoozedUntil: string | null
+): string =>
+  snoozedUntil == null
+    ? `[${groupHash}] is already snoozed indefinitely.`
+    : `[${groupHash}] is already snoozed until [${snoozedUntil}].`;
+
+export const getSeriesNotSnoozedMessage = (groupHash: string): string =>
+  `[${groupHash}] is not snoozed.`;

@@ -36,10 +36,10 @@ describe('automation validation', () => {
 
   it.each([
     ['1', true],
-    ['200', true],
+    ['50', true],
     ['', false],
     ['0', false],
-    ['201', false],
+    ['51', false],
     ['1.5', false],
   ])('validates daily limit %s', (value, expected) => {
     expect(isValidDailyLimit(value)).toBe(expected);
@@ -80,12 +80,30 @@ describe('automation validation', () => {
     });
 
     it('blocks a Slack action without a destination', () => {
+      const withTrigger = { ...values, trigger: createTriggerFormValues('alert') };
       expect(
-        getSaveBlocker({ ...values, slackAction: { target: 'channel', destination: ' ' } })
+        getSaveBlocker({ ...withTrigger, slackAction: { target: 'channel', destination: ' ' } })
       ).toBe('Choose a Slack channel to post to before saving');
-      expect(getSaveBlocker({ ...values, slackAction: { target: 'self', destination: '' } })).toBe(
-        'Choose who to message in Slack before saving'
+      expect(
+        getSaveBlocker({ ...withTrigger, slackAction: { target: 'self', destination: '' } })
+      ).toBe('Choose who to message in Slack before saving');
+    });
+
+    it('blocks a Slack trigger without a channel', () => {
+      const slackTrigger = createTriggerFormValues('slack_message');
+      expect(getSaveBlocker({ ...values, trigger: slackTrigger })).toBe(
+        'Select at least one channel.'
       );
+      expect(
+        getSaveBlocker({
+          ...values,
+          trigger: { ...slackTrigger, channels: ['#oncall'] } as typeof slackTrigger,
+        })
+      ).toBeUndefined();
+    });
+
+    it('asks for a trigger before saving', () => {
+      expect(getSaveBlocker(values)).toBe('Select a trigger to save');
     });
   });
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type { ExperimentalFeatures } from '../../experimental_features';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import {
   DefaultPolicyNotificationMessage,
@@ -26,6 +27,8 @@ interface PolicyProtectionReference {
   osList: PolicyOperatingSystem[];
   enableValue: unknown;
   disableValue: unknown;
+  /** Operating systems where the protection is optional in the policy: absent there means off. */
+  optionalOsList?: PolicyOperatingSystem[];
 }
 
 const allOsValues = [
@@ -55,8 +58,9 @@ const getPolicyPopupReference = (): Array<{
     defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
+    // Optional on Linux: an absent branch is skipped like any other stripped popup.
     branchPath: 'popup.ransomware',
-    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    osList: [...allOsValues],
     defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
@@ -75,9 +79,10 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
   },
   {
     keyPath: 'ransomware.mode',
-    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    osList: [...allOsValues],
     disableValue: ProtectionModes.off,
     enableValue: ProtectionModes.prevent,
+    optionalOsList: [PolicyOperatingSystem.linux],
   },
   {
     keyPath: 'memory_protection.mode',
@@ -147,6 +152,14 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
         },
       },
     },
+    linux: {
+      ...result.linux,
+      ...getDisabledLinuxSpecificProtections(result),
+      popup: {
+        ...result.linux.popup,
+        ...getDisabledLinuxSpecificPopups(result),
+      },
+    },
   };
 };
 
@@ -200,15 +213,15 @@ const getDisabledCommonProtectionsForOS = (
 
 const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
   behavior_protection: {
-    ...policy[os].popup.behavior_protection,
+    ...policy[os].popup?.behavior_protection,
     enabled: false,
   },
   malware: {
-    ...policy[os].popup.malware,
+    ...policy[os].popup?.malware,
     enabled: false,
   },
   memory_protection: {
-    ...policy[os].popup.memory_protection,
+    ...policy[os].popup?.memory_protection,
     enabled: false,
   },
 });
@@ -257,6 +270,16 @@ const getDisabledMacSpecificPopups = (policy: PolicyConfig) => ({
   },
 });
 
+const getDisabledLinuxSpecificProtections = (policy: PolicyConfig) =>
+  policy.linux.ransomware
+    ? { ransomware: { ...policy.linux.ransomware, mode: ProtectionModes.off } }
+    : {};
+
+const getDisabledLinuxSpecificPopups = (policy: PolicyConfig) =>
+  policy.linux.popup?.ransomware
+    ? { ransomware: { ...policy.linux.popup.ransomware, enabled: false } }
+    : {};
+
 /**
  * Returns the provided with only event collection turned enabled
  * @param policy
@@ -279,19 +302,22 @@ export const isPolicySetToEventCollectionOnly = (
   const protectionsRef = getPolicyProtectionsReference();
   let message: string | undefined;
 
-  const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
-    return osList.some((osValue) => {
-      const fullKeyPathForOs = `${osValue}.${keyPath}`;
-      const currentValue = get(policy, fullKeyPathForOs);
-      const isEnabled = currentValue !== disableValue;
+  const hasEnabledProtection = protectionsRef.some(
+    ({ keyPath, osList, disableValue, optionalOsList = [] }) => {
+      return osList.some((osValue) => {
+        const fullKeyPathForOs = `${osValue}.${keyPath}`;
+        const currentValue = get(policy, fullKeyPathForOs);
+        const isAbsentOptional = currentValue === undefined && optionalOsList.includes(osValue);
+        const isEnabled = !isAbsentOptional && currentValue !== disableValue;
 
-      if (isEnabled) {
-        message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
-      }
+        if (isEnabled) {
+          message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
+        }
 
-      return isEnabled;
-    });
-  });
+        return isEnabled;
+      });
+    }
+  );
 
   return {
     isOnlyCollectingEvents: !hasEnabledProtection,
@@ -411,6 +437,41 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
         ...linuxEventsRest,
       },
     },
+  };
+};
+
+/**
+ * Linux ransomware protection is configurable only from the per-OS policy form, so it is
+ * enabled only when both feature flags are on.
+ */
+export const isLinuxRansomwareProtectionEnabled = ({
+  linuxRansomwareProtection,
+  perOsPolicySettings,
+}: Pick<ExperimentalFeatures, 'linuxRansomwareProtection' | 'perOsPolicySettings'>): boolean =>
+  linuxRansomwareProtection && perOsPolicySettings;
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection and its user
+ * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
+ */
+export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
+  // The policy may come from an unvalidated API payload, so tolerate a malformed `linux` branch.
+  if (!isObject(policy.linux)) {
+    return policy;
+  }
+
+  const { ransomware: linuxRansomware, ...linuxRest } = policy.linux;
+  const { popup } = linuxRest;
+
+  if (!isObject(popup)) {
+    return { ...policy, linux: linuxRest };
+  }
+
+  const { ransomware: linuxRansomwarePopup, ...popupRest } = popup;
+
+  return {
+    ...policy,
+    linux: { ...linuxRest, popup: popupRest },
   };
 };
 

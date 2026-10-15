@@ -50,6 +50,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/stacktraces', () =>
         esClient.transport.request(
@@ -69,6 +70,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           requestOptions
@@ -93,6 +95,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/flamegraph', () =>
         esClient.transport.request(
@@ -112,6 +115,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           requestOptions
@@ -135,6 +139,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       sampleSize,
       limit,
       durationSeconds,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/topn/functions', () =>
         esClient.transport.request(
@@ -156,6 +161,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
               requested_duration: durationSeconds,
+              schema,
             },
           },
           requestOptions

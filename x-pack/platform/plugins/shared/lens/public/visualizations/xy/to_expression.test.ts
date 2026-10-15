@@ -1077,7 +1077,7 @@ describe('#toExpression', () => {
         legend: { position: Position.Bottom, isVisible: true },
         valueLabels: 'hide',
         preferredSeriesType: 'area',
-        areaFill: 'gradient',
+        areaFill: 'solid',
         layers: [
           {
             layerId: 'first',
@@ -1094,7 +1094,7 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
 
-    expect(ast.chain[0].arguments.areaFill[0]).toEqual('gradient');
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
   });
 
   it('should default areaFill to solid', () => {

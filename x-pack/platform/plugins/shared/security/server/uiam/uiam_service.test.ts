@@ -1009,7 +1009,7 @@ describe('UiamService', () => {
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'test-key-with-exp',
         internal: true,
-        expiration: '7d',
+        expiration: 'P7D',
         role_assignments: {
           limit: {
             access: ['application'],
@@ -1030,6 +1030,115 @@ describe('UiamService', () => {
         body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
       });
+    });
+
+    describe('with configured unsafe default expiration', () => {
+      let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+      let serviceWithDefaultExpiration: UiamService;
+      beforeEach(() => {
+        logger = loggingSystemMock.createLogger();
+        serviceWithDefaultExpiration = new UiamService(
+          logger,
+          ConfigSchema.validate(
+            {
+              uiam: {
+                enabled: true,
+                url: 'https://uiam.service',
+                sharedSecret: 'secret',
+                ssl: { certificateAuthorities: '/some/ca/path' },
+                unsafe: { grantedApiKeyDefaultExpiration: '4h' },
+              },
+            },
+            { serverless: true }
+          ).uiam,
+          {
+            kibanaServerResourceURL:
+              'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp',
+            kibanaVersion: '9.0.0',
+          }
+        );
+
+        fetchSpy.mockResolvedValue({
+          ok: true,
+          json: async () => ({ id: 'api-key-id', key: 'encoded-key', description: 'test-key' }),
+        });
+      });
+
+      it('logs a warning on startup', () => {
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            '`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration` is set to [PT4H]'
+          )
+        );
+      });
+
+      it('applies the default expiration when none is specified', async () => {
+        await serviceWithDefaultExpiration.grantApiKey(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          { name: 'test-key' }
+        );
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toEqual(
+          expect.objectContaining({ description: 'test-key', expiration: 'PT4H' })
+        );
+      });
+
+      it('prefers the explicitly specified expiration', async () => {
+        await serviceWithDefaultExpiration.grantApiKey(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          { name: 'test-key', expiration: '7d' }
+        );
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toEqual(
+          expect.objectContaining({ description: 'test-key', expiration: 'P7D' })
+        );
+      });
+    });
+
+    it('does not log a warning on startup when no unsafe default expiration is configured', () => {
+      const logger = loggingSystemMock.createLogger();
+      new UiamService(
+        logger,
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'https://uiam.service', sharedSecret: 'secret' } },
+          { serverless: true }
+        ).uiam,
+        {
+          kibanaServerResourceURL:
+            'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp',
+          kibanaVersion: '9.0.0',
+        }
+      );
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid expiration without calling UIAM', async () => {
+      await expect(
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+          expiration: 'invalid',
+        })
+      ).rejects.toThrow('Failed to parse value as time value');
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not set expiration when none is specified and no default is configured', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: 'api-key-id', key: 'encoded-key', description: 'test-key' }),
+      });
+
+      await uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+        name: 'test-key',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).not.toHaveProperty('expiration');
     });
 
     it('throws error if granting API key fails with 400 status code', async () => {

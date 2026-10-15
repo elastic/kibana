@@ -32,10 +32,10 @@ const createHandlerContext = () =>
     events: {},
   } as any);
 
-const run = async (query = 'total sales') => {
+const run = async (query = 'total sales', includeFrozen?: boolean) => {
   const tool = generateEsqlTool();
   const result = (await tool.handler(
-    { query, execute_query: true, disable_named_params: false } as any,
+    { query, execute_query: true, disable_named_params: false, include_frozen: includeFrozen },
     createHandlerContext()
   )) as ToolHandlerStandardReturn;
   return result.results;
@@ -110,5 +110,27 @@ describe('generateEsqlTool', () => {
     const results = await run();
 
     expect(typesOf(results)).toEqual([ToolResultType.error]);
+  });
+
+  describe('include_frozen', () => {
+    beforeEach(() => {
+      generateEsqlMock.mockResolvedValue({ query: 'FROM sales', answer: 'ok' });
+    });
+
+    it('excludes frozen tier indices by default', async () => {
+      await run();
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
+
+    it('includes frozen tier indices when opted in', async () => {
+      await run('total sales', true);
+
+      expect(generateEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
   });
 });
