@@ -130,14 +130,16 @@ export const packCrossAxis = ({
   };
 
   const packSequence = (items: StructureSequence): Packed => {
-    const unplaced = items.map((item) => packItem(item));
     // The body of a `merge` step hangs off it, but the items after it start on the same
     // rows (nothing pushes them down, unlike a fallback lane), so it must clear them.
-    const packed = items.map((item, index) =>
-      item.kind === 'step' && item.attached
-        ? packItem(item, Math.max(0, ...unplaced.slice(index + 1).map((piece) => piece.right)))
-        : unplaced[index]
-    );
+    // Packing back to front measures each item once, against the final reach of what follows.
+    const packed: Packed[] = [];
+    let followingReach = 0;
+    [...items].reverse().forEach((item) => {
+      const piece = packItem(item, item.kind === 'step' && item.attached ? followingReach : 0);
+      packed.unshift(piece);
+      followingReach = Math.max(followingReach, piece.right);
+    });
     return {
       left: Math.max(0, ...packed.map((piece) => piece.left)),
       right: Math.max(0, ...packed.map((piece) => piece.right)),
