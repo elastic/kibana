@@ -52,6 +52,9 @@ const validateDirectiveValue = (value: string) => {
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     return `"${value}" must use the http or https protocol`;
   }
+  if (url.username || url.password) {
+    return `"${value}" must be an origin without a username or password`;
+  }
   if (url.pathname !== '/' || url.search || url.hash) {
     return `"${value}" must be an origin without a path, query, or fragment`;
   }

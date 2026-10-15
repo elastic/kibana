@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1";
- */
-
 import type { DeprecatedConfigDetails } from '@kbn/config';
 import { configDeprecationFactory } from '@kbn/config';
 import { permissionsPolicyConfig, permissionsPolicyDirectiveSettings } from './config';
@@ -75,6 +66,19 @@ describe('permissionsPolicyConfig', () => {
           expect(() => validate({ [setting]: ['https://example.com/some/path'] })).toThrow(
             /must be an origin without a path, query, or fragment/
           );
+        });
+
+        it('rejects an origin carrying credentials', () => {
+          for (const value of [
+            'https://user:pass@example.com',
+            'https://user@example.com',
+            'https://:pass@example.com',
+            'http://user:pass@localhost:5601',
+          ]) {
+            expect(() => validate({ [setting]: [value] })).toThrow(
+              /must be an origin without a username or password/
+            );
+          }
         });
 
         it('rejects an empty value', () => {

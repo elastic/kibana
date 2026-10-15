@@ -105,10 +105,16 @@ export const createConfigService = ({
       });
     }
     if (path === 'permissionsPolicy') {
-      return new BehaviorSubject({
-        ...permissionsPolicyConfig.schema.validate({}),
-        ...permissionsPolicy,
-      });
+      // Validating the override, rather than spreading it over an already-validated default, keeps
+      // the mock to the same constraints a real deployment has. The schema fills in every key that
+      // the override leaves out.
+      return new BehaviorSubject(
+        permissionsPolicyConfig.schema.validate(
+          permissionsPolicy ?? {},
+          {},
+          permissionsPolicyConfig.path
+        )
+      );
     }
     if (path === 'pricing') {
       return new BehaviorSubject({
