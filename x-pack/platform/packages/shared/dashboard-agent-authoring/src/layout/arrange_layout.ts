@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import {
   isSection,
   type AttachmentPanel,
@@ -23,6 +24,12 @@ import {
   type LayoutPanel,
   type LayoutRequest,
 } from './types';
+
+/** The text size of a markdown panel, which its height depends on. */
+const describeMarkdownText = (content: string): string => {
+  const lineCount = content.split('\n').filter((line) => line.trim() !== '').length;
+  return `Markdown text of ${content.length} characters in ${lineCount} lines.`;
+};
 
 interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
@@ -82,17 +89,26 @@ export const arrangeDashboardLayout = async ({
     panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
   );
 
-  const toLayoutPanel = ({ id, type, config, grid }: AttachmentPanel): LayoutPanel => ({
-    id,
-    type,
-    ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
-    ...(typeof config.title === 'string' ? { title: config.title } : {}),
-    ...(authoringNotesByPanelId.has(id) ? { authoringNote: authoringNotesByPanelId.get(id) } : {}),
-    ...(typeof config.content === 'string' ? { markdownLength: config.content.length } : {}),
-    grid,
-    isNew: !originalPanelIds.has(id),
-    contentChanged: editedPanelIds.has(id),
-  });
+  const getAuthoringNote = ({ id, type, config }: AttachmentPanel): string | undefined =>
+    authoringNotesByPanelId.get(id) ??
+    (type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string'
+      ? describeMarkdownText(config.content)
+      : undefined);
+
+  const toLayoutPanel = (panel: AttachmentPanel): LayoutPanel => {
+    const { id, type, config, grid } = panel;
+    const authoringNote = getAuthoringNote(panel);
+    return {
+      id,
+      type,
+      ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
+      ...(typeof config.title === 'string' ? { title: config.title } : {}),
+      ...(authoringNote ? { authoringNote } : {}),
+      grid,
+      isNew: !originalPanelIds.has(id),
+      contentChanged: editedPanelIds.has(id),
+    };
+  };
 
   const toLayoutPanels = (panels: AttachmentPanel[]): LayoutPanel[] =>
     [...panels].sort(byReadingOrder).map(toLayoutPanel);

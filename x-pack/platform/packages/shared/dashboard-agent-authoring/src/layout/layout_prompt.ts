@@ -28,7 +28,7 @@ Do not make metric or gauge panels full width.
 - **Heatmap, tag cloud, treemap, waffle, mosaic** → \`w: 24, h: 10\`.
 - **Pie / donut** → \`w: 12, h: 10\`.
 - **Data table** → \`w: 24–48, h: 12–16\`. Prefer full width so columns are readable.
-- **Markdown** → \`w: 24–48\`, \`h\` from \`markdownLength\`: about \`h: 3–4\` for a sentence or two, \`h: 5–9\` for longer text.
+- **Markdown** → \`w: 24–48\`, \`h\` from the text size in \`authoringNote\`: about \`h: 3–4\` for a sentence or two, \`h: 5–9\` for longer text.
 - **Vega, custom content, ML panels** → \`w: 24–48\`. Size \`h\` for what the panel shows (use \`authoringNote\`): a single KPI card \`h: 6–8\`, a list or table of rows \`h: 10–16\`, a multi-part layout or drawn chart \`h: 16–20\`. Too short makes the panel scroll; too tall leaves an empty gap.
 - **Any other type** (legacy visualizations, maps, saved searches, and other panels not listed above) → \`w: 24\` by default, up to \`48\`. Keep the current \`h\` unless \`instructions\` ask for a change.
 

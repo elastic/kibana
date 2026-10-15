@@ -17,10 +17,8 @@ export interface LayoutPanel {
   /** Lens chart type, e.g. `metric` or `xy`, when known. */
   chartType?: string;
   title?: string;
-  /** What the panel shows, when the panel was authored in this call. */
+  /** What the panel shows when it was authored in this call, or the text size of a markdown panel. */
   authoringNote?: string;
-  /** Length of the text of a markdown panel. */
-  markdownLength?: number;
   grid: { x: number; y: number; w: number; h: number };
   /** Added in this call. */
   isNew: boolean;
