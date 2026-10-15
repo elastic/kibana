@@ -27,7 +27,6 @@ import {
   type DeclineParams,
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
 
 export interface ProposedActionButtonProps {
@@ -167,10 +166,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         />
       ) : decision ? (
         badge.label
-      ) : pendingCaption ? (
-        pendingCaption
       ) : (
-        getEmptyValue()
+        pendingCaption
       );
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);

@@ -49,6 +49,20 @@ describe('ProposedActionButton', () => {
     expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
   });
 
+  it('renders no caption line for a pending proposal with no category or action', () => {
+    renderButton({
+      proposal: {
+        title: 'Roll back the cart deployment',
+        comment: 'Roll back to the previous image.',
+        status: 'pending',
+        impact: 'low',
+      },
+    });
+    expect(screen.getByTestId('proposedAction')).toHaveTextContent(
+      /^Roll back the cart deploymentNeeds review$/
+    );
+  });
+
   it('names the row with its own title and status, not a fixed string every row shares', () => {
     renderButton();
     expect(
