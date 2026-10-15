@@ -772,11 +772,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
-        canPrependTimeFieldColumn(activeColumns, timeFieldName, dataSource, showTimeCol),
-      [timeFieldName, showTimeCol, dataSource]
+        canPrependTimeFieldColumn(activeColumns, dataView, dataSource, showTimeCol),
+      [dataView, showTimeCol, dataSource]
     );
 
     const visibleColumns = useMemo(() => {
