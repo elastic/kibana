@@ -12,6 +12,7 @@ import type { Config, ConfigEntryView, InferenceProvider } from '../types/types'
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 import {
+  CHAT_COMPLETION_TASK_TYPE,
   PROVIDER_CONFIG,
   PROVIDER_SECRETS,
   SERVICE_SETTINGS,
@@ -25,8 +26,19 @@ export interface TaskTypeOption {
   label: string;
 }
 
+/** Orders task types so that `chat_completion` is first (and therefore the default) when supported. */
+export const orderTaskTypes = (taskTypes: string[]): string[] => {
+  if (!taskTypes.includes(CHAT_COMPLETION_TASK_TYPE)) {
+    return taskTypes;
+  }
+  return [
+    CHAT_COMPLETION_TASK_TYPE,
+    ...taskTypes.filter((taskType) => taskType !== CHAT_COMPLETION_TASK_TYPE),
+  ];
+};
+
 export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
-  taskTypes.map((taskType) => ({
+  orderTaskTypes(taskTypes).map((taskType) => ({
     id: taskType,
     label: taskType,
     value: taskType,
