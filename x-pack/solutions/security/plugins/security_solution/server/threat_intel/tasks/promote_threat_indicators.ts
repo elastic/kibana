@@ -210,7 +210,7 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
  * Params (passed via `params` — never interpolated into the script body):
  *   report_id  — dedup key
  *   provider   — source.name of the citing report
- *   trail      — Maltrail trail label (content.title), null for non-maltrail
+ *   trail      — indicator-list label (content.title), null when absent
  *   reference  — per-IOC nearest-ref URL (or source.url), null when absent
  *   first_seen — lineage.extracted_at of the citing report
  *   now        — wall-clock ISO string at the time of the bulk call

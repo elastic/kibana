@@ -15,20 +15,17 @@ import type { APPROVED_CATALOG_SOURCE_IDS } from './constants';
  * and list routes resolve the fetch URL from this map by stable source id.
  */
 export const CATALOG_SOURCE_URLS = {
+  // CC0: https://www.cisa.gov/sites/default/files/licenses/kev/license.txt
   'kev:cisa-known-exploited-vulnerabilities':
     'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-  'rss:mandiant-research': 'https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/',
-  'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
-  'rss:talos': 'https://blog.talosintelligence.com/rss/',
-  'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-  'text_indicator_list:maltrail-cobaltstrike':
-    'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-  'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
-  'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
-  'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-  'rss:fortiguard-threat-signal': 'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
+  'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
+  'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
+  'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
+  'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
+  'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+  'rss:cert-eu-threat-intelligence': 'https://cert.europa.eu/publications/threat-intelligence-rss',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */
