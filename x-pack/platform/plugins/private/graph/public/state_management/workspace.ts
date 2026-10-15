@@ -12,7 +12,8 @@ import { createSelector } from './create_selector';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
 import { fillWorkspace } from '.';
 import { reset } from './global';
-import { datasourceSelector } from './datasource';
+import { datasourceLoaded, datasourceSelector } from './datasource';
+import { syncWorkspaceTopology } from '../services/workspace/sync_workspace_topology';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import type { Workspace, WorkspaceNode } from '../types';
@@ -31,6 +32,7 @@ export interface WorkspaceNodeState {
   color: string;
   scaledSize: number;
   data: WorkspaceNode['data'];
+  icon?: string;
 }
 
 export interface WorkspaceEdgeState {
@@ -42,6 +44,7 @@ export interface WorkspaceEdgeState {
   label: string;
   weight: number;
   width: number;
+  docCount?: number;
 }
 
 export interface WorkspaceSnapshot {
@@ -77,6 +80,15 @@ const initialWorkspaceState: WorkspaceState = {
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
+export const workspaceRuntimeChanged = actionCreator<WorkspaceSnapshot>(
+  'WORKSPACE_RUNTIME_CHANGED'
+);
+export const workspaceLoaded = actionCreator<WorkspaceSnapshot>('WORKSPACE_LOADED');
+export const workspaceGraphMergeStarted = actionCreator('WORKSPACE_GRAPH_MERGE_STARTED');
+export const workspaceGraphMerged = actionCreator<WorkspaceSnapshot>('WORKSPACE_GRAPH_MERGED');
+export const workspacePositionsChanged = actionCreator<
+  Array<Pick<WorkspaceNodeState, 'id' | 'x' | 'y'>>
+>('WORKSPACE_POSITIONS_CHANGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
 export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
@@ -92,6 +104,7 @@ export const deleteSelectedNodes = actionCreator('DELETE_SELECTED_NODES');
 export const blocklistSelectedNodes = actionCreator('BLOCKLIST_SELECTED_NODES');
 export const groupSelectedNodes = actionCreator<string>('GROUP_SELECTED_NODES');
 export const ungroupNode = actionCreator<string>('UNGROUP_NODE');
+export const mergeNodes = actionCreator<{ parentId: string; childId: string }>('MERGE_NODES');
 export const unblockNode = actionCreator<string>('UNBLOCK_NODE');
 export const unblockAllNodes = actionCreator('UNBLOCK_ALL_NODES');
 export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
@@ -100,6 +113,19 @@ export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
+  .case(datasourceLoaded, () => initialWorkspaceState)
+  .case(workspaceLoaded, (_state, workspace) => ({
+    ...initialWorkspaceState,
+    ...workspace,
+    isInitialized: true,
+  }))
+  .case(workspacePositionsChanged, (state, positions) => {
+    const nodesById = { ...state.nodesById };
+    positions.forEach(({ id, x, y }) => {
+      if (nodesById[id]) nodesById[id] = { ...nodesById[id], x, y };
+    });
+    return { ...state, nodesById };
+  })
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
   .case(workspaceChanged, (state, workspace) => ({
     ...workspace,
@@ -107,6 +133,20 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     undoHistory: state.undoHistory,
     redoHistory: state.redoHistory,
   }))
+  .case(workspaceRuntimeChanged, (state, workspace) => ({
+    ...state,
+    ...workspace,
+    selectedNodeIds: state.selectedNodeIds.filter((id) => workspace.nodesById[id]),
+    selectedEdgeIds: state.selectedEdgeIds.filter((id) => workspace.edgesById[id]),
+  }))
+  .case(workspaceGraphMerged, (state, workspace) =>
+    recordUndo(state, {
+      ...state,
+      ...workspace,
+      selectedNodeIds: state.selectedNodeIds.filter((id) => workspace.nodesById[id]),
+      selectedEdgeIds: state.selectedEdgeIds.filter((id) => workspace.edgesById[id]),
+    })
+  )
   .case(selectAllNodes, (state) => ({
     ...state,
     selectedNodeIds: state.nodeIds.filter((id) => state.nodesById[id].parentId === undefined),
@@ -163,14 +203,14 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     for (const nodeId of nodeIds) {
       blocklistedNodesById[nodeId] = state.nodesById[nodeId];
     }
-    return {
+    return recordUndo(state, {
       ...removeNodes(state, nodeIds),
       blocklistedNodesById,
       blocklistedNodeIds: Object.keys(blocklistedNodesById),
-    };
+    });
   })
   .case(groupSelectedNodes, (state, parentId) => {
-    if (!state.nodesById[parentId]) {
+    if (!state.nodesById[parentId] || state.nodesById[parentId].parentId !== undefined) {
       return state;
     }
     return recordUndo(state, {
@@ -202,17 +242,29 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(unblockNode, (state, nodeId) => {
     const blocklistedNodesById = { ...state.blocklistedNodesById };
     delete blocklistedNodesById[nodeId];
-    return {
+    return recordUndo(state, {
       ...state,
       blocklistedNodesById,
       blocklistedNodeIds: state.blocklistedNodeIds.filter((id) => id !== nodeId),
-    };
+    });
   })
-  .case(unblockAllNodes, (state) => ({
-    ...state,
-    blocklistedNodesById: {},
-    blocklistedNodeIds: [],
-  }))
+  .case(mergeNodes, (state, { parentId, childId }) => {
+    const child = state.nodesById[childId];
+    if (!child || !state.nodesById[parentId] || parentId === childId) return state;
+    let ancestorId: string | undefined = parentId;
+    while (ancestorId) {
+      if (ancestorId === childId) return state;
+      ancestorId = state.nodesById[ancestorId]?.parentId;
+    }
+    return recordUndo(state, {
+      ...state,
+      nodesById: { ...state.nodesById, [childId]: { ...child, parentId } },
+      selectedNodeIds: state.selectedNodeIds.filter((id) => id !== childId),
+    });
+  })
+  .case(unblockAllNodes, (state) =>
+    recordUndo(state, { ...state, blocklistedNodesById: {}, blocklistedNodeIds: [] })
+  )
   .case(undoWorkspace, (state) => applyUndo(state))
   .case(redoWorkspace, (state) => applyRedo(state))
   .build();
@@ -235,11 +287,35 @@ const toSnapshot = ({
   ...snapshot
 }: WorkspaceState): WorkspaceSnapshot => snapshot;
 
-const recordUndo = (state: WorkspaceState, nextState: WorkspaceState): WorkspaceState => ({
-  ...nextState,
-  undoHistory: [...state.undoHistory, toSnapshot(state)].slice(-50),
-  redoHistory: [],
-});
+const recordUndo = (state: WorkspaceState, nextState: WorkspaceState): WorkspaceState => {
+  const getTopNodeId = (nodeId: string): string => {
+    let topId = nodeId;
+    let parentId = nextState.nodesById[topId]?.parentId;
+    while (parentId) {
+      topId = parentId;
+      parentId = nextState.nodesById[topId]?.parentId;
+    }
+    return topId;
+  };
+  return {
+    ...nextState,
+    edgesById: Object.fromEntries(
+      nextState.edgeIds.map((id) => {
+        const edge = nextState.edgesById[id];
+        return [
+          id,
+          {
+            ...edge,
+            topSourceId: getTopNodeId(edge.sourceId),
+            topTargetId: getTopNodeId(edge.targetId),
+          },
+        ];
+      })
+    ),
+    undoHistory: [...state.undoHistory, toSnapshot(state)].slice(-50),
+    redoHistory: [],
+  };
+};
 
 const applyUndo = (state: WorkspaceState): WorkspaceState => {
   const previous = state.undoHistory[state.undoHistory.length - 1];
@@ -347,6 +423,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
           label: edge.label,
           weight: edge.weight,
           width: edge.width,
+          docCount: edge.doc_count,
         },
       ];
     })
@@ -382,6 +459,7 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
   label: node.label,
   color: node.color,
   scaledSize: node.scaledSize,
+  icon: node.icon?.id,
   data: {
     field: node.data.field,
     term: node.data.term,
@@ -397,6 +475,7 @@ const topologyActionTypes = new Set([
   blocklistSelectedNodes.type,
   groupSelectedNodes.type,
   ungroupNode.type,
+  mergeNodes.type,
   unblockNode.type,
   unblockAllNodes.type,
   undoWorkspace.type,
@@ -471,34 +550,11 @@ export const registerWorkspaceListeners = (
 
   startListening({
     predicate: (action) => topologyActionTypes.has(action.type),
-    effect: (action) => {
+    effect: (_action, listenerApi) => {
       const workspace = getWorkspace();
-      if (!workspace) {
-        return;
-      }
-
-      if (deleteSelectedNodes.match(action)) {
-        workspace.deleteSelection();
-      } else if (blocklistSelectedNodes.match(action)) {
-        workspace.blocklistSelection();
-      } else if (groupSelectedNodes.match(action)) {
-        workspace.groupSelections(workspace.nodesMap[action.payload]);
-      } else if (ungroupNode.match(action)) {
-        workspace.ungroup(workspace.nodesMap[action.payload]);
-      } else if (unblockNode.match(action)) {
-        const blockedNode = (workspace.blocklistedNodes as WorkspaceNode[]).find(
-          ({ id }) => id === action.payload
-        );
-        if (blockedNode) {
-          workspace.unblockNode(blockedNode);
-        }
-      } else if (unblockAllNodes.match(action)) {
-        workspace.unblockAll();
-      } else if (undoWorkspace.match(action)) {
-        workspace.undo();
-      } else if (redoWorkspace.match(action)) {
-        workspace.redo();
-      }
+      if (!workspace) return;
+      syncWorkspaceTopology(workspace, listenerApi.getState().workspace);
+      synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
       notifyReact();
     },
   });

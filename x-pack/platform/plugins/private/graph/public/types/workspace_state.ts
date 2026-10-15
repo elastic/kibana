@@ -22,7 +22,7 @@ export interface WorkspaceNode {
     term: string;
   };
   scaledSize: number;
-  parent: WorkspaceNode | null;
+  parent?: WorkspaceNode | null;
   color: string;
   numChildren: number;
   isSelected?: boolean;
@@ -36,6 +36,7 @@ export interface WorkspaceEdge {
   id?: string;
   weight: number;
   width: number;
+  doc_count?: number;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
@@ -82,6 +83,7 @@ export interface TermIntersect {
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
+  edgesMap: Record<string, WorkspaceEdge>;
   nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
@@ -163,6 +165,8 @@ export type WorkspaceOptions = Partial<{
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
   topologyChangeHandler: () => void;
+  graphMergeStarted: () => void;
+  useReduxHistory: boolean;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,

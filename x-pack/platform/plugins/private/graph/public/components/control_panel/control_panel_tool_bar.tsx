@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ControlType, Workspace, WorkspaceField } from '../../types';
@@ -16,6 +16,7 @@ import {
   redoWorkspace,
   type GraphDispatch,
   undoWorkspace,
+  workspaceSelector,
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
@@ -30,6 +31,7 @@ export const ControlPanelToolBar = ({
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  const { undoHistory, redoHistory } = useSelector(workspaceSelector);
   const haveNodes = workspace.nodes.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
@@ -104,7 +106,7 @@ export const ControlPanelToolBar = ({
             iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
-            isDisabled={workspace.undoLog.length < 1}
+            isDisabled={undoHistory.length === 0}
             onClick={onUndoClick}
           />
         </EuiToolTip>
@@ -117,7 +119,7 @@ export const ControlPanelToolBar = ({
             iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
-            isDisabled={workspace.redoLog.length === 0}
+            isDisabled={redoHistory.length === 0}
             onClick={onRedoClick}
           />
         </EuiToolTip>

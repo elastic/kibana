@@ -13,7 +13,9 @@ import type { Workspace } from '../types';
 import {
   createGraphStore,
   createWorkspaceState,
-  workspaceChanged,
+  workspaceRuntimeChanged,
+  workspaceGraphMergeStarted,
+  workspaceGraphMerged,
   type GraphStore,
 } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
@@ -92,7 +94,7 @@ export const WorkspaceRoute = ({
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
-      storeRef.current?.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+      storeRef.current?.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
     }
     setRenderCounter((current) => current + 1);
   };
@@ -111,7 +113,15 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: () => setRenderCounter((current) => current + 1),
-          topologyChangeHandler: notifyWorkspaceChanged,
+          useReduxHistory: true,
+          graphMergeStarted: () => storeRef.current?.dispatch(workspaceGraphMergeStarted()),
+          topologyChangeHandler: () => {
+            const workspace = workspaceRef.current;
+            if (workspace) {
+              storeRef.current?.dispatch(workspaceGraphMerged(createWorkspaceState(workspace)));
+            }
+            setRenderCounter((current) => current + 1);
+          },
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,

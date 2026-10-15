@@ -733,6 +733,7 @@ function GraphWorkspace(options) {
 
   //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
+    self.options.graphMergeStarted?.();
     this.stopLayout();
 
     if (!newData.nodes) {
@@ -826,7 +827,7 @@ function GraphWorkspace(options) {
       lastOps.push(new AddEdgeOperation(newEdge, self));
     });
 
-    if (lastOps.length > 0) {
+    if (lastOps.length > 0 && !self.options.useReduxHistory) {
       self.addUndoLogEntry(lastOps);
     }
 

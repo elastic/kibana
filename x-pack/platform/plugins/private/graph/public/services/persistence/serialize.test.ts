@@ -68,6 +68,8 @@ describe('serialize', () => {
         isInitialized: true,
         selectedNodeIds: [],
         selectedEdgeIds: [],
+        undoHistory: [],
+        redoHistory: [],
         nodesById: {
           'node-0': {
             id: 'node-0',
