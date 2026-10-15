@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { type FontFile, type NodeDrawOptions, defineElasticChartsNodeEngine } from './src/node';
+export {
+  type FontFile,
+  type NodeChartEngine,
+  type NodeDrawOptions,
+  defineElasticChartsNodeEngine,
+} from './src/node';

@@ -65,9 +65,14 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
       },
       async (_context, request, response) => {
         const { composition, surface, hints, width, height } = request.body;
+        // A thread per request, since hints are fixed when the engine is made.
         const drawing = await createChartsDrawing({ hints });
-        const { output, timings } = await drawing.render(composition, surface, { width, height });
-        return response.ok({ body: { output, timings, memory: process.memoryUsage() } });
+        try {
+          const { output, timings } = await drawing.render(composition, surface, { width, height });
+          return response.ok({ body: { output, timings, memory: process.memoryUsage() } });
+        } finally {
+          await drawing.close();
+        }
       }
     );
   }

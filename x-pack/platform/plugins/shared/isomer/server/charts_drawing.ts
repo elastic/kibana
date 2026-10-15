@@ -37,6 +37,8 @@ export interface DrawnRender {
 
 export interface ChartsDrawing {
   runtime: KibanaIsomerRuntime;
+  /** Stops the drawing thread. */
+  close(): Promise<void>;
   render(
     composition: Composition,
     surface: 'html' | 'snapshot',
@@ -45,13 +47,12 @@ export interface ChartsDrawing {
 }
 
 /**
- * Draws the charts pack server side with Elastic Charts in a jsdom window, and the snapshot surface to PNG
- * with takumi. The first call installs that window as process globals.
+ * Draws the charts pack server side with Elastic Charts in a jsdom window, in a worker thread, and the snapshot
+ * surface to PNG with takumi. Resolves once that thread can draw.
  */
 export const createChartsDrawing = async ({
   hints,
 }: { hints?: ChartHints } = {}): Promise<ChartsDrawing> => {
-  // Loaded only when drawing is on: it installs the jsdom window before React DOM loads.
   const { defineElasticChartsNodeEngine } = await import('@kbn/isomer-charts-elastic-node');
   const engine = await defineElasticChartsNodeEngine({
     ...(hints ? { hints } : {}),
@@ -68,6 +69,7 @@ export const createChartsDrawing = async ({
   });
   return {
     runtime,
+    close: () => engine.close(),
     render: async (composition, surface, { width, height } = DEFAULT_CHART_SIZE) => {
       const started = performance.now();
       const { release } = await prepareCharts(engine, composition, {
