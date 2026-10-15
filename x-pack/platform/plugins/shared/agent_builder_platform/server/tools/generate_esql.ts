@@ -16,6 +16,7 @@ import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-serve
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   try {
@@ -67,6 +68,7 @@ const nlToEsqlToolSchema = z.object({
     .describe(
       '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const generateEsqlTool = ({
@@ -104,6 +106,7 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
         execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
+        include_frozen: includeFrozen = false,
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
@@ -118,6 +121,7 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
         timeRange,
         includeDatasets: true,
         includeViews: true,
+        includeFrozen,
         modelProvider,
         esClient: esClient.asCurrentUser,
         internalEsClient: esClient.asInternalUser,

@@ -63,6 +63,15 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   },
 }));
 
+const mockOnTelemetryEvent = jest.fn();
+
+jest.mock('../../../../shared/hooks/use_graph_telemetry', () => ({
+  useGraphTelemetry: () => ({
+    onTelemetryEvent: mockOnTelemetryEvent,
+    reportPreviewExpanded: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: () => mockInvestigateInTimeline,
 }));
@@ -105,6 +114,15 @@ describe('GraphVisualization', () => {
     jest.clearAllMocks();
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
+    );
+  });
+
+  it('passes the graph telemetry handler to GraphInvestigation', async () => {
+    render(<GraphVisualization {...EVENT_PROPS} />);
+
+    await waitFor(() => expect(GraphInvestigation).toHaveBeenCalled());
+    expect((GraphInvestigation as unknown as jest.Mock).mock.calls[0][0].onTelemetryEvent).toBe(
+      mockOnTelemetryEvent
     );
   });
 

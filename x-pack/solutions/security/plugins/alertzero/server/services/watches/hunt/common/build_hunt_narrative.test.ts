@@ -248,6 +248,21 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
+  it('names the model tiers that were unavailable when Tier 2 could not run for want of a model', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        tier2_skipped_reason: 'no_inference',
+        unavailable_model_tiers: ['efficient', 'balanced', 'frontier'],
+      }),
+      ctx
+    );
+
+    // Efficient is unavailable too, but Tier 2 has no consumer for it, so it is not blamed.
+    expect(narrative).toContain('no model was available for the Balanced and Frontier tiers');
+    expect(narrative).not.toContain('Efficient');
+  });
+
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
     const skipped = (reason: HuntCoordinatorCoreResult['tier2_skipped_reason']) =>
       buildHuntNarrative(result({ status: 'tier1_only', tier2_skipped_reason: reason }), ctx);

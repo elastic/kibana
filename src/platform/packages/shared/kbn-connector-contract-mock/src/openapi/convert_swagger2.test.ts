@@ -26,7 +26,9 @@ const swagger: OpenApiDocument = {
   },
   paths: {
     '/items/{id}': {
-      parameters: [{ name: 'id', in: 'path', required: true, type: 'string' }],
+      parameters: [
+        { name: 'id', in: 'path', required: true, type: 'string', 'x-ms-skip-url-encoding': true },
+      ],
       get: {
         operationId: 'getItem',
         parameters: [
@@ -112,7 +114,13 @@ describe('convertSwagger2', () => {
     const [get, put, post] = loadOperations(swagger);
 
     expect(get.parameters).toMatchObject([
-      { name: 'id', in: 'path', style: 'simple', schema: { schema: { type: 'string' } } },
+      {
+        name: 'id',
+        in: 'path',
+        style: 'simple',
+        schema: { schema: { type: 'string' } },
+        multiSegment: true,
+      },
       {
         name: 'limit',
         in: 'query',

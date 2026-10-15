@@ -386,6 +386,29 @@ describe('AgentExecutionService', () => {
       );
     });
 
+    it("stores the workflow execution id with the execution's params, for round telemetry", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          workflowExecutionId: 'workflow-run-1',
+        },
+        useTaskManager: false,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentParams: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
+        })
+      );
+    });
+
     it('validates attachments and throws on invalid attachment', async () => {
       (attachmentsService.validateAttachmentInputs as jest.Mock).mockRejectedValue(
         new Error('Attachment validation failed: boom')
