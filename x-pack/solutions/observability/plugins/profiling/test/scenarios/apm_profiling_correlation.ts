@@ -18,8 +18,10 @@
  * - `profiling-java-up` (Java) and `profiling-java-otel` (OTel Java) record the IDs of stacktraces
  *   of the `universal_profiling` and `otel_profiling` scenarios on their transactions. APM
  *   correlates their profiling data through these IDs, in the service and transaction tabs.
+ *   `profiling-java-mixed` (Java) has an instance recording the IDs of each scenario, so it shows
+ *   data in both schemas.
  *   OTel SDKs write the IDs to `elastic.profiler_stack_trace_ids` on OTel-native data, which
- *   synthtrace doesn't keep, so both services use `transaction.profiler_stack_trace_ids`.
+ *   synthtrace doesn't keep, so all of them use `transaction.profiler_stack_trace_ids`.
  *
  * Usage:
  *   node scripts/synthtrace universal_profiling --from now-15m --to now
@@ -91,6 +93,18 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts = {} }) => {
           agentName: 'opentelemetry/java/elastic',
         })
         .instance('profiling-java-otel-instance'),
+      stacktraceIds: OTEL_STACKTRACE_IDS,
+    },
+    {
+      instance: apm
+        .service({ name: 'profiling-java-mixed', environment: ENVIRONMENT, agentName: 'java' })
+        .instance('profiling-java-mixed-up-instance'),
+      stacktraceIds: UNIVERSAL_PROFILING_STACKTRACE_IDS,
+    },
+    {
+      instance: apm
+        .service({ name: 'profiling-java-mixed', environment: ENVIRONMENT, agentName: 'java' })
+        .instance('profiling-java-mixed-otel-instance'),
       stacktraceIds: OTEL_STACKTRACE_IDS,
     },
   ];
