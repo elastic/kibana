@@ -90,8 +90,10 @@ export class RuleTemplatesClient {
       return item ? [item] : [];
     });
 
+    const ruleCounts = await this.rulesClient.getRuleCountsByTemplateId(items.map(({ id }) => id));
+
     return {
-      items,
+      items: items.map((item) => ({ ...item, rule_count: ruleCounts[item.id] ?? 0 })),
       total: res.total,
       page,
       per_page: perPage,

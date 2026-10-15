@@ -14,6 +14,7 @@ import {
   buildRuleTemplateData,
   buildV1RuleTemplateAttributes,
   getFindRuleTemplatesUrl,
+  getInstallRuleTemplateUrl,
   NO_ACCESS_ROLE,
   RULE_TEMPLATE_PER_PAGE_MAX,
   RULE_TEMPLATE_TAGS_MAX_COUNT,
@@ -37,10 +38,12 @@ apiTest.describe('Find rule templates API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleTemplates.cleanUp();
+    await apiServices.alertingV2.rules.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleTemplates.cleanUp();
+    await apiServices.alertingV2.rules.cleanUp();
   });
 
   apiTest(
@@ -64,6 +67,66 @@ apiTest.describe('Find rule templates API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 
       expect(response.body).toMatchObject({ total: 1, page: 1, per_page: 20 });
       expect(response.body.items).toHaveLength(1);
       expect(response.body.items[0]).toMatchObject({ id: 'nginx-error-rate', engine: 'v2', rule });
+    }
+  );
+
+  apiTest(
+    'rule_count: should count the rules created from each template',
+    async ({ apiClient, apiServices }) => {
+      for (const id of ['a-template', 'b-template', 'unused-template']) {
+        await apiServices.alertingV2.ruleTemplates.create({
+          id,
+          attributes: buildRuleTemplateData({ metadata: { name: id } }),
+        });
+      }
+
+      const getRuleCounts = async () => {
+        const response = await apiClient.get(getFindRuleTemplatesUrl(), { headers: adminHeaders });
+        expect(response).toHaveStatusCode(200);
+        const items: Array<{ id: string; rule_count: number }> = response.body.items;
+        return Object.fromEntries(items.map(({ id, rule_count: ruleCount }) => [id, ruleCount]));
+      };
+
+      await apiTest.step('is 0 while no rule was created from the templates', async () => {
+        expect(await getRuleCounts()).toStrictEqual({
+          'a-template': 0,
+          'b-template': 0,
+          'unused-template': 0,
+        });
+      });
+
+      await apiTest.step('counts every rule installed from a template', async () => {
+        const installs = [
+          { templateId: 'a-template', name: 'rule-from-a-1' },
+          { templateId: 'a-template', name: 'rule-from-a-2' },
+          { templateId: 'b-template', name: 'rule-from-b-1' },
+        ];
+        for (const { templateId, name } of installs) {
+          const response = await apiClient.post(getInstallRuleTemplateUrl(templateId), {
+            headers: adminHeaders,
+            body: buildCreateRuleData({ metadata: { name } }),
+          });
+          expect(response).toHaveStatusCode(201);
+        }
+
+        expect(await getRuleCounts()).toStrictEqual({
+          'a-template': 2,
+          'b-template': 1,
+          'unused-template': 0,
+        });
+      });
+
+      await apiTest.step('ignores rules that were not created from a template', async () => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'standalone-rule' } })
+        );
+
+        expect(await getRuleCounts()).toStrictEqual({
+          'a-template': 2,
+          'b-template': 1,
+          'unused-template': 0,
+        });
+      });
     }
   );
 
