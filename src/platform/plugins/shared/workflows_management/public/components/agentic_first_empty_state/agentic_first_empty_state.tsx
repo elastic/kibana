@@ -144,7 +144,8 @@ export function AgenticFirstEmptyState({
           </h2>
         </EuiTitle>
 
-        <EuiSpacer size="m" />
+        {/* Matches the title-to-input gap on the Agent Builder new-chat screen. */}
+        <EuiSpacer size="l" />
 
         {agentInput ? (
           <div data-test-subj="agenticFirstAgentInput">{agentInput}</div>
