@@ -92,6 +92,8 @@ const configSchema = schema.object({
   }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  // Read by the ECH start script before the Node process is chosen. Kibana does not use it.
+  pointer_compression: schema.maybe(schema.boolean()),
   managed_otlp: schema.maybe(managedOtlpConfigSchema),
   onboarding: schema.maybe(
     schema.object({
