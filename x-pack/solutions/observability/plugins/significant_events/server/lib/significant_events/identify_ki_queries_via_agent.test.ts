@@ -99,7 +99,7 @@ describe('executeKIQueryGenerationAgent', () => {
     const executionSignal = new AbortController().signal;
     const timeoutSpy = jest
       .spyOn(kbnStd, 'timeoutSignal')
-      .mockReturnValue(deadline as ReturnType<typeof kbnStd.timeoutSignal>);
+      .mockReturnValue(deadline as unknown as ReturnType<typeof kbnStd.timeoutSignal>);
     const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
 
     await expect(

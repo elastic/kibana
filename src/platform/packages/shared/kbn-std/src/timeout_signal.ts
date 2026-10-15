@@ -29,11 +29,10 @@ export function timeoutSignal(timeoutMs: number): TimeoutAbortSignal {
     controller.abort(new DOMException('The operation was aborted due to timeout', 'TimeoutError'));
   }, timeoutMs);
 
-  // AbortSignal.timeout() does not keep the event loop alive. Browsers and jsdom
-  // return a numeric timer id, which has no unref.
-  const unref = (timer as { unref?: () => void }).unref;
-  if (typeof unref === 'function') {
-    unref.call(timer);
+  // AbortSignal.timeout() does not keep the event loop alive.
+  // Jest's setTimeout returns a number, and `in` throws on a number.
+  if (typeof timer === 'object' && 'unref' in timer && typeof timer.unref === 'function') {
+    timer.unref();
   }
 
   const dispose = () => {
