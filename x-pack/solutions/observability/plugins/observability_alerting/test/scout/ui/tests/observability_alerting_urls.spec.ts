@@ -235,7 +235,7 @@ test.describe(
       await rules.clickRuleName(ruleName);
       await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
-      await test.step('back href stays on the observability list, not /rules/v1/rules', async () => {
+      await test.step('back href stays on the observability list, not /rules/classic/rules', async () => {
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
         await expectObservabilityHref(rules.backLink);
       });

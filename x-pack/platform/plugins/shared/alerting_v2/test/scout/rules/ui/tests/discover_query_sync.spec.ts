@@ -31,7 +31,7 @@ test.describe('Discover query sync — Rule flyout', { tag: testData.UI_TAG }, (
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsRuleFormEditor();
-    await pageObjects.ruleForm.gotoDiscover();
+    await pageObjects.discover.goto({ queryMode: 'esql' });
   });
 
   test.afterAll(async ({ esClient }) => {
@@ -39,8 +39,7 @@ test.describe('Discover query sync — Rule flyout', { tag: testData.UI_TAG }, (
   });
 
   test('flyout query updates when the Discover query changes', async ({ pageObjects }) => {
-    await test.step('switch to ES|QL, run an initial query, and open rule flyout', async () => {
-      await pageObjects.ruleForm.switchToEsqlMode();
+    await test.step('run an initial ES|QL query and open rule flyout', async () => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM logs-* | WHERE message != "" | LIMIT 10'
       );

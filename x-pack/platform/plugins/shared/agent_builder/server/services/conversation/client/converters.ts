@@ -8,6 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationAttachmentSummary,
@@ -100,6 +101,7 @@ export const fromEsWithoutRounds = (
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
@@ -403,6 +405,7 @@ export const toEs = (
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -501,11 +504,13 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
@@ -515,22 +520,27 @@ export const createRequestToEs = ({
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: effectiveUser.id, username: effectiveUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events =
-    conversation.events && conversation.events.length > 0
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
       ? conversation.events
-      : roundsToEvents(forEvents);
+      : roundsToEvents(forEvents)),
+  ];
 
   return {
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
     created_at: createdAt,

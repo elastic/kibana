@@ -20,8 +20,12 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
+import {
+  getTabDataView,
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+} from '../runtime_state';
 import { internalStateSlice } from '../internal_state';
-import { selectTabRuntimeState, selectTabTypeForPersistence } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { rememberDiscoverSession } from '../../../../../services/discover_recently_accessed_service';
@@ -67,7 +71,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+        const currentDataView = getTabDataView(tabRuntimeState);
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
         const updatedTab = cloneDeep(
