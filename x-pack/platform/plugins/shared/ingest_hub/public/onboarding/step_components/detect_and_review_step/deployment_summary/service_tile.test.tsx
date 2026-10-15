@@ -44,8 +44,8 @@ function renderTile(status: ServiceChipState, agentInfo?: ServiceAgentInfo) {
   );
 }
 
-const AGENT_INFO = (health: ServiceAgentInfo['health']) =>
-  ({ health, agentIds: [], policyId: 'p1' } as ServiceAgentInfo);
+const AGENT_INFO = (health: ServiceAgentInfo['health'], issue?: ServiceAgentInfo['issue']) =>
+  ({ health, agentIds: [], policyId: 'p1', issue } as ServiceAgentInfo);
 
 describe('ServiceTile', () => {
   it('renders the service name', () => {
@@ -74,7 +74,7 @@ describe('ServiceTile', () => {
       const { container } = renderTile('error');
       expect(screen.queryByTestId('serviceTile-spinner')).not.toBeInTheDocument();
       expect(container.querySelector('[data-euiicon-type="checkCircle"]')).toBeNull();
-      expect(container.querySelector('[data-euiicon-type="errorFilled"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="errorFill"]')).not.toBeNull();
     });
 
     it('does not show a success icon on timeout', () => {
@@ -106,6 +106,24 @@ describe('ServiceTile', () => {
       expect(screen.getByText('Agent needs attention')).toBeInTheDocument();
     });
 
+    it('asks for an upgrade when the agent is too old for the integration', () => {
+      renderTile(
+        'error',
+        AGENT_INFO('unhealthy', {
+          type: 'incompatible_version',
+          agentVersion: '8.18.0',
+          minVersion: '9.4.0',
+          integrations: ['AWS'],
+        })
+      );
+      expect(screen.getByText('Agent upgrade required')).toBeInTheDocument();
+    });
+
+    it('says the integration is not running when the agent runs none of it', () => {
+      renderTile('error', AGENT_INFO('unhealthy', { type: 'not_running' }));
+      expect(screen.getByText("Integration isn't running")).toBeInTheDocument();
+    });
+
     it('keeps the deployment failure wording when there is no unhealthy agent', () => {
       renderTile('error');
       expect(screen.getByText('Deployment failed')).toBeInTheDocument();
@@ -116,7 +134,7 @@ describe('ServiceTile', () => {
 
     it('shows the error icon for an unhealthy agent', () => {
       const { container } = renderTile('error', AGENT_INFO('unhealthy'));
-      expect(container.querySelector('[data-euiicon-type="errorFilled"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="errorFill"]')).not.toBeNull();
     });
 
     it('keeps the spinner while a healthy agent has not produced data yet', () => {

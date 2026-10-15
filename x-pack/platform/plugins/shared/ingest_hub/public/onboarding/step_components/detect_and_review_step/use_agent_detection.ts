@@ -16,18 +16,20 @@ import {
 } from '@kbn/fleet-plugin/common';
 import {
   getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
   useBulkGetAgentPoliciesQuery,
   useGetAgentsQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
+  assessAgent,
   buildIncomingDataRequests,
   getAgentPolicyIdsByInstance,
   getApplicableAgents,
   instanceHasData,
   summarizeInstanceAgents,
-  type AlertLevelByAgentId,
+  type AssessmentByAgentId,
   type DataRequestInstance,
   type InstanceAgentSummary,
 } from './agent_detection';
@@ -149,14 +151,20 @@ export function useAgentDetection({
         packagePolicies[instanceId] = packagePolicy;
         policiesByInstance[instanceId] = agentPolicy;
 
-        // Scope each agent's health to the package policy this instance deployed.
-        const alertLevels: AlertLevelByAgentId = {};
-        if (packagePolicy) {
+        // Judge each agent by the package policy this instance deployed, not by the agent alone.
+        const assessments: AssessmentByAgentId = {};
+        if (packagePolicy && agentPolicy) {
           for (const agent of applicable) {
-            alertLevels[agent.id] = getComponentAlertLevel(agent, packagePolicy);
+            assessments[agent.id] = assessAgent({
+              agent,
+              agentPolicy,
+              packageName: packagePolicy.package?.name ?? '',
+              alertLevel: getComponentAlertLevel(agent, packagePolicy),
+              units: getPackagePolicyUnitSummary(agent, packagePolicy),
+            });
           }
         }
-        const summary = summarizeInstanceAgents(applicable, alertLevels);
+        const summary = summarizeInstanceAgents(applicable, assessments);
         summaries[instanceId] = summary;
 
         const entry = awsServicesMap?.get(serviceIdByInstanceId[instanceId]);

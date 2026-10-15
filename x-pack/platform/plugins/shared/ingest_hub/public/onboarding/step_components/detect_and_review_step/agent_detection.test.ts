@@ -8,6 +8,7 @@
 import type { Agent } from '@kbn/fleet-plugin/common';
 import {
   aggregateInstanceChipStates,
+  assessAgent,
   buildIncomingDataRequests,
   deriveInstanceChipState,
   getApplicableAgents,
@@ -38,23 +39,29 @@ describe('getAgentHealthState', () => {
   );
 
   it('is unhealthy when the deployed integration has failed or degraded units, even if online', () => {
-    expect(getAgentHealthState(makeAgent('a1', 'online'), 'failed')).toBe('unhealthy');
-    expect(getAgentHealthState(makeAgent('a1', 'online'), 'degraded')).toBe('unhealthy');
+    expect(getAgentHealthState(makeAgent('a1', 'online'), { alertLevel: 'failed' })).toBe(
+      'unhealthy'
+    );
+    expect(getAgentHealthState(makeAgent('a1', 'online'), { alertLevel: 'degraded' })).toBe(
+      'unhealthy'
+    );
   });
 
   it('ignores an agent failure that is outside the deployed integration', () => {
     const agent = { ...makeAgent('a1', 'error'), components: [{ id: 'c1' }] } as unknown as Agent;
-    expect(getAgentHealthState(agent, null)).toBe('healthy');
-    expect(getAgentHealthState({ ...agent, status: 'degraded' }, null)).toBe('healthy');
+    expect(getAgentHealthState(agent, { alertLevel: null })).toBe('healthy');
+    expect(getAgentHealthState({ ...agent, status: 'degraded' }, { alertLevel: null })).toBe(
+      'healthy'
+    );
   });
 
   it('keeps an agent failure when the agent reports no components to scope by', () => {
-    expect(getAgentHealthState(makeAgent('a1', 'error'), null)).toBe('unhealthy');
+    expect(getAgentHealthState(makeAgent('a1', 'error'), { alertLevel: null })).toBe('unhealthy');
   });
 
   it('still treats an offline agent as unhealthy when its units look fine', () => {
     const agent = { ...makeAgent('a1', 'offline'), components: [{ id: 'c1' }] } as unknown as Agent;
-    expect(getAgentHealthState(agent, null)).toBe('unhealthy');
+    expect(getAgentHealthState(agent, { alertLevel: null })).toBe('unhealthy');
   });
 });
 
@@ -200,12 +207,12 @@ describe('summarizeInstanceAgents', () => {
 
   it('ignores an agent failure outside the deployed integration', () => {
     const agent = { ...makeAgent('a1', 'error'), components: [{ id: 'c1' }] } as unknown as Agent;
-    expect(summarizeInstanceAgents([agent], { a1: null }).health).toBe('healthy');
+    expect(summarizeInstanceAgents([agent], { a1: { alertLevel: null } }).health).toBe('healthy');
   });
 
   it('is unhealthy when the deployed integration failed on an otherwise online agent', () => {
     const agent = makeAgent('a1', 'online');
-    const summary = summarizeInstanceAgents([agent], { a1: 'failed' });
+    const summary = summarizeInstanceAgents([agent], { a1: { alertLevel: 'failed' } });
     expect(summary).toMatchObject({ health: 'unhealthy', agent });
   });
 
@@ -429,5 +436,195 @@ describe('pickWorstAgentInstanceId', () => {
     const ids = ['a', 'b'];
     pickWorstAgentInstanceId({ a: summary('healthy'), b: summary('unhealthy') }, ids);
     expect(ids).toEqual(['a', 'b']);
+  });
+});
+
+describe('assessAgent', () => {
+  const POLICY = {
+    revision: 3,
+    min_agent_version: '9.4.0',
+    package_agent_version_conditions: [
+      { name: 'aws', title: 'AWS', version_condition: '>=9.4.0' },
+      { name: 'system', title: 'System', version_condition: '>=8.0.0' },
+    ],
+  };
+  const agentAt = (version: string, overrides: Record<string, unknown> = {}): Agent =>
+    ({
+      id: 'a1',
+      status: 'online',
+      policy_revision: 3,
+      local_metadata: { elastic: { agent: { version } } },
+      components: [{ id: 'system-metrics' }],
+      ...overrides,
+    } as unknown as Agent);
+  const LIVE = { total: 3, stopped: 0 };
+
+  const assess = (agent: Agent, overrides: Record<string, unknown> = {}) =>
+    assessAgent({
+      agent,
+      agentPolicy: POLICY,
+      packageName: 'aws',
+      alertLevel: null,
+      units: LIVE,
+      ...overrides,
+    });
+
+  describe('incompatible agent version', () => {
+    it('flags an agent older than the deployed package needs', () => {
+      expect(assess(agentAt('8.18.0')).issue).toEqual({
+        type: 'incompatible_version',
+        agentVersion: '8.18.0',
+        minVersion: '9.4.0',
+        integrations: ['AWS'],
+      });
+    });
+
+    it('accepts an agent that satisfies the condition', () => {
+      expect(assess(agentAt('9.4.0')).issue).toBeUndefined();
+      expect(assess(agentAt('9.6.1')).issue).toBeUndefined();
+    });
+
+    it('only looks at the deployed package, not other integrations on the policy', () => {
+      const policy = {
+        ...POLICY,
+        package_agent_version_conditions: [
+          { name: 'system', title: 'System', version_condition: '>=99.0.0' },
+        ],
+      };
+      expect(assess(agentAt('8.18.0'), { agentPolicy: policy }).issue).toBeUndefined();
+    });
+
+    it('falls back to the package name when there is no title', () => {
+      const policy = {
+        ...POLICY,
+        package_agent_version_conditions: [
+          { name: 'aws', title: '', version_condition: '>=9.4.0' },
+        ],
+      };
+      const { issue } = assess(agentAt('8.18.0'), { agentPolicy: policy });
+      expect(issue).toMatchObject({ integrations: ['aws'] });
+    });
+
+    it('omits the minimum version when the policy does not record one', () => {
+      const policy = { ...POLICY, min_agent_version: null };
+      const { issue } = assess(agentAt('8.18.0'), { agentPolicy: policy });
+      expect(issue).toMatchObject({ type: 'incompatible_version', minVersion: undefined });
+    });
+
+    it('cannot judge an agent that reports no version, or a policy without conditions', () => {
+      expect(assess(agentAt('', { local_metadata: {} })).issue).toBeUndefined();
+      expect(
+        assess(agentAt('8.18.0'), {
+          agentPolicy: { ...POLICY, package_agent_version_conditions: null },
+        }).issue
+      ).toBeUndefined();
+    });
+
+    it('ignores a condition it cannot parse rather than failing the agent', () => {
+      const policy = {
+        ...POLICY,
+        package_agent_version_conditions: [
+          { name: 'aws', title: 'AWS', version_condition: 'not a range' },
+        ],
+      };
+      expect(assess(agentAt('8.18.0'), { agentPolicy: policy }).issue).toBeUndefined();
+    });
+
+    it('reports the incompatibility ahead of a not-running integration', () => {
+      const { issue } = assess(agentAt('8.18.0'), { units: { total: 0, stopped: 0 } });
+      expect(issue?.type).toBe('incompatible_version');
+    });
+  });
+
+  describe('integration not running', () => {
+    it('flags an up-to-date agent that runs no unit of the deployed package policy', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 0, stopped: 0 } }).issue).toEqual({
+        type: 'not_running',
+      });
+    });
+
+    it('flags an agent whose units for the package policy have all stopped', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 3, stopped: 3 } }).issue).toEqual({
+        type: 'not_running',
+      });
+    });
+
+    it('is fine while at least one unit is live', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 3, stopped: 2 } }).issue).toBeUndefined();
+    });
+
+    it('waits for the agent to apply the latest policy revision', () => {
+      const behind = agentAt('9.6.0', { policy_revision: 2 });
+      expect(assess(behind, { units: { total: 0, stopped: 0 } }).issue).toBeUndefined();
+    });
+
+    it('waits when the revision of the agent or the policy is unknown', () => {
+      const none = { total: 0, stopped: 0 };
+      expect(
+        assess(agentAt('9.6.0', { policy_revision: null }), { units: none }).issue
+      ).toBeUndefined();
+      expect(
+        assess(agentAt('9.6.0'), { units: none, agentPolicy: { ...POLICY, revision: undefined } })
+          .issue
+      ).toBeUndefined();
+    });
+
+    it('waits until the agent has reported any components at all', () => {
+      const silent = agentAt('9.6.0', { components: [] });
+      expect(assess(silent, { units: { total: 0, stopped: 0 } }).issue).toBeUndefined();
+      expect(
+        assess(agentAt('9.6.0', { components: undefined }), { units: { total: 0, stopped: 0 } })
+          .issue
+      ).toBeUndefined();
+    });
+
+    it.each(['enrolling', 'updating', 'offline'] as const)(
+      'does not judge an agent that is %s',
+      (status) => {
+        const agent = agentAt('9.6.0', { status });
+        expect(assess(agent, { units: { total: 0, stopped: 0 } }).issue).toBeUndefined();
+      }
+    );
+
+    it.each(['error', 'degraded'] as const)('still judges a %s agent', (status) => {
+      const agent = agentAt('9.6.0', { status });
+      expect(assess(agent, { units: { total: 0, stopped: 0 } }).issue?.type).toBe('not_running');
+    });
+  });
+
+  it('carries the alert level through so failed units still count', () => {
+    expect(assess(agentAt('9.6.0'), { alertLevel: 'failed' })).toEqual({ alertLevel: 'failed' });
+  });
+});
+
+describe('agent issues and health', () => {
+  const issue = { type: 'not_running' } as const;
+
+  it('makes an online agent with an issue unhealthy', () => {
+    expect(getAgentHealthState(makeAgent('a1', 'online'), { alertLevel: null, issue })).toBe(
+      'unhealthy'
+    );
+  });
+
+  it('reports the issue of the unhealthy agent on the instance summary', () => {
+    const bad = makeAgent('a2', 'online');
+    const summary = summarizeInstanceAgents([makeAgent('a1', 'online'), bad], {
+      a1: { alertLevel: null },
+      a2: { alertLevel: null, issue },
+    });
+    expect(summary).toMatchObject({ health: 'unhealthy', agent: bad, issue });
+  });
+
+  it('prefers an agent with a known issue over one that is merely unhealthy', () => {
+    const offline = makeAgent('a1', 'offline');
+    const stale = makeAgent('a2', 'online');
+    const summary = summarizeInstanceAgents([offline, stale], {
+      a2: { alertLevel: null, issue },
+    });
+    expect(summary).toMatchObject({ agent: stale, issue });
+  });
+
+  it('reports no issue for an unhealthy agent without one', () => {
+    expect(summarizeInstanceAgents([makeAgent('a1', 'offline')]).issue).toBeUndefined();
   });
 });

@@ -18,7 +18,7 @@ import {
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
-import { ServiceStatusIndicator } from './service_status_indicator';
+import { ServiceStatusIndicator, type AgentErrorReason } from './service_status_indicator';
 import { DeliveryMethodBadge } from './delivery_method_badge';
 import { ServiceAgentStatus } from './service_agent_status';
 
@@ -39,7 +39,7 @@ interface ServiceTileProps {
 const STATUS_ICON: Record<string, { type: string; color: string }> = {
   receiving: { type: 'checkCircle', color: 'success' },
   timeout: { type: 'warning', color: 'warning' },
-  error: { type: 'errorFilled', color: 'danger' },
+  error: { type: 'errorFill', color: 'danger' },
 };
 
 /** States that are still settling — the tile shows a spinner until one of the terminal states. */
@@ -54,6 +54,8 @@ export function ServiceTile({
 }: ServiceTileProps) {
   const isPending = PENDING_STATES.includes(status);
   const icon = STATUS_ICON[status];
+  const agentErrorReason: AgentErrorReason | undefined =
+    agentInfo?.health === 'unhealthy' ? agentInfo.issue?.type ?? 'unhealthy' : undefined;
 
   return (
     <EuiPanel paddingSize="m" hasBorder data-test-subj={`serviceTile-${entry.id}`}>
@@ -71,10 +73,7 @@ export function ServiceTile({
               <strong>{name}</strong>
             </EuiText>
             <EuiSpacer size="xs" />
-            <ServiceStatusIndicator
-              status={status}
-              isAgentError={agentInfo?.health === 'unhealthy'}
-            />
+            <ServiceStatusIndicator status={status} agentErrorReason={agentErrorReason} />
           </EuiFlexItem>
           <EuiSpacer size="xs" />
           <EuiFlexItem grow={false}>

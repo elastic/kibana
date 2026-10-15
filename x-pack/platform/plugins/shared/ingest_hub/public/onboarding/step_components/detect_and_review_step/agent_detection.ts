@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
+import satisfies from 'semver/functions/satisfies';
+import validRange from 'semver/ranges/valid';
+import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common';
-import type { ComponentAlertLevel } from '@kbn/fleet-plugin/public';
+import type { ComponentAlertLevel, PackagePolicyUnitSummary } from '@kbn/fleet-plugin/public';
 import type { DeploymentMethod } from '../../aws_service_matrix';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 
 export type AgentHealthState = 'healthy' | 'pending' | 'unhealthy';
+
+/** Why an agent that reports itself fine still cannot run the deployed integration. */
+export type AgentIssue =
+  | {
+      type: 'incompatible_version';
+      agentVersion: string;
+      /** Minimum agent version the policy needs, when Fleet knows it. */
+      minVersion?: string;
+      integrations: string[];
+    }
+  | { type: 'not_running' };
 
 export interface InstanceAgentSummary {
   /** `pending` also covers an instance whose agent does not exist yet. */
@@ -19,6 +32,8 @@ export interface InstanceAgentSummary {
   /** Agent that best represents the instance (worst first) — drives the badge and the flyout. */
   agent?: Agent;
   agentIds: string[];
+  /** Set when the representative agent is unhealthy because it cannot run the integration. */
+  issue?: AgentIssue;
 }
 
 export interface DataRequestInstance {
@@ -45,26 +60,110 @@ const NOT_RUNNING_AGENT_STATUSES: ReadonlySet<string> = new Set([
   'orphaned',
 ]);
 
-/** Per agent id: the worst unit status of the deployed package policy on that agent. */
-export type AlertLevelByAgentId = Record<string, ComponentAlertLevel>;
+/** What is known about an agent relative to the package policy this instance deployed. */
+export interface AgentAssessment {
+  /** Worst unit status of the deployed package policy on the agent. */
+  alertLevel: ComponentAlertLevel;
+  issue?: AgentIssue;
+}
+
+export type AssessmentByAgentId = Record<string, AgentAssessment>;
+
+const AGENT_STATUSES_THAT_RUN_UNITS: ReadonlySet<string> = new Set(['online', 'degraded', 'error']);
+
+interface AssessAgentParams {
+  agent: Agent;
+  agentPolicy: Pick<
+    AgentPolicy,
+    'revision' | 'min_agent_version' | 'package_agent_version_conditions'
+  >;
+  packageName: string;
+  alertLevel: ComponentAlertLevel;
+  units: PackagePolicyUnitSummary;
+}
+
+const getIncompatibleIntegrations = (
+  agentVersion: string | undefined,
+  conditions: AssessAgentParams['agentPolicy']['package_agent_version_conditions'],
+  packageName: string
+): string[] => {
+  if (!agentVersion) return [];
+  return (
+    (conditions ?? [])
+      .filter(({ name }) => name === packageName)
+      // `satisfies` returns false for a range it cannot parse, which would fail the agent for a
+      // condition nobody can act on, so only judge ranges that are valid.
+      .filter(
+        ({ version_condition: versionCondition }) =>
+          !!validRange(versionCondition) && !satisfies(agentVersion, versionCondition)
+      )
+      .map(({ title, name }) => title || name)
+  );
+};
 
 /**
- * An agent reported unhealthy for a reason outside the deployed integration (for example another
- * integration on a shared policy) still counts as healthy when it reports units for ours and none
- * of them failed. Without `alertLevel` there is no way to scope, so the agent status stands.
+ * Spots agents that report Healthy but cannot do the job: a version too old for the deployed
+ * package (the same check Fleet uses for its "Incompatible integrations" warning), or an agent
+ * that has applied the latest policy yet runs no live unit of the package policy.
+ */
+export const assessAgent = ({
+  agent,
+  agentPolicy,
+  packageName,
+  alertLevel,
+  units,
+}: AssessAgentParams): AgentAssessment => {
+  const agentVersion = agent.local_metadata?.elastic?.agent?.version;
+  const integrations = getIncompatibleIntegrations(
+    agentVersion,
+    agentPolicy.package_agent_version_conditions,
+    packageName
+  );
+  if (agentVersion && integrations.length > 0) {
+    return {
+      alertLevel,
+      issue: {
+        type: 'incompatible_version',
+        agentVersion,
+        minVersion: agentPolicy.min_agent_version ?? undefined,
+        integrations,
+      },
+    };
+  }
+
+  // An agent that has not applied the latest policy revision, or has reported nothing yet, is
+  // still catching up rather than failing.
+  const hasAppliedPolicy =
+    agent.policy_revision != null &&
+    agentPolicy.revision != null &&
+    agent.policy_revision >= agentPolicy.revision;
+  const isRunningUnits = !!agent.status && AGENT_STATUSES_THAT_RUN_UNITS.has(agent.status);
+  const hasReportedComponents = !!agent.components?.length;
+  const runsNoLiveUnit = units.total === 0 || units.stopped === units.total;
+  if (isRunningUnits && hasAppliedPolicy && hasReportedComponents && runsNoLiveUnit) {
+    return { alertLevel, issue: { type: 'not_running' } };
+  }
+
+  return { alertLevel };
+};
+
+/**
+ * An agent that cannot run the integration, or whose deployed integration failed or degraded, is
+ * unhealthy whatever its own status says. An agent reported unhealthy for a reason outside the
+ * deployed integration (for example another integration on a shared policy) still counts as
+ * healthy when it reports units for ours and none of them failed. Without an `assessment` there
+ * is no way to scope, so the agent status stands.
  */
 export const getAgentHealthState = (
   agent: Agent,
-  alertLevel?: ComponentAlertLevel
+  assessment?: AgentAssessment
 ): AgentHealthState => {
   const { status } = agent;
-  if (alertLevel) return 'unhealthy';
+  if (assessment?.issue || assessment?.alertLevel) return 'unhealthy';
   if (status === 'online') return 'healthy';
   if (!status || status === 'enrolling' || status === 'updating') return 'pending';
   const isFailureOutsideIntegration =
-    (status === 'error' || status === 'degraded') &&
-    alertLevel === null &&
-    !!agent.components?.length;
+    (status === 'error' || status === 'degraded') && !!assessment && !!agent.components?.length;
   return isFailureOutsideIntegration ? 'healthy' : 'unhealthy';
 };
 
@@ -118,16 +217,26 @@ export const getApplicableAgents = (agents: Agent[], policyIds: string[]): Agent
 /**
  * Any unhealthy agent makes the instance unhealthy (most actionable); otherwise a single online
  * agent is enough; with no agents, or none online yet, the instance is still pending.
- * `alertLevelByAgentId` scopes each agent's health to the deployed package policy.
+ * `assessmentByAgentId` scopes each agent's health to the deployed package policy.
  */
 export const summarizeInstanceAgents = (
   agents: Agent[],
-  alertLevelByAgentId: AlertLevelByAgentId = {}
+  assessmentByAgentId: AssessmentByAgentId = {}
 ): InstanceAgentSummary => {
   const agentIds = agents.map(({ id }) => id);
-  const healthOf = (agent: Agent) => getAgentHealthState(agent, alertLevelByAgentId[agent.id]);
-  const unhealthy = agents.find((agent) => healthOf(agent) === 'unhealthy');
-  if (unhealthy) return { health: 'unhealthy', agent: unhealthy, agentIds };
+  const healthOf = (agent: Agent) => getAgentHealthState(agent, assessmentByAgentId[agent.id]);
+  // Prefer an agent with a known issue so the reason can be shown.
+  const unhealthyAgents = agents.filter((agent) => healthOf(agent) === 'unhealthy');
+  const unhealthy =
+    unhealthyAgents.find((agent) => assessmentByAgentId[agent.id]?.issue) ?? unhealthyAgents[0];
+  if (unhealthy) {
+    return {
+      health: 'unhealthy',
+      agent: unhealthy,
+      agentIds,
+      issue: assessmentByAgentId[unhealthy.id]?.issue,
+    };
+  }
   const healthy = agents.find((agent) => healthOf(agent) === 'healthy');
   if (healthy) return { health: 'healthy', agent: healthy, agentIds };
   return { health: 'pending', agent: agents[0], agentIds };

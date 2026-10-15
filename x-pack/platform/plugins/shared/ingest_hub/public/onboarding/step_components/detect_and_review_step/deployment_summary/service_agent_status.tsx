@@ -16,6 +16,7 @@ import {
   LazyAgentlessStatusDetailsFlyout,
 } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AgentIssue } from '../agent_detection';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
 
 interface ServiceAgentStatusProps {
@@ -51,6 +52,27 @@ const getFlyoutKind = ({
   return canShowEnrollment ? 'enrollment' : undefined;
 };
 
+const getIssueMessage = (issue: AgentIssue): string => {
+  if (issue.type === 'not_running') {
+    return i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.notRunning', {
+      defaultMessage: "The agent isn't running this integration.",
+    });
+  }
+  const { agentVersion, minVersion, integrations } = issue;
+  const names = integrations.join(', ');
+  return minVersion
+    ? i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.upgradeToVersion', {
+        defaultMessage:
+          'Upgrade the agent to {minVersion} or later to run {names}. This agent is on {agentVersion}.',
+        values: { minVersion, names, agentVersion },
+      })
+    : i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.upgradeAgent', {
+        defaultMessage:
+          "This agent is on {agentVersion}, which can't run {names}. Upgrade the agent.",
+        values: { agentVersion, names },
+      });
+};
+
 /**
  * Fleet agent badge for a service deployed through Fleet. An unhealthy agent opens its component
  * health, and a managed integration whose agent is not there yet opens the enrollment status —
@@ -63,7 +85,7 @@ export function ServiceAgentStatus({
   agentInfo,
 }: ServiceAgentStatusProps) {
   const [openFlyout, setOpenFlyout] = useState<FlyoutKind | undefined>();
-  const { agent, agentPolicy, packagePolicy, policyId, health } = agentInfo;
+  const { agent, agentPolicy, packagePolicy, policyId, health, issue } = agentInfo;
   const packageVersion = packagePolicy?.package?.version;
 
   const flyoutKind = getFlyoutKind({
@@ -74,9 +96,13 @@ export function ServiceAgentStatus({
   });
   const close = () => setOpenFlyout(undefined);
 
-  const badge = agent ? (
+  // Fleet reports an agent that cannot run the integration as Healthy. Show it as the Unhealthy
+  // it is for this deployment, so the badge does not contradict the tile.
+  const badgeAgent = agent && issue ? { ...agent, status: 'degraded' as const } : agent;
+
+  const badge = badgeAgent ? (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <LazyAgentHealth agent={agent} hideTooltip={!!flyoutKind} />
+      <LazyAgentHealth agent={badgeAgent} hideTooltip={!!flyoutKind} />
     </Suspense>
   ) : (
     <EuiBadge color="hollow" data-test-subj="serviceTile-agentPendingBadge">
@@ -92,9 +118,16 @@ export function ServiceAgentStatus({
       {flyoutKind ? (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.seeAgentInfo', {
-            defaultMessage: 'See agent info',
-          })}
+          content={
+            <>
+              {issue && <p>{getIssueMessage(issue)}</p>}
+              <p>
+                {i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.seeAgentInfo', {
+                  defaultMessage: 'See agent info',
+                })}
+              </p>
+            </>
+          }
         >
           <button
             type="button"

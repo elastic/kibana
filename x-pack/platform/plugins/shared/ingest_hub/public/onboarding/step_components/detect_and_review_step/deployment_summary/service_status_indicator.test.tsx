@@ -61,20 +61,24 @@ describe('ServiceStatusIndicator', () => {
       expect(screen.getByText('Deployment failed')).toBeInTheDocument();
     });
 
-    it('points at the agent when it is the agent that is unhealthy', () => {
+    it.each([
+      ['unhealthy', 'Agent needs attention'],
+      ['incompatible_version', 'Agent upgrade required'],
+      ['not_running', "Integration isn't running"],
+    ] as const)('explains an agent error of kind %s', (agentErrorReason, label) => {
       render(
         <I18nProvider>
-          <ServiceStatusIndicator status="error" isAgentError />
+          <ServiceStatusIndicator status="error" agentErrorReason={agentErrorReason} />
         </I18nProvider>
       );
-      expect(screen.getByText('Agent needs attention')).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
       expect(screen.queryByText('Deployment failed')).not.toBeInTheDocument();
     });
 
-    it('ignores the agent flag for statuses that are not errors', () => {
+    it('ignores the agent reason for statuses that are not errors', () => {
       render(
         <I18nProvider>
-          <ServiceStatusIndicator status="receiving" isAgentError />
+          <ServiceStatusIndicator status="receiving" agentErrorReason="unhealthy" />
         </I18nProvider>
       );
       expect(screen.getByText('Receiving data')).toBeInTheDocument();

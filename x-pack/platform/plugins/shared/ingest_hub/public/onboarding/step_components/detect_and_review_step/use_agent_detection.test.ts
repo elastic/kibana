@@ -11,6 +11,7 @@ jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn()
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('@kbn/fleet-plugin/public', () => ({
   getComponentAlertLevel: jest.fn(),
+  getPackagePolicyUnitSummary: jest.fn(),
   sendGetAgentIncomingData: jest.fn(),
   useBulkGetAgentPoliciesQuery: jest.fn(),
   useGetAgentsQuery: jest.fn(),
@@ -19,6 +20,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
 import { useQuery } from '@kbn/react-query';
 import {
   getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
   useBulkGetAgentPoliciesQuery,
   useGetAgentsQuery,
@@ -30,6 +32,7 @@ import { useAgentDetection } from './use_agent_detection';
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockGetComponentAlertLevel = getComponentAlertLevel as jest.Mock;
+const mockGetUnitSummary = getPackagePolicyUnitSummary as jest.Mock;
 const mockSendIncomingData = sendGetAgentIncomingData as jest.Mock;
 const mockUseBulkPolicies = useBulkGetAgentPoliciesQuery as jest.Mock;
 const mockUseGetAgents = useGetAgentsQuery as jest.Mock;
@@ -42,9 +45,14 @@ const packagePolicy = (id: string, packageName = 'aws', version = '4.0.0') => ({
   package: { name: packageName, version },
 });
 
-const agentPolicy = (id: string, packagePolicies: unknown[]) => ({
+const agentPolicy = (
+  id: string,
+  packagePolicies: unknown[],
+  extra: Record<string, unknown> = {}
+) => ({
   id,
   package_policies: packagePolicies,
+  ...extra,
 });
 
 const agent = (id: string, status: string, policyId: string, extra = {}) => ({
@@ -93,6 +101,7 @@ describe('useAgentDetection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetComponentAlertLevel.mockReturnValue(null);
+    mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 0 });
   });
 
   describe('which agents are resolved', () => {
@@ -232,6 +241,85 @@ describe('useAgentDetection', () => {
 
       expect(result.current.packagePolicyByInstanceId.s3?.id).toBe('pp-s3');
       expect(result.current.packagePolicyByInstanceId.ec2?.id).toBe('pp-ec2');
+    });
+  });
+
+  describe('agents that cannot run the deployed integration', () => {
+    const versioned = (version: string, extra: Record<string, unknown> = {}) =>
+      agent('a1', 'online', 'policy-s3', {
+        policy_revision: 3,
+        local_metadata: { elastic: { agent: { version } } },
+        components: [{ id: 'system-metrics' }],
+        ...extra,
+      });
+    const policyNeeding94 = agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
+      revision: 3,
+      min_agent_version: '9.4.0',
+      package_agent_version_conditions: [
+        { name: 'aws', title: 'AWS', version_condition: '>=9.4.0' },
+      ],
+    });
+
+    it('is unhealthy when the agent is too old for the deployed package, despite reporting Healthy', () => {
+      const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('8.18.0')] });
+
+      expect(result.current.summaryByInstanceId.s3).toMatchObject({
+        health: 'unhealthy',
+        issue: {
+          type: 'incompatible_version',
+          agentVersion: '8.18.0',
+          minVersion: '9.4.0',
+          integrations: ['AWS'],
+        },
+      });
+    });
+
+    it('is healthy when the agent satisfies the package version', () => {
+      const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
+
+      expect(result.current.summaryByInstanceId.s3).toMatchObject({ health: 'healthy' });
+      expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+    });
+
+    it('is unhealthy when an up-to-date agent runs no unit of the deployed package policy', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
+
+      expect(result.current.summaryByInstanceId.s3).toMatchObject({
+        health: 'unhealthy',
+        issue: { type: 'not_running' },
+      });
+    });
+
+    it('is unhealthy when every unit of the deployed package policy has stopped', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 4, stopped: 4 });
+      const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
+
+      expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+    });
+
+    it('gives an agent that is still applying the latest policy time to catch up', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({
+        agentPolicies: [policyNeeding94],
+        agents: [versioned('9.6.0', { policy_revision: 2 })],
+      });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
+    });
+
+    it('cannot tell without the agent policy, so the agent status stands', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({ agentPolicies: [], agents: [versioned('8.18.0')] });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
+    });
+
+    it('still asks about data for an agent that cannot run the integration', () => {
+      setup({ agentPolicies: [policyNeeding94], agents: [versioned('8.18.0')] });
+
+      // A document attributable to the agent would still be real data, so detection keeps going.
+      expect(mockUseQuery.mock.calls[0][0].enabled).toBe(true);
     });
   });
 

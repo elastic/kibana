@@ -155,6 +155,78 @@ describe('ServiceAgentStatus', () => {
     });
   });
 
+  describe('an agent that cannot run the integration', () => {
+    const withIssue = (issue: ServiceAgentInfo['issue']) =>
+      info({
+        health: 'unhealthy',
+        agent: { id: 'a1', status: 'online' } as never,
+        issue,
+      });
+    const INCOMPATIBLE = {
+      type: 'incompatible_version' as const,
+      agentVersion: '8.18.0',
+      minVersion: '9.4.0',
+      integrations: ['AWS', 'AWS CloudWatch'],
+    };
+
+    it('shows the badge as unhealthy even though Fleet reports the agent online', () => {
+      renderStatus(withIssue(INCOMPATIBLE));
+
+      expect(screen.getByTestId('agentHealth')).toHaveTextContent('degraded');
+    });
+
+    it('still opens the flyout with the real agent, not the relabelled one', async () => {
+      renderStatus(withIssue(INCOMPATIBLE));
+
+      fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
+    });
+
+    it('explains what to upgrade to in the tooltip', async () => {
+      renderStatus(withIssue(INCOMPATIBLE));
+
+      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(
+        await screen.findByText(
+          'Upgrade the agent to 9.4.0 or later to run AWS, AWS CloudWatch. This agent is on 8.18.0.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByText('See agent info')).toBeInTheDocument();
+    });
+
+    it('still explains the upgrade when Fleet does not record a minimum version', async () => {
+      renderStatus(withIssue({ ...INCOMPATIBLE, minVersion: undefined, integrations: ['AWS'] }));
+
+      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(
+        await screen.findByText("This agent is on 8.18.0, which can't run AWS. Upgrade the agent.")
+      ).toBeInTheDocument();
+    });
+
+    it('says so when the agent is not running the integration', async () => {
+      renderStatus(withIssue({ type: 'not_running' }));
+
+      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(
+        await screen.findByText("The agent isn't running this integration.")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('agentHealth')).toHaveTextContent('degraded');
+    });
+
+    it('leaves a plain unhealthy agent with just the "See agent info" tooltip and its real status', async () => {
+      renderStatus(info({ health: 'unhealthy', agent: { id: 'a1', status: 'error' } as never }));
+
+      expect(screen.getByTestId('agentHealth')).toHaveTextContent('error');
+      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
+      await waitFor(() => expect(screen.getByText('See agent info')).toBeInTheDocument());
+      expect(screen.queryByText(/Upgrade the agent/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('an agent that does not exist yet', () => {
     const noAgent = (overrides: Partial<ServiceAgentInfo> = {}) =>
       info({ health: 'pending', agent: undefined, agentIds: [], ...overrides });

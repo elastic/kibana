@@ -58,22 +58,39 @@ const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.Reac
   },
 };
 
+/** Why an error comes from the Fleet agent rather than from a failed deployment. */
+export type AgentErrorReason = 'unhealthy' | 'incompatible_version' | 'not_running';
+
 interface ServiceStatusIndicatorProps {
   status: ServiceChipState;
-  /** The error comes from an unhealthy Fleet agent rather than a failed deployment. */
-  isAgentError?: boolean;
+  agentErrorReason?: AgentErrorReason;
 }
 
-const AGENT_ERROR_LABEL = (
-  <FormattedMessage
-    id="xpack.ingestHub.detectAndReviewStep.serviceStatus.agentError"
-    defaultMessage="Agent needs attention"
-  />
-);
+const AGENT_ERROR_LABELS: Record<AgentErrorReason, React.ReactNode> = {
+  unhealthy: (
+    <FormattedMessage
+      id="xpack.ingestHub.detectAndReviewStep.serviceStatus.agentError"
+      defaultMessage="Agent needs attention"
+    />
+  ),
+  incompatible_version: (
+    <FormattedMessage
+      id="xpack.ingestHub.detectAndReviewStep.serviceStatus.agentUpgradeRequired"
+      defaultMessage="Agent upgrade required"
+    />
+  ),
+  not_running: (
+    <FormattedMessage
+      id="xpack.ingestHub.detectAndReviewStep.serviceStatus.integrationNotRunning"
+      defaultMessage="Integration isn't running"
+    />
+  ),
+};
 
-export function ServiceStatusIndicator({ status, isAgentError }: ServiceStatusIndicatorProps) {
+export function ServiceStatusIndicator({ status, agentErrorReason }: ServiceStatusIndicatorProps) {
   const { color, label: defaultLabel } = STATUS_CONFIG[status];
-  const label = status === 'error' && isAgentError ? AGENT_ERROR_LABEL : defaultLabel;
+  const label =
+    status === 'error' && agentErrorReason ? AGENT_ERROR_LABELS[agentErrorReason] : defaultLabel;
   // In-progress states are indicated by the tile's leading spinner (see ServiceTile), so the
   // label here stays plain text — a second spinner beside it would read as two activities.
   const isPending = status === 'detecting' || status === 'instantiating';
