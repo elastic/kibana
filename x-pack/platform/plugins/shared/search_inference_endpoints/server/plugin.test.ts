@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -35,7 +34,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
     const context = coreMock.createPluginInitializerContext<SearchInferenceEndpointsConfig>({
       enabled: true,
       ui: { enabled: true },
-      dynamicConnectors: { enabled: false, pollingIntervalMins: 15 },
     });
     plugin = new SearchInferenceEndpointsPlugin(context);
     coreSetup = coreMock.createSetup();
@@ -112,10 +110,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
       inference.getConnectorList.mockResolvedValue([]);
       inference.getConnectorById.mockRejectedValue(new Error('not found'));
 
-      startContract = plugin.start(coreStart, {
-        actions: actionsMock.createStart(),
-        inference,
-      });
+      startContract = plugin.start(coreStart, { inference });
     });
 
     it('endpoints.getForFeature reads inference settings with the internal client', async () => {
@@ -193,7 +188,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         async (id: string) => createConnector(id) as any
       );
 
-      const contract = plugin.start(coreStart, { actions: actionsMock.createStart(), inference });
+      const contract = plugin.start(coreStart, { inference });
       contract.features.register({
         featureId: 'any_feature',
         featureName: 'Any feature',
@@ -256,10 +251,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         inference.getConnectorList.mockResolvedValue([]);
         inference.getConnectorById.mockResolvedValue(defaultConnector as any);
 
-        const contractWithDefaultOnly = plugin.start(coreStart, {
-          actions: actionsMock.createStart(),
-          inference,
-        });
+        const contractWithDefaultOnly = plugin.start(coreStart, { inference });
 
         const result = await contractWithDefaultOnly.endpoints.getForFeature(
           'any_feature',
@@ -289,10 +281,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         inference.getConnectorList.mockResolvedValue([]);
         inference.getConnectorById.mockRejectedValue(new Error('not found'));
 
-        const contractWithDefaultOnly = plugin.start(coreStart, {
-          actions: actionsMock.createStart(),
-          inference,
-        });
+        const contractWithDefaultOnly = plugin.start(coreStart, { inference });
 
         const result = await contractWithDefaultOnly.endpoints.getForFeature(
           'any_feature',
