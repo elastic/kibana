@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -22,6 +23,7 @@ import {
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
+  type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
 import {
   dashboardTools,
@@ -36,6 +38,12 @@ import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
+
+const noDashboardCreatedErrorMessage =
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+
+const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
+  panels.length === 0 && (pinnedPanels ?? []).length === 0;
 
 const generateDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -93,6 +101,10 @@ const summarizeDashboard = (
   }),
 });
 
+export interface GenerateDashboardToolDeps {
+  getDashboardValidator: () => Promise<DashboardValidator>;
+}
+
 /**
  * Kibana dashboard generation tool.
  *
@@ -105,9 +117,9 @@ const summarizeDashboard = (
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
  */
-export const generateDashboardTool = (): BuiltinSkillBoundedTool<
-  typeof generateDashboardSchema
-> => {
+export const generateDashboardTool = ({
+  getDashboardValidator,
+}: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
@@ -138,8 +150,11 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const {
+          dashboardData: generatedDashboardData,
+          failures,
+          panelAuthoringNotes,
+        } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -153,25 +168,78 @@ Use operations[] to:
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
             esClient: esClient.asCurrentUser,
           }),
+          validator: await getDashboardValidator(),
         });
 
+        const toDashboardResult = (
+          dashboardData: DashboardAttachmentData,
+          attachmentId: string,
+          version: number
+        ) => ({
+          results: [
+            {
+              type: ToolResultType.dashboard,
+              tool_result_id: getToolResultId(),
+              data: {
+                attachment_id: attachmentId,
+                version,
+                dashboard: summarizeDashboard(
+                  dashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
+                failures: failures.length > 0 ? failures : undefined,
+              },
+            },
+          ],
+        });
+
+        // Nothing survived, so no attachment version is persisted; the failures reach the agent
+        // through the tool result.
+        if (failures.length > 0 && isNewDashboard && isEmptyDashboard(generatedDashboardData)) {
+          logger.info('Dashboard was not created because none of the changes were applied');
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: noDashboardCreatedErrorMessage,
+                  metadata: { failures },
+                },
+              },
+            ],
+          };
+        }
+        if (latestVersion && isEqual(generatedDashboardData, latestVersion.data)) {
+          logger.info('Dashboard was not updated because it did not change');
+          return toDashboardResult(
+            generatedDashboardData,
+            dashboardAttachmentId,
+            latestVersion.version
+          );
+        }
+
         // Data-aware default time range computation
-        const finalDashboardData = await applyDefaultDashboardTimeRange({
-          dashboardData,
+        const dashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData: generatedDashboardData,
           esClient,
           logger,
         });
 
-        const description = `Dashboard: ${finalDashboardData.title}`;
+        const description = `Dashboard: ${dashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: finalDashboardData,
+              data: dashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: finalDashboardData,
+              data: dashboardData,
               description,
             });
 
@@ -187,34 +255,13 @@ Use operations[] to:
             attachment: {
               id: attachment.id,
               type: DASHBOARD_ATTACHMENT_TYPE,
-              data: finalDashboardData,
+              data: dashboardData,
               origin: attachment.origin,
             },
           }
         );
 
-        return {
-          results: [
-            {
-              type: ToolResultType.dashboard,
-              tool_result_id: getToolResultId(),
-              data: {
-                attachment_id: attachment.id,
-                version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(
-                  finalDashboardData,
-                  new Map(
-                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
-                      panelId,
-                      authoringNote,
-                    ])
-                  )
-                ),
-                failures: failures.length > 0 ? failures : undefined,
-              },
-            },
-          ],
-        };
+        return toDashboardResult(dashboardData, attachment.id, attachment.current_version ?? 1);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in generate_dashboard tool: ${errorMessage}`);
