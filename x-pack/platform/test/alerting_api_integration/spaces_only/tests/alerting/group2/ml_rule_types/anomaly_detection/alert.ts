@@ -75,8 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  // Failing: See https://github.com/elastic/kibana/issues/279661
-  describe.skip('alert', () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 
@@ -248,7 +247,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     async function waitForAAD(numDocs: number): Promise<any[]> {
       return await retry.try(async () => {
-        const searchResult = await es.search({ index: AAD_INDEX, size: 1000 });
+        // The rule runs against a live real-time datafeed with interim results, so the alert
+        // can flap between active and recovered while the interim bucket is written. Recovered
+        // alert documents intentionally carry no anomaly score, so only read active alerts here.
+        const searchResult = await es.search({
+          index: AAD_INDEX,
+          size: 1000,
+          query: { term: { 'kibana.alert.status': 'active' } },
+        });
 
         // @ts-expect-error doesn't handle total: number
         const value = searchResult.hits.total.value?.value || searchResult.hits.total.value;
