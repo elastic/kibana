@@ -180,19 +180,22 @@ function buildInvestigationStep(
   hasAlertRows: boolean
 ): Record<string, unknown> {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
-  // The alert shape also covers an automation with no alert or Slack rows, which runs from the
-  // manual trigger and has no payload to read.
   return {
     name,
     type: 'nightshift.triggerInvestigation',
     with: {
       ...(kind === 'slack'
         ? { subject_type: 'manual', subject_id: SLACK_SUBJECT_ID, title: automation.name }
-        : {
+        : hasAlertRows
+        ? {
             subject_type: 'alert',
-            subject_id: hasAlertRows ? '{{ trigger.alert.uuid }}' : automationId,
-            title: hasAlertRows ? '{{ trigger.rule.name }}' : automation.name,
-          }),
+            subject_id: '{{ trigger.alert.uuid }}',
+            title: '{{ trigger.rule.name }}',
+          }
+        : // An automation with no alert or Slack rows runs from the manual trigger and has no
+          // alert payload, and an alert investigation requires `context.alerts`, so the prompt
+          // is the whole subject.
+          { subject_type: 'manual', subject_id: automationId, title: automation.name }),
       summary: automation.name,
       trigger_type: 'automatic',
       ...buildMessage(automation.execution.promptTemplate, kind === 'slack'),
