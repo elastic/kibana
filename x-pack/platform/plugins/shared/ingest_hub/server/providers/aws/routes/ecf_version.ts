@@ -11,7 +11,7 @@ import { ECF_LATEST_VERSION_API_PATH } from '../../../../common/providers/aws/ec
 import { getLatestEcfVersion } from '../services/ecf_version';
 
 /**
- * Registers `GET /internal/ingest_hub/ecf/latest_version`.
+ * Registers `GET /internal/onboarding/ecf/latest_version`.
  *
  * Acts as a server-side proxy for the ECF template on S3, which returns no CORS headers and
  * cannot be fetched directly from the browser. Returns only the resolved semantic version string
