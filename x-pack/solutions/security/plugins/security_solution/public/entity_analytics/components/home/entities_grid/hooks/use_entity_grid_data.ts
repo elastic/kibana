@@ -37,7 +37,7 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Error loading entities table' }
 );
 
-/** Most rows the grid loads. Its body renders only the rows in view, and enriches only those. */
+/** The body renders and enriches only the rows in view, so the grid can load this many. */
 export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
@@ -105,7 +105,6 @@ const fetchCount = async (
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
-/** The rows plus one, from the sort column's query. */
 const fetchSortRows = async (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -117,10 +116,7 @@ const fetchSortRows = async (
   return fetchSortPage(args, { runQuery: createEsqlRunner(context.searchService, signal) });
 };
 
-/**
- * The rows of the view. The sort query reads one row more than the limit: that extra row only
- * tells whether the view has more rows than the grid shows.
- */
+/** The sort query reads one extra row, only to tell whether the view has more. */
 const fetchRows = async (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -136,7 +132,6 @@ const fetchRows = async (
   };
 };
 
-/** The options with no more rows than the grid shows. */
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
@@ -213,15 +208,7 @@ const usePrefetch = (context: GridContext) =>
     [context]
   );
 
-/**
- * The grid's rows, at most `pageSize` of them:
- * 1. Rows: the sort column's query (see queries/README.md).
- * 2. Count: the entities in view, shared by every sort.
- * 3. Enrich: the computed columns of the loaded rows, or of the rows in view (see the
- *    enrichment hook).
- * A new sort or filter paints the previous rows until its own arrive. `prefetch` warms the rows
- * of another view, e.g. a group's records on hover.
- */
+/** The rows of the sort column's query, the count of the view, and the computed columns of rows in view. */
 export const useEntityGridData = (
   requestedOptions: UseEntityGridDataOptions,
   /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */

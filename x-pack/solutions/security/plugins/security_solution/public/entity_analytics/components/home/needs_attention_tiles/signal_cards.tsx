@@ -25,7 +25,6 @@ import type { SignalCardData, SignalCardId } from './data';
 
 export interface SignalCardsProps {
   activeTile: SignalCardId | null;
-  /** Tile values for the current page filters. */
   cards: SignalCardData[];
   onFilterForTile: (tileId: SignalCardId) => void;
   /** Kept for MetricChartsPanel wiring; tiles are whole-tile toggles in v.5. */
@@ -514,8 +513,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 align-items: flex-end;
               `}
             >
-              {/* The spinner sits inside the title so the value's line box keeps the tile
-                  height while loading; otherwise the table below jumps. */}
+              {/* Spinner inside the title, so the tile keeps its height and the table below doesn't jump. */}
               <EuiTitle
                 size="l"
                 css={css`

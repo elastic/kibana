@@ -7,6 +7,7 @@
 
 import { escapeStringValue } from '@kbn/esql-utils';
 import {
+  CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
   RESOLUTION_RISK_SCORE_FIELD,
   RESOLVED_TO_FIELD,
@@ -14,7 +15,7 @@ import {
   getEntityId,
   getEntityIds,
 } from '../common';
-import type { QueryArgs, Row, SortDir, SortValue } from '../common';
+import type { QueryArgs, Row, SortValue } from '../common';
 import {
   buildEntitiesInViewSteps,
   buildEntityFilterConditions,
@@ -24,33 +25,20 @@ import {
   ENTITY_TYPE_FILTER,
   buildRowFieldsSteps,
   buildSortSuffix,
-  compareEntityIds,
   fetchPerIdChunk,
   getEntityAlias,
   getMaxAliasGroups,
+  getSortValue,
+  getSortedPage,
   toList,
 } from './esql';
 import {
   CRITICALITY_LEVELS,
+  SORTABLE_RESOLVED_ENTITY_FIELDS,
   buildResolvedEntityRowSteps,
   getCriticalitySortRank,
 } from './resolved_entities';
 import type { ColumnQuerySpec, EsqlRunner, SortPageContext } from './types';
-
-/** The entity fields whose value on a resolved row is taken over its main entity and aliases. */
-const FIELDS_OVER_ALIASES: readonly string[] = [
-  'asset.criticality',
-  'entity.lifecycle.first_seen',
-  '@timestamp',
-];
-
-/** Sorted by a field of the entity doc. */
-export const nativeSortQuerySpec = {
-  fetchSortPage: (args, ctx) =>
-    args.rowsMode === 'resolved' && FIELDS_OVER_ALIASES.includes(args.sort.field)
-      ? fetchSortedWithAliases(args, ctx)
-      : fetchSortedByField(args, ctx),
-} satisfies ColumnQuerySpec;
 
 const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
   if (args.sort.field === CRITICALITY_FIELD) return fetchSortedByCriticality(args, runQuery);
@@ -60,10 +48,7 @@ const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) => {
   return runQuery(buildSortedByFieldQuery(args));
 };
 
-/**
- * The few resolved entities with aliases are read apart, with their value over the aliases. The
- * others sort by their own value, with as many extra rows as can be dropped, then both merge.
- */
+/** Resolved entities with aliases take values over them, so they're read apart and merged with the rest. */
 const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => {
   const withAliases = await fetchResolvedEntitiesWithAliases(
     args,
@@ -77,11 +62,7 @@ const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => 
   return getMergedPage(args, withAliases, others);
 };
 
-/**
- * The entities in view that pass `condition`, sorted by the stored `sortField`. The sort runs
- * before the row fields, which compute a value on resolved rows: Lucene then stops after the
- * limit instead of sorting every entity in view.
- */
+/** Sorts before the row fields, so Lucene stops at the limit instead of sorting every entity. */
 const buildSortedByFieldQuery = (
   args: QueryArgs,
   sortField: string = args.sort.field,
@@ -93,13 +74,7 @@ const buildSortedByFieldQuery = (
   ...buildRowFieldsSteps(args),
 ];
 
-/**
- * A resolved row's risk score is its resolved entity's, stored on main entities with aliases, or
- * else its own. Each side sorts by its stored field and the two merge.
- *
- * Why: a sort by the score computed per row sorts every entity in view (~13.6s at 10M entities,
- * ECH, Oct 2026).
- */
+/** Sorting by a per-row score sorts everything (~13.6s at 10M), so each stored field sorts apart, then merge. */
 const fetchSortedByResolvedRiskScore = async (
   args: QueryArgs,
   runQuery: EsqlRunner
@@ -119,16 +94,7 @@ const fetchSortedByResolvedRiskScore = async (
   return getSortedPage(args, [...withResolvedScore, ...others]);
 };
 
-const CRITICALITY_FIELD = 'asset.criticality';
-
-/**
- * Criticality sorts by its rank, from unassigned to extreme, not by its text: one query per level,
- * in the order of the sort, until the rows are full.
- *
- * Why: a sort by a rank computed per entity sorts every entity in view (~60s at 10M entities, ECH,
- * Oct 2026); a level is a filter and each query sorts by entity.id, so Lucene stops after the
- * limit (~1.8s for the whole sort). There are at most five levels, whatever the data.
- */
+/** Sorting by a computed rank took ~60s at 10M; one filtered query per level stops early (~1.8s). */
 const fetchSortedByCriticality = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
   const limit = args.pageSize + 1;
   // Unassigned (no known level) is the lowest.
@@ -157,7 +123,6 @@ const buildCriticalityLevelQuery = (
   ...buildRowFieldsSteps(args),
 ];
 
-/** The resolved entities with aliases that pass the filters, with their values over the aliases. */
 const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
@@ -165,45 +130,18 @@ const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string[] => [
   ...buildResolvedEntityRowsOutput(args),
 ];
 
-// A sort by a value that a resolved entity takes over its aliases reads the few resolved entities
-// with aliases apart from the other entities, which sort natively by their own value. The two are
-// merged here.
-
-/**
- * The end of the query of resolved entities with aliases: the filters on the entity fields, which
- * by now hold the resolved entity's values, and the fields of the rows.
- */
+/** The filters now test the resolved entity's values, which replaced the main entity's. */
 const buildResolvedEntityRowsOutput = (args: QueryArgs): string[] => [
   ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
   ...buildRowFieldsSteps(args),
   `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
 ];
 
-const getSortValue = (row: Row, field: string): SortValue => {
-  if (field === CRITICALITY_FIELD) return getCriticalitySortRank(row[field]);
-  const value = row[field];
-  return typeof value === 'string' || typeof value === 'number' ? value : null;
-};
+/** The value a row sorts by: criticality by its rank, from unassigned to extreme. */
+const getNativeSortValue = (row: Row, field: string): SortValue =>
+  field === CRITICALITY_FIELD ? getCriticalitySortRank(row[field]) : getSortValue(row, field);
 
-/** `SORT field <dir> NULLS LAST, entity.id ASC` order. */
-const compareRows =
-  (field: string, direction: SortDir) =>
-  (a: Row, b: Row): number => {
-    const [valueA, valueB] = [getSortValue(a, field), getSortValue(b, field)];
-    if (valueA !== valueB) {
-      if (valueA == null) return 1;
-      if (valueB == null) return -1;
-      return (valueA < valueB ? -1 : 1) * (direction === 'desc' ? -1 : 1);
-    }
-    return compareEntityIds(a, b);
-  };
-
-/**
- * The resolved entities with aliases that pass the filters and the search, with their values, from
- * `query`. A search can't run after the join of the main entities, so its matches among them are
- * read apart. Fails when there are more of them than a page can be built from: a page from part
- * of them would be in the wrong order.
- */
+/** KQL can't run after their join, so matches are checked apart; too many would break the order, so fail. */
 const fetchResolvedEntitiesWithAliases = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
@@ -224,23 +162,23 @@ const fetchResolvedEntitiesWithAliases = async (
   return rows.filter((row) => searchedIds.has(getEntityId(row) ?? ''));
 };
 
-/**
- * The rows from the resolved entities with aliases and the other entities, both sorted: the row
- * of a resolved entity with aliases replaces its own row among the others, then the rows are
- * sorted and cut to the limit and its extra row.
- */
+/** A resolved entity's row over its aliases replaces its own row before the merge. */
 const getMergedPage = (
   args: QueryArgs,
   withAliases: readonly Row[],
   others: readonly Row[]
 ): Row[] => {
   const withAliasesIds = new Set(getEntityIds(withAliases));
-  return getSortedPage(args, [
-    ...withAliases,
-    ...others.filter((row) => !withAliasesIds.has(getEntityId(row) ?? '')),
-  ]);
+  return getSortedPage(
+    args,
+    [...withAliases, ...others.filter((row) => !withAliasesIds.has(getEntityId(row) ?? ''))],
+    getNativeSortValue
+  );
 };
 
-/** The rows in the order of the sort, cut to the limit and its extra row. */
-const getSortedPage = ({ sort, pageSize }: QueryArgs, rows: Row[]): Row[] =>
-  rows.sort(compareRows(sort.field, sort.direction)).slice(0, pageSize + 1);
+export const nativeSortQuerySpec = {
+  fetchSortPage: (args, ctx) =>
+    args.rowsMode === 'resolved' && SORTABLE_RESOLVED_ENTITY_FIELDS.includes(args.sort.field)
+      ? fetchSortedWithAliases(args, ctx)
+      : fetchSortedByField(args, ctx),
+} satisfies ColumnQuerySpec;

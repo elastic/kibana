@@ -562,8 +562,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         isLoading: alertBasedLoading,
-        // TODO: counts only high/critical alerts now. Suggested description:
-        // "Entities with at least one high- or critical-severity alert in the last {timeRange}"
+        // TODO: counts high/critical alerts only; suggested description: "Entities with at least one high- or critical-severity alert in the last {timeRange}"
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {

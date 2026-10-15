@@ -7,13 +7,11 @@
 
 import { css } from '@emotion/react';
 
-/** A row of the grid: as wide as its cells, and at least as wide as the grid. */
 export const gridRowCss = css`
   inline-size: fit-content;
   min-inline-size: 100%;
 `;
 
-/** The cells of a row, side by side. */
 export const gridRowCellsCss = css`
   display: flex;
 `;

@@ -121,8 +121,7 @@ apiTest.describe(
       // The other space: one case.
       await createCaseWithEntity(apiServices.cases, { spaceId: OTHER_SPACE_ID });
       await apiServices.spaces.create({ id: GROUP_SPACE_ID, name: GROUP_SPACE_ID });
-      // A group in its own space: the main entity and its alias share a case, and the alias has
-      // one of its own.
+      // A group in its own space: the main entity and its alias share a case, and the alias has its own.
       const sharedCaseId = await createCaseWithEntity(apiServices.cases, {
         entityId: GROUP_HEAD,
         spaceId: GROUP_SPACE_ID,
@@ -201,8 +200,7 @@ apiTest.describe(
           return response.body;
         };
 
-        // The main entity alone is in the shared case. With its alias it has the alias' own case
-        // too, and the case that they share counts once.
+        // Alone, the main entity has the shared case; with its alias, also the alias' case, the shared one counted once.
         expect(await countOf({ entity_ids: [GROUP_HEAD] })).toStrictEqual({ [GROUP_HEAD]: 1 });
         expect(await countOf({ entity_ids: [GROUP_HEAD], include_members: true })).toStrictEqual({
           [GROUP_HEAD]: 2,

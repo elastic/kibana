@@ -12,10 +12,7 @@ import {
 } from '../components/home/constants';
 import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
 
-/**
- * Scope of the new entities table for the selected time range. Each range has its own
- * scope, so flyouts opened from the table query alerts over the range the table shows.
- */
+/** Each time range has its own scope, so flyouts from the table read alerts over the range it shows. */
 export const getEntityAnalyticsNewHomeScopeId = (timeRange: TimeRange): string =>
   `entity-analytics-new-entities-table-${timeRange}`;
 

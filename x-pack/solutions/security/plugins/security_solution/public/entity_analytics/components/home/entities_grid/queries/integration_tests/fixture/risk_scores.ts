@@ -17,10 +17,7 @@ const REFERENCE_SCORES: Readonly<Record<string, number>> = {
   'user:alice@okta': 80,
 };
 
-/**
- * The group scores of the risk engine, written next to the entity's own score with the same key,
- * and later in the reference window. The change must still read the own reference score.
- */
+/** Group scores written beside the own ones, later in the window: the change must still read the own. */
 const RESOLUTION_SCORES: Readonly<Record<string, number>> = {
   'host:h1': 80,
 };

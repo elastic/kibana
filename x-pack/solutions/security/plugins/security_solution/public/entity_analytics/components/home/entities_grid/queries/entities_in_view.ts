@@ -7,13 +7,10 @@
 
 import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { ENTITY_TYPE_FILTER, getEntityAlias, toList } from './esql';
+import { ENTITY_TYPE_FILTER, buildRowRiskScoreSteps, getEntityAlias, toList } from './esql';
 import type { EntityAggregation } from './esql';
 import { applyResolvedEntityFilterOverrides } from './resolved_entities';
 
-// ── entities in view ─────────────────────────────────────────────────────────
-
-/** Conditions of the entity filters on entity docs, which hold the entities' own values. */
 export const buildEntityFilterConditions = ({
   entityExpression,
   resolvedEntityFilterOverrides,
@@ -22,32 +19,14 @@ export const buildEntityFilterConditions = ({
     ? [applyResolvedEntityFilterOverrides(entityExpression, resolvedEntityFilterOverrides)]
     : [];
 
-/** Conditions on entity docs that make them rows of the grid (rows mode and filters). */
-/** The entities that are rows, as conditions on the entity docs. */
-export const buildEntitiesInViewConditions = (args: QueryArgs): string[] =>
-  args.rowsMode === 'resolved'
-    ? buildResolvedEntitiesInViewConditions(args)
-    : buildIndividualEntitiesInViewConditions(args);
-
-/** Individual rows: every entity of the grid's types that the search and the filters match. */
-const buildIndividualEntitiesInViewConditions = (args: QueryArgs): string[] => [
+/** The grid's rows; on resolved rows only main entities, as their aliases count for them. */
+export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [
   ENTITY_TYPE_FILTER,
-  ...buildSearchConditions(args),
+  ...(args.rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
+  ...(args.searchExpression ? [args.searchExpression] : []),
   ...buildEntityFilterConditions(args),
 ];
 
-/** Resolved rows: the main entities only, as their aliases count for them. */
-const buildResolvedEntitiesInViewConditions = (args: QueryArgs): string[] => [
-  ENTITY_TYPE_FILTER,
-  `${RESOLVED_TO_FIELD} IS NULL`,
-  ...buildSearchConditions(args),
-  ...buildEntityFilterConditions(args),
-];
-
-const buildSearchConditions = ({ searchExpression }: QueryArgs): string[] =>
-  searchExpression ? [searchExpression] : [];
-
-/** Entity docs that are rows of the grid for the current rows mode and filters. */
 export const buildEntitiesInViewSteps = (args: QueryArgs): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
@@ -69,7 +48,19 @@ export const IN_VIEW_AGGREGATION: EntityAggregation = {
   resolvedEntity: 'MAX',
 };
 
-/** The targets among `targetIds` that the search matches. */
+/** The entities side of `FROM (source), (entities)`, marked in view so entities without data stay as rows. */
+export const buildEntitiesInViewBranch = (
+  args: QueryArgs,
+  fields: readonly string[] = [],
+  conditions: readonly string[] = []
+): string[] => [
+  ...buildEntitiesInViewSteps(args),
+  ...buildRowRiskScoreSteps(args),
+  ...conditions.map((condition) => `| WHERE ${condition}`),
+  `| EVAL ${IN_VIEW_FIELD} = 1`,
+  `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...fields].join(', ')}`,
+];
+
 export const buildSearchedTargetsQuery = (
   args: QueryArgs,
   targetIds: readonly string[]

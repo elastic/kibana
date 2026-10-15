@@ -37,7 +37,6 @@ const fetchCaseCounts = async (
   }
 };
 
-/** Counts the cases of the page rows; of a resolved row, over the resolved entity and its aliases. */
 const caseCountEnricher: PageEnricher = {
   fields: [CASE_COUNT_FIELD],
   fetch: async (pageRows, args, ctx) => {
@@ -48,7 +47,5 @@ const caseCountEnricher: PageEnricher = {
     return new Map(entityIds.map((id) => [id, { [CASE_COUNT_FIELD]: counts.get(id) ?? 0 }]));
   },
 };
-
-// ── query spec ────────────────────────────────────────────────────────────────
 
 export const caseCountQuerySpec = { enricher: caseCountEnricher } satisfies ColumnQuerySpec;

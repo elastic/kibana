@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
-import { getEntityId, getEntityIds } from '../common';
+import { getEntityId, getEntityIds, toChunks } from '../common';
 import { PAGE_ENRICHERS } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
@@ -34,11 +34,6 @@ export const ENRICH_CHUNK_SIZE = 50;
 
 /** How long a chunk's computed columns stay fresh: scrolling back to it within this reads nothing. */
 const ENRICH_STALE_TIME_MS = 60_000;
-
-const getChunks = (rows: readonly Row[]): Row[][] =>
-  Array.from({ length: Math.ceil(rows.length / ENRICH_CHUNK_SIZE) }, (_, i) =>
-    rows.slice(i * ENRICH_CHUNK_SIZE, (i + 1) * ENRICH_CHUNK_SIZE)
-  );
 
 /** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
 const isMissingFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
@@ -105,7 +100,6 @@ const getEnrichKey = (
     },
   ] as const;
 
-/** The computed columns of a chunk's rows. */
 const fetchEnrichedChunk = (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -122,11 +116,7 @@ const fetchEnrichedChunk = (
   );
 };
 
-/**
- * The loaded rows: each chunk's rows with its computed columns once they are read. The rows
- * come from the rows query, so a refetch shows fresh entity fields right away; the computed
- * columns come from the chunk's enrich data, matched by entity id.
- */
+/** Rows come from the rows query, so a refetch shows fresh fields; computed columns match by entity id. */
 export const getLoadedRows = (
   chunks: ReadonlyArray<{ rows: readonly Row[]; enriched?: readonly Row[] }>
 ): Row[] =>
@@ -150,10 +140,7 @@ const getEnrichQuery = (
   staleTime: ENRICH_STALE_TIME_MS,
 });
 
-/**
- * The enrich data of every chunk. With `enrichRowsInView` the queries only read the cache:
- * `onRowsInViewChange` fetches the chunks in view into it.
- */
+/** With `enrichRowsInView` these only read the cache; `onRowsInViewChange` fills it. */
 const useEnrichQueries = (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -168,10 +155,7 @@ const useEnrichQueries = (
     })),
   });
 
-/**
- * Fetches the chunks of the rows in view, unless their data is fresh. Not state: a new range
- * re-renders nothing, only the data it reads does.
- */
+/** Not state: a new range re-renders nothing, only the data it fetches does. */
 const useEnrichRowsInView = (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -220,11 +204,7 @@ const useLoadedRows = (
   );
 };
 
-/**
- * The computed columns of the loaded rows, read in chunks of ENRICH_CHUNK_SIZE rows keyed on
- * their entity ids, so a refetch with the same rows keeps showing them while it runs. With
- * `enrichRowsInView`, only the chunks in view are read, as the grid reports them.
- */
+/** Chunks keyed on entity ids, so a refetch with the same rows keeps showing their columns. */
 export const useEntityGridRowsEnrichment = (
   context: GridContext,
   options: UseEntityGridDataOptions,
@@ -232,7 +212,7 @@ export const useEntityGridRowsEnrichment = (
   isPreviousData: boolean,
   enrichRowsInView: boolean
 ) => {
-  const chunks = useMemo(() => getChunks(loadedRows ?? []), [loadedRows]);
+  const chunks = useMemo(() => toChunks(loadedRows ?? [], ENRICH_CHUNK_SIZE), [loadedRows]);
   const enrichQueries = useEnrichQueries(
     context,
     options,

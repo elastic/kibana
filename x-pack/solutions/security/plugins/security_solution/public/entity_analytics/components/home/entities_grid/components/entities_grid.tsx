@@ -104,7 +104,6 @@ export interface EntitiesGridProps {
   rowActions?: RowActions;
   /** When provided, shows the full toolbar with controls. */
   groupSelectorComponent?: React.ReactNode;
-  /** Called when the grid enters or leaves full screen. */
   onFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
@@ -138,8 +137,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const expandedIds = useMemo(() => new Set(expandedIdList), [expandedIdList]);
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map((c) => c.id));
-  // When the column set changes (rows mode), show its columns and keep the user's extra
-  // fields. Adjusting state during render avoids a commit with stale visibility.
+  // Set during render, not in an effect, so a rows mode change never commits stale columns.
   const [columnsForVisibility, setColumnsForVisibility] = useState(columns);
   if (columnsForVisibility !== columns) {
     const prevCatalog = new Set(columnsForVisibility.map((c) => c.id));

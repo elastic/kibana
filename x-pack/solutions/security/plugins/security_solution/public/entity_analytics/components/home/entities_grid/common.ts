@@ -14,8 +14,6 @@ import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helper
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
-// ── constants ────────────────────────────────────────────────────────────────
-
 export const ALLOWED_ENTITY_TYPES = [
   'user',
   'host',
@@ -27,6 +25,7 @@ export const ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 export const RISK_SCORE_NORM_FIELD = 'entity.risk.calculated_score_norm';
 export const RISK_LEVEL_FIELD = 'entity.risk.calculated_level';
+export const CRITICALITY_FIELD = 'asset.criticality';
 /** The group's risk score and level, which the main entity of a group with aliases holds. */
 export const RESOLUTION_RISK_SCORE_FIELD =
   'entity.relationships.resolution.risk.calculated_score_norm';
@@ -47,7 +46,6 @@ export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 export const ROWS_MODES = ['resolved', 'individual'] as const;
 export const SORT_DIRECTIONS = ['asc', 'desc'] as const;
 
-/** Whether `value` is one of `options`, narrowing it to their union. */
 export const isOneOf = <T extends string>(options: readonly T[], value: unknown): value is T =>
   options.some((option) => option === value);
 
@@ -92,14 +90,11 @@ export const ENTITY_FIELDS = [
   ...IDENTITY_KEEP_FIELDS,
 ] as const;
 
-// ── types ────────────────────────────────────────────────────────────────────
-
 export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
 export type RowsMode = (typeof ROWS_MODES)[number];
 export type Row = Record<string, unknown>;
 export type SortDir = (typeof SORT_DIRECTIONS)[number];
 
-/** The filter dropdowns' selections. */
 export interface EntityFilters {
   entityTypes: EntityType[];
   riskLevels: RiskSeverity[];
@@ -115,14 +110,9 @@ export const EMPTY_ENTITY_FILTERS: EntityFilters = {
   watchlists: [],
   dataSources: [],
 };
-/** A sort column value. Sort columns hold strings, numbers or null. */
 export type SortValue = string | number | null;
 
-/**
- * The resolved entities with aliases that pass the entity filters differently from their main
- * entity: the entity docs hold only the own value, so these are added to or removed from the
- * entities that pass on their own.
- */
+/** Entity docs hold only own values, so resolved entities that pass differently are added or removed. */
 export interface ResolvedEntityFilterOverrides {
   /** Resolved entities that pass, though their main entity does not. */
   include: readonly string[];
@@ -138,21 +128,11 @@ export interface QueryArgs {
   rowsMode: RowsMode;
   /** Concrete (non-alias) entity store index name — required for ES|QL LOOKUP JOIN from the browser. */
   concreteEntityIndexName: string;
-  /**
-   * Lucene-pushable search bar predicates (KQL / filter pills / group filters).
-   * Applied as `| WHERE …` on entity docs: the entities in view, or group members.
-   */
+  /** Search bar predicates (KQL, filter pills, group filters), applied to entity docs before any join. */
   searchExpression?: string;
-  /**
-   * Entity doc predicates (URL entity filters, tile id IN-lists).
-   * Applied as `| WHERE …` on entity docs: the entities in view, or after the group join.
-   */
+  /** URL entity filters and tile id lists, applied to entity docs. */
   entityExpression?: string;
-  /**
-   * What `entityExpression` needs to test the resolved entities with aliases, whose value in the
-   * criticality, sources and watchlists columns is not on their doc: see
-   * {@link ResolvedEntityFilterOverrides}.
-   */
+  /** Group values (criticality, sources, watchlists) aren't on the doc, so filters on them need these. */
   resolvedEntityFilterOverrides?: ResolvedEntityFilterOverrides;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
   keepFields?: readonly string[];
@@ -160,15 +140,11 @@ export interface QueryArgs {
   anomalyJobIds: readonly string[];
 }
 
-// ── row readers ──────────────────────────────────────────────────────────────
-
-/** Reads a string field of a row; `undefined` when it is absent or not a string. */
 export const getString = (row: Row, field: string): string | undefined => {
   const value = row[field];
   return typeof value === 'string' ? value : undefined;
 };
 
-/** Reads a number field of a row; `undefined` when it is absent or not a number. */
 export const getNumber = (row: Row, field: string): number | undefined => {
   const value = row[field];
   return typeof value === 'number' ? value : undefined;
@@ -176,6 +152,10 @@ export const getNumber = (row: Row, field: string): number | undefined => {
 
 export const getEntityId = (row: Row): string | undefined => getString(row, ENTITY_ID_FIELD);
 
-/** Entity ids of the rows, without rows that have no id. */
+export const toChunks = <T>(items: readonly T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, i) =>
+    items.slice(i * size, (i + 1) * size)
+  );
+
 export const getEntityIds = (rows: readonly Row[]): string[] =>
   rows.flatMap((row) => getEntityId(row) ?? []);

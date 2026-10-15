@@ -14,61 +14,48 @@ import {
   getString,
 } from '../common';
 import type { QueryArgs, Row } from '../common';
-import { buildComputedColumnSortQuery } from './computed_column_sort';
-import { ENTITY_TYPE_FILTER, getEntityAlias, toList } from './esql';
-import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
-import { fetchComputedColumnSortPage } from './computed_column';
+import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
+import {
+  ENTITY_TYPE_FILTER,
+  buildEntityAggregations,
+  buildJoinedPageSteps,
+  buildStatsByEntityClause,
+  getEntityAlias,
+  toList,
+} from './esql';
+import type { EnrichedFields, SortPageContext } from './types';
+import { buildSortWithValueSteps, getComputedColumnQuerySpec } from './computed_column';
 import type { ComputedColumn } from './computed_column';
 
-/** The resolved entity of an alias, and the entity itself otherwise. */
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
-// ── what the column does ─────────────────────────────────────────────────────
+const buildGroupSizeSortWithValueQuery = (args: QueryArgs, limit: number): string[] => [
+  `FROM ${getEntityAlias(args.namespace)}`,
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+  `| EVAL \`entity.id\` = ${RESOLVED_TO_FIELD}`,
+  `| STATS alias_count = COUNT(*) BY \`entity.id\``,
+  `| EVAL ${GROUP_SIZE_FIELD} = alias_count + 1`,
+  ...buildSortWithValueSteps(args, GROUP_SIZE_FIELD, limit),
+];
 
-/**
- * A group's size is its aliases plus itself. Only resolved entities with aliases have a value
- * over 1, and their alias docs are few, so they are the column's source rows; every other entity
- * is a group of one.
- */
-const groupSizeColumn: ComputedColumn = {
-  field: GROUP_SIZE_FIELD,
-  emptyValue: 1,
-  emptyColumns: `${GROUP_SIZE_FIELD} = TO_LONG(1)`,
-  buildSourceRows: ({ namespace }) => [
-    `FROM ${getEntityAlias(namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-    `| EVAL \`entity.id\` = ${RESOLVED_TO_FIELD}`,
-  ],
-  aggregations: [{ field: 'alias_count', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' }],
-  // The source rows are already counted for the resolved entity.
-  rollsUpOverAliases: false,
-  afterStats: [`| EVAL ${GROUP_SIZE_FIELD} = alias_count + 1`],
-  fetchValues: (rows, args, ctx) => fetchGroupSizes(rows, args, ctx),
-  buildMergedSortQuery: (args) =>
-    buildComputedColumnSortQuery(args, {
-      sourceRows: [
-        `FROM ${getEntityAlias(args.namespace)}`,
-        `| WHERE ${ENTITY_TYPE_FILTER}`,
-        `| EVAL group_key = ${GROUP_KEY}`,
-        `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
-        '| RENAME group_key AS `entity.id`',
-      ],
-      mergeAggregations: [`${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD})`],
-      sortField: GROUP_SIZE_FIELD,
-    }),
-};
+const buildGroupSizeSortAllQuery = (args: QueryArgs): string[] => [
+  'FROM (',
+  `FROM ${getEntityAlias(args.namespace)}`,
+  `| WHERE ${ENTITY_TYPE_FILTER}`,
+  `| EVAL group_key = ${GROUP_KEY}`,
+  `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
+  '| RENAME group_key AS `entity.id`',
+  '), (',
+  ...buildEntitiesInViewBranch(args),
+  ')',
+  buildStatsByEntityClause([
+    `${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD})`,
+    ...buildEntityAggregations([IN_VIEW_AGGREGATION]),
+  ]),
+  `| WHERE ${IN_VIEW_FIELD} == 1`,
+  ...buildJoinedPageSteps(args, GROUP_SIZE_FIELD),
+];
 
-export const groupSizeQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchComputedColumnSortPage(groupSizeColumn, args, ctx),
-  enricher: {
-    fields: [GROUP_SIZE_FIELD],
-    fetch: (rows, args, ctx) => fetchGroupSizes(rows, args, ctx),
-  },
-} satisfies ColumnQuerySpec;
-
-// ── values of given rows ─────────────────────────────────────────────────────
-
-/** The size of each row's group: a resolved entity counts its aliases, an alias is one record. */
 const fetchGroupSizes = async (
   rows: readonly Row[],
   { namespace }: QueryArgs,
@@ -92,3 +79,12 @@ const fetchGroupSizes = async (
   // An alias row is never a group key, so it gets 1: it is a single record.
   return new Map(entityIds.map((id) => [id, { [GROUP_SIZE_FIELD]: byGroupKey.get(id) ?? 1 }]));
 };
+
+const groupSizeColumn: ComputedColumn = {
+  emptyValues: { [GROUP_SIZE_FIELD]: 1 },
+  buildSortAllQuery: buildGroupSizeSortAllQuery,
+  buildSortWithValueQuery: buildGroupSizeSortWithValueQuery,
+  fetchValues: fetchGroupSizes,
+};
+
+export const groupSizeQuerySpec = getComputedColumnQuerySpec(groupSizeColumn);

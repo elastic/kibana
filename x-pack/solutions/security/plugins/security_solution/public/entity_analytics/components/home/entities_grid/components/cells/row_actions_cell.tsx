@@ -89,8 +89,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {/* The popover mounts only once opened: a mounted popover scans its button for focusable
-            elements, which costs too much in every row while the grid scrolls. */}
+        {/* Mounted only once opened: a mounted popover scans its button for focusables, too costly per row. */}
         {isMoreActionsOpen ? (
           <EuiPopover
             aria-label={i18nStrings.moreActions}

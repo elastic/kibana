@@ -6,18 +6,26 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import {
-  buildRowFieldsSteps,
-  buildEntityAggregations,
-  buildAliasesToResolvedEntitySteps,
-} from './esql';
+import { buildRowFieldsSteps, buildEntityAggregations } from './esql';
+import { buildRollUpOverAliasesSteps } from './resolved_entities';
 import type { EntityAggregation } from './esql';
 import type { QueryArgs, Row } from '../common';
-import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
+import { QUERY_SPECS } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { alertCountQuerySpec } from './alerts';
 import { anomalyCountQuerySpec } from './anomalies';
-import type { RunContext, SortPageFetcher } from './types';
+import type { PageEnricher, RunContext, SortPageFetcher } from './types';
+
+const SPECS = Object.entries(QUERY_SPECS);
+
+const SORT_PAGE_FETCHERS = SPECS.flatMap(
+  ([id, spec]): Array<[string, SortPageFetcher]> =>
+    spec?.fetchSortPage ? [[id, spec.fetchSortPage]] : []
+);
+
+const COLUMN_ENRICHERS = SPECS.flatMap(
+  ([id, spec]): Array<[string, PageEnricher]> => (spec?.enricher ? [[id, spec.enricher]] : [])
+);
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
 const { enricher: anomaliesEnricher } = anomalyCountQuerySpec;
@@ -84,7 +92,6 @@ const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   return { runQuery, http };
 };
 
-/** The queries a sort page runs, joined. */
 const recordSortQueries = async (
   fetchSortPage: SortPageFetcher,
   args: QueryArgs
@@ -221,9 +228,7 @@ describe('entities grid query builders', () => {
     });
 
     it('gives the rows of an alias to its resolved entity, and aggregates them', () => {
-      expect(
-        buildAliasesToResolvedEntitySteps(BASE_ARGS.concreteEntityIndexName, AGGREGATIONS)
-      ).toEqual([
+      expect(buildRollUpOverAliasesSteps(BASE_ARGS, AGGREGATIONS)).toEqual([
         `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
         '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
         '| STATS last_at = MAX(last_at), total = SUM(total), high = SUM(high) BY `entity.id`',
@@ -231,9 +236,13 @@ describe('entities grid query builders', () => {
     });
 
     it('keeps only the ids when there is nothing to aggregate', () => {
-      expect(buildAliasesToResolvedEntitySteps(BASE_ARGS.concreteEntityIndexName, []).at(-1)).toBe(
-        '| STATS BY `entity.id`'
-      );
+      expect(buildRollUpOverAliasesSteps(BASE_ARGS, []).at(-1)).toBe('| STATS BY `entity.id`');
+    });
+
+    it('leaves individual rows as they are', () => {
+      expect(
+        buildRollUpOverAliasesSteps({ ...BASE_ARGS, rowsMode: 'individual' }, AGGREGATIONS)
+      ).toEqual([]);
     });
   });
 

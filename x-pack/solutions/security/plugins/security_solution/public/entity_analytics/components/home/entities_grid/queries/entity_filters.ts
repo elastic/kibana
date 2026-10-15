@@ -17,7 +17,6 @@ const buildMvContainsExpression = (field: string, values: readonly string[]): st
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
-/** Entity doc field of each entity filter, in filter order. */
 const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   key: keyof EntityFilters;
   field: string;
@@ -50,7 +49,6 @@ export const buildEntityFiltersExpression = (
       : [`${filterField} IN (${toList(values)})`];
   }).join(' AND ');
 
-/** DSL counterpart of {@link buildEntityFiltersExpression}. */
 export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];

@@ -10,7 +10,7 @@ import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { EMPTY_ENTITY_FILTERS } from '../../common';
 import type { QueryArgs, Row, SortDir } from '../../common';
-import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
+import { QUERY_SPECS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
 import { fetchResolvedEntityFilterOverrides, withResolvedEntityValues } from '../resolved_entities';
@@ -81,8 +81,7 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
     // The entities alone in their group (1 record) come first, by entity id.
     ['host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta', 'host:h1'],
   ],
-  // Criticality sorts by its rank, unassigned the lowest. host:h1 is extreme through one of its
-  // aliases; host:h3, service:payments and user:bob@okta are unassigned.
+  // By rank, unassigned last: host:h1 is extreme through an alias; host:h3, payments and bob are unassigned.
   [
     'asset.criticality',
     'desc',
@@ -275,8 +274,7 @@ describe('entities grid on Elasticsearch', () => {
       it.each(EXPECTED_ORDERS)(
         'reads the first rows of the %s %s order at every limit',
         async (field, direction, expected) => {
-          // Each limit cuts the rows at another place, in the value rows or the empty rows of a
-          // split sort, or where they meet. The rows read one more than the limit.
+          // Each limit cuts at another place: in the value rows, the empty rows, or where they meet.
           for (let pageSize = 1; pageSize < expected.length; pageSize++) {
             const rows = await fetchPage(cluster.runQuery, {
               ...BASE_ARGS,
@@ -359,7 +357,7 @@ describe('entities grid on Elasticsearch', () => {
     ): Promise<Record<string, Row>> => {
       const args = { ...BASE_ARGS, rowsMode };
       const rows = await fetchPage(cluster.runQuery, args);
-      const enricher = COLUMN_ENRICHERS.find(([id]) => id === columnId)?.[1];
+      const enricher = QUERY_SPECS[columnId as keyof typeof QUERY_SPECS]?.enricher;
       if (!enricher) throw new Error(`${columnId} has no enricher`);
       const fields = await enricher.fetch(rows, args, {
         runQuery: cluster.runQuery,

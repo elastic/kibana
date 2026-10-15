@@ -20,7 +20,6 @@ import {
 } from './fetch_entity_case_counts';
 import { fetchGroupMemberIds } from './fetch_group_member_ids';
 
-/** Most member ids a request lists: the cases of all of them are read in one query. */
 export const registerEntityCaseCountsRoute = ({
   router,
   logger: rootLogger,

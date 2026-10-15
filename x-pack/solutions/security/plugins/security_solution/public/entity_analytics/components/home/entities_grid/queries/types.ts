@@ -8,17 +8,14 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { QueryArgs, Row } from '../common';
 
-/** Runs an ES|QL query, given as its steps, and returns its rows. */
 export type EsqlRunner = (steps: readonly string[]) => Promise<Row[]>;
 
 export interface RunContext {
-  /** Runs an ES|QL query and returns its rows. */
   runQuery: EsqlRunner;
   http: HttpSetup;
   signal?: AbortSignal;
 }
 
-/** Fields an enricher fetched, per entity id. */
 export type EnrichedFields = ReadonlyMap<string, Row>;
 
 export interface PageEnricher {
@@ -29,7 +26,6 @@ export interface PageEnricher {
 }
 
 export interface SortPageContext {
-  /** Runs an ES|QL query and returns its rows. */
   runQuery: EsqlRunner;
 }
 

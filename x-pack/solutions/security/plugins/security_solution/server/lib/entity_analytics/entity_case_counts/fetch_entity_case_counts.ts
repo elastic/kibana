@@ -114,11 +114,7 @@ const fetchUnclosedCaseIds = async (
  * The open and in-progress Security cases of the space per entity id. Entities without such
  * cases are left out. Check `canReadSecurityCases` first: the repository is internal.
  */
-/**
- * The number of open and in-progress cases of each entity. An entity with `memberIds` is the
- * main entity of a group: its cases are the distinct cases of itself and its members, so a case
- * attached to two members counts once.
- */
+/** A group's cases are the distinct cases of its main entity and members, so a shared case counts once. */
 export const fetchEntityCaseCounts = async (
   internalRepository: ISavedObjectsRepository,
   casesClient: CasesClient,

@@ -52,22 +52,17 @@ const ESTIMATED_ROW_HEIGHT = 41;
 /** Rows rendered above and below the visible ones, so fast scrolling doesn't show gaps. */
 const OVERSCAN_ROWS = 5;
 
-/**
- * Most rows kept rendered after they leave the view: rendering a row costs more than a frame
- * allows when many come into view at once, so scrolling back to rows already seen renders none.
- */
+/** Rendering many rows at once overruns a frame, so rows seen recently stay rendered. */
 const MAX_KEPT_ROWS = 40;
 
 /** Rows always rendered at the top, so going back to the top renders none. */
 const TOP_ROWS = 15;
 
-/** The grid scrolls its own rows: only the rows in view are rendered. */
 const scrollContainerCss = css`
   max-block-size: 70vh;
   overflow: auto;
 `;
 
-/** A rendered row, placed by the virtualizer. */
 const rowContainerCss = css`
   position: absolute;
   inset-block-start: 0;
@@ -98,18 +93,12 @@ type CellValueComponent = ComponentType<
   EuiDataGridCellValueElementProps & Partial<EntityGridCellContext>
 >;
 
-/** A column's width: a control column's own, or the column's initial width. */
 const getColumnWidth = (col: EuiDataGridCustomBodyProps['visibleColumns'][number]): number =>
   'width' in col && typeof col.width === 'number'
     ? col.width
     : ('initialWidth' in col && col.initialWidth) || 150;
 
-/**
- * A row and, when expanded, its group's records. Memoized: a scroll renders only the rows that
- * come into view, not every rendered row again. The cells render the grid's cell renderers
- * directly, without EUI's cell: its focus handling made each row too costly to render while
- * scrolling.
- */
+/** Memoized, with plain cells instead of EUI's: its focus handling made rows too costly to scroll. */
 const EntityGridRow = memo(
   ({
     index,
@@ -142,7 +131,6 @@ const EntityGridRow = memo(
                 key={col.id}
                 role="gridcell"
                 css={cellCss}
-                // Runtime size: the column's width.
                 style={{ width: getColumnWidth(col) }}
               >
                 <CellValue
@@ -162,10 +150,7 @@ const EntityGridRow = memo(
 );
 EntityGridRow.displayName = 'EntityGridRow';
 
-/**
- * The rows to render: those in view, the first TOP_ROWS, and up to MAX_KEPT_ROWS rows seen most
- * recently, by entity id, so a new sort or filter keeps none of the rows it no longer shows.
- */
+/** Keeps the rows in view, the top rows and recent ones by entity id, so a new sort keeps none it hides. */
 const useKeptRowsRangeExtractor = (rows: readonly Row[]) => {
   const keptIds = useRef(new Set<string>());
   const indexById = useMemo(
@@ -300,7 +285,6 @@ export const EntityGridCustomBody = memo(
         ) : (
           <div
             ref={listRef}
-            // Runtime size: the height of every row.
             style={{ blockSize: virtualizer.getTotalSize(), position: 'relative' }}
           >
             {virtualRows.map(({ index, key, start }) => {

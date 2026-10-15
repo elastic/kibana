@@ -40,7 +40,6 @@ interface UseEntityGridToolbarOptions {
   groupSelectorComponent?: React.ReactNode;
 }
 
-/** The grid's toolbar: the total with the fields button, when it was updated, and the group selector. */
 export const useEntityGridToolbarVisibility = ({
   total,
   shown,

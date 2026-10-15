@@ -24,11 +24,7 @@ const SEARCH = 'KQL("""entity.name: web*""")';
 const row = (id: string, count: number | null = null): Row => ({ 'entity.id': id, count });
 const ids = (rows: readonly Row[]) => rows.map((r) => r['entity.id']);
 
-/**
- * A column whose value rows are `valueRows`, and a runner that answers the engine's queries:
- * value rows, empty rows (all `entities` but the excluded ids, after the cursor), the matches of a
- * search, the check of the search on ids, and the merged query. Records which ran.
- */
+/** A column and a fake runner that answers each engine query and records which ran. */
 const setup = ({
   valueRows = [] as Row[],
   entities = [] as Row[],
@@ -38,19 +34,15 @@ const setup = ({
   const values = new Map(valueRows.map((r) => [r['entity.id'], r]));
   const calls: string[] = [];
   const column: ComputedColumn = {
-    field: 'count',
-    emptyValue,
-    emptyColumns: 'count = TO_LONG(0)',
-    buildSourceRows: () => ['FROM source'],
-    aggregations: [{ field: 'count', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' }],
-    rollsUpOverAliases: false,
+    emptyValues: { count: emptyValue },
+    buildSortWithValueQuery: (_args, limit) => ['FROM source', `| LIMIT ${limit}`],
+    buildSortAllQuery: () => ['MERGED'],
     fetchValues: async (rows) => {
       calls.push(`lookup ${rows.length}`);
       return new Map(
         ids(rows).map((id) => [id as string, { count: values.get(id)?.count ?? emptyValue }])
       );
     },
-    buildMergedSortQuery: () => ['MERGED'],
   };
   const runQuery = async (steps: readonly string[]): Promise<Row[]> => {
     const query = steps.join('\n');

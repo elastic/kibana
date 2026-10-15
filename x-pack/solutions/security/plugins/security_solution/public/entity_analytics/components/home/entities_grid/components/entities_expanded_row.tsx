@@ -34,7 +34,6 @@ import {
 } from '../common';
 import type { Row, TimeRange } from '../common';
 
-/** Most records an expanded group shows. */
 const MAX_GROUP_RECORDS = 100;
 
 const getTruncatedGroupLabel = (shown: number, total: number) =>
@@ -43,10 +42,7 @@ const getTruncatedGroupLabel = (shown: number, total: number) =>
     values: { shown, total },
   });
 
-/**
- * Grid options of a group's records: its target and the entities resolved to it, as
- * individual rows. Expanding is structural, so the table filters don't apply.
- */
+/** A group's records as individual rows; expanding is structural, so the table filters don't apply. */
 export const getGroupRecordsOptions = (
   entityId: string,
   timeRange: TimeRange,
@@ -72,7 +68,6 @@ interface ExpandedEntityRowProps {
   /** Grid density, so child rows match the height of grid rows. */
   cellPadding: EuiDataGridStyleCellPaddings;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
-  /** The grid's columns by id. */
   columnsById: ReadonlyMap<string, EuiDataGridColumn>;
   euiTheme: EuiThemeComputed;
   watchlistNames: Map<string, string>;
@@ -91,18 +86,15 @@ export const getCellPaddingBlock = (
   return '6px';
 };
 
-/** An empty cell under a column: as wide as the column (set inline), never shrunk. */
 const placeholderCellCss = css`
   flex-shrink: 0;
 `;
 
-/** A column's cell: as wide as the column (set inline), never shrunk, clipped. */
 const columnCellCss = css`
   flex-shrink: 0;
   overflow: hidden;
 `;
 
-/** A cell with a value, centered vertically. */
 const valueCellCss = css`
   display: flex;
   align-items: center;
@@ -113,7 +105,6 @@ const fullHeightCss = css`
   height: 100%;
 `;
 
-/** The name cell: the tree connector, then the name. */
 const nameCellCss = css`
   display: flex;
   align-items: center;
@@ -247,7 +238,6 @@ interface ExpandedEntityGroupProps
   keepFields: readonly string[];
 }
 
-/** The records of an expanded group, under its row. */
 export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
   entityId,
   timeRange,

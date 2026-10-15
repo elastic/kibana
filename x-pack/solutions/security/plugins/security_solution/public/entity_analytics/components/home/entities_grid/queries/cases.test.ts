@@ -22,7 +22,6 @@ const ARGS: QueryArgs = {
 
 const ROWS: Row[] = [{ 'entity.id': 'host:h1' }, { 'entity.id': 'user:a' }];
 
-/** An error as `http.post` rejects with on an HTTP error status. */
 const httpError = (status: number) =>
   Object.assign(new Error(`HTTP ${status}`), {
     name: 'HttpFetchError',
@@ -30,14 +29,12 @@ const httpError = (status: number) =>
     response: { status },
   });
 
-/** Enriches the rows with the route answering as `post` does, for rows without group members. */
 const enrichWith = (post: () => Promise<unknown>) => {
   const http = httpServiceMock.createSetupContract();
   http.post.mockImplementation(post);
   return caseCountQuerySpec.enricher.fetch(ROWS, ARGS, { runQuery: jest.fn(async () => []), http });
 };
 
-/** Enriches the rows of `args`, with the entity docs of the group members the query returns. */
 const enrichRows = async (args: QueryArgs) => {
   const http = httpServiceMock.createSetupContract();
   http.post.mockResolvedValue({ 'host:h1': 3 });

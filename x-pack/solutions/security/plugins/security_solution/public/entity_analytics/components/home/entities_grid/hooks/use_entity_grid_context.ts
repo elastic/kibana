@@ -31,7 +31,6 @@ export interface UseEntityGridDataOptions {
   sortField: string;
   /** The sort order. */
   sortDirection: SortDir;
-  /** Most rows to read. */
   pageSize: number;
   /** The search bar's predicates (KQL, filter pills, group filters), applied to the entity docs. */
   searchExpression?: string;
@@ -114,7 +113,6 @@ export const getViewKey = (
   rowsMode,
 });
 
-/** The arguments of the column queries for a view. */
 export const buildQueryArgs = (
   { spaceId, concreteEntityIndexName, anomalyJobIds }: ReadyGridContext,
   options: UseEntityGridDataOptions

@@ -17,14 +17,14 @@ flowchart TD
   NAT -->|yes| NM["Resolved entities with aliases<br/>+ the others, merged<br/>fetchSortedWithAliases (native.ts)"]
 
   N -->|"Computed column (alerts, last alert,<br/>anomalies, risk score change, records)"| F{"Search?"}
-  F -->|no| V["Value rows, sorted<br/>buildValueRowsQuery (computed_column.ts)"]
+  F -->|no| V["Value rows, sorted<br/>the column's buildSortWithValueQuery"]
   V -->|"fewer than the limit"| E["+ empty rows: the entities in view<br/>but the value rows, by entity.id"]
   V -->|"the limit, and empty rows sort first"| B["empty rows in batches by entity.id,<br/>dropping those with a value<br/>fetchEmptyRowsInBatches"]
   F -->|yes| S{"≤ 9,999 matches?"}
   S -->|yes| L["The matches, their values looked up,<br/>sorted here"]
   S -->|no| SV{"≤ 9,999 value rows?"}
   SV -->|yes| SVR["The value rows the search matches<br/>+ the matching empty rows<br/>fetchSearchedRowsByValues"]
-  SV -->|no| M["One merged query per column<br/>(computed_column_sort.ts; alerts: alerts.ts)"]
+  SV -->|no| M["Every entity in view, sorted<br/>the column's buildSortAllQuery"]
 ```
 
 On resolved rows, every plan adds the steps that give the rows of an alias to its resolved
@@ -83,9 +83,9 @@ expanded group show their own.
   alert of the aliases. Each column is an `EntityAggregation` (`esql.ts`): how rows of other data
   aggregate per entity, and how a resolved entity's value comes from its aliases' (`SUM` or `MAX`).
   On resolved rows the queries give the rows of an alias to its resolved entity and aggregate them
-  (`buildAliasesToResolvedEntitySteps`), in the sorts and in the enrichers alike. Each column's spec
-  checks the rows mode once and builds its query from the same steps, with this one added for resolved rows. An enricher also reads the aliases of the page's rows
-  (`withEntityAliases`), to look for their alerts and anomalies too.
+  (`buildRollUpOverAliasesSteps`, `resolved_entities.ts`), in the sorts and in the enrichers alike.
+  An enricher also reads the aliases of the page's rows (`withEntityAliases`), to look for their
+  alerts and anomalies too.
 - **Cases**: the distinct open and in-progress cases of the aliases, so a case attached to two
   aliases counts once. The page asks the case counts route to include the aliases, which it reads
   from the entity index, and the route counts the distinct cases of a resolved entity over its aliases.
@@ -116,7 +116,7 @@ join of the resolved entities, so its matches among the resolved entities are re
 
 Sorting resolved rows by alerts, last alert or anomalies needs no plan of its own: the computed
 column plans run as they are, with the rows of an alias counted for its resolved entity
-(`rollsUpOverAliases`).
+(`buildRollUpOverAliasesSteps`).
 
 ## The plans
 
@@ -125,10 +125,13 @@ resolved rows, a sort by criticality, first seen or last seen reads the resolved
 aliases apart (with their values over the aliases) and merges them with the others.
 
 **Computed columns** (`computed_column.ts`): alerts, last alert, anomalies, risk score change and
-records. Each column says where its values come from (`buildSourceRows` and `aggregations`), the
-value of an entity without any (`emptyValue`), and how to read the values of given rows
-(`fetchValues`, its enricher). Reading every entity in view to sort them together is too slow on a
-large view, so the rows come in two parts:
+records. Each column writes its own queries, because each needs a different trick to be fast:
+every entity in view, sorted (`buildSortAllQuery`, the slow last resort); only the entities with a
+value, sorted (`buildSortWithValueQuery`); and the values of given rows (`fetchValues`, also the
+grid's enricher). It also says what an entity without data shows (`emptyValues`). The engine only
+picks which of them run, and `getComputedColumnQuerySpec` gives the grid the column's sort and
+enricher. Reading every entity in view to sort them together is
+too slow on a large view, so the rows come in two parts:
 - Value rows: the source rows aggregated per entity, the entity docs joined, sorted.
 - Empty rows: every other entity in view. They all show the empty value, so they sort among
   themselves by `entity.id`, natively on the entity index. The empty value sorts with the
@@ -143,14 +146,14 @@ one: the more entities have a value, the more batches.
 A search can't run after the join of the value rows (KQL), so it reads its matches, looks up
 their values, and sorts them here. A search with more matches reads every value row instead,
 keeps those the search matches, and adds the matching empty rows. Only when both are too many
-does it run one merged query of the column: the source index merged with the entities in view
-(`computed_column_sort.ts`; alerts read both indices in one `FROM`, as FORK can't run in a
-subquery).
+does it run one merged query of the column: the source index and the entities in view
+(`buildEntitiesInViewBranch`) read side by side and merged by `entity.id`; alerts read both
+indices in one `FROM`, as FORK can't run in a subquery.
 
 Records counts the alias docs of each resolved entity, plus the entity itself; an entity without
 aliases is a group of one (empty value 1). Risk score change reads the last score of each entity
-before the window, and subtracts it from the current score after the join; an entity without
-either has no change.
+before the window and subtracts it from the current score on the entity doc, before the page
+joins its docs; an entity without either has no change.
 
 ## When a plan can't be used
 

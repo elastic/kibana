@@ -29,7 +29,6 @@ const TEST_SUBJECTS = {
   groupingLoading: TEST_SUBJ_GROUPING_LOADING,
 };
 
-/** What every level passes down to the grids at the bottom. */
 interface GroupViewProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
@@ -41,18 +40,13 @@ interface GroupViewProps {
   rowActions?: RowActions;
 }
 
-/** A level of groups: the grouping state and the group field of each level. */
 interface GroupLevelProps extends GroupViewProps {
   state: EntityURLStateResult;
   selectedGroup: string;
   selectedGroupOptions: string[];
 }
 
-/**
- * The filters of the enclosing groups. A JSON string, not an array: the group wrapper hands
- * each level new filter arrays on every render, and a string compares by value, so the
- * grouping memos below don't recompute on every render.
- */
+/** A JSON string, not an array: the wrapper passes new arrays each render, and strings compare by value. */
 type ParentGroupFilters = string | undefined;
 
 export interface EntitiesGroupsProps extends GroupViewProps {
@@ -68,8 +62,6 @@ export const EntitiesGroups: React.FC<EntitiesGroupsProps> = ({ groupsSelected, 
     selectedGroupOptions={groupsSelected}
   />
 );
-
-// ── level 0: URL-driven pagination ───────────────────────────────────────────
 
 interface GroupWithPaginationProps extends GroupLevelProps {
   groupSelectorComponent?: JSX.Element;
@@ -107,8 +99,6 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
     />
   );
 };
-
-// ── routing: go deeper or render leaf ────────────────────────────────────────
 
 interface GroupContentProps extends GroupLevelProps {
   currentGroupFilters: Filter[];
@@ -153,8 +143,6 @@ const GroupContent: React.FC<GroupContentProps> = ({
     />
   );
 };
-
-// ── level N: local pagination for nested groups ───────────────────────────────
 
 interface GroupWithLocalPaginationProps extends GroupLevelProps {
   groupingLevel: number;
@@ -206,8 +194,6 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
     />
   );
 };
-
-// ── leaf: an entities grid with the search and the group's filters ───────────
 
 interface LeafGridProps extends GroupViewProps {
   currentGroupFilters: Filter[];

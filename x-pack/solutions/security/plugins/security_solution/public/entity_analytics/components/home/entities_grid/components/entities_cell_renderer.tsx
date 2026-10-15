@@ -30,21 +30,14 @@ export interface CellHandlers {
   onAnomalyCountClick?: (row: Row) => void;
 }
 
-/**
- * EUI `cellContext`: what a cell reads besides its value and its row. It must stay stable: EUI
- * builds its cell component from it, so a new one remounts every cell.
- */
+/** Must stay stable: EUI builds its cell component from it, so a new one remounts every cell. */
 export interface EntityGridCellContext {
   watchlistNames: Map<string, string>;
   euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
 }
 
-/**
- * The rows the cells read, apart from `cellContext`: new rows, as their computed columns arrive,
- * re-render the cells instead of remounting them. While `isEnriching`, the painted rows are not
- * enriched yet, and the computed cells stay blank until they are.
- */
+/** Apart from `cellContext`, so new rows re-render cells instead of remounting them. */
 export interface EntityGridRows {
   rows: Row[];
   isEnriching: boolean;

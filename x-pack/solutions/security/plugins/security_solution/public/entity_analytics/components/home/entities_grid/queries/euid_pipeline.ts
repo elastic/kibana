@@ -7,16 +7,15 @@
 
 import {
   getEuidEsqlEvaluation,
+  getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { ALLOWED_ENTITY_TYPES } from '../common';
-import { indentForkBranch } from './esql';
+import { ALLOWED_ENTITY_TYPES, ENTITY_TYPE_FIELD, getEntityIds, isOneOf } from '../common';
+import type { Row } from '../common';
+import { buildIdentityPrefilter, indentForkBranch } from './esql';
 
-// ── EUID query pipeline builders ─────────────────────────────────────────────
-
-/** `EVAL`s of the user, host and service EUIDs into `user_euid`, `host_euid`, `service_euid`. */
 export const buildPerTypeEuidEvals = (): string[] =>
   ALLOWED_ENTITY_TYPES.flatMap((entityType) => {
     const definition = getBuiltInEntityDefinition(entityType);
@@ -27,15 +26,7 @@ export const buildPerTypeEuidEvals = (): string[] =>
     ];
   });
 
-/**
- * ES|QL EVAL that folds `user_euid`, `host_euid`, and `service_euid` into one
- * multi-value column of the ids that are present. `MV_APPEND` returns null if any
- * argument is null, so each argument is a COALESCE that is null only when all three
- * ids are; MV_DEDUPE drops the repeats that come from the fallbacks.
- *
- * A multi-condition CASE would do the same, but ES|QL evaluates it one row at a time,
- * which made this EVAL most of the cost of the alerts tile.
- */
+/** One multi-value id column without CASE, which ES|QL runs row by row (most of the tile's cost). */
 export const evalGuardedTypedEuids = (outputColumn: string): string =>
   [
     `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
@@ -44,106 +35,113 @@ export const evalGuardedTypedEuids = (outputColumn: string): string =>
     '  COALESCE(service_euid, user_euid, host_euid)))',
   ].join('\n');
 
-/**
- * Derives one EUID per document into `entity.id` (first of user, host, service).
- * Anomaly queries use it: ML records do not carry `entity.id`.
- */
+/** ML records carry no entity.id, so one EUID per record is derived: user, then host, then service. */
 export const buildEuidStages = (): string[] => [
   ...buildPerTypeEuidEvals(),
   `| EVAL \`entity.id\` = COALESCE(${ALLOWED_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`,
   '| WHERE `entity.id` IS NOT NULL',
 ];
 
-/**
- * Keeps alerts stamped with any of the ids. An alert can be stamped with several ids, and
- * `IN` is null on a multi-value field, so each id is an `MV_CONTAINS`, which checks every value.
- */
+/** `IN` is null on multi-value fields, so each id is an `MV_CONTAINS`. */
 const buildStampedIdsCondition = (entityIds: readonly string[]): string =>
   entityIds
     .map((id) => `MV_CONTAINS(\`kibana.alert.entity.id\`, ${escapeStringValue(id)})`)
     .join(' OR ');
 
-export interface AlertEuidPipelineOptions {
-  /** When set, the stamped branch keeps only alerts stamped with one of these entity ids. */
-  stampedEntityIds?: readonly string[];
-  /**
-   * Exact filter for the unstamped branch: an OR of `getEuidEsqlFilterBasedOnDocument`
-   * clauses. When `stampedEntityIds` is set and this is not, the unstamped branch is
-   * off (`WHERE false`), so the enrich query does not scan all unstamped alerts.
-   */
+export interface AlertEntityFilter {
+  /** Stamped alerts must be stamped with one of these ids. */
+  entityIds: readonly string[];
+  /** Unstamped alerts must match these clauses; without them none are read, never all. */
   unstampedIdentityClause?: string;
-  /**
-   * Pushable prefilter for `unstampedIdentityClause`. It must be its own top-level
-   * conjunct: nested inside the clause's parentheses, ES|QL does not push it down.
-   */
+  /** Must be its own conjunct: nested in the clause's parentheses, ES|QL won't push it down. */
   unstampedIdentityPrefilter?: string;
-  /** Condition both alert branches add, when the FROM also reads other indices. */
-  alertBranchCondition?: string;
-  /** Steps of an extra FORK branch, which must emit `_ea_entity_id` like the alert branches. */
-  extraBranch?: readonly string[];
 }
 
-/**
- * Maps alert documents to `entity.id` rows. FORK splits the work:
- * - Stamped alerts copy `kibana.alert.entity.id`, which can be multi-value.
- * - Unstamped alerts derive the user, host and service EUIDs from raw fields.
- * The split keeps the EUID `EVAL`s off stamped alerts. MV_EXPAND then makes
- * `entity.id` single-value for STATS and LOOKUP JOIN.
- */
-export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): string[] => {
-  const {
-    stampedEntityIds,
-    unstampedIdentityClause,
-    unstampedIdentityPrefilter,
-    alertBranchCondition,
-    extraBranch,
-  } = options;
-  const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
-  const stampedIdsCondition = stampedEntityIds?.length
-    ? buildStampedIdsCondition(stampedEntityIds)
-    : undefined;
-  const keepCols = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
+/** Older alerts lack an entity id, so they're matched by identity fields; unmatched rows are skipped. */
+export const buildAlertEntityFilter = (entities: readonly Row[]): AlertEntityFilter => {
+  const clauses = new Set<string>();
+  const matched: Row[] = [];
+  for (const entity of entities) {
+    const entityType = entity[ENTITY_TYPE_FIELD];
+    if (isOneOf(ALLOWED_ENTITY_TYPES, entityType)) {
+      const clause = getEuidEsqlFilterBasedOnDocument(
+        getBuiltInEntityDefinition(entityType),
+        entity
+      );
+      if (clause) {
+        clauses.add(clause);
+        matched.push(entity);
+      }
+    }
+  }
+  return {
+    entityIds: getEntityIds(entities),
+    ...(clauses.size
+      ? {
+          unstampedIdentityClause: [...clauses].join(' OR '),
+          unstampedIdentityPrefilter: buildIdentityPrefilter(matched),
+        }
+      : {}),
+  };
+};
 
-  const stampedSteps = [
-    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
-    ...(stampedIdsCondition ? [`| WHERE ${stampedIdsCondition}`] : []),
-    '| EVAL _ea_entity_id = `kibana.alert.entity.id`',
-    `| KEEP ${keepCols}`,
-  ];
+/** `guard` keeps out entity docs when the FROM also reads them; `filter` keeps given entities' alerts. */
+interface AlertBranchOptions {
+  filter?: AlertEntityFilter;
+  guard?: string;
+}
 
-  const unstampedEvals = [...buildPerTypeEuidEvals(), evalGuardedTypedEuids('_ea_entity_id')];
+const ALERT_KEEP_COLUMNS = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
-  const unstampedConjuncts = [
-    ...guard,
-    '`kibana.alert.entity.id` IS NULL',
-    ...(unstampedIdentityClause != null
-      ? [
-          ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
-          `(${unstampedIdentityClause})`,
-        ]
-      : []),
-  ];
-  const unstampedWhere =
-    stampedIdsCondition != null && unstampedIdentityClause == null
+const buildBranchWhere = (guard: string | undefined, conditions: readonly string[]): string =>
+  `WHERE ${[...(guard ? [`(${guard})`] : []), ...conditions].join(' AND ')}`;
+
+/** Stamped alerts copy `kibana.alert.entity.id`, which can be multi-value. */
+export const buildStampedAlertBranch = ({ filter, guard }: AlertBranchOptions = {}): string[] => [
+  buildBranchWhere(guard, ['`kibana.alert.entity.id` IS NOT NULL']),
+  ...(filter?.entityIds.length ? [`| WHERE ${buildStampedIdsCondition(filter.entityIds)}`] : []),
+  '| EVAL _ea_entity_id = `kibana.alert.entity.id`',
+  `| KEEP ${ALERT_KEEP_COLUMNS}`,
+];
+
+export const buildUnstampedAlertBranch = ({ filter, guard }: AlertBranchOptions = {}): string[] => {
+  const { entityIds = [], unstampedIdentityClause, unstampedIdentityPrefilter } = filter ?? {};
+  const where =
+    entityIds.length && unstampedIdentityClause == null
       ? 'WHERE false'
-      : `WHERE ${unstampedConjuncts.join(' AND ')}`;
-
-  const unstampedSteps = [unstampedWhere, ...unstampedEvals, `| KEEP ${keepCols}`];
-
-  const fork = [
-    '| FORK (',
-    indentForkBranch(stampedSteps.join('\n')),
-    '  )',
-    '  (',
-    indentForkBranch(unstampedSteps.join('\n')),
-    '  )',
-    ...(extraBranch ? ['  (', indentForkBranch(extraBranch.join('\n')), '  )'] : []),
-  ].join('\n');
-
+      : buildBranchWhere(guard, [
+          '`kibana.alert.entity.id` IS NULL',
+          ...(unstampedIdentityClause != null
+            ? [
+                ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
+                `(${unstampedIdentityClause})`,
+              ]
+            : []),
+        ]);
   return [
-    fork,
-    '| MV_EXPAND _ea_entity_id',
-    '| WHERE _ea_entity_id IS NOT NULL',
-    '| RENAME _ea_entity_id AS `entity.id`',
+    where,
+    ...buildPerTypeEuidEvals(),
+    evalGuardedTypedEuids('_ea_entity_id'),
+    `| KEEP ${ALERT_KEEP_COLUMNS}`,
   ];
 };
+
+/** Each branch emits `_ea_entity_id`; MV_EXPAND then makes it single-value for STATS and joins. */
+export const buildAlertForkSteps = (branches: ReadonlyArray<readonly string[]>): string[] => [
+  [
+    '| FORK (',
+    // The first branch opens on the FORK line.
+    ...branches.flatMap((branch, index) => [
+      ...(index ? ['  ('] : []),
+      indentForkBranch(branch.join('\n')),
+      '  )',
+    ]),
+  ].join('\n'),
+  '| MV_EXPAND _ea_entity_id',
+  '| WHERE _ea_entity_id IS NOT NULL',
+  '| RENAME _ea_entity_id AS `entity.id`',
+];
+
+/** FORK keeps the costly EUID evals off stamped alerts, which already carry their entity id. */
+export const buildAlertEuidPipeline = (filter?: AlertEntityFilter): string[] =>
+  buildAlertForkSteps([buildStampedAlertBranch({ filter }), buildUnstampedAlertBranch({ filter })]);

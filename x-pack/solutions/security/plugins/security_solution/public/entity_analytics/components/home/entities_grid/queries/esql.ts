@@ -20,41 +20,28 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
-  RESOLVED_TO_FIELD,
   RESOLUTION_RISK_SCORE_FIELD,
   RISK_SCORE_NORM_FIELD,
   getEntityId,
+  toChunks,
 } from '../common';
-import type { QueryArgs, Row, SortDir, TimeRange } from '../common';
+import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
 import type { EsqlRunner } from './types';
-
-// ── index name helpers ───────────────────────────────────────────────────────
 
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
 export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
 export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
 
-/**
- * Alert and anomaly indices don't map every EUID source field (for example `user.entity.id`);
- * with this setting an unmapped field reads as null instead of failing the query.
- */
+/** Alert and anomaly indices don't map every EUID field; unmapped ones read as null instead of failing. */
 export const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 export const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type)`;
 
-/**
- * Keeps the risk score docs of the entity itself. A resolution score is the entity's group
- * score, written next to the entity's own score with the same key and time; docs from before
- * the score types have no type and are the entity's own.
- */
+/** The entity's own score docs: resolution docs hold its group score; untyped older docs are its own. */
 export const OWN_RISK_SCORE_CONDITION = `(${RISK_SCORE_TYPE} IS NULL OR ${RISK_SCORE_TYPE} != "resolution")`;
-
-// ── ML anomalies ─────────────────────────────────────────────────────────────
-// One definition of an entity anomaly, shared by the anomalies tile and column.
 
 export const ML_ANOMALY_INDICES = '.ml-anomalies-shared*';
 
-/** Final anomaly records with a score. */
 export const ANOMALY_RECORD_FILTER =
   'result_type == "record" AND is_interim == false AND record_score >= 1';
 
@@ -62,13 +49,7 @@ export const ANOMALY_RECORD_FILTER =
 export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
   jobIds.length ? `job_id IN (${toList(jobIds)})` : 'false';
 
-// ── primitives ───────────────────────────────────────────────────────────────
-
-/**
- * Most rows an ES|QL query returns, whatever its LIMIT: the default of the
- * `esql.query.result_truncation_max_size` cluster setting. A query that checks for "more than
- * N rows" must ask for at most this many.
- */
+/** ES|QL returns at most this many rows whatever the LIMIT (`esql.query.result_truncation_max_size`). */
 export const ESQL_MAX_RESULT_ROWS = 10_000;
 
 /** Longest ES|QL query Elasticsearch parses, in characters (`EsqlParser.MAX_LENGTH`). */
@@ -76,36 +57,21 @@ export const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 
 export const toList = (items: readonly string[]) => items.map(escapeStringValue).join(', ');
 
-/**
- * Upper bound on the groups with aliases that the entity filters keep. Below it, the size-one
- * branch reads enough targets to fill the page after dropping the targets that have aliases.
- * Above it, a page of size-one groups can come back short. The page, its extra row and the
- * groups are read in one query, so together they stay within the ES|QL result cap.
- */
+/** Resolved entities with aliases read apart must fit beside the page and its extra row in one result. */
 export const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_ROWS - pageSize - 1;
 
-/**
- * Ids per IN list.
- *
- * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a
- * 10k-id list fails ("ESQL statement is too large"). 2,000 ids stays well under the cap.
- */
+/** Statements cap at 1MB and ids run ~100 chars, so an IN list holds at most this many ids. */
 export const ID_LIST_CHUNK_SIZE = 2_000;
 
-/** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
 export const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
   buildQuery: (chunk: readonly string[]) => string[]
 ): Promise<Row[]> => {
-  const chunks: Array<readonly string[]> = [];
-  for (let i = 0; i < ids.length; i += ID_LIST_CHUNK_SIZE) {
-    chunks.push(ids.slice(i, i + ID_LIST_CHUNK_SIZE));
-  }
+  const chunks = toChunks(ids, ID_LIST_CHUNK_SIZE);
   return (await Promise.all(chunks.map((chunk) => runQuery(buildQuery(chunk))))).flat();
 };
 
-/** Raw identity fields that EUIDs are built from. */
 const IDENTITY_SOURCE_FIELDS = [
   ...new Set(
     ALLOWED_ENTITY_TYPES.flatMap(
@@ -117,12 +83,7 @@ const IDENTITY_SOURCE_FIELDS = [
 const getStringValues = (value: unknown): string[] =>
   [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
 
-/**
- * Pushable prefilter: `field IN (…)` over the identity values of `rows`.
- * It matches a superset of the documents whose derived EUID is one of the rows' ids, so it
- * can run before the EUID evaluation, which casts fields with `TO_STRING` and can't be
- * pushed down. Must be its own top-level `WHERE` to reach Lucene.
- */
+/** A pushable `field IN (…)` superset of the rows' EUIDs, so Lucene narrows docs before the EUID eval. */
 export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined => {
   const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
     const values = [...new Set(rows.flatMap((row) => getStringValues(row[field])))];
@@ -134,26 +95,18 @@ export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined
 /** ES|QL field names without quotes: letters, digits, `_` and `.`, not starting with a digit. */
 const PLAIN_FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_.]*$/;
 
-/**
- * Backticks a field name unless it is plain, e.g. `@timestamp` or a field picked in Fields
- * with `-` or `:`. A backtick in the name is doubled.
- */
+/** Fields picked in Fields may contain `-` or `:`, so non-plain names are backticked (backticks doubled). */
 const quoteField = (field: string): string =>
   PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
 
-/**
- * The risk score of a resolved row: its resolved entity's, which the risk engine stores on the
- * main entity, the row; or its own when it has none.
- */
-const buildResolvedRiskScoreSteps = (): string[] => [
-  `| EVAL ${RISK_SCORE_NORM_FIELD} = COALESCE(${RESOLUTION_RISK_SCORE_FIELD}, ${RISK_SCORE_NORM_FIELD})`,
-];
-
-/** The risk score of a row: an entity's own, or a resolved entity's on resolved rows. */
+/** Resolved rows show their resolved entity's score, stored on the main entity, else their own. */
 export const buildRowRiskScoreSteps = ({ rowsMode }: Pick<QueryArgs, 'rowsMode'>): string[] =>
-  rowsMode === 'resolved' ? buildResolvedRiskScoreSteps() : [];
+  rowsMode === 'resolved'
+    ? [
+        `| EVAL ${RISK_SCORE_NORM_FIELD} = COALESCE(${RESOLUTION_RISK_SCORE_FIELD}, ${RISK_SCORE_NORM_FIELD})`,
+      ]
+    : [];
 
-/** KEEP the grid's fields, the fields picked in Fields, and `extra`. */
 const buildKeepClause = (
   { keepFields }: Pick<QueryArgs, 'keepFields'>,
   ...extra: string[]
@@ -162,7 +115,6 @@ const buildKeepClause = (
   return `| KEEP ${fields.map(quoteField).join(', ')}`;
 };
 
-/** The steps that make an entity doc a grid row: its risk score, then its fields. */
 export const buildRowFieldsSteps = (
   args: Pick<QueryArgs, 'keepFields' | 'rowsMode'>,
   ...extra: string[]
@@ -171,26 +123,18 @@ export const buildRowFieldsSteps = (
 export const buildFilterClause = (filterExpression?: string): string[] =>
   filterExpression ? [`| WHERE ${filterExpression}`] : [];
 
-/** AND-join ES|QL boolean fragments; `undefined` when empty. */
 export const joinAnd = (...parts: Array<string | undefined | null | false>): string | undefined => {
   const filtered = parts.filter((p): p is string => typeof p === 'string' && p.length > 0);
   return filtered.length ? filtered.join(' AND ') : undefined;
 };
 
-/**
- * Joins entity docs on `entity.id` only. The search expression must not go in `ON`:
- * ES|QL rejects KQL there. The join needs a concrete index name, not the alias.
- */
+/** Joins on `entity.id` only: ES|QL rejects KQL in `ON`, and the join needs a concrete index name. */
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
 const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
 
-/**
- * Start of the time range as ES|QL date math, e.g. `NOW() - 30 days`. Every grid and tile
- * query filters on it, so they agree on the window, and ES|QL folds it into a constant that
- * still pushes down to Lucene.
- */
+/** One date-math start shared by every grid and tile query, so they agree; ES|QL still pushes it down. */
 export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
 
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
@@ -199,11 +143,7 @@ export const buildSortSuffix = (field: string, direction: SortDir, limit: number
   `| LIMIT ${limit}`,
 ];
 
-/**
- * Page rows after a STATS that produced one row per entity with the sort value: sort and
- * limit, then join the entity docs of just the page rows. The join runs after STATS, on the
- * coordinator, so joining every row before the limit is what made these sorts slow.
- */
+/** Joining every row before the limit made sorts slow, so sort and limit first, then join the page. */
 export const buildJoinedPageSteps = (
   args: QueryArgs,
   sortField: string,
@@ -218,29 +158,16 @@ export const buildJoinedPageSteps = (
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
 
-/**
- * After a step that left one row per resolved entity under `entity.id`: joins the entity doc of the resolved entity's
- * main entity and drops the resolved entities whose main entity is missing.
- */
-export const buildResolvedEntitySteps = (concreteEntityIndexName: string): string[] => [
-  buildLookupJoinClause(concreteEntityIndexName),
-  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
-];
-
-/** How the values of the aliases of a resolved entity give its value: add up, or take the greatest. */
 type ResolvedEntityAggregation = 'SUM' | 'MAX';
 
-/** A column that aggregates rows of other data (alerts, anomalies) per entity. */
 export interface EntityAggregation {
   field: string;
   aggregation: string;
-  /** Only the rows that match this condition count. */
   condition?: string;
   /** How the column of a resolved entity comes from the columns of its aliases. */
   resolvedEntity: ResolvedEntityAggregation;
 }
 
-/** STATS aggregations of every column, over the rows that match `rowCondition`. */
 export const buildEntityAggregations = (
   aggregations: readonly EntityAggregation[],
   rowCondition?: string
@@ -256,33 +183,11 @@ export const buildEntityAggregations = (
 export const buildStatsByEntityClause = (aggregations: readonly string[]): string =>
   `| STATS ${aggregations.length ? `${aggregations.join(', ')} ` : ''}BY \`entity.id\``;
 
-/** STATS aggregations that give each column of a resolved entity from the rows of its aliases. */
-const buildResolvedEntityAggregations = (aggregations: readonly EntityAggregation[]): string[] =>
-  aggregations.map(({ field, resolvedEntity }) => `${field} = ${resolvedEntity}(${field})`);
-
-/**
- * After a STATS per entity, the rows of an alias count for its resolved entity. For a resolved
- * entity with 2 alerts, last at 10:00, and an alias with 3 alerts, last at 11:00, these steps give
- * 5 alerts (`SUM`), last at 11:00 (`MAX`): the rows of the alias get the id of the resolved
- * entity, then `aggregations` aggregate the rows of both.
- */
-export const buildAliasesToResolvedEntitySteps = (
-  concreteEntityIndexName: string,
-  aggregations: readonly EntityAggregation[]
-): string[] => [
-  buildLookupJoinClause(concreteEntityIndexName),
-  `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
-  buildStatsByEntityClause(buildResolvedEntityAggregations(aggregations)),
-];
-
-/** Indents the steps of a FORK branch under its parentheses. */
 export const indentForkBranch = (esql: string): string =>
   esql
     .split('\n')
     .map((line) => `    ${line}`)
     .join('\n');
-
-// ── running queries ──────────────────────────────────────────────────────────
 
 const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
@@ -310,6 +215,29 @@ export const createEsqlRunner =
     return toRows(rawResponse);
   };
 
-/** `entity.id ASC` order. */
 export const compareEntityIds = (a: Row, b: Row): number =>
   (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;
+
+/** The value a row sorts by in `field`; anything but a string or a number sorts as null. */
+export const getSortValue = (row: Row, field: string): SortValue => {
+  const value = row[field];
+  return typeof value === 'string' || typeof value === 'number' ? value : null;
+};
+
+/** Rows merged here keep ES|QL's order, `field <dir> NULLS LAST, entity.id ASC`, cut to the page plus one. */
+export const getSortedPage = (
+  { sort, pageSize }: Pick<QueryArgs, 'sort' | 'pageSize'>,
+  rows: Row[],
+  getValue: (row: Row, field: string) => SortValue = getSortValue
+): Row[] =>
+  rows
+    .sort((a, b) => {
+      const [valueA, valueB] = [getValue(a, sort.field), getValue(b, sort.field)];
+      if (valueA !== valueB) {
+        if (valueA == null) return 1;
+        if (valueB == null) return -1;
+        return (valueA < valueB ? -1 : 1) * (sort.direction === 'desc' ? -1 : 1);
+      }
+      return compareEntityIds(a, b);
+    })
+    .slice(0, pageSize + 1);

@@ -11,13 +11,7 @@ import type { TimeRange } from '../common';
 import type { RowActions } from './cells/row_actions_cell';
 import type { EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 
-/**
- * The React context of the custom body and the expander: the cell context plus the expanded
- * groups (expand state lives here, not in the cell context), the columns and the callbacks.
- * `timeRange` and `keepFields` are those of the expanded groups' records, `cellPadding` is the
- * display selector's density, which child rows match, and `total` is the number of entities in
- * view.
- */
+/** Expand state lives here, not in the cell context, which must stay stable. */
 export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   expandedIds: ReadonlySet<string>;
   timeRange: TimeRange;

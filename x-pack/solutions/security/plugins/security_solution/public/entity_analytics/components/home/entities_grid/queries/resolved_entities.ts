@@ -8,6 +8,7 @@
 import { escapeStringValue } from '@kbn/esql-utils';
 import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import {
+  CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
   RESOLVED_TO_FIELD,
   getEntityId,
@@ -18,23 +19,27 @@ import type { ResolvedEntityFilterOverrides, QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
   ID_LIST_CHUNK_SIZE,
-  buildResolvedEntitySteps,
+  buildLookupJoinClause,
   buildRowFieldsSteps,
+  buildStatsByEntityClause,
   fetchPerIdChunk,
   getEntityAlias,
   toList,
 } from './esql';
+import type { EntityAggregation } from './esql';
 import type { EsqlRunner } from './types';
 
-// A resolved row is a resolved entity: the main entity that other entities, its aliases, resolve to.
-// The columns below show the value over the resolved entity and its aliases together. Most entities
-// have no aliases and keep their own values, so only the resolved entities with aliases are read here.
-
-const CRITICALITY_FIELD = 'asset.criticality';
 const SOURCE_FIELD = 'entity.source';
 const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 const LAST_SEEN_FIELD = '`@timestamp`';
+
+/** The resolved entity values a grid column sorts by, under their column ids. */
+export const SORTABLE_RESOLVED_ENTITY_FIELDS: readonly string[] = [
+  CRITICALITY_FIELD,
+  FIRST_SEEN_FIELD,
+  '@timestamp',
+];
 
 const RESOLVED_ENTITY_VALUE_FIELDS = [
   CRITICALITY_FIELD,
@@ -73,7 +78,12 @@ const buildExtreme = (fn: 'GREATEST' | 'LEAST', a: string, b: string): string =>
 const buildUnion = (a: string, b: string): string =>
   `MV_DEDUPE(COALESCE(MV_APPEND(${a}, ${b}), ${a}, ${b}))`;
 
-/** The aliases of each resolved entity, with the main entity's own values joined in. */
+/** Drops resolved entities whose main entity doc is missing. */
+const buildResolvedEntitySteps = (concreteEntityIndexName: string): string[] => [
+  buildLookupJoinClause(concreteEntityIndexName),
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+];
+
 const buildResolvedEntityAliasSteps = ({
   concreteEntityIndexName,
 }: Pick<QueryArgs, 'concreteEntityIndexName'>): string[] => [
@@ -83,11 +93,7 @@ const buildResolvedEntityAliasSteps = ({
   ...buildResolvedEntitySteps(concreteEntityIndexName),
 ];
 
-/**
- * The resolved entity values: criticality (the highest of the aliases), sources and watchlists (the
- * distinct values), first seen (the earliest) and last seen (the latest), under the entity
- * field names, over the main entity's own values and those of its aliases.
- */
+/** Group values: highest criticality, all sources and watchlists, earliest first seen, latest last seen. */
 const buildResolvedEntityValueSteps = (): string[] => [
   `| EVAL own_rank = ${buildCriticalityRankExpression(CRITICALITY_FIELD)}`,
   `| EVAL group_rank = ${buildExtreme('GREATEST', 'own_rank', 'alias_rank')}`,
@@ -106,15 +112,11 @@ const buildResolvedEntityValueSteps = (): string[] => [
   )}, ${LAST_SEEN_FIELD} = ${buildExtreme('GREATEST', LAST_SEEN_FIELD, 'alias_last_seen')}`,
 ];
 
-/** The resolved entities with aliases as rows: the alias docs per resolved entity, with the resolved entity values over them. */
 export const buildResolvedEntityRowSteps = (
   args: Pick<QueryArgs, 'concreteEntityIndexName'>
 ): string[] => [...buildResolvedEntityAliasSteps(args), ...buildResolvedEntityValueSteps()];
 
-/**
- * One row per resolved entity with aliases among `targetIds`, with its resolved entity values under the entity
- * field names, so the page rows take them as they are.
- */
+/** Under the entity field names, so the page rows take them as they are. */
 const buildResolvedEntityValuesQuery = (
   args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName'>,
   targetIds: readonly string[]
@@ -125,10 +127,7 @@ const buildResolvedEntityValuesQuery = (
   `| KEEP \`entity.id\`, ${RESOLVED_ENTITY_VALUE_FIELDS.join(', ')}`,
 ];
 
-/**
- * The resolved rows with their resolved entities' values: a row whose main entity has aliases takes the
- * values of the whole group, the others keep their own.
- */
+/** Rows whose main entity has aliases show the whole group's values. */
 export const withResolvedEntityValues = async (
   rows: Row[],
   args: QueryArgs,
@@ -146,21 +145,25 @@ export const withResolvedEntityValues = async (
   });
 };
 
-// ── filters on the resolved entity values ────────────────────────────────────
+/** On resolved rows an alias's rows count for its resolved entity: counts add up (SUM), latest wins (MAX). */
+export const buildRollUpOverAliasesSteps = (
+  { rowsMode, concreteEntityIndexName }: Pick<QueryArgs, 'rowsMode' | 'concreteEntityIndexName'>,
+  aggregations: readonly EntityAggregation[]
+): string[] =>
+  rowsMode === 'resolved'
+    ? [
+        buildLookupJoinClause(concreteEntityIndexName),
+        `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
+        buildStatsByEntityClause(
+          aggregations.map(({ field, resolvedEntity }) => `${field} = ${resolvedEntity}(${field})`)
+        ),
+      ]
+    : [];
 
-/**
- * Most resolved entities the filters on the resolved entity values may add or remove.
- *
- * Why: the resolved entities go into the entity filter as id lists, and an ES|QL statement is capped at
- * 1MB (ids run to about 100 characters). 4,000 ids is about 400KB. Telemetry (Oct 2026): the
- * largest space has about 4,000 resolved entities with aliases, and only a part of them can differ.
- */
+/** Overrides go in as id lists under the 1MB cap; the largest space has ~4k resolved entities (Oct 2026). */
 const MAX_RESOLVED_ENTITY_FILTER_OVERRIDES = 4_000;
 
-/**
- * Whether the entity filters test a column that shows the resolved entity's value: only then can
- * a resolved entity pass them differently from its main entity.
- */
+/** Only filters on group-valued columns can pass a resolved entity differently from its main entity. */
 export const needsResolvedEntityFilterOverrides = ({
   rowsMode,
   entityExpression,
@@ -171,11 +174,7 @@ export const needsResolvedEntityFilterOverrides = ({
     entityExpression.includes(field)
   );
 
-/**
- * The resolved entities with aliases that pass the entity filters differently from their main
- * entity: `resolved_entity_matches` is whether the resolved entity passes, where `own_matches` of
- * the main entity is the opposite. Every other resolved entity passes as its main entity does.
- */
+/** Resolved entities whose group passes the filters differently from their main entity alone. */
 const buildResolvedEntityFilterOverridesQuery = (
   args: Required<Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression'>>
 ): string[] => [
@@ -192,7 +191,6 @@ const buildResolvedEntityFilterOverridesQuery = (
 
 const EMPTY_OVERRIDES: ResolvedEntityFilterOverrides = { include: [], exclude: [] };
 
-/** Reads the overrides of the entity filters; none when they don't test the resolved entity's values. */
 export const fetchResolvedEntityFilterOverrides = async (
   args: QueryArgs,
   runQuery: EsqlRunner
@@ -214,11 +212,7 @@ export const fetchResolvedEntityFilterOverrides = async (
   return { include: idsOf(true), exclude: idsOf(false) };
 };
 
-/**
- * The entity filters as one predicate on the entity docs, which hold the own values: the
- * entities that pass on their own, without the resolved entities that do not, with the resolved
- * entities that do. Individual rows have no overrides.
- */
+/** Entity docs hold own values, so the filters add or drop the resolved entities that pass differently. */
 export const applyResolvedEntityFilterOverrides = (
   expression: string,
   { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
@@ -229,12 +223,7 @@ export const applyResolvedEntityFilterOverrides = (
   return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
 };
 
-// ── aliases of the page's rows ───────────────────────────────────────────────
-
-/**
- * The rows with the aliases of the resolved entities among them, for a read of other data to
- * find the rows of the aliases too: they count for their resolved entity.
- */
+/** Aliases' data counts for their resolved entity, so reads of other data need the aliases too. */
 export const withEntityAliases = async (
   rows: readonly Row[],
   args: QueryArgs,
@@ -257,10 +246,7 @@ export const withEntityAliases = async (
   return [...rows, ...aliases];
 };
 
-/**
- * The rows in parts of at most `maxRows`, each resolved entity in one part with its aliases, so
- * that a part aggregates them together. Fails for a resolved entity with more rows than that.
- */
+/** A resolved entity and its aliases must share a query to be aggregated together. */
 export const getPartsByResolvedEntity = (rows: readonly Row[], maxRows: number): Row[][] => {
   const byResolvedEntity = new Map<string, Row[]>();
   rows.forEach((row) => {

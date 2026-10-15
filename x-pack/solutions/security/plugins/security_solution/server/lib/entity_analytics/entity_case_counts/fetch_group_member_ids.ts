@@ -14,7 +14,6 @@ const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 /** A search returns at most `index.max_result_window` hits, 10,000 by default: one is the probe. */
 const MAX_MEMBERS = 10_000 - 1;
 
-/** The ids of the entities resolved to each of the given entities, by the id of the latter. */
 export const fetchGroupMemberIds = async (
   esClient: ElasticsearchClient,
   spaceId: string,

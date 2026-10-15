@@ -61,11 +61,7 @@ interface AlertSeverityCounts {
   low: number;
 }
 
-/**
- * The share of each severity, drawn like the distribution bar of the alerts pages. Plain
- * elements: `DistributionBar` mounts a hidden tooltip for each part, which made this the most
- * expensive cell to render while scrolling, and the grid shows no tooltips in cells.
- */
+/** Plain elements, not `DistributionBar`: its hidden tooltip per part made this the costliest cell to scroll. */
 const AlertSeverityBar = memo(
   ({ euiTheme, ...counts }: AlertSeverityCounts & { euiTheme: EuiThemeComputed }) => {
     const barCss = useMemo(
@@ -84,7 +80,6 @@ const AlertSeverityBar = memo(
             title={label}
             css={severityPartCss}
             data-test-subj="alertSeverityBar__part"
-            // Runtime values: the severity's color and its share of the bar.
             style={{ backgroundColor: getSeverityColor(key, euiTheme), flex: counts[key] }}
           />
         ))}
