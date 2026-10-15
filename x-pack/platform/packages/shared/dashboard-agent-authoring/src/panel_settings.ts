@@ -12,11 +12,13 @@ import {
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 
 /**
- * Panel-level settings that sit beside a panel type's own keys in `config`.
+ * Panel-level settings that sit beside a panel type's own keys in `config` and that no
+ * panel builder writes. `title` and `description` are left out: builders own them and may
+ * omit them on purpose (e.g. titleless metric panels).
  * `drilldowns` is listed by hand because its schema is built at runtime.
  */
 export const PANEL_SETTINGS_KEYS: readonly string[] = [
-  ...Object.keys(serializedTitlesSchema.shape),
+  ...Object.keys(serializedTitlesSchema.omit({ title: true, description: true }).shape),
   ...Object.keys(serializedTimeRangeSchema.shape),
   'drilldowns',
 ];

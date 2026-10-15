@@ -33,14 +33,6 @@ export interface VisPanelResolverDeps {
   esClient: IScopedClusterClient;
 }
 
-/**
- * Panel settings the Lens chart schema can't express, kept out of the model input.
- * `edit_panels` carries them over. Title and description stay so the model can edit them.
- */
-const NON_CHART_PANEL_SETTINGS_KEYS = PANEL_SETTINGS_KEYS.filter(
-  (key) => key !== 'title' && key !== 'description'
-);
-
 /** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
 const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
   const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
@@ -112,8 +104,9 @@ export const createVisPanelResolver = ({
         };
       }
 
+      // The Lens chart schema can't express panel settings; `edit_panels` carries them over.
       const existingConfig = existingPanel
-        ? (omit(existingPanel.config, NON_CHART_PANEL_SETTINGS_KEYS) as VisualizationConfig)
+        ? (omit(existingPanel.config, PANEL_SETTINGS_KEYS) as VisualizationConfig)
         : undefined;
 
       const result = await buildLensConfig({

@@ -1781,13 +1781,12 @@ describe('executeDashboardOperations', () => {
 
     describe('panel settings on edit', () => {
       const panelSettings = {
-        title: 'Requests',
-        description: 'All requests',
         hide_title: true,
         hide_border: true,
         time_range: { from: 'now-7d', to: 'now' },
         drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
       };
+      const displayText = { title: 'Requests', description: 'All requests' };
 
       const editPanel = async (
         existingPanel: AttachmentPanel,
@@ -1815,11 +1814,16 @@ describe('executeDashboardOperations', () => {
         return getPanelsOnly(result.dashboardData.panels)[0];
       };
 
-      it('keeps Lens panel settings, lets generated values win, and drops stale chart keys', async () => {
+      it('keeps Lens panel settings, takes display text from the new config, and drops stale chart keys', async () => {
         const panel = await editPanel(
           {
             ...createLensPanel('panel-1'),
-            config: { type: 'xy', breakdown_by: { column: 'host' }, ...panelSettings },
+            config: {
+              type: 'xy',
+              breakdown_by: { column: 'host' },
+              ...panelSettings,
+              ...displayText,
+            },
           },
           {},
           createResolvedPanelContent({
@@ -1835,12 +1839,29 @@ describe('executeDashboardOperations', () => {
         });
       });
 
-      it('keeps the description and other settings of a Vega panel', async () => {
+      it('does not restore a metric title that an enhance edit drops', async () => {
+        const metrics = [{ type: 'primary', column: 'Total requests' }];
+        const panel = await editPanel(
+          {
+            ...createLensPanel('panel-1'),
+            config: { type: 'metric', title: 'Total requests', metrics, ...panelSettings },
+          },
+          { applyChartRules: true },
+          createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric', metrics },
+          })
+        );
+
+        expect(panel.config).toEqual({ ...panelSettings, type: 'metric', metrics });
+      });
+
+      it('keeps Vega panel settings', async () => {
         const panel = await editPanel(
           {
             id: 'vega-1',
             type: VEGA_VIS_TYPE,
-            config: { spec: '{"mark":"bar"}', ...panelSettings },
+            config: { spec: '{"mark":"bar"}', ...panelSettings, ...displayText },
             grid: { x: 0, y: 0, w: 24, h: 9 },
           },
           {},
@@ -1862,7 +1883,7 @@ describe('executeDashboardOperations', () => {
           {
             id: 'cc-1',
             type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-            config: { template: '<div>Old</div>', ...panelSettings },
+            config: { template: '<div>Old</div>', ...panelSettings, ...displayText },
             grid: { x: 0, y: 0, w: 24, h: 6 },
           },
           { renderer: 'custom_content' },
