@@ -84,7 +84,7 @@ export const createForgetTool = ({
         getCoreStart,
       });
 
-      const userScopeId = await resolveMemoryUserScopeId({ request, getCoreStart });
+      const userScopeId = await resolveMemoryUserScopeId({ request, esClient, getCoreStart });
 
       const currentUserClient = esClient.asCurrentUser;
       const searchResponse = await currentUserClient.search<StoredMemoryDocument>({

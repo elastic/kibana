@@ -165,7 +165,7 @@ export const createRememberTool = ({
         getCoreStart,
       });
 
-      const userScopeId = await resolveMemoryUserScopeId({ request, getCoreStart });
+      const userScopeId = await resolveMemoryUserScopeId({ request, esClient, getCoreStart });
 
       const currentUserClient = esClient.asCurrentUser;
       const currentDate = getCurrentDate();

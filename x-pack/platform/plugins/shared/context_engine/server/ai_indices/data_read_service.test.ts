@@ -46,7 +46,7 @@ describe('AiIndexDataReadService', () => {
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
-    scopeIds: ['user://u_1'],
+    getScopeIds: async () => ['user://u_1'],
     auditLogger,
     aiIndexService,
     logger,

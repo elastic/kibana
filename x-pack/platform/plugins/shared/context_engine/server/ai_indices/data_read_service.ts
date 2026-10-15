@@ -38,7 +38,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     private readonly deps: {
       esClient: ElasticsearchClient;
       spaceId: string;
-      scopeIds: string[];
+      getScopeIds: () => Promise<string[]>;
       auditLogger: AuditLogger;
       aiIndexService: Pick<AiIndexService, 'get' | 'list'>;
       logger: Logger;
@@ -47,9 +47,12 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   ) {}
 
   async query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse> {
-    const { esClient, spaceId, scopeIds, auditLogger, aiIndexService } = this.deps;
+    const { esClient, spaceId, getScopeIds, auditLogger, aiIndexService } = this.deps;
     try {
-      const aiIndexDests = (await aiIndexService.list(spaceId)).map(({ dest }) => dest);
+      const [aiIndexDests, scopeIds] = await Promise.all([
+        aiIndexService.list(spaceId).then((aiIndices) => aiIndices.map(({ dest }) => dest)),
+        getScopeIds(),
+      ]);
       const response = await queryAiIndices({
         esClient,
         spaceId,
