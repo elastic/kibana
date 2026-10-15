@@ -22,7 +22,7 @@ describe('useTimeRangeParam', () => {
   it('returns the default when the URL has no eaTimeRange param', () => {
     const { wrapper } = makeWrapper();
     const { result } = renderHook(() => useTimeRangeParam(), { wrapper });
-    expect(result.current[0]).toBe('30d');
+    expect(result.current[0]).toBe('24h');
   });
 
   it('reads a valid time range from the URL', () => {
@@ -34,19 +34,19 @@ describe('useTimeRangeParam', () => {
   it('falls back to the default for an invalid value', () => {
     const { wrapper } = makeWrapper('?eaTimeRange=bogus');
     const { result } = renderHook(() => useTimeRangeParam(), { wrapper });
-    expect(result.current[0]).toBe('30d');
+    expect(result.current[0]).toBe('24h');
   });
 
   it('rewrites the URL to the default on mount when the param is missing', () => {
     const { wrapper } = makeWrapper('?other=keep');
     const { result } = renderHook(() => useTimeRangeParam(), { wrapper });
-    expect(result.current[0]).toBe('30d');
+    expect(result.current[0]).toBe('24h');
   });
 
   it('rewrites the URL to the default on mount when the param has an invalid value', () => {
     const { wrapper } = makeWrapper('?eaTimeRange=bogus&other=keep');
     const { result } = renderHook(() => useTimeRangeParam(), { wrapper });
-    expect(result.current[0]).toBe('30d');
+    expect(result.current[0]).toBe('24h');
   });
 
   it('preserves unrelated URL params when setting a new time range', () => {
@@ -83,7 +83,7 @@ describe('useTimeRangeParam', () => {
       history.replace('/?other=keep');
     });
 
-    expect(result.current[0]).toBe('30d');
-    expect(history.location.search).toContain('eaTimeRange=30d');
+    expect(result.current[0]).toBe('24h');
+    expect(history.location.search).toContain('eaTimeRange=24h');
   });
 });

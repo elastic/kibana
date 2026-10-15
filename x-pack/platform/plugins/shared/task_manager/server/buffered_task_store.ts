@@ -6,10 +6,11 @@
  */
 
 import type { TaskStore } from './task_store';
-import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, PartialConcreteTaskInstance, TaskCredential } from './task';
 import type { Updatable } from './task_running';
 import type { Operation, BufferOptions, Entity } from './lib/bulk_operation_buffer';
 import { createBuffer } from './lib/bulk_operation_buffer';
+import type { Result } from './lib/result_type';
 import { unwrapPromise, asErr, asOk } from './lib/result_type';
 
 // by default allow updates to be buffered for up to 50ms
@@ -96,5 +97,9 @@ export class BufferedTaskStore implements Updatable {
 
   public async get(id: string): Promise<ConcreteTaskInstance> {
     return this.taskStore.get(id);
+  }
+
+  public async getVerifiedCredential(id: string): Promise<Result<TaskCredential, Error>> {
+    return this.taskStore.getVerifiedCredential(id);
   }
 }

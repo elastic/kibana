@@ -103,6 +103,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await es.cluster.putSettings({
         persistent: { 'search.allow_expensive_queries': null },
       });
+      // `before` can fail ahead of the policy creation, leaving nothing to clean up here.
+      if (!parentId) {
+        return;
+      }
       await es.deleteByQuery({
         index: '.fleet-policies',
         refresh: true,

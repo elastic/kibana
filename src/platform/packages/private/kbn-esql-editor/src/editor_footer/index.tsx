@@ -22,6 +22,7 @@ import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
+import { HistoryPanelSlide } from './history_panel_slide';
 import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { ESQLQueryStats } from './query_stats';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
@@ -181,7 +182,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isHistoryOpen && (
+      <HistoryPanelSlide isOpen={isHistoryOpen}>
         <EuiFlexItem grow={false}>
           <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
@@ -194,7 +195,7 @@ export const EditorFooter = memo(function EditorFooter({
             enableCreateView={enableCreateView}
           />
         </EuiFlexItem>
-      )}
+      </HistoryPanelSlide>
       {isLanguageComponentOpen && editorIsInline && (
         <EuiFlexItem grow={false}>
           <LanguageDocumentationInline searchInDescription height={resizableContainerHeight} />
