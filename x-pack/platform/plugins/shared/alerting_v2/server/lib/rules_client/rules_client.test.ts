@@ -866,15 +866,15 @@ describe('RulesClient', () => {
         items.map((item) =>
           item.id === 'rule-dup'
             ? {
-              id: item.id,
-              error: { statusCode: 409, error: 'Conflict', message: 'exists' },
-            }
+                id: item.id,
+                error: { statusCode: 409, error: 'Conflict', message: 'exists' },
+              }
             : {
-              id: item.id,
-              attributes: item.attrs,
-              version: 'v1',
-              references: item.references ?? [],
-            }
+                id: item.id,
+                attributes: item.attrs,
+                version: 'v1',
+                references: item.references ?? [],
+              }
         )
       );
       getRuleExecutorTaskIdMock.mockImplementation(
@@ -3159,9 +3159,9 @@ describe('RulesClient', () => {
     // Minimal BulkUpdateTaskResult builder for the task-manager mock: `tasks`
     // are the rotated task ids, `errors` the per-task failures.
     const rotationResult = (rotatedTaskIds: string[]) =>
-    ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
-      ReturnType<typeof taskManager.bulkUpdateSchedules>
-    >);
+      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
+        ReturnType<typeof taskManager.bulkUpdateSchedules>
+      >);
 
     it('rotates the executor task API key and stamps audit metadata', async () => {
       const client = createClient();
@@ -4271,12 +4271,14 @@ describe('RulesClient', () => {
           data: { ...workflowCreateData, enabled: true },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith({ request, origin: 'user' }, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
-        ]);
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith({ request, origin: 'user' }, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
-        ]);
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' })]
+        );
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' })]
+        );
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
@@ -4299,12 +4301,14 @@ describe('RulesClient', () => {
           data: { ...workflowCreateData, enabled: false },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith({request, origin: 'user'}, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
-        ]);
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith({request, origin: 'user'}, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
-        ]);
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' })]
+        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' })]
+        );
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
 
@@ -4327,9 +4331,10 @@ describe('RulesClient', () => {
           data: workflowCreateData,
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith({request, origin: 'user'}, [
-          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-noop', spaceId: 'space-1' }),
-        ]);
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-noop', spaceId: 'space-1' })]
+        );
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
