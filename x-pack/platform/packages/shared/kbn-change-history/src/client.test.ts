@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserProfile } from '@kbn/core/server';
 import { elasticsearchServiceMock, userProfileServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
@@ -32,6 +33,29 @@ const dataStreamClientMock = {
   search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } }),
 };
 
+const createSearchResult = () => ({
+  hits: {
+    total: { value: 1 },
+    hits: [
+      {
+        _source: {
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          user: { id: 'uid-1', name: 'alice' },
+          event: { id: 'e1', module: 'workflows', dataset: 'definitions', action: 'update' },
+          object: { id: 'obj-1', type: 'workflow' },
+        },
+      },
+    ],
+  },
+});
+
+const createProfile = (uid: string, user: Partial<UserProfile['user']> = {}): UserProfile => ({
+  uid,
+  enabled: true,
+  data: {},
+  user: { username: uid, ...user },
+});
+
 describe('ChangeHistoryClient', () => {
   const logger = loggingSystemMock.createLogger();
   const defaultConstructorOpts = {
@@ -41,9 +65,11 @@ describe('ChangeHistoryClient', () => {
     kibanaVersion: '9.4.0',
   };
 
-  const createInitializedClient = async () => {
+  const createInitializedClient = async (
+    opts?: Parameters<ChangeHistoryClient['initialize']>[1]
+  ) => {
     const client = new ChangeHistoryClient(defaultConstructorOpts);
-    await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+    await client.initialize(elasticsearchServiceMock.createElasticsearchClient(), opts);
     return client;
   };
 
@@ -218,6 +244,30 @@ describe('ChangeHistoryClient', () => {
         })
       );
     });
+
+    it('does not resolve user profiles when no userProfileService was provided', async () => {
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient();
+
+      const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+      expect(result.items[0].user.full_name).toBeUndefined();
+      expect(result.items[0].user.email).toBeUndefined();
+    });
+
+    it('resolves user.full_name from the user profile when userProfileService was provided', async () => {
+      const userProfileService = userProfileServiceMock.createStart();
+      userProfileService.bulkGet.mockResolvedValue([
+        createProfile('uid-1', { full_name: 'Alice A.' }),
+      ]);
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient({ userProfileService });
+
+      const result = await client.getHistory('default', 'workflow', 'obj-1');
+
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
+      expect(result.items[0].user.full_name).toBe('Alice A.');
+    });
   });
 
   describe('getEvent', () => {
@@ -254,6 +304,21 @@ describe('ChangeHistoryClient', () => {
       const client = await createInitializedClient();
 
       await expect(client.getEvent('default', 'missing')).resolves.toBeUndefined();
+    });
+
+    it('resolves user.full_name and user.email from the user profile when userProfileService was provided', async () => {
+      const userProfileService = userProfileServiceMock.createStart();
+      userProfileService.bulkGet.mockResolvedValue([
+        createProfile('uid-1', { full_name: 'Alice A.', email: 'alice@example.com' }),
+      ]);
+      dataStreamClientMock.search.mockResolvedValueOnce(createSearchResult());
+      const client = await createInitializedClient({ userProfileService });
+
+      const document = await client.getEvent('default', 'e1');
+
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
+      expect(document?.user.full_name).toBe('Alice A.');
+      expect(document?.user.email).toBe('alice@example.com');
     });
 
     it('throws when the data stream is not initialized', async () => {
@@ -509,88 +574,5 @@ describe('ChangeHistoryClient.logBulk', () => {
 
     expect(thrown).toBe(noLivingConnections);
     expect(thrown.name).toBe('NoLivingConnectionsError');
-  });
-});
-
-describe('ChangeHistoryClient.getHistory', () => {
-  const logger = loggingSystemMock.createLogger();
-  const defaultConstructorOpts = {
-    module: 'workflows',
-    dataset: 'definitions',
-    logger,
-    kibanaVersion: '9.4.0',
-  };
-
-  const createSearchResult = () => ({
-    hits: {
-      total: { value: 1 },
-      hits: [
-        {
-          _source: {
-            '@timestamp': '2026-01-01T00:00:00.000Z',
-            user: { id: 'uid-1', name: 'alice' },
-            event: { id: 'e1', module: 'workflows', dataset: 'definitions', action: 'update' },
-            object: { id: 'obj-1', type: 'workflow' },
-          },
-        },
-      ],
-    },
-  });
-
-  let dataStreamMock: { search: jest.Mock };
-
-  beforeEach(() => {
-    FLAGS.FEATURE_ENABLED = true;
-    dataStreamMock = { search: jest.fn().mockImplementation(async () => createSearchResult()) };
-    DataStreamClientMock.initialize.mockResolvedValue(dataStreamMock as never);
-  });
-
-  afterEach(() => jest.clearAllMocks());
-
-  it('does not call userProfileService.bulkGet when no service was provided at initialize()', async () => {
-    const service = userProfileServiceMock.createStart();
-    const client = new ChangeHistoryClient(defaultConstructorOpts);
-    await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
-
-    const result = await client.getHistory('default', 'workflow', 'obj-1');
-
-    expect(service.bulkGet).not.toHaveBeenCalled();
-    expect(result.items[0].user.full_name).toBeUndefined();
-  });
-
-  it('calls userProfileService.bulkGet and enriches full_name when service was provided', async () => {
-    const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([
-      { uid: 'uid-1', user: { username: 'alice', full_name: 'Alice A.' } } as never,
-    ]);
-    const client = new ChangeHistoryClient(defaultConstructorOpts);
-    await client.initialize(elasticsearchServiceMock.createElasticsearchClient(), {
-      userProfileService: service,
-    });
-
-    const result = await client.getHistory('default', 'workflow', 'obj-1');
-
-    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
-    expect(result.items[0].user.full_name).toBe('Alice A.');
-  });
-
-  it('enriches full_name and email on getEvent when service was provided', async () => {
-    const service = userProfileServiceMock.createStart();
-    service.bulkGet.mockResolvedValue([
-      {
-        uid: 'uid-1',
-        user: { username: 'alice', full_name: 'Alice A.', email: 'alice@example.com' },
-      } as never,
-    ]);
-    const client = new ChangeHistoryClient(defaultConstructorOpts);
-    await client.initialize(elasticsearchServiceMock.createElasticsearchClient(), {
-      userProfileService: service,
-    });
-
-    const document = await client.getEvent('default', 'e1');
-
-    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['uid-1']) });
-    expect(document?.user.full_name).toBe('Alice A.');
-    expect(document?.user.email).toBe('alice@example.com');
   });
 });

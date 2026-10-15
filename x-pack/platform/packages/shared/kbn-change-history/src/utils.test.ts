@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { UserProfile } from '@kbn/core/server';
 import { userProfileServiceMock } from '@kbn/core/server/mocks';
 import { sha256, sanitizeFields, REDACTED, enrichWithProfiles } from './utils';
 import type { ChangeHistoryDocument } from './types';
@@ -388,11 +389,33 @@ describe('#sanitizeFields', () => {
 describe('#enrichWithProfiles', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const doc = (id: string | undefined, name: string): ChangeHistoryDocument =>
-    ({ user: { id, name } } as ChangeHistoryDocument);
+  const doc = (id: string | undefined, name: string): ChangeHistoryDocument => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    ecs: { version: '9.3.0' },
+    user: { id, name },
+    event: {
+      id: 'e1',
+      module: 'workflows',
+      dataset: 'definitions',
+      action: 'update',
+      type: 'change',
+    },
+    object: {
+      id: 'obj-1',
+      type: 'workflow',
+      hash: 'hash',
+      fields: { hashed: [], redacted: [] },
+      snapshot: {},
+    },
+    service: { type: 'kibana', version: '9.4.0' },
+  });
 
-  const profile = (uid: string, full_name?: string, email?: string) =>
-    ({ uid, user: { username: uid, full_name, email } } as never);
+  const profile = (uid: string, full_name?: string, email?: string): UserProfile => ({
+    uid,
+    enabled: true,
+    data: {},
+    user: { username: uid, full_name, email },
+  });
 
   beforeEach(() => jest.clearAllMocks());
 
