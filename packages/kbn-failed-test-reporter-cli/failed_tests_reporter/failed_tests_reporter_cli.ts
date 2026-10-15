@@ -86,6 +86,12 @@ async function checkConsistentFailures({
   }
 }
 
+// Switch between the legacy per-failure issue creation (default) and leaving new issues to the
+// daily flaky suite reporter (`node scripts/report_flaky_test_issues`). Existing issues are
+// updated either way. Set to 'false' in the pipeline env to turn creation off, unset or 'true'
+// to fall back to the legacy behaviour.
+const CREATE_ISSUES = process.env.REPORT_FAILED_TESTS_CREATE_ISSUES !== 'false';
+
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
@@ -153,6 +159,11 @@ export function runFailedTestsReporterCli() {
 
         if (reportPaths.length) {
           log.info('found', reportPaths.length, 'reports', reportPaths);
+          if (!CREATE_ISSUES) {
+            log.info(
+              'REPORT_FAILED_TESTS_CREATE_ISSUES=false: no new issues will be opened, only existing ones updated'
+            );
+          }
 
           // Separate JUnit and Scout reports
           const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
@@ -177,6 +188,7 @@ export function runFailedTestsReporterCli() {
             pipeline,
             prependTitle,
             updateGithub,
+            createIssues: CREATE_ISSUES,
             indexInEs,
             reportUpdate,
             bkMeta,

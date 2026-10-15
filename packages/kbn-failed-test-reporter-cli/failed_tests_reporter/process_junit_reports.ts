@@ -44,6 +44,7 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    createIssues,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -150,6 +151,15 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (!createIssues) {
+        pushMessage(
+          'Test has not failed recently on tracked branches. No issue was opened: new ' +
+            'failed-test issues are filed by the daily flaky suite reporter'
+        );
+        failure.failureCount = 0;
         continue;
       }
 

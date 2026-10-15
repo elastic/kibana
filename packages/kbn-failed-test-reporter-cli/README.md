@@ -10,6 +10,12 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
 the `--failing-suites-repo owner/name` given.
 
+`REPORT_FAILED_TESTS_CREATE_ISSUES=false` keeps it from opening new issues: tracked failures still
+bump their issue, failures without one are indexed, written to the failure report and left to
+`report_flaky_test_issues` below. Unset or `true` (the default) is the legacy behaviour, where every
+new failure opens an issue. Set it in the pipeline env next to `REPORT_FAILED_TESTS_TO_GITHUB` and flip
+it back to fall back to the legacy reporting at any time.
+
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
 dashboard in the CI space, which shows the test's daily passed and failed attempts, its daily

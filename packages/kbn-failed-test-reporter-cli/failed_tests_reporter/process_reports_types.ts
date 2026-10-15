@@ -22,6 +22,12 @@ export interface ProcessReportsParams {
   pipeline: string;
   prependTitle: string;
   updateGithub: boolean;
+  /**
+   * Whether a failure without a `failed-test` issue gets a new one. Existing issues are updated
+   * either way. Off once the daily flaky suite reporter files the issues instead, see
+   * `REPORT_FAILED_TESTS_CREATE_ISSUES`.
+   */
+  createIssues: boolean;
   indexInEs: boolean;
   reportUpdate: boolean;
   bkMeta: BuildkiteMetadata;
