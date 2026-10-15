@@ -480,12 +480,18 @@ describe('AttackTabBulkActions', () => {
       );
     });
 
-    it('still counts an unresolved row in the selection it names', () => {
+    it('counts only the rows it can act on', () => {
       renderBar([resolvedSelection[0], { attackId: 'attack-unresolved', title: 'Snapshot only' }]);
 
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-        'Selected 2 attacks'
+        'Selected 1 attack'
       );
+    });
+
+    it('renders nothing when no selected row can be acted on', () => {
+      renderBar([{ attackId: 'attack-unresolved', title: 'Snapshot only' }]);
+
+      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
