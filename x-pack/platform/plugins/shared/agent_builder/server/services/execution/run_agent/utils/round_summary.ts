@@ -49,6 +49,9 @@ const getConnectorsUsage = (
     if (tokens?.cached !== undefined) {
       usage.cached_input_tokens = (usage.cached_input_tokens ?? 0) + tokens.cached;
     }
+    if (tokens?.thinking !== undefined) {
+      usage.reasoning_tokens = (usage.reasoning_tokens ?? 0) + tokens.thinking;
+    }
     if (model && usage.model === undefined) {
       usage.model = model;
     }
@@ -72,12 +75,18 @@ export const getModelUsage = (
   let outputTokens = 0;
   let cachedInputTokens = 0;
   let hasCachedInputTokens = false;
+  let reasoningTokens = 0;
+  let hasReasoningTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += getOutputTokens(call.tokens);
     if (call.tokens?.cached !== undefined) {
       cachedInputTokens += call.tokens.cached;
       hasCachedInputTokens = true;
+    }
+    if (call.tokens?.thinking !== undefined) {
+      reasoningTokens += call.tokens.thinking;
+      hasReasoningTokens = true;
     }
   }
   const modelFromResponse = stats.calls.find(
@@ -91,6 +100,7 @@ export const getModelUsage = (
     input_tokens: inputTokens,
     output_tokens: outputTokens,
     ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
+    ...(hasReasoningTokens ? { reasoning_tokens: reasoningTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
     ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
     ...(connectors.length > 0 ? { connectors } : {}),

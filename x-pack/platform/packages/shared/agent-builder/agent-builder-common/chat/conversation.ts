@@ -731,7 +731,8 @@ export interface RoundModelUsageStats {
   reasoning_tokens?: number;
   /**
    * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
-   * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.
+   * top-level `llm_calls`, `input_tokens`, `output_tokens`, `cached_input_tokens` and
+   * `reasoning_tokens`. The last two are only set when at least one entry reports them.
    * Absent on rounds persisted before the breakdown existed.
    */
   connectors?: ConnectorModelUsageStats[];
