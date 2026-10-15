@@ -5,50 +5,46 @@
  * 2.0.
  */
 
+import { resolveChartTheme } from '@kbn/isomer-primitives-charts';
 import { defineElasticChartsNodeEngine } from './node';
 
-const theme = async () =>
-  (await import('@kbn/isomer-primitives-charts')).resolveChartTheme('light');
+const request = {
+  mode: 'light' as const,
+  theme: resolveChartTheme('light'),
+  width: 300,
+  height: 160,
+};
 
 describe('defineElasticChartsNodeEngine', () => {
-  it('draws an xy chart in Node as markup with its plot as a Skia image', async () => {
+  it('draws in a worker and leaves this thread without DOM globals', async () => {
     const engine = await defineElasticChartsNodeEngine();
-    const artifact = await engine.draw!(
-      {
-        type: 'xyChart',
-        x: { type: 'category' },
-        series: [
-          {
-            label: 'Requests',
-            kind: 'bar',
-            points: [
-              { x: 'a', y: 1 },
-              { x: 'b', y: 2 },
-            ],
-          },
-        ],
-      } as never,
-      { mode: 'light', theme: await theme(), width: 400, height: 200 }
-    );
-    expect(artifact.plot.kind).toBe('markup');
-    const { html, stylesheet } = artifact.plot as {
-      html: string;
-      stylesheet: string;
-    };
-    expect(html).toMatch(/<img [^>]*src="data:image\/png;base64,/);
-    expect(html).not.toContain('<canvas');
-    expect(stylesheet).not.toContain('min-content');
+    try {
+      const artifact = await engine.draw!(
+        { type: 'metricTrend', title: 'Visits', value: 1610 } as never,
+        request
+      );
+      expect((artifact.plot as { html: string }).html).toContain('Visits');
+      expect('window' in globalThis).toBe(false);
+      expect('document' in globalThis).toBe(false);
+    } finally {
+      await engine.close();
+    }
   });
 
-  it('draws a metric with grid rows a static rasterizer can parse', async () => {
+  it('rejects a drawing the thread cannot make, keeps drawing, and rejects after close', async () => {
     const engine = await defineElasticChartsNodeEngine();
-    const artifact = await engine.draw!(
-      { type: 'metricTrend', title: 'Visits', value: 1610 } as never,
-      { mode: 'light', theme: await theme(), width: 300, height: 160 }
-    );
-    const { html } = artifact.plot as { html: string };
-    expect(html).toContain('Visits');
-    expect(html).not.toContain('min-content');
-    expect(html).toMatch(/grid-template-rows:\s*auto 1fr auto auto/);
+    try {
+      await expect(engine.draw!({ type: 'nope' } as never, request)).rejects.toThrow(
+        /no drawing for nope/
+      );
+      await expect(
+        engine.draw!({ type: 'metricTrend', title: 'Visits', value: 1 } as never, request)
+      ).resolves.toMatchObject({ width: 300, height: 160 });
+    } finally {
+      await engine.close();
+    }
+    await expect(
+      engine.draw!({ type: 'metricTrend', title: 'Visits', value: 1 } as never, request)
+    ).rejects.toThrow(/closed/);
   });
 });
