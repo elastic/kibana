@@ -18,6 +18,25 @@ const toSurfaceText = (content: string) => {
 };
 
 describe('text attachment type', () => {
+  describe('validate', () => {
+    const validate = (input: unknown) => createTextAttachmentType().validate(input);
+
+    it('accepts a file name and keeps it', async () => {
+      const data = { content: '# Notes', name: 'notes.md' };
+      expect(await validate(data)).toEqual({ valid: true, data });
+    });
+
+    it('accepts content without a file name', async () => {
+      const data = { content: '# Notes' };
+      expect(await validate(data)).toEqual({ valid: true, data });
+    });
+
+    it('rejects a file name longer than 1024 characters', async () => {
+      const result = await validate({ content: '# Notes', name: 'a'.repeat(1025) });
+      expect(result.valid).toBe(false);
+    });
+  });
+
   describe('toSurfaceComposition', () => {
     it('shows the content as written, in a code block', () => {
       expect(toSurfaceText('**not bold**\n# not a heading')).toEqual([

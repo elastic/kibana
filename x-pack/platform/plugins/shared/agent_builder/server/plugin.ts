@@ -13,10 +13,10 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
-  CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
-  SUPPORTED_DOCUMENT_MIME_TYPES,
+  CHAT_ATTACHMENT_BINARIES_FILE_KIND,
+  SUPPORTED_BINARY_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
-  MAX_DOCUMENT_FILE_KIND_BYTES,
+  MAX_BINARY_FILE_KIND_BYTES,
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
@@ -111,9 +111,9 @@ export class AgentBuilderPlugin
     });
 
     setupDeps.files.registerFileKind({
-      id: CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
-      allowedMimeTypes: [...SUPPORTED_DOCUMENT_MIME_TYPES],
-      maxSizeBytes: MAX_DOCUMENT_FILE_KIND_BYTES,
+      id: CHAT_ATTACHMENT_BINARIES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_BINARY_MIME_TYPES],
+      maxSizeBytes: MAX_BINARY_FILE_KIND_BYTES,
       http: {
         create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
         download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },

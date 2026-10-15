@@ -11,23 +11,23 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   Attachment,
-  DocumentAttachmentData,
-  SupportedDocumentMimeType,
+  BinaryAttachmentData,
+  SupportedBinaryMimeType,
 } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
-  CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
+  CHAT_ATTACHMENT_BINARIES_FILE_KIND,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
-  MAX_DOCUMENT_BYTES,
-  MAX_DOCUMENT_TEXT_LENGTH,
+  MAX_BINARY_BYTES,
+  MAX_BINARY_TEXT_LENGTH,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
-import type { DocumentConverter, DocumentConverters } from './converters';
-import { documentErrors } from './errors';
-import { createDocumentAttachmentType } from './document';
+import type { BinaryConverter, BinaryConverters } from './converters';
+import { binaryErrors } from './errors';
+import { createBinaryAttachmentType } from './binary';
 
-const validData: DocumentAttachmentData = {
+const validData: BinaryAttachmentData = {
   file_id: 'file-abc',
   name: 'invoice.pdf',
   mime_type: 'application/pdf',
@@ -35,7 +35,7 @@ const validData: DocumentAttachmentData = {
 };
 
 const createFilesPluginStub = ({
-  fileKind = CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
+  fileKind = CHAT_ATTACHMENT_BINARIES_FILE_KIND,
   mimeType = 'application/pdf',
   name = 'invoice.pdf',
   size = 100,
@@ -61,27 +61,22 @@ const createFilesPluginStub = ({
 
 const createConverterMock = () => ({
   isAvailable: jest.fn<boolean, []>(() => true),
-  toText: jest.fn<ReturnType<DocumentConverter['toText']>, Parameters<DocumentConverter['toText']>>(
+  toText: jest.fn<ReturnType<BinaryConverter['toText']>, Parameters<BinaryConverter['toText']>>(
     async () => '# Invoice\n\nHello'
   ),
 });
 
-describe('document attachment type', () => {
-  const converterMocks: Record<
-    SupportedDocumentMimeType,
-    ReturnType<typeof createConverterMock>
-  > = {
+describe('binary attachment type', () => {
+  const converterMocks: Record<SupportedBinaryMimeType, ReturnType<typeof createConverterMock>> = {
     'application/pdf': createConverterMock(),
-    'text/markdown': createConverterMock(),
-    'text/plain': createConverterMock(),
   };
-  const documentConverters: DocumentConverters = converterMocks;
+  const binaryConverters: BinaryConverters = converterMocks;
   const pdfConverter = converterMocks['application/pdf'];
 
   const createDefinition = (plugin: FilesStart) =>
-    createDocumentAttachmentType({
+    createBinaryAttachmentType({
       getFilesPlugin: async () => plugin,
-      documentConverters,
+      binaryConverters,
     });
 
   const createResolveContext = (request: KibanaRequest): AttachmentResolveContext => ({
@@ -124,10 +119,19 @@ describe('document attachment type', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('rejects a markdown mime type', async () => {
+      const { plugin } = createFilesPluginStub();
+      const result = await createDefinition(plugin).validate(
+        { ...validData, name: 'notes.md', mime_type: 'text/markdown' },
+        validateContext
+      );
+      expect(result.valid).toBe(false);
+    });
+
     it('rejects text that is too long', async () => {
       const { plugin } = createFilesPluginStub();
       const result = await createDefinition(plugin).validate(
-        { ...validData, text: 'a'.repeat(MAX_DOCUMENT_TEXT_LENGTH + 1) },
+        { ...validData, text: 'a'.repeat(MAX_BINARY_TEXT_LENGTH + 1) },
         validateContext
       );
       expect(result.valid).toBe(false);
@@ -152,7 +156,7 @@ describe('document attachment type', () => {
       expect(result).toEqual({ valid: false, error: 'File not found.' });
     });
 
-    it('rejects when the file is not a document file kind', async () => {
+    it('rejects when the file is not a binary file kind', async () => {
       const { plugin } = createFilesPluginStub({ fileKind: CHAT_ATTACHMENT_IMAGES_FILE_KIND });
       const result = await createDefinition(plugin).validate(validData, validateContext);
       expect(result).toEqual({ valid: false, error: 'File not found.' });
@@ -186,32 +190,7 @@ describe('document attachment type', () => {
       );
     });
 
-    it('uses the converter of the markdown mime type', async () => {
-      const { plugin } = createFilesPluginStub({
-        mimeType: 'text/markdown',
-        name: 'notes.md',
-        bytes: Buffer.from('# Notes'),
-      });
-      converterMocks['text/markdown'].toText.mockResolvedValue('# Notes');
-
-      const data = await createDefinition(plugin).resolve!(
-        'file-abc',
-        createResolveContext(request)
-      );
-
-      expect(data).toEqual({
-        file_id: 'file-abc',
-        name: 'notes.md',
-        mime_type: 'text/markdown',
-        text: '# Notes',
-      });
-      expect(converterMocks['text/markdown'].toText).toHaveBeenCalledWith(
-        expect.objectContaining({ bytes: Buffer.from('# Notes'), fileName: 'notes.md' })
-      );
-      expect(pdfConverter.toText).not.toHaveBeenCalled();
-    });
-
-    it.each([null, 'application/zip'])(
+    it.each([null, 'text/plain', 'application/zip'])(
       'fails without a download when the file mime type is %s',
       async (mimeType) => {
         const { plugin, downloadContent } = createFilesPluginStub({ mimeType });
@@ -246,7 +225,7 @@ describe('document attachment type', () => {
       ).rejects.toThrow('File not found.');
     });
 
-    it('fails with the same message when the file is not a document file kind', async () => {
+    it('fails with the same message when the file is not a binary file kind', async () => {
       const { plugin, downloadContent } = createFilesPluginStub({
         fileKind: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       });
@@ -259,7 +238,7 @@ describe('document attachment type', () => {
 
     it('fails before the download when the file size is over the limit', async () => {
       const { plugin, downloadContent } = createFilesPluginStub({
-        size: MAX_DOCUMENT_BYTES['application/pdf'] + 1,
+        size: MAX_BINARY_BYTES['application/pdf'] + 1,
       });
 
       await expect(
@@ -271,7 +250,7 @@ describe('document attachment type', () => {
     it('fails when the downloaded bytes are over the limit', async () => {
       const { plugin } = createFilesPluginStub({
         size: 100,
-        bytes: Buffer.alloc(MAX_DOCUMENT_BYTES['application/pdf'] + 1),
+        bytes: Buffer.alloc(MAX_BINARY_BYTES['application/pdf'] + 1),
       });
 
       await expect(
@@ -280,29 +259,8 @@ describe('document attachment type', () => {
       expect(pdfConverter.toText).not.toHaveBeenCalled();
     });
 
-    it('takes the size limit from the mime type', async () => {
-      const threeMb = 3 * 1024 * 1024;
-      const textFile = createFilesPluginStub({
-        mimeType: 'text/plain',
-        name: 'notes.txt',
-        size: threeMb,
-        bytes: Buffer.alloc(threeMb),
-      });
-
-      await expect(
-        createDefinition(textFile.plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The file is larger than 2 MB.');
-      expect(textFile.downloadContent).not.toHaveBeenCalled();
-
-      const pdfFile = createFilesPluginStub({ size: threeMb, bytes: Buffer.alloc(threeMb) });
-
-      await expect(
-        createDefinition(pdfFile.plugin).resolve!('file-abc', createResolveContext(request))
-      ).resolves.toEqual(expect.objectContaining({ mime_type: 'application/pdf' }));
-    });
-
     it('fails when the text is too long', async () => {
-      pdfConverter.toText.mockResolvedValue('a'.repeat(MAX_DOCUMENT_TEXT_LENGTH + 1));
+      pdfConverter.toText.mockResolvedValue('a'.repeat(MAX_BINARY_TEXT_LENGTH + 1));
       const { plugin } = createFilesPluginStub();
 
       await expect(
@@ -311,7 +269,7 @@ describe('document attachment type', () => {
     });
 
     it('passes the error of the converter on and keeps the file', async () => {
-      pdfConverter.toText.mockRejectedValue(documentErrors.timeout());
+      pdfConverter.toText.mockRejectedValue(binaryErrors.timeout());
       const { plugin, deleteFile } = createFilesPluginStub();
 
       await expect(
@@ -349,11 +307,11 @@ describe('document attachment type', () => {
   });
 
   describe('format', () => {
-    it('returns the text of the document', async () => {
+    it('returns the text of the file', async () => {
       const { plugin } = createFilesPluginStub();
-      const attachment: Attachment<AttachmentType.document, DocumentAttachmentData> = {
+      const attachment: Attachment<AttachmentType.binary, BinaryAttachmentData> = {
         id: 'attachment-1',
-        type: AttachmentType.document,
+        type: AttachmentType.binary,
         data: validData,
       };
 

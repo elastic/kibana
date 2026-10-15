@@ -16,8 +16,8 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
-import { createDocumentAttachmentType } from './document/document';
-import type { DocumentConverters } from './document/converters';
+import { createBinaryAttachmentType } from './binary/binary';
+import type { BinaryConverters } from './binary/converters';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -27,11 +27,11 @@ import type {
 export const registerAttachmentTypes = ({
   coreSetup,
   setupDeps,
-  documentConverters,
+  binaryConverters,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
-  documentConverters: DocumentConverters;
+  binaryConverters: BinaryConverters;
 }) => {
   const { agentBuilder } = setupDeps;
 
@@ -49,7 +49,7 @@ export const registerAttachmentTypes = ({
     createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
-    createDocumentAttachmentType({ getFilesPlugin, documentConverters }),
+    createBinaryAttachmentType({ getFilesPlugin, binaryConverters }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

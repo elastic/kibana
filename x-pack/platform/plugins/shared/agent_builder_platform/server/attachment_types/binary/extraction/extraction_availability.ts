@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import {
+  DOCUMENT_EXTRACTION_ENDPOINT_ID,
+  // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
+  USE_FAKE_EXTRACTION,
+  // FAKE_EXTRACTION:end
+} from './constants';
+
+export interface DocumentExtractionAvailability {
+  isAvailable: () => boolean;
+  check: (esClient: ElasticsearchClient) => Promise<void>;
+}
+
+const getStatusCode = (error: unknown): number | undefined =>
+  (error as { statusCode?: number } | undefined)?.statusCode;
+
+/**
+ * Creates a holder for the document extraction state. `check` looks for the endpoint once per instance.
+ */
+export const createDocumentExtractionAvailability = ({
+  logger,
+}: {
+  logger: Logger;
+}): DocumentExtractionAvailability => {
+  let available = false;
+  let availabilityCheck: Promise<void> | undefined;
+
+  const isAvailable = (): boolean => {
+    // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
+    if (USE_FAKE_EXTRACTION) {
+      return true;
+    }
+    // FAKE_EXTRACTION:end
+    return available;
+  };
+
+  const check = (esClient: ElasticsearchClient): Promise<void> => {
+    availabilityCheck ??= (async () => {
+      try {
+        const { endpoints } = await esClient.inference.get({
+          inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID,
+        });
+        available = endpoints.some(
+          ({ inference_id: id }) => id === DOCUMENT_EXTRACTION_ENDPOINT_ID
+        );
+      } catch (error) {
+        available = false;
+        if (getStatusCode(error) !== 404) {
+          logger.warn(
+            `Could not check the document extraction endpoint: ${(error as Error).message}`
+          );
+        }
+      }
+      logger.info(
+        `PDF reading is ${available ? 'available' : 'not available'} on this deployment.`
+      );
+    })();
+    return availabilityCheck;
+  };
+
+  return { isAvailable, check };
+};

@@ -6,7 +6,7 @@
  */
 
 import { setTimeout as sleep } from 'timers/promises';
-import { documentErrors } from '../errors';
+import { binaryErrors } from '../errors';
 
 const DEFAULT_DELAY_MS = 2000;
 const SLOW_DELAY_MS = 30 * 1000;
@@ -23,7 +23,7 @@ export const fakeExtractDocument = async ({
 }): Promise<string> => {
   const name = fileName.replace(/\.pdf$/i, '');
   if (name === 'error') {
-    throw documentErrors.extractionFailed();
+    throw binaryErrors.extractionFailed();
   }
   await sleep(name === 'slow' ? SLOW_DELAY_MS : DEFAULT_DELAY_MS, undefined, { signal });
   return '# Fake PDF\n\nThe PDF contains one word: Hello';

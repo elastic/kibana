@@ -14,15 +14,16 @@ jest.mock('../extraction/extract_document', () => ({
   extractDocument: (params: unknown) => mockExtractDocument(params),
 }));
 
-const mockIsDocumentExtractionAvailable = jest.fn();
-jest.mock('../extraction/extraction_availability', () => ({
-  isDocumentExtractionAvailable: () => mockIsDocumentExtractionAvailable(),
-}));
-
 describe('pdf converter', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = {} as ElasticsearchClient;
-  const converter = createPdfConverter({ getEsClient: async () => esClient, logger });
+  const mockIsAvailable = jest.fn();
+  const extractionAvailability = { isAvailable: mockIsAvailable, check: jest.fn() };
+  const converter = createPdfConverter({
+    getEsClient: async () => esClient,
+    extractionAvailability,
+    logger,
+  });
   const signal = new AbortController().signal;
 
   beforeEach(() => {
@@ -64,7 +65,7 @@ describe('pdf converter', () => {
   });
 
   it.each([true, false])('is available: %s when the document extraction is', (available) => {
-    mockIsDocumentExtractionAvailable.mockReturnValue(available);
+    mockIsAvailable.mockReturnValue(available);
     expect(converter.isAvailable()).toBe(available);
   });
 });

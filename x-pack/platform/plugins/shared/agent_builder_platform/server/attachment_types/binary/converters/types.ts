@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
+import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
 
-export interface DocumentToTextParams {
+export interface BinaryToTextParams {
   bytes: Buffer;
   fileId: string;
   fileName: string;
   signal: AbortSignal;
 }
 
-export interface DocumentConverter {
+export interface BinaryConverter {
   /** false when this deployment cannot read the format, e.g. no Reader endpoint */
   isAvailable: () => boolean;
-  toText: (params: DocumentToTextParams) => Promise<string>;
+  toText: (params: BinaryToTextParams) => Promise<string>;
 }
 
-export type DocumentConverters = Readonly<Record<SupportedDocumentMimeType, DocumentConverter>>;
+export type BinaryConverters = Readonly<Record<SupportedBinaryMimeType, BinaryConverter>>;
