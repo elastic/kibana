@@ -50,10 +50,10 @@ const AddRulesPageComponent: React.FC = () => {
     <>
       <AddPrebuiltRulesTableContextProvider>
         <AddPrebuiltRulesAppHeader />
-        <NeedAdminForUpdateRulesCallOut />
-        <MissingDetectionsPrivilegesCallOut />
         <SecuritySolutionPageWrapper>
           <EuiSpacer size="s" />
+          <NeedAdminForUpdateRulesCallOut />
+          <MissingDetectionsPrivilegesCallOut />
           <AddPrebuiltRulesTable />
         </SecuritySolutionPageWrapper>
       </AddPrebuiltRulesTableContextProvider>
