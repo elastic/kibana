@@ -15,7 +15,7 @@ import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_t
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
-/** Normalized lifecycle column: unset or non-deleted stored values become `active`. */
+/** Normalized lifecycle column: unset stored values become `active`. */
 const KI_LIFECYCLE_STATUS_ALIAS = 'lifecycle_status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */

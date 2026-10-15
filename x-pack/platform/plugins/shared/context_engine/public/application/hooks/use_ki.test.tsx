@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
+import { KI_LIFECYCLE_STATUSES } from '../../../common/step_types/ki';
 import { useKi } from './use_ki';
 
 const renderUseKi = (
@@ -63,7 +64,7 @@ describe('useKi', () => {
         version: '1',
         query: {
           index: 'ai-index-idx-sample-ki',
-          lifecycle_status: ['active', 'deleted'],
+          lifecycle_status: [...KI_LIFECYCLE_STATUSES],
         },
       })
     );
