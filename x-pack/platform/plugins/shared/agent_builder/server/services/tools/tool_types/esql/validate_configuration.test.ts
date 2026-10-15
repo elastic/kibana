@@ -79,10 +79,12 @@ describe('validateConfig', () => {
 
       const syntaxErrors = [
         {
-          text: "SyntaxError: mismatched input 'WHERE' expecting {'row', 'from', 'show'}",
-          code: '400',
-          type: 'error' as const,
-          location: { min: 1, max: 6 },
+          startLineNumber: 1,
+          endLineNumber: 1,
+          startColumn: 1,
+          endColumn: 6,
+          message: "SyntaxError: mismatched input 'WHERE' expecting {'row', 'from', 'show'}",
+          severity: 8,
         },
       ];
       mockValidateQuery.mockResolvedValue({ errors: syntaxErrors, warnings: [] });
