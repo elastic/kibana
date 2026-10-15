@@ -60,7 +60,9 @@ jest.mock('./dashboard_grid_item', () => {
             id={`mockDashboardGridItem_${props.id}`}
             className={className}
           >
-            mockDashboardGridItem
+            <div data-test-subj="dashboardPanel">
+              <p data-test-subj={`mockPanelContent_${props.id}`}>mockDashboardGridItem</p>
+            </div>
           </div>
         );
       }
@@ -292,6 +294,36 @@ describe('DashboardGrid', () => {
         expect(Object.keys(dashboardApi.layout$.getValue().sections)).not.toContain('section1');
         expect(Object.keys(dashboardApi.layout$.getValue().panels)).not.toContain('3'); // this is the panel in section1
       });
+    });
+  });
+
+  describe('click hint', () => {
+    test('shows when a plain click on panel content does nothing in edit mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      const content = screen.getByTestId('mockPanelContent_1');
+      fireEvent.mouseDown(content, { clientX: 10, clientY: 10 });
+      fireEvent.click(content, { clientX: 10, clientY: 10, detail: 1 });
+
+      expect(await screen.findByTestId('dashboardPanelClickHint')).toBeInTheDocument();
+    });
+
+    test('does not show in view mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('view');
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      const content = screen.getByTestId('mockPanelContent_1');
+      fireEvent.mouseDown(content, { clientX: 10, clientY: 10 });
+      fireEvent.click(content, { clientX: 10, clientY: 10, detail: 1 });
+
+      expect(screen.queryByTestId('dashboardPanelClickHint')).not.toBeInTheDocument();
     });
   });
 

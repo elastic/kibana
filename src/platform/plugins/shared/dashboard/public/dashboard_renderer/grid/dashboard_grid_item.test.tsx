@@ -282,6 +282,53 @@ test('Cmd/Ctrl+click toggles panel selection and applies selected class', async 
   expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(false);
 });
 
+describe('selection indicator', () => {
+  const select = async (
+    dashboardApi: { setSelectedPanelIds: (ids: Set<string>) => void },
+    ids: string[]
+  ) => {
+    await act(async () => {
+      dashboardApi.setSelectedPanelIds(new Set(ids));
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+  };
+
+  test('is hidden when no panel is selected', () => {
+    const { component } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    expect(component.queryByTestId('dashboardPanelSelectionIndicator-1')).toBeNull();
+  });
+
+  test('shows an empty circle on unselected panels in select mode', async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await select(dashboardApi, ['2']);
+
+    const indicator = component.getByTestId('dashboardPanelSelectionIndicator-1');
+    expect(indicator.classList).not.toContain('dshDashboardGrid__selectionIndicator--checked');
+    expect(component.queryByText('Selected')).toBeNull();
+  });
+
+  test('shows a check on selected panels', async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await select(dashboardApi, ['1']);
+
+    const indicator = component.getByTestId('dashboardPanelSelectionIndicator-1');
+    expect(indicator.classList).toContain('dshDashboardGrid__selectionIndicator--checked');
+    expect(component.getByText('Selected')).toBeInTheDocument();
+  });
+});
+
 describe('right-click menu', () => {
   // the grid item reads the selection through batched subjects, which update asynchronously
   const select = async (

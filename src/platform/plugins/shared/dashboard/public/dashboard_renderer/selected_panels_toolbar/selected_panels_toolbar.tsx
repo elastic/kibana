@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -16,7 +17,6 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
-  EuiText,
   keys,
   useEuiTheme,
   type UseEuiTheme,
@@ -204,9 +204,13 @@ export const SelectedPanelsToolbar = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s" css={styles.count} data-test-subj="dashboardSelectedPanelsCount">
+              <EuiBadge
+                color="primary"
+                css={styles.count}
+                data-test-subj="dashboardSelectedPanelsCount"
+              >
                 {strings.getSelectedCount(selectedPanelIds.size)}
-              </EuiText>
+              </EuiBadge>
             </EuiFlexItem>
             <div css={shared.separator} aria-hidden />
             {addToChat && (
@@ -377,9 +381,8 @@ const toolbarStyles = {
     '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
   },
   count: ({ euiTheme }: UseEuiTheme) => ({
-    paddingRight: euiTheme.size.s,
-    whiteSpace: 'nowrap' as const,
-    // equal-width digits, so the label doesn't shift as the count changes
+    marginRight: euiTheme.size.s,
+    // equal-width digits, so the badge doesn't change width as the count changes
     fontVariantNumeric: 'tabular-nums',
   }),
   danger: ({ euiTheme }: UseEuiTheme) => ({

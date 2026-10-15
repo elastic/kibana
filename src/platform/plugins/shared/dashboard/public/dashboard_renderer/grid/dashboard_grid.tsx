@@ -27,6 +27,7 @@ import {
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
+  SELECTION_DRAG_THRESHOLD_PX,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import {
@@ -35,9 +36,8 @@ import {
   SelectionPreviewContext,
 } from './panel_context_menu';
 import { isSelectionModifierPressed } from './selection_modifier';
+import { isUnhandledPanelClick, PanelClickHint } from './panel_click_hint';
 import { useLayoutStyles } from './use_layout_styles';
-
-const DRAG_THRESHOLD_PX = 5;
 
 function getAllPanelIdsFromLayout(layout: GridLayoutData): string[] {
   const ids: string[] = [];
@@ -68,6 +68,7 @@ export const DashboardGrid = () => {
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const justDidSelectionDragRef = useRef(false);
+  const pointerDownRef = useRef<{ x: number; y: number } | null>(null);
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
@@ -82,6 +83,10 @@ export const DashboardGrid = () => {
     current: { x: number; y: number };
   } | null>(null);
   const [previewSelectedPanelIds, setPreviewSelectedPanelIds] = useState<Set<string>>(new Set());
+  const [clickHint, setClickHint] = useState<{
+    id: number;
+    position: { x: number; y: number };
+  } | null>(null);
   const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef, selectedPanelIds] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId$,
@@ -124,12 +129,31 @@ export const DashboardGrid = () => {
   const handleGridClick = useCallback(
     (e: React.MouseEvent) => {
       if (viewMode !== 'edit') return;
+      const panel = (e.target as HTMLElement).closest('[data-test-subj="dashboardPanel"]');
+      if (panel) {
+        // Cmd+clicks never get here, the panel handles them in the capture phase
+        const pointerDown = pointerDownRef.current;
+        const hasMoved =
+          pointerDown !== null &&
+          (Math.abs(e.clientX - pointerDown.x) >= SELECTION_DRAG_THRESHOLD_PX ||
+            Math.abs(e.clientY - pointerDown.y) >= SELECTION_DRAG_THRESHOLD_PX);
+        if (!hasMoved && isUnhandledPanelClick(e)) {
+          const { left, width, bottom } = panel.getBoundingClientRect();
+          setClickHint({
+            id: Date.now(),
+            // bottom center of the panel, kept on screen when the panel runs past the viewport
+            position: { x: left + width / 2, y: Math.min(bottom, window.innerHeight) },
+          });
+        }
+        return;
+      }
       if ((selectedPanelIds?.size ?? 0) === 0) return;
-      if ((e.target as HTMLElement).closest('[data-test-subj="dashboardPanel"]')) return;
       dashboardApi.setSelectedPanelIds(new Set());
     },
     [viewMode, selectedPanelIds, dashboardApi]
   );
+
+  const dismissClickHint = useCallback(() => setClickHint(null), []);
 
   // The click that ends a selection drag must not reach the panel, or its Cmd+click handler
   // would immediately toggle off the panel the drag just selected
@@ -141,6 +165,7 @@ export const DashboardGrid = () => {
 
   const handleGridMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      pointerDownRef.current = { x: e.clientX, y: e.clientY };
       if (viewMode !== 'edit' || !isSelectionModifierPressed(e)) return;
       // keep native modifier+click behavior inside editable fields
       if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
@@ -163,7 +188,9 @@ export const DashboardGrid = () => {
         }
         const dx = moveEvent.clientX - start.x;
         const dy = moveEvent.clientY - start.y;
-        const hasDragged = Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
+        const hasDragged =
+          Math.abs(dx) >= SELECTION_DRAG_THRESHOLD_PX ||
+          Math.abs(dy) >= SELECTION_DRAG_THRESHOLD_PX;
         if (hasDragged) {
           dragStateRef.current = {
             start: { ...start },
@@ -384,6 +411,7 @@ export const DashboardGrid = () => {
           ref={layoutRef}
           className={classNames({
             'dshLayout--editing': viewMode === 'edit',
+            'dshLayout--selectMode': viewMode === 'edit' && (selectedPanelIds?.size ?? 0) > 0,
             'dshLayout-withoutMargins': !useMargins,
             'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
           })}
@@ -410,6 +438,14 @@ export const DashboardGrid = () => {
               zIndex: 9998,
             }}
             data-test-subj="dashboardSelectionOverlay"
+          />
+        )}
+        {clickHint && viewMode === 'edit' && (
+          // keyed by click, so each click restarts the hint
+          <PanelClickHint
+            key={clickHint.id}
+            position={clickHint.position}
+            onDismiss={dismissClickHint}
           />
         )}
         {contextMenu && viewMode === 'edit' && (
@@ -448,6 +484,10 @@ const dashboardGridStyles = {
       // Hide hover actions when dashboard has an overlay
       '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
         visibility: 'hidden !important' as 'hidden',
+      },
+      // Select mode: the hovered panel previews the selected outline
+      '&.dshLayout--selectMode .dshDashboardGrid__item:hover .embPanel': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`,
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
