@@ -6,6 +6,7 @@
  */
 
 import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import { CONTENT_FILTER_REFUSAL } from './content_filter_refusal';
 
 interface UnvalidatedMessage {
   content: string;
@@ -75,8 +76,14 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
   const message = chunks.reduce<UnvalidatedMessage>(
     (prev, chunk) => {
       prev.content += chunk.content ?? '';
+      // finish_reason: content_filter lands on the terminating chunk, often with an empty
+      // delta. The OpenAI adapter synthesizes CONTENT_FILTER_REFUSAL for that case. Do not
+      // let that placeholder replace a concrete refusal already accumulated from earlier
+      // chunks (or the same stream would report the generic text instead of the provider's).
       if (chunk.refusal) {
-        prev.refusal = chunk.refusal;
+        if (!prev.refusal || chunk.refusal !== CONTENT_FILTER_REFUSAL) {
+          prev.refusal = chunk.refusal;
+        }
       }
 
       return prev;

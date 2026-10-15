@@ -6,9 +6,47 @@
  */
 
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import { CONTENT_FILTER_REFUSAL } from './content_filter_refusal';
 import { mergeChunks } from './merge_chunks';
 
 describe('mergeChunks', () => {
+  it('keeps a concrete refusal when a later content_filter placeholder arrives', () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        refusal: 'I cannot help with that.',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+      {
+        content: '',
+        refusal: CONTENT_FILTER_REFUSAL,
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+    ]);
+
+    expect(message.refusal).toBe('I cannot help with that.');
+  });
+
+  it('uses the content_filter placeholder when no earlier refusal was present', () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+      {
+        content: '',
+        refusal: CONTENT_FILTER_REFUSAL,
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+    ]);
+
+    expect(message.refusal).toBe(CONTENT_FILTER_REFUSAL);
+  });
+
   it('concatenates content chunks into a single message', async () => {
     const message = mergeChunks([
       {

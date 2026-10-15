@@ -11,16 +11,10 @@ import type {
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import { CONTENT_FILTER_REFUSAL } from '../../utils/content_filter_refusal';
 import type { OpenAIChatCompletionChunkDelta, OpenAIChatCompletionMessage } from './types';
 
-/**
- * Set as the chunk's `refusal` when the provider ends a response with `finish_reason:
- * content_filter` and no refusal text. Anthropic's `stop_reason: refusal`, for one, arrives this
- * way through the Elasticsearch inference API: no content, no tool calls, and nothing but the
- * finish reason to say the response was filtered rather than empty.
- */
-export const CONTENT_FILTER_REFUSAL =
-  'The response was stopped by the provider content filter (finish_reason: content_filter).';
+export { CONTENT_FILTER_REFUSAL };
 
 const refusalFromFinishReason = (
   refusal: string | null | undefined,
