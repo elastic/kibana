@@ -1145,13 +1145,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
+    // While the account may still be alive, this credential is Kibana's one record of the token
+    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
+    // so the credential outlives a rollback that could not finish.
     if (!accountDeleted) {
       return false;
     }
 
-    // While the account may still be alive, this credential is Kibana's one record of the token
-    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
-    // so the credential outlives a rollback that could not finish.
     // The delete is idempotent, so the paths that never reached `set` cost nothing here.
     try {
       await this.credentialStore.delete(principal);
