@@ -203,9 +203,6 @@ EOF
 }
 
 # Set up the workflow step-schema CDN publisher key.
-# The Vault token expires ~20 minutes after the job starts, which is before the serverless image build
-# reaches the publish step, so the key is read here instead of in publish_schema.sh.
-# Not fatal: a failed read must not block the image build; publish_schema.sh reports it.
 {
   if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
     WORKFLOWS_SCHEMA_GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish || true)"
