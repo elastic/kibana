@@ -267,6 +267,42 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('rule schedule with equivalent duration formats', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 3,
+            interval: '60m',
+            from: 'now-24h',
+          }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      [
+        ['interval', '1h'],
+        ['from', 'now-1d'],
+      ].forEach(([fieldName, value]) => {
+        it(`"${fieldName}" patched to an equivalent value "${value}" does NOT customize the rule`, async () => {
+          const { body: patchedRule } = await detectionsApi
+            .patchRule({
+              body: { rule_id: PREBUILT_RULE_ID, [fieldName]: value },
+            })
+            .expect(200);
+
+          expect(patchedRule.rule_source).toMatchObject({
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
+          });
+          // The patched value is kept as is, not normalized
+          expect(patchedRule).toMatchObject({ [fieldName]: value });
+        });
+      });
+    });
+
     describe('custom query rule fields', () => {
       beforeEach(async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
