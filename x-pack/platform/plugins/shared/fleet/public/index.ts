@@ -343,5 +343,11 @@ export type { AgentlessEnrollmentFlyoutProps } from './components/agentless_enro
 
 // Worst unit status of a package policy on an agent — lets step 4 judge an agent by the
 // integration it deployed rather than by unrelated integrations on the same agent.
-export { getComponentAlertLevel } from './components/agentless_status_details_flyout/component_alert_level';
-export type { ComponentAlertLevel } from './components/agentless_status_details_flyout/component_alert_level';
+export {
+  getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';
+export type {
+  ComponentAlertLevel,
+  PackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';
