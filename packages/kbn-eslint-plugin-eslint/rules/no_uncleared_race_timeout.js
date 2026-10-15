@@ -828,8 +828,8 @@ function isTimerCleared(timer, cleared) {
   const sites = target.memberKey
     ? cleared.members.filter((site) => site.key === target.memberKey)
     : target.identifier
-      ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
-      : [];
+    ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
+    : [];
   return sites.some((site) => !callback || !containsNode(callback, site.node));
 }
 
