@@ -189,6 +189,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // Whether the pattern or profile field has focus. While one does, an estimate it made
   // unavailable stays, faded.
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
+  const patternInputRef = useRef<HTMLInputElement>(null);
   // Text typed to search the list to select from, which sizes the list to what it shows.
   const [pickSearch, setPickSearch] = useState('');
   // Set when leaving the profile form, so the link that opened it gets focus back.
@@ -490,7 +491,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // What a valid pattern matches, counted beside its label.
   const hasMatchCount = Boolean(type && pattern && !errors.pattern);
   const matchesLabel = i18n.translate('xpack.boost.ruleForm.matchesLabel', {
-    defaultMessage: '{count, plural, one {# match} other {# matches}}',
+    defaultMessage: '{count, plural, one {# exact match} other {# exact matches}}',
     values: { count: patternPreview.length },
   });
   const patternRow = (
@@ -523,6 +524,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         })}
         isInvalid={Boolean(patternError)}
         disabled={isSaving || !type}
+        inputRef={patternInputRef}
         data-test-subj="boostRulePattern"
       />
     </EuiFormRow>
@@ -753,6 +755,11 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                   exactMatches={patternPreview}
                   names={typedDataSources.map(({ name }) => name)}
                   maxHeight={PREVIEW_MAX_HEIGHT}
+                  onUsePattern={(suggestedPattern) => {
+                    updateDraft({ pattern: suggestedPattern });
+                    // The link that was used goes away, so focus returns to the pattern.
+                    patternInputRef.current?.focus();
+                  }}
                 />
               </>
             ) : (

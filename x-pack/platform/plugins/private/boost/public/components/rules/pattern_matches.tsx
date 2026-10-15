@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -21,7 +22,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { matchesIndexPattern } from '../../../common/resolution';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { matchesIndexPattern, widenIndexPattern } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { SupersedingRule, TargetName } from './target_name';
 
@@ -77,11 +79,16 @@ interface PatternMatchesProps {
   names: readonly string[];
   /** The panel's tallest height, past which its list scrolls. */
   maxHeight: number;
+  /** Replaces the pattern with a suggested one. */
+  onUsePattern: (pattern: string) => void;
 }
 
 interface ListTitle {
   label: string;
   iconType: string;
+  color: 'success' | 'subdued';
+  /** Shown after the label, such as a way to turn partial matches into exact ones. */
+  action?: ReactNode;
 }
 
 /**
@@ -96,6 +103,7 @@ export const PatternMatches = ({
   exactMatches,
   names,
   maxHeight,
+  onUsePattern,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
@@ -143,7 +151,7 @@ export const PatternMatches = ({
       {title && (
         <EuiText
           size="xs"
-          color="subdued"
+          color={title.color}
           css={{
             display: 'flex',
             alignItems: 'center',
@@ -154,6 +162,7 @@ export const PatternMatches = ({
         >
           <EuiIcon type={title.iconType} size="s" aria-hidden={true} />
           {title.label}
+          {title.action}
         </EuiText>
       )}
       <EuiText
@@ -190,7 +199,8 @@ export const PatternMatches = ({
         label: i18n.translate('xpack.boost.patternMatches.exactMatchesTitle', {
           defaultMessage: 'Exact matches',
         }),
-        iconType: 'checkCircle',
+        iconType: 'checkCircleFill',
+        color: 'success' as const,
       };
       return renderList(
         title.label,
@@ -218,11 +228,33 @@ export const PatternMatches = ({
       );
     }
     if (partialMatches.length > 0) {
+      // The narrowest pattern that matches all of them exactly, offered in one click.
+      const suggestedPattern = widenIndexPattern(pattern, partialMatches);
       const title = {
         label: i18n.translate('xpack.boost.patternMatches.partialMatchesTitle', {
           defaultMessage: 'Partial matches',
         }),
         iconType: 'partial',
+        color: 'subdued' as const,
+        action: (
+          <>
+            <span aria-hidden={true}>·</span>
+            <EuiLink
+              onClick={() => onUsePattern(suggestedPattern)}
+              data-test-subj="boostRulePatternSuggestion"
+            >
+              <FormattedMessage
+                id="xpack.boost.patternMatches.usePattern"
+                defaultMessage="Use {pattern}"
+                values={{
+                  pattern: (
+                    <span css={{ fontFamily: euiTheme.font.familyCode }}>{suggestedPattern}</span>
+                  ),
+                }}
+              />
+            </EuiLink>
+          </>
+        ),
       };
       // Subdued, and without what ranks higher, since the rule doesn't apply to these yet.
       return renderList(
@@ -266,11 +298,8 @@ export const PatternMatches = ({
       css={{ display: 'flex', flexDirection: 'column', maxBlockSize: maxHeight }}
       data-test-subj="boostRulePatternMatches"
     >
-      <EuiTabs
-        size="s"
-        bottomBorder={false}
-        css={{ padding: `${euiTheme.size.base} ${euiTheme.size.base} 0` }}
-      >
+      {/* A margin rather than padding, so the tabs' border stops at the panel's padding. */}
+      <EuiTabs size="s" expand css={{ margin: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}>
         {TABS.map((id) => (
           <EuiTab
             key={id}
@@ -294,8 +323,9 @@ export const PatternMatches = ({
           flexDirection: 'column',
           flex: '1 1 auto',
           minBlockSize: 0,
-          // With the 8px inside the list, the content sits 16px from the tabs and the panel's edges.
-          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+          // With the 8px inside the list, the content sits 16px below the tabs and 8px from the
+          // panel's edges.
+          padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
         }}
       >
         {selectedTab === 'matching' ? renderMatching() : renderAll()}

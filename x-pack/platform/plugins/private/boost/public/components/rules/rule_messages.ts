@@ -50,10 +50,10 @@ export const INDEX_PATTERN_ERROR_MESSAGES: Readonly<Record<IndexPatternError, st
 
 export const PATTERN_NO_MATCHES_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.patternNoIndices', {
-    defaultMessage: 'Enter a pattern that matches at least one index.',
+    defaultMessage: 'Enter a pattern that exactly matches at least one index.',
   }),
   data_streams: i18n.translate('xpack.boost.ruleForm.patternNoDataStreams', {
-    defaultMessage: 'Enter a pattern that matches at least one data stream.',
+    defaultMessage: 'Enter a pattern that exactly matches at least one data stream.',
   }),
 };
 

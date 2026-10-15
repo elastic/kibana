@@ -352,7 +352,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 match');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
   });
 
@@ -381,13 +381,24 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 exact matches');
     expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Partial matches');
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
     // The rule doesn't apply to it yet, so what ranks higher doesn't matter.
     expect(within(partialMatch).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
     expect(screen.queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
+  });
+
+  it('offers a pattern that exactly matches the partial matches', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+    await userEvent.click(screen.getByTestId('boostRulePatternSuggestion'));
+
+    expect(screen.getByTestId('boostRulePattern')).toHaveValue('cat*');
+    expect(screen.getByTestId('boostRulePattern')).toHaveFocus();
+    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Exact matches');
   });
 
   it('finds partial matches by any part of their name', async () => {
@@ -411,7 +422,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 exact matches');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
@@ -424,7 +435,7 @@ describe('RuleFlyout pattern matches', () => {
     await userEvent.click(screen.getByTestId('boostRuleSave'));
 
     expect(mutation.mutate).not.toHaveBeenCalled();
-    const message = 'Enter a pattern that matches at least one index.';
+    const message = 'Enter a pattern that exactly matches at least one index.';
     expect(screen.getByText(message)).toBeInTheDocument();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');

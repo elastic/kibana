@@ -17,6 +17,7 @@ import {
   matchesIndexPattern,
   resolveRule,
   splitByIndexPattern,
+  widenIndexPattern,
 } from './resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from './types';
 
@@ -64,6 +65,18 @@ describe('matchesIndexPattern', () => {
 
   it('treats other characters literally', () => {
     expect(matchesIndexPattern('logs.app', 'logsXapp')).toBe(false);
+  });
+});
+
+describe('widenIndexPattern', () => {
+  it('prefers a trailing wildcard, then a leading one, then both', () => {
+    expect(widenIndexPattern('cat', ['catalog-fall', 'catalog-spring'])).toBe('cat*');
+    expect(widenIndexPattern('fall', ['catalog-fall'])).toBe('*fall');
+    expect(widenIndexPattern('2026', ['catalog-2026-fall', 'archive-2026'])).toBe('*2026*');
+  });
+
+  it("doesn't double up wildcards the pattern already has", () => {
+    expect(widenIndexPattern('2026-*', ['catalog-2026-fall'])).toBe('*2026-*');
   });
 });
 
