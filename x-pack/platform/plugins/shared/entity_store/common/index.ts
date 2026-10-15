@@ -121,8 +121,13 @@ export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'g
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export { ExtractionMode } from './domain/definitions/entity_schema';
-export type { EntityDefinitionOfAnyType } from './domain/definitions/entity_schema';
+export { ExtractionMode, extractionBlockSchema } from './domain/definitions/entity_schema';
+export type {
+  EntityDefinitionOfAnyType,
+  EntityDefinitionWithoutId,
+  ExtractionBlock,
+  ExtractedEntityDefinition,
+} from './domain/definitions/entity_schema';
 
 export type {
   Entity,

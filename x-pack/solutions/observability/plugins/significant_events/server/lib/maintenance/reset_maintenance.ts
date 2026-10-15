@@ -161,34 +161,6 @@ const deleteOwnedRules = async ({
   }
 };
 
-/** Reset step: delete every investigation across spaces; returns how many were deleted. */
-const deleteInvestigations = async ({
-  server,
-  failures,
-}: {
-  server: SignificantEventsServer;
-  failures: SignificantEventsMaintenanceFailure[];
-}): Promise<number> => {
-  if (!server.nightshiftInvestigations) {
-    failures.push({ target: 'investigations', error: 'Investigations plugin is not available' });
-    return 0;
-  }
-  try {
-    const result = await server.nightshiftInvestigations.deleteAllInvestigations();
-    failures.push(
-      ...result.failures.map(({ id, spaceId, error }) => ({
-        target: `investigation:${id}@${spaceId}`,
-        spaceId,
-        error,
-      }))
-    );
-    return result.deleted;
-  } catch (error) {
-    failures.push({ target: 'investigations', error: toMessage(error) });
-    return 0;
-  }
-};
-
 /**
  * Destructively clears all Significant Events data across every space and returns every space
  * to enabled. The phases, in order:
@@ -197,7 +169,7 @@ const deleteInvestigations = async ({
  *    that is about to be deleted.
  * 2. Sweep the workflows and Settings toggles of every space and persist what was swept, so an
  *    interrupted reset leaves Resume (or a repeated Reset) the inventory to restore.
- * 3. Delete rules, investigations and data streams, then re-enable the workflows.
+ * 3. Delete rules and data streams, then re-enable the workflows.
  * 4. Return every space to enabled, keeping only what could not be restored.
  *
  * Phases 1 and 2 are all-or-nothing: if any step throws before the data is touched, the
@@ -467,7 +439,6 @@ export const createResetRunner = ({
       }),
       { knowledgeIndicators: 0, storedQueries: 0, rules: 0 }
     );
-    const investigations = await deleteInvestigations({ server, failures });
     const wipedDataStreams = await resetDataStreams({
       esClient,
       internalEsClient,
@@ -495,7 +466,6 @@ export const createResetRunner = ({
         knowledgeIndicators: indicatorsWiped ? knowledgeIndicators : 0,
         storedQueries: indicatorsWiped ? storedQueries : 0,
         rules,
-        investigations,
         dataStreams: wipedDataStreams.size,
       },
       partialFailures: failures,

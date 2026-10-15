@@ -9,7 +9,6 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 
 const SIGNIFICANT_EVENTS_TABS = [
   'sources',
-  'knowledge_indicators',
   'queries',
   'detections',
   SIGNIFICANT_EVENTS_TAB,
