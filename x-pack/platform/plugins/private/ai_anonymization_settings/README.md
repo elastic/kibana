@@ -4,7 +4,8 @@ This plugin provides a dedicated Stack Management page (sibling to **GenAI Setti
 regex-based anonymization rules (`ai:anonymizationSettings`) used by the inference plugin's `chatComplete`
 anonymization pipeline. It is available to every Kibana offering, and requires an Enterprise license like the other
 AI features: below it the page is not listed in Stack Management and the pattern tester endpoint
-returns a 403.
+returns a 403. The page is also not listed where connectors are not available (the same
+capability check as GenAI Settings), as in some serverless tiers.
 
 The page has four tabs:
 

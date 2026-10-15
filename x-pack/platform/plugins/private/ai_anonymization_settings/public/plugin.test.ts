@@ -33,12 +33,14 @@ describe('AiAnonymizationSettingsPlugin', () => {
     plugin: AiAnonymizationSettingsPlugin,
     advancedSettings?: { save?: boolean; show?: boolean },
     license$ = new BehaviorSubject(licenseOf('enterprise')),
-    isSettingRegistered = true
+    isSettingRegistered = true,
+    actions: { show?: boolean; execute?: boolean } = { show: true, execute: true }
   ) => {
     const coreStart = coreMock.createStart();
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: advancedSettings ?? {},
+      actions,
     };
     coreStart.uiSettings.isDeclared.mockReturnValue(isSettingRegistered);
     plugin.start(coreStart, { licensing: { ...licensingMock.createStart(), license$ } });
@@ -116,6 +118,25 @@ describe('AiAnonymizationSettingsPlugin', () => {
       { show: true, save: true },
       new BehaviorSubject(licenseOf('enterprise')),
       false
+    );
+
+    expect(app.enable).not.toHaveBeenCalled();
+  });
+
+  // Some serverless tiers (for example observability essentials) have no connectors, so no AI features
+  // to configure; GenAI Settings is hidden there by the same capability check.
+  it.each([
+    ['no connectors capability', {}],
+    ['connectors that can be listed but not run', { show: true, execute: false }],
+  ])('keeps the page disabled for a user with %s', (_, actions) => {
+    const { plugin, app } = setupPlugin();
+
+    startWith(
+      plugin,
+      { show: true, save: true },
+      new BehaviorSubject(licenseOf('enterprise')),
+      true,
+      actions
     );
 
     expect(app.enable).not.toHaveBeenCalled();
