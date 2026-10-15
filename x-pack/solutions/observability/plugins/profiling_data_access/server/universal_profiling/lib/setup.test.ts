@@ -56,6 +56,7 @@ describe('Merging partial state operations', () => {
   it('returns false when resource management is not enabled', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: false, created: true }),
+      createProfilingState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -64,6 +65,16 @@ describe('Merging partial state operations', () => {
   it('returns false when resources are not created', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: false }),
+      createProfilingState(true),
+    ]);
+
+    expect(areResourcesSetup(mergedState)).toBeFalsy();
+  });
+
+  it('returns false when profiling is not enabled', () => {
+    const mergedState = mergePartialSetupStates(defaultSetupState, [
+      createResourceState({ enabled: true, created: true }),
+      createProfilingState(false),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
