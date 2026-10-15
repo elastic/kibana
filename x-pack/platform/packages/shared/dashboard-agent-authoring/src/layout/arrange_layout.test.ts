@@ -116,7 +116,6 @@ describe('arrangeDashboardLayout', () => {
     const result = await arrange(arrangeLayout);
 
     expect(arrangeLayout).toHaveBeenCalledWith({
-      dashboardTitle: 'Dashboard',
       panels: [
         expect.objectContaining({ id: 'existing', isNew: false, contentChanged: true }),
         expect.objectContaining({

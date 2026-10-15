@@ -114,8 +114,6 @@ export const arrangeDashboardLayout = async ({
     [...panels].sort(byReadingOrder).map(toLayoutPanel);
 
   const request: LayoutRequest = {
-    dashboardTitle: dashboardData.title,
-    ...(dashboardData.description ? { dashboardDescription: dashboardData.description } : {}),
     ...(instructions !== undefined ? { instructions } : {}),
     panels: toLayoutPanels(
       dashboardData.panels.filter((widget): widget is AttachmentPanel => !isSection(widget))

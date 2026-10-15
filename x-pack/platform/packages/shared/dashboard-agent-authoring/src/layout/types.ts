@@ -36,8 +36,6 @@ export interface LayoutSection {
 }
 
 export interface LayoutRequest {
-  dashboardTitle: string;
-  dashboardDescription?: string;
   /** The user's own arrangement or size request. */
   instructions?: string;
   panels: LayoutPanel[];
