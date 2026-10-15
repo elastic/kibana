@@ -137,6 +137,29 @@ export default function (providerContext: FtrProviderContext) {
       ).to.be(false);
     });
 
+    // Reauthorizing re-binds a transform to the caller. Allowing it for an uploaded package
+    // would let a transform admin start a transform its uploader had no privileges to run,
+    // undoing the binding above.
+    it('refuses to reauthorize a transform from an uploaded package', async () => {
+      const buf = await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' });
+      await uploadPackage(buf).expect(200);
+
+      const res = await supertest
+        .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}/transforms/authorize`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ transforms: [{ transformId }] })
+        .expect(403);
+
+      expect(res.body.message).to.contain('Cannot reauthorize transforms');
+
+      // The transform is still bound to the uploader, not to the superuser that just called.
+      const { transforms } = await esClient.transform.getTransform({ transform_id: transformId });
+      const authorization = transforms[0].authorization as
+        | { api_key?: { name: string }; roles?: string[] }
+        | undefined;
+      expect(authorization?.roles).to.be(undefined);
+    });
+
     it('rejects an uploaded transform that targets a restricted index', async () => {
       const buf = await buildPackageZip({ sourceIndex: '.fleet-policies' });
       const res = await uploadPackage(buf).expect(400);

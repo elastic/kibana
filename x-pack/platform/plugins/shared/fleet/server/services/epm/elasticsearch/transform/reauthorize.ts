@@ -16,7 +16,10 @@ import pMap from 'p-map';
 
 import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
+import { FleetUnauthorizedError } from '../../../../errors';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import { getInstallation } from '../../packages/get';
+import { isTrustedInstallSource } from '../../packages/install_source';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { retryTransientEsErrors } from '../retry';
@@ -156,6 +159,21 @@ export async function handleTransformReauthorizeAndStart({
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +
         'This could be because security is not enabled, or API key cannot be generated.'
+    );
+  }
+
+  // Reauthorizing re-binds a transform to whoever calls this route, and this route requires
+  // transform admin on top of Fleet privileges. For a caller-authored package that would undo
+  // the identity binding applied at install time: a user with Integrations All could upload a
+  // transform they have no privileges to run, leave it deferred, and have a transform admin
+  // start it with their own, broader privileges — reaching exactly the restricted indices the
+  // uploader was denied. An uploaded transform runs with its uploader's privileges or not at all.
+  const installation = await getInstallation({ savedObjectsClient, pkgName, logger });
+  if (!isTrustedInstallSource(installation?.install_source)) {
+    throw new FleetUnauthorizedError(
+      `Cannot reauthorize transforms from a ${
+        installation?.install_source ?? 'non-registry'
+      } package: transforms in caller-authored packages stay bound to the Elasticsearch privileges of the user who installed them. Reinstall the package as a user who holds the privileges the transforms need.`
     );
   }
 

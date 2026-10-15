@@ -126,18 +126,19 @@ const installLegacyTransformsAssets = async (
     throw new FleetUnauthorizedError(untrustedTransformAuthErrorMessage(installSource));
   }
 
-  // Deletion is caller-bound too, matching the yml path. This is not just consistency: legacy
-  // deletes pass delete_dest_index, so running them on the internal client would let an uploader
-  // have Fleet drop a destination index their own privileges could never touch — the same
-  // confused-deputy shape this binding exists to remove, pointed at deletion instead of reads.
-  // The trade-off is that re-uploading a package whose transforms were created as kibana_system
-  // before this change fails for an uploader without rights over them, rather than silently
-  // cleaning up. Failing closed is the intended behaviour; see the tests in transforms.test.ts.
+  // Deletion is caller-bound too, matching the yml path.
+  //
+  // Legacy deletes normally pass delete_dest_index, but Elasticsearch authorizes that against
+  // the identity stored on the transform rather than this request. For a caller-authored package
+  // that is the uploader's API key, which typically has no `delete_index` privilege, so asking
+  // for it fails the whole delete and blocks the upgrade. Keep the destination index instead —
+  // the new version writes into it anyway, and Fleet must not drop a caller-named index with its
+  // own privileges. See `deletePrerequisiteAssets` in packages/remove.ts for the same decision.
   await deleteTransforms(
     esClient,
     previousInstalledTransformEsAssets.map((asset) => asset.id),
     // For legacy transforms, delete destination indices upon deleting transforms
-    true,
+    isTrustedSource,
     secondaryAuth
   );
 
@@ -576,8 +577,10 @@ const installTransformsAssets = async (
       deleteTransforms(
         esClient,
         transformsToRemoveWithDestIndex.map((asset) => asset.id),
-        // Delete destination indices if specified or if from old json schema
-        true,
+        // Delete destination indices if specified or if from old json schema. Only for trusted
+        // sources: Elasticsearch checks delete_dest_index against the identity stored on the
+        // transform, so for a caller-authored package this would fail and block the upgrade.
+        isTrustedInstallSource(installSource),
         secondaryAuth
       ),
       deleteTransforms(

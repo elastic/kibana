@@ -1823,6 +1823,18 @@ _meta:
       );
     });
 
+    // delete_dest_index is authorized against the identity stored on the transform, which for an
+    // uploaded package is the uploader's API key. Requesting it would fail the upgrade, so the
+    // destination index is kept and only the transform is removed.
+    it('does not ask Elasticsearch to delete the destination index', async () => {
+      await installLegacyOverExisting();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: false }),
+        expect.anything()
+      );
+    });
+
     // A package installed before this change owns transforms created as kibana_system. An
     // uploader without rights over them now fails the install rather than silently cleaning up
     // with Kibana's own privileges. Failing closed here is deliberate.
