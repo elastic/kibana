@@ -27,6 +27,7 @@ const createMockExecutionClient = () =>
     updateStatus: jest.fn(),
     appendEvents: jest.fn(),
     updateHeartbeat: jest.fn(),
+    markDispatchReady: jest.fn(),
     peek: jest.fn(),
     readEvents: jest.fn(),
     find: jest.fn().mockResolvedValue([]),
