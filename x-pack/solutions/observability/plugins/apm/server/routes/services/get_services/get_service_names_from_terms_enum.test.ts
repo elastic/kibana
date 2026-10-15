@@ -69,4 +69,20 @@ describe('getServiceNamesFromTermsEnum missing APM indices', () => {
       })
     ).rejects.toBe(securityError);
   });
+  it('does not hide an unrelated error carrying a non-ES originalError', async () => {
+    const unrelatedError = Object.assign(new Error('unrelated wrapper failure'), {
+      originalError: new Error('index_not_found_exception: unrelated text'),
+    });
+
+    const apmEventClient = {
+      termsEnum: jest.fn().mockRejectedValue(unrelatedError),
+    } as unknown as APMEventClient;
+
+    await expect(
+      getServiceNamesFromTermsEnum({
+        apmEventClient,
+        ...baseArgs,
+      })
+    ).rejects.toBe(unrelatedError);
+  });
 });
