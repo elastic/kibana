@@ -24,11 +24,12 @@ const THREAT_INTEL_SUPPLY_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Uninstalls one workflow, tolerating not-found so a partial prior install still
- * cleans up. This helper is only reached after the leftover probe decided
- * something is installed; a 403/5xx here is the "workflows keep running against
- * alerts" case. Warn so a production flag-off boot is not silent. The quiet
- * never-installed path is the probe short-circuit, not this catch.
+ * Uninstalls one workflow, tolerating failure so a partial prior install still
+ * cleans up. Not-found is quiet: the managed client returns early when no
+ * document is stored, so this catch never fires on the steady state. The
+ * flag-off path gets here only after the leftover probe decided something is
+ * installed, so a 403/5xx is the "workflows keep running against alerts" case.
+ * Warn so a production boot is not silent.
  */
 const uninstallTolerant = async (
   managedWorkflowsClient: SecurityManagedWorkflowsClient,
@@ -43,6 +44,32 @@ const uninstallTolerant = async (
       `Failed to uninstall the threat intel workflow ${workflowId} in space '${options.spaceId}'`,
       { error }
     );
+  }
+};
+
+/**
+ * Removes the legacy global copy of a supply workflow so the default-space install can create it.
+ * Returns false when the removal fails: the global copy is then re-installed so `ready()` still
+ * sees `id:*` as tracked this boot and does not delete or disable it as an orphan, and the
+ * caller skips the default-space install (it would 409 on the shared `_id`). The move is retried
+ * on the next boot.
+ */
+const removeLegacyGlobalSupplyWorkflow = async (
+  managedWorkflowsClient: SecurityManagedWorkflowsClient,
+  workflowId: (typeof THREAT_INTEL_SUPPLY_WORKFLOW_IDS)[number],
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    await managedWorkflowsClient.uninstall(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    return true;
+  } catch (error) {
+    logger.warn(
+      `Failed to remove the legacy global copy of the threat intel supply workflow ${workflowId}; ` +
+        `keeping it for this boot and retrying the move to the default space on the next boot`,
+      { error }
+    );
+    await managedWorkflowsClient.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    return false;
   }
 };
 
@@ -74,13 +101,14 @@ export const installThreatIntelManagedWorkflows = async ({
 }): Promise<void> => {
   for (const workflowId of THREAT_INTEL_SUPPLY_WORKFLOW_IDS) {
     try {
-      await uninstallTolerant(
+      const legacyRemoved = await removeLegacyGlobalSupplyWorkflow(
         managedWorkflowsClient,
         workflowId,
-        { spaceId: GLOBAL_WORKFLOW_SPACE_ID },
         logger
       );
-      await managedWorkflowsClient.install(workflowId, { spaceId: DEFAULT_SPACE_ID });
+      if (legacyRemoved) {
+        await managedWorkflowsClient.install(workflowId, { spaceId: DEFAULT_SPACE_ID });
+      }
     } catch (error) {
       logger.warn(
         `Failed to install the threat intel supply workflow ${workflowId} in the default space`,

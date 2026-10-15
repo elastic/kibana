@@ -125,14 +125,35 @@ describe('threat intel managed workflow install', () => {
       ]);
     });
 
-    it('returns the default-space install still run when the legacy uninstall fails', async () => {
-      const client = createClient();
-      client.uninstall.mockRejectedValue(new Error('conflict'));
+    describe('when the legacy global uninstall fails', () => {
+      let client: ReturnType<typeof createClient>;
 
-      await runInstall(client);
+      beforeEach(async () => {
+        client = createClient();
+        client.uninstall.mockRejectedValue(new Error('forbidden'));
+        await runInstall(client);
+      });
 
-      expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
-        spaceId: DEFAULT_SPACE_ID,
+      it.each(supplyWorkflowIds)('returns %s not installed in the default space', (workflowId) => {
+        expect(client.install).not.toHaveBeenCalledWith(workflowId, {
+          spaceId: DEFAULT_SPACE_ID,
+        });
+      });
+
+      it.each(supplyWorkflowIds)(
+        'returns %s re-installed in the global space so it stays tracked',
+        (workflowId) => {
+          expect(client.install).toHaveBeenCalledWith(workflowId, {
+            spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+          });
+        }
+      );
+
+      it('returns the attribute workflows still installed', () => {
+        expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+          spaceId: 'space-a',
+          workflowIdSuffix: 'space-a',
+        });
       });
     });
   });
