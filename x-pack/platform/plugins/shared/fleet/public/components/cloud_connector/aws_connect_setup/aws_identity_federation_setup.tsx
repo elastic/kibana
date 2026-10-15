@@ -150,6 +150,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   } = useIacCallback({ enabled: isAwsIdentityFederationEnabled });
   // True while a manual Create is retiring the pending record before posting.
   const [isHandingOff, setIsHandingOff] = useState(false);
+  // The name the pending record holds: what the stack's report will call the identity.
+  const [launchedName, setLaunchedName] = useState('');
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -190,14 +192,16 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // The hook's `templateAlreadyCurrent` is not consumed: it only fires when a stored digest is
   // sent, and New Identity never has one.
   const getLaunchStackParams = useCallback(
-    (iac: CloudConnectorIacState | undefined) =>
-      startCallback({
+    (iac: CloudConnectorIacState | undefined) => {
+      setLaunchedName(connectorName.trim());
+      return startCallback({
         connectorName,
         accountType,
         iacKey: iac?.iac_key,
         iacBlueprintId: iac?.iac_blueprint_id,
         iacBlueprintVersion: iac?.iac_blueprint_version,
-      }),
+      });
+    },
     [startCallback, connectorName, accountType]
   );
   const {
@@ -305,6 +309,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   ]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
+  // When the stack can report back, the record it reports to must already carry the name, so
+  // Launch needs one. Without the callback the name is only needed at Create, as before.
+  const isLaunchMissingName = isCallbackAvailable && !!getCloudConnectorNameError(connectorName);
   // While a live render is in flight `iacConfirm` is still unset, so a Create pressed then would
   // store a keyless identity and the late render's template details would land after the tab
   // switch, on nothing. Wait for it to settle; a failed render fails open once it does.
@@ -337,7 +344,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       content: (
         <>
           <EuiSpacer size="m" />
-          {/* A pending record holds the name typed at Launch; a manual Create uses the current one. */}
+          {/* A pending record holds the name typed at Launch, which the hint below shows; a manual
+              Create uses the current one. */}
           <CloudConnectorNameField
             value={connectorName}
             onChange={(name) => setConnectorName(name)}
@@ -364,7 +372,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             isLoading={isGeneratingTemplate}
             // With the provisioner on the hook never disables the button, but a live render still
             // needs the console URL that only `cloud` provides, so keep the old guard.
-            isDisabled={isLaunchDisabled || !cloud}
+            isDisabled={isLaunchDisabled || !cloud || isLaunchMissingName}
             templateGenerationError={templateGenerationError}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
@@ -379,7 +387,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               >
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.iacCallback.pendingHint"
-                  defaultMessage="Waiting for CloudFormation to create the federated identity. If the stack does not report back, copy the stack ARN and Role ARN from the stack, then create the identity below."
+                  defaultMessage="Waiting for CloudFormation to create the federated identity {name}. If the stack does not report back, copy the stack ARN and Role ARN from the stack, then create the identity below with the current name."
+                  values={{ name: <strong>{launchedName}</strong> }}
                 />
               </EuiText>
             </>

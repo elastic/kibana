@@ -22,6 +22,8 @@ import type { AccountType } from '../../../../common/types/models/cloud_connecto
 export const IAC_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
 export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
+/** Extra time to wait when the deadline finds the stack's report still being applied. */
+export const IAC_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
 export type IacCallbackClientStatus = 'idle' | 'pending' | 'received' | 'expired' | 'error';
 
@@ -125,54 +127,93 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     }
   }, []);
 
+  /**
+   * Retires the record on the server. Settles the hook when the answer is final: a received
+   * report is surfaced, a cancelled or missing record stops the wait. The caller sets the status
+   * for a cancelled record, since it means expired at the deadline and idle on a manual cancel.
+   */
+  const retire = useCallback(
+    async (id: string): Promise<IacCallbackCancelOutcome> => {
+      const { data, error } = await sendDeleteIacCallback(id);
+      if (activeIdRef.current !== id) {
+        // A poll saw the report land while the request was in flight; otherwise a new Launch or
+        // an unmount took the record away, and there is nothing left to wait on.
+        return receivedIdRef.current === id ? 'created' : 'cancelled';
+      }
+      if (error && error.statusCode !== 404) {
+        // The record is still live. Keep waiting rather than let a late report create a second
+        // identity next to a manual one.
+        return 'failed';
+      }
+      const item = data?.item;
+      if (item?.status === 'receiving') {
+        // The stack reported first and its identity is being made; the poll picks it up.
+        return 'created';
+      }
+      stopPolling();
+      activeIdRef.current = undefined;
+      if (item?.status === 'received') {
+        receivedIdRef.current = id;
+        setCreated(toCreated(item));
+        setStatus('received');
+        return 'created';
+      }
+      return 'cancelled';
+    },
+    [stopPolling]
+  );
+
   const cancel = useCallback(async (): Promise<IacCallbackCancelOutcome> => {
     const id = activeIdRef.current;
     if (!id) {
       return 'cancelled';
     }
-    const { data, error } = await sendDeleteIacCallback(id);
-    if (activeIdRef.current !== id) {
-      // A poll saw the report land while the request was in flight; otherwise a new Launch or
-      // an unmount took the record away, and there is nothing left to wait on.
-      return receivedIdRef.current === id ? 'created' : 'cancelled';
+    const outcome = await retire(id);
+    if (outcome === 'cancelled') {
+      // Cancelled, or already gone: nothing will arrive.
+      setStatus('idle');
     }
-    if (error && error.statusCode !== 404) {
-      // The record is still live. Keep waiting rather than let a late report create a second
-      // identity next to a manual one.
-      return 'failed';
-    }
-    const item = data?.item;
-    if (item?.status === 'receiving') {
-      // The stack reported first and its identity is being made; the poll picks it up.
-      return 'created';
-    }
-    stopPolling();
-    activeIdRef.current = undefined;
-    if (item?.status === 'received') {
-      receivedIdRef.current = id;
-      setCreated(toCreated(item));
-      setStatus('received');
-      return 'created';
-    }
-    // Cancelled, or already gone: nothing will arrive.
-    setStatus('idle');
-    return 'cancelled';
-  }, [stopPolling]);
+    return outcome;
+  }, [retire]);
 
   const startPolling = useCallback(
     (id: string, expiresAt: string) => {
-      const deadline = Math.min(
+      let deadline = Math.min(
         new Date(expiresAt).getTime(),
         Date.now() + IAC_CALLBACK_POLL_TIMEOUT_MS
       );
+      let hasGrace = true;
+      let isRetiring = false;
       timerRef.current = setInterval(async () => {
         if (activeIdRef.current !== id) {
           return;
         }
         if (Date.now() > deadline) {
-          stopPolling();
-          activeIdRef.current = undefined;
-          setStatus('expired');
+          // The wait is over. Retire the record so a late report cannot create an identity the
+          // form no longer watches, and so a manual Create does not have to.
+          if (isRetiring) {
+            return;
+          }
+          isRetiring = true;
+          const outcome = await retire(id).finally(() => {
+            isRetiring = false;
+          });
+          if (outcome === 'cancelled') {
+            setStatus('expired');
+          } else if (outcome === 'created' && activeIdRef.current === id) {
+            // Still being applied. Give it a little longer, once.
+            if (hasGrace) {
+              hasGrace = false;
+              deadline = Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS;
+            } else {
+              stopPolling();
+              setStatus('expired');
+            }
+          } else if (outcome === 'failed') {
+            // The record is still live; the id is kept so a manual Create retries the cancel.
+            stopPolling();
+            setStatus('expired');
+          }
           return;
         }
         const { data, error } = await sendGetIacCallback(id);
@@ -197,7 +238,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         }
       }, IAC_CALLBACK_POLL_INTERVAL_MS);
     },
-    [stopPolling]
+    [retire, stopPolling]
   );
 
   const start = useCallback(
@@ -210,9 +251,15 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         return undefined;
       }
       // A new Launch supersedes whatever the previous one was waiting on, including a received one.
+      // A record still being waited on is retired, so its stack cannot create an identity the
+      // form no longer watches. Best effort: its key expires on its own otherwise.
+      const previousId = activeIdRef.current;
       stopPolling();
       activeIdRef.current = undefined;
       setStatus('idle');
+      if (previousId) {
+        sendDeleteIacCallback(previousId).catch(() => {});
+      }
 
       const { data, error } = await sendCreateIacCallback({
         provider: 'aws',

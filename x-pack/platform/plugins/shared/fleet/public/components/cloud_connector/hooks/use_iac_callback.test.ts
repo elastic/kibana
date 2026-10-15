@@ -18,6 +18,7 @@ import type { IacCallback } from '../../../../common/types/models/iac_callback';
 import {
   getIacCallbackKibanaUrl,
   IAC_CALLBACK_POLL_INTERVAL_MS,
+  IAC_CALLBACK_RECEIVING_GRACE_MS,
   useIacCallback,
 } from './use_iac_callback';
 
@@ -211,19 +212,85 @@ describe('useIacCallback', () => {
     expect(mockedGet).toHaveBeenCalledTimes(2);
   });
 
-  it('stops polling as expired once expires_at has passed', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
-    await act(async () => {
-      await result.current.start({});
+  describe('at the deadline', () => {
+    const startAndPassDeadline = async () => {
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+      jest.setSystemTime(new Date('2026-10-13T12:00:01.000Z'));
+      await poll();
+      return result;
+    };
+
+    it('retires the record and stops polling as expired', async () => {
+      const result = await startAndPassDeadline();
+
+      expect(mockedDelete).toHaveBeenCalledWith('cb-1');
+      expect(result.current.status).toBe('expired');
+      // The deadline is checked before each request, so an expired record is never fetched.
+      await poll();
+      expect(mockedGet).not.toHaveBeenCalled();
+      expect(mockedDelete).toHaveBeenCalledTimes(1);
+      // Nothing is left to retire on a manual Create.
+      await act(async () => {
+        await result.current.cancel();
+      });
+      expect(mockedDelete).toHaveBeenCalledTimes(1);
     });
 
-    jest.setSystemTime(new Date('2026-10-13T12:00:01.000Z'));
-    await poll();
+    it('surfaces the identity when the report landed just before', async () => {
+      mockedDelete.mockResolvedValue({
+        data: {
+          item: pendingItem('cb-1', {
+            status: 'received',
+            ...RECEIVED_VALUES,
+            cloud_connector_id: 'cc-1',
+          }),
+        },
+        error: null,
+      } as any);
 
-    expect(result.current.status).toBe('expired');
-    // The deadline is checked before each request, so an expired record is never fetched.
-    await poll();
-    expect(mockedGet).not.toHaveBeenCalled();
+      const result = await startAndPassDeadline();
+
+      expect(result.current.status).toBe('received');
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1' });
+    });
+
+    it('waits a little longer, once, when the report is still being applied', async () => {
+      mockedDelete.mockResolvedValue({
+        data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
+        error: null,
+      } as any);
+
+      const result = await startAndPassDeadline();
+      expect(result.current.status).toBe('pending');
+      await poll();
+      expect(mockedGet).toHaveBeenCalledTimes(1);
+
+      jest.setSystemTime(Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS + 1);
+      await poll();
+      expect(mockedDelete).toHaveBeenCalledTimes(2);
+      expect(result.current.status).toBe('expired');
+    });
+
+    it('keeps the record for a manual Create to retire when the cancel failed', async () => {
+      mockedDelete.mockResolvedValue({ data: null, error: { statusCode: 503 } } as any);
+
+      const result = await startAndPassDeadline();
+      expect(result.current.status).toBe('expired');
+
+      mockedDelete.mockResolvedValue({
+        data: { item: pendingItem('cb-1', { status: 'cancelled' }) },
+        error: null,
+      } as any);
+      let outcome: string | undefined;
+      await act(async () => {
+        outcome = await result.current.cancel();
+      });
+      expect(mockedDelete).toHaveBeenCalledTimes(2);
+      expect(outcome).toBe('cancelled');
+    });
   });
 
   it('a second start() waits on the new record only', async () => {
@@ -248,6 +315,8 @@ describe('useIacCallback', () => {
     });
 
     expect(params?.ElasticCallbackId).toBe('cb-2');
+    // The superseded record is retired so its stack cannot create an unobserved identity.
+    expect(mockedDelete).toHaveBeenCalledWith('cb-1');
     await poll();
     expect(mockedGet).toHaveBeenCalledTimes(1);
     expect(mockedGet).toHaveBeenCalledWith('cb-2');

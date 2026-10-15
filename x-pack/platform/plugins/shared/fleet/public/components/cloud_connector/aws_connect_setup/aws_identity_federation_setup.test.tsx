@@ -354,6 +354,11 @@ describe('AwsIdentityFederationSetup', () => {
         expect.objectContaining({ provider: 'aws', integrations })
       );
 
+      // With the callback available Launch needs the name the record will carry.
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
       await user.click(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation'));
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
     });
@@ -599,6 +604,49 @@ describe('AwsIdentityFederationSetup', () => {
       renderSetup({ cloud, integrations });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
+    });
+
+    it('names the identity the stack will create in the waiting hint', async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderSetup({ cloud, integrations });
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
+      const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
+      await act(async () => {
+        await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
+      });
+      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      rerender(setupElement({ cloud, integrations }));
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
+        'create the federated identity my-identity'
+      );
+      // Renaming afterwards changes what a manual Create uses, not what the stack reports.
+      await user.type(screen.getByTestId('awsIdentityFederationSetup-connectorName'), '-2');
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
+        'create the federated identity my-identity.'
+      );
+    });
+
+    it('needs a name before Launch when the stack can report back', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
+    });
+
+    it('does not need a name before Launch when the callback is not available', () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ available: false }));
+      renderSetup({ cloud, integrations });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
     });
 
     it('shows the success toast and selects the identity the stack created', () => {
