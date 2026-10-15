@@ -95,6 +95,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
   },
   {
+    id: 'alerting.alertStatusChanged',
+    schemaHash: '64adca2383deb9d5ab15e46ecfcedc2503b354b2601d62c9c11bbd830f735142',
+  },
+  {
     id: 'alerting.ruleCreated',
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
