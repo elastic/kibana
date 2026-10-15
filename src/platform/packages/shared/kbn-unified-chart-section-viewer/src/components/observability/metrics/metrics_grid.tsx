@@ -39,10 +39,7 @@ import {
 import { isHistogramMetric } from '../../../common/utils/histogram_metric';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks';
-import {
-  readHistogramBounds,
-  type HistogramBoundsByMetricKey,
-} from './hooks/use_fetch_histogram_bounds';
+import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -426,19 +423,19 @@ const ChartItem = React.memo(
         firstNonNullable(metricItem.metricTypes)
       );
     const { bounds, error: boundsError } = isHistogramDistribution
-      ? readHistogramBounds(histogramBounds.get(getMetricUniqueKey(metricItem)))
+      ? histogramBounds.get(getMetricUniqueKey(metricItem)) ?? {}
       : {};
     // A breakdown splits the series chart. Heatmaps do not encode that split yet.
     const hasBreakdown = applicableDimensions.length > 0;
     // Missing bounds skip the histogram and use the series chart. A point (min === max) still draws.
     // Loading and errors stay on the histogram path so the series chart does not flash first.
-    const drawDistribution =
+    const shouldRenderHistogram =
       isHistogramDistribution &&
       !hasBreakdown &&
       (histogramBoundsLoading || boundsError !== undefined || bounds !== undefined);
 
     const distributionQuery = useMemo(() => {
-      if (!drawDistribution || !bounds) {
+      if (!shouldRenderHistogram || !bounds) {
         return undefined;
       }
       return createHistogramDistributionQuery({
@@ -447,10 +444,10 @@ const ChartItem = React.memo(
         whereStatements,
         originalSource: userSource,
       });
-    }, [drawDistribution, bounds, metricItem, whereStatements, userSource]);
+    }, [shouldRenderHistogram, bounds, metricItem, whereStatements, userSource]);
 
     const esqlQuery = useMemo(() => {
-      if (drawDistribution) {
+      if (shouldRenderHistogram) {
         return distributionQuery ?? '';
       }
       const fieldType = firstNonNullable(metricItem.fieldTypes);
@@ -465,7 +462,7 @@ const ChartItem = React.memo(
           })
         : '';
     }, [
-      drawDistribution,
+      shouldRenderHistogram,
       distributionQuery,
       metricItem,
       applicableDimensions,
@@ -531,11 +528,11 @@ const ChartItem = React.memo(
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
           description={description}
-          chartLayers={drawDistribution ? [] : chartLayers}
-          yAxisTitle={drawDistribution ? undefined : yAxisTitle}
+          chartLayers={shouldRenderHistogram ? [] : chartLayers}
+          yAxisTitle={shouldRenderHistogram ? undefined : yAxisTitle}
           heatmapConfig={heatmapConfig}
-          isLoading={drawDistribution && histogramBoundsLoading}
-          error={drawDistribution ? boundsError : undefined}
+          isLoading={shouldRenderHistogram && histogramBoundsLoading}
+          error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

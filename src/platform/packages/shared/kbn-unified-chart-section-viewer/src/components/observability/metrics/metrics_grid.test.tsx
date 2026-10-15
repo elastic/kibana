@@ -1273,7 +1273,7 @@ describe('MetricsGrid', () => {
       fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
       dimensionFields: [{ name: 'host.name' }],
     };
-    const bounds = new Map([[getMetricUniqueKey(histogramItem), { min: 1, max: 9 }]]);
+    const bounds = new Map([[getMetricUniqueKey(histogramItem), { bounds: { min: 1, max: 9 } }]]);
 
     const enableHeatmaps = () => {
       jest
@@ -1352,7 +1352,9 @@ describe('MetricsGrid', () => {
       enableHeatmaps();
       renderMetricsGrid({
         metricItems: [histogramItem],
-        histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { min: 5, max: 5 }]]),
+        histogramBounds: new Map([
+          [getMetricUniqueKey(histogramItem), { bounds: { min: 5, max: 5 } }],
+        ]),
       });
 
       expect(createESQLQuery).not.toHaveBeenCalled();

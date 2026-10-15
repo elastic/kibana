@@ -137,11 +137,15 @@ describe('useFetchHistogramBounds', () => {
     const { result } = renderBoundsHook(createProps());
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
 
     expect(getQueriedSources()).toEqual(['TS metrics-a', 'TS metrics-b']);
-    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 3, max: 3 });
+    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+      bounds: { min: 3, max: 3 },
+    });
     expect(result.current.loading).toBe(false);
   });
 
@@ -234,7 +238,9 @@ describe('useFetchHistogramBounds', () => {
     const { result } = renderBoundsHook(createProps());
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 2, max: 8 })
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+        bounds: { min: 2, max: 8 },
+      })
     );
 
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
@@ -272,7 +278,9 @@ describe('useFetchHistogramBounds', () => {
 
     rerender({ ...initialProps, metricItems: [histogramB] });
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
 
     expect(mockReportError).not.toHaveBeenCalled();
@@ -284,7 +292,9 @@ describe('useFetchHistogramBounds', () => {
     const { result, rerender } = renderBoundsHook(initialProps);
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
     const previousBounds = result.current.bounds;
 
@@ -307,8 +317,7 @@ describe('useFetchHistogramBounds', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      min: 9,
-      max: 11,
+      bounds: { min: 9, max: 11 },
     });
   });
 
