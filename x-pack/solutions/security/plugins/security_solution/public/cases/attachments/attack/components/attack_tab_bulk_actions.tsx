@@ -40,7 +40,7 @@ import type {
   AttackWithCase,
   AttackWithWorkflowStatus,
 } from '../../../../detections/hooks/attacks/bulk_actions/types';
-import type { AttackToAttach } from '..';
+import { toAttacksToAttach } from '../utils';
 
 /** The telemetry source every bulk action taken from this bar is attributed to. */
 const TELEMETRY_SOURCE = 'case_attachment_table';
@@ -105,41 +105,6 @@ export interface AttackTabBulkActionsProps {
   /** Called once a bulk action lands, so the grid can drop a selection it has already acted on. */
   onActionSuccess: () => void;
 }
-
-/**
- * Builds the `security.attack` payload for a selection, which describes exactly one attack: a
- * selection of several falls back to the markdown-comment payload the bulk item builds from the
- * rows, as does an attack whose index is unknown.
- */
-const getAttackToAttach = (
-  attacks: readonly AttackDiscoveryAlert[]
-): Omit<AttackToAttach, 'alertsIndex'> | undefined => {
-  if (attacks.length !== 1) {
-    return undefined;
-  }
-
-  const [attack] = attacks;
-
-  if (attack.index == null) {
-    return undefined;
-  }
-
-  return {
-    id: attack.id,
-    index: attack.index,
-    title: attack.title,
-    // The narrative the activity card renders from. Still anonymised here; the payload builder
-    // de-anonymises and truncates it.
-    summaryMarkdown: attack.summaryMarkdown,
-    detailsMarkdown: attack.detailsMarkdown,
-    entitySummaryMarkdown: attack.entitySummaryMarkdown,
-    mitreAttackTactics: attack.mitreAttackTactics,
-    timestamp: attack.timestamp,
-    riskScore: attack.riskScore,
-    alertIds: attack.alertIds,
-    replacements: attack.replacements,
-  };
-};
 
 /**
  * The attacks grid's bulk action bar: a count of the selection, and the attack take-action verbs
@@ -272,7 +237,7 @@ export const AttackTabBulkActions = ({
     [attachableAttacks]
   );
 
-  const attackToAttach = useMemo(() => getAttackToAttach(attachableAttacks), [attachableAttacks]);
+  const attacksToAttach = useMemo(() => toAttacksToAttach(attachableAttacks), [attachableAttacks]);
 
   const caseTitle = useMemo(
     () =>
@@ -284,7 +249,7 @@ export const AttackTabBulkActions = ({
 
   const { items: caseItems } = useAttackCaseContextMenuItems({
     attacksWithCase,
-    attackToAttach,
+    attacksToAttach,
     closePopover,
     telemetrySource: TELEMETRY_SOURCE,
     title: caseTitle,

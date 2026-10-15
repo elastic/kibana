@@ -593,7 +593,7 @@ describe('TakeAction', () => {
         </TestProviders>
       );
 
-      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith([
         expect.objectContaining({
           id: attack.id,
           index: '.alerts-index',
@@ -605,8 +605,8 @@ describe('TakeAction', () => {
           mitreAttackTactics: attack.mitreAttackTactics,
           timestamp: attack.timestamp,
           riskScore: attack.riskScore,
-        })
-      );
+        }),
+      ]);
     });
 
     it('has no attack to attach when the attack is missing the index it came from', () => {
@@ -619,7 +619,27 @@ describe('TakeAction', () => {
       expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(undefined);
     });
 
-    it('has no attack to attach when multiple attacks are selected', () => {
+    it('attaches every attack when multiple persisted attacks are selected', () => {
+      const attacks = getMockAttackDiscoveryAlerts().map((attack) => ({
+        ...attack,
+        index: '.alerts-index',
+      }));
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={attacks} />
+        </TestProviders>
+      );
+
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(
+        attacks.map(({ id }) => expect.objectContaining({ id, index: '.alerts-index' }))
+      );
+    });
+
+    it('posts the attack attachments when multiple persisted attacks are selected', async () => {
+      const getAttachments = jest.fn(() => []);
+      mockUseAttackCaseAttachments.mockReturnValue(getAttachments);
+
       render(
         <TestProviders>
           <TakeAction
@@ -628,6 +648,32 @@ describe('TakeAction', () => {
               ...attack,
               index: '.alerts-index',
             }))}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+
+      await waitFor(() => {
+        expect(mockOnAddToCase).toHaveBeenCalledWith({
+          alertIds: [],
+          markdownComments: [],
+          getAttachments,
+        });
+      });
+    });
+
+    it('falls back to the markdown payload when only some of the selection is attachable', () => {
+      const [first, ...rest] = getMockAttackDiscoveryAlerts();
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            // A selection cannot be split across both payloads, so one attack without an index
+            // sends the whole selection down the markdown-comment path.
+            attackDiscoveries={[{ ...first, index: '.alerts-index' }, ...rest]}
           />
         </TestProviders>
       );

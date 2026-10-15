@@ -31,10 +31,10 @@ export interface UseBulkAttackCaseItemsProps {
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
   /**
-   * The single attack being attached. With `attackAttachmentsEnabled` on it is posted as a
-   * `security.attack` attachment plus its constituent alerts instead of a markdown comment.
+   * The attacks being attached. With `attackAttachmentsEnabled` on they are posted as
+   * `security.attack` attachments plus their constituent alerts instead of markdown comments.
    */
-  attackToAttach?: Omit<AttackToAttach, 'alertsIndex'>;
+  attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>;
 }
 
 /**
@@ -45,12 +45,12 @@ export const useBulkAttackCaseItems = ({
   onCasesAdd,
   closePopover,
   telemetrySource,
-  attackToAttach,
+  attacksToAttach,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
     services: { cases, telemetry },
   } = useKibana();
-  const getAttackAttachments = useAttackCaseAttachments(attackToAttach);
+  const getAttackAttachments = useAttackCaseAttachments(attacksToAttach);
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
   const canUserCreateAndReadCases = useCallback(
@@ -98,7 +98,7 @@ export const useBulkAttackCaseItems = ({
         onAddToCase({
           alertIds: [],
           markdownComments: [],
-          // Built per case rather than up front: how many of the attack's alerts fit depends on
+          // Built per case rather than up front: how many of the attacks' alerts fit depends on
           // how many the chosen case already holds, which isn't known until the user picks one.
           getAttachments: getAttackAttachments,
         });

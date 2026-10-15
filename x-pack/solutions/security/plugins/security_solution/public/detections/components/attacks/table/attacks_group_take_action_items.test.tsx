@@ -455,19 +455,21 @@ describe('AttacksGroupTakeActionItems', () => {
 
       expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
         expect.objectContaining({
-          attackToAttach: {
-            id: attack.id,
-            index: attack.index,
-            title: attack.title,
-            summaryMarkdown: attack.summaryMarkdown,
-            detailsMarkdown: attack.detailsMarkdown,
-            entitySummaryMarkdown: attack.entitySummaryMarkdown,
-            mitreAttackTactics: attack.mitreAttackTactics,
-            timestamp: attack.timestamp,
-            riskScore: attack.riskScore,
-            alertIds: attack.alertIds,
-            replacements: attack.replacements,
-          },
+          attacksToAttach: [
+            {
+              id: attack.id,
+              index: attack.index,
+              title: attack.title,
+              summaryMarkdown: attack.summaryMarkdown,
+              detailsMarkdown: attack.detailsMarkdown,
+              entitySummaryMarkdown: attack.entitySummaryMarkdown,
+              mitreAttackTactics: attack.mitreAttackTactics,
+              timestamp: attack.timestamp,
+              riskScore: attack.riskScore,
+              alertIds: attack.alertIds,
+              replacements: attack.replacements,
+            },
+          ],
         })
       );
     });
@@ -476,9 +478,10 @@ describe('AttacksGroupTakeActionItems', () => {
       const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
       renderAttack(attack);
 
-      const { attackToAttach } = mockUseAttackCaseContextMenuItems.mock.calls[0][0];
+      const { attacksToAttach } = mockUseAttackCaseContextMenuItems.mock.calls[0][0];
+      const [attackToAttach] = attacksToAttach as Array<Omit<AttackToAttach, 'alertsIndex'>>;
       const [attackAttachment] = buildAttackAttachments({
-        ...(attackToAttach as Omit<AttackToAttach, 'alertsIndex'>),
+        ...attackToAttach,
         alertsIndex: '.alerts-security.alerts-default',
       }).attachments;
 
@@ -499,7 +502,7 @@ describe('AttacksGroupTakeActionItems', () => {
       renderAttack({ ...mockAttack, index: undefined });
 
       expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
-        expect.objectContaining({ attackToAttach: undefined })
+        expect.objectContaining({ attacksToAttach: [] })
       );
     });
   });
