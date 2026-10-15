@@ -52,6 +52,7 @@ const MAX_LITERAL_LENGTH = 1000;
 const MAX_ENTITY_TYPE_FALLBACK_LENGTH = 256;
 const MAX_DEFINITION_ID_LENGTH = 512;
 const MAX_DEFINITION_NAME_LENGTH = 256;
+const MAX_DEFINITION_DESCRIPTION_LENGTH = 1024;
 
 const entityDefinitionTypeSchema = lazySchema(() =>
   z.string().superRefine((type, ctx) => {
@@ -315,12 +316,15 @@ export const extractionBlockSchema = lazySchema(() =>
   })
 );
 
-/** Identity core (`type`, `name`, `managedBy`, `identityField`) plus the optional `extraction` block. */
+/** Identity core (`type`, `name`, `description`, `managedBy`, `identityField`) plus the optional `extraction` block. */
 export const entitySchema = lazySchema(() =>
   z.object({
     id: z.string().max(MAX_DEFINITION_ID_LENGTH),
     type: entityDefinitionTypeSchema,
+    // The type's display name, shown wherever the type is listed.
     name: z.string().max(MAX_DEFINITION_NAME_LENGTH),
+    // Optional free text on what the entity is and how it is identified.
+    description: z.string().max(MAX_DEFINITION_DESCRIPTION_LENGTH).optional(),
     // Who manages the definition. Optional here; the registry requires it.
     managedBy: z.optional(EntityDefinitionManagedBy),
     identityField: identityFieldSchema,

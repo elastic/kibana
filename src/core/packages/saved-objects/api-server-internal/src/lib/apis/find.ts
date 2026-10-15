@@ -86,6 +86,7 @@ export const performFind = async <T = unknown, A = unknown>(
     searchAfter,
     sortField,
     sortOrder,
+    sort: requestedSort,
     fields,
     type,
     filter,
@@ -207,6 +208,7 @@ export const performFind = async <T = unknown, A = unknown>(
       searchAfter,
       sortField,
       sortOrder,
+      sort: requestedSort,
       namespaces,
       typeToNamespacesMap, // If defined, this takes precedence over the `type` and `namespaces` fields
       hasReference,
