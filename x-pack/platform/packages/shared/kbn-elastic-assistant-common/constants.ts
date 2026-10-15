@@ -124,6 +124,17 @@ export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id'
 export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
+ * The `kibana.alert.rule.rule_type_id` of the dev-only Security Solution data generator rule.
+ *
+ * The rule persists Attack Discoveries as Alerts-as-Data through the same AAD config as scheduled
+ * and ad hoc discoveries, so its documents are attack discoveries and consumers must treat them as
+ * such. It is only registered when Kibana runs in dev mode or on an Elastic-staff-owned cloud
+ * deployment, so that registration — not the shape of the document — is the production gate.
+ */
+export const ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID =
+  'security.attack_discovery.data_generator' as const;
+
+/**
  * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices
  */
 export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
@@ -134,6 +145,37 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
  */
 export const ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX =
   '.adhoc.alerts-security.attack.discovery.alerts' as const;
+
+/**
+ * Maps a concrete attack discovery backing index to a pattern that can actually be read.
+ *
+ * An attack document's `_index` is the concrete backing index, e.g.
+ * `.internal.alerts-security.attack.discovery.alerts-default-000001`, because that is what the
+ * find API returns and what gets snapshotted into attachment metadata. Alert index privileges are
+ * granted on the alias (`.alerts-security.attack.discovery.alerts*`), never on `.internal.alerts-*`,
+ * so any read addressed to the raw backing index is unauthorized for every non-superuser.
+ *
+ * A pattern rather than the alias is deliberate. The alias works only while it points at a single
+ * index: once the alerts index rolls over, single-document operations against it fail with
+ * `alias [...] has more than one index associated with it, can't execute a single index op`.
+ *
+ * Normalising at read time rather than at write time is also deliberate: attachment metadata is
+ * stored unindexed and cannot be backfilled, so a write-time-only fix would leave already-attached
+ * attacks permanently unreadable.
+ *
+ * Anything that matches neither attack-discovery index family is passed through unchanged — it is
+ * already whatever the caller meant, and guessing would be worse than trying it.
+ */
+export const toReadableAttackIndexPattern = (index: string): string => {
+  // Checked first: the adhoc index name contains the scheduled prefix as a substring.
+  if (index.includes(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX)) {
+    return `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-*`;
+  }
+  if (index.includes(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX)) {
+    return `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-*`;
+  }
+  return index;
+};
 
 /**
  * This feature flag disables the InferenceChatModel feature.

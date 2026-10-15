@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/core-injected-metadata-browser-mocks'
   - '@kbn/use-observable'
+  - '@kbn/std'
 tags:
   - shared-browser
   - package
