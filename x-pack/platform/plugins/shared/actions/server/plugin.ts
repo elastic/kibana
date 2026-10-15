@@ -524,7 +524,7 @@ export class ActionsPlugin
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
     defineRoutes({
-      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+      getSpaceId: (request) => request.spaceId,
       router,
       licenseState: this.licenseState,
       actionsConfigUtils,

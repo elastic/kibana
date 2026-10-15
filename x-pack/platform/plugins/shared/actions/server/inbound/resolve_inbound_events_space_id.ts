@@ -11,4 +11,4 @@ import type { ActionsClientContext } from '../actions_client';
 
 export const resolveInboundEventsSpaceId = (
   context: Pick<ActionsClientContext, 'spaceId' | 'spaces' | 'request'>
-): string => context.spaceId ?? context.spaces?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;
+): string => context.spaceId ?? context.request.spaceId ?? DEFAULT_SPACE_ID;

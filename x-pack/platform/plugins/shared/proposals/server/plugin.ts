@@ -204,7 +204,7 @@ export class ProposalsPlugin
   }
 
   private getSpaceId(request: KibanaRequest): string {
-    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    return request.spaceId;
   }
 
   /**

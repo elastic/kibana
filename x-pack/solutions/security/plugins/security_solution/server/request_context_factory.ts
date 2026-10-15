@@ -10,7 +10,6 @@ import { memoize } from 'lodash';
 import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import type { Immutable } from '../common/endpoint/types';
@@ -98,11 +97,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       request
     );
 
-    const getSpaceId = (): string =>
-      startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+    const getSpaceId = (): string => request.spaceId;
 
     appClientFactory.setup({
-      getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
+      getSpaceId: () => request.spaceId,
       config,
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,

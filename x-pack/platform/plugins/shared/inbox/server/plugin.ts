@@ -121,7 +121,7 @@ export class InboxPlugin
     // resolve the active space for this request. When it isn't, Kibana is
     // running single-space so `'default'` is the only possible answer and
     // providers will receive a truthful value.
-    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    return request.spaceId;
   }
 
   start(_core: CoreStart, plugins: InboxStartDependencies): InboxPluginStart {

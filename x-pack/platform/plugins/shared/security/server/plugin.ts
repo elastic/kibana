@@ -20,7 +20,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { CoreSecurityDelegateServiceAccounts } from '@kbn/core-security-server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -353,7 +352,7 @@ export class SecurityPlugin
       http: core.http,
       status: core.status,
       isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
-      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
+      getSpaceId: (request) => request.spaceId,
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
       getFakeRequestPrincipal: (request) =>
@@ -574,7 +573,7 @@ export class SecurityPlugin
       getCurrentUser: this.authenticationStart.getCurrentUser,
       getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
-      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      getSpaceId: (request) => request.spaceId,
       workloadTypes: this.getWorkloadTypes(),
     });
 

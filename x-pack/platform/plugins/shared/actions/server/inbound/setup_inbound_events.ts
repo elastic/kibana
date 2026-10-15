@@ -55,8 +55,7 @@ export function setupInboundEvents({
     return undefined;
   }
 
-  const getSpaceId = (request: KibanaRequest): string =>
-    spaces?.spacesService.getSpaceId(request) ?? 'default';
+  const getSpaceId = (request: KibanaRequest): string => request.spaceId;
 
   registerInboundEventSizeOutcome({ http, logger, getSpaceId });
 

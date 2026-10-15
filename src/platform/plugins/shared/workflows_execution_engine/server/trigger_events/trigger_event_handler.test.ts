@@ -105,9 +105,6 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
     workflowsExtensions: {
       getTriggerDefinition: jest.fn().mockReturnValue({ id: 'cases.updated' }),
     } as any,
-    spaces: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-    } as any,
     config: {
       enabled: true,
       logEvents: true,

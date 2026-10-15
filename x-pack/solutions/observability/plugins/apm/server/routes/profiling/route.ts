@@ -130,7 +130,7 @@ const profilingStatusRoute = createApmServerRoute({
   endpoint: routeDefinitions.profiling.status.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ProfilingStatusResponse> => {
-    const { context, plugins, logger } = resources;
+    const { context, plugins, logger, request } = resources;
     const [esClient, profilingDataAccessStart] = await Promise.all([
       (await context.core).elasticsearch.client,
       await plugins.profilingDataAccess?.start(),
@@ -140,7 +140,7 @@ const profilingStatusRoute = createApmServerRoute({
         const response = await profilingDataAccessStart?.services.universalProfiling.getStatus({
           esClient,
           soClient: (await context.core).savedObjects.client,
-          spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
+          spaceId: request.spaceId,
         });
 
         return { initialized: response.has_setup };

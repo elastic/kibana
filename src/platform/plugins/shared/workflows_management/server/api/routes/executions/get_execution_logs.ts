@@ -19,7 +19,7 @@ import {
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetExecutionLogsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}/logs',
@@ -75,7 +75,7 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
         try {
           const { executionId } = request.params;
           const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             request,
             omitStepExecutions: true,

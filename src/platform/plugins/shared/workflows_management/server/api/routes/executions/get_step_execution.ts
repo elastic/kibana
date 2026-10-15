@@ -23,7 +23,7 @@ import {
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetStepExecutionRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}/step/{stepExecutionId}',
@@ -60,7 +60,7 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId, stepExecutionId } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             request,
             omitStepExecutions: true,

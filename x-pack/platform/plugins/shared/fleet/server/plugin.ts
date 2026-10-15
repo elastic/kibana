@@ -9,7 +9,6 @@ import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   CoreSetup,
   CoreStart,
@@ -673,7 +672,7 @@ export class FleetPlugin
             return getInternalSoClient();
           },
           get spaceId() {
-            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            return request.spaceId;
           },
           getAllSpaces() {
             return spacesPluginsStart!.spacesService.createSpacesClient(request).getAll();

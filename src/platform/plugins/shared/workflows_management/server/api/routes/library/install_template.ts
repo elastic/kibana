@@ -34,7 +34,7 @@ const bodySchema = schema.object({
 });
 
 export function registerInstallTemplateRoute(
-  { router, api, spaces, audit }: RouteDependencies,
+  { router, api, audit }: RouteDependencies,
   libraryService: LibraryService
 ) {
   router.versioned
@@ -65,7 +65,7 @@ export function registerInstallTemplateRoute(
           // The rendered YAML is indistinguishable from a hand-authored one:
           // reuse the same create path as POST /api/workflows/workflow so
           // schema validation, space scoping, and authz apply identically.
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           let createdWorkflow;
           try {
             createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request);

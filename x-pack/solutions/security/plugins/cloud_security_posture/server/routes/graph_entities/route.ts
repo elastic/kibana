@@ -44,7 +44,7 @@ export const defineGraphEntitiesRoute = (router: CspRouter) =>
         const { page } = request.body;
         const { entityIds, start, end, indexPatterns } = request.body
           .query as EntitiesRequest['query'];
-        const spaceId = await cspContext.spacesService?.getSpaceId(request);
+        const spaceId = await request.spaceId;
 
         try {
           const resp = await getEntities({

@@ -18,7 +18,7 @@ import {
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetStatsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/stats',
@@ -42,7 +42,7 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const includeExecutionStats =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           const stats = await api.getWorkflowStats(spaceId, {

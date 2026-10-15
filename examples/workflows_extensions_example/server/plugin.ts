@@ -76,9 +76,7 @@ export class WorkflowsExtensionsExamplePlugin
     const router = core.http.createRouter<WorkflowsExtensionsRequestHandlerContext>();
     registerEmitEventRoute(router);
     registerEmitLoopRoute(router);
-    registerManagedServiceAccountRoutes(router, (request) =>
-      plugins.spaces.spacesService.getSpaceId(request)
-    );
+    registerManagedServiceAccountRoutes(router, (request) => request.spaceId);
 
     return {};
   }
