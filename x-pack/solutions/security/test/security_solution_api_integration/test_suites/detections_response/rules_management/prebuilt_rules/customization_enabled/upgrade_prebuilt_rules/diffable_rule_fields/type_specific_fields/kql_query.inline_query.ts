@@ -705,4 +705,216 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
       });
     });
   }
+
+  describe('"kql_query" with inline query differing only in surrounding whitespace', () => {
+    const STOCK_QUERY = 'process.name:*.exe';
+    const WHITESPACE_QUERY = `  ${STOCK_QUERY}\n`;
+    const NORMALIZED_KQL_QUERY = {
+      query: STOCK_QUERY,
+      language: 'kuery',
+      type: KqlQueryType.inline_query,
+      filters: [],
+    };
+
+    describe('non-customized without an upgrade (AAA diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          query: STOCK_QUERY,
+          language: 'kuery',
+        },
+        patch: {
+          query: WHITESPACE_QUERY,
+        },
+        upgrade: {
+          type: 'query',
+          query: STOCK_QUERY,
+          language: 'kuery',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedFieldsAfterUpgrade: { query: STOCK_QUERY },
+        },
+        getService
+      );
+    });
+
+    describe('non-customized with an upgrade (AAB diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          query: STOCK_QUERY,
+          language: 'kuery',
+        },
+        patch: {
+          query: WHITESPACE_QUERY,
+        },
+        upgrade: {
+          type: 'query',
+          query: 'process.name:*.sys',
+          language: 'kuery',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: NORMALIZED_KQL_QUERY,
+            current: NORMALIZED_KQL_QUERY,
+            target: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+        },
+        getService
+      );
+    });
+
+    describe('customized without an upgrade (ABA diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          query: STOCK_QUERY,
+          language: 'kuery',
+        },
+        patch: {
+          query: 'process.name:*.sys',
+        },
+        upgrade: {
+          type: 'query',
+          query: WHITESPACE_QUERY,
+          language: 'kuery',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          expectedFieldDiffValues: {
+            base: NORMALIZED_KQL_QUERY,
+            current: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            target: NORMALIZED_KQL_QUERY,
+            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+        },
+        getService
+      );
+    });
+
+    describe('customized with the matching upgrade (ABB diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          query: STOCK_QUERY,
+          language: 'kuery',
+        },
+        patch: {
+          query: 'process.name:*.sys',
+        },
+        upgrade: {
+          type: 'query',
+          query: '  process.name:*.sys\n',
+          language: 'kuery',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          expectedFieldDiffValues: {
+            base: NORMALIZED_KQL_QUERY,
+            current: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            target: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+            merged: { ...NORMALIZED_KQL_QUERY, query: 'process.name:*.sys' },
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'kql_query',
+          expectedFieldsAfterUpgrade: { query: 'process.name:*.sys' },
+        },
+        getService
+      );
+    });
+
+    describe('without historical versions', () => {
+      describe('customized with the matching upgrade (-AA diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            query: STOCK_QUERY,
+            language: 'kuery',
+          },
+          patch: {
+            query: WHITESPACE_QUERY,
+          },
+          upgrade: {
+            type: 'query',
+            query: STOCK_QUERY,
+            language: 'kuery',
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'kql_query',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'kql_query',
+            expectedFieldsAfterUpgrade: { query: STOCK_QUERY },
+          },
+          getService
+        );
+      });
+    });
+  });
 }

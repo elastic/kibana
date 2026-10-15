@@ -322,5 +322,203 @@ export function machineLearningJobIdField({ getService }: FtrProviderContext): v
         );
       });
     });
+
+    describe('with equivalent scalar and array formats', () => {
+      describe('non-customized without an upgrade (AAA diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobA',
+          },
+          patch: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobA'],
+          },
+          upgrade: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobA'],
+          },
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedFieldsAfterUpgrade: { machine_learning_job_id: ['jobA'] },
+          },
+          getService
+        );
+      });
+
+      describe('non-customized with an upgrade (AAB diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobA',
+          },
+          patch: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobA'],
+          },
+          upgrade: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobB'],
+          },
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+            expectedFieldDiffValues: {
+              base: ['jobA'],
+              current: ['jobA'],
+              target: ['jobB'],
+              merged: ['jobB'],
+            },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedFieldsAfterUpgrade: { machine_learning_job_id: ['jobB'] },
+          },
+          getService
+        );
+      });
+
+      describe('customized without an upgrade (ABA diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobA',
+          },
+          patch: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobB',
+          },
+          upgrade: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobA'],
+          },
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+            expectedFieldDiffValues: {
+              base: ['jobA'],
+              current: ['jobB'],
+              target: ['jobA'],
+              merged: ['jobB'],
+            },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedFieldsAfterUpgrade: { machine_learning_job_id: ['jobB'] },
+          },
+          getService
+        );
+      });
+
+      describe('customized with the matching upgrade (ABB diff case)', () => {
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobA',
+          },
+          patch: {
+            type: 'machine_learning',
+            machine_learning_job_id: 'jobB',
+          },
+          upgrade: {
+            type: 'machine_learning',
+            machine_learning_job_id: ['jobB'],
+          },
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+            expectedFieldDiffValues: {
+              base: ['jobA'],
+              current: ['jobB'],
+              target: ['jobB'],
+              merged: ['jobB'],
+            },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'machine_learning_job_id',
+            expectedFieldsAfterUpgrade: { machine_learning_job_id: ['jobB'] },
+          },
+          getService
+        );
+      });
+
+      describe('without historical versions', () => {
+        describe('customized with the matching upgrade (-AA diff case)', () => {
+          const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+            installed: {
+              type: 'machine_learning',
+              machine_learning_job_id: 'jobA',
+            },
+            patch: {
+              type: 'machine_learning',
+              machine_learning_job_id: ['jobA'],
+            },
+            upgrade: {
+              type: 'machine_learning',
+              machine_learning_job_id: ['jobA'],
+            },
+            removeInstalledAssets: true,
+          };
+
+          testFieldUpgradeReview(
+            {
+              ruleUpgradeAssets,
+              diffableRuleFieldName: 'machine_learning_job_id',
+              expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            },
+            getService
+          );
+
+          testFieldUpgradesToMergedValue(
+            {
+              ruleUpgradeAssets,
+              diffableRuleFieldName: 'machine_learning_job_id',
+              expectedFieldsAfterUpgrade: { machine_learning_job_id: ['jobA'] },
+            },
+            getService
+          );
+        });
+      });
+    });
   });
 }
