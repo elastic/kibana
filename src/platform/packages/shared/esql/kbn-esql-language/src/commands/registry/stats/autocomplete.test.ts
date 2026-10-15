@@ -1071,6 +1071,15 @@ describe('STATS Autocomplete', () => {
         expect(suggestions.map(({ label }) => label)).toContain('abc');
       });
 
+      it('suggests an implicit BY expression from an empty WHERE clause', async () => {
+        const suggestions = await suggest(
+          'FROM a | STATS COUNT() WHERE ^ BY BUCKET(doubleField, 10)'
+        );
+        const labels = suggestions.map(({ label }) => label);
+
+        expect(labels).toContain('BUCKET(doubleField, 10)');
+      });
+
       it('does not suggest a BY-defined column within the BY clause itself', async () => {
         const suggestions = await suggest('FROM a | STATS COUNT() BY abc = keywordField, def = ^');
 

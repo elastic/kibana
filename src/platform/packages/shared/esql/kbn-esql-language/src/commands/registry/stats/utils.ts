@@ -357,9 +357,13 @@ const statsWithByAtCursor = (
  * WHERE or an unclosed function call) can swallow it. In that case, complete the expression with an
  * editor marker and close the brackets left open at the cursor so the BY clause parses as its own
  * option instead of being pulled inside the unterminated expression. Returns undefined when there
- * is nothing meaningful after the cursor or no BY clause is found.
+ * is nothing meaningful after the cursor or no BY clause is found. `query` is the text the
+ * command locations index into: the original query, or the repaired one when the fallback runs.
  */
-const getCommandAtCursor = (query: string, cursorPosition: number): ESQLCommand | undefined => {
+const getCommandAtCursor = (
+  query: string,
+  cursorPosition: number
+): { command: ESQLCommand; query: string } | undefined => {
   const afterCursor = query.slice(cursorPosition);
   if (!afterCursor.trim()) {
     return undefined;
@@ -368,14 +372,16 @@ const getCommandAtCursor = (query: string, cursorPosition: number): ESQLCommand 
   // Try parsing the query as is.
   const fromFullQuery = statsWithByAtCursor(Parser.parse(query).root, cursorPosition);
   if (fromFullQuery) {
-    return fromFullQuery;
+    return { command: fromFullQuery, query };
   }
 
   // If the query errored when parsed, add an editor marker and close the brackets left open at the cursor.
+  // The repaired tree keeps locations in this string; callers must slice `corrected`, not the original query.
   const beforeCursor = `${query.slice(0, cursorPosition)} ${EDITOR_MARKER} `;
   const corrected = `${beforeCursor}${getBracketsToClose(beforeCursor).join('')}${afterCursor}`;
   const root = removeAutocompleteMarkers(Parser.parse(corrected).root);
-  return statsWithByAtCursor(root, cursorPosition);
+  const command = statsWithByAtCursor(root, cursorPosition);
+  return command ? { command, query: corrected } : undefined;
 };
 
 /**
@@ -394,12 +400,14 @@ export const getAggregationScope = (
     return { context, callbacks };
   }
 
+  // The command param is built from the query up to the cursor, so a BY clause typed after the
+  // cursor is missing. Parse the full text again, and slice implicit names from the query its
+  // locations refer to.
+  const commandAtCursor = getCommandAtCursor(fullQuery, cursorPosition);
   const byColumns = getColumnsDefinedInByClause(
-    // The command param is built from the query up to the cursor, so a BY clause typed after the cursor is missing,
-    // We need to parse the full text again.
-    getCommandAtCursor(fullQuery, cursorPosition) ?? command,
+    commandAtCursor?.command ?? command,
     context.columns,
-    fullQuery,
+    commandAtCursor?.query ?? fullQuery,
     context.unmappedFieldsStrategy
   );
 
