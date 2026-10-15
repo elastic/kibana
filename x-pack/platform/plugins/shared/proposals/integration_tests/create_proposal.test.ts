@@ -272,6 +272,27 @@ describe('create-investigation-proposal workflow execution', () => {
   });
 
   describe('a proposal revised while its gate is parked', () => {
+    it('refuses a revision after release and before the workflow records its decision', async () => {
+      await fixture.start({
+        actionWorkflowId: ACTION_WORKFLOW_ID,
+        actionInput: { name: 'approved-name' },
+      });
+
+      await fixture.releaseGate(true);
+      expect(fixture.onlyProposal()).toMatchObject({ status: 'pending', decisionPending: true });
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+
+      await expect(fixture.revise({ comment: 'Too late' })).rejects.toThrow(
+        'cannot be revised while its decision is being recorded'
+      );
+      expect(fixture.proposals()).toHaveLength(1);
+
+      await fixture.resume(true);
+      const decided = fixture.proposals()[0];
+      expect(decided).toMatchObject({ decision: 'approved', status: 'failed' });
+      expect(decided.decisionPending).toBeUndefined();
+      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(1);
+    });
     it("runs the action against the revised actionInput, not the trigger's original", async () => {
       await fixture.start({
         actionWorkflowId: ACTION_WORKFLOW_ID,

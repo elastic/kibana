@@ -153,6 +153,8 @@ export interface ProposalGateFixture {
   seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
+  /** Writes the release marker without advancing the workflow's decision steps. */
+  releaseGate: (approved: boolean) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
   /**
@@ -194,7 +196,15 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     getWorkflow: jest.fn().mockResolvedValue({
       definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
     }),
-    getWorkflowExecution: jest.fn(),
+    getWorkflowExecution: jest.fn(async (id: string) => {
+      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+      return execution
+        ? {
+            ...execution,
+            stepExecutions: [...engine.stepExecutionRepositoryMock.stepExecutions.values()],
+          }
+        : undefined;
+    }),
     resumeWorkflowExecution: jest.fn(),
   };
 
@@ -291,6 +301,14 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           origin: FIXTURE_ORIGIN,
           ...inputs,
         },
+      });
+    },
+    releaseGate: async (approved: boolean) => {
+      const head = proposals().find((proposal) => proposal.supersededBy === undefined)!;
+      await service.releaseGate(head.id, {
+        approved,
+        spaceId: head.spaceId,
+        request: httpServerMock.createKibanaRequest(),
       });
     },
     resume: async (approved, respondedBy = 'analyst') => {

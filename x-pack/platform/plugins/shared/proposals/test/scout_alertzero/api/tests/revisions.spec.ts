@@ -152,6 +152,27 @@ apiTest.describe(
     );
 
     apiTest(
+      'refuses a revision while the gate decision is being recorded',
+      async ({ apiClient, esClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(PROPOSALS_MANAGE_ROLE);
+        const { id } = await seedProposal(esClient);
+        await esClient.update({
+          index: '.kibana-proposals',
+          id,
+          doc: { decisionPending: true },
+          refresh: 'wait_for',
+        });
+
+        const response = await reviseProposal(apiClient, cookieHeader, id, { comment: 'Too late' });
+        expect(response).toHaveStatusCode(409);
+        const original = await getProposal(apiClient, cookieHeader, id);
+        expect(original.body.status).toBe('pending');
+        expect(original.body.decisionPending).toBe(true);
+        expect(original.body.supersededBy).toBeUndefined();
+      }
+    );
+
+    apiTest(
       'returns 403 for a caller without manage_proposals',
       async ({ apiClient, esClient, samlAuth }) => {
         const { id } = await seedProposal(esClient);

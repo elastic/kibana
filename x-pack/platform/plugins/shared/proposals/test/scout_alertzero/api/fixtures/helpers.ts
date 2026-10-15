@@ -107,6 +107,7 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
                   actionInput: { type: 'flattened' },
                   status: { type: 'keyword' },
                   decision: { type: 'keyword' },
+                  decisionPending: { type: 'boolean' },
                   supersededBy: { type: 'keyword' },
                   rootProposalId: { type: 'keyword' },
                   supersedes: { type: 'keyword' },

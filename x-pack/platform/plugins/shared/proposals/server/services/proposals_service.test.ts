@@ -851,7 +851,7 @@ describe('ProposalsService', () => {
   });
 
   describe('releaseGate', () => {
-    it('should release the gate without writing anything', async () => {
+    it('should release the gate writing only the decision-in-progress marker', async () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
 
@@ -860,9 +860,16 @@ describe('ProposalsService', () => {
         releaseParams({ actionInput: { name: 'Suspicious PowerShell' } })
       );
 
-      // The decision is written by the workflow behind the gate, so there is
-      // nothing durable here to roll back when a resume fails.
-      expect(storage.index).not.toHaveBeenCalled();
+      // The marker is durable before resume; the workflow still owns the decision.
+      expect(storage.index).toHaveBeenCalledTimes(1);
+      expect(storage.index.mock.invocationCallOrder[0]).toBeLessThan(
+        workflowsApi.resumeWorkflowExecution.mock.invocationCallOrder[0]
+      );
+      const [[indexArgs]] = storage.index.mock.calls;
+      expect(indexArgs.document).toEqual(
+        expect.objectContaining({ decisionPending: true, status: 'pending' })
+      );
+      expect(indexArgs.document.decision).toBeUndefined();
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalled();
       expect(proposal.decision).toBeUndefined();
       expect(proposal.status).toBe('pending');
@@ -1018,6 +1025,67 @@ describe('ProposalsService', () => {
         ProposalNotFoundError
       );
     });
+
+    it('should reject a release that is already in flight without rewriting the row', async () => {
+      // A second release on a marked record would advance the row's seq_no
+      // and conflict the decision write the first release set up, even though
+      // its own resume refusal makes it a no-op.
+      const storage = createStorage(baseDocument({ decisionPending: true }));
+      const { service, workflowsApi } = createService(storage);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should clear the pending-decision marker when the gate refuses before resuming', async () => {
+      // The marker is written before the gate is validated; a refusal that
+      // proves the resume never happened must undo it, or revisions of an
+      // undecided proposal are refused forever.
+      const storage = createStorage(baseDocument());
+      // The first read is the release's own load; the cleanup re-reads after
+      // the annotate write, so it sees the row the marker write produced.
+      const markedSearch = {
+        hits: { hits: [searchHit(baseDocument({ decisionPending: true }))], total: { value: 1 } },
+      };
+      const unmarkedSearch = {
+        hits: { hits: [searchHit(baseDocument())], total: { value: 1 } },
+      };
+      storage.search.mockResolvedValueOnce(unmarkedSearch).mockResolvedValue(markedSearch);
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecution.mockResolvedValue(undefined);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      expect(storage.index).toHaveBeenCalledTimes(2);
+      expect(storage.index.mock.calls[0][0].document).toEqual(
+        expect.objectContaining({ decisionPending: true })
+      );
+      expect(storage.index.mock.calls[1][0].document.decisionPending).toBeUndefined();
+    });
+
+    it('should keep the pending-decision marker when the resume call itself fails', async () => {
+      // A failed resume is ambiguous: the workflow may have resumed and be
+      // recording the decision right now, so clearing the marker would reopen
+      // revisions during that write.
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.resumeWorkflowExecution.mockRejectedValue(new Error('workflow api down'));
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        'workflow api down'
+      );
+
+      expect(storage.index).toHaveBeenCalledTimes(1);
+      expect(storage.index.mock.calls[0][0].document).toEqual(
+        expect.objectContaining({ decisionPending: true })
+      );
+    });
   });
 
   describe('releaseGate annotations', () => {
@@ -1058,13 +1126,17 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should not write at all when neither annotation was supplied', async () => {
+    it('should write the decision-in-progress marker even when neither annotation was supplied', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
       await service.releaseGate('proposal-1', releaseParams());
 
-      expect(storage.index).not.toHaveBeenCalled();
+      // The marker rides the annotation write and is written on its own when
+      // no annotation was supplied: `revise()` must be able to refuse in the
+      // window even when the decision carried no free-text.
+      const [[indexArgs]] = storage.index.mock.calls;
+      expect(indexArgs.document).toEqual(expect.objectContaining({ decisionPending: true }));
     });
 
     it('should leave nothing written when the action input no longer matches', async () => {
@@ -1117,6 +1189,29 @@ describe('ProposalsService', () => {
   });
 
   describe('update', () => {
+    it('clears the release marker when recording the decision', async () => {
+      const storage = createStorage(baseDocument({ decisionPending: true }));
+      const { service } = createService(storage);
+
+      const proposal = await service.update(
+        { id: 'proposal-1', decision: 'approved', status: 'executing' },
+        SPACE_ID
+      );
+
+      expect(proposal.decisionPending).toBeUndefined();
+      expect(storage.index.mock.calls[0][0].document.decisionPending).toBeUndefined();
+    });
+
+    it('preserves the release marker on an annotation-only update', async () => {
+      const storage = createStorage(baseDocument({ decisionPending: true }));
+      const { service } = createService(storage);
+
+      const proposal = await service.update({ id: 'proposal-1', rationale: 'Reviewed' }, SPACE_ID);
+
+      expect(proposal.decisionPending).toBe(true);
+      expect(storage.index.mock.calls[0][0].document.decisionPending).toBe(true);
+    });
+
     it('should record the decision and stamp who and when', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -1767,6 +1862,20 @@ describe('ProposalsService', () => {
 
     it('rejects revising a proposal that already has a decision', async () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    // The revise-after-gate-release window: the gate has been released but the
+    // workflow's decision write has not landed yet, so the row still reads
+    // pending/undecided and every other guard passes. The marker is the only
+    // thing that distinguishes this row from one that is genuinely revisable.
+    it('rejects revising a proposal whose decision is in progress (gate released, decision not yet written)', async () => {
+      const storage = createStorage(baseDocument({ decisionPending: true }));
       const { service } = createService(storage);
 
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
