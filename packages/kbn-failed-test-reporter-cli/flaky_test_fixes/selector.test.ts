@@ -21,8 +21,8 @@ import {
   githubIssue,
   SUITE_PATH,
 } from '../flaky_test_issues/test_fixtures';
-import { buildFixGroups, groupKey } from './groups';
-import { FIXABLE_LABEL, FIX_LABEL, TRACKING_LABEL, requestFlakyTestFixes } from './selector';
+import { buildFixGroups } from './groups';
+import { FIXABLE_LABEL, FIX_LABEL, requestFlakyTestFixes } from './selector';
 
 type Options = Parameters<typeof requestFlakyTestFixes>[0];
 const REPO = 'elastic/kibana';
@@ -49,11 +49,15 @@ const event = (id: number, overrides: Partial<GithubIssueEvent> = {}): GithubIss
   ...overrides,
 });
 
-const claim = (id: number, episode = 'initial', filePath = SUITE_PATH) =>
+const linkedPr = (id: number, number = 99) =>
   event(id, {
-    event: 'commented',
-    user: { login: 'kibanamachine' },
-    body: `<!-- flaky-fix-request:v1 ${groupKey(REPO, 'playwright', filePath)} ${episode} -->`,
+    event: 'cross-referenced',
+    source: {
+      issue: {
+        html_url: `https://github.com/${REPO}/pull/${number}`,
+        pull_request: { url: 'api' },
+      },
+    },
   });
 
 const setup = (initialIssues: GithubIssue[]) => {
@@ -71,9 +75,9 @@ const setup = (initialIssues: GithubIssue[]) => {
       return structuredClone(found);
     }),
     getIssueTimeline: jest.fn(async (number) => [...(histories.get(number) ?? [])]),
-    getPullRequestState: jest
-      .fn<ReturnType<Options['github']['getPullRequestState']>, [number]>()
-      .mockResolvedValue('closed'),
+    getFixPullRequest: jest
+      .fn<ReturnType<Options['github']['getFixPullRequest']>, [number]>()
+      .mockResolvedValue({ state: 'CLOSED', mergedAt: null, closingIssues: [] }),
     checkLabel: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
     addLabelsOnce: jest.fn(async (number, labels) => {
       const found = issues.get(number);
@@ -87,17 +91,6 @@ const setup = (initialIssues: GithubIssue[]) => {
           ]);
         }
       }
-    }),
-    addIssueCommentOnce: jest.fn(async (number, body) => {
-      histories.set(number, [
-        ...(histories.get(number) ?? []),
-        event(nextId++, {
-          event: 'commented',
-          user: { login: 'kibanamachine' },
-          body,
-          created_at: '2026-09-15T12:00:00Z',
-        }),
-      ]);
     }),
   };
   const run = (overrides: Partial<Options> = {}) =>
@@ -120,25 +113,20 @@ const setup = (initialIssues: GithubIssue[]) => {
 describe('file-level association', () => {
   it('includes sibling cases absent from the report, but targets only affected cases', () => {
     const test = flakyTest({ testId: 'reported' });
-    const [group] = buildFixGroups(
-      flakyReport([test]),
-      [perTestIssue(1, 'reported'), perTestIssue(2, 'below-threshold')],
-      REPO
-    );
+    const [group] = buildFixGroups(flakyReport([test]), [
+      perTestIssue(1, 'reported'),
+      perTestIssue(2, 'below-threshold'),
+    ]);
     expect(group.siblings.map(({ number }) => number)).toEqual([1, 2]);
     expect(group.targets.map(({ number }) => number)).toEqual([1]);
   });
 
   it('does not promote arbitrary mentions or another framework into the group', () => {
-    const [group] = buildFixGroups(
-      flakyReport([flakyTest()]),
-      [
-        githubIssue({ number: 1, body: `A stack frame mentions ${SUITE_PATH}` }),
-        fileWideIssue(2, { framework: 'jest', labels: LABELS }),
-        issue(3),
-      ],
-      REPO
-    );
+    const [group] = buildFixGroups(flakyReport([flakyTest()]), [
+      githubIssue({ number: 1, body: `A stack frame mentions ${SUITE_PATH}` }),
+      fileWideIssue(2, { framework: 'jest', labels: LABELS }),
+      issue(3),
+    ]);
     expect(group.targets.map(({ number }) => number)).toEqual([3]);
     expect(group.ambiguous).toEqual([]);
   });
@@ -155,8 +143,7 @@ describe('file-level association', () => {
             'test.name': 'another test',
           }),
         }),
-      ],
-      REPO
+      ]
     );
     expect(group.ambiguous).toEqual([1]);
   });
@@ -175,13 +162,9 @@ describe('automatic requests', () => {
       expect.objectContaining({ action: 'requested', issue: 1, siblings: [2, 1] }),
     ]);
     expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
-    expect(github.addIssueCommentOnce.mock.calls[0][1]).toContain('/issues/2');
-    expect(github.addLabelsOnce.mock.invocationCallOrder[0]).toBeLessThan(
-      github.addIssueCommentOnce.mock.invocationCallOrder[0]
-    );
-    expect(github.addIssueCommentOnce.mock.invocationCallOrder[0]).toBeLessThan(
-      github.addLabelsOnce.mock.invocationCallOrder[1]
-    );
+    expect(github.addLabelsOnce).toHaveBeenCalledTimes(1);
+    expect(github.listIssues).toHaveBeenCalledTimes(1);
+    expect(github.listIssues).toHaveBeenCalledWith({ state: 'all', labels: ['failed-test'] });
   });
 
   it('does not request again after consumption, a no-PR result or a new sibling', async () => {
@@ -218,7 +201,7 @@ describe('automatic requests', () => {
     expect(triggerWrites()).toHaveLength(0);
   });
 
-  it('reads historical closed siblings and adopts prior requests', async () => {
+  it('reads historical closed siblings without adding bookkeeping', async () => {
     const { run, histories, triggerWrites, github } = setup([
       issue(1, { state: 'closed' }),
       issue(2),
@@ -226,7 +209,7 @@ describe('automatic requests', () => {
     histories.set(1, [event(1)]);
     expect((await run()).actions[0]).toMatchObject({ reason: 'already-requested', issue: 1 });
     expect(triggerWrites()).toHaveLength(0);
-    expect(github.addLabelsOnce).toHaveBeenCalledWith(1, [TRACKING_LABEL]);
+    expect(github.addLabelsOnce).not.toHaveBeenCalled();
     expect(github.listIssues).toHaveBeenCalledWith({ state: 'all', labels: ['failed-test'] });
   });
 
@@ -244,45 +227,36 @@ describe('automatic requests', () => {
   });
 
   it('does not rotate a closed representative to an eligible sibling', async () => {
-    const { run, histories } = setup([
-      issue(1, { state: 'closed', labels: [TRACKING_LABEL] }),
-      issue(2),
-    ]);
-    histories.set(1, [claim(1)]);
+    const { run, histories } = setup([issue(1, { state: 'closed' }), issue(2)]);
+    histories.set(1, [event(1), event(2, { event: 'unlabeled' })]);
     expect((await run()).actions[0]).toMatchObject({ issue: 1, reason: 'already-requested' });
   });
 
-  it('finds the representative from its claim even if the index label was removed', async () => {
+  it('uses the earliest request rather than the oldest issue number', async () => {
     const { run, histories, triggerWrites } = setup([issue(1), issue(2)]);
-    histories.set(2, [claim(1)]);
+    histories.set(1, [event(2)]);
+    histories.set(2, [event(1)]);
     expect((await run()).actions[0]).toMatchObject({ issue: 2, reason: 'already-requested' });
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('does not reset when a sibling reopens', async () => {
-    const { run, histories, triggerWrites } = setup([
-      issue(1, { labels: [...LABELS, TRACKING_LABEL] }),
-      issue(2),
-    ]);
-    histories.set(1, [claim(1)]);
+    const { run, histories, triggerWrites } = setup([issue(1), issue(2)]);
+    histories.set(1, [event(1)]);
     histories.set(2, [event(2, { event: 'reopened' })]);
     expect((await run()).actions[0].reason).toBe('already-requested');
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('permits one new attempt after representative reopen and fresh fixability', async () => {
-    const { run, histories, triggerWrites, issues } = setup([
-      issue(1, { labels: [...LABELS, TRACKING_LABEL] }),
-      issue(2),
-    ]);
+    const { run, histories, triggerWrites, issues } = setup([issue(1), issue(2)]);
     histories.set(1, [
-      claim(1),
+      event(1),
       event(2, { event: 'reopened' }),
       event(3, { label: { name: FIXABLE_LABEL } }),
     ]);
     expect((await run()).actions[0].action).toBe('requested');
     expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
-    expect(histories.get(1)?.some((item) => item.body?.endsWith(' 2 -->'))).toBe(true);
     const representative = issues.get(1);
     if (!representative) throw new Error('Missing representative');
     representative.labels = representative.labels.filter((label) => label !== FIX_LABEL);
@@ -291,83 +265,122 @@ describe('automatic requests', () => {
   });
 
   it('holds stale fixability carried across a reopen', async () => {
-    const { run, histories, triggerWrites } = setup([
-      issue(1, { labels: [...LABELS, TRACKING_LABEL] }),
-    ]);
-    histories.set(1, [claim(1), event(2, { event: 'reopened' })]);
+    const { run, histories, triggerWrites } = setup([issue(1)]);
+    histories.set(1, [event(1), event(2, { event: 'reopened' })]);
     expect((await run()).actions[0].reason).toBe('awaiting-fresh-investigation');
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('checks current linked PR state, including human PRs, before a reopen retry', async () => {
-    const { run, histories, github, triggerWrites } = setup([
-      issue(1, { labels: [...LABELS, TRACKING_LABEL] }),
-    ]);
+    const { run, histories, github, triggerWrites } = setup([issue(1)]);
     histories.set(1, [
-      claim(1),
+      event(1),
       event(2, { event: 'reopened' }),
       event(3, { label: { name: FIXABLE_LABEL } }),
-      event(4, {
-        event: 'cross-referenced',
-        source: {
-          issue: { html_url: `https://github.com/${REPO}/pull/99`, pull_request: { url: 'api' } },
-        },
-      }),
+      linkedPr(4),
     ]);
-    github.getPullRequestState.mockResolvedValue('open');
-    expect((await run()).actions[0].reason).toBe('related-open-pr');
-    expect(triggerWrites()).toHaveLength(0);
-  });
-
-  it('keeps an incomplete claim reserved instead of choosing another sibling', async () => {
-    const { run, triggerWrites } = setup([
-      issue(1, { labels: [...LABELS, TRACKING_LABEL] }),
-      issue(2),
-    ]);
-    expect((await run()).actions[0].reason).toContain('incomplete-reservation');
+    github.getFixPullRequest.mockResolvedValue({
+      state: 'OPEN',
+      mergedAt: null,
+      closingIssues: [1],
+    });
+    expect((await run()).actions[0].reason).toBe('existing-fix-pr');
     expect(triggerWrites()).toHaveLength(0);
   });
 
   it('does not redispatch after an uncertain trigger response', async () => {
-    const { run, github, triggerWrites } = setup([issue(1), issue(2)]);
+    const { run, github, triggerWrites, issues } = setup([issue(1), issue(2)]);
     const addLabels = github.addLabelsOnce.getMockImplementation();
     if (!addLabels) throw new Error('Missing mock implementation');
     github.addLabelsOnce.mockImplementation(async (number, labels) => {
-      if (labels.includes(FIX_LABEL)) throw new Error('response lost');
       await addLabels(number, labels);
+      // GitHub accepted the request and the fixer consumed its label before we lost the response.
+      const representative = issues.get(number);
+      if (!representative) throw new Error('Missing representative');
+      representative.labels = representative.labels.filter((label) => label !== FIX_LABEL);
+      throw new Error('response lost');
     });
     expect((await run()).actions[0]).toMatchObject({ action: 'failed', reason: 'response lost' });
     expect((await run()).actions[0].reason).toBe('already-requested');
     expect(triggerWrites()).toHaveLength(1);
   });
 
-  it('does not dispatch if the reservation comment failed', async () => {
+  it('can request on a later run when the previous write left no request history', async () => {
     const { run, github, triggerWrites } = setup([issue(1)]);
-    github.addIssueCommentOnce.mockRejectedValueOnce(new Error('comment failed'));
+    github.addLabelsOnce.mockRejectedValueOnce(new Error('request rejected'));
     expect((await run()).actions[0].action).toBe('failed');
-    expect((await run()).actions[0].reason).toContain('incomplete-reservation');
+    expect(triggerWrites()).toHaveLength(1);
+    expect((await run()).actions[0].action).toBe('requested');
+    expect(triggerWrites()).toHaveLength(2);
+  });
+
+  it('does not dispatch if preflight cannot verify the existing trigger label', async () => {
+    const { run, github, triggerWrites } = setup([issue(1)]);
+    github.checkLabel.mockRejectedValueOnce(new Error('label not found'));
+    await expect(run()).rejects.toThrow('label not found');
     expect(triggerWrites()).toHaveLength(0);
   });
 
-  it('does not dispatch when indexing the representative fails', async () => {
-    const { run, github, triggerWrites } = setup([issue(1)]);
-    github.addLabelsOnce.mockRejectedValueOnce(new Error('label write failed'));
-    expect((await run()).actions[0].action).toBe('failed');
-    expect(github.addIssueCommentOnce).not.toHaveBeenCalled();
-    expect(triggerWrites()).toHaveLength(0);
+  it('ignores ordinary PR mentions that do not close a sibling issue', async () => {
+    const { run, histories, github, triggerWrites } = setup([issue(1)]);
+    histories.set(1, [linkedPr(1)]);
+    github.getFixPullRequest.mockResolvedValue({
+      state: 'OPEN',
+      mergedAt: null,
+      closingIssues: [999],
+    });
+    expect((await run()).actions[0].action).toBe('requested');
+    expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
   });
 
-  it('rejects malformed durable history before any writes', async () => {
-    const { run, histories, github } = setup([issue(1, { labels: [...LABELS, TRACKING_LABEL] })]);
-    histories.set(1, [
-      event(1, {
-        event: 'commented',
-        user: { login: 'kibanamachine' },
-        body: '<!-- flaky-fix-request:v1 broken -->',
-      }),
+  it('skips a merged human fix without requiring an AI request label', async () => {
+    const { run, histories, github, triggerWrites } = setup([
+      issue(1, { state: 'closed' }),
+      issue(2),
     ]);
-    await expect(run()).rejects.toThrow('Malformed');
-    expect(github.addLabelsOnce).not.toHaveBeenCalled();
+    histories.set(1, [linkedPr(1)]);
+    github.getFixPullRequest.mockResolvedValue({
+      state: 'MERGED',
+      mergedAt: event(2).created_at,
+      closingIssues: [1],
+    });
+    expect((await run()).actions[0]).toMatchObject({ issue: 1, reason: 'already-fixed' });
+    expect(triggerWrites()).toHaveLength(0);
+  });
+
+  it('allows a freshly investigated recurrence after a human fix', async () => {
+    const { run, histories, github, triggerWrites } = setup([issue(1), issue(2)]);
+    histories.set(1, [
+      linkedPr(1),
+      event(3, { event: 'reopened' }),
+      event(4, { label: { name: FIXABLE_LABEL } }),
+    ]);
+    github.getFixPullRequest.mockResolvedValue({
+      state: 'MERGED',
+      mergedAt: event(2).created_at,
+      closingIssues: [1],
+    });
+    expect((await run()).actions[0]).toMatchObject({ issue: 1, action: 'requested' });
+    expect(triggerWrites()).toEqual([[1, [FIX_LABEL]]]);
+  });
+
+  it('does not treat an unmerged closed PR as a delivered fix', async () => {
+    const { run, histories, github } = setup([issue(1)]);
+    histories.set(1, [linkedPr(1)]);
+    github.getFixPullRequest.mockResolvedValue({
+      state: 'CLOSED',
+      mergedAt: null,
+      closingIssues: [1],
+    });
+    expect((await run()).actions[0].action).toBe('requested');
+  });
+
+  it('holds when a native fix relationship cannot be read', async () => {
+    const { run, histories, github, triggerWrites } = setup([issue(1)]);
+    histories.set(1, [linkedPr(1)]);
+    github.getFixPullRequest.mockRejectedValue(new Error('GraphQL unavailable'));
+    expect((await run()).actions[0].action).toBe('failed');
+    expect(triggerWrites()).toHaveLength(0);
   });
 
   it('requires the trusted automation account for live writes', async () => {
@@ -389,7 +402,6 @@ describe('automatic requests', () => {
     expect((await run({ dryRun: true })).actions[0].action).toBe('would-request');
     expect(github.getIssueTimeline).toHaveBeenCalled();
     expect(github.addLabelsOnce).not.toHaveBeenCalled();
-    expect(github.addIssueCommentOnce).not.toHaveBeenCalled();
   });
 
   it('limits requests independently of the number of issues', async () => {
@@ -469,6 +481,17 @@ describe('automatic requests', () => {
     github.getIssue
       .mockResolvedValueOnce(issue(1))
       .mockResolvedValueOnce(fileWideIssue(1, { filePath: 'other.spec.ts', labels: LABELS }));
+    expect((await run()).actions[0].reason).toBe('changed-during-selection');
+    expect(triggerWrites()).toHaveLength(0);
+  });
+
+  it('rechecks siblings for manual requests that arrived during selection', async () => {
+    const { run, github, triggerWrites } = setup([issue(1), issue(2)]);
+    github.getIssueTimeline
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([event(1)]);
     expect((await run()).actions[0].reason).toBe('changed-during-selection');
     expect(triggerWrites()).toHaveLength(0);
   });

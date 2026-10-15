@@ -7,32 +7,39 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 The `kibana-report-flaky-tests` pipeline selects automatic AI fixes after discovery and issue
 reporting. It groups candidates by **repository, framework and test file**, not test case or
 nested `describe`. One existing open `failed-test` issue with `failure:ai-fixable` represents
-the group; sibling issues remain separate and are linked as supporting context.
+the group; sibling issues remain separate and are listed in the Buildkite decision artifact.
 
 The selector reuses the flaky report's ranking and thresholds. Only active report-backed
 files with failures on `main` qualify. Consistently failing tests, skipped tests, other
 pipelines, and tests outside the report's 200-test cap are not automatically admitted.
 The summary lists eligible issues outside the report. Missing/ambiguous file identity,
 unsupported classifications, team opt-outs (`Team:Kibana Management`), existing requests
-and related open PRs hold a group rather than guessing.
+and existing fix PRs hold a group rather than guessing.
 
-Request history is separate from the transient `ai:fix-flaky` trigger:
+Deduplication uses existing GitHub history, with no extra labels, comments or state store:
 
-- `ai:fix-flaky-tracked` indexes the stable representative, including closed issues without
-  a time cutoff. Do not remove it when the fixer finishes.
-- A trusted `kibanamachine` comment with a `flaky-fix-request:v1` marker reserves the file's
-  current episode **before** applying the trigger. The issue body is not used for this
-  state, because the failure reporter updates it independently.
+- The earliest recorded `ai:fix-flaky` application or trusted fixer comment in the file
+  group identifies its representative. Removing the trigger does not remove the label
+  event from the timeline. Closed `failed-test` issues are included without a time cutoff.
+- GitHub's native closing-issue relationships distinguish fix PRs from ordinary mentions.
+  An open fix PR blocks another request. Merged fixes count as delivered fixes; a closed,
+  unmerged PR does not. If there was no AI request, the earliest merged fix identifies the
+  representative instead.
 - Only the representative's latest `reopened` event resets the automatic budget.
   Reopening another sibling, adding another test issue or removing the trigger does not.
-  A retry requires fresh `failure:ai-fixable` after reopening and no related open PR.
-- Existing label events and trusted fixer comments count as attempts, including manual
-  dispatches and outcomes that produced no PR. The selector adopts this history instead of
-  rotating to another sibling.
-- An incomplete reservation or uncertain write is held for manual reconciliation. Trigger
-  writes are not retried automatically: the original may have succeeded and already been
-  consumed. Check issue history and workflow runs before retrying manually. Preserve claim
-  comments; they intentionally prevent another automatic attempt in that episode.
+  A retry requires fresh `failure:ai-fixable` after reopening and no open fix PR. A request
+  or merged fix on any sibling during that episode holds the group.
+- Trusted fixer comments also record manual dispatches and outcomes that produced no PR.
+  The selector does not rotate to a sibling just because the representative is closed.
+- An uncertain trigger write fails the step without retrying the write. A later run reads
+  the history again: an accepted request still counts even if the fixer already removed
+  its label. If no request is visible, it may try again. Unreadable history fails closed.
+
+This is practical deduplication, not exactly-once delivery: it depends on issue discovery
+and GitHub history visibility. Removing `failed-test`, deleting history, or moving tests
+can prevent the selector from reconstructing a group. Ambiguous identity is held, but
+entirely undiscoverable issues cannot contribute history. Decisions and sibling mappings
+live in Buildkite artifacts/logs rather than issue bookkeeping.
 
 Automatic writes run only in the pipeline's serialized `request-flaky-test-fixes` step,
 using `kibanamachine`, with at most **five requests per run** by default. The request budget
@@ -52,8 +59,8 @@ Before enabling writes:
 
 1. Review `target/flaky_tests/ai_fixes.json` and the build annotation from dry runs, including
    sibling associations, historical attempts, ambiguous matches and coverage exclusions.
-2. Ensure `ai:fix-flaky-tracked` and `ai:fix-flaky` exist and `kibanamachine` can apply them.
-   Live preflight checks the account/labels, and writes verify the returned labels.
+2. Ensure the existing `ai:fix-flaky` label exists and `kibanamachine` can apply it.
+   Live preflight checks the account/label, and writes verify the returned label.
 3. Reconcile in-flight fixes from the old automation. Enable `FLAKY_FIXES_ENABLED=true`
    only after the investigator no longer requests fixes. Set `FLAKY_FIXES_MAX_REQUESTS`
    separately if changing the request budget.
@@ -66,7 +73,8 @@ GITHUB_TOKEN=... node scripts/request_flaky_test_fixes \
 Dry runs perform real GitHub issue/history reads but no writes. New suite issues awaiting
 investigation are held, not polled. Failures are recorded in the summary and fail the step;
 normal holds explain why nothing was requested. Tests cover file-level grouping, historical
-and manual requests, reopen freshness, partial writes, request caps and dry-run behavior.
+and manual requests, native fix relationships, reopen freshness, uncertain writes, request
+caps and dry-run behavior.
 
 ## `node scripts/report_failed_tests`
 

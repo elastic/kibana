@@ -17,13 +17,11 @@ import {
   type GithubIssueEvent,
 } from '../failed_tests_reporter/github_api';
 import { describeIssue } from '../flaky_test_issues/match_issues';
-import { buildFixGroups, groupKey, isTestFilePath, issueFramework } from './groups';
+import { buildFixGroups, isTestFilePath, issueFramework } from './groups';
 
 export const FIX_LABEL = 'ai:fix-flaky';
-export const TRACKING_LABEL = 'ai:fix-flaky-tracked';
 export const FIXABLE_LABEL = 'failure:ai-fixable';
 const OPTED_OUT_TEAM = 'Team:Kibana Management';
-const CLAIM_PREFIX = '<!-- flaky-fix-request:v1 ';
 const AUTHOR = 'kibanamachine';
 
 type SelectorGithub = Pick<
@@ -32,10 +30,9 @@ type SelectorGithub = Pick<
   | 'getAuthenticatedLogin'
   | 'getIssue'
   | 'getIssueTimeline'
-  | 'getPullRequestState'
+  | 'getFixPullRequest'
   | 'checkLabel'
   | 'addLabelsOnce'
-  | 'addIssueCommentOnce'
 >;
 
 export interface FixAction {
@@ -51,6 +48,7 @@ export interface FixSummary {
   githubRepo: string;
   dryRun: boolean;
   reportGeneratedAt: Date;
+  buildUrl: string;
   outsideReport: number[];
   actions: FixAction[];
 }
@@ -66,29 +64,10 @@ interface Options {
   log: ToolingLog;
 }
 
-interface Claim {
-  key: string;
-  episode: string;
-  event: GithubIssueEvent;
-}
-
-const claimsFrom = (events: GithubIssueEvent[]): Claim[] =>
-  events.flatMap((event) => {
-    if (event.user?.login !== AUTHOR || !event.body?.includes(CLAIM_PREFIX)) return [];
-    const match = event.body.match(/<!-- flaky-fix-request:v1 (\S+) (initial|\d+) -->/);
-    if (!match) throw new Error(`Malformed flaky fix request record in comment ${event.id}`);
-    return [{ key: match[1], episode: match[2], event }];
-  });
-
 const latestReopen = (events: GithubIssueEvent[]): GithubIssueEvent | undefined =>
   events
     .filter((event) => event.event === 'reopened')
     .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id)[0];
-
-const episodeOf = (events: GithubIssueEvent[]): string => {
-  const reopen = latestReopen(events);
-  return reopen ? String(reopen.id) : 'initial';
-};
 
 const isFixAttempt = (event: GithubIssueEvent): boolean =>
   (event.event === 'labeled' && event.label?.name === FIX_LABEL) ||
@@ -104,7 +83,7 @@ const eligible = (issue: GithubIssue): boolean =>
   !hasIssueLabel(issue, 'failure:insufficient-data') &&
   !hasIssueLabel(issue, 'failure:test-needs-migration');
 
-/** Select at most one automatic request per file and representative open episode. */
+/** Select one automatic fix per file and representative open episode using existing GitHub history. */
 export const requestFlakyTestFixes = async ({
   github,
   report,
@@ -115,44 +94,21 @@ export const requestFlakyTestFixes = async ({
   fileExists,
   log,
 }: Options): Promise<FixSummary> => {
-  // Historical requests must not disappear merely because their issue was closed a year ago.
   log.info(`Loading open and closed failed-test issues in ${repo}`);
   const issues = await github.listIssues({ state: 'all', labels: ['failed-test'] });
-  log.info(`Loaded ${issues.length} failed-test issues; loading persistent representatives`);
-  const tracked = await github.listIssues({ state: 'all', labels: [TRACKING_LABEL] });
-  const inventory = new Map([...issues, ...tracked].map((issue) => [issue.number, issue]));
-  const timelines = new Map<number, GithubIssueEvent[]>();
-  const history = async (number: number) => {
-    const cached = timelines.get(number);
-    if (cached) return cached;
-    const events = await github.getIssueTimeline(number);
-    timelines.set(number, events);
-    return events;
-  };
+  log.info(`Loaded ${issues.length} failed-test issues`);
+  const readGroup = (numbers: number[]) =>
+    Promise.all(
+      numbers.map(async (number) => {
+        const [issue, events] = await Promise.all([
+          github.getIssue(number),
+          github.getIssueTimeline(number),
+        ]);
+        return { issue, events };
+      })
+    );
 
-  const representatives = new Map<string, GithubIssue>();
-  for (const issue of tracked) {
-    const claims = claimsFrom(await history(issue.number));
-    const details = describeIssue(issue);
-    const framework = issueFramework(details);
-    const filePath = details.suiteFilePath ?? details.filePath;
-    const keys = new Set(claims.map((claim) => claim.key));
-    // An interrupted write may leave only the index label; never let another sibling take over.
-    if (keys.size === 0 && framework && filePath) keys.add(groupKey(repo, framework, filePath));
-    if (keys.size !== 1) {
-      throw new Error(
-        `Cannot establish the tracked group for #${issue.number}; reconcile manually`
-      );
-    }
-    for (const key of keys) {
-      if (representatives.has(key)) {
-        throw new Error(`Multiple representatives for ${key}; reconcile before requesting fixes`);
-      }
-      representatives.set(key, issue);
-    }
-  }
-
-  const groups = buildFixGroups(report, [...inventory.values()], repo);
+  const groups = buildFixGroups(report, issues);
   const associated = new Set(
     groups.flatMap((group) => [...group.siblings.map(({ number }) => number), ...group.ambiguous])
   );
@@ -160,6 +116,7 @@ export const requestFlakyTestFixes = async ({
     githubRepo: repo,
     dryRun,
     reportGeneratedAt: report.generatedAt,
+    buildUrl,
     outsideReport: issues
       .filter((issue) => eligible(issue) && !associated.has(issue.number))
       .map(({ number }) => number),
@@ -169,13 +126,11 @@ export const requestFlakyTestFixes = async ({
     if ((await github.getAuthenticatedLogin()) !== AUTHOR) {
       throw new Error(`Live requests must be authored by ${AUTHOR}`);
     }
-    await github.checkLabel(TRACKING_LABEL);
     await github.checkLabel(FIX_LABEL);
   }
 
-  let reservations = 0;
+  let requests = 0;
   for (const group of groups) {
-    let representative = representatives.get(group.key);
     const action: FixAction = {
       filePath: group.filePath,
       framework: group.framework,
@@ -204,13 +159,9 @@ export const requestFlakyTestFixes = async ({
         hold('no-active-main-failure');
         continue;
       }
-      const fresh = await Promise.all(
-        [...new Set([...action.siblings, ...(representative ? [representative.number] : [])])].map(
-          (number) => github.getIssue(number)
-        )
-      );
+      const members = await readGroup(action.siblings);
       if (
-        fresh.some((issue) => hasIssueLabel(issue, OPTED_OUT_TEAM)) ||
+        members.some(({ issue }) => hasIssueLabel(issue, OPTED_OUT_TEAM)) ||
         tests.some((test) =>
           test.owners.some((owner) => getTeamByGithubHandle(owner)?.github.label === OPTED_OUT_TEAM)
         )
@@ -218,78 +169,70 @@ export const requestFlakyTestFixes = async ({
         hold('team-opted-out');
         continue;
       }
-      if (fresh.some((issue) => hasIssueLabel(issue, FIX_LABEL))) {
+      if (members.some(({ issue }) => hasIssueLabel(issue, FIX_LABEL))) {
         hold('request-in-flight');
         continue;
       }
-      const histories = await Promise.all(fresh.map((issue) => history(issue.number)));
-      const allEvents = histories.flat();
-      const attempts = allEvents.filter(isFixAttempt);
-      const recorded = fresh.filter((issue) =>
-        claimsFrom(timelines.get(issue.number) ?? []).some((claim) => claim.key === group.key)
+      const attempts = members
+        .flatMap(({ issue, events }) =>
+          events.filter(isFixAttempt).map((event) => ({ issue, at: event.created_at }))
+        )
+        .sort((a, b) => a.at.localeCompare(b.at) || a.issue.number - b.issue.number);
+
+      const relatedPrs = new Set<number>();
+      const prPrefix = `https://github.com/${repo}/pull/`;
+      for (const { events } of members) {
+        for (const event of events) {
+          const source = event.source?.issue;
+          if (source?.pull_request && source.html_url.startsWith(prPrefix)) {
+            const number = Number(source.html_url.slice(prPrefix.length));
+            if (!Number.isSafeInteger(number) || number <= 0) {
+              throw new Error(`Invalid linked PR URL: ${source.html_url}`);
+            }
+            relatedPrs.add(number);
+          }
+        }
+      }
+      const prs = await Promise.all([...relatedPrs].map((pr) => github.getFixPullRequest(pr)));
+      const fixes = prs.filter((pr) =>
+        pr.closingIssues.some((number) => action.siblings.includes(number))
       );
-      if (recorded.length > 1) {
-        hold('multiple-representatives: reconcile manually');
+      if (fixes.some((pr) => pr.state === 'OPEN')) {
+        hold('existing-fix-pr');
         continue;
       }
-      representative ??= recorded[0];
-      if (!representative && attempts.length) {
-        // Adopt legacy/manual history rather than pretending the rollout starts with a clean slate.
-        representative = fresh
-          .filter((issue) => timelines.get(issue.number)?.some(isFixAttempt))
-          .sort((a, b) => a.number - b.number)[0];
-      }
-      representative = representative
-        ? fresh.find(({ number }) => number === representative?.number)
-        : group.targets
-            .map((target) => fresh.find(({ number }) => number === target.number))
-            .find((issue): issue is GithubIssue => issue !== undefined && eligible(issue));
+      const merges = fixes
+        .flatMap((pr) => {
+          const at = pr.mergedAt;
+          return pr.state === 'MERGED' && at
+            ? members
+                .filter(({ issue }) => pr.closingIssues.includes(issue.number))
+                .map(({ issue }) => ({ issue, at }))
+            : [];
+        })
+        .sort((a, b) => a.at.localeCompare(b.at) || a.issue.number - b.issue.number);
+
+      // The first request, not the oldest issue number, anchors the representative across runs.
+      const representative =
+        attempts[0]?.issue ??
+        merges[0]?.issue ??
+        group.targets
+          .map((target) => members.find(({ issue }) => issue.number === target.number)?.issue)
+          .find((issue): issue is GithubIssue => issue !== undefined && eligible(issue));
       if (!representative) {
         hold('awaiting-investigation');
         continue;
       }
       action.issue = representative.number;
-      const events = await history(representative.number);
-      const episode = episodeOf(events);
-      const claims = claimsFrom(events).filter((claim) => claim.key === group.key);
-      const reopen = latestReopen(events);
-
-      const relatedPrs = new Set<number>();
-      const prPrefix = `https://github.com/${repo}/pull/`;
-      for (const event of allEvents) {
-        const source = event.source?.issue;
-        if (source?.pull_request && source.html_url.startsWith(prPrefix)) {
-          const number = Number(source.html_url.slice(prPrefix.length));
-          if (!Number.isSafeInteger(number) || number <= 0) {
-            throw new Error(`Invalid linked PR URL: ${source.html_url}`);
-          }
-          relatedPrs.add(number);
-        }
-      }
-      const prStates = await Promise.all(
-        [...relatedPrs].map((pr) => github.getPullRequestState(pr))
-      );
-      if (prStates.includes('open')) {
-        hold('related-open-pr');
-        continue;
-      }
-
-      if (
-        claims.some((claim) => claim.episode === episode) ||
-        attempts.some((event) => !reopen || event.created_at >= reopen.created_at)
-      ) {
-        if (!dryRun && !hasIssueLabel(representative, TRACKING_LABEL)) {
-          await github.addLabelsOnce(representative.number, [TRACKING_LABEL]);
-          await github.addIssueCommentOnce(
-            representative.number,
-            `This file already has an AI fix attempt. Future automatic requests use this issue's reopen history.\n\n${CLAIM_PREFIX}${group.key} ${episode} -->`
-          );
-        }
+      const member = members.find(({ issue }) => issue.number === representative.number);
+      if (!member) throw new Error(`Missing history for representative #${representative.number}`);
+      const reopen = latestReopen(member.events);
+      if (attempts.some(({ at }) => !reopen || at >= reopen.created_at)) {
         hold('already-requested');
         continue;
       }
-      if (hasIssueLabel(representative, TRACKING_LABEL) && claims.length === 0) {
-        hold('incomplete-reservation: reconcile manually');
+      if (merges.some(({ at }) => !reopen || at >= reopen.created_at)) {
+        hold('already-fixed');
         continue;
       }
       if (!eligible(representative)) {
@@ -298,7 +241,7 @@ export const requestFlakyTestFixes = async ({
       }
       if (
         reopen &&
-        !events.some(
+        !member.events.some(
           (event) =>
             event.event === 'labeled' &&
             event.label?.name === FIXABLE_LABEL &&
@@ -308,52 +251,39 @@ export const requestFlakyTestFixes = async ({
         hold('awaiting-fresh-investigation');
         continue;
       }
-      if (reservations >= maxRequests) {
+      if (requests >= maxRequests) {
         hold('request-budget');
         continue;
       }
 
-      // The issue may have closed/reopened or lost eligibility while its history was being read.
-      const current = await github.getIssue(representative.number);
-      const currentEvents = await github.getIssueTimeline(representative.number);
-      const currentDetails = describeIssue(current);
+      // Recheck siblings too: a manual request may have arrived while we read PRs/history.
+      const currentMembers = await readGroup(action.siblings);
+      const current = currentMembers.find(({ issue }) => issue.number === representative.number);
+      if (!current) throw new Error(`Missing representative #${representative.number}`);
+      const currentDetails = describeIssue(current.issue);
       if (
-        !eligible(current) ||
-        hasIssueLabel(current, FIX_LABEL) ||
-        hasIssueLabel(current, OPTED_OUT_TEAM) ||
+        !eligible(current.issue) ||
+        currentMembers.some(
+          ({ issue }) => hasIssueLabel(issue, FIX_LABEL) || hasIssueLabel(issue, OPTED_OUT_TEAM)
+        ) ||
         (currentDetails.suiteFilePath ?? currentDetails.filePath) !== group.filePath ||
         issueFramework(currentDetails) !== group.framework ||
-        episodeOf(currentEvents) !== episode ||
-        currentEvents.some(
-          (event) => isFixAttempt(event) && !events.some((old) => old.id === event.id)
+        latestReopen(current.events)?.id !== reopen?.id ||
+        currentMembers.some(({ issue, events }) =>
+          events.some(
+            (event) =>
+              isFixAttempt(event) &&
+              !members
+                .find((previous) => previous.issue.number === issue.number)
+                ?.events.some((old) => old.id === event.id)
+          )
         )
       ) {
         hold('changed-during-selection');
         continue;
       }
-      reservations += 1;
-      if (!dryRun) {
-        await github.addLabelsOnce(current.number, [TRACKING_LABEL]);
-        const siblings = action.siblings.map(
-          (number) => `https://github.com/${repo}/issues/${number}`
-        );
-        await github.addIssueCommentOnce(
-          current.number,
-          [
-            '### Automatic flaky fix request',
-            '',
-            `This issue represents \`${group.framework}: ${group.filePath}\` for automatic fixes.`,
-            'Sibling issues are supporting evidence, not a claim that every failure has the same root cause:',
-            ...siblings.map((url) => `- ${url}`),
-            '',
-            `Selected from the report generated at ${report.generatedAt.toISOString()}. Pipeline: ${buildUrl}`,
-            'Only reopening this representative permits another automatic attempt. Manual fix requests remain available.',
-            '',
-            `${CLAIM_PREFIX}${group.key} ${episode} -->`,
-          ].join('\n')
-        );
-        await github.addLabelsOnce(current.number, [FIX_LABEL]);
-      }
+      requests += 1;
+      if (!dryRun) await github.addLabelsOnce(current.issue.number, [FIX_LABEL]);
       action.action = dryRun ? 'would-request' : 'requested';
       action.reason = 'eligible';
     } catch (error) {

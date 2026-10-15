@@ -84,6 +84,28 @@ export interface GithubIssueEvent {
   source?: { issue: { html_url: string; pull_request?: { url: string } } };
 }
 
+export interface GithubFixPullRequest {
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  mergedAt: string | null;
+  closingIssues: number[];
+}
+
+interface PullRequestQueryResponse {
+  data?: {
+    repository: {
+      pullRequest:
+        | (Omit<GithubFixPullRequest, 'closingIssues'> & {
+            closingIssuesReferences: {
+              nodes: Array<{ number: number; repository: { nameWithOwner: string } }>;
+              pageInfo: { hasNextPage: boolean; endCursor: string | null };
+            };
+          })
+        | null;
+    } | null;
+  };
+  errors?: Array<{ message: string }>;
+}
+
 export const hasIssueLabel = (issue: GithubIssue, name: string): boolean =>
   issue.labels.some(
     (label) =>
@@ -216,16 +238,62 @@ export class GithubApi {
     return events;
   }
 
-  async getPullRequestState(prNumber: number): Promise<GithubIssueState> {
-    const { data } = await this.request<{ state: GithubIssueState } | undefined>(
-      { method: 'GET', url: `${this.baseUrl}pulls/${prNumber}`, safeForDryRun: true },
-      undefined
-    );
-    if (!data) throw new Error(`GitHub returned no pull request for #${prNumber}`);
-    if (data.state !== 'open' && data.state !== 'closed') {
-      throw new Error(`GitHub returned an unknown state for pull request #${prNumber}`);
+  /** Read GitHub's closing relationships rather than guessing whether a PR mention is a fix. */
+  async getFixPullRequest(prNumber: number): Promise<GithubFixPullRequest> {
+    const [owner, name] = this.repo.split('/');
+    const closingIssues = new Set<number>();
+    let after: string | null = null;
+    while (true) {
+      const response: PullRequestQueryResponse = (
+        await this.request<PullRequestQueryResponse>(
+          {
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+            safeForDryRun: true,
+            data: {
+              query: `query($owner: String!, $name: String!, $number: Int!, $after: String) {
+              repository(owner: $owner, name: $name) {
+                pullRequest(number: $number) {
+                  state mergedAt
+                  closingIssuesReferences(first: 100, after: $after) {
+                    nodes { number repository { nameWithOwner } }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                }
+              }
+            }`,
+              variables: { owner, name, number: prNumber, after },
+            },
+          },
+          {}
+        )
+      ).data;
+      const pr = response.data?.repository?.pullRequest;
+      if (response.errors?.length || !pr) {
+        throw new Error(
+          `Unable to read fix PR #${prNumber}: ${
+            response.errors?.map(({ message }) => message).join('; ') || 'not found'
+          }`
+        );
+      }
+      if (
+        !['OPEN', 'CLOSED', 'MERGED'].includes(pr.state) ||
+        (pr.state === 'MERGED' && !pr.mergedAt)
+      ) {
+        throw new Error(`GitHub returned an invalid state for fix PR #${prNumber}`);
+      }
+      const { nodes, pageInfo } = pr.closingIssuesReferences;
+      for (const issue of nodes) {
+        if (issue.repository.nameWithOwner === this.repo) closingIssues.add(issue.number);
+      }
+      if (!pageInfo.hasNextPage) {
+        return { state: pr.state, mergedAt: pr.mergedAt, closingIssues: [...closingIssues] };
+      }
+      if (!pageInfo.endCursor || pageInfo.endCursor === after) {
+        throw new Error(`Incomplete closing-issue history for fix PR #${prNumber}`);
+      }
+      after = pageInfo.endCursor;
     }
-    return data.state;
   }
 
   async checkLabel(name: string): Promise<void> {
@@ -252,21 +320,6 @@ export class GithubApi {
     );
     if (labels.some((name) => !data.some((label) => label.name === name))) {
       throw new Error(`GitHub did not apply the requested labels to #${issueNumber}`);
-    }
-  }
-
-  async addIssueCommentOnce(issueNumber: number, body: string): Promise<void> {
-    const { data } = await this.request<{ body: string }>(
-      {
-        method: 'POST',
-        url: `${this.baseUrl}issues/${issueNumber}/comments`,
-        data: { body },
-        maxAttempts: 1,
-      },
-      { body }
-    );
-    if (data.body !== body) {
-      throw new Error(`GitHub did not confirm the request record on #${issueNumber}`);
     }
   }
 

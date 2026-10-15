@@ -21,7 +21,6 @@ import { isSkippedTest } from '../flaky_test_issues/skipped';
 import { groupIntoSuites, type FlakySuite } from '../flaky_test_issues/suites';
 
 export interface FixGroup {
-  key: string;
   framework: TestFramework;
   filePath: string;
   suites: FlakySuite[];
@@ -29,9 +28,6 @@ export interface FixGroup {
   targets: GithubIssue[];
   ambiguous: number[];
 }
-
-export const groupKey = (repo: string, framework: string, filePath: string): string =>
-  encodeURIComponent(JSON.stringify([repo, framework, filePath]));
 
 export const issueFramework = (details: IssueDetails): string | undefined =>
   details.suiteFramework ??
@@ -46,16 +42,11 @@ export const isTestFilePath = (filePath: string): boolean =>
   /\.[cm]?[jt]sx?$/.test(filePath);
 
 /** Group report candidates by file, but associate sibling issues independently of report admission. */
-export const buildFixGroups = (
-  report: FlakyTestReport,
-  issues: GithubIssue[],
-  repo: string
-): FixGroup[] => {
+export const buildFixGroups = (report: FlakyTestReport, issues: GithubIssue[]): FixGroup[] => {
   const groups = new Map<string, FixGroup>();
   for (const suite of groupIntoSuites(report.flaky.filter((test) => !isSkippedTest(test)))) {
-    const key = groupKey(repo, suite.framework, suite.filePath);
+    const key = JSON.stringify([suite.framework, suite.filePath]);
     const group = groups.get(key) ?? {
-      key,
       framework: suite.framework,
       filePath: suite.filePath,
       suites: [],

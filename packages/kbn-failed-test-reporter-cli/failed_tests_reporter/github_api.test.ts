@@ -91,10 +91,84 @@ describe('GithubApi writes', () => {
             headers: { link: `<${next}>; rel="next"` },
           })
         )
-        .mockResolvedValueOnce(jsonResponse([{ id: 2, event: 'commented', body: 'claim' }]));
+        .mockResolvedValueOnce(
+          jsonResponse([{ id: 2, event: 'unlabeled', label: { name: 'ai:fix-flaky' } }])
+        );
       const api = new GithubApi({ log, token: 'secret', dryRun: true });
       expect(await api.getIssueTimeline(1)).toHaveLength(2);
       expect(fetchMock.mock.calls[1][0]).toBe(next);
+    });
+
+    it('reads and paginates native closing relationships in dry run, excluding other repositories', async () => {
+      jest.useFakeTimers();
+      const page = (numbers: number[], hasNextPage: boolean) =>
+        jsonResponse({
+          data: {
+            repository: {
+              pullRequest: {
+                state: 'MERGED',
+                mergedAt: '2026-09-09T12:00:00Z',
+                closingIssuesReferences: {
+                  nodes: [
+                    ...numbers.map((number) => ({
+                      number,
+                      repository: { nameWithOwner: 'elastic/kibana' },
+                    })),
+                    { number: 99, repository: { nameWithOwner: 'other/repo' } },
+                  ],
+                  pageInfo: { hasNextPage, endCursor: hasNextPage ? 'next' : null },
+                },
+              },
+            },
+          },
+        });
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValueOnce(page([1], true))
+        .mockResolvedValueOnce(page([2], false));
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      const result = api.getFixPullRequest(42);
+      await jest.runAllTimersAsync();
+      expect(await result).toEqual({
+        state: 'MERGED',
+        mergedAt: '2026-09-09T12:00:00Z',
+        closingIssues: [1, 2],
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/graphql');
+      expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body)).variables.after).toBe('next');
+    });
+
+    it('rejects GraphQL errors rather than treating unreadable links as no fix', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        jsonResponse({
+          data: { repository: null },
+          errors: [{ message: 'Access denied' }],
+        })
+      );
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getFixPullRequest(42)).rejects.toThrow('Access denied');
+    });
+
+    it('rejects incomplete closing-issue pagination', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        jsonResponse({
+          data: {
+            repository: {
+              pullRequest: {
+                state: 'OPEN',
+                mergedAt: null,
+                closingIssuesReferences: {
+                  nodes: [],
+                  pageInfo: { hasNextPage: true, endCursor: null },
+                },
+              },
+            },
+          },
+        })
+      );
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getFixPullRequest(42)).rejects.toThrow('Incomplete closing-issue history');
     });
 
     it.each(['network', 'server'])(

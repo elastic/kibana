@@ -282,7 +282,7 @@ The preparation step clears stale `failure:ai-fixable`. Restore it only when you
 
 Mention an existing fix PR rather than promising another one. Selection can be held for missing evidence, team opt-outs, prior requests, an open PR, unsupported scope, or the request budget. Do not promise that another failure will automatically request a fix.
 
-An engineer can still add `ai:fix-flaky` or dispatch the fixer manually. Do not alter these requests or the persistent `ai:fix-flaky-tracked` label.
+An engineer can still add `ai:fix-flaky` or dispatch the fixer manually. Do not alter these requests. The selector reads existing request events and fix PR relationships; it adds no tracking labels or bookkeeping comments.
 
 #### Teams opted out of automatic fix requests
 
@@ -311,7 +311,7 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Remove `failure:*` labels that no longer match, keep the single correct classification, restore `failure:ai-fixable` only if a fix is still available, and keep `failure:fix-did-not-hold` or `failure:insufficient-data` only when supported by fresh evidence. Leave all `ai:*` request/tracking labels alone.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Remove `failure:*` labels that no longer match, keep the single correct classification, restore `failure:ai-fixable` only if a fix is still available, and keep `failure:fix-did-not-hold` or `failure:insufficient-data` only when supported by fresh evidence. Leave all `ai:*` request labels alone.
 
 ## Close the issue when there is clearly nothing to fix
 
