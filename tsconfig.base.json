@@ -1181,6 +1181,8 @@
       "@kbn/developer-toolbar/*": ["./src/platform/packages/shared/kbn-developer-toolbar/*"],
       "@kbn/developer-toolbar-plugin": ["./src/platform/plugins/shared/developer_toolbar"],
       "@kbn/developer-toolbar-plugin/*": ["./src/platform/plugins/shared/developer_toolbar/*"],
+      "@kbn/digital-experience-plugin": ["./x-pack/solutions/observability/plugins/digital_experience"],
+      "@kbn/digital-experience-plugin/*": ["./x-pack/solutions/observability/plugins/digital_experience/*"],
       "@kbn/discover-contextual-components": ["./src/platform/packages/shared/kbn-discover-contextual-components"],
       "@kbn/discover-contextual-components/*": ["./src/platform/packages/shared/kbn-discover-contextual-components/*"],
       "@kbn/discover-customization-examples-plugin": ["./examples/discover_customization_examples"],

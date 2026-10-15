@@ -1948,6 +1948,9 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/digital-experience-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/digital_experience
       '@kbn/discover-contextual-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-discover-contextual-components
@@ -9615,6 +9618,8 @@ importers:
   x-pack/solutions/observability/plugins/apm_data_access: {}
 
   x-pack/solutions/observability/plugins/client_apps: {}
+
+  x-pack/solutions/observability/plugins/digital_experience: {}
 
   x-pack/solutions/observability/plugins/entity_inventory: {}
 
