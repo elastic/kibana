@@ -289,7 +289,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     setShowAgenticLanding(shouldShowAgenticLandingRef.current);
   }, [id]);
   // The sidebar opens only when the user picked AI: a landing prompt or a remix.
-  // "Start manually" and examples go straight to the editor.
+  // "Start manually" goes straight to the editor.
   const autoOpenAgentChat = !id && Boolean(pendingInitialAgentMessage || initialYaml);
 
   const handleLandingSubmit = useCallback((message: string) => {
@@ -388,7 +388,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <AgenticFirstEmptyStateLive
             onSubmitPrompt={handleLandingSubmit}
             onStartManually={() => setShowAgenticLanding(false)}
-            onSelectExample={() => setShowAgenticLanding(false)}
             onSelectTemplate={(template) =>
               application.navigateToApp(PLUGIN_ID, {
                 deepLinkId: WorkflowsPageName.library,

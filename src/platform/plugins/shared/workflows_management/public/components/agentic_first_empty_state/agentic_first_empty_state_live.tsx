@@ -18,7 +18,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export type AgenticFirstEmptyStateLiveProps = Omit<
   AgenticFirstEmptyStateProps,
-  'liveTemplates' | 'agentInput'
+  'templates' | 'agentInput'
 > & {
   onSubmitPrompt?: (prompt: string) => void;
 };
@@ -71,7 +71,7 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
 
 function LiveInner({ agentInput, ...props }: AgenticFirstEmptyStateProps) {
   const { templates } = useCatalog();
-  return <AgenticFirstEmptyState {...props} liveTemplates={templates} agentInput={agentInput} />;
+  return <AgenticFirstEmptyState {...props} templates={templates} agentInput={agentInput} />;
 }
 
 type AgentChatAccess = 'loading' | 'ready' | 'noLlm' | 'unavailable';

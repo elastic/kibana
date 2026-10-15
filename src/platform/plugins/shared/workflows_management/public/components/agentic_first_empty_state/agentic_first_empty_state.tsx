@@ -9,10 +9,8 @@
 
 import {
   EuiButtonEmpty,
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -25,73 +23,24 @@ import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { TemplateCard } from '@kbn/workflows-ui';
 
-export interface AgenticFirstExample {
-  id: string;
-  title: string;
-  description: string;
-  icons?: string[];
-}
-
 export interface AgenticFirstEmptyStateProps {
-  /** Fallback example cards used when no live templates are supplied (e.g. Storybook). */
-  examples?: AgenticFirstExample[];
-  /**
-   * Live templates from the Workflow Template Library. When provided (typically from
-   * `useCatalog()` behind `useLibraryEnabled()`), the first three replace the mock cards.
-   */
-  liveTemplates?: Template[];
+  /** Workflow Template Library templates. The first three show as cards; none hides the row. */
+  templates?: Template[];
   /** The prompt area, e.g. Agent Builder's chat input. Omitted when AI chat is unavailable. */
   agentInput?: React.ReactNode;
   onStartManually?: () => void;
   onExploreLibrary?: () => void;
-  onSelectExample?: (id: string) => void;
   onSelectTemplate?: (template: Template) => void;
 }
 
-const DEFAULT_EXAMPLES: AgenticFirstExample[] = [
-  {
-    id: 'call-subagent',
-    title: i18n.translate('workflows.agenticFirst.example.callSubagent.title', {
-      defaultMessage: 'Call subagent workflow',
-    }),
-    description: i18n.translate('workflows.agenticFirst.example.callSubagent.description', {
-      defaultMessage: 'Call a subagent workflow to convert data between formats.',
-    }),
-    icons: ['logoElastic', 'console', 'logoGithub'],
-  },
-  {
-    id: 'get-document',
-    title: i18n.translate('workflows.agenticFirst.example.getDocument.title', {
-      defaultMessage: 'Get document',
-    }),
-    description: i18n.translate('workflows.agenticFirst.example.getDocument.description', {
-      defaultMessage: 'Get a document by ID and index name.',
-    }),
-    icons: ['logoSlack'],
-  },
-  {
-    id: 'rss-feed',
-    title: i18n.translate('workflows.agenticFirst.example.rss.title', {
-      defaultMessage: 'RSS feed ingest',
-    }),
-    description: i18n.translate('workflows.agenticFirst.example.rss.description', {
-      defaultMessage: 'Poll an RSS feed and ingest new items into Elasticsearch.',
-    }),
-    icons: ['refresh', 'globe', 'logoElastic'],
-  },
-];
-
 export function AgenticFirstEmptyState({
-  examples = DEFAULT_EXAMPLES,
-  liveTemplates,
+  templates,
   agentInput,
   onStartManually,
   onExploreLibrary,
-  onSelectExample,
   onSelectTemplate,
 }: AgenticFirstEmptyStateProps) {
-  const visibleTemplates = liveTemplates?.slice(0, 3) ?? [];
-  const showLiveTemplates = visibleTemplates.length > 0;
+  const visibleTemplates = templates?.slice(0, 3) ?? [];
   const { euiTheme } = useEuiTheme();
   const containerCss = css`
     width: 100%;
@@ -127,30 +76,31 @@ export function AgenticFirstEmptyState({
           </>
         )}
 
-        <EuiSpacer size="xxl" />
+        {visibleTemplates.length > 0 && (
+          <>
+            <EuiSpacer size="xxl" />
 
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate('workflows.agenticFirst.exampleLabel', {
-                defaultMessage: 'Start from an existing example',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={onExploreLibrary} data-test-subj="agenticFirstExploreLibraryLink">
-              {i18n.translate('workflows.agenticFirst.exploreLibrary', {
-                defaultMessage: 'Explore library',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('workflows.agenticFirst.exampleLabel', {
+                    defaultMessage: 'Start from an existing example',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={onExploreLibrary} data-test-subj="agenticFirstExploreLibraryLink">
+                  {i18n.translate('workflows.agenticFirst.exploreLibrary', {
+                    defaultMessage: 'Explore library',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          {showLiveTemplates
-            ? visibleTemplates.map((template) => (
+            <EuiFlexGroup gutterSize="m" responsive={false}>
+              {visibleTemplates.map((template) => (
                 <EuiFlexItem
                   key={template.slug}
                   grow={1}
@@ -164,47 +114,10 @@ export function AgenticFirstEmptyState({
                 >
                   <TemplateCard template={template} onSelect={(t) => onSelectTemplate?.(t)} />
                 </EuiFlexItem>
-              ))
-            : examples.map((example) => (
-                <EuiFlexItem
-                  key={example.id}
-                  grow={1}
-                  css={css`
-                    flex-basis: 0;
-                    min-width: 0;
-                  `}
-                >
-                  <EuiCard
-                    textAlign="left"
-                    paddingSize="m"
-                    hasBorder
-                    title={
-                      <EuiText size="s">
-                        <strong>{example.title}</strong>
-                      </EuiText>
-                    }
-                    description={
-                      <EuiText size="xs" color="subdued">
-                        {example.description}
-                      </EuiText>
-                    }
-                    icon={
-                      example.icons && example.icons.length > 0 ? (
-                        <EuiFlexGroup gutterSize="xs" responsive={false}>
-                          {example.icons.map((icon, idx) => (
-                            <EuiFlexItem grow={false} key={idx}>
-                              <EuiIcon type={icon} size="m" aria-hidden={true} />
-                            </EuiFlexItem>
-                          ))}
-                        </EuiFlexGroup>
-                      ) : undefined
-                    }
-                    onClick={() => onSelectExample?.(example.id)}
-                    data-test-subj={`agenticFirstExampleCard-${example.id}`}
-                  />
-                </EuiFlexItem>
               ))}
-        </EuiFlexGroup>
+            </EuiFlexGroup>
+          </>
+        )}
 
         <EuiSpacer size="m" />
 

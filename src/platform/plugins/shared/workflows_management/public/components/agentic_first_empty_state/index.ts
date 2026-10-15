@@ -10,7 +10,6 @@
 export {
   AgenticFirstEmptyState,
   type AgenticFirstEmptyStateProps,
-  type AgenticFirstExample,
 } from './agentic_first_empty_state';
 export {
   AgenticFirstEmptyStateLive,

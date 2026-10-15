@@ -12,5 +12,4 @@ export { AgenticFirstEmptyState, AgenticFirstEmptyStateLive } from './agentic_fi
 export type {
   AgenticFirstEmptyStateLiveProps,
   AgenticFirstEmptyStateProps,
-  AgenticFirstExample,
 } from './agentic_first_empty_state';

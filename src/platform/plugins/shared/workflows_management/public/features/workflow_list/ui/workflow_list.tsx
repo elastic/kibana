@@ -46,10 +46,9 @@ import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
-  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
   const location = useLocation();
@@ -338,7 +337,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onStartManually={() =>
           application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
         }
-        onSelectExample={() => onCreateWorkflow?.()}
         onSelectTemplate={(template) =>
           application.navigateToApp(PLUGIN_ID, {
             deepLinkId: WorkflowsPageName.library,

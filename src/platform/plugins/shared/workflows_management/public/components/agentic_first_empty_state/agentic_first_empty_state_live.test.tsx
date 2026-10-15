@@ -76,6 +76,19 @@ describe('AgenticFirstEmptyStateLive', () => {
     expect(screen.queryByTestId('agenticFirstConnectLlmPanel')).not.toBeInTheDocument();
   });
 
+  it('hides the templates row when the library is disabled', async () => {
+    mockGetAgentBuilderAccess.mockResolvedValue({
+      hasRequiredLicense: true,
+      hasLlmConnector: true,
+    });
+
+    renderLive();
+
+    await waitFor(() => expect(mockGetAgentBuilderAccess).toHaveBeenCalled());
+    expect(screen.queryByTestId('agenticFirstExploreLibraryLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agenticFirstStartManuallyButton')).toBeInTheDocument();
+  });
+
   it('replaces the chat input with the connect-LLM panel when no connector exists', async () => {
     mockGetAgentBuilderAccess.mockResolvedValue({
       hasRequiredLicense: true,

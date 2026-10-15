@@ -288,11 +288,7 @@ export function WorkflowsPage() {
         ) : null}
 
         <div css={shouldShowEmptyState ? styles.centeredEmptyState : undefined}>
-          <WorkflowList
-            search={search}
-            setSearch={setSearch}
-            onCreateWorkflow={navigateToCreateWorkflow}
-          />
+          <WorkflowList search={search} setSearch={setSearch} />
         </div>
       </EuiPageTemplate.Section>
       {showImportFlyout ? (

@@ -173,12 +173,10 @@ const createMockWorkflowListDto = (
 
 describe('WorkflowList', () => {
   const setSearch = jest.fn();
-  const onCreateWorkflow = jest.fn();
 
   const defaultProps = {
     search: defaultSearch,
     setSearch,
-    onCreateWorkflow,
   };
 
   beforeEach(() => {
