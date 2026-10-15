@@ -26,6 +26,7 @@ import {
 } from '@kbn/security-mitre-attack-common';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
+import type { ThreatFrameworkGroup } from '../../../../../common/detection_engine/mitre/group_threats_by_framework';
 import { groupThreatsByFramework } from '../../../../../common/detection_engine/mitre/group_threats_by_framework';
 import * as i18n from './translations';
 import { MitreFrameworkThreatSection } from './framework_threat_section';
@@ -46,7 +47,7 @@ interface AddItemProps {
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [isAddFrameworkOpen, setIsAddFrameworkOpen] = useState(false);
   const values = field.value as Threats;
-  const groups = useMemo(() => {
+  const groups = useMemo((): Array<ThreatFrameworkGroup<Threat>> => {
     const grouped = groupThreatsByFramework(values);
     // An empty threat array (e.g. a saved rule without threats) still shows the enterprise section.
     return grouped.length > 0

@@ -57,6 +57,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Threat mappings are grouped by framework**](#scenario-threat-mappings-are-grouped-by-framework)
   - [AI rule creation](#ai-rule-creation)
     - [**Scenario: AI rule creation loads the managed data source**](#scenario-ai-rule-creation-loads-the-managed-data-source)
+    - [**Scenario: Creating a rule that detects LLM prompt injection yields an ATLAS mapping**](#scenario-creating-a-rule-that-detects-llm-prompt-injection-yields-an-atlas-mapping)
+    - [**Scenario: Creating a conventional credential-access rule yields ATT&CK mappings only**](#scenario-creating-a-conventional-credential-access-rule-yields-attck-mappings-only)
+    - [**Scenario: ATT&CK mappings are still produced when ATLAS data fails to load**](#scenario-attck-mappings-are-still-produced-when-atlas-data-fails-to-load)
 
 ## Useful information
 
@@ -425,4 +428,36 @@ And the entries should be grouped under a heading per framework
 When the AI rule creation workflow requests MITRE entity data
 Then the workflow should source MITRE data from the managed data client
 And no direct import of the legacy blob should occur
+```
+
+#### **Scenario: Creating a rule that detects LLM prompt injection yields an ATLAS mapping**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+When user asks the AI rule creation workflow for a rule that detects LLM prompt injection
+Then the generated rule should contain a threat entry with framework "MITRE ATLAS"
+And that entry should contain ATLAS tactic and technique ids
+And no ATLAS technique should appear under an ATT&CK tactic
+```
+
+#### **Scenario: Creating a conventional credential-access rule yields ATT&CK mappings only**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+When user asks the AI rule creation workflow for a conventional credential-access rule
+Then the generated rule should contain threat entries with framework "MITRE ATT&CK"
+And the generated rule should not contain any "MITRE ATLAS" threat entry
+```
+
+#### **Scenario: ATT&CK mappings are still produced when ATLAS data fails to load**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+Given the ATLAS data fails to load
+When user asks the AI rule creation workflow for a rule
+Then the workflow should still produce MITRE ATT&CK mappings
+And the rule creation should not fail
 ```
