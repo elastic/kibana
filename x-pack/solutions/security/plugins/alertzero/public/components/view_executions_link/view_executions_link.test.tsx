@@ -31,10 +31,12 @@ const renderLink = ({
   showManagedWorkflows,
   canChangeAdvancedSettings,
   canReadManagedExecutions = true,
+  label,
 }: {
   showManagedWorkflows: boolean;
   canChangeAdvancedSettings?: boolean;
   canReadManagedExecutions?: boolean;
+  label?: string;
 }) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
@@ -68,6 +70,7 @@ const renderLink = ({
         workerId={WORKER_ID}
         workerName={WORKER_NAME}
         executionsHref={EXECUTIONS_HREF}
+        label={label}
       />
     </KibanaContextProvider>
   );
@@ -76,6 +79,16 @@ const renderLink = ({
 };
 
 describe('ViewExecutionsLink', () => {
+  it('renders a custom label', () => {
+    renderLink({
+      showManagedWorkflows: true,
+      canChangeAdvancedSettings: true,
+      label: 'Attack Discovery',
+    });
+
+    expect(screen.getByTestId(LINK_TEST_SUBJ)).toHaveTextContent('Attack Discovery');
+  });
+
   it('opens the workflow executions tab in a new tab when managed workflows are shown', () => {
     renderLink({ showManagedWorkflows: true, canChangeAdvancedSettings: true });
 
