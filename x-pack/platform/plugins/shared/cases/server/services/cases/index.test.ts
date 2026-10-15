@@ -2414,6 +2414,73 @@ describe('CasesService', () => {
       });
     });
 
+    describe('getCaseIdsByAttachmentIds', () => {
+      it('maps each attachment id to the case ids that reference it', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          ...createSOFindResponse([]),
+          aggregations: {
+            attachmentIds: {
+              buckets: [
+                { key: 'host:a', references: { caseIds: { buckets: [{ key: 'case-1' }] } } },
+                {
+                  key: 'host:b',
+                  references: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+                },
+              ],
+            },
+          },
+        });
+
+        const res = await service.getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a', 'host:b', 'host:c'],
+        });
+
+        expect(res).toEqual([
+          { attachmentId: 'host:a', caseIds: ['case-1'] },
+          { attachmentId: 'host:b', caseIds: ['case-1', 'case-2'] },
+        ]);
+      });
+
+      it('reads unified attachments of the type and ids, aggregating by attachment id', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await service.getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a', 'host:b'],
+        });
+
+        const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+        expect(findArgs).toMatchObject({
+          type: 'cases-attachments',
+          perPage: 0,
+          aggs: {
+            attachmentIds: {
+              terms: { field: 'cases-attachments.attributes.attachmentId', size: 2 },
+              aggs: {
+                references: {
+                  nested: { path: 'cases-attachments.references' },
+                  aggregations: {
+                    caseIds: { terms: { field: 'cases-attachments.references.id' } },
+                  },
+                },
+              },
+            },
+          },
+        });
+        expect(JSON.stringify(findArgs.filter)).toContain('security.entity');
+        expect(JSON.stringify(findArgs.filter)).toContain('host:b');
+      });
+
+      it('returns no case ids when nothing matches', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await expect(
+          service.getCaseIdsByAttachmentIds({ type: 'security.entity', attachmentIds: ['x'] })
+        ).resolves.toEqual([]);
+      });
+    });
+
     describe('getCase', () => {
       it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createCaseSavedObjectResponse());

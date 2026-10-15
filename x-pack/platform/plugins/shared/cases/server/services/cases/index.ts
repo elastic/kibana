@@ -91,6 +91,9 @@ import {
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
+  CaseIdsOfAttachment,
+  GetCaseIdsByAttachmentIdsArgs,
+  GetCaseIdsByAttachmentIdsAggs,
   CasesMapWithPageInfo,
   CasesSearchStats,
   DeleteCaseArgs,
@@ -340,6 +343,51 @@ export class CasesService {
     }
 
     return Object.assign(response, { saved_objects: owners });
+  }
+
+  /**
+   * The ids of the cases each attachment id is attached to. Attachment ids in no case are left out.
+   */
+  public async getCaseIdsByAttachmentIds({
+    type,
+    attachmentIds,
+    filter,
+  }: GetCaseIdsByAttachmentIdsArgs): Promise<CaseIdsOfAttachment[]> {
+    try {
+      this.log.debug(`Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`);
+
+      const attributes = `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes`;
+      const response = await this.unsecuredSavedObjectsClient.find<
+        unknown,
+        GetCaseIdsByAttachmentIdsAggs
+      >({
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        page: 1,
+        perPage: 0,
+        sortField: defaultSortField,
+        aggs: {
+          attachmentIds: {
+            terms: { field: `${attributes}.attachmentId`, size: attachmentIds.length },
+            aggs: this.buildCaseIdsAggs(CASE_ATTACHMENT_SAVED_OBJECT, MAX_DOCS_PER_PAGE),
+          },
+        },
+        filter: combineFilters([
+          nodeBuilder.is(`${attributes}.type`, type),
+          nodeBuilder.or(
+            attachmentIds.map((id) => nodeBuilder.is(`${attributes}.attachmentId`, id))
+          ),
+          filter,
+        ]),
+      });
+
+      return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => ({
+        attachmentId: key,
+        caseIds: references.caseIds.buckets.map((bucket) => bucket.key),
+      }));
+    } catch (error) {
+      this.log.error(`Error on GET cases for attachment ids ${attachmentIds.join(', ')}: ${error}`);
+      throw error;
+    }
   }
 
   /**

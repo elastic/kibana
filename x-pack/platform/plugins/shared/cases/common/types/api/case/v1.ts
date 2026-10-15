@@ -28,6 +28,11 @@ import {
   MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   CASE_EXTENDED_FIELDS,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_OWNERS_PER_LOOKUP,
+  MAX_OWNER_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -704,6 +709,61 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
+/**
+ * Attachments
+ */
+
+const OwnerRt = limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH });
+
+export const CasesByAttachmentIDsRequestRt = rt.intersection([
+  rt.strict({
+    /**
+     * The attachment type, e.g. `security.entity`.
+     */
+    type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
+    /**
+     * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
+     */
+    attachmentIds: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: 'attachmentIds',
+        min: 1,
+        max: MAX_ATTACHMENT_ID_LENGTH,
+      }),
+      min: 1,
+      max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+      fieldName: 'attachmentIds',
+    }),
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * Only the cases of these owners. Without it, the cases of every owner the user can read.
+       */
+      owner: rt.union([
+        OwnerRt,
+        limitedArraySchema({
+          codec: OwnerRt,
+          min: 1,
+          max: MAX_OWNERS_PER_LOOKUP,
+          fieldName: 'owner',
+        }),
+      ]),
+      /**
+       * Only the cases with one of these statuses.
+       */
+      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
+    })
+  ),
+]);
+
+export const GetCaseIDsByAttachmentIDsResponseRt = rt.array(
+  rt.strict({
+    attachmentId: rt.string,
+    caseIds: rt.array(rt.string),
+  })
+);
+
 export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
 export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
@@ -731,6 +791,10 @@ export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
+export type CasesByAttachmentIDsRequest = rt.TypeOf<typeof CasesByAttachmentIDsRequestRt>;
+export type GetCaseIDsByAttachmentIDsResponse = rt.TypeOf<
+  typeof GetCaseIDsByAttachmentIDsResponseRt
+>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequestWithCustomFieldsRt>;
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;

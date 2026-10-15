@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+import pMap from 'p-map';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
@@ -16,6 +18,7 @@ import type {
   AttachmentTotals,
   Case,
   CaseAttributes,
+  CaseStatuses,
   User,
 } from '../../../common/types/domain';
 import type {
@@ -24,6 +27,8 @@ import type {
   AllTagsFindRequest,
   CaseResolveResponse,
   CasesByAlertIDRequest,
+  CasesByAttachmentIDsRequest,
+  GetCaseIDsByAttachmentIDsResponse,
   GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
 import {
@@ -32,6 +37,8 @@ import {
   AllTagsFindRequestRt,
   CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
+  CasesByAttachmentIDsRequestRt,
+  GetCaseIDsByAttachmentIDsResponseRt,
   GetCategoriesResponseRt,
   GetRelatedCasesByAlertResponseRt,
   GetReportersResponseRt,
@@ -40,6 +47,7 @@ import {
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError, isSOError } from '../../common/error';
 import {
+  asArray,
   countAlertsForID,
   flattenCaseSavedObject,
   countUserAttachments,
@@ -50,9 +58,14 @@ import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { getOwnersFilter } from '../../authorization/utils';
-import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  MAX_BULK_GET_CASES,
+  MAX_CONCURRENT_SEARCHES,
+} from '../../../common/constants';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CaseIdsOfAttachment } from '../../services/cases/types';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
@@ -182,6 +195,86 @@ export const getCasesByAlertID = async (
       logger,
     });
   }
+};
+
+/**
+ * Case Client wrapper function for retrieving, per attachment ID (the ID an attachment points at,
+ * e.g. an entity ID), the IDs of the cases it is attached to that the user can read. This handles RBAC
+ * before calling the saved object API.
+ *
+ * @ignore
+ */
+export const getCasesByAttachmentIDs = async (
+  params: CasesByAttachmentIDsRequest,
+  clientArgs: CasesClientArgs
+): Promise<GetCaseIDsByAttachmentIDsResponse> => {
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const { type, owner, attachmentIds, status } = decodeWithExcessOrThrow(
+      CasesByAttachmentIDsRequestRt
+    )(params);
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getCaseIDsByAttachmentIDs
+    );
+
+    const casesOfAttachments = await caseService.getCaseIdsByAttachmentIds({
+      type,
+      attachmentIds,
+      filter: combineAuthorizedAndOwnerFilter(
+        owner,
+        authorizationFilter,
+        Operations.getCaseIDsByAttachmentIDs.savedObjectType
+      ),
+    });
+
+    const res =
+      status === undefined
+        ? casesOfAttachments
+        : await filterByCaseStatus(caseService, casesOfAttachments, asArray(status));
+
+    return decodeOrThrow(GetCaseIDsByAttachmentIDsResponseRt)(res);
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get case IDs using attachment IDs: ${JSON.stringify(params)}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
+/**
+ * Only the cases with one of the statuses; attachment ids left in no case are dropped. Cases whose
+ * attachment outlived them are not found, so they are left out.
+ */
+const filterByCaseStatus = async (
+  caseService: CasesService,
+  casesOfAttachments: CaseIdsOfAttachment[],
+  statuses: CaseStatuses[]
+): Promise<CaseIdsOfAttachment[]> => {
+  const caseIds = [...new Set(casesOfAttachments.flatMap((attachment) => attachment.caseIds))];
+  const responses = await pMap(
+    chunk(caseIds, MAX_BULK_GET_CASES),
+    (ids) => caseService.getCases({ caseIds: ids }),
+    { concurrency: MAX_CONCURRENT_SEARCHES }
+  );
+  const caseIdsWithStatus = new Set(
+    responses
+      .flatMap(({ saved_objects: cases }) => cases)
+      .filter((theCase): theCase is SavedObject<CaseTransformedAttributes> => !isSOError(theCase))
+      .filter(({ attributes }) => statuses.includes(attributes.status))
+      .map(({ id }) => id)
+  );
+
+  return casesOfAttachments.flatMap(({ attachmentId, caseIds: ids }) => {
+    const caseIdsInStatus = ids.filter((id) => caseIdsWithStatus.has(id));
+    return caseIdsInStatus.length > 0 ? [{ attachmentId, caseIds: caseIdsInStatus }] : [];
+  });
 };
 
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) => {

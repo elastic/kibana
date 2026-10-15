@@ -168,6 +168,7 @@ export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_BULK_GET_ATTACHMENTS = 100 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CASES_PER_PAGE = 100 as const;
 export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
@@ -193,6 +194,8 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 export const MAX_TITLE_LENGTH = 160 as const;
 export const MAX_OWNER_LENGTH = 30 as const;
+/** Owners one lookup can filter on; Kibana has only a few. */
+export const MAX_OWNERS_PER_LOOKUP = 10 as const;
 export const MAX_ISO_DATE_LENGTH = 30 as const;
 export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound
 export const MAX_IDS_PER_ATTACHMENT = 1000 as const; // `attachmentId` array size on 1 attachment, not a per-case limit
