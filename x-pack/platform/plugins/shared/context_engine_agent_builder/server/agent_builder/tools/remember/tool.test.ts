@@ -40,7 +40,6 @@ describe('remember tool', () => {
       }),
       getCoreStart: async () => coreMock.createStart(),
       getSecurityStart: async () => undefined,
-      generateSessionId: () => 'generated-session-id',
     });
 
   const createContext = (conversationId?: string, callSource?: 'mcp'): ToolHandlerContext => {
@@ -167,14 +166,38 @@ describe('remember tool', () => {
     expect(createMemory).not.toHaveBeenCalled();
   });
 
-  it('generates an MCP session and preserves service errors', async () => {
+  it('leaves an omitted MCP revision session for the service to preserve', async () => {
+    await run({ ...params, id: 'memory-1' }, undefined, 'mcp');
+
+    expect(reviseMemory).toHaveBeenCalledWith({
+      ...params,
+      id: 'memory-1',
+      writer: {
+        uri: 'tool://platform.context_engine.remember',
+        metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+      },
+      references: undefined,
+    });
+  });
+
+  it('leaves an omitted MCP create session for the service to generate', async () => {
+    await run(params, undefined, 'mcp');
+
+    expect(createMemory).toHaveBeenCalledWith({
+      ...params,
+      writer: {
+        uri: 'tool://platform.context_engine.remember',
+        metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+      },
+      references: undefined,
+    });
+  });
+
+  it('preserves service errors for MCP creates', async () => {
     createMemory.mockRejectedValue(new Error('Context Engine memory is not enabled.'));
 
     const result = await run(params, undefined, 'mcp');
 
-    expect(createMemory).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: 'generated-session-id' })
-    );
     expect(result).toEqual({
       results: [
         {

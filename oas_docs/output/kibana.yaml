@@ -25602,7 +25602,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Subsequent revision attempts return a conflict. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: delete-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25645,7 +25645,7 @@ paths:
                 required:
                   - id
                 type: object
-          description: The memory was tombstoned.
+          description: The memory was tombstoned or was already tombstoned.
         '400':
           content:
             application/json:
@@ -25820,7 +25820,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Writes a revision using the caller's destination read and write privileges. The revision replaces the memory's title, description, and content; the required type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Writes a revision using the caller's destination read and write privileges. The request must include type, title, description, and content; the revision replaces the title, description, and content, while the type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: revise-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks

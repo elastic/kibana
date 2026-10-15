@@ -10,7 +10,6 @@ import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
-import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import {
   DEFAULT_MEMORY_EXPIRATION_DAYS,
@@ -76,7 +75,7 @@ const rememberSchema = z.object({
     .max(MAX_KI_TAGS)
     .optional()
     .describe(
-      'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+      'Optional index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
     ),
   expires_at: isoDateTime({ offset: true })
     .nullable()
@@ -90,14 +89,12 @@ export const createRememberTool = ({
   getMemoryWriteService,
   getCoreStart,
   getSecurityStart,
-  generateSessionId = randomUUID,
 }: {
   getMemoryWriteService: (
     params: GetAiIndexMemoryWriteServiceParams
   ) => Promise<AiIndexMemoryWriteServiceApi>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-  generateSessionId?: () => string;
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: contextEngineMemoryTools.remember,
   type: ToolType.builtin,
@@ -143,7 +140,7 @@ export const createRememberTool = ({
     }
 
     try {
-      const sessionId = conversationId ?? params.sessionId ?? generateSessionId();
+      const sessionId = conversationId ?? params.sessionId;
 
       await assertContextEngineWriteAccess({
         request,
@@ -166,7 +163,7 @@ export const createRememberTool = ({
         content: params.content,
         ...(params.tags !== undefined && { tags: params.tags }),
         ...(params.expires_at !== undefined && { expiresAt: params.expires_at }),
-        sessionId,
+        ...(sessionId !== undefined && { sessionId }),
         writer,
         references: createConversationReferences(conversationId),
       };

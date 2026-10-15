@@ -211,7 +211,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'revise-context-engine-memory',
       summary: 'Revise a memory',
-      description: `Writes a revision using the caller's destination read and write privileges. The revision replaces the memory's title, description, and content; the required type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
+      description: `Writes a revision using the caller's destination read and write privileges. The request must include type, title, description, and content; the revision replaces the title, description, and content, while the type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -269,7 +269,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'delete-context-engine-memory',
       summary: 'Delete a memory',
-      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Subsequent revision attempts return a conflict. ${DESCRIPTION_SUFFIX}`,
+      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -283,7 +283,7 @@ export const registerMemoryRoutes = ({
           response: {
             200: {
               body: deleteMemoryResponseSchema,
-              description: 'The memory was tombstoned.',
+              description: 'The memory was tombstoned or was already tombstoned.',
             },
             400: { body: errorResponseSchema, description: 'The memory cannot be deleted.' },
             403: {
