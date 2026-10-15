@@ -22,9 +22,7 @@ function getExpressionForLayer(
   }
 
   const staticColumns = layer.columns.filter((column) => column.valueSource?.type === 'static');
-  const queryColumns = layer.columns.filter(
-    (column) => column.valueSource?.type !== 'static' && column.valueSource?.type !== 'unconfigured'
-  );
+  const queryColumns = layer.columns.filter((column) => column.valueSource?.type !== 'static');
   if (!staticColumns.length && !queryColumns.length) return null;
   const staticExpressions: ExpressionAstFunction[] = staticColumns.map((column) => ({
     type: 'function',

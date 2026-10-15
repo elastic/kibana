@@ -51,25 +51,6 @@ describe('toExpression', () => {
     indexPatternRefs: [{ id: '1', title: 'foo' }],
   };
 
-  it('does not produce a table for an unconfigured query dimension', () => {
-    const state: TextBasedPrivateState = {
-      ...baseState,
-      layers: {
-        a: {
-          ...baseState.layers.a,
-          columns: [
-            {
-              columnId: 'threshold',
-              fieldName: '',
-              valueSource: { type: 'unconfigured' },
-            },
-          ],
-        },
-      },
-    };
-    expect(toExpression(state, 'a')).toBeNull();
-  });
-
   it('builds static thresholds locally without executing the query', () => {
     const state: TextBasedPrivateState = {
       ...baseState,

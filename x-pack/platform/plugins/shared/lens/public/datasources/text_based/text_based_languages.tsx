@@ -824,9 +824,7 @@ export function getTextBasedDatasource({
         datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          const layerColumns = (state.layers[layerId]?.columns ?? []).filter(
-            (column) => column.valueSource?.type !== 'unconfigured'
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
           // Column ordering: non-metric columns (rows) before metric columns
           const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
           const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
@@ -838,7 +836,7 @@ export function getTextBasedDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
-          if (!column || column.valueSource?.type === 'unconfigured') {
+          if (!column) {
             return null;
           }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);

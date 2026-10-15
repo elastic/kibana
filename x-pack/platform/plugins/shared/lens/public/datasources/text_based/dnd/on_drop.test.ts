@@ -46,11 +46,6 @@ describe('onDrop', () => {
       meta: { type: 'number' },
       valueSource: { type: 'query' },
     },
-    {
-      ...column1,
-      fieldName: '',
-      valueSource: { type: 'unconfigured' },
-    },
   ])('reference column $valueSource.type', (referenceColumn) => {
     it.each([
       {

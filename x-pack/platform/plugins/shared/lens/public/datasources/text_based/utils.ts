@@ -90,12 +90,8 @@ export const reconcileQueryColumns = (
   columnsFromQuery: DatatableColumn[],
   preferredColumnIds: Set<string> = new Set()
 ): TextBasedLayerColumn[] => {
-  const staticColumns = existingColumns.filter(
-    (column) => column.valueSource?.type === 'static' || column.valueSource?.type === 'unconfigured'
-  );
-  existingColumns = existingColumns.filter(
-    (column) => column.valueSource?.type !== 'static' && column.valueSource?.type !== 'unconfigured'
-  );
+  const staticColumns = existingColumns.filter((column) => column.valueSource?.type === 'static');
+  existingColumns = existingColumns.filter((column) => column.valueSource?.type !== 'static');
   const usedColumnIds = new Set<string>();
   const findPreferredFirst = (
     predicate: (column: TextBasedLayerColumn) => boolean

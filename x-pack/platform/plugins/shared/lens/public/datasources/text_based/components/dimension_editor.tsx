@@ -200,7 +200,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       !supportStaticValue ||
       temporaryMethod === staticValueOperationName ||
       columnsQuery !== queryEsql ||
-      (selectedField?.valueSource?.type !== 'unconfigured' && temporaryMethod !== esqlColumnName)
+      temporaryMethod !== esqlColumnName
     )
       return;
     const numericColumns = allColumns.filter(
@@ -362,10 +362,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 data-test-subj="text-based-dimension-field"
                 existingFields={allColumns ?? []}
                 selectedField={
-                  selectedField?.valueSource?.type === 'static' ||
-                  selectedField?.valueSource?.type === 'unconfigured'
-                    ? undefined
-                    : selectedField
+                  selectedField?.valueSource?.type === 'static' ? undefined : selectedField
                 }
                 onChoose={(choice) => {
                   setTemporaryMethod(undefined);
