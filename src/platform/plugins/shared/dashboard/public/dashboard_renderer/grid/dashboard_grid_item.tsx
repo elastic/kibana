@@ -14,17 +14,13 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
-import { isSelectionModifier } from './selection_modifier';
-
-// Mouse movement (in px) after mousedown on a drag handle beyond which the gesture is a drag, not a click
-const DRAG_THRESHOLD_PX = 4;
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -142,79 +138,13 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
 
-    /**
-     * The drag handles (panel title area and move icon) are also the click targets for selecting
-     * a panel. The grid layout stops `mousedown` propagation on these elements, so the listeners
-     * must be attached to the handle elements themselves, which is why `setDragHandles` is wrapped.
-     */
-    const removeSelectionListenersRef = useRef<(() => void) | null>(null);
-    const setDragHandlesWithSelection = useCallback(
-      (refs: Array<HTMLElement | null>) => {
-        removeSelectionListenersRef.current?.();
-        const handles = refs.filter((handle): handle is HTMLElement => handle !== null);
-
-        let mouseDownPosition: { x: number; y: number } | undefined;
-        let dragDetected = false;
-
-        const onDocumentMouseMove = (e: MouseEvent) => {
-          if (!mouseDownPosition || dragDetected) return;
-          if (
-            Math.abs(e.clientX - mouseDownPosition.x) > DRAG_THRESHOLD_PX ||
-            Math.abs(e.clientY - mouseDownPosition.y) > DRAG_THRESHOLD_PX
-          ) {
-            dragDetected = true;
-            // dragging a panel only affects that panel, so any existing selection is dropped
-            dashboardApi.clearPanelSelection();
-          }
-        };
-        const onDocumentMouseUp = () => {
-          document.removeEventListener('mousemove', onDocumentMouseMove);
-        };
-        const onMouseDown = (e: MouseEvent) => {
-          // modifier gestures are handled at the grid level, see use_panel_selection_gestures.ts
-          if (e.button !== 0 || isSelectionModifier(e)) return;
-          mouseDownPosition = { x: e.clientX, y: e.clientY };
-          dragDetected = false;
-          document.addEventListener('mousemove', onDocumentMouseMove, { passive: true });
-          document.addEventListener('mouseup', onDocumentMouseUp, { once: true });
-        };
-        const onClick = (e: MouseEvent) => {
-          if (dragDetected || isSelectionModifier(e)) return;
-          // badges and other interactive children of the title area keep their own behaviour
-          const interactiveAncestor = (e.target as HTMLElement).closest('a, button');
-          if (interactiveAncestor && interactiveAncestor !== e.currentTarget) return;
-          e.preventDefault();
-          dashboardApi.selectPanel(id);
-        };
-
-        handles.forEach((handle) => {
-          handle.addEventListener('mousedown', onMouseDown);
-          handle.addEventListener('click', onClick);
-        });
-        removeSelectionListenersRef.current = () => {
-          document.removeEventListener('mousemove', onDocumentMouseMove);
-          handles.forEach((handle) => {
-            handle.removeEventListener('mousedown', onMouseDown);
-            handle.removeEventListener('click', onClick);
-          });
-        };
-
-        setDragHandles?.(refs);
-      },
-      [dashboardApi, id, setDragHandles]
-    );
-
-    useEffect(() => {
-      return () => removeSelectionListenersRef.current?.();
-    }, []);
-
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         isSharedItem: true,
         showBadges: true,
         showBorder,
         showShadow: false,
-        setDragHandles: setDragHandlesWithSelection,
+        setDragHandles,
       };
 
       return (
@@ -230,7 +160,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
           }}
         />
       );
-    }, [id, dashboardApi, type, showBorder, setDragHandlesWithSelection]);
+    }, [id, dashboardApi, type, showBorder, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;

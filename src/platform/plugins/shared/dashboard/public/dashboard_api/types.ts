@@ -217,8 +217,6 @@ export type DashboardApi = CanExpandPanels &
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
     runQuickSave: () => Promise<void>;
-    /** Makes the given panel the only selected panel (deselects it if it was the only one selected) */
-    selectPanel: (panelId: string) => void;
     /** Adds the given panels to the current selection */
     addPanelsToSelection: (panelIds: string[]) => void;
     /** Removes several panels from the layout in a single state update */

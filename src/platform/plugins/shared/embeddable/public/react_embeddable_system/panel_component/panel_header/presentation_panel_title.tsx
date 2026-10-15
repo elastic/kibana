@@ -24,7 +24,6 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { CustomizePanelActionApi } from '../../../ui_actions/customize_panel_action';
 import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
-import { getSelectionApi } from './get_selection_api';
 
 export const PresentationPanelTitle = ({
   api,
@@ -44,11 +43,7 @@ export const PresentationPanelTitle = ({
   titleHighlight?: string | string[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  // When the parent container supports panel selection, clicking the title selects the panel
-  // instead of opening the customize flyout, so the title must not be rendered as a link.
-  const parentCanSelectPanels = Boolean(getSelectionApi(api));
-  const isEditableTitle =
-    viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api) && !parentCanSelectPanels;
+  const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
 
   const onClick = useCallback(() => {
     openCustomizePanelFlyout({

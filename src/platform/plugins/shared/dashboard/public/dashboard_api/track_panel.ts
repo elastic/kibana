@@ -131,18 +131,11 @@ export function initializeTrackPanel(
       togglePanelSelection: (panelId: string) => {
         const current = selectedPanelIds$.value;
         selectedPanelIds$.next(
-          current.includes(panelId)
-            ? current.filter((id) => id !== panelId)
-            : [...current, panelId]
+          current.includes(panelId) ? current.filter((id) => id !== panelId) : [...current, panelId]
         );
       },
       clearPanelSelection: () => {
         if (selectedPanelIds$.value.length) selectedPanelIds$.next([]);
-      },
-      selectPanel: (panelId: string) => {
-        const current = selectedPanelIds$.value;
-        const isOnlySelected = current.length === 1 && current[0] === panelId;
-        selectedPanelIds$.next(isOnlySelected ? [] : [panelId]);
       },
       addPanelsToSelection: (panelIds: string[]) => {
         const next = Array.from(new Set([...selectedPanelIds$.value, ...panelIds]));
