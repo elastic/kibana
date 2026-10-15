@@ -38,10 +38,10 @@ export interface UnprocessedOtelErrorsByServiceResponse {
  * span. `transaction.id` is unmapped in logs indices and resolves to match-nothing
  * rather than an error, so the clause is inert there; `span.id` is the active filter.
  *
- * Note on environment filtering: `environmentQuery` filters `service.environment`.
- * The OTel-native `logs-*.otel-*` data streams use `deployment.environment.name`
- * (OTel semconv) rather than `service.environment`. Verify against the fixture before
- * merge; if the alias is absent, widen to a bool.should over both field names.
+ * Note on environment filtering: `environmentQuery` matches both `service.environment`
+ * (an alias to the deprecated `deployment.environment` attribute on OTel data streams) and
+ * `resource.attributes.deployment.environment.name` (OTel semconv >= 1.27), so OTel-native
+ * `logs-*.otel-*` documents resolve regardless of which attribute the SDK emitted.
  */
 export async function getUnprocessedOtelErrorsByService({
   logsClient,
