@@ -109,7 +109,7 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
     headers: COMMON_HEADERS,
   });
 
-  if (response.data.error && !/already running/i.test(response.data.error)) {
+  if (response.data.error && !/already running|currently running/i.test(response.data.error)) {
     throw new Error(`Failed to run_soon task '${taskId}': ${response.data.error}`);
   }
 };
