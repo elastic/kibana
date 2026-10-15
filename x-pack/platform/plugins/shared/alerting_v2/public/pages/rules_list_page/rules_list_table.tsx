@@ -95,8 +95,7 @@ export interface RulesListTableProps {
   onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
-  onNavigateToDetails: (rule: RuleApiResponse) => void;
-  onExpand: (rule: RuleApiResponse) => void;
+  onOpenSummary: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -104,6 +103,8 @@ export interface RulesListTableProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
   onUpdateApiKey: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
+  /** When provided, adds View change history to each row actions menu. */
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
   /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
@@ -139,8 +140,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
-  onNavigateToDetails,
-  onExpand,
+  onOpenSummary,
   onQuickEdit,
   onEdit,
   onClone,
@@ -148,6 +148,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onToggleEnabled,
   onUpdateApiKey,
   onRun,
+  onViewChangeHistory,
   togglingRuleId,
   isBulkTogglingEnabled,
   onTableChange,
@@ -172,8 +173,10 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    const showActionsColumn = canWrite || onViewChangeHistory;
+
+    return [
       ...(canWrite
         ? ([
             {
@@ -205,28 +208,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
       {
-        name: '',
-        width: '32px',
-        render: (rule: RuleApiResponse) => (
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-              defaultMessage: 'Open rule summary',
-            })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="maximize"
-              color="text"
-              onClick={() => onExpand(rule)}
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                defaultMessage: 'Open rule summary',
-              })}
-              data-test-subj={`expandRule-${rule.id}`}
-            />
-          </EuiToolTip>
-        ),
-      },
-      {
         field: 'metadata',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
@@ -235,10 +216,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
+            <EuiLink onClick={() => onOpenSummary(rule)} data-test-subj={`ruleNameLink-${rule.id}`}>
               {metadata?.name ?? rule.id}
             </EuiLink>
             {metadata?.description && (
@@ -315,7 +293,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'kind',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Outcome" />
         ),
         width: '10%',
         sortable: true,
@@ -371,7 +349,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(canWrite
+      ...(showActionsColumn
         ? ([
             {
               name: (
@@ -389,32 +367,39 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   responsive={false}
                   justifyContent="flexEnd"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                        defaultMessage: 'Quick edit rule',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => onQuickEdit(rule)}
-                        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Quick edit rule',
+                  {canWrite ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                          defaultMessage: 'Edit rule',
                         })}
-                        data-test-subj={`quickEditRule-${rule.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="pencil"
+                          color="text"
+                          onClick={() => onQuickEdit(rule)}
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.rulesList.action.quickEdit',
+                            {
+                              defaultMessage: 'Edit rule',
+                            }
+                          )}
+                          data-test-subj={`quickEditRule-${rule.id}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <RuleActionsMenu
                       rule={rule}
+                      canWrite={canWrite}
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
                       onUpdateApiKey={onUpdateApiKey}
                       onRun={onRun}
+                      onViewChangeHistory={onViewChangeHistory}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -422,39 +407,49 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
-    ],
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      onUpdateApiKey,
-      onRun,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
+    ];
+  }, [
+    canWrite,
+    isPageSelected,
+    isRowSelected,
+    onSelectPage,
+    onSelectRow,
+    onOpenSummary,
+    onQuickEdit,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onUpdateApiKey,
+    onRun,
+    onViewChangeHistory,
+    togglingRuleId,
+    isBulkTogglingEnabled,
+  ]);
 
   const noItemsMessage =
     search || hasActiveFilters
       ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-          defaultMessage: 'No rules match your search or filters.',
+          defaultMessage: 'No Universal rules match your search or filters.',
         })
       : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-          defaultMessage: 'No rules found.',
+          defaultMessage: 'No Universal rules found.',
         });
 
+  // Single wrapper is required: ContentList lays out its children with a column
+  // gap, and a fragment would flatten Showing/Spacer/HR/Table into separate
+  // gapped siblings (extra space under the search bar).
+  // min-height matches EuiButtonEmpty xs so bulk actions don't grow the row.
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <div>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        css={css`
+          min-height: ${euiTheme.size.l};
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj="rulesListShowingLabel">
             <FormattedMessage
@@ -516,6 +511,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         })}
         data-test-subj="rulesListTable"
       />
-    </>
+    </div>
   );
 };

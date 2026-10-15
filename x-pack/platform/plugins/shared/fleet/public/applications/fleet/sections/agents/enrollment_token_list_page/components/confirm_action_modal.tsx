@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface ConfirmActionModalProps {
   count: number;
@@ -54,13 +55,12 @@ export const ConfirmRevokeModal = ({
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      <EuiCallOut
+      <KbnDangerCallout
         title={i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.description', {
           defaultMessage:
             'Are you sure you want to revoke {count, plural, one {this token} other {these tokens}}? You will no longer be able to use {count, plural, one {it} other {them}} to enroll new agents.',
           values: { count },
         })}
-        color="danger"
       />
     </EuiConfirmModal>
   );
@@ -104,13 +104,12 @@ export const ConfirmDeleteModal = ({
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      <EuiCallOut
+      <KbnDangerCallout
         title={i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.description', {
           defaultMessage:
             'Are you sure you want to delete {count, plural, one {this token} other {these tokens}}? Any active {count, plural, one {token} other {tokens}} will be revoked, and you will no longer be able to use {count, plural, one {it} other {them}} to enroll new agents.',
           values: { count },
         })}
-        color="danger"
       />
     </EuiConfirmModal>
   );

@@ -10,7 +10,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -25,6 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   ALLOWED_SCHEDULES_IN_SECONDS,
@@ -238,19 +238,15 @@ export const BulkScheduleFlyout = ({
         {skippedMonitors.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate('xpack.synthetics.bulkScheduleFlyout.skippedWarning.title', {
                 defaultMessage:
                   '{count, plural, one {# monitor} other {# monitors}} will not be updated',
                 values: { count: skippedMonitors.length },
               })}
+              text={SKIPPED_DESCRIPTION}
             >
-              <EuiText size="s">
-                <p>{SKIPPED_DESCRIPTION}</p>
-              </EuiText>
               <EuiAccordion id={skippedAccordionId} buttonContent={SHOW_SKIPPED_LABEL}>
                 <EuiSpacer size="xs" />
                 <EuiText size="s">
@@ -261,7 +257,7 @@ export const BulkScheduleFlyout = ({
                   </ul>
                 </EuiText>
               </EuiAccordion>
-            </EuiCallOut>
+            </KbnWarningCallout>
           </>
         )}
       </EuiFlyoutBody>

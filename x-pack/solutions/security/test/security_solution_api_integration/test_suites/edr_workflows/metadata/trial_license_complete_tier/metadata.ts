@@ -34,10 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
   const utils = getService('securitySolutionUtils');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246567
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe.skip('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
+  describe('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {
@@ -50,7 +49,10 @@ export default function ({ getService }: FtrProviderContext) {
       let agent2Timestamp: number;
       let metadataTimestamp: number;
 
-      before(async () => {
+      before(async function () {
+        // indexFleetEndpointPolicy retries Fleet/ES transients for up to 5 minutes.
+        this.timeout(10 * 60 * 1000);
+
         await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
         await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
         await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
@@ -66,7 +68,9 @@ export default function ({ getService }: FtrProviderContext) {
           const policy = await indexFleetEndpointPolicy(
             getService('kibanaServer'),
             `Default ${uuidv4()}`,
-            '1.1.1'
+            undefined,
+            undefined,
+            log
           );
           const policyId = policy.integrationPolicies[0].policy_ids[0];
           agent1Timestamp = new Date().getTime();

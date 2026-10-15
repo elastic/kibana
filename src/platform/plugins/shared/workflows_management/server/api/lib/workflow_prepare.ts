@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { Logger } from '@kbn/logging';
+import {
+  collectIgnoredKibanaFetcherOccurrences,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  shouldWarnIgnoredKibanaFetcher,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -17,6 +23,40 @@ import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+
+/** Persist-time warning for ignored kibana YAML `fetcher` settings. */
+export const logIgnoredKibanaFetcherOnPersist = (params: {
+  logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
+  steps: WorkflowYaml['steps'] | undefined;
+  workflowName: string;
+  workflowId?: string;
+}): void => {
+  const { logger, steps, workflowName, workflowId } = params;
+  if (!logger) {
+    return;
+  }
+  const ignoredFetcherSteps = collectIgnoredKibanaFetcherOccurrences(steps)
+    .filter((occurrence) =>
+      shouldWarnIgnoredKibanaFetcher(occurrence.stepType, params.warnIgnoredKibanaFetcher ?? false)
+    )
+    .map((occurrence) => occurrence.stepName)
+    .filter((name): name is string => typeof name === 'string' && name.length > 0);
+  if (ignoredFetcherSteps.length === 0) {
+    return;
+  }
+  logger.warn(
+    `Workflow "${workflowName}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
+    {
+      event: { action: 'workflow-persist' },
+      tags: ['kibana', 'deprecated'],
+      labels: {
+        ...(workflowId ? { workflow_id: workflowId } : {}),
+        step_names: ignoredFetcherSteps.join(','),
+      },
+    }
+  );
+};
 
 /** Derives a list of trigger type ids from a workflow definition. */
 export const getTriggerTypesFromDefinition = (
@@ -38,11 +78,13 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
- * Reads `name`/`description` straight off the YAML without requiring it to pass
+ * Reads `name`/`description`/`tags` straight off the YAML without requiring it to pass
  * schema validation, so a workflow that fails strict validation still keeps its
- * author-given title instead of collapsing to the "Untitled workflow" fallback.
+ * author-given metadata instead of collapsing to the "Untitled workflow" fallback.
  */
-const extractLooseTitleFields = (yamlString: string): { name?: string; description?: string } => {
+const extractLooseMetadataFields = (
+  yamlString: string
+): { name?: string; description?: string; tags?: string[] } => {
   const parsed = parseYamlToJSONWithoutValidation(yamlString);
   if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
     return {};
@@ -51,6 +93,10 @@ const extractLooseTitleFields = (yamlString: string): { name?: string; descripti
   return {
     name: typeof json.name === 'string' && json.name.trim() !== '' ? json.name : undefined,
     description: typeof json.description === 'string' ? json.description : undefined,
+    tags:
+      Array.isArray(json.tags) && json.tags.every((tag) => typeof tag === 'string')
+        ? (json.tags as string[])
+        : undefined,
   };
 };
 
@@ -66,6 +112,9 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
+  nameFallback?: string;
+  logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -75,14 +124,21 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
+    nameFallback,
+    logger,
+    warnIgnoredKibanaFetcher = false,
   } = params;
 
-  const looseTitle = extractLooseTitleFields(yaml);
+  const looseMetadata = extractLooseMetadataFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: looseTitle.name ?? 'Untitled workflow',
-    description: looseTitle.description,
+    // Prefer the YAML-embedded name so the stored name round-trips with the YAML.
+    // `nameFallback` is used only when the YAML cannot carry a `name` key (e.g. a
+    // schema-invalid workflow whose root is a scalar/sequence), so callers such as
+    // cloning can still name the document instead of collapsing to "Untitled workflow".
+    name: looseMetadata.name ?? nameFallback ?? 'Untitled workflow',
+    description: looseMetadata.description,
     enabled: false,
-    tags: [],
+    tags: looseMetadata.tags ?? [],
     definition: undefined,
     valid: false,
   };
@@ -97,6 +153,14 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   }
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
+
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    warnIgnoredKibanaFetcher,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName: workflowToCreate.name,
+    workflowId: id,
+  });
 
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
@@ -132,24 +196,47 @@ export const applyYamlUpdate = (params: {
   workflowYaml: string;
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
+  logger?: Logger;
+  warnIgnoredKibanaFetcher?: boolean;
+  workflowId?: string;
 }): {
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
 } => {
-  const { workflowYaml, zodSchema, triggerDefinitions } = params;
+  const {
+    workflowYaml,
+    zodSchema,
+    triggerDefinitions,
+    logger,
+    warnIgnoredKibanaFetcher = false,
+    workflowId,
+  } = params;
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    warnIgnoredKibanaFetcher,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName:
+      validation.parsedWorkflow?.name ??
+      extractLooseMetadataFields(workflowYaml).name ??
+      'Untitled workflow',
+    workflowId,
+  });
 
   if (!validation.valid || !validation.parsedWorkflow) {
-    const looseTitle = extractLooseTitleFields(workflowYaml);
+    const looseMetadata = extractLooseMetadataFields(workflowYaml);
     return {
       updatedDataPatch: {
         definition: null,
         enabled: false,
         valid: false,
         triggerTypes: [],
-        ...(looseTitle.name !== undefined ? { name: looseTitle.name } : {}),
-        ...(looseTitle.description !== undefined ? { description: looseTitle.description } : {}),
+        ...(looseMetadata.name !== undefined ? { name: looseMetadata.name } : {}),
+        ...(looseMetadata.description !== undefined
+          ? { description: looseMetadata.description }
+          : {}),
+        ...(looseMetadata.tags !== undefined ? { tags: looseMetadata.tags } : {}),
       },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')

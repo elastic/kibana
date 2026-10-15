@@ -18,15 +18,23 @@ import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import type { OnboardingFlow } from './no_data_config';
 import { getNoDataConfig } from './no_data_config';
+import { resolveInfraPageHasData } from './resolve_infra_page_has_data';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
+  children,
   dataSourceAvailability,
   onboardingFlow,
+  hasDataOverride,
+  header,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
   dataSourceAvailability?: EntityTypes | 'all';
   onboardingFlow?: OnboardingFlow;
+  /** Page-owned hasData when the page does not pass onboardingFlow (so this template does not fetch). */
+  hasDataOverride?: boolean;
+  /** Rendered on success and on source-error / no-remote-cluster early returns. */
+  header?: React.ReactNode;
 }) => {
   const {
     services: {
@@ -56,7 +64,7 @@ export const InfraPageTemplate = ({
     [onboardingFlow, dataSourceAvailability]
   );
 
-  const hasData = !!data?.hasData;
+  const hasData = resolveInfraPageHasData(!!data?.hasData, hasDataOverride);
   const noDataConfig = getNoDataConfig({
     hasData,
     loading: isPending(status),
@@ -101,11 +109,11 @@ export const InfraPageTemplate = ({
   }, [hasData, setScreenContext, source]);
 
   if (sourceError) {
-    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
+    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} header={header} />;
   }
 
   if (!isSourceLoading && !remoteClustersExist) {
-    return <NoRemoteCluster />;
+    return <NoRemoteCluster header={header} />;
   }
 
   if (dataViewLoadError) {
@@ -129,6 +137,9 @@ export const InfraPageTemplate = ({
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
       {...pageTemplateProps}
-    />
+    >
+      {header}
+      {children}
+    </PageTemplate>
   );
 };

@@ -6,7 +6,6 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
@@ -103,7 +102,6 @@ export interface StreamsPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
   alerting: AlertingServerStart;
-  alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;

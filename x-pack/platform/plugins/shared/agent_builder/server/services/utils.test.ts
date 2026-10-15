@@ -130,6 +130,7 @@ describe('getUserFromRequest', () => {
   beforeEach(() => {
     security = securityServiceMock.createStart();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
   });
 
   it('returns user id and username from a real request when getCurrentUser succeeds', async () => {
@@ -142,7 +143,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'testuser' });
+    expect(result).toEqual({
+      id: 'profile-123',
+      username: 'testuser',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -161,6 +167,8 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'realm:["file","file1","shareduser"]',
       username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
     });
   });
 
@@ -186,6 +194,8 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'profile-from-api-key',
       username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -203,6 +213,7 @@ describe('getUserFromRequest', () => {
 
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
+      isAdmin: false,
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
@@ -213,7 +224,10 @@ describe('getUserFromRequest', () => {
     const result = await getUserFromRequest({ request, security, esClient });
 
     expect(result).toEqual({
+      id: undefined,
       username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -247,11 +261,49 @@ describe('getUserFromRequest', () => {
     const result = await getUserFromRequest({ request, security, esClient });
 
     expect(result).toEqual({
+      id: undefined,
       username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
     });
   });
 
-  it('propagates non-403 API key profile lookup failures', async () => {
+  it('treats a 404 from API key profile lookup as profile not resolvable (e.g. UIAM keys)', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    // UIAM `essu_` keys cannot be looked up via the native `_security/api_key`
+    // endpoint: Elasticsearch responds 404 with an empty `api_keys` array.
+    esClient.security.getApiKey.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { api_keys: [] },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: undefined,
+      username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
+    });
+  });
+
+  it('propagates unexpected API key profile lookup failures', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {
@@ -292,6 +344,8 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'profile-123',
       username: 'shareduser',
+      isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).not.toHaveBeenCalled();
   });
@@ -302,6 +356,7 @@ describe('getUserFromRequest', () => {
     security.authc.getCurrentUser.mockReturnValue(null);
     esClient.security.authenticate.mockResolvedValue({
       username: 'api-key-user',
+      isAdmin: false,
       authentication_realm: { type: 'native', name: 'native1' },
     } as any);
 
@@ -310,7 +365,10 @@ describe('getUserFromRequest', () => {
     // Leaving id undefined preserves username ownership fallback for un-enriched paths;
     // a realm id from authenticate would mismatch profile_uid-backed agents.
     expect(result).toEqual({
+      id: undefined,
       username: 'api-key-user',
+      isAdmin: false,
+      type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
@@ -326,7 +384,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'originating-user' });
+    expect(result).toEqual({
+      id: 'profile-123',
+      username: 'originating-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -341,9 +404,92 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ username: 'task-manager-user' });
+    expect(result).toEqual({
+      id: undefined,
+      username: 'task-manager-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  it('types an inbound Elasticsearch service account token as a service account', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({ username: 'kibana/automation' } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'kibana/automation',
+      variant: 'stack',
+    });
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      isAdmin: false,
+      type: 'service_account',
+    });
+    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('types a UIAM service account the same way', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({ username: 'sa-7f3c' } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'sa-7f3c',
+      variant: 'uiam',
+    });
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toMatchObject({ id: 'service_account:sa-7f3c', type: 'service_account' });
+  });
+
+  it('identifies a fake request Kibana minted for a service account', async () => {
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    security.authc.getCurrentUser.mockReturnValue(null);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'kibana/automation',
+      variant: 'stack',
+    });
+    esClient.security.authenticate.mockResolvedValue({ username: 'kibana/automation' } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      isAdmin: false,
+      type: 'service_account',
+    });
+  });
+
+  it('does not treat an API key as a service account', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'kibana/automation',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'api_key',
+      apiKeyId: 'k1',
+      variant: 'stack',
+    });
+    esClient.security.getApiKey.mockResolvedValue({ api_keys: [{}] } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result.type).toBe('user');
+    expect(result.id).toBeUndefined();
   });
 
   it('includes the id from getCurrentUser when falling back to ES authenticate for the username', async () => {
@@ -357,7 +503,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-456', username: 'some-user' });
+    expect(result).toEqual({
+      id: 'profile-456',
+      username: 'some-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 });

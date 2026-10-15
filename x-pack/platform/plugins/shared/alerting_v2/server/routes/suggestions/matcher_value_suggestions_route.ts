@@ -17,13 +17,21 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 
+const MAX_UNUSED_FIELD_LENGTH = 16_000;
+const unusedFieldSchema = z
+  .unknown()
+  .refine((value) => JSON.stringify(value).length <= MAX_UNUSED_FIELD_LENGTH, {
+    message: `must not exceed ${MAX_UNUSED_FIELD_LENGTH} characters when serialized`,
+  })
+  .optional();
+
 const suggestionsBodySchema = z
   .object({
     field: z.string().min(1).max(256).describe('The field to suggest values for.'),
     query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
-    // Sent by @kbn/kql's value suggestion provider; unused by this route.
-    fieldMeta: z.unknown().optional(),
-    filters: z.unknown().optional(),
+    // filters and fieldMeta are sent by @kbn/kql's value suggestion provider; unused by this route, so only their size is bounded.
+    fieldMeta: unusedFieldSchema,
+    filters: unusedFieldSchema,
   })
   .strict();
 
@@ -46,6 +54,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get matcher value suggestions',
     description:
       'Get suggestions for action policy matcher values based on an optional search query.',

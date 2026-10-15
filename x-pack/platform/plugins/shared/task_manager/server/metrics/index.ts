@@ -12,6 +12,7 @@ import type { Metrics } from './metrics_stream';
 import { createMetricsAggregators, createMetricsStream } from './metrics_stream';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 export type { Metrics } from './metrics_stream';
 
 interface MetricsStreamOpts {
@@ -20,6 +21,7 @@ interface MetricsStreamOpts {
   reset$: Observable<boolean>; // emits when counter metrics should be reset
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
   taskManagerMetricsCollector?: TaskManagerMetricsCollector; // subscribe to collected task manager metrics
+  definitions: TaskTypeDictionary;
 }
 
 export function metricsStream({
@@ -28,6 +30,7 @@ export function metricsStream({
   logger,
   taskPollingLifecycle,
   taskManagerMetricsCollector,
+  definitions,
 }: MetricsStreamOpts): Observable<Metrics> {
   return createMetricsStream(
     createMetricsAggregators({
@@ -36,6 +39,7 @@ export function metricsStream({
       reset$,
       taskPollingLifecycle,
       taskManagerMetricsCollector,
+      definitions,
     })
   );
 }

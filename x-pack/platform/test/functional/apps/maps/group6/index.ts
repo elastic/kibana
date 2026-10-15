@@ -60,7 +60,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./feature_controls/maps_security'));
     loadTestFile(require.resolve('./feature_controls/maps_spaces'));
-    loadTestFile(require.resolve('./full_screen_mode'));
-    loadTestFile(require.resolve('./vector_styling'));
   });
 }

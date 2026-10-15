@@ -32,6 +32,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Snooze action policies in bulk by ID',
     oasOperationObject: bulkSnoozeActionPoliciesOasExamples,
   } as const;
@@ -65,7 +66,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.actionPolicyClient.bulkSnoozeActionPolicies({
       ids: this.request.body.ids,
-      snoozedUntil: this.request.body.snoozedUntil,
+      snoozedUntil: this.request.body.snoozed_until,
     });
     return this.ctx.response.ok({ body: result });
   }

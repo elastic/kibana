@@ -8,6 +8,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import type { Capabilities } from '@kbn/core/public';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { useSolutionViewSwitchAnnouncements } from './use_solution_view_switch_announcements';
 import type { Space } from '../../../common';
@@ -22,7 +23,7 @@ const capabilities: Capabilities = {
 };
 
 const baseSpace = {
-  id: 'default',
+  id: asSpaceId('default'),
   name: 'Default Space',
   disabledFeatures: [],
   solution: 'oblt',

@@ -207,7 +207,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalled();
-    expect(onDimissReporterSpy).not.toBeCalled();
+    expect(onDimissReporterSpy).not.toHaveBeenCalled();
 
     expect(screen.queryByTestId('euiToastHeader__title')).toBeNull();
   });
@@ -244,7 +244,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
     });
 
     expect(sharedProps.dismissToast).toHaveBeenCalledTimes(REPEATED_TOAST_COUNT);
-    expect(onDimissReporterSpy).not.toBeCalled();
+    expect(onDimissReporterSpy).not.toHaveBeenCalled();
 
     expect(screen.queryByTestId('euiToastHeader__title')).toBeNull();
   });

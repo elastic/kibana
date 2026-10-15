@@ -87,6 +87,7 @@ env:
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
   REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none

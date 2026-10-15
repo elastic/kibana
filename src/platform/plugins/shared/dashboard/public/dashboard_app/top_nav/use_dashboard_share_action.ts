@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
+import type { DashboardRedirect } from '../types';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { shareService } from '../../services/kibana_services';
@@ -24,9 +24,9 @@ import { useShareOptions } from './share/use_share_options';
  * Returns `undefined` when the Share plugin is unavailable.
  */
 export const useDashboardShareAction = ({
-  maybeRedirect,
+  redirectTo,
 }: {
-  maybeRedirect: (result?: SaveDashboardReturn) => void;
+  redirectTo: DashboardRedirect;
 }): AppHeaderShareAction | undefined => {
   const accessControlClient = getAccessControlClient();
   const dashboardApi = useDashboardApi();
@@ -61,10 +61,9 @@ export const useDashboardShareAction = ({
         setIsSaveInProgress(false);
       }, 100);
     } else {
-      const result = await dashboardApi.runInteractiveSave();
-      maybeRedirect(result);
+      await dashboardApi.runInteractiveSave(redirectTo);
     }
-  }, [dashboardApi, lastSavedId, maybeRedirect]);
+  }, [dashboardApi, lastSavedId, redirectTo]);
 
   const showShare = useCallback(
     (returnFocus?: () => void) => {

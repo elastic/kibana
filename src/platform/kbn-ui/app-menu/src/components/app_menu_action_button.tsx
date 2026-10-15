@@ -22,6 +22,7 @@ import {
 import { AppMenuPopover } from './app_menu_popover';
 import { SplitButtonWithNotification } from './split_button_with_notification';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
+import { asPlainText } from '../as_plain_text';
 import { getAppMenuActionButtonTestSubj } from '../test_subjects';
 
 type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
@@ -59,7 +60,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     fullWidth,
   } = props;
 
-  const itemText = upperFirst(label);
+  const itemText = upperFirst(asPlainText(label));
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
 

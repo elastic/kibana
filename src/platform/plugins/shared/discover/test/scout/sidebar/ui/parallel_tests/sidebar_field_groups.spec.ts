@@ -7,18 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BrowserAuthFixture, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects, DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
+
+const setFieldPopularity = async (
+  kbnClient: KbnClient,
+  discoverScoutSpace: DiscoverScoutSpace,
+  fieldCounts: Record<string, number | null>
+) => {
+  const dataViewId = discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW);
+  await kbnClient.request({
+    method: 'POST',
+    path: `/s/${discoverScoutSpace.id}/api/data_views/data_view/${dataViewId}/fields`,
+    body: {
+      fields: Object.fromEntries(
+        Object.entries(fieldCounts).map(([fieldName, count]) => [fieldName, { count }])
+      ),
+    },
+  });
+};
+
+/**
+ *  Popularity tests need to select columns, which calls popularizeField. That
+ *  requires indexPatterns.save and persists counts on the data view; Security editor
+ *  lacks that capability, so they log in as admin.
+ */
+const loginAndOpenDiscover = async (
+  browserAuth: BrowserAuthFixture,
+  discover: DiscoverPageObjects['discover'],
+  { asAdmin = false }: { asAdmin?: boolean } = {}
+) => {
+  await (asAdmin ? browserAuth.loginAsAdmin() : browserAuth.loginAsPrivilegedUser());
+  await discover.goto({ queryMode: 'classic' });
+  await discover.waitUntilTabIsLoaded();
+};
 
 spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-  });
-
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterEach(async ({ pageObjects }) => {
@@ -30,8 +58,10 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('shows available and meta field groups', async ({ pageObjects }) => {
-    const { unifiedFieldList } = pageObjects;
+  spaceTest('shows available, meta field groups', async ({ browserAuth, pageObjects }) => {
+    const { discover, unifiedFieldList } = pageObjects;
+
+    await loginAndOpenDiscover(browserAuth, discover);
 
     expect(await unifiedFieldList.doesSidebarShowFields()).toBe(true);
 
@@ -53,15 +83,16 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
 
   spaceTest(
     'tracks selected and popular fields across refresh',
-    async ({ apiServices, browserAuth, discoverScoutSpace, page, pageObjects }) => {
+    async ({ browserAuth, discoverScoutSpace, kbnClient, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
-      const runtimeFieldName = '_popularity_runtimefield';
 
-      // Selecting columns calls popularizeField, which requires indexPatterns.save and
-      // persists counts on the data view. Security editor lacks that capability.
-      await browserAuth.loginAsAdmin();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
+      await setFieldPopularity(kbnClient, discoverScoutSpace, {
+        extension: null,
+        '@message': null,
+        bytes: null,
+      });
+
+      await loginAndOpenDiscover(browserAuth, discover, { asAdmin: true });
 
       // Each column toggle popularizes the field (indexPatterns.save) and retriggers
       // search. Wait between toggles so saves don't 409 and column state can't race.
@@ -112,11 +143,30 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
         popularBeforeRefresh
       );
+    }
+  );
 
-      await unifiedFieldList.clickFieldListItemRemove('@message');
+  spaceTest(
+    'ranks a high-popularity runtime field above other popular fields',
+    async ({ apiServices, browserAuth, discoverScoutSpace, kbnClient, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
+      const runtimeFieldName = '_popularity_runtimefield';
+
+      // Seed the popularity counts the previous test produced via UI toggles through
+      // the API instead, so this test stays independent and within the time budget.
+      // `clientip` is cleared for retry idempotence: this test popularizes it below.
+      await setFieldPopularity(kbnClient, discoverScoutSpace, {
+        extension: 1,
+        '@message': 3,
+        bytes: 1,
+        clientip: null,
+      });
+
+      await loginAndOpenDiscover(browserAuth, discover, { asAdmin: true });
+
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       await discover.waitUntilSearchingHasFinished();
-      await unifiedFieldList.clickFieldListItemRemove('extension');
-      await discover.waitUntilSearchingHasFinished();
+
       // FTR set popularity: 30 so the new runtime field ranks above selected fields.
       // createRuntimeField already waits for the tab/search to settle.
       await discover.createRuntimeField({
@@ -168,8 +218,10 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     }
   );
 
-  spaceTest('passes filters down to field stats', async ({ pageObjects }) => {
+  spaceTest('passes filters down to field stats', async ({ browserAuth, pageObjects }) => {
     const { discover, filterBar, unifiedFieldList } = pageObjects;
+
+    await loginAndOpenDiscover(browserAuth, discover);
 
     await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
     await discover.waitUntilSearchingHasFinished();

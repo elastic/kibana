@@ -54,7 +54,10 @@ export function createActionPolicySavedObjectService(): {
   actionPolicySavedObjectService: ActionPolicySavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   mockEncryptedSavedObjectsClient: jest.Mocked<EncryptedSavedObjectsClient>;
-  mockFindAllDecrypted: jest.SpyInstance;
+  mockFindAllDecrypted: jest.SpyInstance<
+    ReturnType<ActionPolicySavedObjectService['findAllDecrypted']>,
+    Parameters<ActionPolicySavedObjectService['findAllDecrypted']>
+  >;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSpaces = spacesMock.createStart();

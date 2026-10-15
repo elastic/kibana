@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +37,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import { getChangePointLabel } from './change_point';
+import { getVerdictBadge } from './verdict';
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { EntityChip } from '../entity/entity_chip';
 import { EntityFlyout } from '../entity/entity_flyout';
@@ -45,7 +45,7 @@ import { FlyoutSectionTitle } from '../common/flyout_section_title';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { useKibana } from '../hooks/use_kibana';
 import { useImpactedServices } from '../hooks/use_impacted_services';
-import type { ImpactedService } from '../common/impacted_services';
+import type { ResolvedImpactedService } from '../common/impacted_services';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -69,17 +69,15 @@ export function DetectionFlyout({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const { share, agentBuilder } = useKibana().services;
-  const [selectedEntity, setSelectedEntity] = useState<ImpactedService | undefined>();
+  const [selectedEntity, setSelectedEntity] = useState<ResolvedImpactedService | undefined>();
 
   const {
     services: associatedEntities,
-    failedStreamNames: failedStreamFeatureNames,
-    isInitialLoading: isLoadingStreamFeatures,
-    isFetching: isFetchingStreamFeatures,
-    isError: isStreamFeaturesError,
-    refetch: refetchStreamFeatures,
+    isInitialLoading: isLoadingImpactedServices,
+    failedSourceIds,
+    isError: isImpactedServicesError,
+    refetch: refetchImpactedServices,
   } = useImpactedServices(event);
-  const hasStreamFeatureFailures = isStreamFeaturesError || failedStreamFeatureNames.length > 0;
   const selectedEntityFeature = selectedEntity?.feature;
 
   useEffect(() => {
@@ -94,6 +92,7 @@ export function DetectionFlyout({
 
   const title = detection.rule_name;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
+  const verdictBadge = getVerdictBadge(signal?.verdict);
   const summary = signal?.description;
   const esqlQuery = signal?.evidence?.esql_query;
 
@@ -171,13 +170,9 @@ export function DetectionFlyout({
                 <EuiBadge color="default">{changePointLabel}</EuiBadge>
               </EuiFlexItem>
             )}
-            {signal?.confirmed === false && (
+            {verdictBadge && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">
-                  {i18n.translate('xpack.nightshift.detectionFlyout.unconfirmedBadge', {
-                    defaultMessage: 'Unconfirmed',
-                  })}
-                </EuiBadge>
+                <EuiBadge color={verdictBadge.color}>{verdictBadge.label}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -205,69 +200,60 @@ export function DetectionFlyout({
             </>
           )}
 
-          {(isLoadingStreamFeatures ||
-            hasStreamFeatureFailures ||
-            associatedEntities.length > 0) && (
+          {(isLoadingImpactedServices ||
+            associatedEntities.length > 0 ||
+            isImpactedServicesError ||
+            failedSourceIds.length > 0) && (
             <>
-              <FlyoutSectionTitle>
-                {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
-                  defaultMessage: 'Impacted services',
-                })}
-              </FlyoutSectionTitle>
-              <EuiSpacer size="s" />
-              {isLoadingStreamFeatures && (
+              {(isLoadingImpactedServices || associatedEntities.length > 0) && (
+                <>
+                  <FlyoutSectionTitle>
+                    {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
+                      defaultMessage: 'Impacted services',
+                    })}
+                  </FlyoutSectionTitle>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              {isLoadingImpactedServices && (
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="m" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              {hasStreamFeatureFailures && (
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="warning"
-                  size="s"
-                  title={
-                    isStreamFeaturesError
-                      ? i18n.translate('xpack.nightshift.detectionFlyout.entitiesErrorTitle', {
-                          defaultMessage: 'Unable to load impacted services',
-                        })
-                      : i18n.translate(
-                          'xpack.nightshift.detectionFlyout.entitiesPartialErrorTitle',
-                          { defaultMessage: 'Some impacted services could not be loaded' }
-                        )
-                  }
-                  text={
-                    isStreamFeaturesError ? undefined : (
-                      <p data-test-subj="nightshiftDetectionFlyoutEntitiesFailedStreams">
-                        {i18n.translate(
-                          'xpack.nightshift.detectionFlyout.entitiesPartialErrorDescription',
-                          {
-                            defaultMessage: 'No response from {streamNames}.',
-                            values: { streamNames: failedStreamFeatureNames.join(', ') },
-                          }
-                        )}
-                      </p>
-                    )
-                  }
-                >
-                  <EuiButtonEmpty
-                    color="warning"
-                    data-test-subj="nightshiftDetectionFlyoutEntitiesRetryButton"
-                    flush="left"
-                    iconType="refresh"
-                    isLoading={isFetchingStreamFeatures}
-                    onClick={() => refetchStreamFeatures()}
+              {!isLoadingImpactedServices &&
+                (isImpactedServicesError || failedSourceIds.length > 0) && (
+                  <EuiText
                     size="s"
+                    color="subdued"
+                    data-test-subj="nightshiftDetectionFlyoutImpactedServicesError"
                   >
-                    {i18n.translate('xpack.nightshift.detectionFlyout.entitiesRetryButtonText', {
-                      defaultMessage: 'Retry',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiCallOut>
-              )}
-              {!isLoadingStreamFeatures && associatedEntities.length > 0 && (
+                    <p>
+                      {isImpactedServicesError
+                        ? i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesError', {
+                            defaultMessage: 'Impacted services could not be loaded.',
+                          })
+                        : i18n.translate(
+                            'xpack.nightshift.detectionFlyout.impactedServicesPartialError',
+                            {
+                              defaultMessage:
+                                'Some sources could not be loaded, so this list may be incomplete.',
+                            }
+                          )}
+                    </p>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => refetchImpactedServices()}
+                      data-test-subj="nightshiftDetectionFlyoutImpactedServicesRetry"
+                    >
+                      {i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesRetry', {
+                        defaultMessage: 'Retry',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiText>
+                )}
+              {!isLoadingImpactedServices && associatedEntities.length > 0 && (
                 <EuiFlexGroup gutterSize="s" wrap responsive={false}>
                   {associatedEntities.map((entity) => (
                     <EuiFlexItem grow={false} key={entity.key}>

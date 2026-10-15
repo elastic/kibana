@@ -14,7 +14,7 @@ import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
@@ -46,8 +46,12 @@ import {
   resolveTlsMaterial,
   toGrpcRootCerts,
 } from './otel_tls';
+import { RetryingLogRecordExporter } from './retrying_log_exporter';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+/** Headroom over the retry budget so the processor outlasts it plus one in-flight attempt. */
+const EXPORT_TIMEOUT_MARGIN_MS = 30_000;
 
 const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
   typeof value === 'object' &&
@@ -229,6 +233,20 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     /**
+     * Serverless / internal only. Max log records buffered by the batch processor; once full,
+     * new records are dropped. Floored at 512, the SDK's default export batch size.
+     */
+    maxQueueSize: offeringBasedSchema({
+      serverless: schema.number({ defaultValue: 15_000, min: 512, max: 1_000_000 }),
+    }),
+    /**
+     * Serverless / internal only. How long transient export failures are retried before the
+     * batch is dropped; enables {@link RetryingLogRecordExporter}.
+     */
+    maxElapsedTime: offeringBasedSchema({
+      serverless: schema.duration({ defaultValue: '2m' }),
+    }),
+    /**
      * Optional layout config. Defaults to pattern layout (body.text, aliased to `message`).
      * Use `{ type: 'json' }` for a structured body (body.structured); note that the ECS
      * `message` field will be empty in that case because it aliases body.text.
@@ -291,6 +309,10 @@ export class OtelAppender implements DisposableAppender {
       })
     ),
     dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // The YAML schema gates these on the serverless offering; this runtime path is internal
+    // (plugins calling `LoggingServiceSetup.configure`), so no gating and no defaults.
+    maxQueueSize: schema.maybe(schema.number({ min: 512, max: 1_000_000 })),
+    maxElapsedTime: schema.maybe(schema.duration()),
   });
 
   private readonly loggerProvider: LoggerProvider;
@@ -300,10 +322,17 @@ export class OtelAppender implements DisposableAppender {
   private readonly useStructuredBody: boolean;
   private readonly transformAttributes?: OtelAttributesTransform;
   private readonly promotedAttributes: Attributes;
+  private disposed = false;
 
   constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
-    const exporter = createExporter(config, meterProvider);
+    const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
+    const baseExporter = createExporter(config, meterProvider);
+    // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
+    const exporter =
+      maxElapsedTimeMs !== undefined
+        ? new RetryingLogRecordExporter(baseExporter, maxElapsedTimeMs)
+        : baseExporter;
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
@@ -365,7 +394,17 @@ export class OtelAppender implements DisposableAppender {
     this.promotedAttributes = promoted;
 
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor({ exporter, selfObsMeterProvider: meterProvider })],
+      processors: [
+        new BatchLogRecordProcessor({
+          exporter,
+          selfObsMeterProvider: meterProvider,
+          ...(config.maxQueueSize !== undefined && { maxQueueSize: config.maxQueueSize }),
+          // The processor abandons exports after this timeout, so it must outlast the retry budget.
+          ...(maxElapsedTimeMs !== undefined && {
+            exportTimeoutMillis: maxElapsedTimeMs + EXPORT_TIMEOUT_MARGIN_MS,
+          }),
+        }),
+      ],
       resource,
       meterProvider,
     });
@@ -408,6 +447,8 @@ export class OtelAppender implements DisposableAppender {
   }
 
   public async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
     // Wrap shutdown in a timeout to prevent indefinite hangs when the remote
     // endpoint is unreachable or slow (the spike confirmed this is a real risk).
     // Attach .catch() so that a late rejection from shutdown() after the timeout

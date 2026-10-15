@@ -20,69 +20,72 @@ const renderSortSelector = (sort: MetricsSort) => {
 
 describe('useSortSelector', () => {
   it('forces ascending direction when switching to the recency field', () => {
-    const { result, onChange } = renderSortSelector([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.desc,
-    ]);
+    const { result, onChange } = renderSortSelector({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.desc,
+    });
 
     result.current.handleSortByChange({
       value: METRICS_SORT_BY.recency,
       label: 'Recently explored',
     });
 
-    expect(onChange).toHaveBeenCalledWith([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.asc]);
+    expect(onChange).toHaveBeenCalledWith({
+      sortField: METRICS_SORT_BY.recency,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
   });
 
   it('preserves the current direction when switching to a non-recency field', () => {
-    const { result, onChange } = renderSortSelector([
-      METRICS_SORT_BY.recency,
-      METRICS_SORT_DIRECTION.desc,
-    ]);
+    const { result, onChange } = renderSortSelector({
+      sortField: METRICS_SORT_BY.recency,
+      sortDirection: METRICS_SORT_DIRECTION.desc,
+    });
 
     result.current.handleSortByChange({
       value: METRICS_SORT_BY.alphabetically,
       label: 'Alphabetically',
     });
 
-    expect(onChange).toHaveBeenCalledWith([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.desc,
-    ]);
+    expect(onChange).toHaveBeenCalledWith({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.desc,
+    });
   });
 
   it('falls back to the current field when no option is provided', () => {
-    const { result, onChange } = renderSortSelector([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.asc,
-    ]);
+    const { result, onChange } = renderSortSelector({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
 
     result.current.handleSortByChange(undefined);
 
-    expect(onChange).toHaveBeenCalledWith([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.asc,
-    ]);
+    expect(onChange).toHaveBeenCalledWith({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
   });
 
   it('preserves the current field when the direction changes', () => {
-    const { result, onChange } = renderSortSelector([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.asc,
-    ]);
+    const { result, onChange } = renderSortSelector({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
 
     result.current.handleDirectionChange(METRICS_SORT_DIRECTION.desc);
 
-    expect(onChange).toHaveBeenCalledWith([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.desc,
-    ]);
+    expect(onChange).toHaveBeenCalledWith({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.desc,
+    });
   });
 
   it('marks the current sort field as checked', () => {
-    const { result } = renderSortSelector([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.asc,
-    ]);
+    const { result } = renderSortSelector({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
 
     const selected = result.current.options.find(
       (option) => option.value === METRICS_SORT_BY.alphabetically
@@ -92,10 +95,10 @@ describe('useSortSelector', () => {
   });
 
   it('emits stable telemetry attributes for sort options', () => {
-    const { result } = renderSortSelector([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.asc,
-    ]);
+    const { result } = renderSortSelector({
+      sortField: METRICS_SORT_BY.alphabetically,
+      sortDirection: METRICS_SORT_DIRECTION.asc,
+    });
 
     const ebtProps = result.current.options.map((option) => {
       const attrs = option as {

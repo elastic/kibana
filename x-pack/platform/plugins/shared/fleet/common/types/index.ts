@@ -12,6 +12,7 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfiguredOutput,
+  PreconfiguredDownloadSource,
 } from './models/preconfiguration';
 
 export interface FleetConfigType {
@@ -54,7 +55,6 @@ export interface FleetConfigType {
     };
   };
   iacProvisioner?: {
-    enabled: boolean;
     api?: {
       url?: string;
       tls?: {
@@ -71,6 +71,7 @@ export interface FleetConfigType {
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
+  binaryDownloadSource?: PreconfiguredDownloadSource[];
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
@@ -105,6 +106,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];

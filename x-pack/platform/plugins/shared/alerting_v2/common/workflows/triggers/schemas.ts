@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tagsSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 
 const MAX_RULE_SNAPSHOT_FIELD_LENGTH = 1024;
@@ -15,6 +16,7 @@ export const ruleSnapshotSchema = z.object({
     .string()
     .max(MAX_RULE_SNAPSHOT_FIELD_LENGTH)
     .describe('Kibana space ID where the rule lives.'),
+  tags: tagsSchema.describe('Rule tags for categorization.'),
 });
 
 export type RuleSnapshot = z.infer<typeof ruleSnapshotSchema>;

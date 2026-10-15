@@ -26,6 +26,7 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  ActionSource,
 } from '../../../common/types/domain';
 import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
@@ -40,6 +41,7 @@ import type {
   UserActionInternalFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type { WorkflowUserActionPayload } from '../../../common/types/domain/user_action/workflow/v1';
 import type {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -124,6 +126,9 @@ export interface BuilderParameters {
   template: {
     parameters: { payload: { template: { id: string; version: number } | null } };
   };
+  workflow: {
+    parameters: { payload: WorkflowUserActionPayload };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -190,6 +195,7 @@ export interface ServiceContext {
    * the user-actions service is oblivious to v2's start lifecycle.
    */
   analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  actionSource?: ActionSource;
 }
 
 export interface PushTimeFrameInfo {
@@ -367,6 +373,12 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   newValue: unknown;
   /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
   templateName?: string;
+  /**
+   * customFields keys whose edit is already recorded by the canonical
+   * `extended_fields` user action of the same update — their duplicate legacy
+   * `customFields` user actions are suppressed (#282474).
+   */
+  suppressedCustomFieldKeys?: Set<string>;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
@@ -422,6 +434,11 @@ export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
 
 export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
   userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+  /**
+   * Throw when Saved Objects returns an error for any individual user action.
+   * Successful items are not rolled back.
+   */
+  throwOnItemError?: boolean;
 } & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {

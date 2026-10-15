@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface Props {
   error: { title: string; message: string };
@@ -16,8 +16,10 @@ interface Props {
 
 export const Error: FC<Props> = ({ error }) => {
   return (
-    <EuiCallOut title={error.title} color="danger" iconType="warning" data-test-subj="errorCallout">
-      <p>
+    <KbnDangerCallout
+      title={error.title}
+      data-test-subj="errorCallout"
+      text={
         <FormattedMessage
           id="xpack.ingestPipelines.createFromCsv.errorMessage"
           defaultMessage="{message}"
@@ -25,7 +27,7 @@ export const Error: FC<Props> = ({ error }) => {
             message: error.message,
           }}
         />
-      </p>
-    </EuiCallOut>
+      }
+    />
   );
 };

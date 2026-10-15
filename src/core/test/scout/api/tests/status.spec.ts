@@ -13,17 +13,22 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures';
 
 apiTest.describe('kibana status api', { tag: tags.deploymentAgnostic }, () => {
-  let credentials: RoleApiCredentials;
+  let adminCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    credentials = await requestAuth.getApiKey('viewer');
+    // The full payload requires the `monitor` cluster privilege (unless `status.allowAnonymous`
+    // is enabled, as it is in local Scout configs). Cloud `viewer` roles don't have it, so use
+    // admin for the full-payload assertions and viewer for the redaction-safe ones.
+    adminCredentials = await requestAuth.getApiKeyForAdmin();
+    viewerCredentials = await requestAuth.getApiKey('viewer');
   });
 
   apiTest('returns version, status and metrics fields', async ({ apiClient }) => {
     const response = await apiClient.get('/api/status', {
       headers: {
         ...COMMON_HEADERS,
-        ...credentials.apiKeyHeader,
+        ...adminCredentials.apiKeyHeader,
       },
     });
 
@@ -54,12 +59,29 @@ apiTest.describe('kibana status api', { tag: tags.deploymentAgnostic }, () => {
     expect(typeof body.metrics.os.load['5m']).toBe('number');
     expect(typeof body.metrics.os.load['15m']).toBe('number');
 
-    // avg/max may be undefined early in the process lifetime; only null is invalid
-    expect(body.metrics.response_times.avg_in_millis).toBeDefined();
-    expect(body.metrics.response_times.max_in_millis).toBeDefined();
+    expect(typeof body.metrics.response_times.avg_in_millis).toBe('number');
+    expect(typeof body.metrics.response_times.max_in_millis).toBe('number');
 
     expect(typeof body.metrics.requests.total).toBe('number');
     expect(typeof body.metrics.requests.disconnects).toBe('number');
     expect(typeof body.metrics.concurrent_connections).toBe('number');
+  });
+
+  apiTest('returns at least the overall status level to a viewer', async ({ apiClient }) => {
+    const response = await apiClient.get('/api/status', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(String(response.headers['content-type'])).toMatch(/json/);
+
+    // Depending on `status.allowAnonymous` and the role's cluster privileges this is either the
+    // full payload or the redacted one; `status.overall.level` is present in both.
+    const { body } = response;
+    expect(body.status.overall).toBeDefined();
+    expect(typeof body.status.overall.level).toBe('string');
   });
 });

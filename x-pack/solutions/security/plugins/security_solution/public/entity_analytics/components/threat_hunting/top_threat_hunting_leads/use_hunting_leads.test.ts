@@ -119,7 +119,7 @@ describe('useHuntingLeads', () => {
         title: 'Test Lead',
         byline: 'Test byline',
         description: 'Test description',
-        entities: [{ type: 'user', name: 'test-user' }],
+        entity: { type: 'user', name: 'test-user', id: 'user:test-user' },
         tags: ['tag1'],
         priority: 8,
         chatRecommendations: ['rec1'],
@@ -129,6 +129,9 @@ describe('useHuntingLeads', () => {
         observations: [],
         executionUuid: 'exec-uuid-1',
         sourceType: 'adhoc',
+        topRelatedEntities: [],
+        relatedEntityCounts: {},
+        origin: 'observations',
       },
     ];
 
@@ -146,7 +149,7 @@ describe('useHuntingLeads', () => {
       title: 'Test Lead',
       byline: 'Test byline',
       description: 'Test description',
-      entities: [{ type: 'user', name: 'test-user' }],
+      entity: { type: 'user', name: 'test-user', id: 'user:test-user' },
       tags: ['tag1'],
       priority: 8,
       chatRecommendations: ['rec1'],
@@ -155,6 +158,9 @@ describe('useHuntingLeads', () => {
       status: 'active',
       observations: [],
       sourceType: 'adhoc',
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+      origin: 'observations',
     });
     expect(result.current.totalCount).toBe(1);
   });

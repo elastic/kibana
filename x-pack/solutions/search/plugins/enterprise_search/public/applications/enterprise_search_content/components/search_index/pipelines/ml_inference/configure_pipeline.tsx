@@ -11,7 +11,6 @@ import { useValues, useActions } from 'kea';
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -22,6 +21,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
@@ -118,17 +119,14 @@ export const ConfigurePipeline: React.FC = () => {
             {modelStateChangeError && (
               <>
                 <EuiSpacer />
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
                     { defaultMessage: 'Error changing model state' }
                   )}
-                  color="danger"
-                  iconType="error"
-                >
-                  {modelStateChangeError}
-                </EuiCallOut>
+                  text={modelStateChangeError}
+                />
                 <EuiSpacer />
               </>
             )}

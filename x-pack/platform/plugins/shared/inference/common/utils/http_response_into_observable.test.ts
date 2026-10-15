@@ -63,6 +63,6 @@ describe('httpResponseIntoObservable', () => {
           },
         }).pipe(httpResponseIntoObservable(), toArray())
       );
-    }).rejects.toThrowError(`Internal error`);
+    }).rejects.toThrow(`Internal error`);
   });
 });

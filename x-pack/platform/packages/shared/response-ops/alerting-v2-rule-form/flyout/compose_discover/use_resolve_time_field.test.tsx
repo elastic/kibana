@@ -17,6 +17,7 @@ import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getESQLTimeField: jest.fn(async () => undefined),
 }));
 

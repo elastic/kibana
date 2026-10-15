@@ -16,6 +16,7 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../../attack_discovery/p
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { AISummarySectionSettings } from './ai_summary_section_settings';
+import { useAttackAlertIds } from '../hooks/use_attack_alert_ids';
 
 const KEY = 'aisummary';
 const STORAGE_KEY = 'securitySolution.attackDetailsFlyout.overviewSectionExpanded.v9.4';
@@ -42,6 +43,8 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
     title: KEY,
     defaultValue: true,
   });
+
+  const alertIds = useAttackAlertIds(hit);
 
   const summaryMarkdown = useMemo(
     () => (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN) as string | null) ?? '',
@@ -108,6 +111,7 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
             scopeId={TableId.alertsOnAttacksPage}
             disableActions={showAnonymized}
             markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+            alertIds={alertIds}
           />
         </div>
 
@@ -129,6 +133,7 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
             disableActions={showAnonymized}
             scopeId={TableId.alertsOnAttacksPage}
             markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+            alertIds={alertIds}
           />
         </div>
       </EuiPanel>

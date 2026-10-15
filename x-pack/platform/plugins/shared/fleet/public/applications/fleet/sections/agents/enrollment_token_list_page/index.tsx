@@ -36,6 +36,7 @@ import {
   useGetAgentPolicies,
 } from '../../../hooks';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
+import { getEnrollmentTokenStatus } from '../../../../../services';
 import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
 import { AgentPolicyFilter } from '../agent_list_page/components/filter_bar/agent_policy_filter';
@@ -50,6 +51,10 @@ import { buildKuery } from './utils/build_kuery';
 import type { ActiveFilter } from './utils/build_kuery';
 
 type SelectionMode = 'manual' | 'query';
+
+// A token's status depends on the current time, so the list has to come back on its own for a
+// token that expires while someone is looking at it.
+const REFRESH_INTERVAL_MS = 30000;
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('enrollment_tokens');
@@ -100,11 +105,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
 
   const kuery = buildKuery(search, selectedPolicyIds, activeFilter, excludedPolicyIds);
 
-  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
-    page: pagination.currentPage,
-    perPage: pagination.pageSize,
-    kuery,
-  });
+  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery(
+    {
+      page: pagination.currentPage,
+      perPage: pagination.pageSize,
+      kuery,
+    },
+    { refetchInterval: REFRESH_INTERVAL_MS }
+  );
 
   const agentPoliciesLoaded = !agentPoliciesRequest.isLoading;
   const total = agentPoliciesLoaded ? enrollmentAPIKeysRequest?.data?.total ?? 0 : 0;
@@ -124,6 +132,13 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     });
 
   const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
+
+  // Disable bulk revoke when every manually-selected token is already revoked (active === false).
+  // In query mode we don't have the full token set, so leave it enabled.
+  const allSelectedRevoked =
+    selectionMode === 'manual' &&
+    selectedTokens.length > 0 &&
+    selectedTokens.every((t) => !t.active);
   const showSelectionInfo =
     isBulkActionInProgress ||
     (selectionMode === 'manual' && selectedTokens.length > 0) ||
@@ -214,6 +229,22 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 </EuiFilterButton>
                 <EuiFilterButton
                   isToggle
+                  isSelected={activeFilter === 'expired'}
+                  withNext
+                  onClick={() => {
+                    setPagination({ ...pagination, currentPage: 1 });
+                    clearSelection();
+                    setActiveFilter(activeFilter === 'expired' ? 'all' : 'expired');
+                  }}
+                  data-test-subj="enrollmentTokensList.filterExpired"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentTokensList.filterExpired"
+                    defaultMessage="Expired"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
+                  isToggle
                   isSelected={activeFilter === 'inactive'}
                   onClick={() => {
                     setPagination({ ...pagination, currentPage: 1 });
@@ -238,6 +269,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 onRevoke: () => setBulkActionPending('revoke'),
                 onDelete: () => setBulkActionPending('delete'),
                 plural: true,
+                revokeDisabled: allSelectedRevoked,
               })}
               button={{
                 props: {
@@ -388,13 +420,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         itemId="id"
         columns={columns}
         rowProps={(item: EnrollmentAPIKey) => ({
-          css: !item.active
-            ? css`
-                & td {
-                  color: ${euiTheme.colors.subduedText};
-                }
-              `
-            : undefined,
+          css:
+            getEnrollmentTokenStatus(item) !== 'active'
+              ? css`
+                  & td {
+                    color: ${euiTheme.colors.subduedText};
+                  }
+                `
+              : undefined,
         })}
         selection={{
           selected: selectionMode === 'query' ? rowItems : selectedTokens,

@@ -75,7 +75,7 @@ describe('Options list popover', () => {
       parentApi: {},
     });
     await waitFor(() => {
-      expect(mockFetch).toBeCalled();
+      expect(mockFetch).toHaveBeenCalled();
     });
     mockFetch.mockClear(); // resets so that we wait for fetch again on the next call
 
@@ -170,11 +170,11 @@ describe('Options list popover', () => {
 
     const existsOption = popover.getByTestId('optionsList-control-selection-exists');
     await userEvent.click(existsOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('exists-option', false);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('exists-option', false);
 
     let woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', false);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('woof', false);
 
     // simulate `makeSelection`
     contextMock.componentApi.setSelectedOptions(['woof']);
@@ -182,7 +182,7 @@ describe('Options list popover', () => {
     await clickShowOnlySelections(popover);
     woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', true);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('woof', true);
   });
 
   test('renders a selectable "(blank)" option', async () => {
@@ -222,7 +222,7 @@ describe('Options list popover', () => {
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
       availableOptions.forEach((child, i) => {
-        expect(child).toHaveTextContent(`${selections[i]}. Checked option.`);
+        expect(child).toHaveTextContent(`${selections[i]}`);
       });
     });
 
@@ -299,14 +299,14 @@ describe('Options list popover', () => {
       await waitForSubjectToPublish(contextMock.componentApi.selectedOptions$);
 
       const validSelection = popover.getByTestId('optionsList-control-selection-bark');
-      expect(validSelection).toHaveTextContent('bark. Checked option.');
+      expect(validSelection).toHaveTextContent('bark');
       expect(
         within(validSelection).getByTestId('optionsList-document-count-badge')
       ).toHaveTextContent('75');
       const title = popover.getByTestId('optionList__invalidSelectionLabel');
       expect(title).toHaveTextContent('Invalid selection');
       const invalidSelection = popover.getByTestId('optionsList-control-invalid-selection-woof');
-      expect(invalidSelection).toHaveTextContent('woof. Checked option.');
+      expect(invalidSelection).toHaveTextContent('woof');
       expect(invalidSelection).toHaveClass('optionsList__selectionInvalid');
     });
 
@@ -374,7 +374,7 @@ describe('Options list popover', () => {
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
-      expect(availableOptions[0]).toHaveTextContent('Exists. Checked option.');
+      expect(availableOptions[0]).toHaveTextContent('Exists');
     });
 
     test('clicking another option unselects "Exists"', async () => {

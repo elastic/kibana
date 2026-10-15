@@ -22,6 +22,14 @@ export const createCpsManagerMock = (): jest.Mocked<ICPSManager> => ({
   updateDefaultProjectRouting: jest.fn(),
   getProjectPickerAccess$: jest.fn(() => of(ProjectRoutingAccess.DISABLED)),
   registerAppAccess: jest.fn(),
+  getConfigurationLinks: jest.fn(() => ({
+    currentSpace: {
+      icon: 'controls',
+      label: 'Adjust space defaults',
+      testSubj: 'adjustSpaceDefaultsMenuItem',
+      href: 'https://example.com',
+    },
+  })),
 });
 
 let mockProjectRoutingSubject: BehaviorSubject<string | undefined> | undefined;
