@@ -335,7 +335,7 @@ describe('classifyDetectionsStepDefinition', () => {
     const probeRequest = query.mock.calls
       .map(([request]) => request as { query: string; params?: unknown })
       .find((request) => request.query.includes('LIMIT 1'));
-    expect(probeRequest?.query).toBe(`${STORED_QUERY} | LIMIT 1`);
+    expect(probeRequest?.query).toBe(`${STORED_QUERY}\n| LIMIT 1`);
     expect(logger.info).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('classifyDetections'));
   });
