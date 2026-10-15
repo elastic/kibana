@@ -467,6 +467,15 @@ export class MapsPage {
     await this.waitForLayersToLoad();
   }
 
+  /** Expands the layer control (legend) if it is collapsed. */
+  async openLegend() {
+    const toc = this.page.testSubj.locator('mapLayerTOC');
+    if (!(await toc.isVisible())) {
+      await this.page.testSubj.click('mapExpandLayerControlButton');
+      await expect(toc).toBeVisible();
+    }
+  }
+
   /** Returns the locator for the error icon shown in the TOC entry of `layerName`. */
   getLayerErrorIcon(layerName: string) {
     return this.page.testSubj.locator(`layerTocErrorIcon${layerName.replace(/\s+/g, '_')}`);
