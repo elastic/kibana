@@ -462,8 +462,6 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {
-    // A stored UIAM key is `base64(id:essu_…)`, but only the raw `essu_…` secret authenticates;
-    // the envelope makes Elasticsearch look the id up as a native key. ES keys pass through.
     const requestHeaders: Headers = {
       authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
     };
