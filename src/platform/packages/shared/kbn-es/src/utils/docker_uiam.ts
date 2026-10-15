@@ -119,6 +119,22 @@ const UIAM_QUARKUS_LOGGING_PARAMS: readonly string[] = [
   `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
 ];
 
+/**
+ * Extra `docker run` params for the UIAM container, as a JSON string array in `UIAM_EXTRA_DOCKER_PARAMS`,
+ * e.g. to register an additional platform service account or trust an additional client CA locally.
+ */
+const getUiamExtraDockerParams = (): string[] => {
+  const raw = process.env.UIAM_EXTRA_DOCKER_PARAMS;
+  if (!raw) {
+    return [];
+  }
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed) || !parsed.every((param) => typeof param === 'string')) {
+    throw new Error('UIAM_EXTRA_DOCKER_PARAMS must be a JSON array of strings');
+  }
+  return parsed;
+};
+
 export interface UiamContainer {
   name: string;
   image: string;
@@ -264,6 +280,8 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       '--env',
       'uiam.tokens.refresh.grace_period=PT3S',
+
+      ...getUiamExtraDockerParams(),
 
       '--health-cmd',
       'timeout 1 bash -c "</dev/tcp/localhost/8080"',
