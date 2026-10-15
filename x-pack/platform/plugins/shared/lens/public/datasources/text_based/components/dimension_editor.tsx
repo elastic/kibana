@@ -34,7 +34,11 @@ import {
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
-import { DimensionEditorButtonGroups } from '../../form_based/dimension_panel/dimensions_editor_helpers';
+import {
+  DimensionEditorButtonGroups,
+  esqlColumnName,
+  staticValueOperationName,
+} from '../../form_based/dimension_panel/dimensions_editor_helpers';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
@@ -46,7 +50,9 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const [columnsQuery, setColumnsQuery] = useState<string>();
-  const [temporaryMethod, setTemporaryMethod] = useState<'static_value' | 'esql'>();
+  const [temporaryMethod, setTemporaryMethod] = useState<
+    typeof staticValueOperationName | typeof esqlColumnName
+  >();
   const query = props.state.layers[props.layerId]?.query;
   const { euiTheme } = useEuiTheme();
   const {
@@ -184,17 +190,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
 
   const isStatic = Boolean(
     supportStaticValue &&
-      (temporaryMethod === 'static_value' ||
-        (temporaryMethod !== 'esql' &&
+      (temporaryMethod === staticValueOperationName ||
+        (temporaryMethod !== esqlColumnName &&
           (!selectedField || selectedField.valueSource?.type === 'static')))
   );
 
   useEffect(() => {
     if (
       !supportStaticValue ||
-      temporaryMethod === 'static_value' ||
+      temporaryMethod === staticValueOperationName ||
       columnsQuery !== queryEsql ||
-      (selectedField?.valueSource?.type !== 'unconfigured' && temporaryMethod !== 'esql')
+      (selectedField?.valueSource?.type !== 'unconfigured' && temporaryMethod !== esqlColumnName)
     )
       return;
     const numericColumns = allColumns.filter(
@@ -279,11 +285,11 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor--padded">
         {supportStaticValue && (
           <DimensionEditorButtonGroups
-            selectedMethod={isStatic ? 'static_value' : 'esql'}
+            selectedMethod={isStatic ? staticValueOperationName : esqlColumnName}
             onMethodChange={() => {}}
             options={[
               {
-                id: 'static_value',
+                id: staticValueOperationName,
                 enabled: true,
                 state: isStatic,
                 label: i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
@@ -292,13 +298,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 onClick: () => {
                   setTemporaryMethod(
                     selectedField && selectedField.valueSource?.type !== 'static'
-                      ? 'static_value'
+                      ? staticValueOperationName
                       : undefined
                   );
                 },
               },
               {
-                id: 'esql',
+                id: esqlColumnName,
                 enabled: true,
                 state: !isStatic,
                 label: i18n.translate('xpack.lens.textBasedLanguages.esqlColumnLabel', {
@@ -307,7 +313,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 onClick: () => {
                   setTemporaryMethod(
                     !selectedField || selectedField.valueSource?.type === 'static'
-                      ? 'esql'
+                      ? esqlColumnName
                       : undefined
                   );
                 },

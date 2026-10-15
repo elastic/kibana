@@ -36,6 +36,7 @@ import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constan
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
 export const quickFunctionsName = 'quickFunctions';
+export const esqlColumnName = 'esql';
 export const termsOperationName = 'terms';
 export const optionallySortableOperationNames = ['percentile', 'percentile_ranks'];
 export const nonQuickFunctions = new Set([formulaOperationName, staticValueOperationName]);
@@ -216,7 +217,7 @@ export interface DimensionEditorGroupsOptions {
     | typeof quickFunctionsName
     | typeof staticValueOperationName
     | typeof formulaOperationName
-    | 'esql';
+    | typeof esqlColumnName;
   label: string;
 }
 
