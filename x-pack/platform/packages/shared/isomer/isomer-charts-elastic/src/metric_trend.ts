@@ -14,7 +14,7 @@ import {
 } from '@kbn/isomer-primitives-charts';
 
 import type { ChartHint } from './hints';
-import { kibanaBaseTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 
 /** One value as Lens's metric draws it: the value, the change as its secondary metric, and the trend behind. */
 export const MetricTrendChart = ({
@@ -24,7 +24,11 @@ export const MetricTrendChart = ({
   height,
   onSelect,
   hint = {},
-}: LiveChartProps<MetricTrendNode> & { hint?: ChartHint }): ReactNode => {
+  baseTheme = kibanaBaseTheme,
+}: LiveChartProps<MetricTrendNode> & {
+  hint?: ChartHint;
+  baseTheme?: BaseTheme;
+}): ReactNode => {
   const { formatted, previous, change, trend, tone, band } = resolveMetricTrend(node);
   const color =
     (band === undefined ? undefined : hint.colors?.[`band:${band.index}`]) ??
@@ -56,7 +60,7 @@ export const MetricTrendChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       ...(onSelect ? { onElementClick: () => onSelect([{}]) } : {}),
     }),
     h(Metric, { id: node.title, data: [[datum]] })

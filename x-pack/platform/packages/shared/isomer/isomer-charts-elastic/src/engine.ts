@@ -6,6 +6,7 @@
  */
 
 import { createElement as h, type ReactNode } from 'react';
+import type { Theme } from '@elastic/charts';
 import type {
   ChartEngine,
   ChartNode,
@@ -23,6 +24,7 @@ import { GaugeChart } from './gauge';
 import { HeatmapChart } from './heatmap';
 import { type ChartHint, type ChartHints, chartHintsSchema } from './hints';
 import { MetricTrendChart } from './metric_trend';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 import { TreemapChart } from './treemap';
 import { XyChart } from './xy_chart';
 
@@ -32,6 +34,8 @@ export const ELASTIC_CHARTS_VERSION = '73.3.0';
 export interface ElasticChartsEngineOptions {
   /** Presentation per node id, from the composition's source. Validated here; an unknown key throws. */
   hints?: ChartHints;
+  /** The base theme every chart draws on, e.g. a host's own charts theme. Defaults to {@link kibanaBaseTheme}. */
+  baseTheme?: Theme | BaseTheme;
 }
 
 const live = { live: true, static: false } as const;
@@ -39,8 +43,10 @@ const live = { live: true, static: false } as const;
 /** A `ChartEngine` drawing with Elastic Charts under Kibana's Borealis theme. */
 export const defineElasticChartsEngine = ({
   hints = {},
+  baseTheme: base = kibanaBaseTheme,
 }: ElasticChartsEngineOptions = {}): ChartEngine => {
   const parsed = chartHintsSchema.parse(hints);
+  const baseTheme: BaseTheme = typeof base === 'function' ? base : () => base;
   const hintFor = ({ id }: ChartNode): ChartHint | undefined =>
     id === undefined ? undefined : parsed[id];
   return {
@@ -56,17 +62,29 @@ export const defineElasticChartsEngine = ({
     },
     live: {
       donut: (props: LiveChartProps<DonutNode>): ReactNode =>
-        h(DonutChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(DonutChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
       gauge: (props: LiveChartProps<GaugeNode>): ReactNode =>
-        h(GaugeChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(GaugeChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
       heatmap: (props: LiveChartProps<HeatmapNode>): ReactNode =>
-        h(HeatmapChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(HeatmapChart, {
+          ...props,
+          hint: hintFor(props.node) ?? {},
+          baseTheme,
+        }),
       metricTrend: (props: LiveChartProps<MetricTrendNode>): ReactNode =>
-        h(MetricTrendChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(MetricTrendChart, {
+          ...props,
+          hint: hintFor(props.node) ?? {},
+          baseTheme,
+        }),
       treemap: (props: LiveChartProps<TreemapNode>): ReactNode =>
-        h(TreemapChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(TreemapChart, {
+          ...props,
+          hint: hintFor(props.node) ?? {},
+          baseTheme,
+        }),
       xyChart: (props: LiveChartProps<XyChartNode>): ReactNode =>
-        h(XyChart, { ...props, hint: hintFor(props.node) ?? {} }),
+        h(XyChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
     },
   };
 };

@@ -16,7 +16,7 @@ import {
 
 import type { ChartHint } from './hints';
 import { lightenColor } from './lighten';
-import { kibanaBaseTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 
 /** Lens's default for a share printed on a tile. */
 const LENS_PERCENT_DECIMALS = 2;
@@ -35,7 +35,11 @@ export const TreemapChart = ({
   height,
   onSelect,
   hint = {},
-}: LiveChartProps<TreemapNode> & { hint?: ChartHint }): ReactNode => {
+  baseTheme = kibanaBaseTheme,
+}: LiveChartProps<TreemapNode> & {
+  hint?: ChartHint;
+  baseTheme?: BaseTheme;
+}): ReactNode => {
   const { parts, roots, layout } = resolveTreemap(node);
   const leaves: Leaf[] = parts.flatMap(({ keyPath, value, children }) =>
     children.length === 0 ? [{ path: keyPath, value }] : []
@@ -66,7 +70,7 @@ export const TreemapChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       theme: { background: { color: 'transparent' } },
       showLegend: hint.legend?.show ?? false,
       ...(onSelect

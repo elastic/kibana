@@ -48,3 +48,13 @@ describe('lightenColor', () => {
     expect(lightenColor('#16C5C0', 2, 1)).toBe('#16C5C0');
   });
 });
+
+describe('baseTheme', () => {
+  it('takes a theme or a function of the mode', () => {
+    const theme = kibanaBaseTheme('dark');
+    expect(() => defineElasticChartsEngine({ baseTheme: theme })).not.toThrow();
+    expect(() =>
+      defineElasticChartsEngine({ baseTheme: (mode) => kibanaBaseTheme(mode) })
+    ).not.toThrow();
+  });
+});

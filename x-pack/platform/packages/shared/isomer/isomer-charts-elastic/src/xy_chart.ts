@@ -32,10 +32,19 @@ import {
   type XyChartNode,
 } from '@kbn/isomer-primitives-charts';
 
-import type { ChartHint } from './hints';
+import type { ANNOTATION_ICONS, ChartHint } from './hints';
+
+type AnnotationIcon = (typeof ANNOTATION_ICONS)[number];
 
 type AnnotationTone = ReturnType<typeof resolveXy>['annotations'][number]['tone'];
-import { kibanaBaseTheme, lensXyTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme, lensXyTheme } from './theme';
+
+/** Lens's percent-stack format, `0.[00]%`: a share to at most two decimals. */
+const lensPercent = (share: number): string =>
+  new Intl.NumberFormat('en-US', {
+    style: 'percent',
+    maximumFractionDigits: 2,
+  }).format(share);
 
 /** Lens shades partial buckets with its dark shade, lighter in the light theme. */
 const ENDZONE_OPACITY = { light: 0.2, dark: 0.6 } as const;
@@ -43,13 +52,29 @@ const ENDZONE_OPACITY = { light: 0.2, dark: 0.6 } as const;
 /** Lens fills an annotation range with its color at this opacity. */
 const RANGE_OPACITY = 0.1;
 
-/** Lens's default annotation marker: a triangle pointing at the line, or the count of events a bucket groups. */
-const marker = (color: string, count: number): ReactNode =>
+/** EUI's icon paths on a 16 by 16 grid, as Lens's annotation markers draw them. */
+const ICON_PATHS: Record<AnnotationIcon, readonly string[]> = {
+  triangle: ['M2 4h12l-6 9z'],
+  alert: [
+    'M9 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z',
+    'M7.5 10V5h1v5h-1Z',
+    'M8 1a1 1 0 0 1 .864.496l7 12A1 1 0 0 1 15 15H1a1 1 0 0 1-.864-1.504l7-12A1 1 0 0 1 8 1ZM1 14h14L8 2 1 14Z',
+  ],
+  asterisk: [
+    'm8.536 7.262 3.987-1.52.464 1.427-4.119 1.114 2.677 3.322-1.213.881-2.333-3.573-2.332 3.573-1.213-.882L7.13 8.281 3.013 7.168l.464-1.427 3.986 1.52L7.25 3h1.5l-.214 4.262Z',
+  ],
+  bell: [
+    'M3 7a5 5 0 0 1 4.5-4.975V0h1v2.025A5 5 0 0 1 13 7v2.5a5.617 5.617 0 0 0 1.16 3.418l.065.082H15v1h-5a2 2 0 1 1-4 0H1v-1h.775l.066-.082A5.617 5.617 0 0 0 3 9.5V7Zm4 7a1 1 0 1 0 2 0H7Zm5.811-1.323c.063.116.127.223.188.323H3.001a6.618 6.618 0 0 0 1-3.5V7A4 4 0 1 1 12 7v2.5a6.62 6.62 0 0 0 .811 3.177Z',
+  ],
+};
+
+/** An annotation marker: its icon, or the count of events a bucket groups. */
+const marker = (color: string, count: number, icon: AnnotationIcon): ReactNode =>
   h(
     'svg',
     { width: 16, height: 16, viewBox: '0 0 16 16', 'aria-hidden': true },
     count === 1
-      ? h('path', { d: 'M2 4h12l-6 9z', fill: color })
+      ? ICON_PATHS[icon].map((d) => h('path', { key: d, d, fill: color, fillRule: 'evenodd' }))
       : [
           h('circle', { key: 'dot', cx: 8, cy: 8, r: 8, fill: color }),
           h(
@@ -112,6 +137,8 @@ interface AnnotationEvent {
   until?: number | string;
   color: string;
   count: number;
+  /** The annotation key the event's presentation comes from. */
+  source: string;
 }
 
 /** As Lens does: moments that share a time bucket draw as one marker at its start, counting them. */
@@ -150,6 +177,7 @@ const annotationEvents = (
       at: hasBars ? bucket + interval! / 2 : bucket,
       color: colorOf(first!.key, first!.tone),
       count: members.length,
+      source: first!.key,
     });
   }
   for (const { key, label, at, until, tone } of annotations) {
@@ -161,6 +189,7 @@ const annotationEvents = (
         ...(until === undefined ? {} : { until }),
         color: colorOf(key, tone),
         count: 1,
+        source: key,
       });
     }
   }
@@ -175,8 +204,10 @@ export const XyChart = ({
   height,
   onSelect,
   hint = {},
+  baseTheme = kibanaBaseTheme,
 }: LiveChartProps<XyChartNode & { type: 'xyChart' }> & {
   hint?: ChartHint;
+  baseTheme?: BaseTheme;
 }): ReactNode => {
   const resolved = resolveXy(node);
   const { positions, series, stack, missing, orientation, time } = resolved;
@@ -202,7 +233,7 @@ export const XyChart = ({
   const valueAxis = (id: 'y' | 'y2') => {
     const spec = id === 'y' ? node.y : node.y2;
     const shown = axisHint[id];
-    const format = stack === 'percent' ? { style: 'percent' as const } : spec?.format;
+    const format = stack === 'percent' ? undefined : spec?.format;
     return h(Axis, {
       key: id,
       id,
@@ -216,7 +247,8 @@ export const XyChart = ({
           ? Position.Top
           : Position.Right,
       ...(spec?.title !== undefined && shown?.title !== false ? { title: spec.title } : {}),
-      tickFormat: (value: number) => formatValue(value, format),
+      tickFormat: (value: number) =>
+        stack === 'percent' ? lensPercent(value) : formatValue(value, format),
       gridLine: { visible: shown?.gridlines ?? id === 'y' },
       hide: shown?.ticks === false && shown.title === false,
       ...(spec?.domain === undefined
@@ -232,6 +264,7 @@ export const XyChart = ({
         : { style: { tickLabel: { rotation: shown.labelRotation } } }),
     });
   };
+  const axisFormat = (axis: 'y' | 'y2') => (axis === 'y' ? node.y : node.y2)?.format;
   const toned = (tone: keyof typeof theme.tone | undefined) =>
     tone === undefined ? theme.textSubdued : theme.tone[tone];
   const hasBars = series.some(({ kind }) => kind === 'bar');
@@ -296,7 +329,7 @@ export const XyChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       theme: lensXyTheme,
       rotation: horizontal ? 90 : 0,
       ...(xDomain === undefined ? {} : { xDomain }),
@@ -362,7 +395,17 @@ export const XyChart = ({
         return h(BarSeries, {
           ...common,
           enableHistogramMode: histogram,
-          ...(hint.valueLabels ? { displayValueSettings: { showValueLabel: true } } : {}),
+          ...(hint.valueLabels
+            ? {
+                displayValueSettings: {
+                  showValueLabel: true,
+                  valueFormatter: (value: unknown) =>
+                    stack === 'percent'
+                      ? lensPercent(Number(value))
+                      : formatValue(Number(value), axisFormat(spec.axis)),
+                },
+              }
+            : {}),
         });
       }
       const line = {
@@ -392,14 +435,14 @@ export const XyChart = ({
             opacity: ENDZONE_OPACITY[theme.mode],
           },
         }),
-    events.map(({ key, label, at, until, color, count }) =>
+    events.map(({ key, label, at, until, color, count, source }) =>
       until === undefined
         ? h(LineAnnotation, {
             key: `annotation-${key}`,
             id: `annotation-${key}`,
             domainType: AnnotationDomainType.XDomain,
             dataValues: [{ dataValue: at, details: label }],
-            marker: marker(color, count),
+            marker: marker(color, count, hint.icons?.[source] ?? 'triangle'),
             markerPosition: horizontal ? Position.Left : Position.Top,
             style: { line: { stroke: color, strokeWidth: 1, opacity: 1 } },
           })
