@@ -1698,7 +1698,7 @@ groups:
         default: false
         applies_to:
           stack: ga
-          ech: unavailable
+          ech: ga
           self: ga
 
       - setting: xpack.discoverEnhanced.actions.exploreDataInChart.enabled

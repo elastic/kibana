@@ -60,6 +60,34 @@ export const installThreatIntelManagedWorkflows = async ({
 };
 
 /**
+ * Installs the global TI supply workflows and the per-space attribute workflow
+ * for one space. Failures propagate so Hunt ensure can surface them; unlike the
+ * boot installer this does not swallow per-workflow errors.
+ *
+ * Called from AlertZero when Hunt enable finds a required TI document missing
+ * (for example a space created after boot whose attribute workflow has not been
+ * installed by the promote task yet).
+ */
+export const ensureThreatIntelSupplyWorkflowsForSpace = async ({
+  managedWorkflowsClient,
+  spaceId,
+}: {
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceId: string;
+}): Promise<void> => {
+  for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
+    await managedWorkflowsClient.install(workflowId, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+  }
+
+  await managedWorkflowsClient.install(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+    spaceId,
+    workflowIdSuffix: spaceId,
+  });
+};
+
+/**
  * Idempotent per-space install of attribute_alerts_to_reports. Used at boot and
  * by the promote task to catch spaces created after the last install pass.
  */

@@ -48,6 +48,7 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useAutoCollapseSideNav } from '../../../hooks/use_auto_collapse_side_nav';
 import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -95,6 +96,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
+
+  useAutoCollapseSideNav();
 
   const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
@@ -264,6 +267,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     clearSelectedExecution({ replace: false });
   }, [clearSelectedExecution]);
 
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
+
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
   }, [application, location.state]);
@@ -330,16 +339,19 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         ) : (
           <>
             <WorkflowEditorLayout
-              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
+                />
+              }
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {canShowExecutionUi && id && isExecutionListOpen && (
-              <WorkflowExecutionListFlyout
-                workflowId={id}
-                onClose={onCloseExecutionList}
-                isHidden={Boolean(selectedExecutionId)}
-              />
+            {/* Unmount while a run is open. A hidden list flyout keeps EUI's focus trap and
+                moves focus to the skip link. Filters and the highlighted row live in the URL. */}
+            {canShowExecutionUi && id && isExecutionListOpen && !selectedExecutionId && (
+              <WorkflowExecutionListFlyout workflowId={id} onClose={onCloseExecutionList} />
             )}
             {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout

@@ -4,12 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { firstValueFrom } from 'rxjs';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { OTLP_MINIMUM_FLEET_SERVER_VERSION, SO_SEARCH_LIMIT } from '../../../common/constants';
+import {
+  KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION,
+  ENABLE_OTLP_OUTPUT_FLAG,
+  OTLP_MINIMUM_FLEET_SERVER_VERSION,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
+
+import { isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
 
 /** Returns true when all enrolled Fleet Servers meet the OTLP output minimum version. */
 export async function isOtlpOutputSupported(
@@ -25,6 +35,14 @@ export async function isOtlpOutputSupported(
   });
 }
 
+const isOtlpOutputFlagEnabled = async (): Promise<boolean> => {
+  const featureFlags = appContextService.getFeatureFlags();
+  if (!featureFlags) {
+    return false;
+  }
+  return await firstValueFrom(featureFlags.getBooleanValue$(ENABLE_OTLP_OUTPUT_FLAG, false));
+};
+
 /**
  * Checks whether OTLP output is permitted in this deployment.
  * Returns { result: true } when allowed, or { result: false, error } with a human-readable
@@ -34,7 +52,7 @@ export async function checkOtlpOutputAllowed(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<{ result: boolean; error?: string }> {
-  if (!appContextService.getExperimentalFeatures().enableOtlpOutput) {
+  if (!(await isOtlpOutputFlagEnabled())) {
     return { result: false, error: 'OTLP output type is not enabled' };
   }
 
@@ -42,6 +60,43 @@ export async function checkOtlpOutputAllowed(
     return {
       result: false,
       error: `OTLP output requires all Fleet Servers to be on version ${OTLP_MINIMUM_FLEET_SERVER_VERSION} or later.`,
+    };
+  }
+
+  return { result: true };
+}
+
+/**
+ * Checks whether the OAuth2 authentication method of the Kafka output is permitted in this
+ * deployment: the feature flag is on and all Fleet Servers meet the minimum version.
+ * Returns { result: true } when allowed, or { result: false, error } with a human-readable reason.
+ *
+ * It is only checked when an output using OAuth2 is saved, so the version is checked every time
+ * instead of being cached in the settings as the OTLP output does.
+ */
+export async function checkKafkaOAuth2Allowed(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<{ result: boolean; error?: string }> {
+  if (!(await isKafkaOAuth2AuthEnabled())) {
+    return { result: false, error: 'OAuth2 authentication of Kafka outputs is not enabled' };
+  }
+
+  // Serverless / standalone deployments bundle Fleet Server, so there is no version to check.
+  const isFleetServerStandalone =
+    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
+
+  if (
+    !isFleetServerStandalone &&
+    !(await checkFleetServerVersionsForSecretsStorage(
+      esClient,
+      soClient,
+      KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION
+    ))
+  ) {
+    return {
+      result: false,
+      error: `OAuth2 authentication of Kafka outputs requires all Fleet Servers to be on version ${KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION} or later.`,
     };
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
   updateRuleDataSchema,
@@ -31,6 +31,7 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
+  actionPolicyGroupingSchema,
   groupingModeSchema,
 } from './action_policy_data_schema';
 import {
@@ -97,7 +98,7 @@ import { errorResponseSchema } from './error_response_schema';
  * shared OAS document (alerting v1 already claims ids like `rule_response`).
  */
 const getMeta = (schema: z.ZodType): { id?: string; description?: string } =>
-  (z.globalRegistry.get(schema) as { id?: string; description?: string } | undefined) ?? {};
+  (schema.meta() as { id?: string; description?: string } | undefined) ?? {};
 
 const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 
@@ -127,6 +128,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
   [groupingModeSchema, 'alerting_action_policy_grouping_mode'],
+  [actionPolicyGroupingSchema, 'alerting_action_policy_grouping'],
   [actionPolicyResponseSchema, 'alerting_action_policy_response'],
   [findActionPoliciesResponseSchema, 'alerting_action_policy_list_response'],
   // alert actions

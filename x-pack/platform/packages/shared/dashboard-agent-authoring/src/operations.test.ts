@@ -13,7 +13,7 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from './operations/panels/markdown';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
@@ -26,6 +26,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
+import type { DashboardValidator } from './validate_dashboard';
 
 const usable = (type: string): ControlFieldCapability => ({ status: 'usable', type });
 const NOT_AGGREGATABLE: ControlFieldCapability = { status: 'not_aggregatable' };
@@ -179,7 +180,7 @@ describe('executeDashboardOperations', () => {
           {
             source: 'config',
             type: 'markdown',
-            config: { content: '### Updated summary' },
+            config: { content: '### Updated summary', settings: { open_links_in_new_tab: true } },
             grid: { x: 0, y: 9, w: 48, h: 5 },
           },
         ],
@@ -279,7 +280,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Summary' },
+              config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -333,7 +334,7 @@ describe('executeDashboardOperations', () => {
     expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Summary' },
+        config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
       }),
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
@@ -435,6 +436,64 @@ describe('executeDashboardOperations', () => {
     });
   });
 
+  describe('validator', () => {
+    const validator: DashboardValidator = {
+      validatePanel: ({ config }) =>
+        'unrecognizedKey' in config ? ['config.unrecognizedKey: Unrecognized key'] : [],
+      validateDashboardFields: () => [],
+    };
+
+    it('discards invalid panels after all operations and drops their authoring notes', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Dashboard', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'request',
+                chartType: SupportedChartType.Metric,
+                query: 'show total requests',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+              {
+                source: 'request',
+                chartType: SupportedChartType.Metric,
+                query: 'show p95 latency',
+                grid: { x: 24, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent(
+            { type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } },
+            'Created a metric showing total requests.'
+          ),
+          'show p95 latency': createResolvedPanelContent(
+            { type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric', unrecognizedKey: true } },
+            'Created a metric showing p95 latency.'
+          ),
+        }),
+        validator,
+      });
+
+      const [validPanel, ...otherPanels] = getPanelsOnly(result.dashboardData.panels);
+      expect(validPanel.config).toEqual({ type: 'metric' });
+      expect(otherPanels).toEqual([]);
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+          error: expect.stringContaining('Panel was not added'),
+        }),
+      ]);
+      expect(result.panelAuthoringNotes).toEqual([
+        { panelId: validPanel.id, authoringNote: 'Created a metric showing total requests.' },
+      ]);
+    });
+  });
+
   describe('call-local section keys', () => {
     it('moves existing panels and adds resolved panels into newly keyed sections', async () => {
       const topPanel = createLensPanel('top-panel');
@@ -463,7 +522,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: 'Summary' },
+              config: { content: 'Summary', settings: { open_links_in_new_tab: true } },
               sectionId: 'overview',
               grid: { x: 0, y: 9, w: 48, h: 5 },
             },
@@ -490,7 +549,10 @@ describe('executeDashboardOperations', () => {
       expect(existing.panels).toEqual([]);
       expect(overview.panels).toEqual([
         topPanel,
-        expect.objectContaining({ type: MARKDOWN_EMBEDDABLE_TYPE, config: { content: 'Summary' } }),
+        expect.objectContaining({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: 'Summary', settings: { open_links_in_new_tab: true } },
+        }),
       ]);
       expect(details.panels).toEqual([
         { ...nestedPanel, grid: { x: 0, y: 2, w: 48, h: 8 } },
@@ -782,7 +844,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Section Summary' },
+              config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -802,7 +864,7 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Section Summary' },
+        config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
       }),
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
@@ -1167,7 +1229,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Section Summary' },
+              config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
               sectionId: 'section-a',
             },
@@ -1183,7 +1245,7 @@ describe('executeDashboardOperations', () => {
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Section Summary' },
+        config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
         grid: { x: 0, y: 0, w: 24, h: 4 },
       }),
     ]);
@@ -1963,7 +2025,10 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
-                config: { content: '### Updated summary' },
+                config: {
+                  content: '### Updated summary',
+                  settings: { open_links_in_new_tab: true },
+                },
               },
             ],
           },
@@ -1980,7 +2045,7 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           id: 'md-1',
           type: MARKDOWN_EMBEDDABLE_TYPE,
-          config: { content: '### Updated summary' },
+          config: { content: '### Updated summary', settings: { open_links_in_new_tab: true } },
           grid: { x: 0, y: 0, w: 48, h: 5 },
         })
       );
@@ -2006,7 +2071,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'panel-1',
-                config: { content: 'new text' },
+                config: { content: 'new text', settings: { open_links_in_new_tab: true } },
               },
             ],
           },
@@ -2445,7 +2510,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
-                config: { content: '### New summary' },
+                config: { content: '### New summary', settings: { open_links_in_new_tab: true } },
               },
               {
                 source: 'request',
@@ -2478,7 +2543,7 @@ describe('executeDashboardOperations', () => {
       expect(topLevelPanels[0]).toEqual(
         expect.objectContaining({
           id: 'md-1',
-          config: { content: '### New summary' },
+          config: { content: '### New summary', settings: { open_links_in_new_tab: true } },
         })
       );
       expect(topLevelPanels[1]).toEqual(
@@ -2502,7 +2567,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'config',
                 type: 'markdown',
-                config: { content: '### Summary' },
+                config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
                 grid: { x: 0, y: 0, w: 48, h: 5 },
                 sectionId: 'nonexistent-section',
               },
@@ -2840,6 +2905,15 @@ describe('add_controls / remove_controls operations', () => {
       expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
     });
 
+    it('leaves a dashboard without controls unchanged when every control is dropped', async () => {
+      const { dashboardData } = await addControls(
+        [{ type: 'options_list_control', field_name: 'missing', index }],
+        createFieldCapabilitiesResolver({})
+      );
+
+      expect(dashboardData).toEqual(emptyDashboard);
+    });
+
     const notMapped = `Not mapped on index "${index}".`;
     const notAggregatable = `Is not aggregatable on index "${index}".`;
     const conflicting = `Has conflicting mappings on index "${index}".`;
@@ -2985,6 +3059,16 @@ describe('add_controls / remove_controls operations', () => {
     const remaining = (afterRemove.pinned_panels as Array<Record<string, unknown>>)[0];
     expect(remaining.id).not.toBe(idToRemove);
     expect((remaining.config as Record<string, unknown>).title).toBe('Host');
+  });
+
+  it('remove_controls leaves a dashboard without controls unchanged', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'remove_controls', control_ids: ['nonexistent-id'] }],
+      logger,
+    });
+
+    expect(dashboardData).toEqual(emptyDashboard);
   });
 
   it('remove_controls with unknown id leaves controls unchanged', async () => {

@@ -31,6 +31,7 @@ import { AgentPolicyYamlFlyout } from '../../../components';
 
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;
@@ -326,7 +327,7 @@ export const AgentPolicyActionMenu = memo<{
               {isUpgradeAgentsModalOpen && (
                 <EuiPortal>
                   <AgentUpgradeAgentModal
-                    agents={`policy_id:"${agentPolicy.id}"`}
+                    agents={buildPolicyBaseIdWithFallbackKuery(agentPolicy.id)}
                     agentCount={agentPolicy.agents || 0}
                     onClose={() => {
                       setIsUpgradeAgentsModalOpen(false);

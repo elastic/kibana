@@ -115,6 +115,7 @@ describe('attachPopoverSections', () => {
             label: 'One',
           },
         ],
+        isPaginated: true,
       },
     ];
 
@@ -147,11 +148,13 @@ describe('attachPopoverSections', () => {
         id: 'recentlyViewed',
         label: 'Recently viewed',
         items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
+        isPaginated: true,
       },
       {
         id: 'favorites',
         label: 'Favorites',
         items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
+        isPaginated: true,
       },
     ]);
   });

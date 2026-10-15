@@ -8,6 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useState } from 'react';
 import type {
+  DefaultItemAction,
   EuiBasicTableColumn,
   EuiInMemoryTableProps,
   EuiTableSelectionType,
@@ -229,16 +230,19 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
       {
         name: translations.actionsColumn,
         actions: [
-          {
-            name: translations.openInDiscoverButtonLabel,
-            description: translations.openInDiscoverButtonTooltip,
-            type: 'icon',
-            icon: 'productDiscover',
-            color: 'text',
-            enabled: () => isDiscoverAvailable,
-            onClick: onOpenInDiscover,
-            'data-test-subj': 'esqlViewsOpenInDiscoverAction',
-          },
+          ...(isDiscoverAvailable
+            ? [
+                {
+                  name: translations.openInDiscoverButtonLabel,
+                  description: translations.openInDiscoverButtonTooltip,
+                  type: 'icon',
+                  icon: 'productDiscover',
+                  color: 'text',
+                  onClick: onOpenInDiscover,
+                  'data-test-subj': 'esqlViewsOpenInDiscoverAction',
+                } satisfies DefaultItemAction<EsqlView>,
+              ]
+            : []),
           ...(hasRowActionsMenu
             ? [
                 {

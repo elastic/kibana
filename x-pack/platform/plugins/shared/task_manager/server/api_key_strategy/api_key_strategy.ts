@@ -47,6 +47,8 @@ export interface GrantApiKeysOpts {
 export interface InvalidationTarget {
   apiKeyId: string;
   uiamApiKey?: string;
+  taskId?: string;
+  taskStartedAt?: string;
 }
 
 /**
@@ -113,6 +115,9 @@ export const markApiKeysForInvalidation = async (
           apiKeyId: target.apiKeyId,
           createdAt: new Date().toISOString(),
           ...(target.uiamApiKey ? { uiamApiKey: target.uiamApiKey } : {}),
+          ...(target.taskId && target.taskStartedAt
+            ? { taskId: target.taskId, taskStartedAt: target.taskStartedAt }
+            : {}),
         },
         type: INVALIDATE_API_KEY_SO_NAME,
       }))

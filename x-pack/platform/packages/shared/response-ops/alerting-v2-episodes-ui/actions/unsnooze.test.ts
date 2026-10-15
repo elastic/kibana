@@ -84,7 +84,7 @@ describe('createUnsnoozeAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: error path calls notifications.toasts.addError', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkUnsnoozeSeriesActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
@@ -92,7 +92,7 @@ describe('createUnsnoozeAction', () => {
       episodes: [makeEpisode({ last_snooze_action: 'snooze' })],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

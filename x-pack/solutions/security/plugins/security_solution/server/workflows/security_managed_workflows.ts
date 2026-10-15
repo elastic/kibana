@@ -117,6 +117,41 @@ export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
   }
 };
 
+/**
+ * Full TI managed-workflow install (globals + per-space attribute) for every
+ * current space. Used when bootstrap recovers after the boot-time installer
+ * skipped TI because `bootstrapReady` had rejected.
+ */
+export const installThreatIntelManagedWorkflowsForSpaces = async ({
+  workflowsExtensions,
+  core,
+  logger,
+}: {
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  core: Pick<CoreStart, 'savedObjects'>;
+  logger: Logger;
+}): Promise<void> => {
+  try {
+    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
+    const spaceIds = await enumerateSpaceIds(createSpaceRepository(core));
+    await installThreatIntelManagedWorkflows({
+      managedWorkflowsClient,
+      spaceIds,
+      logger,
+    });
+  } catch (error) {
+    logger.warn(
+      'Failed to install threat intelligence managed workflows after bootstrap recovery',
+      {
+        error,
+      }
+    );
+    // Rethrow so the background recovery loop can retry. Swallowing here left TI
+    // workflows missing until restart after a transient install failure.
+    throw error;
+  }
+};
+
 const createSpaceRepository = (
   core: Pick<CoreStart, 'savedObjects'>
 ): Pick<SavedObjectsClientContract, 'find'> =>
