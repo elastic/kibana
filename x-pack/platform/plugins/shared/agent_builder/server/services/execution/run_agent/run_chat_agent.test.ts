@@ -40,8 +40,8 @@ import {
   createPreExecutionSteps,
 } from './utils';
 import { createAgentGraph } from './graph';
-import { createPromptFactory } from './prompts';
 import { registerInternalTools } from './tools/register_internal_tools';
+import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
 import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
@@ -454,6 +454,84 @@ describe('runDefaultAgentMode', () => {
       expect(call.roundId).not.toBe('preminted-round-id');
       // UUID v4 format sanity: 36 chars with dashes at expected positions.
       expect(call.roundId).toMatch(/^[0-9a-f-]{36}$/);
+    });
+  });
+
+  describe('conversation metadata updates from tools', () => {
+    const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    const updaterPassedToTools = () =>
+      registerInternalToolsMock.mock.calls[0][0].updateConversationMetadata;
+
+    it('attributes a templated conversation metadata patch to the agent and its execution', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1', template_id: 'tmpl-1' }),
+          agentId: 'agent-1',
+          // The execution record id: never the form persisted on conversation events.
+          executionId: '0f7a2c1e-4b7d-4c1a-9e3b-2d5f6a7b8c9d',
+          roundId: 'round-1',
+        },
+        context
+      );
+
+      const updateConversationMetadata = updaterPassedToTools();
+      expect(updateConversationMetadata).toBeDefined();
+      await updateConversationMetadata!({ status: 'open' });
+
+      // Stamped with the round's timeline execution id, which the lifecycle events also carry.
+      expect(context.conversationClient.patchMetadata).toHaveBeenCalledWith(
+        'conv-1',
+        { status: 'open' },
+        {
+          source: 'execution',
+          activity: {
+            actor: { type: 'agent', id: 'agent-1' },
+            execution_id: 'round-1::execution',
+          },
+        }
+      );
+    });
+
+    it('offers no metadata updater when the conversation has no template', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1' }),
+          agentId: 'agent-1',
+        },
+        context
+      );
+
+      expect(updaterPassedToTools()).toBeUndefined();
+      expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();
     });
   });
 
@@ -1039,6 +1117,72 @@ describe('runDefaultAgentMode', () => {
       expect(command.update).toMatchObject({ compactionSummary: storedSummary });
       const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunTracker;
       expect(tracker.latestState().compactionSummary).toEqual(storedSummary);
+    });
+
+    it('attributes a resumed round to its resume execution id, not the execution record', async () => {
+      const { context } = setup();
+      const conversation = createEmptyConversation({
+        id: 'conv-1',
+        template_id: 'tmpl-1',
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+            state: {
+              version: 2,
+              agent: {
+                current_cycle: 1,
+                error_count: 0,
+                nodes: [
+                  {
+                    step: 'execute_tool',
+                    tool_call_id: 'call-1',
+                    tool_id: 'my.tool',
+                    tool_params: { q: 1 },
+                    tool_state: undefined,
+                  },
+                ],
+              },
+            },
+          }),
+        ],
+        // The initial run and one resume are already stored: this run is the second resume.
+        events: [
+          { id: 'round-1::execution_started', execution_id: 'round-1::execution' },
+          { id: 'round-1::execution::1::execution_started', execution_id: 'round-1::execution::1' },
+        ] as any,
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { prompts: { p1: { allow: true } } },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+          agentId: 'agent-1',
+          executionId: '0f7a2c1e-4b7d-4c1a-9e3b-2d5f6a7b8c9d',
+          roundId: 'minted-for-the-resume',
+        },
+        context
+      );
+
+      const [params] = registerInternalToolsMock.mock.calls[0];
+      await params.updateConversationMetadata!({ status: 'open' });
+      expect(context.conversationClient.patchMetadata).toHaveBeenCalledWith(
+        'conv-1',
+        { status: 'open' },
+        expect.objectContaining({
+          activity: {
+            actor: { type: 'agent', id: 'agent-1' },
+            execution_id: 'round-1::execution::2',
+          },
+        })
+      );
     });
 
     it('lets a blocking beforeAgent hook abort a resumed round', async () => {
