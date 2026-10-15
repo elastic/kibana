@@ -15,7 +15,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
@@ -105,13 +105,13 @@ const normalizeToArray = (value?: string | string[]): string[] | undefined => {
 
 export const buildItemFromHit = (
   hit: EsHitRecord,
-  euid: EntityStoreEuid | undefined
+  euidApi: EntityStoreEuidApi | undefined
 ): EventItem | AlertItem => {
   // TODO Fix typing issue and replace `any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hitSource = hit._source as Record<string, any>;
-  const { actorId, targetIds } = euid
-    ? resolveActorAndTargets(hitSource, euid)
+  const { actorId, targetIds } = euidApi
+    ? resolveActorAndTargets(hitSource, euidApi)
     : { actorId: undefined, targetIds: [] };
   return {
     itemType: hit._index?.includes('alerts-security.alerts-')
@@ -166,7 +166,7 @@ export const useFetchDocumentDetails = <_Source = unknown>({
 
   // Async-hydrated: `undefined` until the EUID chunk loads. Items are built from the raw hits
   // below, so rows gain their actor/targets when it arrives without refetching.
-  const euid = useEntityStoreEuidApi()?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
 
   const { isLoading, isFetching, isError, error, data } = useQuery(
     queryKey,
@@ -202,8 +202,8 @@ export const useFetchDocumentDetails = <_Source = unknown>({
   );
 
   const page = useMemo(
-    () => (data?.hits ?? []).map((hit) => buildItemFromHit(hit, euid)),
-    [data?.hits, euid]
+    () => (data?.hits ?? []).map((hit) => buildItemFromHit(hit, euidApi)),
+    [data?.hits, euidApi]
   );
 
   if (missingDataView) {

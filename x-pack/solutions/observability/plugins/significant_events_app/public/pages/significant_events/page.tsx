@@ -31,10 +31,7 @@ import {
   SignificantEventsAppLoading,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
-import {
-  KnowledgeIndicatorsTable,
-  KiGenerationProvider,
-} from './components/knowledge_indicators_table';
+import { KiGenerationProvider } from './components/knowledge_indicators_table';
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/sources_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
@@ -139,14 +136,6 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'sources' } }),
         isSelected: tab === 'sources',
-      },
-      {
-        id: 'knowledge_indicators',
-        label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
-          defaultMessage: 'Knowledge Indicators',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
-        isSelected: tab === 'knowledge_indicators',
       },
       {
         id: 'queries',
@@ -281,7 +270,6 @@ export function SignificantEventsPage() {
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'sources' && <SourcesView />}
-              {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
               {tab === 'queries' && <QueriesTable />}
             </KiGenerationProvider>
           )}
