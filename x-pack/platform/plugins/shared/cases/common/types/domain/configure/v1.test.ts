@@ -137,6 +137,8 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      extractObservables: true,
+      workflowTags: ['soc-triage'],
     };
 
     it('has expected attributes in request', () => {
@@ -222,6 +224,8 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      extractObservables: true,
+      workflowTags: ['soc-triage'],
     };
 
     it('has expected attributes in request', () => {

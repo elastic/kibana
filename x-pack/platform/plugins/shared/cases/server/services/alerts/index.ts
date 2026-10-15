@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import pMap from 'p-map';
+import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import {
+  ALERT_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MgetResponse, MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -28,12 +37,15 @@ import type {
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { CasesEventBus } from '../../events/event_bus';
 
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger,
-    private readonly alertsClient: PublicMethodsOf<AlertsClient>
+    private readonly alertsClient: PublicMethodsOf<AlertsClient>,
+    private readonly casesEventBus?: CasesEventBus,
+    private readonly request?: KibanaRequest
   ) {}
 
   public async executeAggregations({
@@ -88,9 +100,23 @@ export class AlertService {
 
   public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]): Promise<number> {
     try {
-      // Map of <index, <alert status, <alert close reason, alerts to update>>
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
+
+      let prefetchResult:
+        | { previousStatusMap: Map<string, STATUS_VALUES>; changeableKeys: Set<string> }
+        | undefined;
+      if (this.casesEventBus?.hasAlertStatusChangedListeners() && this.request) {
+        try {
+          prefetchResult = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
+            retries: 3,
+          });
+        } catch (err) {
+          this.logger.warn(
+            `Failed to prefetch previous alert statuses for Cases event bus: ${err}`
+          );
+        }
+      }
 
       const updateResults = await pMap(
         indexBuckets,
@@ -98,12 +124,167 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
+      if (this.casesEventBus && this.request && prefetchResult !== undefined) {
+        // Isolate event dispatch: a listener exception must not change the mutation result.
+        try {
+          this.emitStatusChangedEvents(
+            alerts,
+            prefetchResult.previousStatusMap,
+            prefetchResult.changeableKeys,
+            this.casesEventBus,
+            this.request
+          );
+        } catch (err) {
+          this.logger.error(`Failed to emit alertStatusChanged events: ${err}`);
+        }
+      }
+
       return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
         error,
         logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * True when the document has a non-null workflow status field. `getUpdateAlertsStatusScript`
+   * sets `ctx.op = 'noop'` when both `kibana.alert.workflow_status` and `signal.status` are
+   * null or missing, so such documents never transition and must not emit status events.
+   */
+  private static hasWorkflowStatusField(source: unknown): boolean {
+    if (typeof source !== 'object' || source === null) return false;
+    const s = source as Record<string, unknown>;
+    if (s[ALERT_WORKFLOW_STATUS] != null) return true;
+    const signal = s.signal;
+    return (
+      typeof signal === 'object' &&
+      signal !== null &&
+      (signal as Record<string, unknown>).status != null
+    );
+  }
+
+  private static parseWorkflowStatus(source: unknown): STATUS_VALUES | undefined {
+    if (typeof source !== 'object' || source === null) return undefined;
+    const s = source as Record<string, unknown>;
+    const modern = s[ALERT_WORKFLOW_STATUS];
+    if (modern != null) {
+      // A non-null modern field is authoritative; do not fall back to signal.status.
+      if (
+        modern === 'open' ||
+        modern === 'acknowledged' ||
+        modern === 'in-progress' ||
+        modern === 'closed'
+      ) {
+        return modern;
+      }
+      return undefined;
+    }
+    // Legacy .siem-signals documents only have signal.status; use it as a fallback.
+    const signal = s.signal;
+    if (typeof signal === 'object' && signal !== null) {
+      const legacy = (signal as Record<string, unknown>).status;
+      if (
+        legacy === 'open' ||
+        legacy === 'acknowledged' ||
+        legacy === 'in-progress' ||
+        legacy === 'closed'
+      ) {
+        return legacy as STATUS_VALUES;
+      }
+    }
+    return undefined;
+  }
+
+  private async prefetchPreviousStatuses(alerts: UpdateAlertStatusRequest[]): Promise<{
+    previousStatusMap: Map<string, STATUS_VALUES>;
+    // Keys of documents the update script can actually mutate, i.e. found AND carrying a
+    // non-null status field. Narrower than "found" on purpose: a status-less attachment is
+    // a guaranteed Elasticsearch no-op and must not start a workflow.
+    changeableKeys: Set<string>;
+  }> {
+    const docs = alerts.reduce<Array<{ _id: string; _index: string }>>((acc, a) => {
+      if (!AlertService.isEmptyAlert(a)) {
+        acc.push({ _id: a.id, _index: a.index });
+      }
+      return acc;
+    }, []);
+    if (docs.length === 0) return { previousStatusMap: new Map(), changeableKeys: new Set() };
+    const response = await this.scopedClusterClient.mget({
+      docs,
+      _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
+    });
+    const previousStatusMap = new Map<string, STATUS_VALUES>();
+    const changeableKeys = new Set<string>();
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._id != null && doc._index != null) {
+        const key = `${doc._index}:${doc._id}`;
+        // Track status-field presence separately from parseWorkflowStatus, which returns
+        // undefined both for an invalid non-null status (a real, repairable transition)
+        // and for a document with no status field at all (an Elasticsearch no-op).
+        if (AlertService.hasWorkflowStatusField(doc._source)) {
+          changeableKeys.add(key);
+        }
+        const previousStatus = AlertService.parseWorkflowStatus(doc._source);
+        if (previousStatus !== undefined) {
+          previousStatusMap.set(key, previousStatus);
+        }
+      }
+    }
+    return { previousStatusMap, changeableKeys };
+  }
+
+  private emitStatusChangedEvents(
+    alerts: UpdateAlertStatusRequest[],
+    previousStatusMap: Map<string, STATUS_VALUES>,
+    changeableKeys: Set<string>,
+    casesEventBus: CasesEventBus,
+    request: KibanaRequest
+  ) {
+    const idToIndex = new Map<string, string>();
+    const byStatus = new Map<STATUS_VALUES, string[]>();
+    for (const alert of alerts) {
+      if (!AlertService.isEmptyAlert(alert)) {
+        const translatedStatus = this.translateStatus(alert);
+        const key = `${alert.index}:${alert.id}`;
+        const previousStatus = previousStatusMap.get(key);
+        // Emit only for alerts the update script can mutate (found, with a non-null status
+        // field) whose status is actually changing. Alerts with an unrecognized stored
+        // status (previousStatus === undefined) are included — the mutation still succeeds
+        // and the event schema does not require a previousStatuses row for every emitted ID.
+        const isActualChange = changeableKeys.has(key) && previousStatus !== translatedStatus;
+        if (isActualChange) {
+          idToIndex.set(alert.id, alert.index);
+          const bucket = byStatus.get(translatedStatus);
+          if (bucket !== undefined) {
+            bucket.push(alert.id);
+          } else {
+            byStatus.set(translatedStatus, [alert.id]);
+          }
+        }
+      }
+    }
+    for (const [status, alertIds] of byStatus) {
+      const indicesSet = new Set<string>();
+      for (const id of alertIds) {
+        const index = idToIndex.get(id);
+        if (index !== undefined) {
+          indicesSet.add(index);
+        }
+      }
+      casesEventBus.emitAlertStatusChanged(request, {
+        alertIds,
+        status,
+        previousStatuses: alertIds.flatMap((id) => {
+          const index = idToIndex.get(id);
+          const previousStatus =
+            index !== undefined ? previousStatusMap.get(`${index}:${id}`) : undefined;
+          return previousStatus !== undefined ? [{ id, previousStatus }] : [];
+        }),
+        alertIdToIndex: Object.fromEntries(idToIndex),
+        indices: Array.from(indicesSet),
       });
     }
   }
@@ -273,12 +454,178 @@ export class AlertService {
         return;
       }
 
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an alert');
+
       await this.alertsClient.ensureAllAlertsAuthorizedRead({
         alerts: nonEmptyAlerts,
       });
     } catch (error) {
       throw createCaseError({
         message: `Failed to authorize alerts: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Rejects CPS/CCS index references before any `mget` — rule_registry's own authorization check
+   * silently skips (doesn't throw) a hit missing `_source`, which is what a cross-project `mget` returns.
+   */
+  private rejectNonLocalIndices(alerts: AlertInfo[], label: string): void {
+    const nonLocalAlert = alerts.find((alert) => isNonLocalIndexName(alert.index));
+
+    if (nonLocalAlert != null) {
+      throw Boom.badRequest(
+        `Cannot attach ${label} from a linked project or remote cluster index: ${nonLocalAlert.index}`
+      );
+    }
+  }
+
+  /**
+   * Authorizes attack attachments, which reference an attack discovery AAD alert.
+   *
+   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
+   * every document that carries those fields, and silently accepts a document that is missing, is
+   * not an alert, or belongs to another space. The status sync later writes to the reference by id
+   * alone, so all three are rejected here, before the attachment is persisted.
+   *
+   * Scheduled and ad-hoc discoveries are both accepted, but only scheduled ones reach alerting
+   * RBAC — see `ensureScheduledAttacksAuthorized`.
+   */
+  public async ensureAttacksAuthorized({
+    attacks,
+    spaceId,
+  }: {
+    attacks: AlertInfo[];
+    spaceId: string;
+  }): Promise<void> {
+    try {
+      const nonEmptyAttacks = this.getNonEmptyAlerts(attacks);
+
+      if (nonEmptyAttacks.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+
+      const { docs } = await this.scopedClusterClient.mget<AttackAuthorizationFields>({
+        docs: nonEmptyAttacks.map((attack) => ({ _id: attack.id, _index: attack.index })),
+        _source_includes: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+      });
+
+      const missingIds = docs.filter((doc) => !('found' in doc && doc.found)).map((doc) => doc._id);
+
+      if (missingIds.length > 0) {
+        throw Boom.badRequest(`Referenced attack(s) not found: ${missingIds.join(', ')}`);
+      }
+
+      const invalidIds = docs
+        .filter((doc) => !AlertService.isAttackInSpace(doc, spaceId))
+        .map((doc) => doc._id);
+
+      if (invalidIds.length > 0) {
+        throw Boom.badRequest(
+          `Referenced document(s) are not attack discoveries in space ${spaceId}: ${invalidIds.join(
+            ', '
+          )}`
+        );
+      }
+
+      await this.ensureScheduledAttacksAuthorized(nonEmptyAttacks, docs);
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to authorize attacks: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
+   *
+   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
+   * sentinel the alerting framework never registers and no feature privilege grants, so
+   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
+   * superuser. They carry no privacy of their own — the generating user is recorded on the
+   * document so it can be filtered on, not hidden — so the caller-scoped `mget` that produced
+   * `docs` is the authorization: it is the same Elasticsearch index privilege gate the attack
+   * discovery APIs read ad-hoc discoveries with, and the one the status sync writes through.
+   */
+  private async ensureScheduledAttacksAuthorized(
+    attacks: AlertInfo[],
+    docs: Array<MgetResponseItem<AttackAuthorizationFields>>
+  ): Promise<void> {
+    const scheduledKeys = new Set(
+      docs
+        .filter((doc) => AlertService.isScheduledAttack(doc))
+        .map((doc) => `${doc._index}:${doc._id}`)
+    );
+
+    const scheduledAttacks = attacks.filter((attack) =>
+      scheduledKeys.has(`${attack.index}:${attack.id}`)
+    );
+
+    if (scheduledAttacks.length <= 0) {
+      return;
+    }
+
+    await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: scheduledAttacks });
+  }
+
+  private static isAttackInSpace(
+    doc: MgetResponseItem<AttackAuthorizationFields>,
+    spaceId: string
+  ): boolean {
+    if (!('found' in doc) || !doc.found) {
+      return false;
+    }
+
+    const source = doc._source;
+    const ruleTypeId = source?.[ALERT_RULE_TYPE_ID];
+
+    return (
+      (ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+        ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID) &&
+      Array.isArray(source?.[SPACE_IDS]) &&
+      source[SPACE_IDS].includes(spaceId)
+    );
+  }
+
+  private static isScheduledAttack(doc: MgetResponseItem<AttackAuthorizationFields>): boolean {
+    if (!('found' in doc) || !doc.found) {
+      return false;
+    }
+
+    return doc._source?.[ALERT_RULE_TYPE_ID] === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
+  }
+
+  /**
+   * Existence check for non-alert indexed attachments (events) — no alerting RBAC, and CPS/CCS
+   * refs are rejected before `mget`.
+   */
+  public async ensureDocumentsExist({ alerts }: { alerts: AlertInfo[] }): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an event');
+
+      const results = await this.getAlerts(nonEmptyAlerts);
+      const missingEventIds = (results?.docs ?? [])
+        .filter((doc) => !('found' in doc && doc.found))
+        .map((doc) => doc._id);
+
+      if (missingEventIds.length > 0) {
+        throw Boom.badRequest(`Referenced event(s) not found: ${missingEventIds.join(', ')}`);
+      }
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to verify referenced events exist: ${error}`,
         error,
         logger: this.logger,
       });
@@ -375,6 +722,12 @@ export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
+}
+
+/** The only `_source` fields `ensureAttacksAuthorized` reads back from the referenced document. */
+interface AttackAuthorizationFields {
+  [ALERT_RULE_TYPE_ID]?: string;
+  [SPACE_IDS]?: string[];
 }
 
 interface AlertIdIndex {

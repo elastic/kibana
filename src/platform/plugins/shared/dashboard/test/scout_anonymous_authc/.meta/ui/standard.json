@@ -1,8 +1,7 @@
 {
   "sha1": "61895ef139256780b02dad2bece4728458716607",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout_anonymous_authc/ui/tests/save_modal_no_access_control.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 46,
+        "column": 44
       }
     }
   ]

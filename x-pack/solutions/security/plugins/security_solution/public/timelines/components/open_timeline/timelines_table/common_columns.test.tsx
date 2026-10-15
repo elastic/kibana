@@ -186,7 +186,7 @@ describe('#getCommonColumns', () => {
       );
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
-      expect(onToggleShowNotes).toBeCalledWith({
+      expect(onToggleShowNotes).toHaveBeenCalledWith({
         abc: <div />,
         'saved-timeline-11': (
           <NotePreviews notes={hasNotes[0].notes} timelineId={TimelineId.active} />
@@ -220,7 +220,7 @@ describe('#getCommonColumns', () => {
 
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
-      expect(onToggleShowNotes).toBeCalledWith({
+      expect(onToggleShowNotes).toHaveBeenCalledWith({
         abc: <div />,
       });
     });

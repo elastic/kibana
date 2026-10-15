@@ -26,7 +26,6 @@ import {
   toInboxAction,
   toInboxHistoryAction,
 } from './to_inbox_action';
-import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
@@ -34,8 +33,6 @@ export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
 export interface CreateWorkflowsInboxProviderArgs {
   api: WorkflowsManagementApi;
   logger: Logger;
-  /** Same instance as HTTP routes — inbox resume must emit identical security audit events. */
-  audit: WorkflowManagementAuditLog;
   /**
    * Fallback slice size for direct provider calls. The Inbox registry passes
    * an explicit `perPage` sized to the requested merged page.
@@ -51,11 +48,12 @@ export interface CreateWorkflowsInboxProviderArgs {
  * the provider does NOT promote prior-step output into source-specific
  * "proposal" payloads. Workflow authors who need to surface context to the
  * responder embed it in the `waitForInput.with.message` template.
+ *
+ * Resume security audit is emitted by {@link WorkflowsManagementApi.resumeWorkflowExecution}.
  */
 export const createWorkflowsInboxProvider = ({
   api,
   logger,
-  audit,
   pageSize = 1000,
 }: CreateWorkflowsInboxProviderArgs): InboxActionProvider => {
   return {
@@ -68,6 +66,7 @@ export const createWorkflowsInboxProvider = ({
       const { results, total, reasoningByStepId } = await api.listWaitingForInputSteps(
         ctx.spaceId,
         {
+          request: ctx.request,
           page: params.page ?? 1,
           perPage: params.perPage ?? pageSize,
           includeReasoning: true,
@@ -86,6 +85,7 @@ export const createWorkflowsInboxProvider = ({
     ): Promise<InboxActionProviderListResult> {
       const { results, total, reasoningByStepId, deletedWorkflowIds } =
         await api.listProcessedWaitForInputSteps(ctx.spaceId, {
+          request: ctx.request,
           page: params.page ?? 1,
           perPage: params.perPage ?? pageSize,
           // Push the filter dimensions the workflows step-exec index can
@@ -112,7 +112,9 @@ export const createWorkflowsInboxProvider = ({
       // the listing (space + waitForInput + terminated-or-audit-stamped) but
       // skips user-supplied filter clauses on purpose. See
       // `listProcessedWaitForInputFacets` for the stability rationale.
-      const { channel, respondedBy } = await api.listProcessedWaitForInputFacets(ctx.spaceId);
+      const { channel, respondedBy } = await api.listProcessedWaitForInputFacets(ctx.spaceId, {
+        request: ctx.request,
+      });
       return { channel, respondedBy };
     },
 
@@ -134,7 +136,8 @@ export const createWorkflowsInboxProvider = ({
       // later waitForInput step from the same execution.
       const stepExecution = await api.getStepExecution(
         { executionId: parsed.executionId, id: parsed.stepExecutionId },
-        ctx.spaceId
+        ctx.spaceId,
+        ctx.request
       );
 
       if (!stepExecution) {
@@ -169,16 +172,9 @@ export const createWorkflowsInboxProvider = ({
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );
       try {
-        const { resumedBy } = await api.resumeWorkflowExecution(
-          parsed.executionId,
-          ctx.spaceId,
-          input,
-          ctx.request,
-          { channel, stepExecutionId: parsed.stepExecutionId }
-        );
-        audit.logExecutionResumed(ctx.request, {
-          executionId: parsed.executionId,
-          resumedBy,
+        await api.resumeWorkflowExecution(parsed.executionId, ctx.spaceId, input, ctx.request, {
+          channel,
+          stepExecutionId: parsed.stepExecutionId,
         });
       } catch (error) {
         if (error instanceof WorkflowExecutionInvalidStatusError) {
@@ -188,10 +184,6 @@ export const createWorkflowsInboxProvider = ({
             `step execution ${parsed.stepExecutionId} was already claimed or no longer accepts input`
           );
         }
-        audit.logExecutionResumed(ctx.request, {
-          executionId: parsed.executionId,
-          error,
-        });
         throw error;
       }
     },

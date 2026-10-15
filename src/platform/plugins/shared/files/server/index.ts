@@ -43,6 +43,7 @@ export type {
   FileServiceStart,
 } from './file_service';
 export type { FileServiceFactory } from './file_service/file_service_factory';
+export { FileNotFoundError } from './file_service/errors';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { FilesPlugin } = await import('./plugin');

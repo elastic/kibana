@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, isoDateTime } from '@kbn/zod';
 import { isInternalURL } from '@kbn/std';
 import {
   NOTIFICATION_NAMESPACES,
@@ -83,7 +83,7 @@ const notificationObject = z
   .object({
     notification_id: notificationIdSchema,
     /** Occurrence time, set by NC for `timeseries` notification kind */
-    event_timestamp: z.iso.datetime().optional(),
+    event_timestamp: isoDateTime().optional(),
     /** Registry namespace that owns this notification, e.g. `inference`. */
     namespace: z.enum(NOTIFICATION_NAMESPACES),
     /** Registry type within `namespace`, e.g. `modelStatus` */
@@ -116,7 +116,7 @@ export const notificationWriteSchema = notificationObject.superRefine((value, ct
 export const notificationReadSchema = notificationObject
   .extend({
     /** Ingest time, stamped on write by NC — never producer-supplied. */
-    '@timestamp': z.iso.datetime(),
+    '@timestamp': isoDateTime(),
     namespace: z.string().min(1).max(64),
     type: z.string().min(1).max(64),
     // Catch unknown severity tiers that may be added in the future
@@ -126,19 +126,13 @@ export const notificationReadSchema = notificationObject
 
 /**
  * Read-path query params. Used primarily at the HTTP GET route boundary.
- *`queryNotifications` re-parses it for extra validation..
+ *`queryNotifications` re-parses it for extra validation.
  */
 export const notificationQueryParamsSchema = z
   .object({
     namespace: z.string().min(1).max(64).optional(),
     type: z.string().min(1).max(64).optional(),
-    // accept either a single string or array for the severity param
-    // and normalize to array so callers don't have to.
-    severity: z
-      .union([z.enum(SEVERITIES), z.array(z.enum(SEVERITIES)).max(SEVERITIES.length)])
-      .transform((value) => (Array.isArray(value) ? value : [value]))
-      .optional(),
-    from: z.iso.datetime().optional(),
-    to: z.iso.datetime().optional(),
+    from: isoDateTime().optional(),
+    to: isoDateTime().optional(),
   })
   .strict();

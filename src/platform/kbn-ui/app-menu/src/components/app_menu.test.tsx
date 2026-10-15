@@ -17,7 +17,7 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
 }));
 

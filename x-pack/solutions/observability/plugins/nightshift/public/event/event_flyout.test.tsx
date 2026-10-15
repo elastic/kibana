@@ -10,31 +10,55 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { UseInvestigationResult } from '@kbn/investigation-output';
+import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { EventFlyout } from './event_flyout';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
+const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
+
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-  useInvestigationState: () => ({
-    status: 'complete',
-    state: undefined,
-    error: undefined,
-    conversationId: undefined,
-  }),
+  useInvestigation: (args: unknown) => mockUseInvestigation(args),
+  InvestigationOutput: ({ status }: { status: string }) => (
+    <div data-test-subj="investigationOutput">{status}</div>
+  ),
 }));
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({
+const investigationDetails = {
+  id: 'conv-1',
+  title: 'Web latency spike',
+  title_pending: false,
+  created_at: '2026-07-10T12:00:00Z',
+  updated_at: '2026-07-10T12:05:00Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open', summary: 'Latency rose after a deploy.' },
+  in_progress: false,
+  subjects: [],
+  proposals: [],
+} satisfies Investigation;
+
+const mockOpenConversationDetails = jest.fn();
+
+jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
+  useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
+}));
+
+let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
+
+jest.mock('../hooks/use_fetch_source_features', () => ({
+  useFetchSourceFeatures: () => ({
     features: [],
-    failedStreamNames: [],
+    failedSourceIds: [],
     isInitialLoading: false,
     isFetching: false,
     isError: false,
@@ -71,7 +95,7 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
           detection_id: 'det-1',
           rule_name: 'latency-p95-spike',
           rule_uuid: 'rule-uuid-001',
-          stream_name: 'logs.web-frontend',
+          source_id: 'logs.web-frontend',
           change_point_type: 'spike',
           '@timestamp': '2026-07-10T12:00:00Z',
         },
@@ -90,7 +114,10 @@ jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },
-      agentBuilder: { openChat: mockOpenChat },
+      agentBuilder: {
+        openChat: mockOpenChat,
+        openConversationDetails: mockOpenConversationDetails,
+      },
       notifications: {
         toasts: {
           addSuccess: jest.fn(),
@@ -110,6 +137,11 @@ jest.mock('../hooks/use_kibana', () => ({
         },
       },
       application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },
@@ -119,19 +151,24 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
-  stream_names: ['logs.web-frontend', 'logs.api-gateway'],
+  status: 'active',
+  source_ids: ['logs.web-frontend', 'logs.api-gateway'],
   title: 'Web latency spike across frontend and API gateway',
   summary:
     'P95 latency jumped from 120ms to 890ms on web-frontend and api-gateway services. This is a long summary that should be truncated because it exceeds three hundred characters total length when we add enough text here to push it past the limit for the show more toggle to appear in the UI component. Adding even more text to ensure we are definitely past the three hundred character maximum truncation threshold.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.92,
 };
 
 describe('EventFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockInvestigationRunStatuses = undefined;
+    mockOpenConversationDetails.mockClear();
+    mockUseInvestigation.mockReturnValue({
+      status: 'complete',
+      investigation: investigationDetails,
+    });
     window.history.pushState({}, '', '/app/observability/nightshift');
   });
 
@@ -156,7 +193,7 @@ describe('EventFlyout', () => {
   });
 
   it('hides the investigation badge when the event has no investigations', () => {
-    renderFlyout({ event: { ...mockEvent, status: 'closed' } });
+    renderFlyout({ event: { ...mockEvent, status: 'inactive' } });
 
     expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
     expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
@@ -168,7 +205,7 @@ describe('EventFlyout', () => {
     renderFlyout({
       event: {
         ...mockEvent,
-        status: 'closed',
+        status: 'inactive',
         investigations: [
           {
             workflow_execution_id: 'exec-1',
@@ -243,13 +280,13 @@ describe('EventFlyout', () => {
     expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
   });
 
-  it('renders the investigation summary when the event has investigations', () => {
+  it('renders the investigation from the shared API and opens its conversation details', () => {
     renderFlyout({
       event: {
         ...mockEvent,
         investigations: [
           {
-            workflow_execution_id: 'exec-1',
+            workflow_execution_id: 'conv-1',
             started_at: '2026-07-10T12:00:00Z',
             completed_at: '2026-07-10T12:05:00Z',
           },
@@ -257,9 +294,65 @@ describe('EventFlyout', () => {
       },
     });
 
-    expect(screen.getByTestId('nightshiftInvestigationSummaryCard')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationShowDetailsButton')).toBeInTheDocument();
+    expect(mockUseInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'conv-1' })
+    );
+    expect(screen.getByTestId('investigationOutput')).toHaveTextContent('complete');
     expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+  });
+
+  it('marks an unavailable investigation and withholds the details button', () => {
+    mockUseInvestigation.mockReturnValue({
+      status: 'unavailable',
+      error: "You don't have permission to view this investigation.",
+    });
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'conv-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+      'Investigation unavailable'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no investigation when the investigation does not exist', () => {
+    mockInvestigationRunStatuses = {};
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'legacy-execution',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    expect(mockUseInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: undefined })
+    );
   });
 
   it('calls onClose when flyout is closed', () => {

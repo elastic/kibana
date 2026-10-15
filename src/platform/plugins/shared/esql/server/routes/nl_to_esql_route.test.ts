@@ -24,12 +24,10 @@ jest.mock('@kbn/data-plugin/server', () => ({
 jest.mock('./helpers', () => ({
   resolveConnectorId: jest.fn(),
   createScopedModel: jest.fn(),
-  resolveIncludeDatasets: jest.fn(),
 }));
 
 const { generateEsql, generateEsqlCompletion } = jest.requireMock('@kbn/agent-builder-genai-utils');
-const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } =
-  jest.requireMock('./helpers');
+const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
 function buildMocks() {
   const handler = jest.fn();
@@ -105,7 +103,6 @@ describe('registerNLtoESQLRoute', () => {
 
     resolveConnectorId.mockResolvedValue('connector-1');
     createScopedModel.mockResolvedValue({});
-    resolveIncludeDatasets.mockResolvedValue(false);
 
     const licenseError = Object.assign(new Error('license_expired'), { reason: 'license_expired' });
     generateEsql.mockRejectedValue(licenseError);
@@ -123,32 +120,17 @@ describe('registerNLtoESQLRoute', () => {
 
     resolveConnectorId.mockResolvedValue('connector-1');
     createScopedModel.mockResolvedValue({});
-    resolveIncludeDatasets.mockResolvedValue(false);
     generateEsql.mockResolvedValue({ query: 'FROM kibana_sample_data_flights' });
 
     request.body = { nlInstruction: 'show me all flights' };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'none', includeDatasets: true, includeViews: true })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights' },
     });
-  });
-
-  it('passes includeDatasets through from resolveIncludeDatasets', async () => {
-    const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
-      buildMocks();
-    registerNLtoESQLRoute(router, getStartServices, context);
-
-    resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockResolvedValue({});
-    resolveIncludeDatasets.mockResolvedValue(true);
-    generateEsql.mockResolvedValue({ query: 'FROM speedtest_fixed' });
-
-    request.body = { nlInstruction: 'show me all speedtests' };
-    await handler(requestHandlerContext, request, response);
-
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ includeDatasets: true }));
   });
 
   it('does not call generateEsql for a completion request (uses generateEsqlCompletion instead)', async () => {
@@ -169,7 +151,6 @@ describe('registerNLtoESQLRoute', () => {
 
     expect(generateEsqlCompletion).toHaveBeenCalled();
     expect(generateEsql).not.toHaveBeenCalled();
-    expect(resolveIncludeDatasets).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: ' | LIMIT 10', replacesNext: false },
     });

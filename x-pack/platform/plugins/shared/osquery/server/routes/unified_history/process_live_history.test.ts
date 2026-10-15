@@ -17,8 +17,7 @@ const mockGetResultCountsForActions = jest.requireMock('../../lib/get_result_cou
 
 const mockRequest = httpServerMock.createKibanaRequest();
 
-const createMockOsqueryContext = (cpsEnabled = false) => ({
-  cpsEnabled,
+const createMockOsqueryContext = () => ({
   getStartServices: jest.fn().mockResolvedValue([
     {
       elasticsearch: {
@@ -68,7 +67,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -95,7 +93,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -124,7 +121,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -134,7 +130,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'default',
       undefined,
       false
     );
@@ -167,7 +162,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -177,7 +171,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      'default',
       undefined,
       false
     );
@@ -194,7 +187,6 @@ describe('processLiveHistory', () => {
       liveHits: [createLiveHit()],
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'production',
       integrationNamespaces: ['prod'],
       ccsEnabled: true,
       logger: {} as never,
@@ -203,7 +195,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'production',
       ['prod'],
       true
     );
@@ -214,7 +205,6 @@ describe('processLiveHistory', () => {
       liveHits: [],
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -235,8 +225,8 @@ describe('processLiveHistory', () => {
 
     await processLiveHistory({
       liveHits: [createLiveHit()],
+      cpsActive: true,
       osqueryContext: {
-        cpsEnabled: true,
         getStartServices: jest.fn().mockResolvedValue([
           {
             elasticsearch: {
@@ -249,14 +239,12 @@ describe('processLiveHistory', () => {
         ]),
       } as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       mockScopedEsClient,
       ['query-1'],
-      'default',
       undefined,
       false
     );

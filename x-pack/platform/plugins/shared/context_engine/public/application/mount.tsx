@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { ContextEngineAppChromeAdapter } from '../app_chrome_adapter';
 import type { AgentBuilderIntegration, ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
@@ -27,6 +28,7 @@ export const mountApp = async ({
   element,
   history,
   getChatOpener,
+  appChrome,
   getAgentBuilderIntegration,
 }: {
   core: CoreStart;
@@ -34,6 +36,7 @@ export const mountApp = async ({
   element: HTMLElement;
   history: ScopedHistory;
   getChatOpener?: () => ChatOpener | undefined;
+  appChrome?: ContextEngineAppChromeAdapter;
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }) => {
   const services: ContextEngineServices = {
@@ -44,6 +47,8 @@ export const mountApp = async ({
     console: plugins.console,
     spaces: plugins.spaces,
     getChatOpener,
+    appChrome,
+    history,
     getAgentBuilderIntegration,
   };
 

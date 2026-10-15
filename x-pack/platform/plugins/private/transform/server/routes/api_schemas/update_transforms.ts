@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 import type { TransformPivotConfig } from '../../../common/types/transform';
+import { TRANSFORM_PROJECT_ROUTING_MAX_LENGTH } from '../../../common/constants';
 
 import { runtimeMappingsSchema } from './common';
 import { retentionPolicySchema, settingsSchema, syncSchema } from './transforms';
@@ -25,7 +26,7 @@ const sourceUpdateSchema = schema.object({
     ])
   ),
   query: schema.maybe(schema.recordOf(schema.string({ maxLength: 1000 }), schema.any())),
-  project_routing: schema.maybe(schema.string({ maxLength: 1000 })),
+  project_routing: schema.maybe(schema.string({ maxLength: TRANSFORM_PROJECT_ROUTING_MAX_LENGTH })),
 });
 
 // POST _transform/{transform_id}/_update

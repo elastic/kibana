@@ -12,6 +12,7 @@ import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
+  CustomBulkActionGroupId,
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
@@ -28,6 +29,23 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
+
+export type BulkActionMenuItem = AlertTableContextMenuItem;
+
+/**
+ * Structured groups returned for composed bulk-action menus.
+ * `casesItems` and `timelineItems` are sub-partitions of custom bulk actions
+ * whose producers set `groupId: 'cases'` or `groupId: 'timeline'` respectively.
+ * `customItems` holds any remaining custom actions that declare no group.
+ */
+export interface BulkActionGroups {
+  statusItems: BulkActionMenuItem[];
+  casesItems: BulkActionMenuItem[];
+  timelineItems: BulkActionMenuItem[];
+  customItems: BulkActionMenuItem[];
+  workflowItems: BulkActionMenuItem[];
+}
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -43,6 +61,52 @@ export interface BulkActionsProps {
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
 }
+
+type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
+
+const getCustomActionGroup = (groupId?: CustomBulkActionGroupId): keyof CustomActionGroups => {
+  switch (groupId) {
+    case 'cases':
+      return 'casesItems';
+    case 'timeline':
+      return 'timelineItems';
+    default:
+      return 'customItems';
+  }
+};
+
+const getCustomActionGroups = ({
+  customBulkActions,
+  query,
+  closePopover,
+  eventIds,
+}: Pick<BulkActionsProps, 'customBulkActions' | 'query' | 'closePopover' | 'eventIds'>) => {
+  const groups: CustomActionGroups = {
+    casesItems: [],
+    timelineItems: [],
+    customItems: [],
+  };
+
+  for (const action of customBulkActions ?? []) {
+    const isDisabled = Boolean(query && action.disableOnQuery);
+    const menuItem: BulkActionMenuItem = {
+      key: action.key,
+      disabled: isDisabled,
+      'data-test-subj': action['data-test-subj'],
+      icon: action.icon,
+      toolTipContent: isDisabled ? action.disabledLabel : null,
+      onClick: () => {
+        closePopover?.();
+        action.onClick(eventIds);
+      },
+      name: action.label,
+    };
+
+    groups[getCustomActionGroup(action.groupId)].push(menuItem);
+  }
+
+  return groups;
+};
 
 export const useBulkActionItems = ({
   eventIds,
@@ -194,77 +258,63 @@ export const useBulkActionItems = ({
     closePopover: closePopover ?? noop,
   });
 
-  const items = useMemo(() => {
-    const actionItems: AlertTableContextMenuItem[] = [];
-    if (showAlertStatusActions && hasAlertsUpdate) {
-      if (currentStatus !== FILTER_OPEN) {
-        actionItems.push({
-          key: 'open',
-          'data-test-subj': 'open-alert-status',
-          onClick: () => {
-            closePopover?.();
-            onClickUpdate(FILTER_OPEN as AlertWorkflowStatus);
-          },
-          name: i18n.BULK_ACTION_OPEN_SELECTED,
-        });
-      }
-      if (currentStatus !== FILTER_ACKNOWLEDGED) {
-        actionItems.push({
-          key: 'acknowledge',
-          'data-test-subj': 'acknowledged-alert-status',
-          onClick: () => {
-            closePopover?.();
-            onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus);
-          },
-          name: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-        });
-      }
-      if (currentStatus !== FILTER_CLOSED) {
-        actionItems.push({
-          key: alertClosingReasonItem?.key,
-          'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
-          name: alertClosingReasonItem?.label,
-          panel: alertClosingReasonItem?.panel,
-        });
-      }
+  const statusItems = useMemo<BulkActionMenuItem[]>(() => {
+    const result: BulkActionMenuItem[] = [];
+    if (!showAlertStatusActions || !hasAlertsUpdate) return result;
+    if (currentStatus !== FILTER_OPEN) {
+      result.push({
+        key: ALERT_STATUS_ACTION_IDS.markAsOpen,
+        'data-test-subj': 'open-alert-status',
+        onClick: () => {
+          closePopover?.();
+          onClickUpdate(FILTER_OPEN as AlertWorkflowStatus);
+        },
+        name: i18n.BULK_ACTION_OPEN_SELECTED,
+      });
     }
-
-    const additionalItems = customBulkActions
-      ? customBulkActions.reduce<AlertTableContextMenuItem[]>((acc, action) => {
-          const isDisabled = !!(query && action.disableOnQuery);
-          acc.push({
-            key: action.key,
-            disabled: isDisabled,
-            'data-test-subj': action['data-test-subj'],
-            toolTipContent: isDisabled ? action.disabledLabel : null,
-            onClick: () => {
-              closePopover?.();
-              action.onClick(eventIds);
-            },
-            name: action.label,
-          });
-          return acc;
-        }, [])
-      : [];
-
-    return [
-      ...actionItems,
-      ...additionalItems,
-      ...(showRunWorkflowActions ? runWorkflowMenuItem : []),
-    ];
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
+      result.push({
+        key: ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
+        'data-test-subj': 'acknowledged-alert-status',
+        onClick: () => {
+          closePopover?.();
+          onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus);
+        },
+        name: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
+      });
+    }
+    if (currentStatus !== FILTER_CLOSED) {
+      result.push({
+        key: alertClosingReasonItem?.key,
+        'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
+        name: alertClosingReasonItem?.label,
+        panel: alertClosingReasonItem?.panel,
+      });
+    }
+    return result;
   }, [
     showAlertStatusActions,
     hasAlertsUpdate,
-    customBulkActions,
-    runWorkflowMenuItem,
-    showRunWorkflowActions,
     currentStatus,
     closePopover,
     onClickUpdate,
     alertClosingReasonItem,
-    query,
-    eventIds,
   ]);
+
+  const { casesItems, timelineItems, customItems } = useMemo(
+    () => getCustomActionGroups({ customBulkActions, query, closePopover, eventIds }),
+    [customBulkActions, query, closePopover, eventIds]
+  );
+
+  const workflowItems = useMemo<BulkActionMenuItem[]>(
+    () => (showRunWorkflowActions ? runWorkflowMenuItem : []),
+    [showRunWorkflowActions, runWorkflowMenuItem]
+  );
+
+  const groups = useMemo<BulkActionGroups>(
+    () => ({ statusItems, casesItems, timelineItems, customItems, workflowItems }),
+    [statusItems, casesItems, timelineItems, customItems, workflowItems]
+  );
 
   const panels = useMemo(
     () =>
@@ -284,5 +334,5 @@ export const useBulkActionItems = ({
     [alertClosingReasonPanels, runDocumentWorkflowPanel, showRunWorkflowActions]
   );
 
-  return useMemo(() => ({ items, panels }), [items, panels]);
+  return useMemo(() => ({ panels, groups }), [panels, groups]);
 };

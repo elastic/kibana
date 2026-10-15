@@ -8,6 +8,9 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { DISCOVER_TABS_LOCAL_STORAGE_KEY } from '../constants';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -42,6 +45,11 @@ export class MetricsExperiencePage {
   public readonly gridSettings: GridSettings;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
+  /**
+   * The app scroll container carries the inline offset a push flyout applies for as long as it is
+   * open. See `grid_global_app_style` for the rule this resolves against.
+   */
+  public readonly appScrollContainer: Locator;
 
   private readonly page: ScoutPage;
 
@@ -66,6 +74,7 @@ export class MetricsExperiencePage {
     this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
+    this.appScrollContainer = page.locator(`#${APP_MAIN_SCROLL_CONTAINER_ID}`);
   }
 
   public getCardByIndex(index: number): Locator {
@@ -209,5 +218,49 @@ export class MetricsExperiencePage {
    */
   public getCardTitleHighlight(index: number, text: string): Locator {
     return this.getCardTitleHighlights(index).filter({ hasText: text });
+  }
+
+  /**
+   * Returns the decoded `_p` (profile state) segment of a Discover URL, or an
+   * empty string when the URL carries none. Standalone Discover keeps its app
+   * state in the URL fragment (`useHashQuery`), so `_p` is read out of the
+   * hash's query string rather than the top-level search params.
+   */
+  public getProfileState(url: string): string {
+    const { hash } = new URL(url);
+    const queryStart = hash.indexOf('?');
+    if (queryStart === -1) {
+      return '';
+    }
+    return new URLSearchParams(hash.slice(queryStart + 1)).get(PROFILE_STATE_URL_KEY) ?? '';
+  }
+
+  /**
+   * Reads a metrics profile-state field persisted in local tab storage, or `undefined` when no
+   * open tab carries one (defaults are stripped rather than written). Tab state is written on a
+   * 300ms trailing throttle, so poll this before reloading or navigating.
+   */
+  public getPersistedMetricsStateField(
+    field:
+      | 'sortDirection'
+      | 'sortField'
+      | 'counterAggregation'
+      | 'gaugeAggregation'
+      | 'histogramPercentile'
+  ): Promise<string | undefined> {
+    return this.page.evaluate(
+      ([storageKey, fieldName]) => {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return undefined;
+        const { openTabs } = JSON.parse(raw) as {
+          openTabs?: Array<{
+            profileState?: { metricsState?: Record<string, string> };
+          }>;
+        };
+        return openTabs?.find((tab) => tab.profileState?.metricsState?.[fieldName] != null)
+          ?.profileState?.metricsState?.[fieldName];
+      },
+      [DISCOVER_TABS_LOCAL_STORAGE_KEY, field] as const
+    );
   }
 }

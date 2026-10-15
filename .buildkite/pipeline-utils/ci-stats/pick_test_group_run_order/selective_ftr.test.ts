@@ -10,9 +10,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as JSON5 from 'json5';
-import { getKibanaDir } from '../../utils';
-import { getModuleLookup } from '../../affected-packages/module_lookup';
-import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr';
+import { getKibanaDir } from '../../utils.ts';
+import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
+import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr.ts';
 
 /**
  * Instead of asserting specific IDs in/out of the list (which just mirrors the
@@ -122,6 +122,15 @@ describe('shouldSkipFtrTests', () => {
     ).toBe(true);
   });
 
+  it('returns true for dependency ownership and Renovate changes', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/dependency-ownership']), [
+        'packages/kbn-dependency-ownership/src/rule.ts',
+        'renovate.json',
+      ])
+    ).toBe(true);
+  });
+
   it('returns false when any affected module is not excluded', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/scout', '@kbn/dashboard-plugin']), [
@@ -135,7 +144,7 @@ describe('shouldSkipFtrTests', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/scout']), [
         'src/platform/packages/shared/kbn-scout/src/index.ts',
-        'yarn.lock',
+        'pnpm-lock.yaml',
       ])
     ).toBe(false);
     expect(

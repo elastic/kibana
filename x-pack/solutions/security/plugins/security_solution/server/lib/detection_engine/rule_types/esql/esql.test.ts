@@ -212,4 +212,23 @@ describe('esqlExecutor', () => {
       expect(result.state).toHaveProperty('lastQuery', params.query);
     });
   });
+
+  it('should handle scheduleNotificationResponseActionsService call', async () => {
+    (
+      ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+    ).mockResolvedValue({
+      id: 'QUERY-ID',
+      is_running: false,
+      columns: [],
+      values: [],
+    });
+
+    const result = await esqlExecutor(mockedArguments);
+
+    expect(mockScheduleNotificationResponseActionsService).toHaveBeenCalledWith({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: params.responseActions,
+    });
+  });
 });

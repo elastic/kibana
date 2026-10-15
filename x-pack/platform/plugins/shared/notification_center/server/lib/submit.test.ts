@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
@@ -24,18 +25,18 @@ const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const create = jest.fn().mockResolvedValue({ errors: false, items: [{ create: {} }] });
   const dataStreams = dataStreamServiceMock.createStartContract();
   dataStreams.initializeClient.mockResolvedValue({ create } as never);
-  const getBooleanValue = jest.fn().mockResolvedValue(enabled);
+  const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
   const core = {
     getStartServices: jest
       .fn()
-      .mockResolvedValue([{ dataStreams, featureFlags: { getBooleanValue } }]),
+      .mockResolvedValue([{ dataStreams, featureFlags: { getBooleanValue$ } }]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { core, create, getBooleanValue };
+  return { core, create, getBooleanValue$ };
 };
 
 const setup = (opts: { enabled?: boolean } = {}) => {
-  const { core, create, getBooleanValue } = createCoreMock(opts);
-  return { forType: buildForType(core), create, getBooleanValue };
+  const { core, create, getBooleanValue$ } = createCoreMock(opts);
+  return { forType: buildForType(core), create, getBooleanValue$ };
 };
 
 describe('buildForType', () => {
@@ -68,11 +69,11 @@ describe('buildForType', () => {
   });
 
   it('evaluates the feature flag keyed to the notification namespace/type', async () => {
-    const { forType, getBooleanValue } = setup();
+    const { forType, getBooleanValue$ } = setup();
 
     await forType(modelStatus).submit(content);
 
-    expect(getBooleanValue).toHaveBeenCalledWith(
+    expect(getBooleanValue$).toHaveBeenCalledWith(
       'notificationCenter.types.inference.modelStatus',
       false
     );
@@ -96,11 +97,11 @@ describe('buildForType', () => {
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
       const { buildForType: buildIsolated } = await import('./submit');
-      const { core, create, getBooleanValue } = createCoreMock();
+      const { core, create, getBooleanValue$ } = createCoreMock();
 
       const result = await buildIsolated(core)(modelStatus).submit(content);
 
-      expect(getBooleanValue).not.toHaveBeenCalled();
+      expect(getBooleanValue$).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ status: 'submitted' });
     });

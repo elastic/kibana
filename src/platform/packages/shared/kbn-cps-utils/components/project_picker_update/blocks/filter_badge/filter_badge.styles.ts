@@ -24,6 +24,9 @@ export const filterBadgeStyles = (euiThemeContext: UseEuiTheme) => {
         fontWeight: euiTheme.font.weight.bold,
         paddingRight: euiTheme.size.xs,
       },
+      '& svg': {
+        cursor: 'pointer',
+      },
     }),
     inactive: css({
       '--euiBadgeTextColor': disabledColors.color,

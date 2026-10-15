@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -52,6 +53,7 @@ interface GetEntityAnomalyOverviewParams {
   ml: MlPluginSetup;
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const buildTacticCounts = (
@@ -90,6 +92,7 @@ export const getEntityAnomalyOverview = async ({
   ml,
   request,
   soClient,
+  mitreDataClient,
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
   const effectiveFromMs = fromMs ?? effectiveToMs - DEFAULT_OVERVIEW_LOOKBACK_MS;
@@ -115,11 +118,19 @@ export const getEntityAnomalyOverview = async ({
     ml,
     request,
     soClient,
+    mitreDataClient,
   });
 
-  let resolvedJobIds = allSecurityJobIds;
+  // getJobConfig uses the space-aware anomalyDetectorsProvider and silently drops any job
+  // not installed in the current space, so its keys are the installed security job IDs.
+  // Using template IDs from getSecurityMlJobIds directly would match anomaly records from
+  // other spaces whose jobs share the same template-defined IDs.
+  const installedSecurityJobIds = [...allJobConfigs.keys()];
+  if (installedSecurityJobIds.length === 0) return empty;
+
+  let resolvedJobIds = installedSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
-    const tacticMatchedIds = allSecurityJobIds.filter((id) =>
+    const tacticMatchedIds = installedSecurityJobIds.filter((id) =>
       allJobConfigs.get(id)?.threatTactics.some((t) => threatTactics.includes(t))
     );
     resolvedJobIds = tacticMatchedIds;
@@ -127,7 +138,10 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
+    getBuiltInEntityDefinition(entityType),
+    entityRecord
+  );
   if (!entityFilter) {
     logger.warn(
       `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`

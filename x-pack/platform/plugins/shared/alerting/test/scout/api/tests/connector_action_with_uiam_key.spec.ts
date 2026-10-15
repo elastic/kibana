@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -43,9 +43,10 @@ const waitFor = async (
   return false;
 };
 
+// Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/275688
 apiTest.describe(
   'Connector actions for rules with UIAM-issued API keys',
-  { tag: tags.serverless.observability.complete },
+  { tag: '@local-serverless-observability_complete' },
   () => {
     let createdRuleId: string | undefined;
     let createdConnectorId: string | undefined;

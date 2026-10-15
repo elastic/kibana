@@ -58,6 +58,78 @@ function renderPackageCard(props: PackageCardProps) {
   return { utils };
 }
 
+describe('package card layout', () => {
+  it('uses an EUI-derived default minimum height', () => {
+    const {
+      utils: { queryByTestId },
+    } = renderPackageCard(cardProps());
+
+    const card = queryByTestId('integration-card:card-1');
+    expect(card).toHaveStyle('min-height: 128px');
+  });
+});
+
+describe('package card search member match', () => {
+  it('shows which bundled service matched instead of the description', () => {
+    const {
+      utils: { getByText, queryByText },
+    } = renderPackageCard(
+      cardProps({
+        description: 'Generic AWS description',
+        searchMemberMatch: { memberTitles: ['Amazon GuardDuty'], collectionTitle: 'AWS' },
+      })
+    );
+
+    expect(getByText('Amazon GuardDuty').tagName).toBe('STRONG');
+    expect(getByText(/is part of the/)).toBeInTheDocument();
+    expect(queryByText('Generic AWS description')).not.toBeInTheDocument();
+  });
+
+  it('lists every matched service, each in bold, and uses the plural verb', () => {
+    const {
+      utils: { getByText },
+    } = renderPackageCard(
+      cardProps({
+        searchMemberMatch: {
+          memberTitles: ['AWS CloudTrail', 'AWS CloudWatch', 'Amazon CloudFront'],
+          collectionTitle: 'AWS',
+        },
+      })
+    );
+
+    for (const title of ['AWS CloudTrail', 'AWS CloudWatch', 'Amazon CloudFront']) {
+      expect(getByText(title).tagName).toBe('STRONG');
+    }
+    expect(getByText(/are part of the/)).toBeInTheDocument();
+  });
+
+  it('names at most three services and counts the rest', () => {
+    const {
+      utils: { getByText, queryByText },
+    } = renderPackageCard(
+      cardProps({
+        searchMemberMatch: {
+          memberTitles: ['Amazon A', 'Amazon B', 'Amazon C', 'Amazon D', 'Amazon E'],
+          collectionTitle: 'AWS',
+        },
+      })
+    );
+
+    expect(getByText('Amazon C').tagName).toBe('STRONG');
+    expect(queryByText('Amazon D')).not.toBeInTheDocument();
+    expect(getByText(/2 more/).tagName).not.toBe('STRONG');
+    expect(getByText(/are part of the/)).toBeInTheDocument();
+  });
+
+  it('shows the description when nothing matched', () => {
+    const {
+      utils: { getByText },
+    } = renderPackageCard(cardProps({ description: 'Generic AWS description' }));
+
+    expect(getByText('Generic AWS description')).toBeInTheDocument();
+  });
+});
+
 // FLAKY: https://github.com/elastic/kibana/issues/200848
 describe.skip('package card', () => {
   let mockNavigateToApp: jest.Mock;
@@ -129,17 +201,6 @@ describe.skip('package card', () => {
       );
       const badgeElement = await queryByTitle('Quickstart');
       expect(!!badgeElement).toEqual(isQuickstart);
-    }
-  );
-
-  it.each([true, false])(
-    'determines whether to render card with collection button when `isCollectionCard` is %s`',
-    async (isCollectionCard) => {
-      const {
-        utils: { queryByText },
-      } = renderPackageCard(cardProps({ isCollectionCard }));
-      const collectionButton = queryByText('View collection');
-      expect(!!collectionButton).toEqual(isCollectionCard);
     }
   );
 
@@ -220,5 +281,26 @@ describe.skip('package card', () => {
       );
       expect(mockGetLineClamp).toHaveBeenCalledWith(1);
     });
+  });
+});
+
+describe('package card — collection variant badge', () => {
+  it('renders a variant count badge when isCollectionCard and groupMembers are present', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(
+      cardProps({
+        isCollectionCard: true,
+        groupMembers: [cardProps({ id: 'member-1' }) as any, cardProps({ id: 'member-2' }) as any],
+      })
+    );
+    expect(queryByText('2 variants')).toBeInTheDocument();
+  });
+
+  it('does not render a variant count badge when isCollectionCard is false', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(cardProps({ isCollectionCard: false }));
+    expect(queryByText(/variant/)).not.toBeInTheDocument();
   });
 });

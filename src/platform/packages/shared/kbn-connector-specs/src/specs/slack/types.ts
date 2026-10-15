@@ -64,6 +64,25 @@ export type SlackConversationsListParams = Record<string, string | number | bool
 
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
+// Conservative upper bounds on user-supplied strings to keep schema validation
+// cheap and prevent unbounded input. Slack IDs/timestamps are short; cursors
+// are opaque tokens kept generous; email follows RFC 5321. Channel names are
+// capped at 80 characters by Slack; the generic name bound leaves room for a
+// leading "#" and usernames. Message text is truncated by Slack at 40,000
+// characters, but chat.update rejects text over 4,000 characters (msg_too_long).
+// conversations.invite accepts up to 1000 user IDs.
+const SLACK_MAX_ID_LENGTH = 64;
+const SLACK_MAX_TIMESTAMP_LENGTH = 32;
+const SLACK_MAX_CURSOR_LENGTH = 1024;
+const SLACK_MAX_EMAIL_LENGTH = 320;
+const SLACK_MAX_CHANNEL_NAME_LENGTH = 80;
+const SLACK_MAX_NAME_LENGTH = 255;
+const SLACK_MAX_SEARCH_QUERY_LENGTH = 2000;
+const SLACK_MAX_MESSAGE_TEXT_LENGTH = 40000;
+const SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH = 4000;
+const SLACK_MAX_INVITE_USERS = 1000;
+const SLACK_MAX_INVITE_USERS_LENGTH = SLACK_MAX_INVITE_USERS * (SLACK_MAX_ID_LENGTH + 1);
+
 const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = 1000;
 const SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CONVERSATIONS_LIST_LIMIT;
 const SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES = 10;
@@ -72,6 +91,7 @@ const SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES = 100;
 const slackConversationTypesWithPublicDefault = () =>
   z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
     .transform(
       (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
@@ -83,6 +103,7 @@ export const SlackResolveChannelIdInputSchema = lazySchema(() =>
     name: z
       .string()
       .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
       .describe(
         'Channel name to resolve (e.g. "general" or "#general"). Returns the first matching conversation ID (C.../G...). To list or browse channels (e.g. what is available), use listChannels instead of probing many names here.'
       ),
@@ -98,6 +119,7 @@ export const SlackResolveChannelIdInputSchema = lazySchema(() =>
     excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe('Optional cursor to resume a previous scan (advanced). Usually omit.'),
     limit: z
@@ -130,6 +152,7 @@ export const SlackListChannelsInputSchema = lazySchema(() =>
     excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor from a previous listChannels response (nextCursor). Omit for the first page.'
@@ -162,29 +185,34 @@ export const SlackSearchMessagesInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(SLACK_MAX_SEARCH_QUERY_LENGTH)
       .describe(
         'Plain text search query to find messages. Do NOT embed Slack search operators like from: or in: here — use the dedicated fromUser, inChannel, after, and before parameters instead. Keep queries focused on a few keywords rather than long phrases for better results.'
       ),
     inChannel: z
       .string()
+      .max(SLACK_MAX_NAME_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).'
       ),
     fromUser: z
       .string()
+      .max(SLACK_MAX_NAME_LENGTH)
       .optional()
       .describe(
         "Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query. Accepts a Slack username or user ID, NOT a full name. If you only know a person's full name, search for it as keywords in the query parameter first, then use the sender.username field from results for subsequent filtered searches."
       ),
     after: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).'
       ),
     before: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).'
@@ -205,6 +233,7 @@ export const SlackSearchMessagesInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).'
@@ -240,6 +269,7 @@ export const SlackCreateConversationInputSchema = lazySchema(() =>
     name: z
       .string()
       .min(1)
+      .max(SLACK_MAX_CHANNEL_NAME_LENGTH)
       .describe(
         'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
       ),
@@ -256,24 +286,18 @@ export const SlackInviteToConversationInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
       .describe('The ID of the channel to invite users to (e.g. C... or G...).'),
     users: z
       .string()
       .min(1)
+      .max(SLACK_MAX_INVITE_USERS_LENGTH)
       .describe(
-        'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).'
+        `Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234). Slack accepts up to ${SLACK_MAX_INVITE_USERS} users.`
       ),
   })
 );
 export type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
-
-// Conservative upper bounds on user-supplied strings to keep schema validation
-// cheap and prevent unbounded input. Slack IDs/timestamps are short; cursors
-// are opaque tokens kept generous; email follows RFC 5321.
-const SLACK_MAX_ID_LENGTH = 64;
-const SLACK_MAX_TIMESTAMP_LENGTH = 32;
-const SLACK_MAX_CURSOR_LENGTH = 1024;
-const SLACK_MAX_EMAIL_LENGTH = 320;
 
 const SLACK_MAX_HISTORY_LIMIT = 1000;
 const SLACK_DEFAULT_HISTORY_LIMIT = 100;
@@ -449,6 +473,7 @@ export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
 const slackConversationTypesAllDefault = () =>
   z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
     .transform(
       (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
@@ -635,12 +660,14 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
       .describe(
-        'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use listChannels to browse available channels, or resolveChannelId when you know the channel name and need its ID.'
+        'Conversation ID (C.../G.../D...) or, on the Elastic Slack app, a connected channel name (e.g. "#general"). Use listChannels or resolveChannelId to look up an ID.'
       ),
-    text: z.string().min(1).describe('The message text to send'),
+    text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
     threadTs: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe('Timestamp of another message to reply to (creates a threaded reply)'),
     unfurlLinks: z
@@ -651,3 +678,30 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
   })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
+
+export const SlackUpdateMessageInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
+      .describe(
+        'Conversation ID (C.../G.../D...) holding the message. Slack does not accept channel names when editing; only the Elastic Slack app also accepts a connected channel name (e.g. "#general").'
+      ),
+    messageTs: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the message to edit, as returned in ts by sendMessage. Must be a message this app posted.'
+      ),
+    text: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH)
+      .describe(
+        'The new message text, at most 4,000 characters. It replaces the current text of the message, and Slack removes any blocks the message had.'
+      ),
+  })
+);
+export type SlackUpdateMessageInput = z.infer<typeof SlackUpdateMessageInputSchema>;

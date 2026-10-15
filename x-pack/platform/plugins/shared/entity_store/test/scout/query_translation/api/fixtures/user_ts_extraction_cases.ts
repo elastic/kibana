@@ -7,7 +7,7 @@
 
 /**
  * Strict expectations for `user.ts` identity + extraction rules, aligned with
- * `test/scout/common/es_archives/updates/data.json` documents (unless `ingestSource` is set).
+ * `test/scout/common/es_archives/logs/data.json` documents (unless `ingestSource` is set).
  *
  * Used by Scout `dsl_translation` / `painless_translation` and by
  * `common/domain/euid/user_ts_extraction_cases.test.ts` to guard against drift.
@@ -28,11 +28,12 @@ export interface UserTsExpectedMeta {
 export interface UserTsExtractionCase {
   /** Stable id for test titles / debugging */
   readonly id: string;
-  /** Elasticsearch query that must match exactly one document in the updates archive */
+  /** Elasticsearch query that must match exactly one document in the logs archive */
   readonly query: object;
   /**
-   * Document shape passed to `getEuidDslFilterBasedOnDocument('user', doc)` (subset of `_source`
-   * sufficient to build the same filter as the archived doc).
+   * Document shape passed to
+   * `getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), doc)`
+   * (subset of `_source` sufficient to build the same filter as the archived doc).
    */
   readonly dslFilterSource: Record<string, unknown>;
   readonly expectedEuid: string | undefined;
@@ -49,7 +50,7 @@ export interface UserTsExtractionCase {
   readonly expectNoPerDocumentDsl?: boolean;
 }
 
-/** Cases backed by `es_archives/updates/data.json` (plus optional ingested-only rows). */
+/** Cases backed by `es_archives/logs/data.json` (plus optional ingested-only rows). */
 export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   // --- IDP: event.kind asset + event.module namespace mapping (user.ts fieldEvaluations) ---
   {
@@ -401,7 +402,151 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       cloud: { provider: 'aws' },
     },
   },
-  // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
+  // --- AWS: user.entity.id (IAM ARN) ranked first when cloud.provider is aws ---
+  {
+    id: 'asset-cloud-provider-aws-iam-role-entity-id',
+    query: { term: { 'user.name': 'scout-aws-iam-role' } },
+    dslFilterSource: {
+      user: {
+        id: 'arn:aws:iam::123456789012:role/scout/ScoutRole',
+        name: 'scout-aws-iam-role',
+        entity: { id: 'arn:aws:iam::123456789012:role/scout/ScoutRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:role/scout/ScoutRole@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-iam-role',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'arn:aws:iam::123456789012:role/scout/ScoutRole',
+        name: 'scout-aws-iam-role',
+        entity: { id: 'arn:aws:iam::123456789012:role/scout/ScoutRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-iam-user-entity-id',
+    query: { term: { 'user.name': 'scout-aws-iam-user' } },
+    dslFilterSource: {
+      user: {
+        id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user',
+        name: 'scout-aws-iam-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:user/scout-aws-iam-user@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-iam-user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user',
+        name: 'scout-aws-iam-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-iam-user' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-entity-id-over-email',
+    query: { term: { 'user.name': 'scout-aws-sso' } },
+    dslFilterSource: {
+      user: {
+        email: 'scout-aws-sso@example.com',
+        id: 'AROAEXAMPLE:scout-aws-sso@example.com',
+        name: 'scout-aws-sso',
+        entity: { id: 'arn:aws:iam::123456789012:role/ScoutSsoRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:arn:aws:iam::123456789012:role/ScoutSsoRole@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout-aws-sso',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        email: 'scout-aws-sso@example.com',
+        id: 'AROAEXAMPLE:scout-aws-sso@example.com',
+        name: 'scout-aws-sso',
+        entity: { id: 'arn:aws:iam::123456789012:role/ScoutSsoRole' },
+      },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-local-precedence',
+    query: { term: { 'user.name': 'scout-aws-local-user' } },
+    dslFilterSource: {
+      user: {
+        name: 'scout-aws-local-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-local-user' },
+      },
+      host: { id: 'scout-aws-ec2-host' },
+      event: { kind: 'event', module: 'system', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:scout-aws-local-user@scout-aws-ec2-host@local',
+    expectedMeta: {
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
+      entityName: 'scout-aws-local-user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        name: 'scout-aws-local-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-local-user' },
+      },
+      host: { id: 'scout-aws-ec2-host' },
+      event: { kind: 'event', module: 'system', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-cloudtrail-event-does-not-create',
+    query: { term: { 'user.name': 'scout-aws-cloudtrail-user' } },
+    dslFilterSource: {
+      user: {
+        id: 'AIDAEXAMPLESCOUT',
+        name: 'scout-aws-cloudtrail-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-cloudtrail-user' },
+      },
+      event: { kind: 'event', module: 'aws', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: {
+        id: 'AIDAEXAMPLESCOUT',
+        name: 'scout-aws-cloudtrail-user',
+        entity: { id: 'arn:aws:iam::123456789012:user/scout-aws-cloudtrail-user' },
+      },
+      event: { kind: 'event', module: 'aws', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  // --- IAM event types without `event.kind: asset`: no longer an IdP create path ---
   {
     id: 'idp-iam-okta-user-id',
     query: {
@@ -414,13 +559,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'any-random', category: 'iam', type: 'user', module: 'okta' },
       host: { entity: { id: 'host-505' } },
     },
-    expectedEuid: 'user:user-505@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'karen.green',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
+  // IAM lifecycle doc with a valid `user.name` + `host.id` pair: classified as `local`.
   {
     id: 'idp-iam-azure-null-kind-email',
     query: {
@@ -436,10 +578,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: null, category: 'iam', type: 'creation', module: 'azure' },
       host: { id: 'host-606' },
     },
-    expectedEuid: 'user:larry@example.com@entra_id',
+    expectedEuid: 'user:larry.black@host-606@local',
     expectedMeta: {
-      namespace: 'entra_id',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'larry.black',
     },
   },
@@ -453,12 +595,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'group', module: 'entityanalytics_ad' },
       host: { name: 'server-07' },
     },
-    expectedEuid: 'user:mary.blue@corp@active_directory',
-    expectedMeta: {
-      namespace: 'active_directory',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'mary.blue',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   // --- Namespace from data_stream.dataset (first segment) ---
   {
@@ -469,12 +607,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'deletion' },
       data_stream: { dataset: 'entityanalytics_okta.users' },
     },
-    expectedEuid: 'user:okta.from.dataset@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'okta.from.dataset',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   {
     id: 'idp-asset-aws-from-dataset',
@@ -646,8 +780,10 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 
 /**
  * Expected number of user documents in `es_archives/updates` that pass
- * `getEuidDslDocumentsContainsIdFilter('user')` (documentsFilter ∧ postAggFilter).
- * Keep in sync: archive user docs with defined EUID; this table lists archive-backed cases with EUID + cases without; ingested-only
- * case is excluded here.
+ * `getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))`, which is built from
+ * `documentsFilter` only (see `common/domain/euid/dsl.ts`). Documents that pass `documentsFilter`
+ * but fail `postAggFilter` are
+ * still counted here, so this number is independent of the `postAggFilter` gates. Ingested-only
+ * cases are excluded.
  */
 export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 29;

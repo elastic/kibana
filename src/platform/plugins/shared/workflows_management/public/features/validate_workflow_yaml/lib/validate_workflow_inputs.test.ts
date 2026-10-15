@@ -211,6 +211,7 @@ describe('validateWorkflowInputs', () => {
       expect(results[0]).toMatchObject({
         severity: 'warning',
         owner: 'workflow-inputs-validation',
+        ruleId: 'unknownInputKey',
       });
       expect(results[0].message).toContain('unknown_field');
       expect(results[0].message).toContain('Child Workflow');
@@ -265,6 +266,7 @@ describe('validateWorkflowInputs', () => {
       expect(results[0]).toMatchObject({
         severity: 'error',
         owner: 'workflow-inputs-validation',
+        ruleId: 'missingRequiredInput',
       });
       expect(results[0].message).toContain('required_field');
       expect(results[0].message).toContain('Child Workflow');

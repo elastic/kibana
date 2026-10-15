@@ -14,6 +14,7 @@ import type {
   CanExpandPanels,
   HasEditCapabilities,
   PublishesBlockingError,
+  PublishesRendered,
   PublishesUnifiedSearch,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -84,6 +85,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
+  PublishesRendered &
   PublishesUnifiedSearch & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
     canEditUnifiedSearch: () => boolean;
@@ -166,6 +168,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         buildFiltersFromState(state.service_name, state.environment)
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const rendered$ = new BehaviorSubject<boolean>(false);
 
       const stateApi = initializeStateApi<ServiceMapEmbeddableState>({
         parentApi,
@@ -197,6 +200,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...timeRangeManager.api,
         ...stateApi,
         blockingError$,
+        rendered$,
         filters$,
         query$,
         canEditUnifiedSearch: () => true,
@@ -348,6 +352,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             );
           }, []);
 
+          const onRendered = useCallback((isRendered: boolean) => {
+            rendered$.next(isRendered);
+          }, []);
+
           const fetchContext = useFetchContext(api);
           const effectiveTimeRange = fetchContext.timeRange;
           if (!effectiveTimeRange) {
@@ -388,6 +396,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}
+                  onRendered={onRendered}
                   mapOrientation={mapOrientation ?? 'horizontal'}
                   onMapOrientationChange={customStateManager.api.setMapOrientation}
                   parentFilters={parentFilters}

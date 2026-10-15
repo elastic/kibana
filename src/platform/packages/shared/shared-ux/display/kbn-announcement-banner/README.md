@@ -40,13 +40,13 @@ An announcement banner component with optional media, actions and dismiss button
 1. Install dependencies:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 2. Start Storybook:
 
 ```bash
-yarn storybook shared_ux
+pnpm storybook shared_ux
 ```
 
 Open [http://localhost:9001](http://localhost:9001) to view the application.
@@ -58,6 +58,6 @@ The project includes comprehensive test coverage using Jest and RTL.
 Run tests with:
 
 ```bash
-yarn test:jest src/platform/packages/shared/shared-ux/display/kbn-announcement-banner              # Run all tests
-yarn test:jest src/platform/packages/shared/shared-ux/display/kbn-announcement-banner --watch      # Run in watch mode
+pnpm test:jest src/platform/packages/shared/shared-ux/display/kbn-announcement-banner              # Run all tests
+pnpm test:jest src/platform/packages/shared/shared-ux/display/kbn-announcement-banner --watch      # Run in watch mode
 ```

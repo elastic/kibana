@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  useKibana as useKibanaFromReact,
+  type KibanaReactContextValue,
+} from '@kbn/kibana-react-plugin/public';
 import type {
   AgentBuilderIntegration,
   ChatOpener,
+  ContextEngineAppServices,
   ContextEngineStartDependencies,
 } from '../../types';
 
-export interface ContextEngineServices extends CoreStart {
+export interface ContextEngineServices extends ContextEngineAppServices {
   data: ContextEngineStartDependencies['data'];
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
@@ -33,6 +36,5 @@ export interface ContextEngineServices extends CoreStart {
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }
 
-const useTypedKibana = () => useKibana<ContextEngineServices>();
-
-export { useTypedKibana as useKibana };
+export const useKibana = (): KibanaReactContextValue<ContextEngineServices> =>
+  useKibanaFromReact<ContextEngineServices>();

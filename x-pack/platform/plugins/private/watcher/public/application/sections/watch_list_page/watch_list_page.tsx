@@ -10,7 +10,6 @@ import React, { useState, useMemo, useEffect, Fragment } from 'react';
 import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
@@ -21,9 +20,9 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiPageHeader,
   EuiPageTemplate,
 } from '@elastic/eui';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -33,6 +32,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
+import { watcherPageDescription, watcherPageTitle } from '../../lib/watcher_app_header';
 import type { Error } from '../../components';
 import {
   getPageErrorCode,
@@ -45,6 +45,27 @@ import { useLoadWatches } from '../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';
 import { useAppContext } from '../../app_context';
 import { PageError as GenericPageError } from '../../shared_imports';
+
+const createWatchButtonLabel = i18n.translate(
+  'xpack.watcher.sections.watchList.createWatchButtonLabel',
+  { defaultMessage: 'Create' }
+);
+const createThresholdAlertLabel = i18n.translate(
+  'xpack.watcher.sections.watchList.createThresholdAlertButtonLabel',
+  { defaultMessage: 'Create threshold alert' }
+);
+const createThresholdAlertDescription = i18n.translate(
+  'xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip',
+  { defaultMessage: 'Send an alert on a specified condition.' }
+);
+const createAdvancedWatchLabel = i18n.translate(
+  'xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel',
+  { defaultMessage: 'Create advanced watch' }
+);
+const createAdvancedWatchDescription = i18n.translate(
+  'xpack.watcher.sections.watchList.createAdvancedWatchTooltip',
+  { defaultMessage: 'Set up a custom watch in JSON.' }
+);
 
 /*
  * EuiMemoryTable relies on referential equality of a column's name field when sorting by that column.
@@ -182,13 +203,6 @@ export const WatchListPage = () => {
     [watches, deletedWatches]
   );
 
-  const watcherDescriptionText = (
-    <FormattedMessage
-      id="xpack.watcher.sections.watchList.subhead"
-      defaultMessage="Watch for changes or anomalies in your data and take action if needed."
-    />
-  );
-
   const createWatchContextMenu = (
     <EuiPopover
       id="createWatchPanel"
@@ -200,10 +214,7 @@ export const WatchListPage = () => {
           iconSide="right"
           onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.createWatchButtonLabel"
-            defaultMessage="Create"
-          />
+          {createWatchButtonLabel}
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -232,39 +243,19 @@ export const WatchListPage = () => {
               {watchType === WATCH_TYPES.THRESHOLD ? (
                 <Fragment>
                   <EuiText size="m">
-                    <span>
-                      <FormattedMessage
-                        id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
-                        defaultMessage="Create threshold alert"
-                      />
-                    </span>
+                    <span>{createThresholdAlertLabel}</span>
                   </EuiText>
                   <EuiText size="s" color="subdued">
-                    <span>
-                      <FormattedMessage
-                        id="xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip"
-                        defaultMessage="Send an alert on a specified condition."
-                      />
-                    </span>
+                    <span>{createThresholdAlertDescription}</span>
                   </EuiText>
                 </Fragment>
               ) : (
                 <Fragment>
                   <EuiText size="m">
-                    <span>
-                      <FormattedMessage
-                        id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
-                        defaultMessage="Create advanced watch"
-                      />
-                    </span>
+                    <span>{createAdvancedWatchLabel}</span>
                   </EuiText>
                   <EuiText size="s" color="subdued">
-                    <span>
-                      <FormattedMessage
-                        id="xpack.watcher.sections.watchList.createAdvancedWatchTooltip"
-                        defaultMessage="Set up a custom watch in JSON."
-                      />
-                    </span>
+                    <span>{createAdvancedWatchDescription}</span>
                   </EuiText>
                 </Fragment>
               )}
@@ -275,66 +266,101 @@ export const WatchListPage = () => {
     </EuiPopover>
   );
 
+  const hasWatches = Boolean(availableWatches && availableWatches.length > 0);
+  const createWatchMenu: AppHeaderMenu = {
+    primaryActionItem: {
+      id: 'createWatch',
+      label: createWatchButtonLabel,
+      iconType: 'plusCircle',
+      testId: 'createWatchButton',
+      popoverWidth: 260,
+      items: [
+        {
+          id: 'createThresholdAlert',
+          label: createThresholdAlertLabel,
+          description: createThresholdAlertDescription,
+          testId: 'thresholdWatchCreateLink',
+          run: () => goToCreateThresholdAlert(),
+        },
+        {
+          id: 'createAdvancedWatch',
+          label: createAdvancedWatchLabel,
+          description: createAdvancedWatchDescription,
+          testId: 'jsonWatchCreateLink',
+          run: () => goToCreateAdvancedWatch(),
+        },
+      ],
+    },
+  };
+
+  const header = (
+    <AppHeader
+      title={watcherPageTitle}
+      description={watcherPageDescription}
+      docLink={watcherGettingStartedUrl}
+      menu={hasWatches ? createWatchMenu : undefined}
+      spacing="bleed"
+    />
+  );
+
   if (isWatchesLoading) {
     return (
-      <EuiPageTemplate.EmptyPrompt>
-        <SectionLoading>
+      <>
+        {header}
+        <EuiSpacer size="l" />
+        <SectionLoading inline>
           <FormattedMessage
             id="xpack.watcher.sections.watchList.loadingWatchesDescription"
             defaultMessage="Loading watches…"
           />
         </SectionLoading>
-      </EuiPageTemplate.EmptyPrompt>
+      </>
     );
   }
 
   const errorCode = getPageErrorCode(error);
   if (errorCode) {
-    return <PageError errorCode={errorCode} />;
+    return (
+      <>
+        {header}
+        <PageError errorCode={errorCode} />
+      </>
+    );
   } else if (error) {
     return (
-      <GenericPageError
-        title={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.errorTitle"
-            defaultMessage="Error loading watches"
-          />
-        }
-        error={error as unknown as Error}
-      />
+      <>
+        {header}
+        <GenericPageError
+          title={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.errorTitle"
+              defaultMessage="Error loading watches"
+            />
+          }
+          error={error as unknown as Error}
+        />
+      </>
     );
   }
 
   if (availableWatches && availableWatches.length === 0) {
-    const emptyPromptBody = (
-      <EuiText color="subdued">
-        <p>
-          {watcherDescriptionText}{' '}
-          <EuiLink href={watcherGettingStartedUrl} target="_blank">
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.watcherLearnMoreLinkText"
-              defaultMessage="Learn more."
-            />
-          </EuiLink>
-        </p>
-      </EuiText>
-    );
-
     return (
-      <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.emptyPromptTitle"
-              defaultMessage="You don’t have any watches yet"
-            />
-          </h1>
-        }
-        body={emptyPromptBody}
-        actions={createWatchContextMenu}
-        data-test-subj="emptyPrompt"
-      />
+      <>
+        {header}
+        <EuiPageTemplate.EmptyPrompt
+          iconType="managementApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.emptyPromptTitle"
+                defaultMessage="You don’t have any watches yet"
+              />
+            </h2>
+          }
+          actions={createWatchContextMenu}
+          data-test-subj="emptyPrompt"
+        />
+      </>
     );
   }
 
@@ -516,7 +542,6 @@ export const WatchListPage = () => {
             )}
           </EuiButton>
         ) : undefined,
-      toolsRight: createWatchContextMenu,
     };
 
     content = (
@@ -582,31 +607,7 @@ export const WatchListPage = () => {
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.header"
-              defaultMessage="Watcher"
-            />
-          </span>
-        }
-        bottomBorder
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={watcherGettingStartedUrl}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
-              defaultMessage="Watcher docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
-        description={watcherDescriptionText}
-      />
+      {header}
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {

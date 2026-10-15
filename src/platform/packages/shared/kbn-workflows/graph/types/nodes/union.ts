@@ -13,6 +13,7 @@ import {
   DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
+  SyntheticGraphNodeSchema,
   WaitForApprovalGraphNodeSchema,
   WaitForInputGraphNodeSchema,
   WaitGraphNodeSchema,
@@ -61,6 +62,7 @@ import {
 } from './switch_nodes';
 
 const GraphNodeUnionSchema = z.discriminatedUnion('type', [
+  SyntheticGraphNodeSchema,
   AtomicGraphNodeSchema,
   DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,

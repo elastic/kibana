@@ -1,0 +1,170 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  HuntCoordinatorRequestBody,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { randomUUID } from 'crypto';
+import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
+import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
+import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
+import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
+import { resolveHuntModels } from './lib/hunt_models';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import type { RouteDependencies } from '../register_routes';
+
+export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+
+/**
+ * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
+ * The coordinator does NOT write feedback — `completed_successfully` on the result
+ * tells the caller whether the managed-workflow feedback step should proceed.
+ *
+ * A blocked scope answers 200 with `status: 'blocked'` rather than an error status,
+ * deliberately differing from the standalone `hunt_for_threat` route's 409: this route
+ * chains Tier 1 into Tier 2, so a caller already reads the status field either way, and
+ * `hunt_for_threat` has no such chain to read one from. See elastic/security-team#19741.
+ */
+export const registerHuntCoordinatorRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getHuntServices,
+}: RouteDependencies): void => {
+  router.versioned
+    .post({
+      path: HUNT_COORDINATOR_URL,
+      access: INTERNAL_API_ACCESS,
+      security: {
+        authz: {
+          // Tier 2 spends LLM tokens and can execute LLM-generated ES|QL as the caller.
+          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
+        },
+      },
+      summary: 'Run the two-tier hunt coordinator for a report',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(HuntCoordinatorRequestBody),
+          },
+        },
+      },
+      withAlertZeroEnabled(async (context, request, response) => {
+        try {
+          const core = await context.core;
+          const spaceId = getSpaceId(request);
+          // Telemetry, alerts, and ES|QL run as the calling user so their index
+          // privileges apply. The reports index is plugin-owned and hidden, and Kibana
+          // feature privileges grant no Elasticsearch privileges on it, so it is read
+          // with the internal user and scoped by the explicit space filter.
+          const esClient = core.elasticsearch.client.asCurrentUser;
+          const reportsEsClient = core.elasticsearch.client.asInternalUser;
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
+
+          const indexPatterns = await resolveHuntUniverse(context, logger);
+
+          const {
+            report_id,
+            text,
+            iocs,
+            techniques,
+            time_range,
+            size,
+            max_assets,
+            llm_confidence_threshold,
+            tier2_when,
+            max_tier2_sample_events,
+            trigger,
+            run_id,
+          } = request.body;
+
+          // One model per tier, resolved independently: a tier with no usable endpoint is
+          // absent from `models` and only its consumers degrade (see `HuntModels`). A missing
+          // connector is the ordinary outcome, not an error, so it never fails the request.
+          // They are resolved regardless of `tier2_when`, since resolving a connector spends
+          // no tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
+          // so a `never` run stays `never`.
+          const { models, failures } = await resolveHuntModels({
+            inference: getInference(),
+            searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            request,
+            uiSettingsClient: core.uiSettings.client,
+            logger,
+          });
+          for (const failure of failures) {
+            // A missing connector is the ordinary outcome, but a resolution that threw is a
+            // fault, and at debug it would be invisible in production.
+            const log =
+              failure.reason === 'resolution_error'
+                ? logger.warn.bind(logger)
+                : logger.debug.bind(logger);
+            log(
+              `hunt_coordinator: ${failure.tier} model unavailable, its consumers will degrade — ${failure.message}`
+            );
+          }
+
+          // The Worker fan-out supplies a run id so one sweep's children share it,
+          // which is what the packaging barrier and conclusion dedupe key off. Only
+          // mint one when the caller has no sweep to tie the run to.
+          const result = await huntCoordinator(
+            { esClient, reportsEsClient, mitreDataClient },
+            models,
+            logger,
+            {
+              report_id,
+              spaceId,
+              text,
+              iocs,
+              techniques,
+              time_range,
+              size,
+              max_assets,
+              llm_confidence_threshold,
+              tier2_when,
+              max_tier2_sample_events,
+              trigger,
+              indexPatterns,
+              // The Worker fan-out supplies a run id so one sweep's children share it,
+              // which is what the packaging barrier and conclusion dedupe key off. Only
+              // mint one when the caller has no sweep to tie the run to.
+              run_id: run_id ?? randomUUID(),
+            }
+          );
+
+          // SSE entries ride the response only on a confirmed hit for a named
+          // report; the hunt child fans out over them with ai.attachment.add.
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone. The impact
+          // entities come from those same entries, so a run attaches impact only
+          // for what it confirmed.
+          let body: HuntCoordinatorResponse = result;
+          if (result.has_confirmed_hit && report_id) {
+            const sse = buildSseData(result, report_id, { spaceId });
+            body = { ...result, sse, impacted_entities: buildImpactEntities(sse) };
+          }
+          return response.ok({ body });
+        } catch (err) {
+          if (err instanceof InvalidHuntWindowError) {
+            return response.badRequest({ body: { message: err.message } });
+          }
+          logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Hunt coordinator failed' },
+          });
+        }
+      })
+    );
+};

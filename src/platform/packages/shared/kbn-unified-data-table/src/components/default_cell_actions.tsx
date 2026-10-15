@@ -11,14 +11,17 @@ import type { MutableRefObject } from 'react';
 import React, { useContext } from 'react';
 import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import { REVERSE_CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getIgnoredReason } from '@kbn/discover-utils';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import type { SourceDisplayMode, ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
@@ -37,6 +40,20 @@ function onFilterCell(
   }
 }
 
+/**
+ * Elasticsearch did not index this value, so a filter built from it would never
+ * match. Whether that happened is per document, not per column, so it cannot be
+ * decided in `buildCellActions` alongside the other filter checks.
+ */
+function isCellValueIgnored(
+  context: DataTableContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  field: DataViewField
+): boolean {
+  const row = context.getRowByIndex(rowIndex);
+  return Boolean(row && getIgnoredReason(field, row.raw._ignored));
+}
+
 export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
@@ -51,6 +68,10 @@ export const FilterInBtn = ({
     defaultMessage: 'Filter for this {value}',
     values: { value: columnId },
   });
+
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
 
   return (
     <Component
@@ -84,6 +105,10 @@ export const FilterOutBtn = ({
     values: { value: columnId },
   });
 
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
+
   return (
     <Component
       onClick={() => {
@@ -101,11 +126,66 @@ export const FilterOutBtn = ({
   );
 };
 
+export const ReverseCategorizeBtn = ({
+  cellActionProps: { Component, columnId, rowIndex },
+  field,
+  dataGridRef,
+  uiActions,
+}: {
+  cellActionProps: EuiDataGridColumnCellActionProps;
+  field: DataViewField;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  uiActions?: UiActionsStart;
+}) => {
+  const context = useContext(UnifiedDataTableContext);
+  const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorize', {
+    defaultMessage: 'Find similar values',
+  });
+
+  const isTextfield = field.esTypes?.includes('text') === true;
+
+  if (!uiActions || !isTextfield || !context.dataView.isTimeBased()) {
+    return null;
+  }
+
+  return (
+    <Component
+      onClick={() => {
+        const row = context.getRowByIndex(rowIndex);
+        const rawValue = row?.flattened[columnId];
+        // Use the indexed/flattened value so category regex matching is not broken by
+        // field formatting or clipboard escaping from valueToStringConverter.
+        const fieldValue =
+          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue);
+
+        uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
+          field,
+          dataView: context.dataView,
+          originatingApp: 'discover',
+          fieldValue,
+          openInNewTab: context.onOpenInNewTab,
+          query: context.queryContext?.query,
+          filters: context.queryContext?.filters,
+          filterQuery: context.queryContext?.filterQuery,
+          timeRange: context.queryContext?.timeRange,
+        });
+        dataGridRef?.current?.closeCellPopover();
+      }}
+      iconType="search"
+      aria-label={buttonTitle}
+      title={buttonTitle}
+      data-test-subj="reverseCategorizeButton"
+    >
+      {buttonTitle}
+    </Component>
+  );
+};
+
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  sourceDisplayMode: SourceDisplayMode
+  documentsDisplayMode: DocumentsDisplayMode
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -138,16 +218,23 @@ export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  sourceDisplayMode: SourceDisplayMode,
+  documentsDisplayMode: DocumentsDisplayMode,
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
-  hideFilteringOnComputedColumns?: boolean
+  hideFilteringOnComputedColumns?: boolean,
+  uiActions?: UiActionsStart,
+  dataView?: DataView
 ) {
   const shouldShowFilters = shouldShowFieldFilterInOutActions({
     dataViewField: field,
     hideFilteringOnComputedColumns,
     onFilter,
   });
+
+  const showReverseCategorize =
+    field.esTypes?.includes('text') === true &&
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
 
   return [
     ...(shouldShowFilters
@@ -171,7 +258,18 @@ export function buildCellActions(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
         valueToStringConverter,
-        sourceDisplayMode
+        documentsDisplayMode
       ),
+    ...(showReverseCategorize
+      ? [
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            ReverseCategorizeBtn({
+              cellActionProps,
+              field,
+              dataGridRef,
+              uiActions,
+            }),
+        ]
+      : []),
   ];
 }

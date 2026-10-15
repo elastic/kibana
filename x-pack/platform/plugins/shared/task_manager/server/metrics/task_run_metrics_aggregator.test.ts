@@ -8,7 +8,7 @@
 import * as uuid from 'uuid';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskStatus } from '../task';
+import { TaskStatus, TaskTypeGroup } from '../task';
 import type { TaskManagerStats } from '../task_events';
 import { asTaskManagerStatEvent, asTaskRunEvent, TaskPersistence } from '../task_events';
 import { TaskRunResult } from '../task_running';
@@ -16,7 +16,11 @@ import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
 const logger = loggingSystemMock.createLogger();
 
-export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
+export const getTaskRunSuccessEvent = (
+  type: string,
+  isExpired: boolean = false,
+  taskTypeGroup?: TaskTypeGroup
+) => {
   const id = uuid.v4();
   return asTaskRunEvent(
     id,
@@ -38,6 +42,7 @@ export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false)
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Success,
       isExpired,
+      taskTypeGroup,
     }),
     {
       start: 1689698780490,
@@ -49,7 +54,8 @@ export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false)
 export const getTaskRunFailedEvent = (
   type: string,
   isExpired: boolean = false,
-  result: TaskRunResult = TaskRunResult.Failed
+  result: TaskRunResult = TaskRunResult.Failed,
+  taskTypeGroup?: TaskTypeGroup
 ) => {
   const id = uuid.v4();
   return asTaskRunEvent(
@@ -73,6 +79,7 @@ export const getTaskRunFailedEvent = (
       persistence: TaskPersistence.Recurring,
       result,
       isExpired,
+      taskTypeGroup,
     })
   );
 };
@@ -351,20 +358,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true)
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {
@@ -466,20 +487,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true)
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {

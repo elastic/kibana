@@ -44,22 +44,20 @@ export const StepDefine: FC<StepDefineProps> = ({
       {isCurrentStep && (
         <>
           {searchItems && stepDefineState ? (
-            <>
-              {dataViewPicker}
-              <EuiSpacer size="m" />
-              <StepDefineForm
-                key={searchItems.dataView.id ?? searchItems.dataView.getIndexPattern()}
-                onChange={setStepDefineState}
-                overrides={{ ...stepDefineState }}
-                searchItems={searchItems}
-              />
-            </>
+            <StepDefineForm
+              key={searchItems.dataView.id ?? searchItems.dataView.getIndexPattern()}
+              dataViewPicker={dataViewPicker}
+              onChange={setStepDefineState}
+              overrides={{ ...stepDefineState }}
+              searchItems={searchItems}
+            />
           ) : (
             <EmptyStepDefineForm
               dataViewPicker={dataViewPicker}
               transformFunction={stepDefineState?.transformFunction ?? initialTransformFunction}
             />
           )}
+          <EuiSpacer size="m" />
           <WizardNav next={onNext} nextActive={Boolean(searchItems && stepDefineState?.valid)} />
         </>
       )}

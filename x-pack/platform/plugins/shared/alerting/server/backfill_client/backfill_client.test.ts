@@ -272,7 +272,8 @@ describe('BackfillClient', () => {
       expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
         'ad_hoc_run-backfill': {
           title: 'Alerting Backfill Rule Run',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
+          taskTypeGroup: 'alerting',
           createTaskRunner: expect.any(Function),
         },
       });
@@ -405,6 +406,44 @@ describe('BackfillClient', () => {
             originalSO: bulkCreateParams?.[index],
           })
         )
+      );
+    });
+
+    test('should schedule backfill for a rule that only has a UIAM API key', async () => {
+      const uiamApiKey = Buffer.from('uiam-id:essu_key').toString('base64');
+      const rule = getMockRule({ apiKey: null, uiamApiKey });
+      ruleTypeRegistry.get.mockReturnValue({ ...mockRuleType, ruleTaskTimeout: '1d' });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [getBulkCreateParam('abc', '1', getMockAdHocRunAttributes())],
+      });
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: [getMockData()],
+        rules: [rule],
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            apiKeyId: '',
+            apiKeyToUse: '',
+            uiamApiKey,
+            uiamApiKeyId: 'uiam-id',
+          }),
+        }),
+      ]);
+      expect(result).not.toContainEqual(
+        expect.objectContaining({
+          error: expect.objectContaining({ message: 'Rule 1 has no API key' }),
+        })
       );
     });
 

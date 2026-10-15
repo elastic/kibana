@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/management-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",

@@ -1,21 +1,9 @@
 {
-  "sha1": "a1d72db7ca50d9c5a01957af9b3b55ce5504560c",
+  "sha1": "dbac7fb13702bdea489c736f5a2bb133c7249e26",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
-      "title": "Teardown Discover sidebar tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "a38a9adb5e6f0a9-62c28ccadd9bbd7",
       "title": "Setup Discover sidebar tests data",
@@ -147,8 +135,8 @@
       }
     },
     {
-      "id": "f8b28b67a00765a-668ab1e7987f62f",
-      "title": "Discover sidebar field groups shows available and meta field groups",
+      "id": "f8b28b67a00765a-45a867937fbfb72",
+      "title": "Discover sidebar field groups shows available, meta field groups",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -162,8 +150,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 22,
-        "column": 5
+        "line": 52,
+        "column": 32
       }
     },
     {
@@ -182,8 +170,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 33,
-        "column": 81
+        "line": 62,
+        "column": 21
+      }
+    },
+    {
+      "id": "f8b28b67a00765a-ceb81a9a1e4ba7b",
+      "title": "Discover sidebar field groups ranks a high-popularity runtime field above other popular fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
+        "line": 117,
+        "column": 30
       }
     },
     {
@@ -202,8 +210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 153,
-        "column": 17
+        "line": 190,
+        "column": 16
       }
     },
     {
@@ -310,19 +318,18 @@
       "title": "Discover sidebar runtime fields supports ad-hoc data views with runtime field relabel and remove",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 65,
-        "column": 13
+        "line": 77,
+        "column": 31
       }
     },
     {
@@ -330,18 +337,17 @@
       "title": "Discover sidebar runtime fields keeps the sidebar rendered when document retrieval fails",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 91,
+        "line": 139,
         "column": 9
       }
     },
@@ -350,6 +356,25 @@
       "title": "Discover sidebar runtime fields removes the data grid column after a runtime field is deleted",
       "expectedStatus": "passed",
       "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
+        "line": 163,
+        "column": 59
+      }
+    },
+    {
+      "id": "6091b3d993172f9-5bdbad41f4079e8",
+      "title": "Discover sidebar selected fields reordering should reorder the table columns by moving a selected field with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-search",
@@ -360,9 +385,40 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 117,
-        "column": 25
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_selected_fields_reorder.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "6091b3d993172f9-51ea90806fbc55f",
+      "title": "Discover sidebar selected fields reordering should reorder the table columns by dragging a selected field onto another one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_selected_fields_reorder.spec.ts",
+        "line": 81,
+        "column": 27
+      }
+    },
+    {
+      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
+      "title": "Teardown Discover sidebar tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

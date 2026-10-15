@@ -29,6 +29,7 @@ const buildActions = () =>
     expressions: expressionsPluginMock.createStartContract(),
     spaces: spacesPluginMock.createStartContract(),
     queryClient: new QueryClient(),
+    isRuleAvailable: () => true,
     getDiscoverHref: async () => 'https://discover/foo',
   });
 

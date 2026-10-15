@@ -86,7 +86,7 @@ describe('ResolveAllConflicts', () => {
         id="resolveAllConflictsVisibilityPopover"
       >
         <button
-          class="euiLink emotion-euiLink-primary-ResolveAllButton"
+          class="euiLink emotion-euiLink-text-ResolveAllButton"
           type="button"
         >
           (resolve all)

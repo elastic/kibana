@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        expect(await testSubjects.exists('dashboardLink--Error fetching dashboard--error')).to.be(
-          true
-        );
+        await testSubjects.existOrFail('dashboardLink--Error fetching dashboard--error', {
+          timeout: 5000,
+        });
         expect(
           await testSubjects.isEnabled('dashboardLink--Error fetching dashboard--error')
         ).to.be(false);

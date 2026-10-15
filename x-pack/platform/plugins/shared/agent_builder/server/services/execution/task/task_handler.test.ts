@@ -19,14 +19,12 @@ import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
 import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
 import { deliverCallbackEvents } from '../callback/deliver_callback_events';
-import {
-  collectAndWriteEvents,
-  handleAgentExecution,
-  serializeExecutionError,
-} from '../execution_runner';
+import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
 
 jest.mock('../execution_runner');
+jest.mock('../utils/serialize_execution_error');
 jest.mock('../persistence');
 jest.mock('../callback/deliver_callback_events');
 
@@ -104,6 +102,7 @@ describe('TaskHandler event streaming and finalization', () => {
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
+  const surfacesService = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,6 +130,7 @@ describe('TaskHandler event streaming and finalization', () => {
       logger,
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
+      surfacesService,
     } as never);
 
   const run = () =>
@@ -165,6 +165,16 @@ describe('TaskHandler event streaming and finalization', () => {
     };
   };
 
+  it('records a task_manager abort reason when Task Manager cancels the task', async () => {
+    await createHandler().cancel({ executionId: 'execution-1' });
+
+    expect(executionClient.updateStatus).toHaveBeenCalledWith(
+      'execution-1',
+      ExecutionStatus.aborted,
+      { abortReason: { source: 'task_manager' } }
+    );
+  });
+
   it('passes the same shared event stream to persistence and callback delivery', async () => {
     await run();
 
@@ -173,6 +183,7 @@ describe('TaskHandler event streaming and finalization', () => {
       execution,
       events$: expect.anything(),
       callbackDeliveryService,
+      surfacesService,
       logger: expect.anything(),
     });
     expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);
@@ -235,7 +246,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'setup failed' }
+      { error: { code: 'internal_error', message: 'setup failed' } }
     );
   });
 
@@ -247,7 +258,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'agent failed' }
+      { error: { code: 'internal_error', message: 'agent failed' } }
     );
   });
 
@@ -261,7 +272,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
-      { code: 'internal_error', message: 'Converse request was aborted' }
+      { error: { code: 'internal_error', message: 'Converse request was aborted' } }
     );
   });
 
@@ -273,7 +284,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      undefined
+      { error: undefined }
     );
   });
 

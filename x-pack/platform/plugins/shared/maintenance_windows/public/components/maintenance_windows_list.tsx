@@ -70,6 +70,30 @@ const getColumns = ({
     sortable: ({ status }) => STATUS_SORT[status],
   },
   {
+    field: 'scope',
+    name: i18n.TABLE_SCOPE,
+    'data-test-subj': 'maintenance-windows-column-scope',
+    render: (scope: MaintenanceWindowUI['scope']) => {
+      const showAlerts = scope?.alerting?.enabled === true;
+      const showEpisodes = scope?.alertingV2?.enabled === true;
+      if (!showAlerts && !showEpisodes) return null;
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {showAlerts && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_ALERTS}</EuiBadge>
+            </EuiFlexItem>
+          )}
+          {showEpisodes && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_EPISODES}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
+  },
+  {
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',

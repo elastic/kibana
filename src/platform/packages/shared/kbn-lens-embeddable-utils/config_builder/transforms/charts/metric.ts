@@ -10,7 +10,7 @@
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   buildTrendlineQueryWithMetricFieldMap,
-  buildTrendlineBucketExpression,
+  queryHasTsSourceCommand,
   LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
@@ -23,6 +23,7 @@ import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -36,6 +37,7 @@ import {
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
+import { LENS_DEFAULT_TIME_FIELD } from '../constants';
 import {
   addLayerColumn,
   buildDataSourceState,
@@ -109,12 +111,13 @@ export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
   ['temperature', 'temperature'],
-]);
+] satisfies Array<[MetricIconName, VisIconType]>);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -156,12 +159,33 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
   return metric.type === 'primary';
 }
 
+function getSecondaryNameVisibility(
+  label: NonNullable<MetricStyling['secondary']>['label']
+): MetricVisualizationState['secondaryNameVisibility'] {
+  const isVisible = label?.visible ?? DEFAULT_SECONDARY_LABEL_VISIBLE;
+  if (!isVisible) {
+    return 'hidden';
+  }
+  return label?.placement ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+}
+
+function isSecondaryLabelHidden(visualization: MetricVisualizationState): boolean {
+  return visualization.secondaryNameVisibility === 'hidden' || visualization.secondaryLabel === '';
+}
+
 function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return { density: DEFAULT_DENSITY };
+    return {
+      density: DEFAULT_DENSITY,
+      ...(hasSecondary
+        ? {
+            secondaryNameVisibility: getSecondaryNameVisibility(undefined),
+          }
+        : {}),
+    };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
@@ -181,8 +205,7 @@ function convertStylingToStateFormat(
     iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
-          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
-          secondaryLabelPosition: secondaryStyling?.label?.placement,
+          secondaryNameVisibility: getSecondaryNameVisibility(secondaryStyling?.label),
           secondaryAlign: secondaryStyling?.value?.alignment,
         })
       : {}),
@@ -218,7 +241,7 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+          ...(isSecondaryLabelHidden(visualization)
             ? {
                 label: {
                   visible: false,
@@ -226,9 +249,9 @@ function convertStylingToAPIFormat(
               }
             : {
                 label: {
-                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  visible: true,
                   placement:
-                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                    visualization.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
                 },
               }),
           value: {
@@ -520,13 +543,13 @@ function enrichConfigurationWithVisualizationProperties(
   }
 
   if (secondaryMetric) {
-    if (visualization.secondaryTrend?.type === 'dynamic') {
-      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
+    // Leftover vis Label is what the chart paints; emit it as the API name so GET+PUT cannot change appearance.
+    if (visualization.secondaryLabel) {
+      secondaryMetric.label = visualization.secondaryLabel;
     }
 
-    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
-      secondaryMetric.label = secondaryLabelOverride;
+    if (visualization.secondaryTrend?.type === 'dynamic') {
+      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -751,7 +774,9 @@ function buildEsqlTrendlineLayer(
   const dataSource = 'data_source' in config ? config.data_source : undefined;
   if (!dataSource || dataSource.type !== 'esql') return undefined;
 
-  const timeField = mainLayer.timeField;
+  const timeField =
+    mainLayer.timeField ??
+    (queryHasTsSourceCommand(dataSource.query) ? LENS_DEFAULT_TIME_FIELD : undefined);
   if (!timeField) return undefined;
 
   const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
@@ -783,13 +808,12 @@ function buildEsqlTrendlineLayer(
     );
   }
 
-  // Build trendline columns: time bucket + copies of metric columns from main layer
-  // The fieldName must match the ES|QL result column name, which is the full
-  // BUCKET expression (e.g. "BUCKET(timestamp, 75, ?_tstart, ?_tend)"),
-  // not the raw field name.
+  // Build trendline columns: time bucket + copies of metric columns from main layer.
+  // Use the query helper's resolved result column so aliased TBUCKET expressions
+  // map to their actual ES|QL result field.
   const timeColumn: TextBasedLayerColumn = {
     columnId: HISTOGRAM_COLUMN_NAME,
-    fieldName: buildTrendlineBucketExpression(timeField),
+    fieldName: trendlineQueryResult.timeField,
     meta: { type: 'date' },
   };
 

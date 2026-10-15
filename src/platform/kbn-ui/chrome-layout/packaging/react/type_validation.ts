@@ -29,12 +29,16 @@
 import type { LayoutConfig as SourceLayoutConfig } from '../../src/layout_config_context';
 import type { LayoutAppearance as SourceLayoutAppearance } from '../../src/layout.types';
 import type { GridLayoutGlobalStylesProps as SourceGridLayoutGlobalStylesProps } from '../../src/layouts/grid_global_app_style';
+import type { CSSVarName as SourceCSSVarName } from '../../src/constants';
+import type { HighContrastSeparatorOptions as SourceHighContrastSeparatorOptions } from '../../src/utils';
 
 // Packaged types.
 import type {
   ChromeLayoutConfig as PackagedChromeLayoutConfig,
   LayoutAppearance as PackagedLayoutAppearance,
   GridLayoutGlobalStylesProps as PackagedGridLayoutGlobalStylesProps,
+  CSSVarName as PackagedCSSVarName,
+  HighContrastSeparatorOptions as PackagedHighContrastSeparatorOptions,
 } from './types';
 
 // LayoutAppearance must match exactly.
@@ -49,6 +53,10 @@ const _layoutAppearance: ValidateLayoutAppearance = true;
 const _layoutConfig: PackagedChromeLayoutConfig = {} as SourceLayoutConfig;
 const _gridLayoutGlobalStylesProps: PackagedGridLayoutGlobalStylesProps =
   {} as SourceGridLayoutGlobalStylesProps;
+const _cssVarName: PackagedCSSVarName = 'banner.height';
+const _sourceCssVarName: SourceCSSVarName = _cssVarName;
+const _highContrastSeparatorOptions: PackagedHighContrastSeparatorOptions =
+  {} as SourceHighContrastSeparatorOptions;
 
 // ChromeLayoutProps validation is suppressed because the packaged `Slot` type
 // uses a simplified `ReactNode` that excludes `ReactPortal` / `ReactFragment`.
@@ -58,5 +66,8 @@ const _gridLayoutGlobalStylesProps: PackagedGridLayoutGlobalStylesProps =
 void _layoutAppearance;
 void _layoutConfig;
 void _gridLayoutGlobalStylesProps;
+void _cssVarName;
+void _sourceCssVarName;
+void _highContrastSeparatorOptions;
 
 export const TYPE_VALIDATION_PASSED = true;

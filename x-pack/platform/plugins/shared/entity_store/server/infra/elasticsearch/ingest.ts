@@ -81,10 +81,25 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
-  /** Use `false` when downstream consumers tolerate the 1 s natural refresh window (e.g. CCS updates data stream). Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index). */
+  /** Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index); `false` when downstream consumers tolerate the 1 s natural refresh window. */
   refresh: boolean | 'wait_for';
   /** Called once per document rejected by the ES bulk API. Use to increment an external dropped-docs counter. */
   onDropped?: () => void;
+}
+
+/**
+ * Per-document outcomes of one bulk write, aggregated here rather than reported per document:
+ * the caller records them as three counter increments per entity page instead of one per entity.
+ *
+ * `noop` is a real outcome, not a rounding error — `doc_as_upsert` reports it whenever the
+ * document is already byte-identical, which is common for repeatedly-seen entities. Dropped
+ * documents are reported separately via `onDropped`, so the four together account for every row
+ * sent: `created + updated + noop + dropped === esqlResponse.values.length`.
+ */
+export interface IngestEntitiesOutcome {
+  created: number;
+  updated: number;
+  noop: number;
 }
 
 /**
@@ -99,6 +114,8 @@ interface IngestEntitiesParams {
  *
  * When esIdField is provided: uses update with doc_as_upsert (upsert by _id).
  * When esIdField is omitted: uses create and Elasticsearch auto-generates _id.
+ *
+ * Returns how many documents were created, updated and left unchanged.
  */
 export async function ingestEntities({
   esClient,
@@ -111,14 +128,16 @@ export async function ingestEntities({
   transformDocument,
   refresh,
   onDropped,
-}: IngestEntitiesParams) {
+}: IngestEntitiesParams): Promise<IngestEntitiesOutcome> {
   const options: TransportRequestOptions = {};
   if (signal) {
     options.signal = signal;
   }
 
+  const outcome: IngestEntitiesOutcome = { created: 0, updated: 0, noop: 0 };
+
   const { columns, values } = esqlResponse;
-  if (values.length === 0) return;
+  if (values.length === 0) return outcome;
 
   const useUpsertById = esIdField !== undefined;
   let identityFieldIndex = -1;
@@ -191,6 +210,19 @@ export async function ingestEntities({
         }
         return [{ create: {} }, doc];
       },
+      onSuccess: ({ result }) => {
+        switch ((result.update ?? result.create)?.result) {
+          case 'created':
+            outcome.created++;
+            break;
+          case 'updated':
+            outcome.updated++;
+            break;
+          case 'noop':
+            outcome.noop++;
+            break;
+        }
+      },
       onDrop: (dropped) => {
         // Aggregated below rather than logged per doc: a systemic failure
         // (missing privileges, a read-only index) rejects every doc in the
@@ -210,4 +242,6 @@ export async function ingestEntities({
       } doc(s) from bulk operation into ${targetIndex}. Failures by type: ${dropAggregator.format()}`
     );
   }
+
+  return outcome;
 }

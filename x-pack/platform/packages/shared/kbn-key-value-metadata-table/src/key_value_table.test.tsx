@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { KeyValueTable } from '.';
-import type { render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { renderWithTheme } from './utils/test_helpers';
 
 function getKeys(output: ReturnType<typeof render>) {
@@ -60,5 +61,49 @@ describe('KeyValueTable', () => {
       'ccc',
       'aaa',
     ]);
+  });
+
+  it('renders one list item per value for multi-value fields', () => {
+    const output = renderWithTheme(
+      <KeyValueTable keyValuePairs={[{ key: 'host.ip', value: ['10.0.0.1', '10.0.0.2'] }]} />
+    );
+
+    const items = output.container.querySelectorAll('li');
+    expect(Array.from(items).map((item) => item.textContent)).toEqual(['10.0.0.1', '10.0.0.2']);
+  });
+
+  describe('column alignment', () => {
+    const longKey = 'error.exception.attributes.some.very.long.nested.field.name';
+
+    it('gives the key column a content-independent width that wraps instead of overflowing', () => {
+      const output = renderWithTheme(
+        <KeyValueTable keyValuePairs={[{ key: longKey, value: 'value' }]} />
+      );
+
+      const keyCell = output.getByTestId('dot-key').closest('td');
+      expect(keyCell).toHaveStyle({ width: '24em' });
+      expect(keyCell).not.toHaveStyle({ whiteSpace: 'nowrap' });
+    });
+
+    it('uses a fixed table layout even when the host app defaults EuiTable to auto', () => {
+      const { container } = render(
+        <EuiProvider componentDefaults={{ EuiTable: { tableLayout: 'auto' } }}>
+          <KeyValueTable keyValuePairs={[{ key: longKey, value: 'value' }]} />
+        </EuiProvider>
+      );
+
+      expect(container.querySelector('table')).toHaveStyle({ tableLayout: 'fixed' });
+    });
+
+    it('still lets consumers opt out via tableProps', () => {
+      const output = renderWithTheme(
+        <KeyValueTable
+          keyValuePairs={[{ key: longKey, value: 'value' }]}
+          tableProps={{ tableLayout: 'auto' }}
+        />
+      );
+
+      expect(output.container.querySelector('table')).toHaveStyle({ tableLayout: 'auto' });
+    });
   });
 });
