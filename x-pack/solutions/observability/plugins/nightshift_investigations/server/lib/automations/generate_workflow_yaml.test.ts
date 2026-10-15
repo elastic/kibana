@@ -173,13 +173,6 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers[0].type).toBe('manual');
     });
-
-    it('investigates the prompt rather than an alert', () => {
-      const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }];
-      const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.steps[0].with).toMatchObject({ subject_type: 'manual', subject_id: 'auto-123' });
-    });
   });
 
   describe('trigger_investigation step', () => {

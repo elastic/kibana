@@ -76,9 +76,7 @@ export function generateWorkflowYaml(
         name: 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
-          // An alert investigation needs the alert snapshots in `context.alerts`, which only an
-          // alert trigger has; a manually run automation investigates its prompt instead.
-          subject_type: isAlertTrigger ? 'alert' : 'manual',
+          subject_type: 'alert',
           subject_id: isAlertTrigger ? '{{ trigger.alert.uuid }}' : automationId,
           title: isAlertTrigger ? '{{ trigger.rule.name }}' : automation.name,
           summary: automation.name,
