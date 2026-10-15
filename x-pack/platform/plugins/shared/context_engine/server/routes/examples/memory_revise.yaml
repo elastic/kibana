@@ -8,11 +8,7 @@ requestBody:
       examples:
         reviseMemoryRequest:
           value:
-            type: memory.session_fact
-            title: Cast duration fields before comparison
-            description: duration_ms is mapped as a keyword.
             content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
-            session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
 responses:
   200:
     content:
@@ -65,9 +61,5 @@ x-codeSamples:
         -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
         -H "kbn-xsrf: true" -H "Content-Type: application/json" \
         -d '{
-          "type": "memory.session_fact",
-          "title": "Cast duration fields before comparison",
-          "description": "duration_ms is mapped as a keyword.",
-          "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons.",
-          "session_id": "73008bd7-f4e1-4052-a42c-e29483d06f47"
+          "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons."
         }'

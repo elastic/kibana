@@ -137,6 +137,15 @@ describe('memory routes', () => {
     );
   });
 
+  it('accepts partial revisions and rejects empty revision bodies', () => {
+    const bodySchema = routes[`PATCH:${AI_INDEX_MEMORY_BY_ID_PATH}`].validate.request?.body;
+
+    expect(bodySchema?.validate({ title: 'Updated title' })).toEqual({
+      title: 'Updated title',
+    });
+    expect(() => bodySchema?.validate({})).toThrow('At least one memory field must be supplied.');
+  });
+
   it('leaves session generation to the caller-scoped service', async () => {
     createMemory.mockResolvedValue({ id: 'memory-1', sessionId: 'generated-session' });
 
@@ -173,6 +182,24 @@ describe('memory routes', () => {
         sessionId: 'session-1',
       })
     );
+  });
+
+  it('passes only supplied revision fields to the service', async () => {
+    reviseMemory.mockResolvedValue({ id: 'memory-1', sessionId: 'existing-session' });
+
+    await call(
+      'PATCH',
+      AI_INDEX_MEMORY_BY_ID_PATH,
+      { aiIndexId: 'support', memoryId: 'memory-1' },
+      { title: 'Updated title' }
+    );
+
+    expect(reviseMemory).toHaveBeenCalledWith({
+      aiIndexId: 'support',
+      id: 'memory-1',
+      title: 'Updated title',
+      writer: { uri: MEMORY_API_PROVENANCE_SOURCE, metadata: {} },
+    });
   });
 
   it('leaves an omitted revision session ID for the service to resolve', async () => {

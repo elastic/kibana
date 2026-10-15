@@ -299,6 +299,40 @@ describe('AiIndexMemoryWriteService', () => {
     );
   });
 
+  it('preserves omitted content fields during a partial revision', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'physical-memory-id',
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: existingDocument,
+          },
+        ],
+      },
+    });
+
+    await service.reviseMemory({
+      aiIndexId: 'support',
+      id: 'memory-1',
+      title: 'Updated title',
+      writer,
+    });
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          type: existingDocument.type,
+          title: 'Updated title',
+          description: existingDocument.description,
+          content: existingDocument.content,
+        }),
+      })
+    );
+  });
+
   it('preserves expiry and session when a revision omits them', async () => {
     search.mockResolvedValue({
       hits: {

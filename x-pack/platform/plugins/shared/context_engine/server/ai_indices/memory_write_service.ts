@@ -40,9 +40,12 @@ export interface CreateMemoryRequest extends MemoryContent {
   references?: MemoryReference[];
 }
 
-export interface ReviseMemoryRequest extends Omit<CreateMemoryRequest, 'sessionId'> {
+export interface ReviseMemoryRequest extends Partial<MemoryContent> {
+  aiIndexId: string;
   id: string;
   sessionId?: string;
+  writer: MemoryWriter;
+  references?: MemoryReference[];
 }
 
 export interface ForgetMemoryRequest {
@@ -71,7 +74,7 @@ interface ExistingMemory {
   documentId: string;
   seqNo?: number;
   primaryTerm?: number;
-  document: StoredMemoryDocument;
+  document: StoredMemoryDocument & { type: MemoryType };
 }
 
 /** Caller-scoped Memory writes shared by tools and public APIs. */
@@ -124,7 +127,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
           `Memory '${request.id}' was deleted and cannot be revised.`
         );
       }
-      if (existing.document.type !== request.type) {
+      if (request.type !== undefined && existing.document.type !== request.type) {
         throw new MemoryWriteError(
           'memory_type_mismatch',
           `Memory '${request.id}' has type '${existing.document.type}' and cannot be revised as '${request.type}'.`
@@ -137,7 +140,14 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         this.getExistingSessionId(existing.document) ??
         (this.deps.generateSessionId ?? randomUUID)();
       const document = this.createDocument({
-        request: { ...request, sessionId },
+        request: {
+          ...request,
+          type: request.type ?? existing.document.type,
+          title: request.title ?? existing.document.title,
+          description: request.description ?? existing.document.description,
+          content: request.content ?? existing.document.content,
+          sessionId,
+        },
         aiIndex,
         id: request.id,
         existingDocument: existing.document,
@@ -315,7 +325,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       documentId: hit._id,
       seqNo: hit._seq_no,
       primaryTerm: hit._primary_term,
-      document: hit._source,
+      document: { ...hit._source, type: hit._source.type },
     };
   }
 
@@ -325,7 +335,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     id,
     existingDocument,
   }: {
-    request: CreateMemoryRequest;
+    request: CreateMemoryRequest & { sessionId: string };
     aiIndex: AiIndexHttpItem;
     id: string;
     existingDocument?: StoredMemoryDocument;

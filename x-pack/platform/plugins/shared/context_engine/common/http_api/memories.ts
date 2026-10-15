@@ -19,6 +19,16 @@ export interface WriteMemoryRequest {
   session_id?: string;
 }
 
+export interface ReviseMemoryRequest {
+  type?: MemoryType;
+  title?: string;
+  description?: string;
+  content?: string;
+  tags?: string[];
+  expires_at?: string | null;
+  session_id?: string;
+}
+
 export interface WriteMemoryResponse {
   id: string;
   session_id: string;

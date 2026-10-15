@@ -17,6 +17,7 @@ import {
 } from '../../common/constants';
 import type {
   DeleteMemoryResponse,
+  ReviseMemoryRequest,
   WriteMemoryRequest,
   WriteMemoryResponse,
 } from '../../common/http_api/memories';
@@ -31,6 +32,7 @@ import {
   deleteMemoryResponseSchema,
   memoryCollectionParamsSchema,
   memoryItemParamsSchema,
+  memoryReviseBodySchema,
   memoryWriteBodySchema,
   writeMemoryResponseSchema,
 } from './schemas/memories_schema';
@@ -136,6 +138,17 @@ const toServiceRequest = (aiIndexId: string, body: WriteMemoryRequest) => ({
   writer,
 });
 
+const toServiceRevisionRequest = (aiIndexId: string, body: ReviseMemoryRequest) => ({
+  aiIndexId,
+  ...(body.type !== undefined && { type: body.type }),
+  ...(body.title !== undefined && { title: body.title }),
+  ...(body.description !== undefined && { description: body.description }),
+  ...(body.content !== undefined && { content: body.content }),
+  ...(body.tags !== undefined && { tags: body.tags }),
+  ...(body.expires_at !== undefined && { expiresAt: body.expires_at }),
+  writer,
+});
+
 export const registerMemoryRoutes = ({
   router,
   logger,
@@ -211,7 +224,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'revise-context-engine-memory',
       summary: 'Revise a memory',
-      description: `Writes a revision using the caller's destination read and write privileges. The request must include type, title, description, and content; the revision replaces the title, description, and content, while the type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
+      description: `Writes a partial revision using the caller's destination read and write privileges. Supply at least one memory field. Omitted fields are preserved, and a supplied type must match the existing memory. Concurrent revisions of the same data-stream-backed memory are unsupported. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -221,7 +234,7 @@ export const registerMemoryRoutes = ({
       {
         version: AI_INDEX_API_VERSION,
         validate: {
-          request: { params: memoryItemParamsSchema, body: memoryWriteBodySchema },
+          request: { params: memoryItemParamsSchema, body: memoryReviseBodySchema },
           response: {
             200: { body: writeMemoryResponseSchema, description: 'The memory was revised.' },
             400: { body: errorResponseSchema, description: 'The memory cannot be written.' },
@@ -248,7 +261,7 @@ export const registerMemoryRoutes = ({
             esClient: (await ctx.core).elasticsearch.client.asCurrentUser,
             request,
           }).reviseMemory({
-            ...toServiceRequest(request.params.aiIndexId, request.body),
+            ...toServiceRevisionRequest(request.params.aiIndexId, request.body),
             ...(request.body.session_id !== undefined && {
               sessionId: request.body.session_id,
             }),

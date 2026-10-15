@@ -25116,7 +25116,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Writes a revision using the caller's destination read and write privileges. The request must include type, title, description, and content; the revision replaces the title, description, and content, while the type must match the existing memory. Omitted tags, expiry, and session ID are preserved. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Writes a partial revision using the caller's destination read and write privileges. Supply at least one memory field. Omitted fields are preserved, and a supplied type must match the existing memory. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: revise-context-engine-memory
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25149,10 +25149,6 @@ paths:
               reviseMemoryRequest:
                 value:
                   content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
-                  description: duration_ms is mapped as a keyword.
-                  session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
-                  title: Cast duration fields before comparison
-                  type: memory.session_fact
             schema:
               additionalProperties: false
               properties:
@@ -25197,11 +25193,6 @@ paths:
                     - memory.session
                     - memory.session_fact
                   type: string
-              required:
-                - type
-                - title
-                - description
-                - content
               type: object
       responses:
         '200':
@@ -25392,11 +25383,7 @@ paths:
               -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
               -H "kbn-xsrf: true" -H "Content-Type: application/json" \
               -d '{
-                "type": "memory.session_fact",
-                "title": "Cast duration fields before comparison",
-                "description": "duration_ms is mapped as a keyword.",
-                "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons.",
-                "session_id": "73008bd7-f4e1-4052-a42c-e29483d06f47"
+                "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons."
               }'
       x-state: Experimental
   /api/dashboards:
