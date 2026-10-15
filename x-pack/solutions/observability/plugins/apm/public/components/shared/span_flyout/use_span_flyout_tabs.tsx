@@ -22,7 +22,6 @@ import { SpanMetadata } from '../metadata_table/span_metadata';
 import type { SpanLinksCount } from '../span_links';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
-import { SpanDatabase } from './span_db';
 
 /** Resolves the waterfall span flyout tabs: Metadata, then Stack Trace, Span links, and GenAI when present. */
 export function useSpanFlyoutTabs({
@@ -77,7 +76,6 @@ export function useSpanFlyoutTabs({
       content: (
         <>
           <EuiSpacer size="m" />
-          <SpanDatabase spanDb={span.span?.db} />
           <SpanMetadata
             span={span}
             prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}

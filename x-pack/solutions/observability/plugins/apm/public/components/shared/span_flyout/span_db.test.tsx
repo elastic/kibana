@@ -4,30 +4,83 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
-import { SpanDatabase } from './span_db';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import { useSpanDatabaseCallout } from './span_db';
 
-describe('SpanDatabase', () => {
-  it('renders the title and statement when spanDb has a statement', () => {
-    render(<SpanDatabase spanDb={{ statement: 'SELECT * FROM users', type: 'sql' }} />);
+type SpanDb = NonNullable<Span['span']>['db'];
 
-    expect(screen.getByText('Database statement')).toBeInTheDocument();
-    expect(screen.getByText('SELECT * FROM users')).toBeInTheDocument();
+const TABS = [
+  { id: 'metadata', label: 'Metadata' },
+  { id: 'stack-trace', label: 'Stack Trace' },
+];
+
+function DatabaseCalloutHost({ spanDb }: { spanDb?: SpanDb }) {
+  const callout = useSpanDatabaseCallout(spanDb);
+  return (
+    <FlyoutTemplate onClose={jest.fn()} session="never" tabs={TABS} data-test-subj="spanFlyout">
+      <FlyoutTemplate.Header title="Span" />
+      <FlyoutTemplate.Body>
+        {callout}
+        <FlyoutTemplate.Body.TabPanel tabId="metadata">
+          <div data-test-subj="metadataPanel">metadata</div>
+        </FlyoutTemplate.Body.TabPanel>
+        <FlyoutTemplate.Body.TabPanel tabId="stack-trace">
+          <div data-test-subj="stackTracePanel">stack trace</div>
+        </FlyoutTemplate.Body.TabPanel>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+}
+
+const renderCallout = (spanDb?: SpanDb) =>
+  render(
+    <EuiThemeProvider>
+      <I18nProvider>
+        <DatabaseCalloutHost spanDb={spanDb} />
+      </I18nProvider>
+    </EuiThemeProvider>
+  );
+
+describe('useSpanDatabaseCallout', () => {
+  it('renders the statement in an info callout', () => {
+    renderCallout({ statement: 'SELECT * FROM users', type: 'sql' });
+
+    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    expect(callout).toHaveTextContent('Database statement');
+    expect(callout).toHaveTextContent('SELECT * FROM users');
+    expect(screen.getByTestId('metadataPanel')).not.toContainElement(callout);
+  });
+
+  it('keeps the same callout mounted when the tab changes', async () => {
+    const user = userEvent.setup();
+    renderCallout({ statement: 'SELECT * FROM users', type: 'sql' });
+
+    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    await user.click(screen.getByRole('tab', { name: 'Stack Trace' }));
+
+    expect(screen.getByTestId('stackTracePanel')).toBeInTheDocument();
+    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toBe(callout);
+    expect(callout).toHaveTextContent('SELECT * FROM users');
   });
 
   it('does not render when spanDb is undefined', () => {
-    const { container } = render(<SpanDatabase />);
-    expect(container).toBeEmptyDOMElement();
+    renderCallout();
+    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
   });
 
   it('does not render when spanDb has no statement', () => {
-    const { container } = render(<SpanDatabase spanDb={{ type: 'sql' }} />);
-    expect(container).toBeEmptyDOMElement();
+    renderCallout({ type: 'sql' });
+    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
   });
 
   it('does not render when spanDb.statement is an empty string', () => {
-    const { container } = render(<SpanDatabase spanDb={{ statement: '', type: 'sql' }} />);
-    expect(container).toBeEmptyDOMElement();
+    renderCallout({ statement: '', type: 'sql' });
+    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
   });
 });

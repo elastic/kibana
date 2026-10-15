@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
@@ -137,7 +138,7 @@ describe('SpanFlyout', () => {
     expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
   });
 
-  it('shows the span header, the database statement atop Metadata, and the Discover action', () => {
+  it('shows the span header, the database statement callout, and the Discover action', () => {
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
 
     renderFlyout({ kuery: 'service.name: "a"' });
@@ -145,8 +146,10 @@ describe('SpanFlyout', () => {
     expect(screen.getByRole('heading', { name: 'SELECT * FROM orders' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutHeader')).toHaveTextContent('Span details');
     expect(screen.getByTestId('spanFlyoutTab-metadata')).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('heading', { name: 'Database statement' })).toBeInTheDocument();
-    expect(screen.getByTestId('mockSpanMetadata')).toBeInTheDocument();
+    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    expect(callout).toHaveTextContent('Database statement');
+    expect(callout).toHaveTextContent('SELECT * FROM orders');
+    expect(screen.getByTestId('mockSpanMetadata')).not.toContainElement(callout);
     expect(screen.queryByTestId('spanFlyoutCompositeCallout')).not.toBeInTheDocument();
 
     expect(lastMenuPropsArgs()).toEqual({
@@ -173,13 +176,29 @@ describe('SpanFlyout', () => {
     );
   });
 
-  it('selects the tab named by flyoutDetailTab', () => {
+  it('selects the tab named by flyoutDetailTab and keeps the database statement visible', () => {
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
 
     renderFlyout({ flyoutDetailTab: 'span_links' });
 
     expect(screen.getByTestId('spanLinksTab')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('mockSpanLinks')).toBeInTheDocument();
+    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toHaveTextContent(
+      'SELECT * FROM orders'
+    );
+    expect(screen.queryByTestId('mockSpanMetadata')).not.toBeInTheDocument();
+  });
+
+  it('keeps the same database statement callout mounted when switching tabs', async () => {
+    const user = userEvent.setup();
+    setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
+    renderFlyout();
+
+    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    await user.click(screen.getByTestId('spanLinksTab'));
+
+    expect(screen.getByTestId('mockSpanLinks')).toBeInTheDocument();
+    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toBe(callout);
   });
 
   it('does not show the previous span while the next one loads', () => {
@@ -202,6 +221,7 @@ describe('SpanFlyout', () => {
 
     expect(screen.queryByRole('heading', { name: 'SELECT * FROM orders' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
+    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockSpanMetadata')).not.toBeInTheDocument();
     expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
   });

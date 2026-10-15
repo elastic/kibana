@@ -13,6 +13,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import type { SpanLinksCount } from '../span_links';
 import { WATERFALL_FLYOUT_MAX_WIDTH } from '../waterfall_item_flyout/constants';
+import { useSpanDatabaseCallout } from './span_db';
 import { useSpanFlyoutHeader } from './use_span_flyout_header';
 import { useSpanFlyoutMenuProps } from './use_span_flyout_menu_props';
 import { useSpanFlyoutTabs } from './use_span_flyout_tabs';
@@ -75,6 +76,7 @@ export function SpanFlyout({
     totalDuration,
   });
   const tabs = useSpanFlyoutTabs({ span, parentTransaction, spanLinksCount });
+  const databaseCallout = useSpanDatabaseCallout(span?.span?.db);
 
   const flyoutMenuProps = useSpanFlyoutMenuProps({
     isSpanLoaded: !!span,
@@ -113,6 +115,7 @@ export function SpanFlyout({
             data-test-subj="spanFlyoutCompositeCallout"
           />
         ) : null}
+        {databaseCallout}
         {span ? null : <EuiSkeletonText isLoading />}
         {tabs.map(({ tab, panel }) => (
           <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>
