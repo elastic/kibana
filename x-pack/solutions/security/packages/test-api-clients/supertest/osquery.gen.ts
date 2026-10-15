@@ -30,21 +30,21 @@ import type {
 } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
 import type {
   OsqueryCopyPacksRequestParamsInput,
-  OsqueryGetPacksDetailsRequestParamsInput,
-  OsqueryUpdatePacksRequestParamsInput,
-  OsqueryUpdatePacksRequestBodyInput,
   OsqueryCreatePacksRequestBodyInput,
   OsqueryDeletePacksRequestParamsInput,
   OsqueryFindPacksRequestQueryInput,
+  OsqueryGetPacksDetailsRequestParamsInput,
+  OsqueryUpdatePacksRequestParamsInput,
+  OsqueryUpdatePacksRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
 import type {
   OsqueryCopySavedQueryRequestParamsInput,
+  OsqueryCreateSavedQueryRequestBodyInput,
+  OsqueryDeleteSavedQueryRequestParamsInput,
   OsqueryFindSavedQueriesRequestQueryInput,
   OsqueryGetSavedQueryDetailsRequestParamsInput,
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
-  OsqueryCreateSavedQueryRequestBodyInput,
-  OsqueryDeleteSavedQueryRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import type {
   OsqueryCreateLiveQueryRequestBodyInput,
