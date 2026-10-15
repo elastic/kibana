@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { buildUserScopeId } from '@kbn/context-engine-plugin/common/memory';
 
 /**
  * The `user://<profile uid>` scope of the caller. The uid is what Elasticsearch matches in the
- * memory DLS template, so a caller without an activated profile cannot own a memory.
+ * memory DLS template, so a caller without an activated profile cannot own a memory. Core's
+ * security service is used because it also resolves the profile on enriched Task Manager requests.
  */
 export const resolveMemoryUserScopeId = async ({
   request,
-  getSecurityStart,
+  getCoreStart,
 }: {
   request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<CoreStart>;
 }): Promise<string> => {
-  const security = await getSecurityStart();
-  const profileUid = security?.authc.getCurrentUser(request)?.profile_uid;
+  const coreStart = await getCoreStart();
+  const profileUid = coreStart.security.authc.getCurrentUser(request)?.profile_uid;
   if (!profileUid) {
     throw new Error('Cannot store user memory without a user profile.');
   }

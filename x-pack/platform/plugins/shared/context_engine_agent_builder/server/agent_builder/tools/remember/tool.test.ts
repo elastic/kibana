@@ -11,7 +11,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { kiFieldsSchema } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createRememberTool } from './tool';
@@ -27,19 +26,19 @@ describe('remember tool', () => {
   const search = jest.fn();
   const index = jest.fn();
   const getCurrentUser = jest.fn();
-  const security = { authc: { getCurrentUser } } as unknown as SecurityPluginStart;
 
   const createTool = () =>
     createRememberTool({
       getAiIndexService: async () => ({ get } as unknown as AiIndexService),
       getCoreStart: async () => {
         const coreStart = coreMock.createStart();
+        coreStart.security.authc.getCurrentUser = getCurrentUser;
         coreStart.uiSettings.globalAsScopedToClient = jest
           .fn()
           .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
         return coreStart;
       },
-      getSecurityStart: async () => security,
+      getSecurityStart: async () => undefined,
       generateId: () => 'logical-memory-id',
       generateSessionId: () => 'generated-session-id',
       getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),

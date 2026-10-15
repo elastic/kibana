@@ -10,7 +10,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createForgetTool } from './tool';
@@ -26,19 +25,19 @@ describe('forget tool', () => {
   const search = jest.fn();
   const index = jest.fn();
   const getCurrentUser = jest.fn();
-  const security = { authc: { getCurrentUser } } as unknown as SecurityPluginStart;
 
   const createTool = () =>
     createForgetTool({
       getAiIndexService: async () => ({ get } as unknown as AiIndexService),
       getCoreStart: async () => {
         const coreStart = coreMock.createStart();
+        coreStart.security.authc.getCurrentUser = getCurrentUser;
         coreStart.uiSettings.globalAsScopedToClient = jest
           .fn()
           .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
         return coreStart;
       },
-      getSecurityStart: async () => security,
+      getSecurityStart: async () => undefined,
     });
 
   const createContext = (): ToolHandlerContext => {
