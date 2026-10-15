@@ -143,6 +143,13 @@ const mockFindResult = (attacks: unknown[], overrides: Record<string, unknown> =
   });
 };
 
+/**
+ * A live document for every attachment id given, so each of those rows resolves — which is what
+ * makes a row selectable, since the bulk actions all read the live document.
+ */
+const mockResolvedAttacks = (attachmentIds: string[]) =>
+  mockFindResult(attachmentIds.map((attachmentId) => ({ ...liveAttack, id: attachmentId })));
+
 const renderTab = (props?: Partial<CommonAttachmentListViewProps>) =>
   render(
     <TestProviders>
@@ -979,13 +986,22 @@ describe('AttackTabContent', () => {
       buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
     ];
 
-    /** Twelve unresolvable attachments, so every row sorts on the same snapshotted timestamp. */
+    /** Both rows resolve, so both are selectable. */
+    const renderTwoSelectable = () => {
+      mockResolvedAttacks(['attack-id-1', 'attack-id-2']);
+
+      return renderAttachments(twoAttachments());
+    };
+
+    /** Twelve attachments that all resolve, so every row is selectable. */
     const renderTwelveAttachments = () => {
-      mockFindResult([]);
+      const attachmentIds = Array.from({ length: 12 }, (_, index) => `attack-id-${index}`);
+
+      mockResolvedAttacks(attachmentIds);
 
       return renderAttachments(
-        Array.from({ length: 12 }, (_, index) =>
-          buildAttachment({ id: `so-${index}`, attachmentId: `attack-id-${index}` })
+        attachmentIds.map((attachmentId, index) =>
+          buildAttachment({ id: `so-${index}`, attachmentId })
         )
       );
     };
@@ -1033,7 +1049,7 @@ describe('AttackTabContent', () => {
     });
 
     it('reflects a partial selection in the header checkbox', async () => {
-      renderAttachments(twoAttachments());
+      renderTwoSelectable();
 
       await user.click(rowCheckbox('so-1'));
       expect(selectAllCheckbox()).toBePartiallyChecked();
@@ -1057,7 +1073,7 @@ describe('AttackTabContent', () => {
     });
 
     it('deselects every row when the header checkbox is cleared', async () => {
-      renderAttachments(twoAttachments());
+      renderTwoSelectable();
 
       await user.click(selectAllCheckbox());
       await user.click(selectAllCheckbox());
@@ -1107,18 +1123,75 @@ describe('AttackTabContent', () => {
 
       expect(rowCheckbox('so-1')).not.toBeChecked();
     });
+
+    describe('rows that cannot be acted on', () => {
+      it('disables the checkbox of an unresolved row, and explains why', async () => {
+        renderAttachments(twoAttachments());
+
+        expect(rowCheckbox('so-1')).toBeEnabled();
+        expect(rowCheckbox('so-2')).toBeDisabled();
+
+        await user.hover(rowCheckbox('so-2').closest('span') as HTMLElement);
+
+        expect(await screen.findByText(/could not be loaded/i)).toBeInTheDocument();
+      });
+
+      it('disables every checkbox while the live query is still loading', () => {
+        mockFindResult([], { isLoading: true, status: 'loading' });
+        renderAttachments(twoAttachments());
+
+        expect(rowCheckbox('so-1')).toBeDisabled();
+        expect(selectAllCheckbox()).toBeDisabled();
+      });
+
+      it('leaves an unresolved row out of select all', async () => {
+        renderAttachments(twoAttachments());
+
+        await user.click(selectAllCheckbox());
+
+        expect(rowCheckbox('so-1')).toBeChecked();
+        expect(rowCheckbox('so-2')).not.toBeChecked();
+        // Every row it could select is selected, so the header reads as fully checked.
+        expect(selectAllCheckbox()).toBeChecked();
+      });
+
+      it('disables select all when no row can be acted on', () => {
+        mockFindResult([]);
+        renderAttachments(twoAttachments());
+
+        expect(selectAllCheckbox()).toBeDisabled();
+      });
+
+      it('counts only the selectable rows in the select-all label', async () => {
+        // Two of the three rows resolve, so selecting one leaves the header offering the other.
+        mockResolvedAttacks(['attack-id-1', 'attack-id-2']);
+        renderAttachments([
+          ...twoAttachments(),
+          buildAttachment({ id: 'so-3', attachmentId: 'attack-id-3' }),
+        ]);
+
+        await user.click(rowCheckbox('so-1'));
+
+        expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
+          'Select all 2 attacks'
+        );
+      });
+    });
   });
 
   describe('the bulk action bar', () => {
     const rowCheckbox = (savedObjectId: string) =>
       screen.getByTestId(`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${savedObjectId}`);
 
-    /** Sorted by detection time, `so-1` is the live attack and `so-2` the unresolved one. */
-    const renderTwoAttachments = () =>
-      renderAttachments([
+    /** Both rows resolve, so both are selectable and the bar can count either. */
+    const renderTwoAttachments = () => {
+      mockResolvedAttacks(['attack-id-1', 'attack-id-2']);
+
+      return renderAttachments([
         buildAttachment(),
         buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
       ]);
+    };
 
     const bulkActionsMenu = () => screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID);
 

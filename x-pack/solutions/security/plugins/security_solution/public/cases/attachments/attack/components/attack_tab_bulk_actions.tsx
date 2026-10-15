@@ -87,14 +87,15 @@ export interface SelectedAttack {
   /** The attack title, from the live document where it resolved and the snapshot otherwise. */
   title: string;
   /**
-   * The live attack document. Absent where the row could not be resolved, which is what keeps it
-   * out of every action: the bulk items read the live alert ids, tags, assignees and status.
+   * The live attack document. The grid only lets a row be selected once it has one, so in practice
+   * this is always set; it stays optional so the bar is still correct on its own terms, and the
+   * filter below is what enforces that.
    */
   attack?: AttackDiscoveryAlert;
 }
 
 export interface AttackTabBulkActionsProps {
-  /** The selected rows. The bar renders nothing while this is empty. */
+  /** The selected rows. The bar renders nothing while none of them can be acted on. */
   selectedAttacks: readonly SelectedAttack[];
   /** Every row the grid is currently showing, which is what "select all" selects. */
   totalAttacks: number;
@@ -131,11 +132,19 @@ export const AttackTabBulkActions = ({
     onActionSuccess();
   }, [invalidateAttackDiscoveriesCache, onActionSuccess]);
 
-  // A row that resolved to nothing but its snapshot has no live document to act on, so it is
-  // left out of every action rather than acted on with stale values.
-  const resolvedAttacks = useMemo(
-    () => selectedAttacks.flatMap(({ attack }) => (attack != null ? [attack] : [])),
+  // A row that resolved to nothing but its snapshot has no live document to act on. The grid
+  // already keeps those out of the selection, so this is a backstop rather than the guard — but
+  // it is the one the bar's own count and title are drawn from, so the bar never names more than
+  // it will touch even if a caller hands it an unresolved row.
+  const actionableAttacks = useMemo(
+    () =>
+      selectedAttacks.flatMap(({ attack, title }) => (attack != null ? [{ attack, title }] : [])),
     [selectedAttacks]
+  );
+
+  const resolvedAttacks = useMemo(
+    () => actionableAttacks.map(({ attack }) => attack),
+    [actionableAttacks]
   );
 
   const baseAttackProps = useMemo(
@@ -241,10 +250,10 @@ export const AttackTabBulkActions = ({
 
   const caseTitle = useMemo(
     () =>
-      selectedAttacks.length === 1
-        ? selectedAttacks[0].title
-        : getSelectionTitle(selectedAttacks.length),
-    [selectedAttacks]
+      actionableAttacks.length === 1
+        ? actionableAttacks[0].title
+        : getSelectionTitle(actionableAttacks.length),
+    [actionableAttacks]
   );
 
   const { items: caseItems } = useAttackCaseContextMenuItems({
@@ -285,10 +294,10 @@ export const AttackTabBulkActions = ({
   const selectedLabel = useMemo(
     () =>
       getSelectedLabel(
-        numeral(selectedAttacks.length).format(defaultNumberFormat),
-        selectedAttacks.length
+        numeral(actionableAttacks.length).format(defaultNumberFormat),
+        actionableAttacks.length
       ),
-    [defaultNumberFormat, selectedAttacks.length]
+    [defaultNumberFormat, actionableAttacks.length]
   );
 
   const selectAllLabel = useMemo(
@@ -310,7 +319,8 @@ export const AttackTabBulkActions = ({
     [assignPanels, menuItems, runWorkflowPanels, tagsPanels, workflowPanels]
   );
 
-  if (selectedAttacks.length === 0) {
+  // A selection with nothing actionable in it is no selection as far as this bar is concerned.
+  if (actionableAttacks.length === 0) {
     return null;
   }
 

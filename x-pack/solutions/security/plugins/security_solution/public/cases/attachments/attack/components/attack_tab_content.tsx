@@ -109,6 +109,8 @@ interface AttackGridCellContextValue {
   canInvestigateInTimeline: boolean;
   investigateAttackInTimeline: (attack: AttackDiscoveryAlert | undefined) => void;
   rows: AttackRow[];
+  /** How many rows can be selected, which is every row that resolved to a live document. */
+  selectableRowCount: number;
   selectedRowCount: number;
   selectedRowIds: ReadonlySet<string>;
   toggleAllRowsSelected: () => void;
@@ -476,7 +478,7 @@ const compareRows = (
 };
 
 const SelectAllAttacksHeaderCell = () => {
-  const { areAllRowsSelected, selectedRowCount, toggleAllRowsSelected } =
+  const { areAllRowsSelected, selectableRowCount, selectedRowCount, toggleAllRowsSelected } =
     useAttackGridCellContext();
 
   const selectAllId = useGeneratedHtmlId({ prefix: 'attackTabSelectAll' });
@@ -486,6 +488,7 @@ const SelectAllAttacksHeaderCell = () => {
       aria-label={SELECT_ALL_LABEL}
       checked={areAllRowsSelected}
       data-test-subj={ATTACK_TAB_SELECT_ALL_TEST_ID}
+      disabled={selectableRowCount === 0}
       id={selectAllId}
       indeterminate={selectedRowCount > 0 && !areAllRowsSelected}
       onChange={toggleAllRowsSelected}
@@ -504,14 +507,29 @@ const SelectAttackCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     return null;
   }
 
-  return (
+  const checkbox = (
     <EuiCheckbox
       aria-label={getSelectAttackLabel(getTitle(row.attack, row.metadata))}
       checked={selectedRowIds.has(row.savedObjectId)}
       data-test-subj={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
+      disabled={row.attack == null}
       id={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
       onChange={() => toggleRowSelected(row.savedObjectId)}
     />
+  );
+
+  // The bulk actions all read the live document, so a row without one has nothing to act on and
+  // its checkbox is disabled. Only an unresolved row explains itself: a row whose live query is
+  // still in flight is disabled too, but it is about to resolve and the grid already shows a
+  // progress bar. The span is what the tooltip binds to, since a disabled input emits no mouse
+  // events of its own, and it takes the tab stop the disabled input gives up so the reason stays
+  // reachable from the keyboard.
+  return row.isUnresolved ? (
+    <EuiToolTip content={UNRESOLVED_TOOLTIP}>
+      <span tabIndex={0}>{checkbox}</span>
+    </EuiToolTip>
+  ) : (
+    checkbox
   );
 };
 
@@ -852,24 +870,34 @@ const AttackTabTable = ({
     });
   }, []);
 
-  // Taken from the rows rather than the selection, so an attachment removed from the case while
-  // selected cannot leave the header checkbox stuck or the bulk bar naming a row that is gone.
+  // Every bulk action reads the live attack document, so a row without one cannot be acted on and
+  // is kept out of the selection entirely. Covers both the row that resolved to nothing but its
+  // snapshot and the row whose live query has not returned yet. Doing it here rather than in the
+  // bulk bar is what keeps the count honest: the bar reports what it is given.
+  const selectableRows = useMemo(() => rows.filter(({ attack }) => attack != null), [rows]);
+
+  // Taken from the selectable rows rather than the selection, so an attachment removed from the
+  // case while selected, or one that stops resolving on a refetch, cannot leave the header
+  // checkbox stuck or the bulk bar naming a row it cannot act on.
   const selectedRows = useMemo(
-    () => rows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)),
-    [rows, selectedRowIds]
+    () => selectableRows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)),
+    [selectableRows, selectedRowIds]
   );
 
   const selectedRowCount = selectedRows.length;
 
-  const areAllRowsSelected = rows.length > 0 && selectedRowCount === rows.length;
+  const areAllRowsSelected =
+    selectableRows.length > 0 && selectedRowCount === selectableRows.length;
 
   const toggleAllRowsSelected = useCallback(() => {
     // Every filtered row, not just the page on screen: the user asked for "all", and the rows
     // the grid is paginating over are all in hand here.
     setSelectedRowIds(
-      areAllRowsSelected ? NO_SELECTION : new Set(rows.map(({ savedObjectId }) => savedObjectId))
+      areAllRowsSelected
+        ? NO_SELECTION
+        : new Set(selectableRows.map(({ savedObjectId }) => savedObjectId))
     );
-  }, [areAllRowsSelected, rows]);
+  }, [areAllRowsSelected, selectableRows]);
 
   const cellContext = useMemo<AttackGridCellContextValue>(
     () => ({
@@ -877,6 +905,7 @@ const AttackTabTable = ({
       canInvestigateInTimeline,
       investigateAttackInTimeline,
       rows,
+      selectableRowCount: selectableRows.length,
       selectedRowCount,
       selectedRowIds,
       toggleAllRowsSelected,
@@ -887,6 +916,7 @@ const AttackTabTable = ({
       canInvestigateInTimeline,
       investigateAttackInTimeline,
       rows,
+      selectableRows.length,
       selectedRowCount,
       selectedRowIds,
       toggleAllRowsSelected,
@@ -915,13 +945,19 @@ const AttackTabTable = ({
               onActionSuccess={clearSelection}
               onToggleSelectAll={toggleAllRowsSelected}
               selectedAttacks={selectedAttacks}
-              totalAttacks={rows.length}
+              totalAttacks={selectableRows.length}
             />
           ),
         },
       },
     }),
-    [areAllRowsSelected, clearSelection, rows.length, selectedAttacks, toggleAllRowsSelected]
+    [
+      areAllRowsSelected,
+      clearSelection,
+      selectableRows.length,
+      selectedAttacks,
+      toggleAllRowsSelected,
+    ]
   );
 
   return (
