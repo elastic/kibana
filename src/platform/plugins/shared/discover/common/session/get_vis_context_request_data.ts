@@ -55,10 +55,14 @@ const extractEsqlFingerprint = (
   }
 
   const referencedDataViewIds = new Set<string>();
+  const layerTimeFields: string[] = [];
 
   for (const layer of Object.values(layers)) {
     if (isRecord(layer) && typeof layer.index === 'string' && layer.index.length > 0) {
       referencedDataViewIds.add(layer.index);
+      if (typeof layer.timeField === 'string' && layer.timeField !== '') {
+        layerTimeFields.push(layer.timeField);
+      }
     }
   }
 
@@ -68,22 +72,16 @@ const extractEsqlFingerprint = (
   }
 
   const [dataViewId] = referencedDataViewIds;
-  const adHocDataViews = get(attributes, 'state.adHocDataViews');
-  if (!isRecord(adHocDataViews)) {
+  const lensDataViewSpec = get(attributes, ['state', 'adHocDataViews', dataViewId]);
+  if (isRecord(lensDataViewSpec) && lensDataViewSpec.type !== ESQL_TYPE) {
     return undefined;
   }
 
-  const lensDataViewSpec = adHocDataViews[dataViewId];
-  if (!isRecord(lensDataViewSpec) || lensDataViewSpec.type !== ESQL_TYPE) {
-    return undefined;
-  }
+  const specTimeField = isRecord(lensDataViewSpec) ? lensDataViewSpec.timeFieldName : undefined;
+  const timeField =
+    typeof specTimeField === 'string' && specTimeField !== '' ? specTimeField : layerTimeFields[0];
 
-  const { timeFieldName } = lensDataViewSpec;
-  if (typeof timeFieldName !== 'string' || timeFieldName === '') {
-    return { dataViewId };
-  }
-
-  return { dataViewId, timeField: timeFieldName };
+  return timeField === undefined ? { dataViewId } : { dataViewId, timeField };
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

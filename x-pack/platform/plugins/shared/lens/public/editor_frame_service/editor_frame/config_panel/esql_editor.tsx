@@ -10,6 +10,7 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getRepresentativeQuery } from '@kbn/lens-common';
+import type { TextBasedPersistedState } from '@kbn/lens-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -32,6 +33,7 @@ import { getActiveDataFromDatatable } from '../../../state_management/shared_log
 import { useLensSelector, selectSearchSessionId } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getGridAttrs, getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { withEsqlLayerDataViewSpecs } from '../../../data_views_service/esql_layer_data_view_specs';
 import { addColumnsToCache } from '../../../datasources/text_based/fieldlist_cache';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -157,7 +159,16 @@ export function ESQLEditor({
 
   const adHocDataViews = useMemo(() => {
     if (attributes && attributes.state.adHocDataViews) {
-      return Object.values(attributes.state.adHocDataViews);
+      const textBasedState = attributes.state.datasourceStates?.textBased as
+        | TextBasedPersistedState
+        | undefined;
+      return Object.values(
+        withEsqlLayerDataViewSpecs(
+          attributes.state.adHocDataViews,
+          textBasedState?.layers,
+          attributes.references
+        )
+      );
     }
     return Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
   }, [attributes, framePublicAPI.dataViews.indexPatterns]);

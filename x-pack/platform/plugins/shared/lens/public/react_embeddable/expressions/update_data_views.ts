@@ -15,6 +15,7 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { LensRuntimeState, TextBasedPersistedState } from '@kbn/lens-common';
 import { getIndexPatternsObjects } from '../../utils';
+import { withEsqlLayerDataViewSpecs } from '../../data_views_service/esql_layer_data_view_specs';
 import type { LensEmbeddableStartServices } from '../types';
 
 type DataViewsService = LensEmbeddableStartServices['dataViews'];
@@ -67,12 +68,14 @@ export async function getUsedDataViews(
       dataViews
     ),
 
-    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => {
-      const esqlLayer = spec.id ? esqlLayersByIndex.get(spec.id) : undefined;
-      return esql && esqlLayer
-        ? getEsqlDataView(spec, esqlLayer.query, esqlLayer.timeField, dataViews, esql)
-        : dataViews.create(spec);
-    }),
+    ...Object.values(withEsqlLayerDataViewSpecs(adHocDataViewsSpecs, esql?.layers, references)).map(
+      (spec) => {
+        const esqlLayer = spec.id ? esqlLayersByIndex.get(spec.id) : undefined;
+        return esql && esqlLayer
+          ? getEsqlDataView(spec, esqlLayer.query, esqlLayer.timeField, dataViews, esql)
+          : dataViews.create(spec);
+      }
+    ),
   ]);
 
   return uniqBy(indexPatterns.concat(adHocDataViews), 'id');

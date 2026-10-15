@@ -115,4 +115,39 @@ describe('ES|QL attributes creation', () => {
     const attributes = await loadESQLAttributes(getServices());
     expect(attributes).not.toBeUndefined();
   });
+
+  it('does not persist the data view spec of the ES|QL layer of a new panel', async () => {
+    const adHocDataView = {
+      ...dataViewMock,
+      id: 'esql-id',
+      isPersisted: () => false,
+      toMinimalSpec: () => ({ id: 'esql-id', title: 'index', type: 'esql' }),
+    } as unknown as typeof dataViewMock;
+    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+    mockCreateEsqlAdHocDataView.mockResolvedValueOnce(adHocDataView);
+    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+      {
+        title: 'MyTitle',
+        visualizationId: 'lnsXY',
+        datasourceId: 'textBased',
+        datasourceState: {
+          layers: {
+            layer1: { index: 'esql-id', query: { esql: 'FROM index' }, columns: [] },
+          },
+        },
+        visualizationState: {},
+        columns: 1,
+        score: 1,
+        previewIcon: 'icon',
+        changeType: 'initial',
+        keptLayerIds: [],
+      },
+    ]);
+
+    const attributes = await loadESQLAttributes(getServices());
+
+    expect(attributes?.state.datasourceStates.textBased).toBeDefined();
+    expect(attributes?.state.adHocDataViews).toEqual({});
+  });
 });
