@@ -7,7 +7,7 @@
     "title": "Legacy Vega visualization",
     "uiStateJSON": "{}",
     "version": 1,
-    "visState": "{\"title\":\"Legacy Vega visualization\",\"type\":\"vega\",\"params\":{\"spec\":\"{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }\"}}"
+    "visState": "{\"title\":\"Legacy Vega visualization\",\"type\":\"vega\",\"params\":{\"spec\":\"{\\n  // Comments are allowed in HJSON\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  data: []\\n  marks: []\\n}\"}}"
   },
   "coreMigrationVersion": "8.0.0",
   "id": "legacy_vega_visualization",
@@ -58,7 +58,7 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
     },
     "optionsJSON": "{}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"savedVis\":{\"title\":\"Legacy Vega hybrid\",\"type\":\"vega\",\"params\":{\"spec\":\"{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}},\"panelRefName\":\"panel_1\"}]",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"savedVis\":{\"title\":\"Legacy Vega hybrid\",\"type\":\"vega\",\"params\":{\"spec\":\"{\\n  // Comments are allowed in HJSON\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  data: []\\n  marks: []\\n}\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}},\"panelRefName\":\"panel_1\"}]",
     "timeRestore": false,
     "title": "Legacy Vega hybrid dashboard",
     "version": 1

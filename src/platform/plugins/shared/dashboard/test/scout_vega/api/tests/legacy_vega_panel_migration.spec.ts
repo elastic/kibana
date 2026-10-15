@@ -47,7 +47,14 @@ const MIGRATED_PANELS = [
       filters: [{ data_view_id: 'logs-data-view' }],
       spec: {
         format: 'hjson',
-        value: '{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }',
+        value: [
+          '{',
+          '  // Comments are allowed in HJSON',
+          '  $schema: https://vega.github.io/schema/vega/v5.json',
+          '  data: []',
+          '  marks: []',
+          '}',
+        ].join('\n'),
       },
     },
   },
