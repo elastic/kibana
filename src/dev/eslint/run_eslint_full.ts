@@ -59,7 +59,8 @@ run(
         });
         workers.push(worker);
         const sendNextChunk = () => {
-          const chunk = bail && errorCount > 0 ? undefined : chunks.shift();
+          const stop = bail && errorCount > 0;
+          const chunk = stop ? undefined : chunks.shift();
           if (chunk) {
             worker.send(chunk);
           } else {

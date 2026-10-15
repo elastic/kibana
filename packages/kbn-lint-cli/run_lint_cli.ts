@@ -48,7 +48,7 @@ run(
       await watchAndLintFiles({ procRunner, log, addCleanupTask, options });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options, sharded: options.paths.length === 0 });
+      await lintFiles({ procRunner, options, sharded: paths.length === 0 });
       log.success('Linting files completed');
     }
   },
@@ -77,7 +77,7 @@ async function lintFiles({
   sharded?: boolean;
 }) {
   const runOxlint = sharded
-    ? (args: string[]) => runOxlintShards(args)
+    ? runOxlintShards
     : (args: string[]) =>
         procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
 
@@ -95,14 +95,15 @@ async function lintFiles({
 
 /** Lints the whole repo with one oxlint process per shard, printing each shard's output whole. */
 async function runOxlintShards(args: string[]) {
+  // `-z` keeps paths with non-ASCII characters unquoted, so they are not dropped by the filter
   const { stdout } = await execa(
     'git',
-    ['ls-files', '--cached', '--others', '--exclude-standard'],
+    ['ls-files', '-z', '--cached', '--others', '--exclude-standard'],
     {
       cwd: REPO_ROOT,
     }
   );
-  const files = stdout.split('\n').filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)));
+  const files = stdout.split('\0').filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)));
   const shardCount = Math.max(1, Math.round(Os.availableParallelism() / THREADS_PER_SHARD));
 
   const results = await Promise.all(
