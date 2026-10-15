@@ -27,6 +27,7 @@ import {
   getFeaturesEndpoint,
   deleteSignificantEvent,
   retryOnWriteLease,
+  retryToolOnWriteLease,
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
 
@@ -139,14 +140,16 @@ for (const role of ['editor', 'admin'] as const) {
       });
 
       apiTest('creates a knowledge indicator from Agent Builder', async ({ apiClient }) => {
-        const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
-          headers: toolHeaders,
-          body: {
-            tool_id: KI_FEATURE_CREATE_TOOL_ID,
-            tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
-          },
-          responseType: 'json',
-        });
+        const response = await retryToolOnWriteLease(() =>
+          apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+            headers: toolHeaders,
+            body: {
+              tool_id: KI_FEATURE_CREATE_TOOL_ID,
+              tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
+            },
+            responseType: 'json',
+          })
+        );
         expect(response).toHaveStatusCode(200);
         expect(response.body.results).toStrictEqual([
           expect.objectContaining({
