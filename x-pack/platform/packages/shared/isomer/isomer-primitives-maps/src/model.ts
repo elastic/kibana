@@ -174,20 +174,27 @@ export const createMapModel = (node: MapNode): MapModel => {
   const markerValues = extent(
     (node.markers ?? []).flatMap(({ value }) => (value === undefined ? [] : [value]))
   );
+  const sizeOf = (marker: MapMarker) => marker.size ?? marker.value;
+  const markerSizes = extent(
+    (node.markers ?? []).flatMap((marker) => {
+      const size = sizeOf(marker);
+      return size === undefined ? [] : [size];
+    })
+  );
+  const radius = node.markerSize ?? (node.markerRamp ? MARKER_RADIUS : undefined);
   const markers: MapMarkerModel[] = (node.markers ?? []).map((marker: MapMarker) => {
     const point = project(marker.lon, marker.lat);
+    const size = sizeOf(marker);
     const scaled =
-      node.markerRamp && marker.value !== undefined && markerValues.max > markerValues.min
-        ? (marker.value - markerValues.min) / (markerValues.max - markerValues.min)
+      radius && size !== undefined && markerSizes.max > markerSizes.min
+        ? (size - markerSizes.min) / (markerSizes.max - markerSizes.min)
         : undefined;
     return {
       id: marker.id,
       label: marker.label,
       tone: marker.tone ?? 'neutral',
       value: marker.value,
-      radius: node.markerRamp
-        ? MARKER_RADIUS.min + (scaled ?? 0) * (MARKER_RADIUS.max - MARKER_RADIUS.min)
-        : MARKER_RADIUS.fixed,
+      radius: radius ? radius.min + (scaled ?? 0) * (radius.max - radius.min) : MARKER_RADIUS.fixed,
       fill:
         node.markerRamp && marker.value !== undefined
           ? rampColor(node.markerRamp, marker.value, markerValues.min, markerValues.max)

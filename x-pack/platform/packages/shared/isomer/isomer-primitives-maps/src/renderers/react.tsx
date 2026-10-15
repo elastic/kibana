@@ -138,9 +138,10 @@ export const createMapReactRenderer =
             marker.label ? (
               <text
                 key={`${marker.id}-label`}
-                x={marker.x + marker.radius + 3}
+                x={node.markerLabels === 'inside' ? marker.x : marker.x + marker.radius + 3}
                 y={marker.y + 4}
                 fontSize={11}
+                textAnchor={node.markerLabels === 'inside' ? 'middle' : 'start'}
                 fill={PAINT.text}
               >
                 {marker.label}

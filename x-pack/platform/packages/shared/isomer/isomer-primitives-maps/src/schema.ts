@@ -29,6 +29,7 @@ const markerSchema = z.object({
   label: z.string().max(80).optional(),
   tone: tone.optional(),
   value: z.number().finite().optional(),
+  size: z.number().finite().optional(),
   group: z.string().max(64).optional(),
 });
 
@@ -77,6 +78,10 @@ export const mapSchema = z.object({
     .optional(),
   markers: z.array(markerSchema).max(MAP_MAX_MARKERS).optional(),
   markerRamp: ramp.optional(),
+  markerSize: z
+    .object({ min: z.number().min(0).max(200), max: z.number().min(0).max(200) })
+    .optional(),
+  markerLabels: z.enum(['beside', 'inside']).optional(),
   cells: z.array(cellSchema).max(MAP_MAX_CELLS).optional(),
   cellShape: z.enum(['grid', 'hex', 'heatmap']).optional(),
   cellRamp: ramp.optional(),
