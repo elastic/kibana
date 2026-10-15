@@ -34,6 +34,7 @@ const lastOptions = () =>
 const returns = (overrides = {}) =>
   mockPreviousPeriod.mockReturnValue({
     previous: undefined,
+    reachesBack: undefined,
     isHistoryMissing: false,
     isError: false,
     ...overrides,
@@ -74,9 +75,23 @@ describe.each([
   ],
 ] as const)('%s', (_name, render, tileKey) => {
   it('is the count minus the previous period', () => {
-    returns({ previous: 4 });
+    returns({ previous: 4, reachesBack: true });
     const { result } = render({});
-    expect(result.current).toEqual({ delta: 6, isDeltaLoading: false, isHistoryMissing: false });
+    expect(result.current).toEqual({
+      delta: 6,
+      isDeltaLoading: false,
+      isHistoryMissing: false,
+      reachesBack: true,
+    });
+  });
+
+  it('passes on whether the history reaches back, so the sparkline can follow the same rule', () => {
+    returns({ reachesBack: true });
+    expect(render({}).result.current.reachesBack).toBe(true);
+    returns({ reachesBack: false, isHistoryMissing: true });
+    expect(render({}).result.current.reachesBack).toBe(false);
+    returns({ reachesBack: undefined });
+    expect(render({}).result.current.reachesBack).toBeUndefined();
   });
 
   it('runs once the page is ready, the tile is not skipped and its count is above 0', () => {
@@ -105,15 +120,17 @@ describe.each([
       delta: undefined,
       isDeltaLoading: false,
       isHistoryMissing: false,
+      reachesBack: undefined,
     });
   });
 
   it('says the history is too short, with no delta and no spinner', () => {
-    returns({ isHistoryMissing: true });
+    returns({ isHistoryMissing: true, reachesBack: false });
     expect(render({}).result.current).toEqual({
       delta: undefined,
       isDeltaLoading: false,
       isHistoryMissing: true,
+      reachesBack: false,
     });
   });
 
@@ -191,6 +208,17 @@ describe('the risk tile deltas', () => {
     expect(lastOptions().guardQuery).toContain('has_end');
   });
 
+  it('share one history check: the same key and the same query, so it goes out once', () => {
+    renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
+    const movers = lastOptions();
+    renderHook(() => useNewlyHighCriticalDelta({ ...base, count: 3 }));
+    const newlyHighCritical = lastOptions();
+    expect(movers.guardKey).toBeDefined();
+    expect(newlyHighCritical.guardKey).toBe(movers.guardKey);
+    expect(newlyHighCritical.guardQuery).toBe(movers.guardQuery);
+    expect(newlyHighCritical.tileKey).not.toBe(movers.tileKey);
+  });
+
   it('read the previous period of their own tile', () => {
     renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
     expect(lastOptions().previousQuery).toContain('current_score - boundary_score >= 10');
@@ -206,12 +234,13 @@ describe('useAlertBasedTilesDelta', () => {
     );
 
   it('gives each tile its own delta from the one shared previous-period query', () => {
-    returns({ previous: { severeAlertsCount: 7, watchlistedCount: 6 } });
+    returns({ previous: { severeAlertsCount: 7, watchlistedCount: 6 }, reachesBack: true });
     expect(render().result.current).toEqual({
       severeAlertsDelta: 3,
       watchlistedDelta: -2,
       isDeltaLoading: false,
       isHistoryMissing: false,
+      reachesBack: true,
     });
   });
 

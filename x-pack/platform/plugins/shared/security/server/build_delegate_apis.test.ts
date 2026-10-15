@@ -260,7 +260,7 @@ describe('buildSecurityApi', () => {
       ).toBe(false);
     });
 
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+    it('returns false when the setting is not available', () => {
       expect(buildApiWithConfig({}).serviceAccounts.isEnabled()).toBe(false);
     });
   });

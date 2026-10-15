@@ -10,6 +10,54 @@ export const BOUNDARY_WINDOW_HOURS = 2;
 
 const ENTITY_EUID = 'COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)';
 
+const entityEuidEval = (indent: string): string => `${indent}| EVAL entity_euid = ${ENTITY_EUID}`;
+const dropWithoutEntity = (indent: string): string => `${indent}| WHERE entity_euid IS NOT NULL`;
+const riskScoreEval = (indent: string): string =>
+  `${indent}| EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
+const riskLevelEval = (indent: string): string =>
+  `${indent}| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`;
+// Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
+const levelNumEvals = (indent: string): string[] => [
+  `${indent}| EVAL level_low = CASE(risk_level == "Low", 1, 0),`,
+  `${indent}       level_moderate = CASE(risk_level == "Moderate", 2, level_low),`,
+  `${indent}       level_high = CASE(risk_level == "High", 3, level_moderate),`,
+  `${indent}       level_num = CASE(risk_level == "Critical", 4, level_high)`,
+];
+
+/**
+ * Returns the stages that give each risk score doc its entity id (`entity_euid`) and score
+ * (`risk_score`) and drop the docs without an entity. Shared by the history branches and the
+ * sparkline series, so they read a score the same way.
+ */
+export const buildRiskScoreEvals = (indent: string): string[] => [
+  entityEuidEval(indent),
+  riskScoreEval(indent),
+  dropWithoutEntity(indent),
+];
+
+/**
+ * Returns the stages that give each risk score doc its entity id and its level as a number
+ * (`level_num`, 1 Low to 4 Critical), like {@link buildRiskScoreEvals}.
+ */
+export const buildRiskLevelEvals = (indent: string): string[] => [
+  entityEuidEval(indent),
+  riskLevelEval(indent),
+  dropWithoutEntity(indent),
+  ...levelNumEvals(indent),
+];
+
+/**
+ * Returns the stages that give each risk score doc its entity id, its score (`risk_score`) and its
+ * level as a number (`level_num`), for a query that needs both, like the risk sparklines.
+ */
+export const buildRiskScoreAndLevelEvals = (indent: string): string[] => [
+  entityEuidEval(indent),
+  riskScoreEval(indent),
+  riskLevelEval(indent),
+  dropWithoutEntity(indent),
+  ...levelNumEvals(indent),
+];
+
 /**
  * Returns the lines of a sub-query that gives each entity's last risk score in the risk score
  * history at one moment: the last score in the two hours before `at`. Scoring runs hourly, so that
@@ -23,9 +71,7 @@ export const buildRiskScoreHistoryBranch = (
 ): string[] => [
   `  FROM ${riskScoreIndex}`,
   `  | WHERE @timestamp >= ${at} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${at}`,
-  `  | EVAL entity_euid = ${ENTITY_EUID}`,
-  `  | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`,
-  `  | WHERE entity_euid IS NOT NULL`,
+  ...buildRiskScoreEvals('  '),
   `  | STATS ${outputColumn} = LAST(risk_score, @timestamp) BY entity_euid`,
   `  | RENAME entity_euid AS \`entity.id\``,
 ];
@@ -41,14 +87,7 @@ export const buildRiskLevelHistoryBranch = (
 ): string[] => [
   `  FROM ${riskScoreIndex}`,
   `  | WHERE @timestamp >= ${at} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${at}`,
-  `  | EVAL entity_euid = ${ENTITY_EUID}`,
-  `  | EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
-  `  | WHERE entity_euid IS NOT NULL`,
-  // Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
-  `  | EVAL level_low = CASE(risk_level == "Low", 1, 0),`,
-  `         level_moderate = CASE(risk_level == "Moderate", 2, level_low),`,
-  `         level_high = CASE(risk_level == "High", 3, level_moderate),`,
-  `         level_num = CASE(risk_level == "Critical", 4, level_high)`,
+  ...buildRiskLevelEvals('  '),
   `  | STATS ${outputColumn} = LAST(level_num, @timestamp) BY entity_euid`,
   `  | RENAME entity_euid AS \`entity.id\``,
 ];

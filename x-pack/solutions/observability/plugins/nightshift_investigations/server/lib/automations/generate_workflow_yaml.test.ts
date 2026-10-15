@@ -183,6 +183,18 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers).toEqual([{ type: 'manual' }]);
     });
+
+    // An alert investigation requires `context.alerts`, which a manual run has none of.
+    it('investigates the prompt rather than an alert', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'schedule' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with).toMatchObject({
+        subject_type: 'manual',
+        subject_id: 'auto-123',
+        title: 'Test automation',
+      });
+    });
   });
 
   describe('slack trigger', () => {

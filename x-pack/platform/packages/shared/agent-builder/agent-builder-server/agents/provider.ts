@@ -17,6 +17,7 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  EventActor,
   ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
@@ -59,11 +60,17 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  /**
+   * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
+   * `metadata_updated` activity event attributed via `options.activity` (default: current user).
+   */
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: { source: ConversationWriteSource }
+    options: {
+      source: ConversationWriteSource;
+      activity?: { actor?: EventActor; execution_id?: string };
+    }
   ): Promise<{ changedFields: string[] }>;
 }
 

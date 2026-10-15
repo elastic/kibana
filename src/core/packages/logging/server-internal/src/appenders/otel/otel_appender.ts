@@ -15,6 +15,7 @@ import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/expo
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { withTimeout } from '@kbn/std';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
@@ -454,10 +455,7 @@ export class OtelAppender implements DisposableAppender {
     // Attach .catch() so that a late rejection from shutdown() after the timeout
     // fires does not produce an unhandled promise rejection.
     const shutdownPromise = this.loggerProvider.shutdown().catch(() => {});
-    await Promise.race([
-      shutdownPromise,
-      new Promise<void>((resolve) => setTimeout(resolve, DISPOSE_TIMEOUT_MS)),
-    ]);
+    await withTimeout({ promise: shutdownPromise, timeoutMs: DISPOSE_TIMEOUT_MS });
   }
 }
 
