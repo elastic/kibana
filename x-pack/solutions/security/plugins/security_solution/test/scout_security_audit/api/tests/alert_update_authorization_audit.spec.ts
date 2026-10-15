@@ -7,115 +7,71 @@
 
 import { readFileSync } from 'fs';
 import { randomUUID } from 'crypto';
-import { AUDIT_LOG_PATH } from '@kbn/scout-security';
+import type { KibanaRole } from '@kbn/scout-security';
+import { AUDIT_LOG_PATH, PUBLIC_API_HEADERS, apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../common/constants';
-import {
-  apiTest,
-  tags,
-  AUTHORIZATION_FAILURE_AUDIT_MESSAGE,
-  KIBANA_ALL_NO_INDEX_PRIVILEGES_ROLE,
-  NO_SECURITY_PRIVILEGES_ROLE,
-  PUBLIC_HEADERS,
-} from '../fixtures';
+
+const HOOK_MESSAGE = 'Failed attempt to update alerts because required privileges were not granted';
 
 interface AuditEvent {
-  '@timestamp'?: string;
-  message?: string;
-  event?: { action?: string; outcome?: string };
+  '@timestamp': string;
+  message: string;
+  event: { action: string };
 }
 
-const SETTLE_MS = 2_000;
-
-const readAuditEvents = (since: number): AuditEvent[] => {
+const readMessages = (since: number): string[] => {
   try {
     return readFileSync(AUDIT_LOG_PATH, 'utf8')
       .split('\n')
       .filter(Boolean)
       .map((line) => JSON.parse(line) as AuditEvent)
-      .filter(({ '@timestamp': timestamp }) => new Date(timestamp ?? 0).getTime() >= since);
+      .filter((e) => e.event?.action === 'alert_update' && Date.parse(e['@timestamp']) >= since)
+      .map((e) => e.message);
   } catch {
-    // the file does not exist until the first event is written
-    return [];
+    return []; // the file does not exist until the first event is written
   }
 };
 
-const waitForAuditEvents = async (
-  since: number,
-  predicate: (events: AuditEvent[]) => boolean,
-  timeoutMs = 15_000
-): Promise<AuditEvent[]> => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const events = readAuditEvents(since);
-    if (predicate(events)) return events;
-    await new Promise((resolve) => setTimeout(resolve, 300));
-  }
-  throw new Error(`Timed out waiting for audit events in ${AUDIT_LOG_PATH}`);
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Route authorization passes, then Elasticsearch returns 403 inside the handler.
+const noIndexAccess: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+};
+// Security `read` is not granted, so route authorization rejects the request.
+const noSecurity: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
 };
 
-const isAuthorizationFailureEvent = ({ event, message }: AuditEvent): boolean =>
-  event?.action === 'alert_update' &&
-  event?.outcome === 'failure' &&
-  message === AUTHORIZATION_FAILURE_AUDIT_MESSAGE;
-
-apiTest.describe(
-  'Alert update route authorization audit',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    apiTest(
-      'audits a route authorization 403 once and adds no event for a handler-side 403',
-      async ({ apiClient, requestAuth }) => {
-        const alertId = randomUUID();
-        const body = {
-          status: 'closed',
-          query: { bool: { filter: { terms: { _id: [alertId] } } } },
-        };
-
-        // 1. Rejected by route authorization before the handler runs.
-        const { apiKeyHeader: noSecurityHeader } = await requestAuth.getApiKeyForCustomRole(
-          NO_SECURITY_PRIVILEGES_ROLE
-        );
-        const deniedStart = Date.now();
-        const deniedResponse = await apiClient.post(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
-          headers: { ...noSecurityHeader, ...PUBLIC_HEADERS },
+apiTest.describe('Alert update route authorization audit', { tag: tags.stateful.classic }, () => {
+  apiTest(
+    'audits a route authorization 403 once, and a handler-side 403 not at all',
+    async ({ apiClient, requestAuth }) => {
+      const alertId = randomUUID();
+      const post = async (role: KibanaRole) => {
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(role);
+        return apiClient.post(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+          headers: { ...apiKeyHeader, ...PUBLIC_API_HEADERS, 'kbn-xsrf': 'true' },
           responseType: 'json',
-          body,
+          body: { status: 'closed', query: { bool: { filter: { terms: { _id: [alertId] } } } } },
         });
-        expect(deniedResponse).toHaveStatusCode(403);
+      };
 
-        await waitForAuditEvents(
-          deniedStart,
-          (events) => events.filter(isAuthorizationFailureEvent).length > 0
-        );
-        await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
-        expect(readAuditEvents(deniedStart).filter(isAuthorizationFailureEvent)).toHaveLength(1);
+      const start = Date.now();
+      expect(await post(noIndexAccess)).toHaveStatusCode(403);
+      expect(await post(noSecurity)).toHaveStatusCode(403);
 
-        // 2. Authorized by route authorization, then 403 from Elasticsearch inside the handler.
-        const { apiKeyHeader: noIndexPrivilegesHeader } = await requestAuth.getApiKeyForCustomRole(
-          KIBANA_ALL_NO_INDEX_PRIVILEGES_ROLE
-        );
-        const handlerStart = Date.now();
-        const handlerResponse = await apiClient.post(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
-          headers: { ...noIndexPrivilegesHeader, ...PUBLIC_HEADERS },
-          responseType: 'json',
-          body,
-        });
-        expect(handlerResponse).toHaveStatusCode(403);
+      // Audit events are written asynchronously: wait for the expected hook event, then give a
+      // wrongly emitted extra one (from either request) time to show up.
+      for (let i = 0; i < 50 && !readMessages(start).includes(HOOK_MESSAGE); i++) await sleep(300);
+      await sleep(1_000);
 
-        // The handler audits its own failure for this request, which proves it ran.
-        const handlerEvents = await waitForAuditEvents(handlerStart, (events) =>
-          events.some(
-            ({ event, message }) =>
-              event?.action === 'alert_update' &&
-              event?.outcome === 'failure' &&
-              message?.includes(alertId)
-          )
-        );
-        await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
-        expect(readAuditEvents(handlerStart).filter(isAuthorizationFailureEvent)).toHaveLength(0);
-        expect(handlerEvents.length).toBeGreaterThan(0);
-      }
-    );
-  }
-);
+      const messages = readMessages(start);
+      expect(messages.filter((m) => m === HOOK_MESSAGE)).toHaveLength(1);
+      expect(messages.some((m) => m.includes(alertId))).toBe(true); // handler ran and audited itself
+    }
+  );
+});
