@@ -11,11 +11,16 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as uiamConfig } from '../../uiam_local/serverless/search.serverless.config';
-import { serviceAccountsServerArgs } from '../shared';
+import { serviceAccountsServerArgs, serviceAccountsUiamEphemeralTokenExpiration } from '../shared';
 
 // Reuse the local UIAM stack with service accounts enabled for Serverless integration tests.
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
+  esServerlessOptions: {
+    ...uiamConfig.esServerlessOptions,
+    uiam: true,
+    uiamEphemeralTokenExpiration: serviceAccountsUiamEphemeralTokenExpiration,
+  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
@@ -24,6 +29,10 @@ export const servers: ScoutServerConfig = {
       // Exercise the managed plugin API through the Workflows example's HTTP endpoints.
       `--plugin-path=${resolve(REPO_ROOT, 'examples/developer_examples')}`,
       `--plugin-path=${resolve(REPO_ROOT, 'examples/workflows_extensions_example')}`,
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'x-pack/platform/test/task_manager/plugins/service_accounts'
+      )}`,
     ],
   },
 };

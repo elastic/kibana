@@ -10,8 +10,8 @@ import moment from 'moment';
 
 import { TaskScheduling } from './task_scheduling';
 import { asOk } from './lib/result_type';
-import type { ConcreteTaskInstance } from './task';
-import { TaskStatus } from './task';
+import type { ConcreteTaskInstance, TaskInstance, TaskRunAs } from './task';
+import { TaskPriority, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
@@ -19,6 +19,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
@@ -82,6 +83,11 @@ describe('TaskScheduling', () => {
     foo: {
       title: 'foo',
       maxConcurrency: 2,
+      createTaskRunner: jest.fn(),
+    },
+    priorityOverride: {
+      title: 'priority override',
+      allowPriorityOverride: true,
       createTaskRunner: jest.fn(),
     },
   });
@@ -509,6 +515,136 @@ describe('TaskScheduling', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 409,
+    });
+  });
+
+  describe('runAs', () => {
+    const runAs: TaskRunAs = {
+      workloadType: 'workflow',
+      workloadId: 'workflow-1',
+      spaceId: 'default',
+      expectedServiceAccountId: 'service-account-1',
+    };
+    const serviceAccountCredential = { type: 'service_account', ...runAs };
+    const middlewareRunAs: TaskRunAs = { ...runAs, workloadId: 'workflow-2' };
+
+    const createTaskSchedulingWithMiddlewareRunAs = () => {
+      const beforeSave = jest.fn(async ({ taskInstance }: { taskInstance: TaskInstance }) => ({
+        taskInstance: { ...taskInstance, runAs: middlewareRunAs },
+      }));
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        middleware: { ...createInitialMiddleware(), beforeSave },
+      });
+      return { beforeSave, taskScheduling };
+    };
+
+    test('schedule keeps the runAs of the caller and hides it from the middleware', async () => {
+      const { beforeSave, taskScheduling } = createTaskSchedulingWithMiddlewareRunAs();
+
+      await taskScheduling.schedule({ taskType: 'foo', params: {}, state: {}, runAs });
+      await taskScheduling.schedule({ taskType: 'foo', params: {}, state: {} });
+
+      expect(beforeSave.mock.calls[0][0].taskInstance).not.toHaveProperty('runAs');
+      expect(mockTaskStore.schedule.mock.calls[0][0].runAs).toEqual(runAs);
+      expect(mockTaskStore.schedule.mock.calls[1][0]).not.toHaveProperty('runAs');
+    });
+
+    test('bulkSchedule keeps the runAs of the caller and hides it from the middleware', async () => {
+      const { beforeSave, taskScheduling } = createTaskSchedulingWithMiddlewareRunAs();
+
+      await taskScheduling.bulkSchedule([
+        { taskType: 'foo', params: {}, state: {}, runAs },
+        { taskType: 'foo', params: {}, state: {} },
+      ]);
+
+      expect(beforeSave.mock.calls[0][0].taskInstance).not.toHaveProperty('runAs');
+      expect(beforeSave.mock.calls[1][0].taskInstance).not.toHaveProperty('runAs');
+      const [[serviceAccountTask, apiKeyTask]] = mockTaskStore.bulkSchedule.mock.calls[0];
+      expect(serviceAccountTask.runAs).toEqual(runAs);
+      expect(apiKeyTask).not.toHaveProperty('runAs');
+    });
+
+    test.each([
+      { name: 'a different runAs', stored: serviceAccountCredential, requested: middlewareRunAs },
+      { name: 'runAs for a task without one', stored: undefined, requested: runAs },
+      {
+        name: 'no runAs for a task with one',
+        stored: serviceAccountCredential,
+        requested: undefined,
+      },
+    ])(
+      'ensureScheduled rejects with a conflict when called with $name',
+      async ({ stored, requested }) => {
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        const bulkUpdateSchedulesSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+        mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+        mockTaskStore.getCredential.mockResolvedValueOnce(stored);
+
+        const error = await taskScheduling
+          .ensureScheduled({ ...getTask(), runAs: requested })
+          .catch((e) => e);
+
+        expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
+        expect(error.statusCode).toBe(409);
+        expect(error.message).toBe(
+          'Task "my-foo-id" exists with a different runAs. Remove it and schedule it again.'
+        );
+        expect(mockTaskStore.getCredential).toHaveBeenCalledWith('my-foo-id');
+        expect(bulkUpdateSchedulesSpy).not.toHaveBeenCalled();
+      }
+    );
+
+    test('ensureScheduled updates the schedule of an existing task that has the same runAs', async () => {
+      const task = { ...getTask(), runAs };
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest
+        .spyOn(taskScheduling, 'bulkUpdateSchedules')
+        .mockResolvedValue({ tasks: [task], errors: [] });
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockResolvedValueOnce(serviceAccountCredential);
+
+      const result = await taskScheduling.ensureScheduled(task);
+
+      expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
+        ['my-foo-id'],
+        { interval: '1m' },
+        undefined
+      );
+      expect(result.id).toEqual('my-foo-id');
+    });
+
+    test('ensureScheduled updates the schedule of an existing task that is removed before its credential is read', async () => {
+      const task = { ...getTask(), runAs };
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest
+        .spyOn(taskScheduling, 'bulkUpdateSchedules')
+        .mockResolvedValue({ tasks: [task], errors: [] });
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'my-foo-id')
+      );
+
+      const result = await taskScheduling.ensureScheduled(task);
+
+      expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
+        ['my-foo-id'],
+        { interval: '1m' },
+        undefined
+      );
+      expect(result.id).toEqual('my-foo-id');
+    });
+
+    test('ensureScheduled throws when the credential of the existing task cannot be read', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(taskScheduling.ensureScheduled({ ...getTask(), runAs })).rejects.toThrow(
+        'Failure'
+      );
+      expect(bulkUpdateSchedulesSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -1444,6 +1580,63 @@ describe('TaskScheduling', () => {
   });
 
   describe('runSoon', () => {
+    test.each([
+      [TaskPriority.Standard, TaskPriority.UserInteractive, TaskPriority.UserInteractive],
+      [TaskPriority.UserInteractive, TaskPriority.Standard, TaskPriority.Standard],
+      [TaskPriority.UserInteractive, undefined, TaskPriority.UserInteractive],
+    ])('updates priority from %s with override %s to %s', async (priority, override, expected) => {
+      const task = taskManagerMock.createTask({
+        taskType: 'priorityOverride',
+        status: TaskStatus.Idle,
+        priority,
+        version: 'original-version',
+      });
+      mockTaskStore.get.mockResolvedValueOnce(task);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.runSoon(task.id, { priority: override });
+
+      expect(mockTaskStore.update).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        {
+          ...task,
+          priority: expected,
+          runAt: new Date(),
+          scheduledAt: new Date(),
+        },
+        { validate: false, refresh: false }
+      );
+    });
+
+    test.each([TaskStatus.Claiming, TaskStatus.Running])(
+      'does not promote a task with status %s',
+      async (status) => {
+        const task = taskManagerMock.createTask({
+          taskType: 'priorityOverride',
+          status,
+          priority: TaskPriority.Standard,
+        });
+        mockTaskStore.get.mockResolvedValueOnce(task);
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+        await expect(
+          taskScheduling.runSoon(task.id, { priority: TaskPriority.UserInteractive })
+        ).rejects.toBeInstanceOf(TaskAlreadyRunningError);
+        expect(mockTaskStore.update).not.toHaveBeenCalled();
+      }
+    );
+
+    test('rejects a priority override for a task type that has not opted in', async () => {
+      const task = taskManagerMock.createTask({ status: TaskStatus.Idle });
+      mockTaskStore.get.mockResolvedValueOnce(task);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await expect(
+        taskScheduling.runSoon(task.id, { priority: TaskPriority.UserInteractive })
+      ).rejects.toThrow('Task type "foo" does not allow priority overrides');
+      expect(mockTaskStore.update).not.toHaveBeenCalled();
+    });
+
     // Opt-in, since a nudged claim can run the task early enough to change what it observes.
     test('does not nudge or force a refresh by default', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
@@ -1537,22 +1730,25 @@ describe('TaskScheduling', () => {
       expect(claimNudgeService.notify).not.toHaveBeenCalled();
     });
 
-    test('reports 409 conflict errors via the conflict flag without throwing', async () => {
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    test.each([undefined, { priority: TaskPriority.UserInteractive }])(
+      'reports 409 conflicts without throwing (options: %p)',
+      async (options) => {
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(
-        taskManagerMock.createTask({ id, status: TaskStatus.Idle })
-      );
-      mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
+        mockTaskStore.get.mockResolvedValueOnce(
+          taskManagerMock.createTask({ id, taskType: 'priorityOverride', status: TaskStatus.Idle })
+        );
+        mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
-      const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id, forced: false, conflict: true });
-      expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
-        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
-      );
-      expect(claimNudgeService.notify).not.toHaveBeenCalled();
-    });
+        const result = await taskScheduling.runSoon(id, options);
+        expect(result).toEqual({ id, forced: false, conflict: true });
+        expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
+          'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
+        );
+        expect(claimNudgeService.notify).not.toHaveBeenCalled();
+      }
+    );
 
     test('rejects when the task is being claimed', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';

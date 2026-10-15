@@ -27,16 +27,19 @@ export const highlightCommand: ICommand = {
   name: Commands.HIGHLIGHT,
   methods: highlightCommandMethods,
   metadata: {
+    docPreserving: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.highlightDoc', {
       defaultMessage:
         'Highlights matching terms in text fields and returns the highlighted content as a new column.',
     }),
     declaration:
-      'HIGHLIGHT [prefix = "<prefix>"] <query> ON field1 [, field2, ...] [WITH { <options> }]',
+      'HIGHLIGHT [prefix = "<prefix>"] [<query>] [ON field1 [, field2, ...] | ON *] [WITH { <options> }]',
     examples: [
       'FROM books | HIGHLIGHT "star wars" ON title',
       'FROM books | HIGHLIGHT prefix = "hl_" "star wars" ON title',
       'FROM books | HIGHLIGHT MATCH(title, "return") ON title',
+      'FROM books | WHERE MATCH(title, "return") | HIGHLIGHT',
+      'FROM books | HIGHLIGHT "return" ON *',
       'FROM books | HIGHLIGHT "hobbit" ON title, description WITH { "pre_tags": ["<b>"], "post_tags": ["</b>"], "number_of_fragments": 3, "fragment_size": 150 }',
     ],
     preview: true,

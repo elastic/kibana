@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,6 +33,12 @@ const CLOSE_LABEL = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.clo
 const CREATE_RULE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.title', {
   defaultMessage: 'Create rule',
 });
+const UNIVERSAL_BADGE_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsFlyout.universalBadge',
+  {
+    defaultMessage: 'Universal',
+  }
+);
 
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
@@ -115,9 +122,18 @@ export const RuleCreateOptionsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>{CREATE_RULE_TITLE}</h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                  <h2>{CREATE_RULE_TITLE}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="ruleCreateOptionsFlyoutUniversalBadge">
+                  {UNIVERSAL_BADGE_LABEL}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>

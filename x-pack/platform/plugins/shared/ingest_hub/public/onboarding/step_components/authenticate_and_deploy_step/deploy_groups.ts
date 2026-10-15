@@ -18,6 +18,7 @@ import {
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
+  DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
 export { collectDeployResults } from './deploy_group_helpers';
 
@@ -96,7 +97,9 @@ export function buildDeployGroups(
     }
   }
 
-  return groupByPackage(originals, duplicates, storedServiceVars);
+  // An instance without a namespace deploys into the default one, so it shares a policy with the
+  // instances that name it explicitly.
+  return groupByPackage(originals, duplicates, storedServiceVars, DEFAULT_NAMESPACE);
 }
 
 function buildAgentlessPolicyName(group: DeployGroup): string {
@@ -170,7 +173,15 @@ export async function deployGroup(
   }
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
+  // Refs of a sibling policy let a new group reuse credentials the user kept; Fleet tracks them
+  // on the new policy too, so deleting the sibling does not delete the shared secret.
+  const vars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    undefined,
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+  );
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group),
