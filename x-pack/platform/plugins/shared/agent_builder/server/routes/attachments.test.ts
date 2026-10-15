@@ -17,17 +17,8 @@ import { hashContent } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
-import { getAgentApiAccessFromRequest } from '../services/utils';
+import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
-
-jest.mock('../services/utils', () => ({
-  ...jest.requireActual('../services/utils'),
-  getAgentApiAccessFromRequest: jest.fn(),
-}));
-
-const mockGetAgentApiAccess = getAgentApiAccessFromRequest as jest.MockedFunction<
-  typeof getAgentApiAccessFromRequest
->;
 
 describe('Attachment Routes', () => {
   let mockRouter: jest.Mocked<IRouter>;
@@ -98,7 +89,6 @@ describe('Attachment Routes', () => {
   });
 
   beforeEach(() => {
-    mockGetAgentApiAccess.mockResolvedValue({ canReadAgents: true, canManageAgents: true });
     jest.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
@@ -217,7 +207,6 @@ describe('Attachment Routes', () => {
 
   const createMockContext = () => ({
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser: {} } },
       uiSettings: {
         client: {
           get: jest.fn().mockResolvedValue(true),
@@ -1022,6 +1011,7 @@ describe('Attachment Routes', () => {
     const request = {
       params: { conversation_id: 'conv-1', attachment_id: 'att-1' },
       body: { origin: 'so-1' },
+      authzResult: { [apiPrivileges.manageAgents]: true },
     };
 
     const mockTypeDefinition = (onOriginUpdated?: jest.Mock) => {
@@ -1034,6 +1024,17 @@ describe('Attachment Routes', () => {
         })
       );
     };
+
+    it('requires read access and surfaces manageAgents as a non-enforced extended privilege', () => {
+      const [originRouteConfig] = (mockRouter.versioned.put as jest.Mock).mock.calls
+        .map(([config]) => config)
+        .filter((config) => config.path.endsWith('/origin'));
+
+      expect(originRouteConfig.security.authz).toEqual({
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        extendedPrivileges: [apiPrivileges.manageAgents],
+      });
+    });
 
     it('calls the type onOriginUpdated hook with the conversation agent', async () => {
       mockConversationsClient.get.mockResolvedValue(
@@ -1060,11 +1061,14 @@ describe('Attachment Routes', () => {
       mockConversationsClient.get.mockResolvedValue(
         createMockConversation([createMockAttachment({ id: 'att-1' })])
       );
-      mockGetAgentApiAccess.mockResolvedValue({ canReadAgents: true, canManageAgents: false });
       const onOriginUpdated = jest.fn().mockResolvedValue(undefined);
       mockTypeDefinition(onOriginUpdated);
 
-      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+      await getHandler('PUT', path)(
+        createMockContext(),
+        { ...request, authzResult: { [apiPrivileges.manageAgents]: false } },
+        mockResponse
+      );
 
       expect(onOriginUpdated).toHaveBeenCalledWith(
         expect.anything(),

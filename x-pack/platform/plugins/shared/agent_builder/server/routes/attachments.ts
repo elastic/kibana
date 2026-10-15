@@ -28,7 +28,6 @@ import type {
   GetAttachmentResponse,
 } from '../../common/http_api/attachments';
 import { createAttachmentPublicClient } from '../services/attachments';
-import { getAgentApiAccessFromRequest } from '../services/utils';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';
@@ -727,7 +726,11 @@ export function registerAttachmentRoutes({
     .put({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}/origin`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+          // Not enforced: surfaced in `request.authzResult` for attachment type hooks that edit agents.
+          extendedPrivileges: [apiPrivileges.manageAgents],
+        },
       },
       access: 'public',
       summary: 'Update attachment origin',
@@ -831,16 +834,11 @@ export function registerAttachmentRoutes({
         const warnings: string[] = [];
         if (onOriginUpdated && isVersionedAttachmentWithOrigin(updated)) {
           try {
-            const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-            const { canManageAgents } = await getAgentApiAccessFromRequest({
-              esClient,
-              space: (await ctx.agentBuilder).spaces.getSpaceId(),
-            });
             await onOriginUpdated(updated, {
               request,
               conversationId,
               agentId: conversation.agent_id,
-              canManageAgents,
+              canManageAgents: request.authzResult?.[apiPrivileges.manageAgents] === true,
             });
           } catch (e) {
             logger.warn(
