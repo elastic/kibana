@@ -306,9 +306,9 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
                 {isSelected && (
                   <>
                     <EuiIcon
-                      type="checkCircleFill"
-                      color="primary"
-                      size="l"
+                      type="check"
+                      color="ghost"
+                      size="s"
                       css={styles.selectionCheck}
                       aria-hidden={true}
                     />
@@ -391,17 +391,23 @@ const dashboardGridItemStyles = {
       alignItems: 'center',
       justifyContent: 'center',
       boxSizing: 'border-box',
-      width: euiTheme.size.l,
-      height: euiTheme.size.l,
+      // checkbox-sized, so it reads as selectable without competing with the panel content
+      width: `calc(${euiTheme.size.base} + ${euiTheme.size.xxs})`,
+      height: `calc(${euiTheme.size.base} + ${euiTheme.size.xxs})`,
       borderRadius: '50%',
-      border: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseProminent}`,
+      border: `1.5px solid ${euiTheme.colors.borderBaseProminent}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
+      // a plain halo keeps it legible over busy chart content
+      boxShadow: `0 0 0 ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBasePlain}`,
       pointerEvents: 'none',
       [euiCanAnimate]: {
-        transition: `border-color ${euiTheme.animation.fast} ease-out`,
+        transition: `border-color ${euiTheme.animation.fast} ease-out, background-color ${euiTheme.animation.fast} ease-out`,
       },
       '&.dshDashboardGrid__selectionIndicator--checked': {
-        borderColor: 'transparent',
+        borderColor: euiTheme.colors.backgroundFilledPrimary,
+        backgroundColor: euiTheme.colors.backgroundFilledPrimary,
+        // the filled disc stands out on its own, and a halo would show on colored panels
+        boxShadow: 'none',
       },
     }),
   selectionCheck: ({ euiTheme }: UseEuiTheme) => {
