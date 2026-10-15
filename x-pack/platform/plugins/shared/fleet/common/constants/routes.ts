@@ -134,6 +134,7 @@ export const IAC_PROVISIONER_API_ROUTES = {
   // One-time callback records that let a launched CloudFormation stack report its role back.
   CALLBACK_CREATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks`,
   CALLBACK_INFO_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  CALLBACK_DELETE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
   // Public: called by the stack's Lambda with the record's API key, not by the browser.
   CALLBACK_RECEIVE_PATTERN: `${API_ROOT}/iac_provisioner/callbacks/{callbackId}`,
 };

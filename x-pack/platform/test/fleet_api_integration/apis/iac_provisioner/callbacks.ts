@@ -181,6 +181,47 @@ export default function (providerContext: FtrProviderContext) {
       expect(created.iac_deployment_id).to.be(stackArn);
     });
 
+    it('cancels a pending record, so a late report is turned away', async () => {
+      const { item, api_key: apiKey } = await createCallback();
+
+      const { body } = await supertest
+        .delete(`${CALLBACKS_PATH}/${item.id}`)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .expect(200);
+      expect(body.item.status).to.be('cancelled');
+      expect(body.item).to.not.have.property('api_key_id');
+
+      // The cancel invalidated the key, so the stack can no longer report.
+      await receive(item.id, apiKey).expect(401);
+
+      const connectors = await supertest
+        .get('/api/fleet/cloud_connectors')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      expect(connectors.body.items.find((c: { id: string }) => c.id === item.id)).to.be(undefined);
+    });
+
+    it('hands back the received record when cancelled after the stack reported', async () => {
+      const { item, api_key: apiKey } = await createCallback({ connector_name: 'cancel-late' });
+      const stackArn = `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/77777777-8888-9999-0000-111111111111`;
+      await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
+
+      const { body } = await supertest
+        .delete(`${CALLBACKS_PATH}/${item.id}`)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .expect(200);
+      expect(body.item.status).to.be('received');
+      // The connector takes the record's id, so a retry of the report can never make a second one.
+      expect(body.item.cloud_connector_id).to.be(item.id);
+    });
+
+    it('answers 404 when cancelling an unknown record', async () => {
+      await supertest
+        .delete(`${CALLBACKS_PATH}/does-not-exist`)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .expect(404);
+    });
+
     it('rejects an unknown create field', async () => {
       await supertest
         .post(CALLBACKS_PATH)

@@ -9,7 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 const IacCallbackStatusSchema = schema.oneOf([
   schema.literal('pending'),
+  schema.literal('receiving'),
   schema.literal('received'),
+  schema.literal('cancelled'),
 ]);
 
 const AccountTypeSchema = schema.oneOf([

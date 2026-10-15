@@ -146,8 +146,10 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     status: callbackStatus,
     created: callbackCreated,
     start: startCallback,
-    stop: stopCallback,
+    cancel: cancelCallback,
   } = useIacCallback({ enabled: isAwsIdentityFederationEnabled });
+  // True while a manual Create is retiring the pending record before posting.
+  const [isHandingOff, setIsHandingOff] = useState(false);
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -204,7 +206,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     isGeneratingTemplate,
     templateGenerationError,
     iacConfirm,
-    hasLaunched,
     clearIacConfirm,
   } = useCloudConnectorTemplate({
     provider: 'aws',
@@ -219,19 +220,18 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     getLaunchStackParams: isCallbackAvailable ? getLaunchStackParams : undefined,
   });
 
-  // A later launch that never reached the console cannot call back, so stop waiting on the
-  // record an earlier launch created.
+  // A later launch that never reached the console cannot call back, so retire the record an
+  // earlier launch created.
   useEffect(() => {
     if (callbackStatus === 'pending' && templateGenerationError) {
-      stopCallback();
+      cancelCallback();
     }
-  }, [callbackStatus, templateGenerationError, stopCallback]);
+  }, [callbackStatus, templateGenerationError, cancelCallback]);
 
-  // When the stack can report back, the ARN fields and Create only show when it won't: the
-  // launch went out without a callback record, or the wait ended without an identity.
+  // The ARN fields and Create always show: Kibana cannot tell whether the template it launched
+  // can report back (a package's static template may predate the callback), so the user can
+  // finish by hand at any point. Once the wait has ended without an identity, a hint says so.
   const hasCallbackGivenUp = callbackStatus === 'expired' || callbackStatus === 'error';
-  const hasLaunchedWithoutCallback = !!hasLaunched && callbackStatus === 'idle';
-  const showManualEntry = !isCallbackAvailable || hasCallbackGivenUp || hasLaunchedWithoutCallback;
 
   const handledCreatedIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -264,7 +264,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     }
   );
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useCallback(async () => {
+    // Retire the pending record first, so a late report cannot create a second identity. When
+    // the stack got there first, its identity is picked up instead of creating one by hand.
+    setIsHandingOff(true);
+    const createdByCallback = await cancelCallback();
+    setIsHandingOff(false);
+    if (createdByCallback) {
+      return;
+    }
     createConnector({
       name: connectorName,
       cloudProvider: 'aws',
@@ -276,6 +284,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
     });
   }, [
+    cancelCallback,
     createConnector,
     connectorName,
     accountType,
@@ -318,11 +327,10 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       content: (
         <>
           <EuiSpacer size="m" />
-          {/* The pending record already holds the name the identity will get. */}
+          {/* A pending record holds the name typed at Launch; a manual Create uses the current one. */}
           <CloudConnectorNameField
             value={connectorName}
             onChange={(name) => setConnectorName(name)}
-            disabled={callbackStatus === 'pending'}
             data-test-subj="awsIdentityFederationSetup-connectorName"
           />
           <EuiSpacer size="m" />
@@ -361,7 +369,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               >
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.iacCallback.pendingHint"
-                  defaultMessage="Waiting for CloudFormation to create the federated identity…"
+                  defaultMessage="Waiting for CloudFormation to create the federated identity. If the stack does not report back, copy the stack ARN and Role ARN from the stack, then create the identity below."
                 />
               </EuiText>
             </>
@@ -381,58 +389,54 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               </EuiText>
             </>
           )}
-          {showManualEntry && (
-            <>
-              {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
-                  it is what the identity's details link to and what a later update targets. */}
-              <EuiSpacer size="m" />
-              <StackArnField
-                value={stackArn}
-                onChange={setStackArn}
-                data-test-subj="awsIdentityFederationSetup-stackArn"
-              />
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
-                  defaultMessage: 'Role ARN',
-                })}
-                isInvalid={roleArnInvalid}
-                error={
-                  roleArnInvalid
-                    ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
-                        defaultMessage: 'Role ARN is required',
-                      })
-                    : undefined
-                }
-                fullWidth
+          {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
+              it is what the identity's details link to and what a later update targets. */}
+          <EuiSpacer size="m" />
+          <StackArnField
+            value={stackArn}
+            onChange={setStackArn}
+            data-test-subj="awsIdentityFederationSetup-stackArn"
+          />
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
+              defaultMessage: 'Role ARN',
+            })}
+            isInvalid={roleArnInvalid}
+            error={
+              roleArnInvalid
+                ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
+                    defaultMessage: 'Role ARN is required',
+                  })
+                : undefined
+            }
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              value={roleArn}
+              isInvalid={roleArnInvalid}
+              onChange={(e) => setRoleArn(e.target.value)}
+              data-test-subj="awsIdentityFederationSetup-roleArn"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isCreating || isHandingOff}
+                isDisabled={isCreateDisabled}
+                onClick={handleCreate}
+                data-test-subj="awsIdentityFederationSetup-createButton"
               >
-                <EuiFieldText
-                  fullWidth
-                  value={roleArn}
-                  isInvalid={roleArnInvalid}
-                  onChange={(e) => setRoleArn(e.target.value)}
-                  data-test-subj="awsIdentityFederationSetup-roleArn"
+                <FormattedMessage
+                  id="xpack.fleet.awsIdentityFederationSetup.createButton"
+                  defaultMessage="Create Identity"
                 />
-              </EuiFormRow>
-              <EuiSpacer size="l" />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    isLoading={isCreating}
-                    isDisabled={isCreateDisabled}
-                    onClick={handleCreate}
-                    data-test-subj="awsIdentityFederationSetup-createButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.awsIdentityFederationSetup.createButton"
-                      defaultMessage="Create Identity"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       ),
     },

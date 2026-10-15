@@ -32,6 +32,7 @@ import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
 import type {
   CreateIacCallbackRequestSchema,
+  DeleteIacCallbackRequestSchema,
   GetIacCallbackRequestSchema,
   ReceiveIacCallbackRequestSchema,
 } from '../../types/rest_spec/iac_callback';
@@ -231,6 +232,28 @@ export const getIacCallbackHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const { spaceId } = await context.fleet;
   const item = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!item) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  return response.ok({ body: { item } });
+};
+
+/**
+ * Retires a record the browser no longer waits on, for example because the identity is being
+ * created by hand. Answers with the record as the stack left it when it had already reported.
+ */
+export const deleteIacCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof DeleteIacCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!existing) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  const item = await iacCallbackService.cancel(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    existing.id
+  );
   if (!item) {
     return response.notFound(CALLBACK_NOT_FOUND);
   }

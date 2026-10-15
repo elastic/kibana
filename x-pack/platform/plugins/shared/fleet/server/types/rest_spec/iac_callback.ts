@@ -17,7 +17,9 @@ const CallbackIdParamsSchema = schema.object({
 
 const IacCallbackStatusSchema = schema.oneOf([
   schema.literal('pending'),
+  schema.literal('receiving'),
   schema.literal('received'),
+  schema.literal('cancelled'),
 ]);
 
 export const IacCallbackItemSchema = schema.object({
@@ -88,6 +90,14 @@ export const GetIacCallbackRequestSchema = {
 };
 
 export const GetIacCallbackResponseSchema = schema.object({
+  item: IacCallbackItemSchema,
+});
+
+export const DeleteIacCallbackRequestSchema = {
+  params: CallbackIdParamsSchema,
+};
+
+export const DeleteIacCallbackResponseSchema = schema.object({
   item: IacCallbackItemSchema,
 });
 

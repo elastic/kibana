@@ -32,6 +32,15 @@ export interface GetIacCallbackResponse {
   item: IacCallback;
 }
 
+export interface DeleteIacCallbackRequest {
+  params: { callbackId: string };
+}
+
+/** The record as left by the cancel: `cancelled`, or untouched when the stack had already reported. */
+export interface DeleteIacCallbackResponse {
+  item: IacCallback;
+}
+
 export interface ReceiveIacCallbackRequest {
   params: { callbackId: string };
   body: IacCallbackReceivedValues;

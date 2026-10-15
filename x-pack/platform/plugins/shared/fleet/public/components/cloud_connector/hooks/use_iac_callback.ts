@@ -8,7 +8,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useStartServices } from '../../../hooks';
-import { sendCreateIacCallback, sendGetIacCallback } from '../../../hooks/use_request/iac_callback';
+import {
+  sendCreateIacCallback,
+  sendDeleteIacCallback,
+  sendGetIacCallback,
+} from '../../../hooks/use_request/iac_callback';
 import type {
   IacCallback,
   IacCallbackIdentity,
@@ -48,8 +52,13 @@ export interface UseIacCallbackResult {
    * The launch then goes ahead without it.
    */
   start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
-  /** Stops waiting on the current record. Its key expires on its own. */
-  stop: () => void;
+  /**
+   * Stops waiting on the current record and retires it on the server, so a late report cannot
+   * create an identity the form no longer watches. Resolves true when the stack had already
+   * reported: the identity it made is surfaced through `created` (now, or by the next poll while
+   * it is still being made), so the caller must not create one by hand.
+   */
+  cancel: () => Promise<boolean>;
 }
 
 /**
@@ -108,10 +117,32 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     }
   }, []);
 
-  const stop = useCallback(() => {
+  const cancel = useCallback(async () => {
+    const id = activeIdRef.current;
+    if (!id) {
+      return false;
+    }
+    const { data } = await sendDeleteIacCallback(id);
+    if (activeIdRef.current !== id) {
+      // Superseded by a new Launch, or unmounted, while the request was in flight.
+      return false;
+    }
+    const item = data?.item;
+    if (item?.status === 'receiving') {
+      // The stack reported first and its identity is being made; the poll picks it up.
+      return true;
+    }
     stopPolling();
     activeIdRef.current = undefined;
-    setStatus((current) => (current === 'received' ? current : 'idle'));
+    if (item?.status === 'received') {
+      setCreated(toCreated(item));
+      setStatus('received');
+      return true;
+    }
+    // Cancelled, or gone: either way nothing will arrive. A failed request is treated the same;
+    // the key then expires on its own.
+    setStatus('idle');
+    return false;
   }, [stopPolling]);
 
   const startPolling = useCallback(
@@ -200,5 +231,5 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
 
   const available = enabled && getIacCallbackKibanaUrl(http.basePath) !== undefined;
 
-  return { available, status, created, start, stop };
+  return { available, status, created, start, cancel };
 };

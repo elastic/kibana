@@ -28,6 +28,7 @@ import {
 
 import {
   createIacCallbackHandler,
+  deleteIacCallbackHandler,
   getIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
@@ -45,6 +46,7 @@ jest.mock('../../services/iac_callback', () => ({
   iacCallbackService: {
     create: jest.fn(),
     get: jest.fn(),
+    cancel: jest.fn(),
     receive: jest.fn(),
   },
 }));
@@ -602,6 +604,56 @@ describe('IaC callback handlers', () => {
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
 
       await getIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+  });
+
+  describe('deleteIacCallbackHandler', () => {
+    it('cancels the record and returns it', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.cancel.mockResolvedValue({ ...ITEM, status: 'cancelled' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.cancel).toHaveBeenCalledWith(soClient, 'cb-1');
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...ITEM, status: 'cancelled' } },
+      });
+    });
+
+    it('returns the record as the stack left it when it had already reported', async () => {
+      const received = {
+        ...ITEM,
+        status: 'received' as const,
+        ...PAYLOAD,
+        cloud_connector_id: 'cb-1',
+      };
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.cancel.mockResolvedValue(received);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: received } });
+    });
+
+    it('returns 404 for a record created in another space without cancelling it', async () => {
+      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteIacCallbackHandler(buildCallbackContext('default'), request, response);
+
+      expect(mockedService.cancel).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('returns 404 for an unknown record', async () => {
+      mockedService.get.mockResolvedValue(undefined);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
+
+      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });

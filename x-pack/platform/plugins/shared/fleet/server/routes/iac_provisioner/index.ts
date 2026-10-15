@@ -17,6 +17,8 @@ import {
 import {
   CreateIacCallbackRequestSchema,
   CreateIacCallbackResponseSchema,
+  DeleteIacCallbackRequestSchema,
+  DeleteIacCallbackResponseSchema,
   GetIacCallbackRequestSchema,
   GetIacCallbackResponseSchema,
   ReceiveIacCallbackRequestSchema,
@@ -25,6 +27,7 @@ import {
 
 import {
   createIacCallbackHandler,
+  deleteIacCallbackHandler,
   getIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
@@ -140,6 +143,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getIacCallbackHandler
+    );
+
+  router.versioned
+    .delete({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
+      summary: 'Cancel an IaC callback',
+      description:
+        'Retire a callback record the form no longer waits on and invalidate its API key. A record the stack has already reported to is returned unchanged.',
+      access: 'internal',
+      security: IAC_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: DeleteIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeleteIacCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+          },
+        },
+      },
+      deleteIacCallbackHandler
     );
 
   // Public: the stack's Lambda calls this with the record's API key. Kibana rejects an invalid

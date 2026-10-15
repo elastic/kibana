@@ -7,7 +7,11 @@
 
 import type { AccountType } from './cloud_connector';
 
-export type IacCallbackStatus = 'pending' | 'received';
+/**
+ * `receiving` is the window between a report being accepted and its cloud connector existing;
+ * `cancelled` is a record the browser retired, for example because the identity was created by hand.
+ */
+export type IacCallbackStatus = 'pending' | 'receiving' | 'received' | 'cancelled';
 
 /** What the stack's Lambda reports once the IAM role exists. */
 export interface IacCallbackReceivedValues {

@@ -54689,7 +54689,9 @@ paths:
                   status:
                     enum:
                       - pending
+                      - receiving
                       - received
+                      - cancelled
                     type: string
                 required:
                   - status

@@ -8,7 +8,11 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { useStartServices } from '../../../hooks';
-import { sendCreateIacCallback, sendGetIacCallback } from '../../../hooks/use_request/iac_callback';
+import {
+  sendCreateIacCallback,
+  sendDeleteIacCallback,
+  sendGetIacCallback,
+} from '../../../hooks/use_request/iac_callback';
 import type { IacCallback } from '../../../../common/types/models/iac_callback';
 
 import {
@@ -23,6 +27,7 @@ jest.mock('../../../hooks/use_request/iac_callback');
 const mockedUseStartServices = jest.mocked(useStartServices);
 const mockedCreate = jest.mocked(sendCreateIacCallback);
 const mockedGet = jest.mocked(sendGetIacCallback);
+const mockedDelete = jest.mocked(sendDeleteIacCallback);
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const EXPIRES_AT = '2026-10-13T12:00:00.000Z';
@@ -80,6 +85,10 @@ describe('useIacCallback', () => {
       error: null,
     } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem() }, error: null } as any);
+    mockedDelete.mockResolvedValue({
+      data: { item: pendingItem('cb-1', { status: 'cancelled' }) },
+      error: null,
+    } as any);
   });
 
   afterEach(() => {
@@ -305,18 +314,102 @@ describe('useIacCallback', () => {
     expect(result.current.status).toBe('idle');
   });
 
-  it('stop() stops polling and returns to idle', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
-    await act(async () => {
-      await result.current.start({});
-    });
-    act(() => {
-      result.current.stop();
+  describe('cancel()', () => {
+    it('retires the record, stops polling and returns to idle', async () => {
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+
+      let createdByCallback: boolean | undefined;
+      await act(async () => {
+        createdByCallback = await result.current.cancel();
+      });
+
+      expect(mockedDelete).toHaveBeenCalledWith('cb-1');
+      expect(createdByCallback).toBe(false);
+      expect(result.current.status).toBe('idle');
+      await poll();
+      expect(mockedGet).not.toHaveBeenCalled();
     });
 
-    expect(result.current.status).toBe('idle');
-    await poll();
-    expect(mockedGet).not.toHaveBeenCalled();
+    it('surfaces the identity when the stack had already reported', async () => {
+      mockedDelete.mockResolvedValue({
+        data: {
+          item: pendingItem('cb-1', {
+            status: 'received',
+            ...RECEIVED_VALUES,
+            connector_name: 'my-identity',
+            cloud_connector_id: 'cc-1',
+          }),
+        },
+        error: null,
+      } as any);
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+
+      let createdByCallback: boolean | undefined;
+      await act(async () => {
+        createdByCallback = await result.current.cancel();
+      });
+
+      expect(createdByCallback).toBe(true);
+      expect(result.current.status).toBe('received');
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'my-identity' });
+      await poll();
+      expect(mockedGet).not.toHaveBeenCalled();
+    });
+
+    it('keeps polling when the report is still being applied', async () => {
+      mockedDelete.mockResolvedValue({
+        data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
+        error: null,
+      } as any);
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+
+      let createdByCallback: boolean | undefined;
+      await act(async () => {
+        createdByCallback = await result.current.cancel();
+      });
+
+      expect(createdByCallback).toBe(true);
+      expect(result.current.status).toBe('pending');
+      await poll();
+      expect(mockedGet).toHaveBeenCalledWith('cb-1');
+    });
+
+    it('still stops waiting when the cancel request fails', async () => {
+      mockedDelete.mockResolvedValue({ data: null, error: { statusCode: 404 } } as any);
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+
+      let createdByCallback: boolean | undefined;
+      await act(async () => {
+        createdByCallback = await result.current.cancel();
+      });
+
+      expect(createdByCallback).toBe(false);
+      expect(result.current.status).toBe('idle');
+    });
+
+    it('does nothing without a record to wait on', async () => {
+      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+
+      let createdByCallback: boolean | undefined;
+      await act(async () => {
+        createdByCallback = await result.current.cancel();
+      });
+
+      expect(createdByCallback).toBe(false);
+      expect(mockedDelete).not.toHaveBeenCalled();
+    });
   });
 
   it('does not poll for a record whose creation finished after unmount', async () => {
