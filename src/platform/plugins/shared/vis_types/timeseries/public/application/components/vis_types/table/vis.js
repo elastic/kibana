@@ -122,7 +122,9 @@ class TableVis extends Component {
             ? createReactFieldFormatter(
                 getMetricsField(column.metrics),
                 fieldFormatMap,
-                hasColorRules
+                hasColorRules,
+                undefined,
+                this.props.isInteractive
               )
             : createTickFormatter(column.formatter, column.value_template, getConfig);
         const value = formatter(item.last);
