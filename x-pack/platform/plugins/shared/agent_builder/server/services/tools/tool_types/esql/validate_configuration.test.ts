@@ -101,6 +101,70 @@ describe('validateConfig', () => {
         "Validation error: \nSyntaxError: mismatched input 'WHERE' expecting {'row', 'from', 'show'}"
       );
     });
+
+    it('should throw error with message from semantic errors (ESQLMessage)', async () => {
+      const config = {
+        query: 'FROM my_cases | STATS a = NOT_A_FUNCTION(case_id)',
+        params: {},
+      };
+
+      const semanticErrors = [
+        {
+          text: 'Unknown function NOT_A_FUNCTION',
+          code: 'unknownFunction',
+          type: 'error' as const,
+          location: { min: 26, max: 50 },
+        },
+      ];
+      mockValidateQuery.mockResolvedValue({ errors: semanticErrors, warnings: [] });
+      mockCreateBadRequestError.mockImplementation((message: string) => {
+        const error = new Error(message);
+        error.name = 'AgentBuilderBadRequestError';
+        return error as any;
+      });
+
+      await expect(validateConfig(config)).rejects.toThrow();
+
+      expect(mockCreateBadRequestError).toHaveBeenCalledWith(
+        'Validation error: \nUnknown function NOT_A_FUNCTION'
+      );
+    });
+
+    it('should include messages from both syntax and semantic errors', async () => {
+      const config = {
+        query: 'FROM my_cases | BAD_COMMAND | STATS a = NOT_A_FUNCTION(case_id)',
+        params: {},
+      };
+
+      const mixedErrors = [
+        {
+          startLineNumber: 1,
+          endLineNumber: 1,
+          startColumn: 17,
+          endColumn: 28,
+          message: "SyntaxError: mismatched input 'BAD_COMMAND'",
+          severity: 8,
+        },
+        {
+          text: 'Unknown function NOT_A_FUNCTION',
+          code: 'unknownFunction',
+          type: 'error' as const,
+          location: { min: 41, max: 65 },
+        },
+      ];
+      mockValidateQuery.mockResolvedValue({ errors: mixedErrors, warnings: [] });
+      mockCreateBadRequestError.mockImplementation((message: string) => {
+        const error = new Error(message);
+        error.name = 'AgentBuilderBadRequestError';
+        return error as any;
+      });
+
+      await expect(validateConfig(config)).rejects.toThrow();
+
+      expect(mockCreateBadRequestError).toHaveBeenCalledWith(
+        "Validation error: \nSyntaxError: mismatched input 'BAD_COMMAND'\nUnknown function NOT_A_FUNCTION"
+      );
+    });
   });
 
   describe('parameter validation errors', () => {
