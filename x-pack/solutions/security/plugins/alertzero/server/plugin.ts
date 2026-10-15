@@ -51,6 +51,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -143,6 +144,7 @@ export class AlertZeroPlugin
       agentBuilder,
       proposals,
       agenticInvestigations,
+      contextEngine,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -164,6 +166,9 @@ export class AlertZeroPlugin
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
+    if (contextEngine) {
+      registerInvestigationsAiIndex({ contextEngine });
+    }
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();
