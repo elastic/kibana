@@ -1152,7 +1152,8 @@ export class WorkflowsManagementApi {
 
   /**
    * The status of each execution the caller can read, in one read. An id that is missing, in
-   * another space, or whose workflow the caller cannot read is left out of the result.
+   * another space, or whose workflow the caller cannot read or that no longer exists is left out
+   * of the result.
    */
   public async getWorkflowExecutionStatuses(
     workflowExecutionIds: string[],
@@ -1166,19 +1167,15 @@ export class WorkflowsManagementApi {
     if (executions.length === 0) {
       return [];
     }
-    const workflows = await this.workflowsService.getWorkflowsByIds(
+    const access = await this.workflowsService.getAccessControl();
+    const readable = await this.workflowsService.getWorkflowsSourceByIds(
       [...new Set(executions.map(({ workflowId }) => workflowId).filter(Boolean))],
       spaceId,
-      { includeDeleted: true }
+      ['id'],
+      { includeDeleted: true, accessControlFilter: await access.readFilter(options.request) }
     );
-    const access = await this.workflowsService.getAccessControl();
-    const permissions = await Promise.all(
-      workflows.map((workflow) => access.permissions(workflow, options.request))
-    );
-    const hiddenIds = new Set(
-      workflows.filter((_, index) => !permissions[index].read).map(({ id }) => id)
-    );
-    return executions.filter(({ workflowId }) => !hiddenIds.has(workflowId));
+    const readableIds = new Set(readable.map(({ id }) => id));
+    return executions.filter(({ workflowId }) => readableIds.has(workflowId));
   }
 
   public async getChildWorkflowExecutions(

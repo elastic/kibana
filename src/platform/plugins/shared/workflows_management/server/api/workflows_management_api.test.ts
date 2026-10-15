@@ -553,45 +553,50 @@ describe('WorkflowsManagementApi', () => {
       status: ExecutionStatus.CANCELLED,
     });
 
-    it('should leave out the executions of workflows the caller cannot read, checked in one batch', async () => {
-      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
-      if (!workflow) throw new Error('Missing workflow fixture');
+    it('should leave out the executions of workflows the caller cannot read, filtered in one query', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { term: { 'access_control.access_mode': 'public' } };
+      jest.mocked(access.readFilter).mockResolvedValue(filter);
       mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([
         status('run-1', 'workflow-123'),
         status('run-2', 'private-hidden'),
         status('run-3', 'workflow-123'),
-        status('run-4', 'hard-deleted'),
       ]);
-      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
-        workflow,
-        {
-          ...workflow,
-          id: 'private-hidden',
-          access_control: { access_mode: 'private', entries: [] },
-        },
-      ]);
-      const access = await mockWorkflowsService.getAccessControl();
-      jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
-        read: access_control?.access_mode !== 'private',
-        execute: false,
-        edit: false,
-        manage: false,
-      }));
+      // The read filter runs in the query, so an unreadable workflow is simply not returned.
+      mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([{ id: 'workflow-123' }]);
 
       const result = await api.getWorkflowExecutionStatuses(
-        ['run-1', 'run-2', 'run-3', 'run-4'],
+        ['run-1', 'run-2', 'run-3'],
         'default',
         { request: mockRequest }
       );
 
-      expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
-      expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
-        ['workflow-123', 'private-hidden', 'hard-deleted'],
+      expect(access.readFilter).toHaveBeenCalledWith(mockRequest);
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+        ['workflow-123', 'private-hidden'],
         'default',
-        { includeDeleted: true }
+        ['id'],
+        { includeDeleted: true, accessControlFilter: filter }
       );
-      // A hard-deleted workflow has no ACL left to deny, as in `getWorkflowExecution`.
-      expect(result.map(({ id }) => id)).toEqual(['run-1', 'run-3', 'run-4']);
+      expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
+      expect(result.map(({ id }) => id)).toEqual(['run-1', 'run-3']);
+    });
+
+    it('should leave out an execution when its workflow no longer exists', async () => {
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([
+        status('run-1', 'workflow-123'),
+        status('run-2', 'hard-deleted'),
+      ]);
+      mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([{ id: 'workflow-123' }]);
+
+      const result = await api.getWorkflowExecutionStatuses(['run-1', 'run-2'], 'default', {
+        request: mockRequest,
+      });
+
+      // Unlike `getWorkflowExecution`, which keeps it: with no ACL left, nothing proves the caller
+      // may read it.
+      expect(result.map(({ id }) => id)).toEqual(['run-1']);
     });
 
     it('should not look up workflows when no execution was found', async () => {
@@ -600,7 +605,7 @@ describe('WorkflowsManagementApi', () => {
       await expect(
         api.getWorkflowExecutionStatuses(['missing'], 'default', { request: mockRequest })
       ).resolves.toEqual([]);
-      expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).not.toHaveBeenCalled();
     });
   });
 
