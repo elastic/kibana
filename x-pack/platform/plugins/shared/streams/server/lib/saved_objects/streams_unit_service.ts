@@ -144,7 +144,7 @@ export class StreamsUnitService {
     const configuration = await this.getConfigurationSavedObject(unitId);
 
     if (!configuration) {
-      throw new StatusError(`Streams unit [${unitId}] not found.`, 404);
+      return { unit: { sources: [], destinations: [], pipelines: [] }, ui_metadata: {} };
     }
 
     const uiMetadata = await this.getUiMetadataSavedObject(configuration.id);
@@ -160,11 +160,14 @@ export class StreamsUnitService {
     unit,
     ui_metadata: uiMetadata,
     secrets,
+    onPublished,
   }: {
     unitId: string;
     unit: StreamsUnit.Configuration;
     ui_metadata?: StreamsUnit.UiMetadata;
     secrets?: StreamsUnit.Secrets;
+    /** Runs once the unit is published, before the UI metadata write that may still fail. */
+    onPublished?: () => Promise<void>;
   }): Promise<UnitValidationResult> {
     if (!this.canEncrypt) {
       throw new StatusError(
@@ -239,6 +242,8 @@ export class StreamsUnitService {
       });
       throw error;
     }
+
+    await onPublished?.();
 
     const metadataToWrite =
       uiMetadata !== undefined

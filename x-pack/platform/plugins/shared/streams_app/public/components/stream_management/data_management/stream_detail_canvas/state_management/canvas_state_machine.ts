@@ -364,6 +364,7 @@ export const canvasStateMachine = setup({
                 urlState: {
                   ...context.urlState,
                   flyoutName: event.flyoutName,
+                  flyoutKind: event.flyoutKind ?? null,
                   flyoutTab: 'overview',
                 },
               }),
@@ -393,6 +394,7 @@ export const canvasStateMachine = setup({
                 urlState: {
                   ...context.urlState,
                   flyoutName: null,
+                  flyoutKind: null,
                   flyoutTab: null,
                 },
               }),
@@ -611,14 +613,12 @@ export const canvasStateMachine = setup({
         input: {
           unitDefinition,
           metadataBySourceId: {},
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
       destinationsRef: spawn('destinationsMachine', {
         input: {
           unitDefinition,
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
@@ -646,7 +646,7 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
-      destinationsMachine: createDestinationsMachineActor({ core }),
+      destinationsMachine: createDestinationsMachineActor({ core, apiKeyGenerationDeps }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -676,10 +676,14 @@ function createSourcesMachineActor({
   );
 }
 
-function createDestinationsMachineActor({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+function createDestinationsMachineActor({
+  core,
+  apiKeyGenerationDeps,
+}: Pick<CanvasStateServiceDeps, 'core' | 'apiKeyGenerationDeps'>) {
   return destinationsStateMachine.provide(
     createDestinationsMachineImplementations({
       toasts: core.notifications.toasts,
+      apiKeyGenerationDeps,
     })
   );
 }
@@ -819,11 +823,12 @@ function createUrlInitializerActor({
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      const { flyoutName, flyoutTab, query } = urlState.data;
+      const { flyoutName, flyoutKind, flyoutTab, query } = urlState.data;
       sendBack({
         type: 'url.init',
         urlState: {
           flyoutName,
+          flyoutKind: flyoutKind ?? null,
           flyoutTab: flyoutName && !flyoutTab ? 'overview' : flyoutTab,
           query: query || null,
         },

@@ -171,14 +171,15 @@ describe('StreamsUnitService', () => {
     expect(soClient.get).toHaveBeenCalledWith('streams-ui-metadata', 'default-streams-ui-metadata');
   });
 
-  it('throws 404 when the unit does not exist', async () => {
+  it('returns an empty unit when the unit does not exist', async () => {
     const soClient = createSoClient();
     soClient.get.mockRejectedValue(notFoundError);
 
     const service = createService({ soClient });
 
-    await expect(service.getUnit('default')).rejects.toMatchObject({
-      statusCode: 404,
+    await expect(service.getUnit('default')).resolves.toEqual({
+      unit: { sources: [], destinations: [], pipelines: [] },
+      ui_metadata: {},
     });
   });
 
@@ -251,6 +252,31 @@ describe('StreamsUnitService', () => {
         initialNamespaces: ['*'],
       }
     );
+  });
+
+  it('runs onPublished after publishing, even when the UI metadata write then fails', async () => {
+    const order: string[] = [];
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+    soClient.create.mockImplementation(async (type: string, attributes) => {
+      if (type === 'streams-ui-metadata') {
+        throw new Error('metadata write failed');
+      }
+      return asSavedObject(type, attributes);
+    });
+    const publishUnit = jest.fn().mockImplementation(async () => {
+      order.push('publish');
+    });
+    const onPublished = jest.fn().mockImplementation(async () => {
+      order.push('onPublished');
+    });
+
+    const service = createService({ soClient, publishUnit });
+
+    await expect(
+      service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets, onPublished })
+    ).rejects.toThrow('metadata write failed');
+    expect(order).toEqual(['publish', 'onPublished']);
   });
 
   it('keeps stored secrets when the PUT omits them', async () => {
