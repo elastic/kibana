@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { timingSafeEqual } from 'crypto';
 import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
@@ -17,6 +16,7 @@ import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
+  resolveUiamClientAuthentication,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -39,7 +39,10 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { assertUiamCredential, getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -472,6 +475,7 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
     this.#kibanaServerResourceURL = options.kibanaServerResourceURL;
@@ -521,48 +525,28 @@ export class UiamService implements UiamServicePublic {
     };
   }
 
-  /**
-   * Verifies that a real request came from a trusted Kibana caller using this exact credential.
-   */
-  #hasValidInternalCallerAttestation(
-    request: KibanaRequest,
-    authorization: HTTPAuthorizationHeader
-  ): boolean {
-    const presented = request.headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
-    if (typeof presented !== 'string') {
-      return false;
-    }
-
-    const expected = deriveInternalCallerAttestation(this.#config.sharedSecret, authorization);
-    const presentedBuffer = Buffer.from(presented);
-    const expectedBuffer = Buffer.from(expected);
-    return (
-      presentedBuffer.length === expectedBuffer.length &&
-      timingSafeEqual(presentedBuffer, expectedBuffer)
-    );
-  }
-
-  /**
-   * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request. API key requests are classified as follows:
-   * - Fake request with an external marker: external.
-   * - Other fake request: internal.
-   * - Real request with a valid attestation: internal.
-   * - Real request without a valid attestation: external.
-   */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
-    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-    assertUiamCredential(authorization);
-    const { scheme } = authorization;
-    const isExternalApiKey =
-      scheme.toLowerCase() === 'apikey' &&
-      (request.isFakeRequest
-        ? isExternalUiamCredential(request)
-        : !this.#hasValidInternalCallerAttestation(request, authorization));
-    const clientAuthentication = isExternalApiKey ? null : getUiamClientAuthentication(request);
+    const credential = getUiamAuthorizationHeaderFromRequest(request);
+    const clientAuthentication = resolveUiamClientAuthentication(
+      this.#config.sharedSecret,
+      request.isFakeRequest
+        ? {
+            credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
+            credential,
+          }
+        : {
+            credentialSource: 'inbound',
+            credential,
+            relayedClientAuthentication: request.headers[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: request.headers,
+          }
+    );
+
     return {
-      ...this.#getClientAuthenticationHeaders(clientAuthentication),
-      Authorization: authorization.toString(),
+      ...(typeof clientAuthentication === 'string'
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
+      Authorization: credential.toString(),
     };
   }
 
