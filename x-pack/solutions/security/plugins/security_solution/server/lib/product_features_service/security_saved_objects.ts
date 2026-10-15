@@ -66,7 +66,8 @@ export const securityV5SavedObjects = [
   EngineDescriptorTypeName,
   EntityStoreGlobalStateTypeName,
   // Entity resolution rules: built-in rule overrides and custom rules. Writes
-  // through the HTTP routes also need `securitySolution-entity-analytics-manage`.
+  // through the HTTP routes also need `securitySolution-entity-analytics-manage`;
+  // the maintainer reads both as its API key owner.
   EntityResolutionRuleTypeName,
   CustomResolutionRuleTypeName,
   ...savedObjectTypes.filter(

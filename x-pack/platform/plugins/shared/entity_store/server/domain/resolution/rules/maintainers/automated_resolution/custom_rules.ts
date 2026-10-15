@@ -12,31 +12,35 @@ import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_main
 import type { ResolutionClient } from '../../../resolution_client';
 import {
   CUSTOM_RULE_STATE_KEY_PREFIX,
+  compareByCreation,
   customRuleStateKey,
   fingerprintDefinition,
   toExpressionMatchSpec,
-  toRuleDefinition,
   type CustomResolutionRule,
 } from '../../custom';
 import { runEsqlMatcherRule } from '../../matcher';
 import type { ResolutionRulesClient } from '../../rule_client';
 import type { EsqlExpressionMatchSpec } from '../../rule_registry';
-import type { CustomRuleState, PerRuleState } from './types';
+import { EMPTY_RULE_STATE, type CustomRuleState, type PerRuleState } from './types';
 
-const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
-
-/** Time left before the maintainer's task timeout when custom rules stop. */
+/**
+ * The soft deadline: how long before the maintainer's task timeout custom rules
+ * stop. A run that ends on its own saves every rule's state; a run Task Manager
+ * cancels at the timeout saves none, OOTB rules included.
+ */
 export const CUSTOM_RULES_DEADLINE_MARGIN_MS = 60 * 1000;
 
-/** Telemetry scope value for every custom rule; ids are per deployment. */
+/** Telemetry scope value for every custom rule. */
 const CUSTOM_RULE_TELEMETRY_ID = 'custom';
+
+const MAX_LAST_ERROR_LENGTH = 500;
 
 export interface RunCustomRulesDeps {
   /**
-   * Rule state for this run, starting as the state read at the start of the
-   * run. Custom-rule entries are read, written and pruned here.
+   * Per-rule state for this run, starting as the state read at the start of
+   * the run. Custom-rule entries are read, written and pruned here.
    */
-  rules: Record<string, PerRuleState>;
+  ruleStates: Record<string, PerRuleState>;
   resolutionRulesClient: ResolutionRulesClient;
   index: string;
   esClient: ElasticsearchClient;
@@ -45,53 +49,66 @@ export interface RunCustomRulesDeps {
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
   mutatedIds: Set<string>;
-  /**
-   * Epoch ms after which no custom rule starts and a running one stops between
-   * groups. A run that ends on its own saves every rule's state; a run Task
-   * Manager cancels saves none, OOTB rules included.
-   */
+  /** Epoch ms of the soft deadline: no custom rule starts after it and a running one stops between groups. */
   deadline: number;
 }
 
 const asCustomState = (state: PerRuleState | undefined): Partial<CustomRuleState> =>
   (state ?? {}) as Partial<CustomRuleState>;
 
-const byCreation = (a: CustomResolutionRule, b: CustomResolutionRule): number =>
-  (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id);
+// State written by another Kibana version may hold anything.
+const asText = (value: unknown): string => (typeof value === 'string' ? value : '');
 
-/**
- * Rules the deadline stopped or didn't reach last run go first, the one that
- * least recently ran first leading, so they take turns at the full budget and
- * no rule waits forever. The rest follow, oldest first, so the order is stable
- * and explainable.
- */
-export const orderForRun = (
+/** Deferred rules go first, the one that least recently went first leading; the rest follow oldest first. */
+const orderForRun = (
   customRules: CustomResolutionRule[],
-  rules: Readonly<Record<string, PerRuleState>>
+  ruleStates: Readonly<Record<string, PerRuleState>>
 ): CustomResolutionRule[] => {
-  const stateOf = (rule: CustomResolutionRule) => asCustomState(rules[customRuleStateKey(rule.id)]);
+  const stateOf = (rule: CustomResolutionRule) =>
+    asCustomState(ruleStates[customRuleStateKey(rule.id)]);
   const deferred = customRules.filter((rule) => stateOf(rule).deferredByDeadline === true);
   const rest = customRules.filter((rule) => stateOf(rule).deferredByDeadline !== true);
   return [
     ...deferred.sort(
       (a, b) =>
-        (stateOf(a).ranFirstAt ?? '').localeCompare(stateOf(b).ranFirstAt ?? '') || byCreation(a, b)
+        asText(stateOf(a).lastStartedFirstAt).localeCompare(
+          asText(stateOf(b).lastStartedFirstAt)
+        ) || compareByCreation(a, b)
     ),
-    ...rest.sort(byCreation),
+    ...rest.sort(compareByCreation),
   ];
 };
 
+const truncate = (message: string): string =>
+  message.length > MAX_LAST_ERROR_LENGTH ? `${message.slice(0, MAX_LAST_ERROR_LENGTH)}…` : message;
+
 const markDeferred = (
-  rules: Record<string, PerRuleState>,
+  ruleStates: Record<string, PerRuleState>,
   notStarted: CustomResolutionRule[]
 ): void => {
   for (const { id } of notStarted) {
     const stateKey = customRuleStateKey(id);
-    rules[stateKey] = { ...EMPTY_RULE_STATE, ...rules[stateKey], deferredByDeadline: true };
+    ruleStates[stateKey] = {
+      ...EMPTY_RULE_STATE,
+      ...ruleStates[stateKey],
+      deferredByDeadline: true,
+    };
   }
 };
 
-const readPriorState = (
+const recordFailure = (
+  ruleStates: Record<string, PerRuleState>,
+  stateKey: string,
+  error: unknown
+): void => {
+  ruleStates[stateKey] = {
+    ...EMPTY_RULE_STATE,
+    ...ruleStates[stateKey],
+    lastError: truncate(getErrorMessage(error)),
+  };
+};
+
+const priorStateIfDefinitionUnchanged = (
   previous: PerRuleState | undefined,
   definitionFingerprint: string
 ): PerRuleState => {
@@ -101,55 +118,64 @@ const readPriorState = (
   return { lastProcessedTimestamp: previous.lastProcessedTimestamp, lastRun: previous.lastRun };
 };
 
-const pruneDeletedRules = (
-  rules: Record<string, PerRuleState>,
+// An unauthorized saved-objects `find` returns an empty page rather than
+// throwing, so a rule missing from the list is only pruned once a read by id
+// confirms it's gone. Otherwise one run without access would wipe every rule's
+// progress and the next run would rescan from scratch.
+const pruneDeletedRules = async (
+  { ruleStates, resolutionRulesClient, logger }: RunCustomRulesDeps,
   customRules: CustomResolutionRule[]
-): void => {
+): Promise<void> => {
   const live = new Set(customRules.map(({ id }) => customRuleStateKey(id)));
-  for (const key of Object.keys(rules)) {
-    if (key.startsWith(CUSTOM_RULE_STATE_KEY_PREFIX) && !live.has(key)) {
-      delete rules[key];
+  const missing = Object.keys(ruleStates).filter(
+    (key) => key.startsWith(CUSTOM_RULE_STATE_KEY_PREFIX) && !live.has(key)
+  );
+  for (const stateKey of missing) {
+    const id = stateKey.slice(CUSTOM_RULE_STATE_KEY_PREFIX.length);
+    try {
+      if ((await resolutionRulesClient.getCustomRule(id)) === undefined) {
+        delete ruleStates[stateKey];
+      }
+    } catch (error) {
+      logger.warn(
+        `${stateKey}: keeping its state; the maintainer's API key owner can't read the rule (${getErrorMessage(
+          error
+        )})`
+      );
     }
   }
 };
 
 const compileRule = (
-  rule: CustomResolutionRule,
-  logger: Logger
-): { spec: EsqlExpressionMatchSpec; definitionFingerprint: string } | undefined => {
-  try {
-    const definition = toRuleDefinition(rule);
-    return {
-      spec: toExpressionMatchSpec(definition),
-      definitionFingerprint: fingerprintDefinition(definition),
-    };
-  } catch (error) {
-    logger.warn(`Custom resolution rule '${rule.id}' failed: ${getErrorMessage(error)}`);
-    return undefined;
-  }
-};
+  rule: CustomResolutionRule
+): { spec: EsqlExpressionMatchSpec; definitionFingerprint: string } => ({
+  spec: toExpressionMatchSpec(rule),
+  definitionFingerprint: fingerprintDefinition(rule),
+});
 
 /**
  * Applies saved custom rules after the OOTB rules. Each rule is isolated: an
- * invalid or failing rule is logged and skipped, and nothing here throws.
+ * invalid or failing rule is logged, recorded as `lastError` in its state, and
+ * skipped.
  *
- * Rules run in `orderForRun` order until `deadline`. A rule cut off
- * mid-scan keeps its previous watermark and repeats its query next run; the
- * matcher skips groups it already linked, so the links it made still count as
- * progress.
+ * A rule cut off mid-scan keeps its previous watermark and repeats its query
+ * next run; the matcher skips groups it already linked, so the links it made
+ * still count as progress.
  */
 export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promise<void> {
-  const { rules, resolutionRulesClient, logger, signal } = deps;
+  const { resolutionRulesClient, logger, signal } = deps;
 
   let customRules: CustomResolutionRule[];
   try {
     customRules = await resolutionRulesClient.getCustomRules();
   } catch (error) {
-    logger.warn(`Skipping custom resolution rules this run; failed to load them: ${error}`);
+    logger.warn(
+      `Skipping custom resolution rules this run; failed to load them: ${getErrorMessage(error)}`
+    );
     return;
   }
 
-  pruneDeletedRules(rules, customRules);
+  await pruneDeletedRules(deps, customRules);
 
   const remainingMs = deps.deadline - Date.now();
   if (remainingMs <= 0) {
@@ -175,13 +201,13 @@ export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promis
 async function runEnabledRulesUntilAborted(
   deps: RunCustomRulesDeps,
   customRules: CustomResolutionRule[],
-  softSignal: AbortSignal
+  deadlineOrAbortSignal: AbortSignal
 ): Promise<void> {
-  const { rules, resolutionRulesClient, index, esClient, logger, signal } = deps;
-  const reachedDeadline = () => softSignal.aborted && !signal.aborted;
+  const { ruleStates, resolutionRulesClient, index, esClient, logger, signal } = deps;
+  const reachedDeadline = () => deadlineOrAbortSignal.aborted && !signal.aborted;
   const enabledRules = orderForRun(
     customRules.filter(({ enabled }) => enabled),
-    rules
+    ruleStates
   );
   if (enabledRules.length > 0) {
     logger.info(
@@ -191,58 +217,62 @@ async function runEnabledRulesUntilAborted(
     );
   }
 
-  let startedOne = false;
-  for (const [position, listed] of enabledRules.entries()) {
-    if (softSignal.aborted) {
+  let anyRuleStartedThisRun = false;
+  for (const [position, listedRule] of enabledRules.entries()) {
+    const stateKey = customRuleStateKey(listedRule.id);
+    if (deadlineOrAbortSignal.aborted) {
       const notStarted = enabledRules.slice(position);
       if (reachedDeadline()) {
-        markDeferred(rules, notStarted);
+        markDeferred(ruleStates, notStarted);
         logger.info(
           `Custom resolution rules reached the soft deadline; ${notStarted.length} rule(s) continue next run`
         );
       } else {
-        logger.debug(`Aborted automated-resolution before custom rule '${listed.id}'`);
+        logger.debug(`Aborted automated-resolution before ${stateKey}`);
       }
       return;
     }
 
     // Re-read right before running: a disable, delete or edit since the list
     // was loaded must take effect now, not after the deadline.
-    let rule: CustomResolutionRule | undefined;
+    let currentRule: CustomResolutionRule | undefined;
     try {
-      rule = await resolutionRulesClient.getCustomRule(listed.id);
+      currentRule = await resolutionRulesClient.getCustomRule(listedRule.id);
     } catch (error) {
-      logger.warn(`Custom resolution rule '${listed.id}' failed: ${getErrorMessage(error)}`);
+      logger.warn(`${stateKey} failed: ${getErrorMessage(error)}`);
+      recordFailure(ruleStates, stateKey, error);
       continue;
     }
-    if (!rule?.enabled) {
-      logger.debug(
-        `Skipping custom resolution rule '${listed.id}': disabled or deleted since load`
-      );
+    if (!currentRule?.enabled) {
+      logger.debug(`Skipping ${stateKey}: disabled or deleted since load`);
       continue;
     }
 
-    const stateKey = customRuleStateKey(rule.id);
-    const compiled = compileRule(rule, logger);
-    if (!compiled) {
+    let compiled: ReturnType<typeof compileRule>;
+    try {
+      compiled = compileRule(currentRule);
+    } catch (error) {
+      logger.warn(`${stateKey} failed: ${getErrorMessage(error)}`);
+      recordFailure(ruleStates, stateKey, error);
       continue;
     }
     const { spec, definitionFingerprint } = compiled;
 
-    const ruleState = readPriorState(rules[stateKey], definitionFingerprint);
+    const ruleState = priorStateIfDefinitionUnchanged(ruleStates[stateKey], definitionFingerprint);
     const lastAttemptAt = new Date().toISOString();
-    const ranFirstAt = startedOne
-      ? asCustomState(rules[stateKey]).ranFirstAt ?? null
+    const lastStartedFirstAt = anyRuleStartedThisRun
+      ? asCustomState(ruleStates[stateKey]).lastStartedFirstAt ?? null
       : lastAttemptAt;
-    startedOne = true;
+    anyRuleStartedThisRun = true;
     let matcherResultState: PerRuleState = ruleState;
+    let lastError: string | null = null;
     try {
       matcherResultState = await runEsqlMatcherRule({
         state: ruleState,
         esClient,
         logger,
         resolutionClient: deps.resolutionClient,
-        signal: softSignal,
+        signal: deadlineOrAbortSignal,
         telemetry: deps.telemetry,
         spec,
         ruleId: stateKey,
@@ -253,7 +283,8 @@ async function runEnabledRulesUntilAborted(
       await esClient.indices.refresh({ index });
     } catch (error) {
       if (!reachedDeadline()) {
-        logger.warn(`Custom resolution rule '${rule.id}' failed: ${getErrorMessage(error)}`);
+        logger.warn(`${stateKey} failed: ${getErrorMessage(error)}`);
+        lastError = truncate(getErrorMessage(error));
       }
     }
 
@@ -262,15 +293,17 @@ async function runEnabledRulesUntilAborted(
       logger.info(`${stateKey}: stopped at the soft deadline; continues next run`);
     }
 
-    // Written even when the rule failed or stopped early: the attempt fields
-    // order the next run, and the state still holds the previous watermark.
+    // Written even when the rule failed or stopped early: the state still holds
+    // the previous watermark, and `deferredByDeadline` and `lastStartedFirstAt`
+    // order the next run.
     const nextState: CustomRuleState = {
       ...matcherResultState,
       definitionFingerprint,
       lastAttemptAt,
-      ranFirstAt,
+      lastStartedFirstAt,
       deferredByDeadline,
+      lastError,
     };
-    rules[stateKey] = nextState;
+    ruleStates[stateKey] = nextState;
   }
 }

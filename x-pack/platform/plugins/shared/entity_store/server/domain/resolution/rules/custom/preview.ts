@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import { escapeEsqlStringLiteral } from '../../../../../common/esql/strings';
-import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
+import { executeEsqlQuery, isPartialEsqlResponse } from '../../../../infra/elasticsearch/esql';
 import { MAX_RESOLUTION_SEARCH_SIZE } from '../../resolution_client';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import {
@@ -72,9 +71,6 @@ const linkableIds = (row: MatchGroupRow): Set<string> =>
 // entity; those turn into no-ops once the entities are read.
 const hasSomethingToLink = (row: MatchGroupRow): boolean => linkableIds(row).size >= 2;
 
-const isPartial = (response: ESQLSearchResponse): boolean =>
-  (response as ESQLSearchResponse & { is_partial?: boolean }).is_partial === true;
-
 const keepLargest = (sample: MatchGroupRow[], row: MatchGroupRow): void => {
   if (sample.length < PREVIEW_SAMPLE_SIZE) {
     sample.push(row);
@@ -91,10 +87,10 @@ const countExistingAliasesOf = async (
   index: string,
   entityIds: string[],
   signal?: AbortSignal
-): Promise<Map<string, number>> => {
+): Promise<{ counts: Map<string, number>; partial: boolean }> => {
   const counts = new Map<string, number>();
   if (entityIds.length === 0) {
-    return counts;
+    return { counts, partial: false };
   }
   const ids = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
   const response = await executeEsqlQuery({
@@ -112,7 +108,7 @@ const countExistingAliasesOf = async (
   for (const row of response.values) {
     counts.set(String(row[idIndex]), Number(row[countIndex]));
   }
-  return counts;
+  return { counts, partial: isPartialEsqlResponse(response) };
 };
 
 const buildSample = async (
@@ -120,7 +116,7 @@ const buildSample = async (
   index: string,
   rows: MatchGroupRow[],
   signal?: AbortSignal
-): Promise<CustomRulePreviewSample[]> => {
+): Promise<{ sample: CustomRulePreviewSample[]; partial: boolean }> => {
   const ids = [...new Set(rows.flatMap((row) => [...linkableIds(row)]))];
   const entities = await fetchEntities(esClient, index, ids);
 
@@ -128,21 +124,22 @@ const buildSample = async (
     const plan = planMatchGroupLink(row, entities);
     return plan && plan.aliasIds.length > 0 ? [{ row, ...plan }] : [];
   });
-  const aliasCounts = await countExistingAliasesOf(
+  const { counts: aliasCounts, partial } = await countExistingAliasesOf(
     esClient,
     index,
     planned.flatMap(({ aliasIds }) => aliasIds),
     signal
   );
 
-  return planned.map(({ row, target, aliasIds }) => ({
+  const sample = planned.map(({ row, target, aliasIds }) => ({
     match_value: row.matchValue,
     group_size: row.groupSize,
     target: target.entityId,
     aliases: aliasIds,
-    existing_targets: row.existingTargetIds,
+    existing_targets: [...new Set(row.existingTargetIds)],
     cascade_alias_count: aliasIds.reduce((sum, id) => sum + (aliasCounts.get(id) ?? 0), 0),
   }));
+  return { sample, partial };
 };
 
 /**
@@ -189,7 +186,7 @@ export const previewCustomRule = async ({
       signal,
       query: buildMatchGroupsQuery({ index, spec, afterMatchValue, pageSize }),
     });
-    preview.partial ||= isPartial(response);
+    preview.partial ||= isPartialEsqlResponse(response);
     const rows = parseMatchGroupRows(response);
 
     for (const row of rows) {
@@ -197,9 +194,9 @@ export const previewCustomRule = async ({
       const verdict = classifyMatchGroup(row, spec.declineSameNamespaceDuplicates);
       if (verdict === 'oversized') {
         preview.skipped.oversized++;
-      } else if (verdict === 'ambiguous') {
+      } else if (verdict === 'same_namespace_duplicates') {
         preview.skipped.same_namespace_duplicates++;
-      } else if (verdict === 'noop' || !hasSomethingToLink(row)) {
+      } else if (verdict === 'nothing_to_link' || !hasSomethingToLink(row)) {
         preview.skipped.nothing_to_link++;
       } else {
         preview.would_link_groups++;
@@ -220,6 +217,8 @@ export const previewCustomRule = async ({
     afterMatchValue = rows[rows.length - 1].matchValue;
   }
 
-  preview.sample = await buildSample(esClient, index, sampleRows, signal);
+  const { sample, partial } = await buildSample(esClient, index, sampleRows, signal);
+  preview.sample = sample;
+  preview.partial ||= partial;
   return preview;
 };

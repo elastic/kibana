@@ -12,7 +12,7 @@ import { getErrorMessage } from '../../../../../common';
 import { ENTITY_ID_FIELD } from '../../../../../common/domain/definitions/common_fields';
 import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/user_entity_constants';
 import { getFieldValue } from '../../../../../common/domain/euid/commons';
-import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
+import { executeEsqlQuery, isPartialEsqlResponse } from '../../../../infra/elasticsearch/esql';
 import { searchEntitiesByIds } from '../../../../infra/elasticsearch/resolution';
 import { ResolutionSearchTruncatedError } from '../../../errors';
 import type { ResolutionClient } from '../../resolution_client';
@@ -65,8 +65,11 @@ export interface FetchedEntity extends TargetSelectionEntity {
   resolvedTo?: string;
 }
 
-/** What the engine does with a group before reading any entity. */
-export type MatchGroupVerdict = 'oversized' | 'ambiguous' | 'noop' | 'candidate';
+export type MatchGroupVerdict =
+  | 'oversized'
+  | 'same_namespace_duplicates'
+  | 'nothing_to_link'
+  | 'candidate';
 
 interface BucketStats {
   resolutionsCreated: number;
@@ -272,7 +275,7 @@ function countNonLocalUnresolved(row: MatchGroupRow): {
   };
 }
 
-/** The engine's per-group checks that need only the match-group row. */
+/** What the engine does with a group before reading any entity: the checks that need only the row. */
 export function classifyMatchGroup(
   row: MatchGroupRow,
   declineSameNamespaceDuplicates: boolean
@@ -287,11 +290,11 @@ export function classifyMatchGroup(
   // SIDs are excluded at query time so LocalSystem never reaches this path.
   const nonLocal = countNonLocalUnresolved(row);
   if (declineSameNamespaceDuplicates && nonLocal.namespaceCount < nonLocal.entityCount) {
-    return 'ambiguous';
+    return 'same_namespace_duplicates';
   }
 
   if (row.unresolvedIds.length < 2 && row.existingTargetIds.length === 0) {
-    return 'noop';
+    return 'nothing_to_link';
   }
 
   return 'candidate';
@@ -349,7 +352,7 @@ async function resolveMatchGroup(
     return;
   }
 
-  if (verdict === 'ambiguous') {
+  if (verdict === 'same_namespace_duplicates') {
     const nonLocal = countNonLocalUnresolved(row);
     stats.skippedAmbiguousBuckets++;
     logger.warn(
@@ -358,7 +361,7 @@ async function resolveMatchGroup(
     return;
   }
 
-  if (verdict === 'noop') {
+  if (verdict === 'nothing_to_link') {
     stats.skippedNoopBuckets++;
     return;
   }
@@ -482,8 +485,8 @@ export function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow
   });
 }
 
-export function assertCompleteEsqlResults(response: ESQLSearchResponse, context: string): void {
-  if ((response as ESQLSearchResponse & { is_partial?: boolean }).is_partial === true) {
+function assertCompleteEsqlResults(response: ESQLSearchResponse, context: string): void {
+  if (isPartialEsqlResponse(response)) {
     throw new Error(`${context}: ES|QL returned partial results; watermark will not advance`);
   }
 }

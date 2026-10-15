@@ -53,6 +53,16 @@ describe('ES|QL matcher query builder', () => {
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
+    it('escapes control characters in the page cursor so the next page still parses', async () => {
+      const query = buildMatchGroupsQuery({
+        index: INDEX,
+        spec: EMAIL,
+        afterMatchValue: 'alice\n"x"\r\tcorp',
+      });
+      expect(query).toContain('| WHERE match_value > "alice\\n\\"x\\"\\r\\tcorp"');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
     it('restricts groups to those with a member newer than the watermark', async () => {
       const query = buildMatchGroupsQuery({
         index: INDEX,
@@ -162,19 +172,21 @@ describe('ES|QL matcher query builder', () => {
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
-    it('drops groups whose members all resolve to one root', async () => {
+    it('drops groups whose members all resolve to one target', async () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).toContain(
-        '| EVAL root = COALESCE(entity.relationships.resolution.resolved_to, entity.id)'
+        '| EVAL effective_target = COALESCE(entity.relationships.resolution.resolved_to, entity.id)'
       );
-      expect(query).toContain('min_root = MIN(root),\n        max_root = MAX(root)');
-      expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1 AND min_root != max_root');
+      expect(query).toContain(
+        'min_target = MIN(effective_target),\n        max_target = MAX(effective_target)'
+      );
+      expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1 AND min_target != max_target');
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
-    it('leaves the OOTB query without the root filter', () => {
+    it('leaves the OOTB query without the fully-resolved filter', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
-      expect(query).not.toContain('root');
+      expect(query).not.toContain('effective_target');
       expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1\n');
     });
 
@@ -214,7 +226,8 @@ describe('ES|QL matcher query builder', () => {
       const query = buildMatcherValidationQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).not.toContain('unmapped_fields');
       expect(query.startsWith(`FROM "${INDEX}"`)).toBe(true);
-      expect(query.endsWith('| KEEP match_value\n| LIMIT 0')).toBe(true);
+      expect(query).toContain('| EVAL raw_match_value = (TO_LOWER(user.name))');
+      expect(query.endsWith('| KEEP match_value, raw_match_value\n| LIMIT 0')).toBe(true);
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });

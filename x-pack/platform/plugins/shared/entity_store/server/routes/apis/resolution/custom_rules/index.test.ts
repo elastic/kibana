@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
+import { NEVER, Subject, type Observable } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../../common';
@@ -16,7 +18,8 @@ import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  CustomResolutionRuleForbiddenError,
+  CustomResolutionRuleLimitError,
+  MissingEntityIndexWritePrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -33,7 +36,11 @@ interface RegisteredRoute {
   method: string;
   routeConfig: Record<string, unknown>;
   versionConfig: Record<string, unknown>;
-  handler: Function;
+  handler: (
+    ctx: unknown,
+    req: unknown,
+    res: unknown
+  ) => Promise<{ status: number; body?: unknown }>;
 }
 
 const registerAll = (): RegisteredRoute[] => {
@@ -67,7 +74,10 @@ const createResponse = () => ({
   notFound: jest.fn((response) => ({ status: 404, ...response })),
   forbidden: jest.fn((response) => ({ status: 403, ...response })),
   conflict: jest.fn((response) => ({ status: 409, ...response })),
+  customError: jest.fn((response) => ({ status: response.statusCode, ...response })),
 });
+
+const request = (aborted$: Observable<void> = NEVER) => ({ body: {}, events: { aborted$ } });
 
 const { RESOLUTION_CUSTOM_RULES, RESOLUTION_CUSTOM_RULE, RESOLUTION_CUSTOM_RULES_PREVIEW } =
   ENTITY_STORE_ROUTES.internal;
@@ -123,7 +133,7 @@ describe('custom resolution rules routes', () => {
           customResolutionRulesClient: { create: jest.fn().mockRejectedValue(error) },
         }),
       };
-      const result = await createRoute().handler(ctx, { body: {} }, res);
+      const result = await createRoute().handler(ctx, request(), res);
       return { result, logger };
     };
 
@@ -131,13 +141,30 @@ describe('custom resolution rules routes', () => {
       ['an invalid rule', 400, new InvalidCustomResolutionRuleError('bad')],
       ['a missing rule', 404, new CustomResolutionRuleNotFoundError('x')],
       ['a missing entity store', 404, new EntityStoreNotInstalledError()],
-      ['no write access to the entity index', 403, new CustomResolutionRuleForbiddenError('i')],
+      ['no write access to the entity index', 403, new MissingEntityIndexWritePrivilegeError('i')],
+      ['the per-space rule limit', 409, new CustomResolutionRuleLimitError(20)],
       [
         'a saved-objects authorization error',
         403,
         SavedObjectsErrorHelpers.decorateForbiddenError(new Error('x')),
       ],
       ['a version conflict', 409, SavedObjectsErrorHelpers.createConflictError('t', 'x')],
+      [
+        'an Elasticsearch authorization error',
+        403,
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: {
+            error: {
+              type: 'security_exception',
+              reason: 'action [indices:data/read/esql] is unauthorized',
+            },
+          },
+          headers: {},
+          warnings: [],
+          meta: {} as never,
+        }),
+      ],
     ])('maps %s to %i', async (_case, status, error) => {
       const { result } = await callWith(error);
 
@@ -154,8 +181,43 @@ describe('custom resolution rules routes', () => {
         }),
       };
 
-      await expect(createRoute().handler(ctx, { body: {} }, createResponse())).rejects.toBe(error);
+      await expect(createRoute().handler(ctx, request(), createResponse())).rejects.toBe(error);
       expect(logger.error).toHaveBeenCalledWith(error);
+    });
+
+    it('passes the Elasticsearch reason through on a 403', async () => {
+      const { result } = await callWith(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception', reason: 'missing view_index_metadata' } },
+          headers: {},
+          warnings: [],
+          meta: {} as never,
+        })
+      );
+
+      expect(result.body).toEqual({ message: 'missing view_index_metadata' });
+    });
+
+    it('does not log a request the client closed as a server error', async () => {
+      const aborted$ = new Subject<void>();
+      const logger = loggerMock.create();
+      const ctx = {
+        entityStore: Promise.resolve({
+          logger,
+          customResolutionRulesClient: {
+            create: jest.fn().mockImplementation(async () => {
+              aborted$.next();
+              throw new Error('Request aborted');
+            }),
+          },
+        }),
+      };
+
+      const result = await createRoute().handler(ctx, request(aborted$), createResponse());
+
+      expect(result.status).toBe(499);
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });

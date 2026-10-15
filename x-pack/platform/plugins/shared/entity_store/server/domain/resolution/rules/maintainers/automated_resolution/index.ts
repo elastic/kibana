@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { getErrorMessage } from '../../../../../../common';
 import { RESOLUTION_RULE_KINDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../../../../tasks/entity_maintainers/types';
 import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionClient } from '../../..';
 import {
   AUTOMATED_RESOLUTION_STATE_VERSION,
+  EMPTY_RULE_STATE,
   type AutomatedResolutionState,
   type PerRuleState,
 } from './types';
@@ -24,8 +26,6 @@ export const MAINTAINER_ID = 'automated-resolution';
 
 const MAINTAINER_TIMEOUT_MINUTES = 5;
 const MAINTAINER_TIMEOUT_MS = MAINTAINER_TIMEOUT_MINUTES * 60 * 1000;
-
-const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
 const createInitialState = (): AutomatedResolutionState => ({
   version: AUTOMATED_RESOLUTION_STATE_VERSION,
@@ -121,18 +121,23 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     }
 
     if (!signal.aborted) {
-      await runCustomResolutionRules({
-        rules,
-        resolutionRulesClient,
-        index,
-        esClient,
-        logger,
-        resolutionClient,
-        signal,
-        telemetry,
-        mutatedIds,
-        deadline: runStartedAt + MAINTAINER_TIMEOUT_MS - CUSTOM_RULES_DEADLINE_MARGIN_MS,
-      });
+      // A throw here would reject the run and lose the OOTB watermarks advanced above.
+      try {
+        await runCustomResolutionRules({
+          ruleStates: rules,
+          resolutionRulesClient,
+          index,
+          esClient,
+          logger,
+          resolutionClient,
+          signal,
+          telemetry,
+          mutatedIds,
+          deadline: runStartedAt + MAINTAINER_TIMEOUT_MS - CUSTOM_RULES_DEADLINE_MARGIN_MS,
+        });
+      } catch (error) {
+        logger.warn(`Custom resolution rules failed this run: ${getErrorMessage(error)}`);
+      }
     }
 
     return { ...state, rules };

@@ -21,4 +21,5 @@ export { EntityAlreadyExistsError } from './entity_already_exists';
 export { EntityStoreNotInstalledError } from './entity_store_not_installed';
 export { InvalidCustomResolutionRuleError } from './invalid_custom_resolution_rule_error';
 export { CustomResolutionRuleNotFoundError } from './custom_resolution_rule_not_found_error';
-export { CustomResolutionRuleForbiddenError } from './custom_resolution_rule_forbidden_error';
+export { MissingEntityIndexWritePrivilegeError } from './missing_entity_index_write_privilege_error';
+export { CustomResolutionRuleLimitError } from './custom_resolution_rule_limit_error';

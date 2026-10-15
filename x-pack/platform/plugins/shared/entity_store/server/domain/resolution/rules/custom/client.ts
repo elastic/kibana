@@ -5,28 +5,39 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
+import {
+  getEsErrorReason,
+  isEsResponseErrorWithStatus,
+} from '../../../../infra/elasticsearch/es_errors';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import {
-  CustomResolutionRuleForbiddenError,
+  CustomResolutionRuleLimitError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
+  MissingEntityIndexWritePrivilegeError,
 } from '../../../errors';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
-import { buildMatcherValidationQuery } from '../matcher';
-import { MAX_CUSTOM_RULES_PER_SPACE } from './constants';
+import { RAW_MATCH_VALUE_COLUMN, buildMatcherValidationQuery } from '../matcher';
+import {
+  CustomResolutionRuleTypeName,
+  DEFAULT_DECLINE_SAME_NAMESPACE_DUPLICATES,
+  MAX_CUSTOM_RULES_PER_SPACE,
+} from './constants';
 import {
   canonicalDefinitionKey,
   toExpressionMatchSpec,
   type CustomResolutionRuleDefinition,
 } from './match_spec';
 import { previewCustomRule, type CustomRulePreview } from './preview';
-import { CustomResolutionRuleTypeName, type CustomResolutionRuleAttributes } from './saved_object';
+import type { CustomResolutionRuleAttributes } from './saved_object';
 import type {
   CustomResolutionRuleCreate,
   CustomResolutionRulePreviewRequest,
@@ -76,17 +87,9 @@ const toAttributes = (rule: CustomResolutionRuleFields): CustomResolutionRuleAtt
   enabled: rule.enabled,
 });
 
-export const toRuleDefinition = (
-  rule: Pick<
-    CustomResolutionRule,
-    'namespaces' | 'filter' | 'match_value' | 'decline_same_namespace_duplicates'
-  >
-): CustomResolutionRuleDefinition => ({
-  namespaces: rule.namespaces,
-  ...(rule.filter !== undefined && { filter: rule.filter }),
-  matchValue: rule.match_value,
-  declineSameNamespaceDuplicates: rule.decline_same_namespace_duplicates,
-});
+/** Oldest first; ties broken by id so the order is stable. */
+export const compareByCreation = (a: CustomResolutionRule, b: CustomResolutionRule): number =>
+  (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id);
 
 /** Saved custom rules in the SO client's space, oldest first. */
 export const findCustomResolutionRules = async (
@@ -96,22 +99,15 @@ export const findCustomResolutionRules = async (
     type: CustomResolutionRuleTypeName,
     perPage: FIND_PAGE_SIZE,
   });
-  return savedObjects
-    .map(toRule)
-    .sort(
-      (a, b) => (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id)
-    );
+  return savedObjects.map(toRule).sort(compareByCreation);
 };
 
-/** One saved custom rule in the SO client's space, or undefined if it's gone. */
-export const findCustomResolutionRule = async (
+const findSavedObject = async (
   soClient: SavedObjectsClientContract,
   id: string
-): Promise<CustomResolutionRule | undefined> => {
+): Promise<SavedObject<CustomResolutionRuleAttributes> | undefined> => {
   try {
-    return toRule(
-      await soClient.get<CustomResolutionRuleAttributes>(CustomResolutionRuleTypeName, id)
-    );
+    return await soClient.get<CustomResolutionRuleAttributes>(CustomResolutionRuleTypeName, id);
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return undefined;
@@ -120,12 +116,13 @@ export const findCustomResolutionRule = async (
   }
 };
 
-const isEsBadRequest = (error: unknown): error is esErrors.ResponseError =>
-  error instanceof esErrors.ResponseError && error.statusCode === 400;
-
-const esReason = (error: esErrors.ResponseError): string => {
-  const reason = (error.body as { error?: { reason?: unknown } } | undefined)?.error?.reason;
-  return typeof reason === 'string' ? reason : error.message;
+/** One saved custom rule in the SO client's space, or undefined if it's gone. */
+export const findCustomResolutionRule = async (
+  soClient: SavedObjectsClientContract,
+  id: string
+): Promise<CustomResolutionRule | undefined> => {
+  const savedObject = await findSavedObject(soClient, id);
+  return savedObject && toRule(savedObject);
 };
 
 export class CustomResolutionRulesClient {
@@ -133,8 +130,7 @@ export class CustomResolutionRulesClient {
     private readonly deps: {
       soClient: SavedObjectsClientContract;
       esClient: ElasticsearchClient;
-      // Kibana space / Entity Store index namespace, not entity.namespace.
-      namespace: string;
+      spaceId: string;
       logger: Logger;
     }
   ) {}
@@ -153,19 +149,18 @@ export class CustomResolutionRulesClient {
       namespaces: input.namespaces,
       ...(input.filter !== undefined && { filter: input.filter }),
       match_value: input.match_value,
-      decline_same_namespace_duplicates: input.decline_same_namespace_duplicates ?? true,
+      decline_same_namespace_duplicates:
+        input.decline_same_namespace_duplicates ?? DEFAULT_DECLINE_SAME_NAMESPACE_DUPLICATES,
       enabled: input.enabled ?? false,
     };
-    const { index } = await this.validate(toRuleDefinition(rule));
+    const { index } = await this.validate(rule);
     if (rule.enabled) {
       await this.assertCanWriteLinks(index);
     }
 
     const existing = await this.list();
     if (existing.length >= MAX_CUSTOM_RULES_PER_SPACE) {
-      throw new InvalidCustomResolutionRuleError(
-        `a space can hold at most ${MAX_CUSTOM_RULES_PER_SPACE} custom rules`
-      );
+      throw new CustomResolutionRuleLimitError(MAX_CUSTOM_RULES_PER_SPACE);
     }
 
     const created = await this.deps.soClient.create<CustomResolutionRuleAttributes>(
@@ -197,25 +192,29 @@ export class CustomResolutionRulesClient {
       enabled: patch.enabled ?? current.enabled,
     };
 
-    // Renaming or disabling must work even if the rule no longer validates (a
-    // field it reads was removed). A changed definition, or turning the rule
-    // on, is checked.
-    const nextDefinition = toRuleDefinition(next);
-    const definitionChanged =
-      canonicalDefinitionKey(toRuleDefinition(current)) !== canonicalDefinitionKey(nextDefinition);
+    // Renaming or disabling must work even if the rule no longer validates.
+    const definitionChanged = canonicalDefinitionKey(current) !== canonicalDefinitionKey(next);
     if (definitionChanged || (next.enabled && !current.enabled)) {
-      const { index } = await this.validate(nextDefinition);
+      const { index } = await this.validate(next);
       if (next.enabled) {
         await this.assertCanWriteLinks(index);
       }
     }
 
-    const updated = await this.deps.soClient.update<CustomResolutionRuleAttributes>(
-      CustomResolutionRuleTypeName,
-      id,
-      toAttributes(next),
-      { refresh: 'wait_for', mergeAttributes: false, version: savedObject.version }
-    );
+    let updated: SavedObjectsUpdateResponse<CustomResolutionRuleAttributes>;
+    try {
+      updated = await this.deps.soClient.update<CustomResolutionRuleAttributes>(
+        CustomResolutionRuleTypeName,
+        id,
+        toAttributes(next),
+        { refresh: 'wait_for', mergeAttributes: false, version: savedObject.version }
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw new CustomResolutionRuleNotFoundError(id);
+      }
+      throw error;
+    }
     this.deps.logger.info(`Updated custom resolution rule '${id}' (enabled=${next.enabled})`);
     return {
       id,
@@ -241,26 +240,27 @@ export class CustomResolutionRulesClient {
     request: CustomResolutionRulePreviewRequest,
     signal?: AbortSignal
   ): Promise<CustomRulePreview> {
-    const definition = toRuleDefinition({
+    const { spec, index } = await this.validate({
       ...request,
-      decline_same_namespace_duplicates: request.decline_same_namespace_duplicates ?? true,
+      decline_same_namespace_duplicates:
+        request.decline_same_namespace_duplicates ?? DEFAULT_DECLINE_SAME_NAMESPACE_DUPLICATES,
     });
-    const { spec, index } = await this.validate(definition);
-    return previewCustomRule({ esClient: this.deps.esClient, index, spec, signal });
-  }
-
-  private async getSavedObject(id: string): Promise<SavedObject<CustomResolutionRuleAttributes>> {
     try {
-      return await this.deps.soClient.get<CustomResolutionRuleAttributes>(
-        CustomResolutionRuleTypeName,
-        id
-      );
+      return await previewCustomRule({ esClient: this.deps.esClient, index, spec, signal });
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        throw new CustomResolutionRuleNotFoundError(id);
+      if (isEsResponseErrorWithStatus(error, 400)) {
+        throw new InvalidCustomResolutionRuleError(getEsErrorReason(error));
       }
       throw error;
     }
+  }
+
+  private async getSavedObject(id: string): Promise<SavedObject<CustomResolutionRuleAttributes>> {
+    const savedObject = await findSavedObject(this.deps.soClient, id);
+    if (!savedObject) {
+      throw new CustomResolutionRuleNotFoundError(id);
+    }
+    return savedObject;
   }
 
   /**
@@ -268,14 +268,14 @@ export class CustomResolutionRulesClient {
    * owner's credentials, so whoever enables or changes one must be able to
    * write those links themselves, as with the link API.
    *
-   * @throws CustomResolutionRuleForbiddenError
+   * @throws MissingEntityIndexWritePrivilegeError
    */
   private async assertCanWriteLinks(index: string): Promise<void> {
     const { has_all_requested: canWrite } = await this.deps.esClient.security.hasPrivileges({
       index: [{ names: [index], privileges: ['write'] }],
     });
     if (!canWrite) {
-      throw new CustomResolutionRuleForbiddenError(index);
+      throw new MissingEntityIndexWritePrivilegeError(index);
     }
   }
 
@@ -287,18 +287,28 @@ export class CustomResolutionRulesClient {
     definition: CustomResolutionRuleDefinition
   ): Promise<{ spec: EsqlExpressionMatchSpec; index: string }> {
     const spec = toExpressionMatchSpec(definition);
-    const { esClient, namespace } = this.deps;
-    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+    const { esClient, spaceId } = this.deps;
+    const index = await resolveLatestEntitiesIndexName(esClient, spaceId);
     if (!(await esClient.indices.exists({ index }))) {
       throw new EntityStoreNotInstalledError();
     }
+    let columns: Array<{ name: string; type: string }>;
     try {
-      await executeEsqlQuery({ esClient, query: buildMatcherValidationQuery({ index, spec }) });
+      ({ columns } = await executeEsqlQuery({
+        esClient,
+        query: buildMatcherValidationQuery({ index, spec }),
+      }));
     } catch (error) {
-      if (isEsBadRequest(error)) {
-        throw new InvalidCustomResolutionRuleError(esReason(error));
+      if (isEsResponseErrorWithStatus(error, 400)) {
+        throw new InvalidCustomResolutionRuleError(getEsErrorReason(error));
       }
       throw error;
+    }
+    if (columns.find(({ name }) => name === RAW_MATCH_VALUE_COLUMN)?.type === 'boolean') {
+      throw new InvalidCustomResolutionRuleError(
+        'must not be a boolean: every entity would share the key "true" or "false"',
+        'match_value'
+      );
     }
     return { spec, index };
   }

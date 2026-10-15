@@ -77,7 +77,10 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
       definitionFingerprint: record.definitionFingerprint,
     }),
     ...(typeof record.lastAttemptAt === 'string' && { lastAttemptAt: record.lastAttemptAt }),
-    ...(typeof record.ranFirstAt === 'string' && { ranFirstAt: record.ranFirstAt }),
+    ...(typeof record.lastStartedFirstAt === 'string' && {
+      lastStartedFirstAt: record.lastStartedFirstAt,
+    }),
+    ...(typeof record.lastError === 'string' && { lastError: record.lastError }),
     ...(typeof record.deferredByDeadline === 'boolean' && {
       deferredByDeadline: record.deferredByDeadline,
     }),

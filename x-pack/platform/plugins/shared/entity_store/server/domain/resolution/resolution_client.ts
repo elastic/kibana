@@ -39,7 +39,7 @@ interface ResolutionClientOpts {
   /**
    * Latest-entities index already resolved by the caller; reads by the caller
    * and writes here must use the same one. Without it every operation
-   * re-resolves the name, which costs several Elasticsearch calls.
+   * re-resolves the name.
    */
   latestIndex?: string;
 }

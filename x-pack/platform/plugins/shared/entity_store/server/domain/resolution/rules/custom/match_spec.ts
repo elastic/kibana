@@ -8,16 +8,15 @@
 import { createHash } from 'crypto';
 import { InvalidCustomResolutionRuleError } from '../../../errors';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
+import type { CustomResolutionRule } from './client';
 import { CUSTOM_RULE_NAMESPACE_PATTERN } from './constants';
-import { parseSingleEsqlExpression } from './expression';
+import { normalizeSingleEsqlExpression, referencesAField } from './expression';
 
 /** The parts of a custom rule that decide what it links. */
-export interface CustomResolutionRuleDefinition {
-  namespaces: readonly string[];
-  filter?: string;
-  matchValue: string;
-  declineSameNamespaceDuplicates: boolean;
-}
+export type CustomResolutionRuleDefinition = Pick<
+  CustomResolutionRule,
+  'namespaces' | 'filter' | 'match_value' | 'decline_same_namespace_duplicates'
+>;
 
 /**
  * Validates a rule definition and turns it into the matcher's spec.
@@ -27,7 +26,12 @@ export interface CustomResolutionRuleDefinition {
 export const toExpressionMatchSpec = (
   definition: CustomResolutionRuleDefinition
 ): EsqlExpressionMatchSpec => {
-  const { namespaces, filter, matchValue, declineSameNamespaceDuplicates } = definition;
+  const {
+    namespaces,
+    filter,
+    match_value: matchValue,
+    decline_same_namespace_duplicates: declineSameNamespaceDuplicates,
+  } = definition;
 
   if (namespaces.length === 0) {
     throw new InvalidCustomResolutionRuleError('must list at least one namespace', 'namespaces');
@@ -35,7 +39,7 @@ export const toExpressionMatchSpec = (
   const invalid = namespaces.filter((namespace) => !CUSTOM_RULE_NAMESPACE_PATTERN.test(namespace));
   if (invalid.length > 0) {
     throw new InvalidCustomResolutionRuleError(
-      `must be lowercase letters, digits or '_': ${invalid.join(', ')}`,
+      `must be letters, digits, '_', '.' or '-': ${invalid.join(', ')}`,
       'namespaces'
     );
   }
@@ -43,10 +47,20 @@ export const toExpressionMatchSpec = (
     throw new InvalidCustomResolutionRuleError('must not repeat a namespace', 'namespaces');
   }
 
+  const matchValueExpression = normalizeSingleEsqlExpression('match_value', matchValue);
+  if (!referencesAField(matchValueExpression)) {
+    throw new InvalidCustomResolutionRuleError(
+      'must read at least one field: a constant key puts every entity in one group',
+      'match_value'
+    );
+  }
+
   return {
     namespaces: [...namespaces],
-    ...(filter !== undefined && { filterExpression: parseSingleEsqlExpression('filter', filter) }),
-    matchValueExpression: parseSingleEsqlExpression('match_value', matchValue),
+    ...(filter !== undefined && {
+      filterExpression: normalizeSingleEsqlExpression('filter', filter),
+    }),
+    matchValueExpression,
     declineSameNamespaceDuplicates,
   };
 };
@@ -59,8 +73,8 @@ export const toExpressionMatchSpec = (
 export const canonicalDefinitionKey = ({
   namespaces,
   filter,
-  matchValue,
-  declineSameNamespaceDuplicates,
+  match_value: matchValue,
+  decline_same_namespace_duplicates: declineSameNamespaceDuplicates,
 }: CustomResolutionRuleDefinition): string =>
   JSON.stringify([
     [...namespaces].sort(),

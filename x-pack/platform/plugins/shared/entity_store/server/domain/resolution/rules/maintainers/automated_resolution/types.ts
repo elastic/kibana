@@ -23,15 +23,20 @@ export interface PerRuleState extends EntityMaintainerState {
   lastRun: EntityMaintainerState | null;
 }
 
-// State of a `custom:<id>` rule: the fingerprint of the definition its watermark
-// belongs to, when it was last attempted, when it last ran first in a run,
-// and whether the soft deadline stopped it or kept it from starting on its last
-// run. A subtype because the state's index signature can't hold optional fields.
+export const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
+
+// A subtype because the state's index signature can't hold optional fields.
 export interface CustomRuleState extends PerRuleState {
+  /** Hash of the definition the watermark belongs to; a change rescans. */
   definitionFingerprint: string;
+  /** For people reading the state; nothing orders on it. */
   lastAttemptAt: string;
-  ranFirstAt: string | null;
+  /** The last run in which this rule went first; rotates deferred rules. */
+  lastStartedFirstAt: string | null;
+  /** The soft deadline stopped this rule, or kept it from starting, on its last run. */
   deferredByDeadline: boolean;
+  /** Why the last attempt failed; null after a run that didn't fail. */
+  lastError: string | null;
 }
 
 // `rules` is an open map keyed by rule id rather than a fixed set: a rule with no

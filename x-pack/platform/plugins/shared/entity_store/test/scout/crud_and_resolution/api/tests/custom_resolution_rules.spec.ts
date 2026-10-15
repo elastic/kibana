@@ -121,68 +121,76 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         },
         kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
       });
-      // Scout has one custom role per worker, so each asInteractiveUser call redefines it.
-      const manager = await samlAuth.asInteractiveUser(securityRole('all'));
-      const managerHeaders = { ...manager.cookieHeader, ...INTERNAL_HEADERS };
+      // Scout has one custom role per worker: each asInteractiveUser call
+      // redefines it, so the same session takes on whichever role was set last.
+      const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
+      const customRoleHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+      let ruleId = '';
 
-      const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
-        headers: managerHeaders,
-        responseType: 'json',
-        body: { name: 'Security all rule', ...LOCAL_USERS_TO_AD_RULE },
+      await apiTest.step('Security all creates a disabled rule', async () => {
+        const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+          headers: customRoleHeaders,
+          responseType: 'json',
+          body: { name: 'Security all rule', ...LOCAL_USERS_TO_AD_RULE },
+        });
+        expect(created.statusCode).toBe(200);
+        ruleId = created.body.id;
       });
-      expect(created.statusCode).toBe(200);
 
       const enableRule = () =>
-        apiClient.put(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id), {
-          headers: managerHeaders,
+        apiClient.put(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId), {
+          headers: customRoleHeaders,
           responseType: 'json',
           body: { enabled: true },
         });
-      const enabledWithoutWrite = await enableRule();
-      expect(enabledWithoutWrite.statusCode).toBe(403);
-      expect(enabledWithoutWrite.body.message).toContain("'write' index privilege");
 
-      await samlAuth.asInteractiveUser(
-        securityRole('all', ['read', 'view_index_metadata', 'write'])
-      );
-      const enabledWithWrite = await enableRule();
-      expect(enabledWithWrite.statusCode).toBe(200);
-      expect(enabledWithWrite.body.enabled).toBe(true);
+      await apiTest.step('enabling it needs write on the entity index', async () => {
+        const enabledWithoutWrite = await enableRule();
+        expect(enabledWithoutWrite.statusCode).toBe(403);
+        expect(enabledWithoutWrite.body.message).toContain("'write' index privilege");
 
-      const reader = await samlAuth.asInteractiveUser(securityRole('read'));
-      const readerHeaders = { ...reader.cookieHeader, ...INTERNAL_HEADERS };
+        await samlAuth.asInteractiveUser(
+          securityRole('all', ['read', 'view_index_metadata', 'write'])
+        );
+        const enabledWithWrite = await enableRule();
+        expect(enabledWithWrite.statusCode).toBe(200);
+        expect(enabledWithWrite.body.enabled).toBe(true);
+      });
 
-      const listedByReader = await apiClient.get(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
-        { headers: readerHeaders, responseType: 'json' }
-      );
-      expect(listedByReader.statusCode).toBe(200);
-      expect(
-        (listedByReader.body as { rules: Array<{ id: string }> }).rules.map(({ id }) => id)
-      ).toContain(created.body.id);
+      await apiTest.step('Security read lists rules but cannot create or delete', async () => {
+        await samlAuth.asInteractiveUser(securityRole('read'));
 
-      const createdByReader = await apiClient.post(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
-        {
-          headers: readerHeaders,
+        const listed = await apiClient.get(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+          headers: customRoleHeaders,
+          responseType: 'json',
+        });
+        expect(listed.statusCode).toBe(200);
+        expect(
+          (listed.body as { rules: Array<{ id: string }> }).rules.map(({ id }) => id)
+        ).toContain(ruleId);
+
+        const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+          headers: customRoleHeaders,
           responseType: 'json',
           body: { name: 'Security read rule', ...LOCAL_USERS_TO_AD_RULE },
-        }
-      );
-      expect(createdByReader.statusCode).toBe(403);
+        });
+        expect(created.statusCode).toBe(403);
 
-      const deletedByReader = await apiClient.delete(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id),
-        { headers: readerHeaders, responseType: 'json' }
-      );
-      expect(deletedByReader.statusCode).toBe(403);
+        const deleted = await apiClient.delete(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers: customRoleHeaders, responseType: 'json' }
+        );
+        expect(deleted.statusCode).toBe(403);
+      });
 
-      await samlAuth.asInteractiveUser(securityRole('all'));
-      const deletedByManager = await apiClient.delete(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id),
-        { headers: managerHeaders, responseType: 'json' }
-      );
-      expect(deletedByManager.statusCode).toBe(200);
+      await apiTest.step('Security all deletes it', async () => {
+        await samlAuth.asInteractiveUser(securityRole('all'));
+        const deleted = await apiClient.delete(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers: customRoleHeaders, responseType: 'json' }
+        );
+        expect(deleted.statusCode).toBe(200);
+      });
     }
   );
 
@@ -277,6 +285,13 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         expect(disabled.body.enabled).toBe(false);
 
         await seedUser(esClient, LATE_HOST_USER, 'local', 'jd12345');
+        const preview = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES_PREVIEW,
+          { headers, responseType: 'json', body: LOCAL_USERS_TO_AD_RULE }
+        );
+        expect(preview.statusCode).toBe(200);
+        expect(preview.body.would_extend_existing_groups).toBe(1);
+
         await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
         await assertNotResolved(esClient, LATE_HOST_USER);
       });

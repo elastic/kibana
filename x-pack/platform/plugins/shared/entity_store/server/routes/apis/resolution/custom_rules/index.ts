@@ -10,7 +10,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { buildStrictRouteValidationWithZod } from '../../utils/build_strict_route_validation';
-import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES, getErrorMessage } from '../../../../../common';
+import {
+  getEsErrorReason,
+  isEsResponseErrorWithStatus,
+} from '../../../../infra/elasticsearch/es_errors';
 import {
   RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS,
   RESOLUTION_ENTITY_STORE_PERMISSIONS,
@@ -19,7 +23,8 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
-  CustomResolutionRuleForbiddenError,
+  CustomResolutionRuleLimitError,
+  MissingEntityIndexWritePrivilegeError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -37,8 +42,8 @@ export const CUSTOM_RULES_ROUTE_MIDDLEWARES = [enterpriseLicenseMiddleware] as c
 const routeConfig = (authz: AuthzEnabled) =>
   ({ access: 'internal', security: { authz }, enableQueryVersion: true } as const);
 
-const READ = routeConfig(RESOLUTION_ENTITY_STORE_PERMISSIONS);
-const MANAGE = routeConfig(RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS);
+const READ_ROUTE_CONFIG = routeConfig(RESOLUTION_ENTITY_STORE_PERMISSIONS);
+const MANAGE_ROUTE_CONFIG = routeConfig(RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS);
 
 /** Maps known errors to a response; rethrows anything else after logging it. */
 const toErrorResponseOrThrow = (
@@ -55,7 +60,7 @@ const toErrorResponseOrThrow = (
   ) {
     return res.notFound({ body: { message: error.message } });
   }
-  if (error instanceof CustomResolutionRuleForbiddenError) {
+  if (error instanceof MissingEntityIndexWritePrivilegeError) {
     return res.forbidden({ body: { message: error.message } });
   }
   if (error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error)) {
@@ -65,13 +70,25 @@ const toErrorResponseOrThrow = (
       },
     });
   }
+  if (error instanceof CustomResolutionRuleLimitError) {
+    return res.conflict({ body: { message: error.message } });
+  }
   if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
     return res.conflict({
       body: { message: 'The rule was changed by another request; read it again and retry' },
     });
   }
+  if (isEsResponseErrorWithStatus(error, 403)) {
+    return res.forbidden({ body: { message: getEsErrorReason(error) } });
+  }
   logger.error(error instanceof Error ? error : String(error));
   throw error;
+};
+
+const abortSignalFor = (req: KibanaRequest): AbortSignal => {
+  const controller = new AbortController();
+  req.events.aborted$.subscribe(() => controller.abort());
+  return controller.signal;
 };
 
 const withCustomRulesClient =
@@ -79,7 +96,8 @@ const withCustomRulesClient =
     handler: (
       client: CustomResolutionRulesClient,
       req: KibanaRequest<P, Q, B>,
-      res: KibanaResponseFactory
+      res: KibanaResponseFactory,
+      signal: AbortSignal
     ) => Promise<IKibanaResponse>
   ) =>
   async (
@@ -88,18 +106,19 @@ const withCustomRulesClient =
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> => {
     const { logger, customResolutionRulesClient } = await ctx.entityStore;
+    const signal = abortSignalFor(req);
     try {
-      return await handler(customResolutionRulesClient, req, res);
+      return await handler(customResolutionRulesClient, req, res, signal);
     } catch (error) {
+      if (signal.aborted) {
+        logger.debug(
+          `Custom resolution rules request aborted by the client: ${getErrorMessage(error)}`
+        );
+        return res.customError({ statusCode: 499, body: { message: 'Request aborted' } });
+      }
       return toErrorResponseOrThrow(error, res, logger);
     }
   };
-
-const abortSignalFor = (req: KibanaRequest): AbortSignal => {
-  const controller = new AbortController();
-  req.events.aborted$.subscribe(() => controller.abort());
-  return controller.signal;
-};
 
 export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRouter) {
   const { RESOLUTION_CUSTOM_RULES, RESOLUTION_CUSTOM_RULE, RESOLUTION_CUSTOM_RULES_PREVIEW } =
@@ -108,7 +127,11 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
   const idParams = buildStrictRouteValidationWithZod(CustomResolutionRuleIdParams);
 
   router.versioned
-    .get({ ...READ, path: RESOLUTION_CUSTOM_RULES, summary: 'List custom entity resolution rules' })
+    .get({
+      ...READ_ROUTE_CONFIG,
+      path: RESOLUTION_CUSTOM_RULES,
+      summary: 'List custom entity resolution rules',
+    })
     .addVersion(
       { version, validate: false },
       wrapMiddlewares(
@@ -121,7 +144,7 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
 
   router.versioned
     .post({
-      ...MANAGE,
+      ...MANAGE_ROUTE_CONFIG,
       path: RESOLUTION_CUSTOM_RULES,
       summary: 'Create a custom entity resolution rule',
     })
@@ -143,7 +166,7 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
 
   router.versioned
     .post({
-      ...READ,
+      ...READ_ROUTE_CONFIG,
       path: RESOLUTION_CUSTOM_RULES_PREVIEW,
       summary: 'Preview what a custom entity resolution rule would link',
     })
@@ -159,15 +182,20 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
           async (
             client,
             req: KibanaRequest<unknown, unknown, CustomResolutionRulePreviewRequest>,
-            res
-          ) => res.ok({ body: await client.preview(req.body, abortSignalFor(req)) })
+            res,
+            signal
+          ) => res.ok({ body: await client.preview(req.body, signal) })
         ),
         CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
-    .get({ ...READ, path: RESOLUTION_CUSTOM_RULE, summary: 'Get a custom entity resolution rule' })
+    .get({
+      ...READ_ROUTE_CONFIG,
+      path: RESOLUTION_CUSTOM_RULE,
+      summary: 'Get a custom entity resolution rule',
+    })
     .addVersion(
       { version, validate: { request: { params: idParams } } },
       wrapMiddlewares(
@@ -180,7 +208,7 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
 
   router.versioned
     .put({
-      ...MANAGE,
+      ...MANAGE_ROUTE_CONFIG,
       path: RESOLUTION_CUSTOM_RULE,
       summary: 'Update a custom entity resolution rule',
       description:
@@ -210,7 +238,7 @@ export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRou
 
   router.versioned
     .delete({
-      ...MANAGE,
+      ...MANAGE_ROUTE_CONFIG,
       path: RESOLUTION_CUSTOM_RULE,
       summary: 'Delete a custom entity resolution rule',
       description:

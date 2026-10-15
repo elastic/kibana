@@ -21,19 +21,33 @@ const describeParseFailure = (source: string): string => {
     : 'must be a single ES|QL expression';
 };
 
+type ExpressionRoot = ReturnType<typeof Parser.parseExpression>['root'];
+
+// Keep the author's parentheses: re-deriving them from precedence can change
+// meaning, e.g. `a * (b / c)` under integer division.
+const parseExpression = (source: string): ExpressionRoot =>
+  Parser.parseExpression(source, { withParens: true }).root;
+
+const reprintsUnchanged = (printed: string): boolean => {
+  try {
+    return BasicPrettyPrinter.expression(parseExpression(printed)) === printed;
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Parses `source` as exactly one ES|QL expression and returns it re-printed
- * from the parsed tree. The matcher only ever composes the re-printed text, so
- * comments, pipes and extra commands in the input can never reach the query.
+ * from the parsed tree. The re-printed text must itself parse back to the same
+ * text, so comments, pipes and extra commands in the input can never reach the
+ * query, even through a printer that writes a name unescaped.
  *
  * @throws InvalidCustomResolutionRuleError naming `attribute`
  */
-export const parseSingleEsqlExpression = (attribute: string, source: string): string => {
-  let root: ReturnType<typeof Parser.parseExpression>['root'];
+export const normalizeSingleEsqlExpression = (attribute: string, source: string): string => {
+  let root: ExpressionRoot;
   try {
-    // Keep the author's parentheses: re-deriving them from precedence can
-    // change meaning, e.g. `a * (b / c)` under integer division.
-    ({ root } = Parser.parseExpression(source, { withParens: true }));
+    root = parseExpression(source);
   } catch {
     throw new InvalidCustomResolutionRuleError(describeParseFailure(source), attribute);
   }
@@ -50,10 +64,14 @@ export const parseSingleEsqlExpression = (attribute: string, source: string): st
   }
 
   let hasParam = false;
+  let hasUnsafeInteger = false;
   Walker.walk(root, {
     visitLiteral: (node) => {
       if (node.literalType === 'param') {
         hasParam = true;
+      }
+      if (node.literalType === 'integer' && !Number.isSafeInteger(node.value)) {
+        hasUnsafeInteger = true;
       }
     },
   });
@@ -63,6 +81,29 @@ export const parseSingleEsqlExpression = (attribute: string, source: string): st
       attribute
     );
   }
+  // The parser stores numbers as JS numbers, so a larger integer would run as a
+  // rounded value.
+  if (hasUnsafeInteger) {
+    throw new InvalidCustomResolutionRuleError(
+      `integers beyond ±${Number.MAX_SAFE_INTEGER} are not supported; compare as a string`,
+      attribute
+    );
+  }
 
-  return BasicPrettyPrinter.expression(root);
+  const printed = BasicPrettyPrinter.expression(root);
+  if (!reprintsUnchanged(printed)) {
+    throw new InvalidCustomResolutionRuleError('must be a single ES|QL expression', attribute);
+  }
+  return printed;
+};
+
+/** True when a normalized expression reads at least one field. */
+export const referencesAField = (normalized: string): boolean => {
+  let found = false;
+  Walker.walk(parseExpression(normalized), {
+    visitColumn: () => {
+      found = true;
+    },
+  });
+  return found;
 };

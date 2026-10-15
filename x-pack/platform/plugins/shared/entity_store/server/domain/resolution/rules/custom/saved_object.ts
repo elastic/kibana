@@ -16,8 +16,6 @@ import {
   MAX_CUSTOM_RULE_NAMESPACE_LENGTH,
 } from './constants';
 
-export { CustomResolutionRuleTypeName };
-
 export interface CustomResolutionRuleAttributes {
   name: string;
   // Not `namespaces`: that name is the saved object's own spaces field.
@@ -59,7 +57,7 @@ export const CustomResolutionRuleType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
-    // Rules are always read as a whole set per space; nothing is searched.
+    // No attribute is searched or sorted on.
     properties: {},
   },
   modelVersions: { 1: version1 },

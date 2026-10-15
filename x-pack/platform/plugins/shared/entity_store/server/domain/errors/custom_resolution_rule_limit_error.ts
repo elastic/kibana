@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export class CustomResolutionRuleForbiddenError extends Error {
-  constructor(index: string) {
-    super(
-      `An enabled custom resolution rule links entities in '${index}', so enabling or changing one requires the 'write' index privilege there`
-    );
+export class CustomResolutionRuleLimitError extends Error {
+  constructor(limit: number) {
+    super(`A space can hold at most ${limit} custom resolution rules; delete one first`);
   }
 }

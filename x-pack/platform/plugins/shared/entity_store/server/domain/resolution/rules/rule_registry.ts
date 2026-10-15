@@ -44,7 +44,7 @@ export const ACCOUNT_DOMAIN_SID_INCLUSION = 'S-1-5-21-.*';
  */
 export const UPN_INCLUSION = '[^@]+@[^@]+';
 
-export type EsqlMatchSpec = {
+export type EsqlFieldMatchSpec = {
   /** Empty means every namespace (email rule). */
   namespaces: readonly string[];
   lowercase: boolean;
@@ -64,7 +64,7 @@ export type EsqlMatchSpec = {
 
 /**
  * Customer-authored matcher. Both expressions must come from
- * `parseSingleEsqlExpression`, so each is exactly one ES|QL expression.
+ * `normalizeSingleEsqlExpression`, so each is exactly one ES|QL expression.
  */
 export interface EsqlExpressionMatchSpec {
   /** At least one namespace; custom rules never scan every namespace. */
@@ -76,7 +76,7 @@ export interface EsqlExpressionMatchSpec {
 }
 
 /** Any matcher spec: a built-in field rule or a custom expression rule. */
-export type MatcherSpec = EsqlMatchSpec | EsqlExpressionMatchSpec;
+export type MatcherSpec = EsqlFieldMatchSpec | EsqlExpressionMatchSpec;
 
 export const isExpressionMatchSpec = (spec: MatcherSpec): spec is EsqlExpressionMatchSpec =>
   'matchValueExpression' in spec;
@@ -90,7 +90,7 @@ export interface ResolutionRuleConfig {
    * Parameterized ES|QL matcher. Absent for rules that use a different query
    * shape (`related_user_alias_resolution` stays on Query DSL).
    */
-  matcher?: EsqlMatchSpec;
+  matcher?: EsqlFieldMatchSpec;
 }
 
 export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [

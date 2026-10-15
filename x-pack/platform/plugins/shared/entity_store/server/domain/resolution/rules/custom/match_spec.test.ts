@@ -16,14 +16,14 @@ import {
 const LOCAL_USERS_TO_AD: CustomResolutionRuleDefinition = {
   namespaces: ['local', 'active_directory'],
   filter: 'NOT ENDS_WITH(user.name, "$")',
-  matchValue: 'TO_LOWER(user.name)',
-  declineSameNamespaceDuplicates: true,
+  match_value: 'TO_LOWER(user.name)',
+  decline_same_namespace_duplicates: true,
 };
 
 describe('toExpressionMatchSpec', () => {
   it('parses both expressions', () => {
     expect(
-      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, matchValue: 'TO_LOWER(user.name) // key' })
+      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, match_value: 'TO_LOWER(user.name) // key' })
     ).toEqual({
       namespaces: ['local', 'active_directory'],
       filterExpression: 'NOT ENDS_WITH(user.name, "$")',
@@ -34,7 +34,7 @@ describe('toExpressionMatchSpec', () => {
 
   it('passes the same-namespace opt-out through', () => {
     expect(
-      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, declineSameNamespaceDuplicates: false })
+      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, decline_same_namespace_duplicates: false })
     ).toMatchObject({ declineSameNamespaceDuplicates: false });
   });
 
@@ -43,13 +43,19 @@ describe('toExpressionMatchSpec', () => {
     expect(toExpressionMatchSpec(withoutFilter)).not.toHaveProperty('filterExpression');
   });
 
+  it('accepts namespaces with uppercase letters, dots and hyphens', () => {
+    expect(
+      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, namespaces: ['HR-Sync', 'okta.system'] })
+    ).toMatchObject({ namespaces: ['HR-Sync', 'okta.system'] });
+  });
+
   it.each([
     ['no namespaces', { namespaces: [] }],
-    ['an uppercase namespace', { namespaces: ['Active_Directory'] }],
+    ['a space in a namespace', { namespaces: ['Active Directory'] }],
     ['a quote in a namespace', { namespaces: ['local", "okta'] }],
     ['a repeated namespace', { namespaces: ['local', 'local'] }],
     ['an invalid filter', { filter: 'user.name | LIMIT 1' }],
-    ['an invalid match value', { matchValue: 'a = 1' }],
+    ['an invalid match value', { match_value: 'a = 1' }],
   ])('rejects %s', (_case, override) => {
     expect(() => toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, ...override })).toThrow(
       InvalidCustomResolutionRuleError
@@ -63,9 +69,20 @@ describe('fingerprintDefinition', () => {
       fingerprintDefinition({
         ...LOCAL_USERS_TO_AD,
         namespaces: ['active_directory', 'local'],
-        matchValue: '  TO_LOWER(user.name)\n',
+        match_value: '  TO_LOWER(user.name)\n',
       })
     ).toBe(fingerprintDefinition(LOCAL_USERS_TO_AD));
+  });
+
+  it('keeps the positional format stored fingerprints were computed from', () => {
+    expect(canonicalDefinitionKey(LOCAL_USERS_TO_AD)).toBe(
+      JSON.stringify([
+        ['active_directory', 'local'],
+        'NOT ENDS_WITH(user.name, "$")',
+        'TO_LOWER(user.name)',
+        true,
+      ])
+    );
   });
 
   it('is built from the stored source, so a printer upgrade cannot change it', () => {
@@ -77,8 +94,8 @@ describe('fingerprintDefinition', () => {
   it.each([
     ['namespaces', { namespaces: ['local'] }],
     ['filter', { filter: 'user.name IS NOT NULL' }],
-    ['match value', { matchValue: 'TO_UPPER(user.name)' }],
-    ['same-namespace check', { declineSameNamespaceDuplicates: false }],
+    ['match value', { match_value: 'TO_UPPER(user.name)' }],
+    ['same-namespace check', { decline_same_namespace_duplicates: false }],
   ])('changes when the %s change', (_case, override) => {
     expect(fingerprintDefinition({ ...LOCAL_USERS_TO_AD, ...override })).not.toBe(
       fingerprintDefinition(LOCAL_USERS_TO_AD)

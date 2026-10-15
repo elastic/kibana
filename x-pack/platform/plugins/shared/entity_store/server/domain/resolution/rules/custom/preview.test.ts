@@ -52,20 +52,33 @@ const groupsResponse = (groups: Group[], isPartial = false) => ({
   ]),
 });
 
+// Only the ids the alias query actually asks about, so a query that names the
+// wrong entities can't still return the expected count.
+const idsInAliasQuery = (query: string): string[] => {
+  const list = new RegExp(`${RESOLVED_TO_FIELD.replace(/\./g, '\\.')} IN \\(([^)]*)\\)`).exec(
+    query
+  )?.[1];
+  return [...(list ?? '').matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(([, id]) => id);
+};
+
 const setup = (
   groups: Group[] | ((query: string) => Group[]),
   aliasCounts: Record<string, number> = {},
-  { isPartial = false } = {}
+  { isPartial = false, isAliasQueryPartial = false } = {}
 ) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query }: { query: string }) => {
     if (query.includes('STATS alias_count = COUNT(*)')) {
+      const asked = new Set(idsInAliasQuery(query));
       return {
+        ...(isAliasQueryPartial && { is_partial: true }),
         columns: [
           { name: 'alias_count', type: 'long' },
           { name: RESOLVED_TO_FIELD, type: 'keyword' },
         ],
-        values: Object.entries(aliasCounts).map(([id, n]) => [n, id]),
+        values: Object.entries(aliasCounts)
+          .filter(([id]) => asked.has(id))
+          .map(([id, n]) => [n, id]),
       };
     }
     return groupsResponse(typeof groups === 'function' ? groups(query) : groups, isPartial);
@@ -179,6 +192,59 @@ describe('previewCustomRule', () => {
       target: 'user:m@active_directory',
       cascade_alias_count: 7,
     });
+  });
+
+  it('counts existing aliases only of the planned aliases, not of the target', async () => {
+    const esClient = setup(
+      [
+        {
+          key: 'merge',
+          ids: ['user:m@HOST-1@local'],
+          namespaces: ['local'],
+          targets: ['user:m@active_directory', 'user:m@okta'],
+        },
+      ],
+      { 'user:m@active_directory': 5, 'user:m@okta': 7 }
+    );
+
+    const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC });
+
+    expect(preview.sample[0].cascade_alias_count).toBe(7);
+  });
+
+  it('lists each existing target once in the sample', async () => {
+    const esClient = setup([
+      {
+        key: 'extend',
+        ids: ['user:e@HOST-1@local'],
+        namespaces: ['local'],
+        targets: ['user:e@active_directory', 'user:e@active_directory', 'user:e@active_directory'],
+        total: 4,
+      },
+    ]);
+
+    const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC });
+
+    expect(preview.sample[0].existing_targets).toEqual(['user:e@active_directory']);
+  });
+
+  it('reports partial results when only the alias count was partial', async () => {
+    const esClient = setup(
+      [
+        {
+          key: 'merge',
+          ids: ['user:m@HOST-1@local'],
+          namespaces: ['local'],
+          targets: ['user:m@active_directory', 'user:m@okta'],
+        },
+      ],
+      { 'user:m@okta': 7 },
+      { isAliasQueryPartial: true }
+    );
+
+    const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC });
+
+    expect(preview.partial).toBe(true);
   });
 
   it('reports partial results instead of failing', async () => {

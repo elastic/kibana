@@ -7,15 +7,14 @@
 
 export {
   CustomResolutionRulesClient,
+  compareByCreation,
   findCustomResolutionRule,
   findCustomResolutionRules,
-  toRuleDefinition,
   type CustomResolutionRule,
 } from './client';
 export { CUSTOM_RULE_STATE_KEY_PREFIX, customRuleStateKey } from './constants';
 export { fingerprintDefinition, toExpressionMatchSpec } from './match_spec';
-export type { CustomRulePreview, CustomRulePreviewSample } from './preview';
-export { CustomResolutionRuleType, CustomResolutionRuleTypeName } from './saved_object';
+export { CustomResolutionRuleType } from './saved_object';
 export {
   CustomResolutionRuleCreate,
   CustomResolutionRuleIdParams,

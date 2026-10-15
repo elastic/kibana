@@ -26,8 +26,13 @@ export const CustomResolutionRuleCreate = lazySchema(() =>
       .describe('`entity.namespace` values the rule considers, e.g. `local`, `active_directory`.'),
     filter: expression().optional().describe('ES|QL boolean expression evaluated per entity.'),
     match_value: expression().describe('ES|QL expression that computes the key to group by.'),
-    decline_same_namespace_duplicates: z.boolean().optional(),
-    enabled: z.boolean().optional(),
+    decline_same_namespace_duplicates: z
+      .boolean()
+      .optional()
+      .describe(
+        'Default true: skip a group when two non-local entities share a namespace. Set false when duplicates are identifier drift, not distinct accounts.'
+      ),
+    enabled: z.boolean().optional().describe('Default false.'),
   })
 );
 export type CustomResolutionRuleCreate = z.infer<typeof CustomResolutionRuleCreate>;

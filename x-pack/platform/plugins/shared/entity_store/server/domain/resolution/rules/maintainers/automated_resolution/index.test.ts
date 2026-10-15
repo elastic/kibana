@@ -340,9 +340,46 @@ describe('automatedResolutionMaintainerConfig', () => {
         ...matcherState,
         definitionFingerprint: expect.any(String),
         lastAttemptAt: expect.any(String),
-        ranFirstAt: expect.any(String),
+        lastStartedFirstAt: expect.any(String),
         deferredByDeadline: false,
+        lastError: null,
       });
+    });
+
+    it('stops a hanging custom rule a minute before the task timeout', async () => {
+      jest.useFakeTimers({ now: new Date('2026-10-15T10:00:00Z') });
+      try {
+        let abortedAfterMs: number | undefined;
+        (runEsqlMatcherRule as jest.Mock).mockImplementation(
+          async ({ ruleId, signal }: { ruleId: string; signal: AbortSignal }) => {
+            if (!ruleId.startsWith('custom:')) {
+              return matcherState;
+            }
+            const startedAt = Date.parse('2026-10-15T10:00:00Z');
+            return new Promise((resolve) => {
+              signal.addEventListener('abort', () => {
+                abortedAfterMs = Date.now() - startedAt;
+                resolve(matcherState);
+              });
+            });
+          }
+        );
+
+        const pending = runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          undefined,
+          jest.fn().mockResolvedValue([customRule])
+        );
+        await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
+        const result = await pending;
+
+        expect(abortedAfterMs).toBe(4 * 60 * 1000);
+        expect(result.rules['custom:rule-1']).toMatchObject({ deferredByDeadline: true });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('leaves OOTB results unchanged when custom rules cannot be loaded', async () => {

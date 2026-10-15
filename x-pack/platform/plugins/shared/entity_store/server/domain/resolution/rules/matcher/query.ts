@@ -10,7 +10,7 @@ import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/
 import { escapeEsqlStringLiteral } from '../../../../../common/esql/strings';
 import {
   isExpressionMatchSpec,
-  type EsqlMatchSpec,
+  type EsqlFieldMatchSpec,
   type EsqlExpressionMatchSpec,
   type MatcherSpec,
 } from '../rule_registry';
@@ -46,7 +46,7 @@ export interface BuildWatermarkQueryParams {
 
 const quote = (value: string): string => `"${escapeEsqlStringLiteral(value)}"`;
 
-const matchFieldExpression = (spec: EsqlMatchSpec): string => {
+const matchFieldExpression = (spec: EsqlFieldMatchSpec): string => {
   if (spec.fieldByNamespace) {
     const arms = Object.entries(spec.fieldByNamespace).map(
       ([namespace, field]) => `${ENTITY_NAMESPACE_FIELD} == ${quote(namespace)}, ${field}`
@@ -66,16 +66,15 @@ const namespaceFilter = (spec: MatcherSpec): string | undefined => {
 };
 
 interface QueryParts {
-  filters: string[];
+  entityFilters: string[];
   matchValueEval: string;
-  gates: string[];
-  /** Drop groups whose members all resolve to one root (custom rules only). */
-  skipLinkedGroups: boolean;
+  matchValueFilters: string[];
+  skipFullyResolvedGroups: boolean;
 }
 
-const fieldSpecParts = (spec: EsqlMatchSpec): QueryParts => {
+const fieldSpecParts = (spec: EsqlFieldMatchSpec): QueryParts => {
   const matchField = matchFieldExpression(spec);
-  const filters = [
+  const entityFilters = [
     `${ENGINE_METADATA_TYPE_FIELD} == ${quote(ENTITY_TYPE)}`,
     // Single-value only: two emails (or two IDs) on one entity is genuinely
     // ambiguous for matching. Email skip is intended. CrowdStrike multi-id is
@@ -84,53 +83,57 @@ const fieldSpecParts = (spec: EsqlMatchSpec): QueryParts => {
   ];
   const namespaces = namespaceFilter(spec);
   if (namespaces) {
-    filters.push(namespaces);
+    entityFilters.push(namespaces);
   }
 
-  const gates = [
+  const matchValueFilters = [
     `${MATCH_GROUP_COLUMNS.matchValue} IS NOT NULL`,
     `${MATCH_GROUP_COLUMNS.matchValue} != ""`,
   ];
   if (spec.inclusionPattern) {
-    gates.push(`${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.inclusionPattern)}`);
+    matchValueFilters.push(
+      `${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.inclusionPattern)}`
+    );
   }
   if (spec.exclusionPattern) {
-    gates.push(`NOT ${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.exclusionPattern)}`);
+    matchValueFilters.push(
+      `NOT ${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.exclusionPattern)}`
+    );
   }
 
   return {
-    filters,
+    entityFilters,
     matchValueEval: spec.lowercase ? `TO_LOWER(${matchField})` : matchField,
-    gates,
-    skipLinkedGroups: false,
+    matchValueFilters,
+    skipFullyResolvedGroups: false,
   };
 };
 
 const expressionSpecParts = (spec: EsqlExpressionMatchSpec): QueryParts => {
-  const filters = [`${ENGINE_METADATA_TYPE_FIELD} == ${quote(ENTITY_TYPE)}`];
+  const entityFilters = [`${ENGINE_METADATA_TYPE_FIELD} == ${quote(ENTITY_TYPE)}`];
   const namespaces = namespaceFilter(spec);
   if (namespaces) {
-    filters.push(namespaces);
+    entityFilters.push(namespaces);
   }
   if (spec.filterExpression) {
-    filters.push(`(${spec.filterExpression})`);
+    entityFilters.push(`(${spec.filterExpression})`);
   }
 
   return {
-    filters,
+    entityFilters,
     // TO_STRING keeps the page cursor (`match_value > "<last>"`) a string
     // comparison whatever type the customer's key has.
     matchValueEval: `TO_STRING(${spec.matchValueExpression})`,
-    // No MV_COUNT in the filters: an expression has no single source field, so
+    // No MV_COUNT in the entity filters: an expression has no single source field, so
     // the computed key is checked instead.
-    gates: [
+    matchValueFilters: [
       `${MATCH_GROUP_COLUMNS.matchValue} IS NOT NULL`,
       `MV_COUNT(${MATCH_GROUP_COLUMNS.matchValue}) == 1`,
       `${MATCH_GROUP_COLUMNS.matchValue} != ""`,
     ],
-    // A group whose members all resolve to one root is already linked; without
-    // this a cancelled first scan re-reads it every run.
-    skipLinkedGroups: true,
+    // A group whose members all resolve to one target is already linked;
+    // without this a cancelled first scan re-reads it every run.
+    skipFullyResolvedGroups: true,
   };
 };
 
@@ -157,13 +160,14 @@ export const buildMatchGroupsQuery = ({
   watermark,
   pageSize = MATCHER_PAGE_SIZE,
 }: BuildMatchGroupsQueryParams): string => {
-  const { filters, matchValueEval, gates, skipLinkedGroups } = queryPartsFor(spec);
+  const { entityFilters, matchValueEval, matchValueFilters, skipFullyResolvedGroups } =
+    queryPartsFor(spec);
   const parts = [
     NULLIFY_UNMAPPED_FIELDS_SETTING,
     `FROM ${quote(index)}`,
-    `| WHERE ${filters.join('\n    AND ')}`,
+    `| WHERE ${entityFilters.join('\n    AND ')}`,
     `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
-    `| WHERE ${gates.join('\n    AND ')}`,
+    `| WHERE ${matchValueFilters.join('\n    AND ')}`,
   ];
 
   if (afterMatchValue !== undefined) {
@@ -182,8 +186,8 @@ export const buildMatchGroupsQuery = ({
       USER_ENTITY_NAMESPACE.Local
     )}, 1, 0)`
   );
-  if (skipLinkedGroups) {
-    parts.push(`| EVAL root = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`);
+  if (skipFullyResolvedGroups) {
+    parts.push(`| EVAL effective_target = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`);
   }
 
   // Cap existing_targets with TOP(..., 100), not VALUES(). run.ts skips any
@@ -198,13 +202,15 @@ export const buildMatchGroupsQuery = ({
     `${MATCH_GROUP_COLUMNS.unresolvedLocalN} = SUM(is_unresolved_local)`,
     `${MATCH_GROUP_COLUMNS.totalN} = COUNT(*)`,
     'new_n = SUM(is_new)',
-    // Two roots differ iff MIN != MAX; exact, and cheaper than a distinct count.
-    ...(skipLinkedGroups ? ['min_root = MIN(root)', 'max_root = MAX(root)'] : []),
+    // Two targets differ iff MIN != MAX; exact, and cheaper than a distinct count.
+    ...(skipFullyResolvedGroups
+      ? ['min_target = MIN(effective_target)', 'max_target = MAX(effective_target)']
+      : []),
   ];
   const groupFilter = [
     `${MATCH_GROUP_COLUMNS.totalN} >= 2`,
     'new_n >= 1',
-    ...(skipLinkedGroups ? ['min_root != max_root'] : []),
+    ...(skipFullyResolvedGroups ? ['min_target != max_target'] : []),
   ];
 
   parts.push(
@@ -227,8 +233,8 @@ export const buildWatermarkQuery = ({
   spec,
   watermark,
 }: BuildWatermarkQueryParams): string => {
-  const { filters: specFilters, matchValueEval, gates } = queryPartsFor(spec);
-  const filters = [...specFilters, `${RESOLVED_TO_FIELD} IS NULL`];
+  const { entityFilters, matchValueEval, matchValueFilters } = queryPartsFor(spec);
+  const filters = [...entityFilters, `${RESOLVED_TO_FIELD} IS NULL`];
   const newerThan = watermarkFilter(watermark);
   if (newerThan) {
     filters.push(newerThan);
@@ -239,7 +245,7 @@ export const buildWatermarkQuery = ({
     `FROM ${quote(index)}`,
     `| WHERE ${filters.join('\n    AND ')}`,
     `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
-    `| WHERE ${gates.join('\n    AND ')}`,
+    `| WHERE ${matchValueFilters.join('\n    AND ')}`,
     `| STATS ${WATERMARK_COLUMN} = MAX(${FIRST_SEEN_FIELD})`,
     `| LIMIT 1`,
   ].join('\n');
@@ -250,6 +256,8 @@ export const buildWatermarkQuery = ({
  * `SET unmapped_fields="nullify"` so Elasticsearch rejects an unknown field
  * instead of silently matching nothing.
  */
+export const RAW_MATCH_VALUE_COLUMN = 'raw_match_value';
+
 export const buildMatcherValidationQuery = ({
   index,
   spec,
@@ -257,13 +265,20 @@ export const buildMatcherValidationQuery = ({
   index: string;
   spec: MatcherSpec;
 }): string => {
-  const { filters, matchValueEval, gates } = queryPartsFor(spec);
+  const { entityFilters, matchValueEval, matchValueFilters } = queryPartsFor(spec);
+  // The key before TO_STRING, so validation can see its real type.
+  const rawMatchValue = isExpressionMatchSpec(spec)
+    ? [`| EVAL ${RAW_MATCH_VALUE_COLUMN} = (${spec.matchValueExpression})`]
+    : [];
   return [
     `FROM ${quote(index)}`,
-    `| WHERE ${filters.join('\n    AND ')}`,
+    `| WHERE ${entityFilters.join('\n    AND ')}`,
+    ...rawMatchValue,
     `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
-    `| WHERE ${gates.join('\n    AND ')}`,
-    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}`,
+    `| WHERE ${matchValueFilters.join('\n    AND ')}`,
+    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}${
+      rawMatchValue.length > 0 ? `, ${RAW_MATCH_VALUE_COLUMN}` : ''
+    }`,
     `| LIMIT 0`,
   ].join('\n');
 };

@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { CustomResolutionRule } from '../../custom';
-import { fingerprintDefinition, toRuleDefinition } from '../../custom';
+import { fingerprintDefinition } from '../../custom';
 import { runEsqlMatcherRule } from '../../matcher';
 import type { ResolutionRulesClient } from '../../rule_client';
 import type { ResolutionClient } from '../../../resolution_client';
@@ -36,20 +36,20 @@ const rule = (id: string, overrides: Partial<CustomResolutionRule> = {}): Custom
   ...overrides,
 });
 
-const fingerprintOf = (customRule: CustomResolutionRule) =>
-  fingerprintDefinition(toRuleDefinition(customRule));
+const fingerprintOf = (customRule: CustomResolutionRule) => fingerprintDefinition(customRule);
 
 const watermarked = (
   id: string,
-  ranFirstAt: string | null = '2026-10-01T00:00:00Z',
+  lastStartedFirstAt: string | null = '2026-10-01T00:00:00Z',
   deferredByDeadline = false
 ) => ({
   [`custom:${id}`]: {
     ...WATERMARKED,
     definitionFingerprint: fingerprintOf(rule(id)),
     lastAttemptAt: '2026-10-01T00:00:00Z',
-    ranFirstAt,
+    lastStartedFirstAt,
     deferredByDeadline,
+    lastError: null,
   },
 });
 
@@ -72,7 +72,7 @@ const run = async (
   const rules: Record<string, PerRuleState> = { ...previous };
   const listed = customRules instanceof Error ? [] : customRules;
   await runCustomResolutionRules({
-    rules,
+    ruleStates: rules,
     resolutionRulesClient: {
       getCustomRules:
         customRules instanceof Error
@@ -124,8 +124,9 @@ describe('runCustomResolutionRules', () => {
       ...WATERMARKED,
       definitionFingerprint: fingerprintOf(rule('a')),
       lastAttemptAt: expect.any(String),
-      ranFirstAt: expect.any(String),
+      lastStartedFirstAt: expect.any(String),
       deferredByDeadline: false,
+      lastError: null,
     });
   });
 
@@ -170,7 +171,7 @@ describe('runCustomResolutionRules', () => {
     expect(calledRuleIds()).toEqual(['custom:a', 'custom:b']);
     expect(rules['custom:a']).toMatchObject({ lastProcessedTimestamp: null });
     expect(rules['custom:b']).toMatchObject(WATERMARKED);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'a' failed"));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('custom:a failed'));
   });
 
   it('keeps the watermark of a failed rule and records the attempt', async () => {
@@ -181,16 +182,49 @@ describe('runCustomResolutionRules', () => {
     expect(rules['custom:a']).toEqual({
       ...previous['custom:a'],
       lastAttemptAt: expect.any(String),
-      ranFirstAt: expect.any(String),
+      lastStartedFirstAt: expect.any(String),
+      lastError: 'boom',
     });
     expect(rules['custom:a']).not.toEqual(previous['custom:a']);
+  });
+
+  it('clears the last error once the rule runs cleanly', async () => {
+    const previous = { 'custom:a': { ...watermarked('a')['custom:a'], lastError: 'boom' } };
+    const { rules } = await run([rule('a')], { previous });
+
+    expect(rules['custom:a']).toMatchObject({ lastError: null });
+  });
+
+  it('records why a rule that no longer validates was skipped', async () => {
+    const { rules } = await run([rule('bad', { match_value: 'a | LIMIT 1' })]);
+
+    expect(rules['custom:bad']).toMatchObject({
+      lastError: expect.stringContaining("Invalid 'match_value'"),
+    });
+  });
+
+  it('keeps running later rules when re-reading one fails, and records the failure', async () => {
+    const { rules, logger } = await run([rule('a'), rule('b')], {
+      reread: (id) => {
+        if (id === 'a') {
+          throw new Error('Unable to get entity-resolution-custom-rule');
+        }
+        return rule(id);
+      },
+    });
+
+    expect(calledRuleIds()).toEqual(['custom:b']);
+    expect(rules['custom:a']).toMatchObject({
+      lastError: expect.stringContaining('Unable to get'),
+    });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('custom:a failed'));
   });
 
   it('skips a rule that no longer validates without stopping the others', async () => {
     const { logger } = await run([rule('bad', { match_value: 'a | LIMIT 1' }), rule('good')]);
 
     expect(calledRuleIds()).toEqual(['custom:good']);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'bad' failed"));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('custom:bad failed'));
   });
 
   it('keeps the state of a disabled rule without running it', async () => {
@@ -235,6 +269,21 @@ describe('runCustomResolutionRules', () => {
     );
   });
 
+  it('keeps the state of a rule missing from the list when reading it by id is forbidden', async () => {
+    const previous = watermarked('a');
+    const { rules, logger } = await run([], {
+      previous,
+      reread: () => {
+        throw new Error('Unable to get entity-resolution-custom-rule');
+      },
+    });
+
+    expect(rules).toEqual(previous);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('custom:a: keeping its state')
+    );
+  });
+
   it('leaves all state alone when the rules cannot be loaded', async () => {
     const previous = watermarked('a');
     const { rules, logger } = await run(new Error('forbidden'), { previous });
@@ -247,9 +296,10 @@ describe('runCustomResolutionRules', () => {
   it('stops before the next rule once the task is aborted', async () => {
     const controller = new AbortController();
     controller.abort();
-    await run([rule('a')], { signal: controller.signal });
+    const { rules } = await run([rule('a')], { signal: controller.signal });
 
     expect(runEsqlMatcherRule).not.toHaveBeenCalled();
+    expect(rules).toEqual({});
   });
 
   describe('soft deadline', () => {
@@ -307,8 +357,9 @@ describe('runCustomResolutionRules', () => {
       expect(rules['custom:a']).toEqual({
         ...previous['custom:a'],
         lastAttemptAt: '2026-10-13T10:00:00.000Z',
-        ranFirstAt: '2026-10-13T10:00:00.000Z',
+        lastStartedFirstAt: '2026-10-13T10:00:00.000Z',
         deferredByDeadline: true,
+        lastError: null,
       });
       expect(rules['custom:b']).toEqual({ ...previous['custom:b'], deferredByDeadline: true });
       expect(logger.info).toHaveBeenCalledWith(
@@ -418,10 +469,12 @@ describe('runCustomResolutionRules', () => {
         controller.abort();
         return runUntilAborted(deps);
       });
-      const { logger } = await run([rule('a'), rule('b')], { signal: controller.signal });
+      const { rules, logger } = await run([rule('a'), rule('b')], { signal: controller.signal });
 
       expect(calledRuleIds()).toEqual(['custom:a']);
       expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('soft deadline'));
+      expect(rules['custom:a']).toMatchObject({ deferredByDeadline: false });
+      expect(rules['custom:b']).toBeUndefined();
     });
   });
 });

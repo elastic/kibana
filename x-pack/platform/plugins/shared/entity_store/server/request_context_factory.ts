@@ -159,7 +159,7 @@ export async function createRequestHandlerContext({
     customResolutionRulesClient: new CustomResolutionRulesClient({
       soClient: core.savedObjects.client,
       esClient: core.elasticsearch.client.asCurrentUser,
-      namespace,
+      spaceId: namespace,
       logger,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
