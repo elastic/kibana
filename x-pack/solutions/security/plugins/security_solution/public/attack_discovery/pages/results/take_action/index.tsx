@@ -199,10 +199,10 @@ const TakeActionComponent: React.FC<Props> = ({
     replacements
   );
 
-  // Only persisted attacks can be posted as `security.attack` attachments: the metadata requires
-  // the index the document came from so the attachment can sync status and reopen the flyout. A
-  // selection cannot be split across both payloads, so one ad hoc or index-less discovery sends
-  // the whole selection down the markdown-comment path below.
+  // Only attacks persisted as alerts can be posted as `security.attack` attachments: the metadata
+  // requires the index the document came from. Ad hoc is not the dividing line — a persisted ad
+  // hoc discovery has an index and attaches like any other. A selection cannot be split across
+  // both payloads, so one unattachable discovery sends the whole selection down the markdown path.
   const attacksToAttach = useMemo(() => {
     // Widened from the `AttackDiscovery[] | AttackDiscoveryAlert[]` prop so the type guard narrows:
     // calling `filter` on a union of array types drops the predicate's narrowing.
