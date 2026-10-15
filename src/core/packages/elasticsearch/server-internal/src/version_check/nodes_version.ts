@@ -50,8 +50,8 @@ export interface NodesVersionState {
   readonly controlState: NodesVersionControlState;
   /** `undefined` until the first compatibility settles. */
   readonly compatibility: NodesVersionCompatibility | undefined;
-  /** Retries left before a request error settles as the compatibility. */
-  readonly attemptsLeft: number;
+  /** Failed requests since the last settled compatibility; each is retried up to `healthCheckRetry`. */
+  readonly failures: number;
 }
 
 export type NodesVersionEvent =
@@ -59,11 +59,11 @@ export type NodesVersionEvent =
   | { readonly type: 'compatibilityChanged'; readonly compatibility: NodesVersionCompatibility }
   | { readonly type: 'compatibilityUnchanged' };
 
-export const initialState = (config: NodesVersionConfig): NodesVersionState => ({
+export const initialState: NodesVersionState = {
   controlState: 'STARTUP',
   compatibility: undefined,
-  attemptsLeft: config.healthCheckRetry,
-});
+  failures: 0,
+};
 
 const pollingInterval = (
   config: NodesVersionConfig,
@@ -109,11 +109,11 @@ export const model = (
   state: NodesVersionState,
   result: NodesVersionResult
 ): AugmentedState<NodesVersionState, NodesVersionEvent> => {
-  if (!result.ok && state.attemptsLeft > 0) {
+  if (!result.ok && state.failures < config.healthCheckRetry) {
     return {
       state: {
         ...state,
-        attemptsLeft: state.attemptsLeft - 1,
+        failures: state.failures + 1,
       },
       event: { type: 'retried' },
     };
@@ -129,7 +129,7 @@ export const model = (
     state: {
       controlState,
       compatibility,
-      attemptsLeft: config.healthCheckRetry,
+      failures: 0,
     },
     event: changed
       ? { type: 'compatibilityChanged', compatibility }
@@ -141,7 +141,7 @@ export const nodesVersionMachine = (
   action: Action<NodesInfo>,
   config: NodesVersionConfig
 ): StateActionMachine<NodesVersionState, NodesInfo, NodesVersionEvent> => ({
-  initialState: initialState(config),
+  initialState,
   next: () => action,
   model: (state, result) => {
     const step = model(config, state, result);
