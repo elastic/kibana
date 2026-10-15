@@ -432,7 +432,6 @@ describe('getSandboxCredentials()', () => {
 
   describe('stack connector sandbox hooks', () => {
     const httpConnectorTypeId = 'test.http-sandbox';
-    const apiKey = 'super-secret-es-api-key-value';
 
     const httpSecretsSchema = {
       schema: z
