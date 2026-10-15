@@ -171,18 +171,27 @@ export const generateOtelTemplates = ({
         const value: string = signal.value;
         /** Inlines the source-derived name as a field reference, quoted only when ES|QL requires it. */
         const field: string = esqlFieldName(`metrics.${value}`);
+        /** Groups by the attribute keys recorded with the metric's measurements, when any were found. */
+        const groupBy: string =
+          signal.dimensions === undefined || signal.dimensions.length === 0
+            ? ''
+            : ` BY ${signal.dimensions
+                .map((key) => esqlFieldName(`attributes.${key}`))
+                .join(', ')}`;
         return [
           generatedTemplate({
             context,
             severityScore: 50,
             template: {
               description:
-                'Aggregates a source-instrumented OpenTelemetry metric using its instrument family.',
+                groupBy.length === 0
+                  ? 'Aggregates a source-instrumented OpenTelemetry metric using its instrument family.'
+                  : 'Aggregates a source-instrumented OpenTelemetry metric using its instrument family, grouped by the attributes recorded with it.',
               evidence: signal.evidence,
               query: `TS ${METRIC_SOURCE}\n| WHERE ${field} IS NOT NULL\n| STATS ${metricStats(
                 signal.metricKind,
                 field
-              )}`,
+              )}${groupBy}`,
               signalType: 'metric',
               title: `Metric: ${value}`,
             },

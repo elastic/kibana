@@ -14,6 +14,13 @@ import { mapBounded } from '../source/map_bounded';
 import { buildBlockCommentIndex } from './block_comment_index';
 import { extractOtelSignalsFromWindows, type OtelSourceWindow } from './extract_otel_signals';
 import { otelMetricConstructorGrepPattern } from './instrumentation_patterns';
+import {
+  attributeKeyBindings,
+  extractMetricMeasurements,
+  measurementWindowLines,
+  metricMeasurementGrepPatterns,
+  withMetricDimensions,
+} from './metric_measurements';
 import { isProductionOtelPath } from './path_policy';
 
 /** Git-grep ERE patterns that locate windows likely to contain an extractable OTel signal. */
@@ -48,10 +55,12 @@ export interface OtelDiscoveryResult {
 
 /** Collects every path and line matched by one pattern while retaining incomplete source coverage diagnostics. */
 const locationsForPattern = async ({
+  caseSensitive,
   pattern,
   reader,
   repository,
 }: {
+  readonly caseSensitive?: boolean;
   readonly pattern: string;
   readonly reader: SourceReader;
   readonly repository: ResolvedRepository;
@@ -68,7 +77,7 @@ const locationsForPattern = async ({
     invalidCursorMessage: () =>
       `OTel extraction pattern ${JSON.stringify(pattern)} returned a missing or repeated cursor.`,
     reader,
-    request: { pattern, repository },
+    request: { ...(caseSensitive === undefined ? {} : { caseSensitive }), pattern, repository },
   });
   if (collected.error !== undefined && collected.failureKind !== undefined) {
     diagnostics.push({ error: collected.error, kind: collected.failureKind, pattern });
@@ -83,24 +92,28 @@ const locationsForPattern = async ({
   return { diagnostics, locations };
 };
 
-/** Discovers OTel signals while retaining failures separately from a complete empty discovery result. */
-export const discoverOtelSignals = async ({
-  patterns = otelExtractionPatterns,
+/** Collects the merged path and line hits of several patterns, plus any grep failures. */
+const locationsForPatterns = async ({
+  caseSensitive,
+  patterns,
   reader,
   repository,
 }: {
-  /** Supplies validated repository-specific fallback patterns instead of standard OTel idioms when present. */
-  readonly patterns?: readonly string[];
+  readonly caseSensitive?: boolean;
+  readonly patterns: readonly string[];
   readonly reader: SourceReader;
   readonly repository: ResolvedRepository;
-}): Promise<OtelDiscoveryResult> => {
-  /** Candidate locations aggregate the complete union of every successfully read standard OTel pattern. */
+}): Promise<{
+  readonly diagnostics: readonly OtelDiscoveryDiagnostic[];
+  readonly locations: ReadonlyMap<string, ReadonlySet<number>>;
+}> => {
+  /** Candidate locations aggregate the complete union of every successfully read pattern. */
   const locations: Map<string, Set<number>> = new Map();
   /** Diagnostics expose partial source coverage to orchestration even when no signals were extracted. */
   const diagnostics: OtelDiscoveryDiagnostic[] = [];
   for (const pattern of patterns) {
     /** Failed patterns retain their diagnostic while independent patterns continue. */
-    const patternResult = await locationsForPattern({ pattern, reader, repository });
+    const patternResult = await locationsForPattern({ caseSensitive, pattern, reader, repository });
     diagnostics.push(...patternResult.diagnostics);
     for (const [path, lines] of patternResult.locations) {
       /** Mutable local sets make merging overlapping pattern hits explicit and complete. */
@@ -109,6 +122,28 @@ export const discoverOtelSignals = async ({
       locations.set(path, mergedLines);
     }
   }
+  return { diagnostics, locations };
+};
+
+/** Reads one bounded window per hit, in sorted order, from paths whose comment state is fully known. */
+const readHitWindows = async ({
+  linesAfter,
+  linesBefore,
+  locations,
+  reader,
+  repository,
+}: {
+  readonly linesAfter: number;
+  readonly linesBefore: number;
+  readonly locations: ReadonlyMap<string, ReadonlySet<number>>;
+  readonly reader: SourceReader;
+  readonly repository: ResolvedRepository;
+}): Promise<{
+  readonly diagnostics: readonly OtelDiscoveryDiagnostic[];
+  readonly windows: readonly OtelSourceWindow[];
+}> => {
+  /** Diagnostics preserve partial results rather than converting failures to a complete empty result. */
+  const diagnostics: OtelDiscoveryDiagnostic[] = [];
   /** Candidate-path lexical paging avoids repository-wide quote materialization. */
   const blockCommentResult = await buildBlockCommentIndex({
     paths: [...locations.keys()],
@@ -136,10 +171,10 @@ export const discoverOtelSignals = async ({
       line,
       path,
       result: await reader.readWindow({
-        endLine: line + otelWindowRadius,
+        endLine: line + linesAfter,
         path,
         repository,
-        startLine: Math.max(1, line - otelWindowRadius),
+        startLine: Math.max(1, line - linesBefore),
       }),
     })
   );
@@ -171,5 +206,61 @@ export const discoverOtelSignals = async ({
       startLine: result.value.startLine,
     });
   }
-  return { diagnostics, signals: extractOtelSignalsFromWindows(windows) };
+  return { diagnostics, windows };
+};
+
+/** Discovers OTel signals while retaining failures separately from a complete empty discovery result. */
+export const discoverOtelSignals = async ({
+  patterns = otelExtractionPatterns,
+  reader,
+  repository,
+}: {
+  /** Supplies validated repository-specific fallback patterns instead of standard OTel idioms when present. */
+  readonly patterns?: readonly string[];
+  readonly reader: SourceReader;
+  readonly repository: ResolvedRepository;
+}): Promise<OtelDiscoveryResult> => {
+  /** Hits of every standard OTel pattern. */
+  const hits = await locationsForPatterns({ patterns, reader, repository });
+  /** Windows centered on each hit. */
+  const primary = await readHitWindows({
+    linesAfter: otelWindowRadius,
+    linesBefore: otelWindowRadius,
+    locations: hits.locations,
+    reader,
+    repository,
+  });
+  /** Signals found at instrumentation sites, before measurement dimensions are added. */
+  const signals: readonly OtelSignal[] = extractOtelSignalsFromWindows(primary.windows);
+  /** Diagnostics from both passes; any one makes coverage incomplete. */
+  const diagnostics: OtelDiscoveryDiagnostic[] = [...hits.diagnostics, ...primary.diagnostics];
+  /** Measurement calls are often far from the constructor, so they need their own repository-wide search. */
+  const measurementPatterns: readonly string[] = metricMeasurementGrepPatterns(signals);
+  if (measurementPatterns.length === 0) return { diagnostics, signals };
+  /** Instrument variable names are case-sensitive identifiers. */
+  const measurementHits = await locationsForPatterns({
+    caseSensitive: true,
+    patterns: measurementPatterns,
+    reader,
+    repository,
+  });
+  /** Windows starting at each measurement receiver and covering wrapped arguments. */
+  const measurementWindows = await readHitWindows({
+    linesAfter: measurementWindowLines,
+    linesBefore: 0,
+    locations: measurementHits.locations,
+    reader,
+    repository,
+  });
+  diagnostics.push(...measurementHits.diagnostics, ...measurementWindows.diagnostics);
+  return {
+    diagnostics,
+    signals: withMetricDimensions({
+      measurements: extractMetricMeasurements({
+        keyBindings: attributeKeyBindings([...primary.windows, ...measurementWindows.windows]),
+        windows: measurementWindows.windows,
+      }),
+      signals,
+    }),
+  };
 };

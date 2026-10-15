@@ -137,6 +137,95 @@ describe('discoverOtelSignals', () => {
     );
   });
 
+  describe('metric measurement dimensions', () => {
+    /** One file whose constructor and wrapped measurement call are far apart. */
+    const source: Readonly<Record<number, string>> = {
+      10: 'const latency = meter.createHistogram("bridge.operation.duration");',
+      200: 'latency.record(performance.now() - started, {',
+      201: '  "operation.name": name,',
+      202: '  "agent.persona": labels.persona,',
+      203: '});',
+    };
+    /** Serves the constructor to the standard pass and the receiver line to the measurement pass. */
+    const readerFor = (
+      measurementGrep: SourceReader['grep'],
+      requests: { caseSensitive?: boolean; pattern: string }[] = []
+    ): SourceReader => ({
+      grep: async (request) => {
+        requests.push({ caseSensitive: request.caseSensitive, pattern: request.pattern });
+        if (request.pattern === otelMetricConstructorGrepPattern) {
+          return {
+            items: [{ line: 10, path: 'src/telemetry.ts', text: source[10] }],
+            status: 'complete',
+          };
+        }
+        return request.pattern.includes('latency')
+          ? measurementGrep(request)
+          : { items: [], status: 'complete' };
+      },
+      listSourcePage: async () => ({ items: [], status: 'complete' }),
+      readWindow: async ({ endLine, startLine }) => ({
+        status: 'success',
+        value: {
+          endLine,
+          lines: Array.from(
+            { length: endLine - startLine + 1 },
+            (_, i) => source[startLine + i] ?? ''
+          ),
+          path: 'src/telemetry.ts',
+          startLine,
+        },
+      }),
+    });
+
+    it('adds grouping keys found by a case-sensitive search for the instrument variable', async () => {
+      /** Every grep request made during discovery. */
+      const requests: { caseSensitive?: boolean; pattern: string }[] = [];
+      /** Holds local test or extraction state. */
+      const result = await discoverOtelSignals({
+        reader: readerFor(
+          async () => ({
+            items: [{ line: 200, path: 'src/telemetry.ts', text: source[200] }],
+            status: 'complete',
+          }),
+          requests
+        ),
+        repository,
+      });
+
+      expect(result.diagnostics).toEqual([]);
+      expect(result.signals).toEqual([
+        expect.objectContaining({
+          dimensions: ['operation.name'],
+          instrument: 'latency',
+          kind: 'metric_name',
+          value: 'bridge.operation.duration',
+        }),
+      ]);
+      expect(requests.filter(({ pattern }) => pattern.includes('latency'))).toEqual([
+        expect.objectContaining({ caseSensitive: true }),
+      ]);
+    });
+
+    it('reports a failed measurement search as a coverage diagnostic', async () => {
+      /** Holds local test or extraction state. */
+      const result = await discoverOtelSignals({
+        reader: readerFor(async () => ({
+          error: { code: 'grep_failed', message: 'boom', retryable: true },
+          status: 'failure',
+        })),
+        repository,
+      });
+
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({ kind: 'grep', pattern: expect.stringContaining('latency') }),
+      ]);
+      expect(result.signals).toEqual([
+        expect.not.objectContaining({ dimensions: expect.anything() }),
+      ]);
+    });
+  });
+
   it('discovers Rust in_span instrumentation from a bounded source window', async () => {
     /** Holds local test or extraction state. */
     const reader: SourceReader = {

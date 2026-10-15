@@ -174,7 +174,7 @@ const indexExpressionPattern: RegExp =
   /^(?:(?:u?int(?:8|16|32|64)?|long|float(?:32|64)?|double|number|integer)\s*\(\s*)*(?:[ijk]|idx|index)\s*\)*$/i;
 
 /** Lower-cases a key and separates its words with underscores across dot, dash, and camelCase styles. */
-const normalizedKeyWords = (key: string): string =>
+export const normalizedKeyWords = (key: string): string =>
   key
     .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
     .replace(/[.-]/g, '_')
@@ -205,6 +205,23 @@ const inferValueHint = (key: string, expression: string = ''): OtelValueHint => 
   if (/enum|status|type|kind|state/.test(normalized)) return 'enum';
   return 'unknown';
 };
+
+/**
+ * Matches the assignment that ends right before a metric constructor token, such as `events = meter.`,
+ * `x, err := m.`, `$c ??= Globals::meterProvider()->getMeter('q')->`, or a Java builder chain.
+ * The optional `: Type` covers TypeScript, Python, and Kotlin annotations.
+ */
+const instrumentBindingPattern: RegExp =
+  /([A-Za-z_$][\w$]*)(?:\s*:(?![:=])\s*[\w$.]+(?:<[^<>=;\n]*>)?(?:\[\])?)?\s*(?:,\s*[A-Za-z_][\w]*\s*)?(?::=|\?\?=|(?<![=!<>+\-*/%&|^?])=(?![=>]))\s*(?:new\s+)?(?:[\w$]+\s*(?:<[^<>\n]*>)?\s*(?:\((?:[^()]|\([^()]*\))*\))?\s*(?:\?\.|\.|->|::)\s*)*$/;
+/** Bounds the backwards search for an instrument binding to one statement-sized span. */
+const instrumentBindingLookbehind: number = 400;
+
+/** Returns the variable or field name a metric constructor is assigned to, without a PHP or Ruby `$` sigil. */
+export const metricInstrumentBinding = (prefix: string): string | undefined =>
+  prefix
+    .slice(-instrumentBindingLookbehind)
+    .match(instrumentBindingPattern)?.[1]
+    .replace(/^\$+/, '');
 
 /** Maps an instrument-constructor token to its OTel aggregation family. */
 const metricKindFromToken = (token: string): OtelMetricKind => {
@@ -662,17 +679,24 @@ export const extractOtelSignalsFromWindows = (
       const literal = literalFromMatch(match, 2);
       if (literal === undefined) continue;
       if (!isExecutableMatch(content, window.initialCommentState, match, window.path)) continue;
+      /** Literal metric names carry the variable they are assigned to so measurement calls can be linked. */
+      const signal = literalSignal({
+        concatenated: isConcatenated(content, match),
+        kind: 'metric_name',
+        metricKind: metricKindFromToken(match[1]),
+        quote: literal.quote,
+        raw: literal.raw,
+        window: windowAtMatch(window, match),
+      });
+      /** The masked prefix keeps commented-out assignments from being taken as the binding. */
+      const instrument = metricInstrumentBinding(content.slice(0, match.index ?? 0));
       addSignal({
         seen,
         signals,
-        signal: literalSignal({
-          concatenated: isConcatenated(content, match),
-          kind: 'metric_name',
-          metricKind: metricKindFromToken(match[1]),
-          quote: literal.quote,
-          raw: literal.raw,
-          window: windowAtMatch(window, match),
-        }),
+        signal:
+          signal === undefined || signal.templated === true || instrument === undefined
+            ? signal
+            : { ...signal, instrument },
       });
     }
     /** Dynamic metric names remain source evidence while avoiding unsupported literal query generation. */

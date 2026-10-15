@@ -50,6 +50,10 @@ export const otelSignalRt = t.intersection([
     language: t.string,
   }),
   t.partial({
+    /** Low-cardinality attribute keys recorded with a metric's measurements, in source order. */
+    dimensions: t.readonlyArray(t.string),
+    /** Source variable or field that holds a metric instrument, used to find its measurement calls. */
+    instrument: t.string,
     metricKind: otelMetricKindRt,
     templated: t.boolean,
     value: t.string,
