@@ -6,7 +6,7 @@
  */
 
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { isProbeableQuery, runProbe, type ProbeWindow } from './run_probe';
+import { isProbeableQuery, runProbe, runStoredQuery, type ProbeWindow } from './run_probe';
 
 const STORED_QUERY =
   'FROM $.logs-checkout | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE x == 1';
@@ -77,10 +77,25 @@ describe('runProbe', () => {
     expect(query).toHaveBeenCalledTimes(1);
     const [request, options] = query.mock.calls[0];
     expect(request).toEqual({
-      query: `${STORED_QUERY} | LIMIT 1`,
+      query: `${STORED_QUERY}\n| LIMIT 1`,
       params: [{ _tstart: WINDOW.from }, { _tend: WINDOW.to }],
     });
     expect(options.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('appends any tail on its own line, so a trailing comment cannot swallow it, and returns the rows', async () => {
+    const { esClient, query } = createEsClient(respondsWith([['bucket', 3]]));
+
+    const result = await runStoredQuery({
+      esClient,
+      ...baseParams({ query: `${STORED_QUERY} // a comment` }),
+      tail: 'KEEP b, c',
+    });
+
+    expect(result).toMatchObject({ status: 'ok', values: [['bucket', 3]] });
+    expect(query.mock.calls[0][0]).toMatchObject({
+      query: `${STORED_QUERY} // a comment\n| KEEP b, c`,
+    });
   });
 
   it('reports no rows when the query returns none', async () => {
