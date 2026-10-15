@@ -167,7 +167,6 @@ describe('validateConfig', () => {
         "Validation error: \nSyntaxError: mismatched input 'BAD_COMMAND'\nUnknown function NOT_A_FUNCTION"
       );
     });
-
   });
 
   describe('parameter validation errors', () => {
