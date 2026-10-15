@@ -227,8 +227,6 @@
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
-    "@kbn/core-user-profile-server",
-    "@kbn/core-user-profile-server-mocks",
     "@kbn/langchain",
     "@kbn/discover-shared-plugin",
     "@kbn/react-hooks",
@@ -286,6 +284,7 @@
     "@kbn/agentic-investigations-plugin",
     "@kbn/mitre-attack-plugin",
     "@kbn/security-mitre-attack-common",
+    "@kbn/security-mitre-attack-mocks",
     "@kbn/security-mitre-attack-server",
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
@@ -328,6 +327,8 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/test-es-server",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-user-profile-server",
     "@kbn/core-security-server",
   ]
 }
