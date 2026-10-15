@@ -183,14 +183,17 @@ Panel positions and sizes are set automatically after the operations run. Use \`
         });
 
         // The arranger checks its own output and writes only grids, so the result is not validated again.
-        const generatedDashboardData = await arrangeDashboardLayout({
-          originalPanels: latestVersion?.data.panels ?? [],
-          dashboardData: validatedDashboardData,
-          instructions: layout,
-          arrangeLayout: createLayoutArranger({ modelProvider }),
-          reportFailure: (failure) => failures.push(failure),
-          logger,
-        });
+        const { dashboardData: generatedDashboardData, failure: layoutFailure } =
+          await arrangeDashboardLayout({
+            originalPanels: latestVersion?.data.panels ?? [],
+            dashboardData: validatedDashboardData,
+            instructions: layout,
+            arrangeLayout: createLayoutArranger({ modelProvider }),
+            logger,
+          });
+        if (layoutFailure) {
+          failures.push(layoutFailure);
+        }
 
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,

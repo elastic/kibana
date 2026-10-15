@@ -57,11 +57,9 @@ const completeArrangement: LayoutArrangement = {
 
 describe('arrangeDashboardLayout', () => {
   let logger: Logger;
-  let reportFailure: jest.Mock;
 
   beforeEach(() => {
     logger = { warn: jest.fn() } as unknown as Logger;
-    reportFailure = jest.fn();
   });
 
   const arrange = (
@@ -76,7 +74,6 @@ describe('arrangeDashboardLayout', () => {
       dashboardData,
       instructions,
       arrangeLayout,
-      reportFailure,
       logger,
     });
 
@@ -93,7 +90,7 @@ describe('arrangeDashboardLayout', () => {
     const result = await arrange(arrangeLayout, { dashboardData: dashboardWithRetitledPanel });
 
     expect(arrangeLayout).not.toHaveBeenCalled();
-    expect(result).toBe(dashboardWithRetitledPanel);
+    expect(result.dashboardData).toBe(dashboardWithRetitledPanel);
   });
 
   it('calls the layout when a panel changes chart type', async () => {
@@ -128,7 +125,7 @@ describe('arrangeDashboardLayout', () => {
     expect(arrangeLayout).toHaveBeenCalledWith(
       expect.objectContaining({ instructions: 'make everything full width' })
     );
-    expect(result.panels[0].grid).toEqual({ x: 0, y: 0, w: 48, h: 9 });
+    expect(result.dashboardData.panels[0].grid).toEqual({ x: 0, y: 0, w: 48, h: 9 });
   });
 
   it('sends the previous and current dashboards with short ids, and applies the arrangement', async () => {
@@ -161,7 +158,7 @@ describe('arrangeDashboardLayout', () => {
       },
       changes: { addedPanels: ['p3'] },
     });
-    expect(result.panels).toEqual([
+    expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({ id: 'existing', grid: { x: 0, y: 0, w: 48, h: 9 } }),
       expect.objectContaining({
         id: 'section-a',
@@ -170,7 +167,7 @@ describe('arrangeDashboardLayout', () => {
       }),
       expect.objectContaining({ id: 'new-panel', grid: { x: 0, y: 9, w: 48, h: 9 } }),
     ]);
-    expect(reportFailure).not.toHaveBeenCalled();
+    expect(result.failure).toBeUndefined();
   });
 
   it('omits the previous dashboard for a new dashboard', async () => {
@@ -180,7 +177,6 @@ describe('arrangeDashboardLayout', () => {
       originalPanels: [],
       dashboardData: dashboardWithNewPanel,
       arrangeLayout,
-      reportFailure,
       logger,
     });
 
@@ -228,7 +224,6 @@ describe('arrangeDashboardLayout', () => {
       originalPanels: [createMarkdownPanel('Short')],
       dashboardData: { title: 'Dashboard', panels: [createMarkdownPanel('Longer text')] },
       arrangeLayout,
-      reportFailure,
       logger,
     });
 
@@ -297,9 +292,9 @@ describe('arrangeDashboardLayout', () => {
   ])('keeps the current layout when the arrangement %s', async (_, arrangement, issue) => {
     const result = await arrange(async () => arrangement);
 
-    expect(result).toBe(dashboardWithNewPanel);
+    expect(result.dashboardData).toBe(dashboardWithNewPanel);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(issue));
-    expect(reportFailure).not.toHaveBeenCalled();
+    expect(result.failure).toBeUndefined();
   });
 
   it('keeps the current layout when the layout call fails', async () => {
@@ -307,9 +302,9 @@ describe('arrangeDashboardLayout', () => {
       throw new Error('Model unavailable');
     });
 
-    expect(result).toBe(dashboardWithNewPanel);
+    expect(result.dashboardData).toBe(dashboardWithNewPanel);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Model unavailable'));
-    expect(reportFailure).not.toHaveBeenCalled();
+    expect(result.failure).toBeUndefined();
   });
 
   it('skips the layout call for a dashboard without panels', async () => {
@@ -322,8 +317,8 @@ describe('arrangeDashboardLayout', () => {
     });
 
     expect(arrangeLayout).not.toHaveBeenCalled();
-    expect(result).toBe(dashboardData);
-    expect(reportFailure).not.toHaveBeenCalled();
+    expect(result.dashboardData).toBe(dashboardData);
+    expect(result.failure).toBeUndefined();
   });
 
   it('reports a failure when a layout request is not applied', async () => {
@@ -331,8 +326,8 @@ describe('arrangeDashboardLayout', () => {
       instructions: 'make the new panel full width',
     });
 
-    expect(result).toBe(dashboardWithNewPanel);
-    expect(reportFailure).toHaveBeenCalledWith({
+    expect(result.dashboardData).toBe(dashboardWithNewPanel);
+    expect(result.failure).toEqual({
       type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
       identifier: 'layout',
       error: expect.stringContaining('section "section-a" is missing'),
