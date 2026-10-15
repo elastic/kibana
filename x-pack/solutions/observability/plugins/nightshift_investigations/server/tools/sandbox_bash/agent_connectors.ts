@@ -15,6 +15,8 @@ export interface AgentConnector {
   id: string;
   name: string;
   actionTypeId: string;
+  /** Usage note rendered under the connector in the manifest, for connectors Nightshift serves. */
+  usage?: string;
 }
 
 /**

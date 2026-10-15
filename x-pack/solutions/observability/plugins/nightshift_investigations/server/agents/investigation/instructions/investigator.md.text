@@ -389,7 +389,7 @@ sets overflow context:
   resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | LIMIT 0` (columns only).
-- POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
+- POST ES|QL to `$ELASTICSEARCH_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
   through `jq` and write bulky output to a file under `/workspace` instead of pasting it back.
 
 </esql_rules>

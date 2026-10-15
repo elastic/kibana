@@ -10,6 +10,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
+import type { AgentConnector } from './agent_connectors';
+import { REQUEST_SCOPED_CONNECTOR } from './request_scoped_connector';
 
 /**
  * Values that must never reach the manifest. They are attached to the raw connector
@@ -64,11 +66,13 @@ const renderManifest = async ({
   connectors = [createRawConnector()],
   withActionsClient = true,
   secretKeys = [],
+  virtualConnectors,
 }: {
   allowedConnectorIds?: readonly string[];
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
   secretKeys?: readonly string[];
+  virtualConnectors?: readonly AgentConnector[];
 } = {}) => {
   const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
@@ -79,6 +83,7 @@ const renderManifest = async ({
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
     secretKeys,
+    virtualConnectors,
     logger,
   });
 
@@ -142,6 +147,17 @@ describe('writeConnectorManifest', () => {
 
       expect(content).toContain('## My GitHub (connector-id: connector-1');
       expect(content).toContain('## Second GitHub (connector-id: connector-2');
+    });
+
+    it('lists the request-scoped Elasticsearch connector with its ELASTICSEARCH_* usage', async () => {
+      const { content } = await renderManifest({ virtualConnectors: [REQUEST_SCOPED_CONNECTOR] });
+
+      expect(content).toContain(
+        '## Elasticsearch (this cluster, investigation identity) (connector-id: nightshift-elasticsearch'
+      );
+      expect(content).toContain(
+        'curl -sS -H "Authorization: ${ELASTICSEARCH_AUTHORIZATION}" "$ELASTICSEARCH_URL/_query"'
+      );
     });
 
     it('notes when the allow-list is empty', async () => {

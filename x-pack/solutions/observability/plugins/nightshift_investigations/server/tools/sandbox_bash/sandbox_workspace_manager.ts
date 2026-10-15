@@ -60,12 +60,17 @@ export const createSandboxWorkspaceManager = ({
       session: SandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
-      const { actions, elasticsearchUrl, sandboxSecretsClient } = getDeps();
+      const { actions, elasticsearchUrl, getSandboxServiceAccountId, sandboxSecretsClient } =
+        getDeps();
       const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
-      const telemetryCheck = checkRequestScopedConnector(callContext, elasticsearchUrl);
+      const telemetryCheck = await checkRequestScopedConnector(
+        callContext,
+        elasticsearchUrl,
+        getSandboxServiceAccountId
+      );
       const canUseTelemetry = !('errorMessage' in telemetryCheck);
       if (
         !canUseTelemetry &&

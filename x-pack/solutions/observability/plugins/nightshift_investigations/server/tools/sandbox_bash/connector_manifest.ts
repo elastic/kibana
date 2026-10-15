@@ -12,7 +12,10 @@ import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
-  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+  [
+    `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`,
+    ...(connector.usage ? ['', connector.usage] : []),
+  ].join('\n');
 
 const renderSecretsSections = (secretKeys: readonly string[]): string[] => {
   const sections = [

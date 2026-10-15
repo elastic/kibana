@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { RunCommandParams } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
 import { authorizeConnector } from './connector_authorization';
@@ -19,11 +20,20 @@ import {
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
 
+/**
+ * Env vars of the request-scoped Elasticsearch connector, the same in both modes. In UIAM mode
+ * sandbox-api sets the URL (its egress proxy) and the authorization is absent.
+ */
+export const ELASTICSEARCH_URL_ENV = 'ELASTICSEARCH_URL';
+export const ELASTICSEARCH_AUTHORIZATION_ENV = 'ELASTICSEARCH_AUTHORIZATION';
+
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
   env: Record<string, string>;
   /** Secret values that must be redacted from command output before it leaves Kibana. */
   secretValues: string[];
+  /** gRPC metadata for this command's sandbox-api call. Carries identifiers, never secrets. */
+  metadata?: RunCommandParams['metadata'];
 }
 
 export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMessage: string };
@@ -32,6 +42,8 @@ export interface ConnectorCredentialDeps {
   actions?: ActionsPluginStart;
   /** Elasticsearch URL the sandbox reaches this cluster at; enables the request-scoped connector. */
   elasticsearchUrl?: string;
+  /** Set in UIAM mode: the service account sandbox-api assumes for the request-scoped connector. */
+  getSandboxServiceAccountId?: () => Promise<string | undefined>;
 }
 
 export type ResolveConnectorCredentials = (
@@ -143,9 +155,10 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
  * Deny by default: the connector must be on the agent allow-list. The request-scoped
- * Elasticsearch connector exposes the API key of the current run; any other connector must be
- * preconfigured (kibana.yml), with its secrets held in memory by the actions plugin, and the
- * current user must be allowed to read and execute it in the current space.
+ * Elasticsearch connector either asks sandbox-api to assume the UIAM service account (UIAM mode)
+ * or exposes the API key of the current run; any other connector must be preconfigured
+ * (kibana.yml), with its secrets held in memory by the actions plugin, and the current user must
+ * be allowed to read and execute it in the current space.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -156,21 +169,44 @@ export const createConnectorCredentialResolver =
     logger: Logger;
   }): ResolveConnectorCredentials =>
   async (connectorId, callContext) => {
-    const { actions, elasticsearchUrl } = getDeps();
+    const { actions, elasticsearchUrl, getSandboxServiceAccountId } = getDeps();
 
     if (connectorId === REQUEST_SCOPED_CONNECTOR_ID) {
-      const checked = checkRequestScopedConnector(callContext, elasticsearchUrl);
+      const checked = await checkRequestScopedConnector(
+        callContext,
+        elasticsearchUrl,
+        getSandboxServiceAccountId
+      );
       if ('errorMessage' in checked) return checked;
 
-      logger.debug(`Injecting the run's API key into a single sandbox command`);
+      const env: Record<string, string> = {
+        [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
+        [`${CONNECTOR_ENV_PREFIX}TYPE`]: REQUEST_SCOPED_CONNECTOR.actionTypeId,
+      };
 
-      const { env, secretValues } = buildConnectorEnv({
-        connectorId,
-        actionTypeId: REQUEST_SCOPED_CONNECTOR.actionTypeId,
-        config: { url: checked.url },
-        secrets: { password: checked.encoded },
-      });
-      return { env, secretValues: [...secretValues, checked.secret] };
+      if (checked.mode === 'uiam') {
+        logger.debug(
+          `Asking sandbox-api to assume service account [${checked.serviceAccountId}] for a single command`
+        );
+        return {
+          env,
+          secretValues: [],
+          metadata: {
+            'x-uiam-service-account-id': checked.serviceAccountId,
+            'x-elasticsearch-url': checked.url,
+          },
+        };
+      }
+
+      logger.debug(`Injecting the run's API key into a single sandbox command`);
+      return {
+        env: {
+          ...env,
+          [ELASTICSEARCH_URL_ENV]: checked.url,
+          [ELASTICSEARCH_AUTHORIZATION_ENV]: `ApiKey ${checked.encoded}`,
+        },
+        secretValues: [checked.encoded, checked.secret],
+      };
     }
 
     const authorized = await authorizeConnector(connectorId, callContext, actions);

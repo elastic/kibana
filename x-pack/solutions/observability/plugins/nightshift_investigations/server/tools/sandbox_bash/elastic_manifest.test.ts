@@ -14,8 +14,9 @@ describe('renderElasticManifest', () => {
     const content = renderElasticManifest('elasticsearch-telemetry');
 
     expect(content).toContain('`connector_id: "elasticsearch-telemetry"`');
-    expect(content).toContain('`CONNECTOR_CONFIG_URL`');
-    expect(content).toContain('`CONNECTOR_SECRET_PASSWORD`');
+    expect(content).toContain('`ELASTICSEARCH_URL`');
+    expect(content).toContain('`ELASTICSEARCH_AUTHORIZATION`');
+    expect(content).not.toContain('CONNECTOR_');
     expect(content).toContain('never hard-code their values');
   });
 
@@ -23,8 +24,9 @@ describe('renderElasticManifest', () => {
     const content = renderElasticManifest('elasticsearch-telemetry');
 
     expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
-    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
-    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
+    expect(content).toContain('-H "Authorization: ${ELASTICSEARCH_AUTHORIZATION}"');
+    expect(content).toContain('"$ELASTICSEARCH_URL/_remote/info"');
+    expect(content).toContain('"$ELASTICSEARCH_URL/_query"');
   });
 
   it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {

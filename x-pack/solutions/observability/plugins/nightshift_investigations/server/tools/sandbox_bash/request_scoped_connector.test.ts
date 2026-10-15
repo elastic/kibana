@@ -78,22 +78,48 @@ describe('readRequestApiKey', () => {
 });
 
 describe('checkRequestScopedConnector', () => {
-  it('returns the URL and key for an allow-listed agent', () => {
-    expect(checkRequestScopedConnector(callContext(), ES_URL)).toEqual({
+  it('returns the URL and key for an allow-listed agent', async () => {
+    expect(await checkRequestScopedConnector(callContext(), ES_URL)).toEqual({
+      mode: 'api_key',
       url: ES_URL,
       encoded: ENCODED,
       secret: SECRET,
     });
   });
 
-  it('denies agents that do not allow-list the connector', () => {
-    expect(checkRequestScopedConnector(callContext(undefined, ['other']), ES_URL)).toEqual({
-      errorMessage: expect.stringContaining('not assigned'),
-    });
+  it('returns the UIAM service account when one is stored, even for a UIAM-key run', async () => {
+    expect(
+      await checkRequestScopedConnector(
+        callContext(fakeRequest('ApiKey essu_internal_key')),
+        ES_URL,
+        async () => 'sa-id'
+      )
+    ).toEqual({ mode: 'uiam', url: ES_URL, serviceAccountId: 'sa-id' });
   });
 
-  it('is unavailable without a sandbox-reachable Elasticsearch URL', () => {
-    expect(checkRequestScopedConnector(callContext(), undefined)).toEqual({
+  it('uses the API key while no UIAM service account is stored', async () => {
+    expect(await checkRequestScopedConnector(callContext(), ES_URL, async () => undefined)).toEqual(
+      expect.objectContaining({ mode: 'api_key' })
+    );
+  });
+
+  it('denies agents that do not allow-list the connector', async () => {
+    const getServiceAccountId = jest.fn();
+
+    expect(
+      await checkRequestScopedConnector(
+        callContext(undefined, ['other']),
+        ES_URL,
+        getServiceAccountId
+      )
+    ).toEqual({
+      errorMessage: expect.stringContaining('not assigned'),
+    });
+    expect(getServiceAccountId).not.toHaveBeenCalled();
+  });
+
+  it('is unavailable without a sandbox-reachable Elasticsearch URL', async () => {
+    expect(await checkRequestScopedConnector(callContext(), undefined)).toEqual({
       errorMessage: expect.stringContaining('sandbox.elasticsearch.url'),
     });
   });

@@ -16,10 +16,41 @@ describe('Nightshift investigations configuration', () => {
     expect(config.schema.validate({ cortex: { enabled: false } }).cortex.enabled).toBe(false);
   });
 
-  it('enables the request-scoped Elasticsearch connector by default', () => {
+  const UIAM_DEFAULTS = {
+    enabled: false,
+    assumer_service_account_id: 'sandbox-api',
+    roles: ['nightshift'],
+    service_account_name: 'nightshift-sandbox',
+  };
+
+  it('enables the request-scoped Elasticsearch connector by default, with UIAM mode off', () => {
     expect(config.schema.validate({ sandbox: {} }).sandbox?.elasticsearch).toEqual({
       enabled: true,
+      uiam: UIAM_DEFAULTS,
     });
+  });
+
+  it('accepts a UIAM mode override', () => {
+    expect(
+      config.schema.validate({
+        sandbox: {
+          elasticsearch: {
+            uiam: { enabled: true, assumer_service_account_id: 'sbx', roles: ['viewer'] },
+          },
+        },
+      }).sandbox?.elasticsearch.uiam
+    ).toEqual({
+      ...UIAM_DEFAULTS,
+      enabled: true,
+      assumer_service_account_id: 'sbx',
+      roles: ['viewer'],
+    });
+  });
+
+  it('rejects UIAM mode without roles', () => {
+    expect(() =>
+      config.schema.validate({ sandbox: { elasticsearch: { uiam: { roles: [] } } } })
+    ).toThrow();
   });
 
   it('accepts an opt-out and a sandbox-reachable Elasticsearch URL', () => {
@@ -27,7 +58,7 @@ describe('Nightshift investigations configuration', () => {
       config.schema.validate({
         sandbox: { elasticsearch: { enabled: false, url: 'https://es.example.com' } },
       }).sandbox?.elasticsearch
-    ).toEqual({ enabled: false, url: 'https://es.example.com' });
+    ).toEqual({ enabled: false, url: 'https://es.example.com', uiam: UIAM_DEFAULTS });
   });
 
   it('rejects a non-http Elasticsearch URL', () => {

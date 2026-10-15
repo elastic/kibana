@@ -85,11 +85,13 @@ import {
   nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
+  nightshiftSandboxEsAccessSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
+import { createSandboxElasticsearchAccessClient } from './sandbox_elasticsearch_access';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -171,6 +173,7 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
+    core.savedObjects.registerType(nightshiftSandboxEsAccessSavedObjectType);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
@@ -194,6 +197,29 @@ export class NightshiftInvestigationsPlugin
       canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
       logger: this.logger.get('sandbox_secrets'),
     });
+
+    const sandboxEsAccessLogger = this.logger.get('sandbox_elasticsearch_access');
+    const uiamConfig = this.ctx.config.get().sandbox?.elasticsearch.uiam;
+    const sandboxElasticsearchAccessClient = createSandboxElasticsearchAccessClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, security: this.security }),
+      config: {
+        enabled: uiamConfig?.enabled ?? false,
+        serviceAccountName: uiamConfig?.service_account_name ?? 'nightshift-sandbox',
+        roles: uiamConfig?.roles ?? ['nightshift'],
+        assumerServiceAccountId: uiamConfig?.assumer_service_account_id ?? 'sandbox-api',
+      },
+      logger: sandboxEsAccessLogger,
+    });
+    // A lookup failure leaves the connector on the API key path, which fails closed for UIAM keys.
+    const getSandboxServiceAccountId = sandboxElasticsearchAccessClient.isEnabled()
+      ? () =>
+          sandboxElasticsearchAccessClient.getServiceAccountId().catch((error) => {
+            sandboxEsAccessLogger.warn(
+              `Failed to read the sandbox Elasticsearch service account: ${error.message}`
+            );
+            return undefined;
+          })
+      : undefined;
 
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
@@ -254,7 +280,11 @@ export class NightshiftInvestigationsPlugin
         const elasticsearchUrl = this.isElasticsearchConnectorEnabled(plugins)
           ? config.sandbox?.elasticsearch.url ?? core.elasticsearch.publicBaseUrl
           : undefined;
-        const getConnectorDeps = () => ({ actions: this.actionsStart, elasticsearchUrl });
+        const getConnectorDeps = () => ({
+          actions: this.actionsStart,
+          elasticsearchUrl,
+          getSandboxServiceAccountId,
+        });
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ ...getConnectorDeps(), sandboxSecretsClient }),
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
@@ -448,6 +478,7 @@ export class NightshiftInvestigationsPlugin
           sandboxSecretsClient,
           customContextClient,
           onboardingClient,
+          sandboxElasticsearchAccessClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(

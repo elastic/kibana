@@ -57,7 +57,23 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({}),
-  handler: async ({ request, onboardingClient }): Promise<StartOnboardingSuggestionsResponse> => {
+  handler: async ({
+    request,
+    logger,
+    onboardingClient,
+    sandboxElasticsearchAccessClient,
+  }): Promise<StartOnboardingSuggestionsResponse> => {
+    // Onboarding is the first request with a user who can create the sandbox's service account.
+    // The investigation can still run without it, so a failure is only logged.
+    if (sandboxElasticsearchAccessClient.isEnabled()) {
+      await sandboxElasticsearchAccessClient.ensure(request).catch((error) => {
+        logger.warn(
+          `Failed to ensure the sandbox Elasticsearch service account: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
+    }
     try {
       return await onboardingClient.start(request);
     } catch (error) {

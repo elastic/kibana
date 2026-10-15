@@ -13,11 +13,39 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
  * The request-scoped Elasticsearch connector: the sandbox queries this cluster with the API key of
  * the current agent run, injected per command only when the agent asks for it.
  */
+/**
+ * UIAM mode (serverless): instead of the run's API key, the sandbox reaches this cluster as a UIAM
+ * service account that sandbox-api may assume. Kibana only sends the account id; sandbox-api and
+ * its egress proxy hold the token, so no credential enters the sandbox.
+ */
+const sandboxElasticsearchUiamConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  // UIAM platform service account of sandbox-api, added to the account's `assumable_by`.
+  assumer_service_account_id: schema.string({
+    defaultValue: 'sandbox-api',
+    minLength: 1,
+    maxLength: 1024,
+  }),
+  // Elasticsearch roles the account is limited to. UIAM caps them at 50 names of 507 characters.
+  roles: schema.arrayOf(schema.string({ minLength: 1, maxLength: 507 }), {
+    defaultValue: ['nightshift'],
+    minSize: 1,
+    maxSize: 50,
+  }),
+  service_account_name: schema.string({
+    defaultValue: 'nightshift-sandbox',
+    minLength: 1,
+    maxLength: 128,
+  }),
+});
+
 const sandboxElasticsearchConfigSchema = schema.object({
   // Disable where the sandbox cannot reach this cluster, e.g. network policies or no public URL.
   enabled: schema.boolean({ defaultValue: true }),
-  // Elasticsearch URL as reachable from inside the sandbox. Defaults to elasticsearch.publicBaseUrl.
+  // Elasticsearch URL as reachable from inside the sandbox (or, in UIAM mode, from sandbox-api's
+  // egress proxy). Defaults to elasticsearch.publicBaseUrl.
   url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+  uiam: sandboxElasticsearchUiamConfigSchema,
 });
 
 const sandboxConfigSchema = schema.object({

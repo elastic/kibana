@@ -12,7 +12,8 @@ import type { SandboxCallContext } from './tool_utils';
 
 /**
  * Id of the virtual Elasticsearch connector. It does not exist in the actions framework: the
- * sandbox reaches this cluster with the API key the current agent run is authenticated with.
+ * sandbox reaches this cluster either as a UIAM service account assumed by sandbox-api, or with
+ * the API key the current agent run is authenticated with.
  */
 export const REQUEST_SCOPED_CONNECTOR_ID = 'nightshift-elasticsearch';
 
@@ -20,6 +21,10 @@ export const REQUEST_SCOPED_CONNECTOR: Readonly<AgentConnector> = Object.freeze(
   id: REQUEST_SCOPED_CONNECTOR_ID,
   name: 'Elasticsearch (this cluster, investigation identity)',
   actionTypeId: '.nightshift-elasticsearch',
+  usage:
+    'Exposes `ELASTICSEARCH_URL` and `ELASTICSEARCH_AUTHORIZATION` rather than `CONNECTOR_CONFIG_*` / ' +
+    '`CONNECTOR_SECRET_*`; see `/workspace/elastic.md`. Always call it as ' +
+    '`curl -sS -H "Authorization: ${ELASTICSEARCH_AUTHORIZATION}" "$ELASTICSEARCH_URL/_query" ...`.',
 });
 
 interface RequestApiKey {
@@ -66,11 +71,23 @@ export const readRequestApiKey = (request: KibanaRequest): Resolution<RequestApi
   return { encoded: credentials, secret };
 };
 
-/** Checks that the virtual connector can be used in this call and returns what it would expose. */
-export const checkRequestScopedConnector = (
+/** How the sandbox reaches this cluster in one command. */
+export type RequestScopedConnectorAccess =
+  /** sandbox-api assumes the service account; Kibana sends only its id and the URL. */
+  | { mode: 'uiam'; url: string; serviceAccountId: string }
+  /** The run's own API key is injected into the command's environment. */
+  | ({ mode: 'api_key'; url: string } & RequestApiKey);
+
+/**
+ * Checks that the virtual connector can be used in this call and returns how. UIAM mode wins once
+ * `getUiamServiceAccountId` (set only when UIAM mode is configured) resolves an account; otherwise
+ * the run's own API key is used.
+ */
+export const checkRequestScopedConnector = async (
   callContext: SandboxCallContext,
-  elasticsearchUrl: string | undefined
-): Resolution<RequestApiKey & { url: string }> => {
+  elasticsearchUrl: string | undefined,
+  getUiamServiceAccountId?: () => Promise<string | undefined>
+): Promise<Resolution<RequestScopedConnectorAccess>> => {
   if (!callContext.allowedConnectorIds.includes(REQUEST_SCOPED_CONNECTOR_ID)) {
     return {
       errorMessage: `Connector '${REQUEST_SCOPED_CONNECTOR_ID}' is not assigned to this agent.`,
@@ -85,8 +102,13 @@ export const checkRequestScopedConnector = (
     };
   }
 
+  const serviceAccountId = await getUiamServiceAccountId?.();
+  if (serviceAccountId) {
+    return { mode: 'uiam', url: elasticsearchUrl, serviceAccountId };
+  }
+
   const apiKey = readRequestApiKey(callContext.request);
   if ('errorMessage' in apiKey) return apiKey;
 
-  return { ...apiKey, url: elasticsearchUrl };
+  return { mode: 'api_key', ...apiKey, url: elasticsearchUrl };
 };

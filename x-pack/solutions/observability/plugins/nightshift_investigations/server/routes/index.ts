@@ -18,6 +18,7 @@ import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { sandboxSecretsRoutes } from './sandbox_secrets';
 import { customContextRoutes } from './custom_context';
 import { onboardingRoutes } from './onboarding';
+import { sandboxElasticsearchAccessRoutes } from './sandbox_elasticsearch_access';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
@@ -53,6 +54,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...sandboxSecretsRoutes,
   ...customContextRoutes,
   ...onboardingRoutes,
+  ...sandboxElasticsearchAccessRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,

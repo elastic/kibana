@@ -109,6 +109,25 @@ describe('sandbox bash tool — sandbox secrets', () => {
     });
   });
 
+  it('passes connector metadata to sandbox-api for that command only', async () => {
+    const metadata = {
+      'x-uiam-service-account-id': 'sa-id',
+      'x-elasticsearch-url': 'https://es01:9200',
+    };
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { CONNECTOR_ID: 'nightshift-elasticsearch' },
+      secretValues: [],
+      metadata,
+    });
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+    await run({});
+
+    expect(runCommand.mock.calls[0][0].metadata).toEqual(metadata);
+    expect(runCommand.mock.calls[1][0]).not.toHaveProperty('metadata');
+  });
+
   it('redacts both connector credentials and sandbox secrets from output', async () => {
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
       env: { CONNECTOR_SECRET_TOKEN: CONNECTOR_TOKEN },

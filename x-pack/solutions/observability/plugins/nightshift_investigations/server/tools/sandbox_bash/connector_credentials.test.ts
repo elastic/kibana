@@ -262,10 +262,13 @@ describe('createConnectorCredentialResolver', () => {
     const encoded = Buffer.from(`key-id:${secret}`).toString('base64');
     const esUrl = 'https://es.example.com';
 
-    const resolveRequestScoped = (elasticsearchUrl: string | undefined = esUrl) => {
+    const resolveRequestScoped = (
+      elasticsearchUrl: string | undefined = esUrl,
+      getSandboxServiceAccountId?: () => Promise<string | undefined>
+    ) => {
       const actions = actionsMock.createStart();
       const resolve = createConnectorCredentialResolver({
-        getDeps: () => ({ actions, elasticsearchUrl }),
+        getDeps: () => ({ actions, elasticsearchUrl, getSandboxServiceAccountId }),
         logger: loggingSystemMock.createLogger(),
       });
       const callContext: SandboxCallContext = {
@@ -277,19 +280,40 @@ describe('createConnectorCredentialResolver', () => {
       return { result: resolve(REQUEST_SCOPED_CONNECTOR_ID, callContext), actions };
     };
 
-    it("injects the run's API key and the sandbox Elasticsearch URL", async () => {
+    it("injects the run's API key as ELASTICSEARCH_AUTHORIZATION next to ELASTICSEARCH_URL", async () => {
       const { result, actions } = resolveRequestScoped();
 
       expect(await result).toEqual({
         env: {
           CONNECTOR_ID: REQUEST_SCOPED_CONNECTOR_ID,
           CONNECTOR_TYPE: '.nightshift-elasticsearch',
-          CONNECTOR_CONFIG_URL: esUrl,
-          CONNECTOR_SECRET_PASSWORD: encoded,
+          ELASTICSEARCH_URL: esUrl,
+          ELASTICSEARCH_AUTHORIZATION: `ApiKey ${encoded}`,
         },
         secretValues: [encoded, secret],
       });
       expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('sends only the UIAM service account id and URL as metadata in UIAM mode', async () => {
+      const { result } = resolveRequestScoped(esUrl, async () => 'sa-id');
+
+      expect(await result).toEqual({
+        env: {
+          CONNECTOR_ID: REQUEST_SCOPED_CONNECTOR_ID,
+          CONNECTOR_TYPE: '.nightshift-elasticsearch',
+        },
+        secretValues: [],
+        metadata: { 'x-uiam-service-account-id': 'sa-id', 'x-elasticsearch-url': esUrl },
+      });
+    });
+
+    it('falls back to the API key while no UIAM service account is stored', async () => {
+      const { result } = resolveRequestScoped(esUrl, async () => undefined);
+
+      expect(await result).toMatchObject({
+        env: { ELASTICSEARCH_AUTHORIZATION: `ApiKey ${encoded}` },
+      });
     });
 
     it('fails without a sandbox-reachable Elasticsearch URL', async () => {

@@ -396,6 +396,27 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith(CLEARED_HINTS);
     });
 
+    it('offers the connector in UIAM mode to a run carrying a UIAM key', async () => {
+      const session = createSessionMock(false);
+      const uiamManager = createSandboxWorkspaceManager({
+        getDeps: () => ({
+          elasticsearchUrl: ES_URL,
+          getSandboxServiceAccountId: async () => 'sa-id',
+        }),
+        logger,
+      });
+
+      await uiamManager.ensureWorkspaceReady({
+        session,
+        callContext: createTelemetryCallContext(undefined, 'ApiKey essu_internal_key'),
+      });
+
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ virtualConnectors: [REQUEST_SCOPED_CONNECTOR] })
+      );
+      expect(mockWriteElasticManifest).toHaveBeenCalled();
+    });
+
     it('does not seed hints for agents without the connector on their allow-list', async () => {
       const session = createSessionMock(false);
       await managerWithTelemetry.ensureWorkspaceReady({
