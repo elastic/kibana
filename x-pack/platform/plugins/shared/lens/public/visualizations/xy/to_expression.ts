@@ -42,6 +42,7 @@ import {
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import type {
   XYVisualizationState,
   YConfig,
@@ -349,7 +350,7 @@ export const buildXYExpression = (
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',
-    hideEndzones: state.hideEndzones ?? false,
+    hideEndzones: state.hideEndzones ?? LENS_XY_HIDE_ENDZONES_DEFAULT,
     addTimeMarker:
       (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],

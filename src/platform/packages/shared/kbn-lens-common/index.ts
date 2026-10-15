@@ -415,6 +415,7 @@ export {
   YAxisModes,
   SeriesTypes,
   AvailableReferenceLineIcons,
+  LENS_XY_HIDE_ENDZONES_DEFAULT,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
