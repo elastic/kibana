@@ -6,7 +6,6 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -15,8 +14,17 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
   type QueryAttempt,
   type SignificantEventType,
-  type SignificantEventsToolUsage,
 } from '@kbn/nightshift-ai';
+
+interface ToolCallCounts {
+  calls: number;
+  failures: number;
+}
+
+export interface KIQueryGenerationToolUsage {
+  get_features: ToolCallCounts;
+  validate_queries: ToolCallCounts;
+}
 
 export const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
@@ -36,7 +44,7 @@ export interface Query {
   expects_matches?: boolean;
 }
 
-/** Eval-only: a query attempt from add_queries, incl. rejected ones. Owned by `@kbn/nightshift-ai`. */
+/** Eval-only: a query attempt from validate_queries, incl. rejected ones. Owned by `@kbn/nightshift-ai`. */
 export type { QueryAttempt };
 
 export interface KIQueryGenerationEvaluationExample {
@@ -55,13 +63,11 @@ export interface KIQueryGenerationEvaluationExample {
 
 interface KIQueryGenerationTaskOutput {
   queries: Query[];
-  toolUsage?: SignificantEventsToolUsage;
+  toolUsage?: KIQueryGenerationToolUsage;
   traceId?: string | null;
   /** Resolved KI source and grounding mode for this task's run. */
   ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
   grounding_mode?: 'baseline' | 'grounded';
-  /** Reasoning-loop diagnostics from the shared agent, for treatment verification. */
-  reasoning_diagnostics?: ReasoningPromptDiagnostics;
   sample_logs?: string[];
   sample_docs?: Array<Record<string, unknown>>;
   query_attempts?: QueryAttempt[];
@@ -79,7 +85,7 @@ export const getQueriesFromOutput = (output: KIQueryGenerationOutput | undefined
 
 export const getToolUsageFromOutput = (
   output: KIQueryGenerationOutput | undefined
-): SignificantEventsToolUsage | undefined =>
+): KIQueryGenerationToolUsage | undefined =>
   output && !Array.isArray(output) ? output.toolUsage : undefined;
 
 export const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>

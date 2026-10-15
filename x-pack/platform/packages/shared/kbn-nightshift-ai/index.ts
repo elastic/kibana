@@ -26,7 +26,6 @@ export {
   type QueryValidationResult,
   type QueryValidationContext,
 } from './src/significant_events/queries/validate_ki_queries';
-export { type SignificantEventsToolUsage } from './src/significant_events/queries/tools/tool_usage';
 export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/queries/tools/features_tool';
 export { significantEventsAgentPrompt } from './src/significant_events/queries/prompt';
 export {
@@ -38,15 +37,13 @@ export {
   type SignificantEventType,
 } from './src/significant_events/queries/types';
 export {
-  identifyFeatures,
   toPreviouslyIdentifiedFeature,
-  type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
   type SearchSimilarFeaturesArguments,
   type SimilarFeatureHit,
-} from './src/significant_events/features/identify_features';
+} from './src/significant_events/features/types';
 export { featuresPrompt } from './src/significant_events/features/prompt';
 export { buildFeatureIdentificationUserMessage } from './src/significant_events/features/build_feature_identification_user_message';
 export {

@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
   type InferenceDocument,
   type SearchSimilarFeaturesArguments,
-  type AnalysisTarget,
-  type SimilarFeatureHit,
-  featuresPrompt,
   compactInferenceDocuments,
 } from '@kbn/nightshift-ai';
-import { tags } from '@kbn/scout';
+import { tags, type KbnClient } from '@kbn/scout';
 import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
@@ -27,9 +22,19 @@ import {
   type Example,
 } from '@kbn/evals';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
+import {
+  FeatureAccumulator,
+  type BaseFeature,
+  type Feature,
+  type FeatureUpsert,
+  mergeFeature,
+} from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
+import {
+  cleanSignificantEventsDataStreams,
+  ensureStreamsEnabled,
+} from '../../src/data_generators/replay';
+import { createEvalSource, deleteEvalSource } from '../../src/eval_source';
 import { evaluate } from '../../src/evaluate';
 import {
   createSemanticUniquenessEvaluator,
@@ -62,7 +67,7 @@ interface AvailableDeduplicationScenario {
 interface DedupContextInput extends Record<string, unknown> {
   sampleDocuments: InferenceDocument[];
   knownFeatureIds: string;
-  similarFeature?: SimilarFeatureHit;
+  seededFeature?: FeatureUpsert;
 }
 
 interface DedupContextExpected {
@@ -76,6 +81,8 @@ interface DedupContextOutput {
   features: BaseFeature[];
   searchCalls: SearchSimilarFeaturesArguments[];
 }
+
+const DEDUP_CONTEXT_STREAM_NAME = 'logs.otel';
 
 const checkoutDocument: InferenceDocument = {
   _id: 'checkout-doc',
@@ -106,12 +113,14 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
       id: 'semantic-search-id-reuse',
       input: {
         sampleDocuments: [checkoutDocument],
-        knownFeatureIds: '',
-        similarFeature: {
+        knownFeatureIds: 'entity: inventory-service',
+        seededFeature: {
           id: 'checkout-service',
+          type: 'entity',
+          subtype: 'service',
           title: 'Checkout API',
           description: 'Checkout API service handling checkout requests',
-          // Feature confidence is 0-100; the hit is handed to the model verbatim.
+          properties: { name: 'checkout-api' },
           confidence: 99,
         },
       },
@@ -121,6 +130,31 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
       },
     },
   ],
+};
+
+const replaceStoredFeatures = async (
+  kbnClient: KbnClient,
+  sourceId: string,
+  features: FeatureUpsert[]
+) => {
+  const {
+    data: { features: storedFeatures },
+  } = await kbnClient.request<{ features: Feature[] }>({
+    method: 'GET',
+    path: `/internal/streams/${sourceId}/features`,
+  });
+  const operations = [
+    ...storedFeatures.map(({ id }) => ({ delete: { id } })),
+    ...features.map((feature) => ({ index: { feature } })),
+  ];
+  if (operations.length === 0) {
+    return;
+  }
+  await kbnClient.request({
+    method: 'POST',
+    path: `/internal/streams/${sourceId}/features/_bulk`,
+    body: { operations },
+  });
 };
 
 const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContextOutput> = {
@@ -420,82 +454,55 @@ evaluate.describe(
 
     evaluate(
       'known feature ids and semantic duplicate search',
-      async ({ executorClient, inferenceClient, logger }) => {
-        await executorClient.runExperiment(
-          {
-            datasets: [dedupContextDataset],
-            concurrency: 1,
-            task: async ({ input }: DedupContextExample): Promise<DedupContextOutput> => {
-              if (!input) {
-                throw new Error('Deduplication context input is missing');
-              }
+      async ({ executorClient, fetch, connector, kbnClient, esClient, apiServices, log }) => {
+        await ensureStreamsEnabled({ esClient, apiServices, log });
+        const source = await createEvalSource({
+          fetch,
+          title: 'KI feature deduplication context',
+          esql: `FROM ${DEDUP_CONTEXT_STREAM_NAME}`,
+        });
 
-              const searchCalls: SearchSimilarFeaturesArguments[] = [];
-              const searchTool: ToolDefinition = {
-                description:
-                  'Search known features by meaning. Pass every uncertain candidate in the candidates array; results are grouped by candidate_id.',
-                schema: {
-                  type: 'object',
-                  properties: {
-                    candidates: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          candidate_id: { type: 'string' },
-                          title: { type: 'string' },
-                          description: { type: 'string' },
-                          type: { type: 'string' },
-                        },
-                        required: ['candidate_id', 'title', 'description', 'type'],
-                      },
-                    },
-                  },
-                  required: ['candidates'],
-                },
-              };
-              const searchCallback: ToolCallback = async (toolCall) => {
-                const rawCandidates = toolCall.function.arguments?.candidates;
-                const candidates = (
-                  Array.isArray(rawCandidates) ? rawCandidates : []
-                ) as SearchSimilarFeaturesArguments[];
-                const results = candidates.map((candidate) => {
-                  searchCalls.push(candidate);
-                  const searchText =
-                    `${candidate.candidate_id} ${candidate.title} ${candidate.description}`.toLowerCase();
-                  const features: SimilarFeatureHit[] =
-                    input.similarFeature &&
-                    candidate.type === 'entity' &&
-                    searchText.includes('checkout')
-                      ? [input.similarFeature]
-                      : [];
-                  return { candidate_id: candidate.candidate_id, features };
+        try {
+          await executorClient.runExperiment(
+            {
+              datasets: [dedupContextDataset],
+              concurrency: 1,
+              task: async ({ input }: DedupContextExample): Promise<DedupContextOutput> => {
+                if (!input) {
+                  throw new Error('Deduplication context input is missing');
+                }
+
+                await replaceStoredFeatures(
+                  kbnClient,
+                  source.id,
+                  input.seededFeature ? [input.seededFeature] : []
+                );
+
+                const { features, searchCalls } = await runFeatureIdentificationAgent({
+                  fetch,
+                  log,
+                  streamName: source.id,
+                  connectorId: connector.id,
+                  sampleDocuments: input.sampleDocuments,
+                  knownFeatureIds: input.knownFeatureIds,
                 });
-                return { response: { results } };
-              };
 
-              const { features } = await identifyFeatures({
-                target: {
-                  id: MANAGED_STREAM_NAME,
-                  name: MANAGED_STREAM_NAME,
-                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
-                  samplingSource: MANAGED_STREAM_NAME,
-                } satisfies AnalysisTarget,
-                sampleDocuments: input.sampleDocuments,
-                systemPrompt: featuresPrompt,
-                inferenceClient,
-                logger,
-                signal: new AbortController().signal,
-                knownFeatureIds: input.knownFeatureIds,
-                additionalTools: { search_similar_features: searchTool },
-                additionalToolCallbacks: { search_similar_features: searchCallback },
-              });
-
-              return { features, searchCalls };
+                return { features, searchCalls };
+              },
             },
-          },
-          [dedupContextContractEvaluator]
-        );
+            [dedupContextContractEvaluator]
+          );
+        } finally {
+          try {
+            await replaceStoredFeatures(kbnClient, source.id, []);
+          } finally {
+            try {
+              await deleteEvalSource({ fetch, source });
+            } finally {
+              await apiServices.streams.disable().catch(() => {});
+            }
+          }
+        }
       }
     );
   }

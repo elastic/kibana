@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
@@ -16,8 +15,6 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   cached_tokens_used: number;
   duration_ms: number;
   source_id: string;
-  tool_usage?: SignificantEventsToolUsage;
-  external_content_tool_continuations?: number;
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps {
