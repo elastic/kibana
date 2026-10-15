@@ -449,6 +449,11 @@ export interface ServiceAccountAuditEventParams {
    * message only.
    */
   force?: boolean;
+  /**
+   * The platform services, outside Kibana, that a create names as assumers of the account.
+   * Recorded in the message only.
+   */
+  platformAssumers?: readonly string[];
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
@@ -458,6 +463,7 @@ export function serviceAccountAuditEvent({
   serviceAccount,
   workload,
   force,
+  platformAssumers,
   outcome,
   error,
 }: ServiceAccountAuditEventParams): AuditEvent {
@@ -479,7 +485,10 @@ export function serviceAccountAuditEvent({
         workload.plugin_id
       }/${workload.type}/${workload.id}]`
     : '';
-  const doc = `${accountDoc}${workloadDoc}${force ? ' [force=true]' : ''}`;
+  const assumersDoc = platformAssumers?.length
+    ? ` [platformAssumers=${platformAssumers.join(',')}]`
+    : '';
+  const doc = `${accountDoc}${workloadDoc}${force ? ' [force=true]' : ''}${assumersDoc}`;
 
   const [present, progressive, past] = serviceAccountAuditVerbs[action];
   // An error with an `unknown` outcome is a failure whose cleanup could not be confirmed, so the

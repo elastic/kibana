@@ -20,12 +20,6 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
  */
 const sandboxElasticsearchUiamConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  // UIAM platform service account of sandbox-api, added to the account's `assumable_by`.
-  assumer_service_account_id: schema.string({
-    defaultValue: 'sandbox-api',
-    minLength: 1,
-    maxLength: 1024,
-  }),
   // Elasticsearch roles the account is limited to. UIAM caps them at 50 names of 507 characters.
   roles: schema.arrayOf(schema.string({ minLength: 1, maxLength: 507 }), {
     defaultValue: ['nightshift'],

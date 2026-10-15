@@ -324,5 +324,38 @@ describe('<Host />', () => {
         expect(getByTestId('host-panel-header')).toHaveTextContent('Risk: Low');
       });
     });
+
+    describe('risk summary', () => {
+      it('shows only the resolution-group risk score in the group view', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+        expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+      });
+
+      it('shows only the individual risk score when no aliases are returned', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord);
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+        expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
+          'Entity risk contributions'
+        );
+      });
+    });
   });
 });

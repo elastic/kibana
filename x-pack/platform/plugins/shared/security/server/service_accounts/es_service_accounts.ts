@@ -17,7 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
   AuditLogger,
@@ -204,7 +204,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     const cleanup: CreateCleanupReport = {};
@@ -252,7 +252,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams,
+    params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger,
     cleanup: CreateCleanupReport
   ): Promise<ServiceAccount> {
@@ -292,13 +292,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles, description, assumableByPlatformServiceAccounts } =
-      parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
-    // Silently dropping the platform assumers would leave the caller holding an account that the
-    // platform service it was created for cannot use.
-    if (assumableByPlatformServiceAccounts) {
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
+      params,
+      ES_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
+    // Elasticsearch service accounts cannot be assumed by anything outside this Kibana. Dropping
+    // the assumers would hand back an account the platform service cannot use.
+    if (platformAssumers?.length) {
       throw Boom.badRequest(
-        'Cannot create a service account: `assumableByPlatformServiceAccounts` requires the UIAM backend'
+        'Cannot create a service account: `platformAssumers` is only supported when service accounts are backed by UIAM'
       );
     }
     const serviceAccountId = `${namespace}/${name}`;

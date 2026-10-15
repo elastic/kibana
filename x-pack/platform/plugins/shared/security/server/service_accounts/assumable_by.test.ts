@@ -33,7 +33,7 @@ describe('buildAssumableBy', () => {
         organizationId: 'organization-id',
         projectId: 'project-id',
         projectType: 'observability',
-        platformServiceAccountIds: ['sandbox-api'],
+        platformServiceAccountIds: ['relay-service', 'sandbox-api'],
       })
     ).toEqual([
       {
@@ -42,6 +42,7 @@ describe('buildAssumableBy', () => {
         project_type: 'observability',
         project_id: 'project-id',
       },
+      { type: 'platform-service-account', service_account_id: 'relay-service' },
       { type: 'platform-service-account', service_account_id: 'sandbox-api' },
     ]);
   });

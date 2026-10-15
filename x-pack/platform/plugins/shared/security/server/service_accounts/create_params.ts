@@ -7,33 +7,26 @@
 
 import Boom from '@hapi/boom';
 
-import type { CreateServiceAccountParams } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams } from '@kbn/core-security-server';
 import { z } from '@kbn/zod';
 
+import { PLATFORM_ASSUMERS } from './platform_assumers';
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
 import {
   getCreateServiceAccountParamsSchema,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 
-/** UIAM caps `assumable_by` at 100 entries, and the current project always takes one of them. */
-export const MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS = 99;
-
 /**
- * Create parameters accepted from callers of the server contract. A superset of the route body:
- * `assumableByPlatformServiceAccounts` is never accepted over HTTP. Duplicate IDs are dropped,
- * keeping first occurrences in order.
+ * The route schema plus `platformAssumers`, which only server-side callers may pass. Duplicate
+ * names are dropped, keeping first occurrences in order.
  */
 const getServerCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
   getCreateServiceAccountParamsSchema(limits).extend({
-    assumableByPlatformServiceAccounts: z
+    platformAssumers: z
       .preprocess(
-        (ids) => (Array.isArray(ids) ? Array.from(new Set(ids)) : ids),
-        z
-          .array(z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH))
-          .min(1)
-          .max(MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS)
+        (assumers) => (Array.isArray(assumers) ? Array.from(new Set(assumers)) : assumers),
+        z.array(z.enum(PLATFORM_ASSUMERS)).max(PLATFORM_ASSUMERS.length)
       )
       .optional(),
   });
@@ -54,7 +47,7 @@ export type ParsedCreateServiceAccountParams = ReturnType<
  * Rejects with a 400, so the failure looks the same whichever entry point the caller used.
  */
 export const parseCreateServiceAccountParams = (
-  params: CreateServiceAccountParams,
+  params: CreateServiceAccountServerParams,
   limits: ServiceAccountRoleLimits
 ): ParsedCreateServiceAccountParams => {
   const parsed = getServerCreateServiceAccountParamsSchema(limits).safeParse(params);
@@ -76,7 +69,9 @@ export const parseCreateServiceAccountParams = (
  * {@link parseCreateServiceAccountParams} has vouched for anything, so the name is checked on its
  * own here rather than written to the log as received.
  */
-export const auditableName = (params: CreateServiceAccountParams): { name: string } | undefined => {
+export const auditableName = (
+  params: CreateServiceAccountServerParams
+): { name: string } | undefined => {
   const parsed = serviceAccountNameSchema.safeParse(params.name);
   return parsed.success ? { name: parsed.data } : undefined;
 };

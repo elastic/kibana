@@ -383,24 +383,19 @@ describe('Create service account route', () => {
       ]);
     });
 
-    // Platform assumers are for server-side callers only, never for a browser.
-    it('rejects `assumableByPlatformServiceAccounts`, which only the server contract accepts', () => {
-      expect(
-        issuesFor({ ...requestBody, assumableByPlatformServiceAccounts: ['sandbox-api'] })
-      ).toEqual([
-        expect.objectContaining({
-          code: 'unrecognized_keys',
-          keys: ['assumableByPlatformServiceAccounts'],
-        }),
-      ]);
-    });
-
     // Callers choose roles through `roles`; the UIAM role assignments model is Kibana's to build.
     it('rejects `role_assignments`, which Kibana supplies itself', () => {
       expect(
         issuesFor({ ...requestBody, role_assignments: { limit: { access: ['application'] } } })
       ).toEqual([
         expect.objectContaining({ code: 'unrecognized_keys', keys: ['role_assignments'] }),
+      ]);
+    });
+
+    // Platform assumers come from server-side callers only, never from a browser.
+    it('rejects `platformAssumers`, which only the server contract accepts', () => {
+      expect(issuesFor({ ...requestBody, platformAssumers: ['relay'] })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['platformAssumers'] }),
       ]);
     });
 

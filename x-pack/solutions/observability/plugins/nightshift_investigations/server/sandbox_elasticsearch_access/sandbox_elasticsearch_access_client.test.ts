@@ -20,7 +20,6 @@ const CONFIG = {
   enabled: true,
   serviceAccountName: 'nightshift-sandbox',
   roles: ['nightshift'],
-  assumerServiceAccountId: 'sandbox-api',
 };
 
 const binding = (
@@ -95,7 +94,7 @@ describe('createSandboxElasticsearchAccessClient', () => {
       name: 'nightshift-sandbox-space-a',
       description: expect.stringContaining('[space-a]'),
       roles: ['nightshift'],
-      assumableByPlatformServiceAccounts: ['sandbox-api'],
+      platformAssumers: ['sandbox'],
     });
     expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(request, {
       workloadType: 'sandbox_elasticsearch',

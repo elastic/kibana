@@ -209,7 +209,6 @@ export class NightshiftInvestigationsPlugin
         enabled: uiamConfig?.enabled ?? false,
         serviceAccountName: uiamConfig?.service_account_name ?? 'nightshift-sandbox',
         roles: uiamConfig?.roles ?? ['nightshift'],
-        assumerServiceAccountId: uiamConfig?.assumer_service_account_id ?? 'sandbox-api',
       },
       logger: sandboxEsAccessLogger,
     });

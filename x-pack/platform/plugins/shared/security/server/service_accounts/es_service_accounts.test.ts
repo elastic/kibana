@@ -157,6 +157,20 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    it('rejects platform assumers, which only UIAM supports', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: ['relay'] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('creates the account when the list of platform assumers is empty', async () => {
+      mockHappyPath();
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: [] })
+      ).resolves.toEqual(createdAccount);
+    });
+
     it('rejects an oversized description before creating an account', async () => {
       await expect(
         serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })
@@ -441,19 +455,6 @@ describe('EsServiceAccounts', () => {
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    // Elasticsearch service accounts have no `assumable_by`; dropping the field silently would
-    // hand back an account the platform service cannot use.
-    it('rejects platform assumers, which only UIAM supports', async () => {
-      await expect(
-        serviceAccounts.create(request, {
-          ...createParams,
-          assumableByPlatformServiceAccounts: ['sandbox-api'],
-        })
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
-
-      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {

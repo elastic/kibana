@@ -7,12 +7,9 @@
 
 import Boom from '@hapi/boom';
 
-import type { CreateServiceAccountParams } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams } from '@kbn/core-security-server';
 
-import {
-  MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS,
-  parseCreateServiceAccountParams,
-} from './create_params';
+import { parseCreateServiceAccountParams } from './create_params';
 import { SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH } from '../../common/service_accounts';
 
 /** Each backend passes its own limits. Small ones keep the boundary cases readable. */
@@ -20,7 +17,7 @@ const limits = { maxRoles: 3, maxRoleNameLength: 8 };
 const { maxRoles, maxRoleNameLength } = limits;
 
 /** Returns the Boom error `parseCreateServiceAccountParams` threw, or fails the test. */
-const expectRejection = (params: CreateServiceAccountParams): Boom.Boom => {
+const expectRejection = (params: CreateServiceAccountServerParams): Boom.Boom => {
   try {
     parseCreateServiceAccountParams(params, limits);
   } catch (e) {
@@ -54,7 +51,7 @@ describe('parseCreateServiceAccountParams', () => {
   // There is no "derive them from the creator" default, so an omitted `roles` is a 400 and not
   // the widest grant the creator could make.
   it('rejects an omitted roles array', () => {
-    const error = expectRejection({ name: 'nightshift-relay' } as CreateServiceAccountParams);
+    const error = expectRejection({ name: 'nightshift-relay' } as CreateServiceAccountServerParams);
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`roles`');
@@ -134,7 +131,9 @@ describe('parseCreateServiceAccountParams', () => {
   });
 
   it('falls back to `params` when the issue has no path', () => {
-    const error = expectRejection('nightshift-relay' as unknown as CreateServiceAccountParams);
+    const error = expectRejection(
+      'nightshift-relay' as unknown as CreateServiceAccountServerParams
+    );
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`params`');
@@ -177,40 +176,42 @@ describe('parseCreateServiceAccountParams', () => {
     expect(error.message).toContain('`description`');
   });
 
-  describe('assumableByPlatformServiceAccounts', () => {
-    it('passes the platform service accounts along, dropping duplicates', () => {
+  describe('platformAssumers', () => {
+    it('passes the assumers along, dropping duplicates', () => {
       expect(
         parseCreateServiceAccountParams(
           {
-            name: 'nightshift-sandbox',
+            name: 'nightshift-relay',
             roles: ['viewer'],
-            assumableByPlatformServiceAccounts: ['sandbox-api', 'sandbox-api', 'other'],
+            platformAssumers: ['relay', 'sandbox', 'relay'],
           },
           limits
         )
       ).toEqual({
-        name: 'nightshift-sandbox',
+        name: 'nightshift-relay',
         roles: ['viewer'],
-        assumableByPlatformServiceAccounts: ['sandbox-api', 'other'],
+        platformAssumers: ['relay', 'sandbox'],
       });
     });
 
-    it.each<[string, string[]]>([
-      ['an empty list', []],
-      ['an empty id', ['']],
-      [
-        'more ids than UIAM accepts next to the project',
-        Array.from({ length: MAX_ASSUMABLE_BY_PLATFORM_SERVICE_ACCOUNTS + 1 }, (_, i) => `sa-${i}`),
-      ],
-    ])('rejects %s', (_, assumableByPlatformServiceAccounts) => {
+    it('accepts an empty list', () => {
+      expect(
+        parseCreateServiceAccountParams(
+          { name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] },
+          limits
+        )
+      ).toEqual({ name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] });
+    });
+
+    it('rejects an assumer that is not in the catalog', () => {
       const error = expectRejection({
-        name: 'nightshift-sandbox',
+        name: 'nightshift-relay',
         roles: ['viewer'],
-        assumableByPlatformServiceAccounts,
-      });
+        platformAssumers: ['unknown-service'],
+      } as never);
 
       expect(error.output.statusCode).toBe(400);
-      expect(error.message).toContain('`assumableByPlatformServiceAccounts');
+      expect(error.message).toContain('`platformAssumers');
     });
   });
 });

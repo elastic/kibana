@@ -25,12 +25,6 @@ export interface CreateServiceAccountParams {
    * last editor could do is the model service accounts exist to replace.
    */
   roles: string[];
-  /**
-   * IDs of UIAM platform service accounts that may also exchange the account's credentials, in
-   * addition to the current project. Server-side only: the HTTP route rejects it, and the
-   * Elasticsearch backend, which has no such concept, refuses a create that sets it.
-   */
-  assumableByPlatformServiceAccounts?: string[];
 }
 
 /**

@@ -167,12 +167,12 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
-    it('appends the requested platform service accounts to `assumable_by` after the project', async () => {
+    it('appends the named platform assumers to `assumable_by` after the project', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
       await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
         ...createParams,
-        assumableByPlatformServiceAccounts: ['sandbox-api', 'other-service', 'sandbox-api'],
+        platformAssumers: ['relay', 'sandbox', 'relay'],
       });
 
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
@@ -185,12 +185,35 @@ describe('UiamServiceAccounts', () => {
               project_type: 'security',
               project_id: 'project-id',
             },
+            { type: 'platform-service-account', service_account_id: 'relay-service' },
             { type: 'platform-service-account', service_account_id: 'sandbox-api' },
-            { type: 'platform-service-account', service_account_id: 'other-service' },
           ],
         }),
         undefined
       );
+    });
+
+    it('refuses an assumer that is not in the catalog, without calling UIAM', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['unknown-service'],
+        } as never)
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('ignores an `assumable_by` passed in the params', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 'other-service' }],
+      } as never);
+
+      const [, body] = mockUiam.createServiceAccount.mock.calls[0];
+      expect(JSON.stringify(body)).not.toContain('other-service');
     });
 
     // UIAM counts duplicates against its 50-role cap before dropping them, so the request is
@@ -579,6 +602,23 @@ describe('UiamServiceAccounts', () => {
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             user: { target: { id: 'service-account-id', name: 'nightshift-relay' } },
+          })
+        );
+      });
+
+      it('names the platform assumers in the `success` event, without returning them', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+        const created = await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          platformAssumers: ['relay', 'relay'],
+        });
+
+        expect(created).not.toHaveProperty('platformAssumers');
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'User has created service account [id=service-account-id, name=nightshift-relay] [platformAssumers=relay]',
           })
         );
       });

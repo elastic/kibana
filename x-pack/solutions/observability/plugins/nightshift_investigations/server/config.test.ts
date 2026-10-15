@@ -18,7 +18,6 @@ describe('Nightshift investigations configuration', () => {
 
   const UIAM_DEFAULTS = {
     enabled: false,
-    assumer_service_account_id: 'sandbox-api',
     roles: ['nightshift'],
     service_account_name: 'nightshift-sandbox',
   };
@@ -35,14 +34,13 @@ describe('Nightshift investigations configuration', () => {
       config.schema.validate({
         sandbox: {
           elasticsearch: {
-            uiam: { enabled: true, assumer_service_account_id: 'sbx', roles: ['viewer'] },
+            uiam: { enabled: true, roles: ['viewer'] },
           },
         },
       }).sandbox?.elasticsearch.uiam
     ).toEqual({
       ...UIAM_DEFAULTS,
       enabled: true,
-      assumer_service_account_id: 'sbx',
       roles: ['viewer'],
     });
   });

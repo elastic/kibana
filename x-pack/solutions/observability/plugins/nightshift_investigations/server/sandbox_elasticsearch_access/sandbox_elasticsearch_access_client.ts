@@ -62,7 +62,6 @@ export interface SandboxElasticsearchAccessConfig {
   /** Prefix of the account name; the space id is appended. */
   serviceAccountName: string;
   roles: string[];
-  assumerServiceAccountId: string;
 }
 
 export interface SandboxElasticsearchAccessClientDeps {
@@ -143,7 +142,7 @@ export const createSandboxElasticsearchAccessClient = ({
       name: getSandboxServiceAccountName(config.serviceAccountName, spaceId),
       description: `Lets the Nightshift sandbox query this project through sandbox-api, for space [${spaceId}].`,
       roles: config.roles,
-      assumableByPlatformServiceAccounts: [config.assumerServiceAccountId],
+      platformAssumers: ['sandbox'],
     });
     logger.info(
       `Created sandbox Elasticsearch service account [${account.id}] for space [${spaceId}]`

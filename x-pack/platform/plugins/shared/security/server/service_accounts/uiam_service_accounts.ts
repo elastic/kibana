@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -25,6 +25,7 @@ import { parseCreateServiceAccountParams } from './create_params';
 import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
@@ -191,25 +192,19 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     try {
       const account = await this.createAccount(request, params, auditLogger);
-      auditLogger.log(
-        serviceAccountAuditEvent({
-          action: ServiceAccountAuditAction.CREATE,
-          serviceAccount: { id: account.id, name: account.name },
-        })
-      );
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
         serviceAccountBackend: 'uiam',
       });
       return account;
     } catch (e) {
-      // An authorization refusal is the one failure audited, and `createAccount` logs it where
-      // it happens.
+      // An authorization refusal is the one failure audited. `createAccount` logs it, and the
+      // success event, where the validated parameters are in scope.
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
@@ -218,10 +213,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
-  /** `auditLogger` records an authorization refusal. */
+  /** `auditLogger` records the created account, or an authorization refusal. */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams,
+    params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
@@ -230,8 +225,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles, description, assumableByPlatformServiceAccounts } =
-      parseCreateServiceAccountParams(params, UIAM_SERVICE_ACCOUNT_ROLE_LIMITS);
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
+      params,
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
@@ -246,6 +243,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           serviceAccountAuditEvent({
             action: ServiceAccountAuditAction.CREATE,
             serviceAccount: { name },
+            platformAssumers,
             error,
           })
         ),
@@ -266,7 +264,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy({
             ...this.cloudProjectContext,
-            platformServiceAccountIds: assumableByPlatformServiceAccounts,
+            platformServiceAccountIds: getPlatformAssumerServiceAccountIds(platformAssumers ?? []),
           }),
         },
         // External API keys must not carry client authentication (`null`); everything else is
@@ -285,6 +283,14 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     // caller, describing a failure that did not happen. The roles are echoed from the request
     // rather than read back. UIAM stores them as sent, and the directory reads the same roles out
     // of its role assignments on list and get.
+    auditLogger.log(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: result.id, name: result.name },
+        platformAssumers,
+      })
+    );
+
     return {
       id: result.id,
       name: result.name,
