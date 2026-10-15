@@ -45,6 +45,8 @@ export interface MapMarker {
   label?: string;
   tone?: NamedColor;
   value?: number;
+  /** What the marker's size encodes, when it is not \`value\`. */
+  size?: number;
   group?: string;
 }
 
@@ -97,6 +99,10 @@ export interface MapNode extends PrimitiveNode {
   markers?: MapMarker[];
   /** Colors markers by `value` and sizes them by it, as Kibana draws geo-grid clusters. */
   markerRamp?: MapRamp;
+  /** Radius range in pixels for markers sized by \`size\`, or by \`value\` without one. */
+  markerSize?: { min: number; max: number };
+  /** \`inside\` centers a marker's label on it, as Kibana prints a cluster's count. Defaults to \`beside\`. */
+  markerLabels?: 'beside' | 'inside';
   cells?: MapCell[];
   cellShape?: MapCellShape;
   cellRamp?: MapRamp;
