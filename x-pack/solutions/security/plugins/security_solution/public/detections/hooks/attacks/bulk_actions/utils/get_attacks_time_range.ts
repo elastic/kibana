@@ -12,8 +12,13 @@ import type { TimeRange } from '../../../../../common/store/inputs/model';
  * How far back from an attack's own timestamp the timeline looks.
  *
  * Matches Attack Discovery's default alert selection window, which is the widest span the alerts
- * behind an attack are normally drawn from. A schedule configured to look back further could
- * still generate an attack whose oldest alerts fall outside this.
+ * behind an attack are normally drawn from.
+ *
+ * It is a default rather than a maximum. A schedule configured with a longer window, say
+ * `start: now-7d`, can produce an attack whose oldest alerts fall outside this, and those alerts
+ * stay hidden even though the filter names them by id. Fixing that needs the window the attack
+ * was generated from, which the alert does not carry the way a detection alert carries
+ * `kibana.alert.rule.from`. Tracked in #298153.
  */
 const ATTACK_LOOKBACK_HOURS = 24;
 
