@@ -117,7 +117,41 @@ describe('AutomationsPage', () => {
     };
     renderPage();
 
-    expect(screen.getByTestId('nightshiftAutomationsServiceAccountReadOnly')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftAutomationsServiceAccountReadOnly')).toHaveTextContent(
+      'manage_security'
+    );
+    // The action stays visible, disabled, so the reason is discoverable where it is needed.
+    expect(screen.getByRole('button', { name: 'Create custom automation' })).toBeDisabled();
+  });
+
+  it('explains the missing privilege on the disabled create action', async () => {
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Create custom automation' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Requires the manage_security cluster privilege'
+    );
+  });
+
+  it('offers no edit actions to users without Nightshift manage', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: { capabilities: { nightshift: { manage: false } }, navigateToUrl: jest.fn() },
+        http: { basePath: { prepend: (path: string) => path } },
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
+    });
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    expect(
+      screen.queryByTestId('nightshiftAutomationsServiceAccountReadOnly')
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Create custom automation' })
     ).not.toBeInTheDocument();

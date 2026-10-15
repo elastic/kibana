@@ -8,12 +8,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
-import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useKibana } from '../hooks/use_kibana';
 import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
+import {
+  MANAGE_SECURITY_REQUIRED_BODY,
+  MANAGE_SECURITY_REQUIRED_REASON,
+  MANAGE_SECURITY_REQUIRED_TITLE,
+} from './utils/edit_permission';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 import { useAutomationFilters } from './hooks/use_automation_filters';
 import { useAutomationUsage, type TimeRange } from './hooks/use_automation_usage';
@@ -51,12 +55,19 @@ export const AutomationsPage = (): React.ReactElement => {
   ).canManage;
   // Automations run as the space's automations service account, and writing a workflow bound to
   // a service account requires manage_security.
+  // Until the status is known, nothing is offered for editing, so no action flickers in and out.
   const { data: serviceAccount } = useInvestigatorServiceAccount();
   const needsManageSecurity = serviceAccount?.serviceAccountsEnabled === true;
   const canManage =
     hasManagePrivilege &&
-    (!needsManageSecurity || serviceAccount?.canModifyBoundWorkflows === true);
-  const isReadOnlyForServiceAccount = hasManagePrivilege && needsManageSecurity && !canManage;
+    serviceAccount !== undefined &&
+    (!needsManageSecurity || serviceAccount.canModifyBoundWorkflows === true);
+  // A Nightshift manager who is only missing manage_security sees the edit actions disabled, with
+  // that reason, rather than not at all.
+  const editDisabledReason =
+    hasManagePrivilege && needsManageSecurity && !canManage
+      ? MANAGE_SECURITY_REQUIRED_REASON
+      : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
   const refreshAutomations = useRefreshAutomations();
@@ -130,13 +141,17 @@ export const AutomationsPage = (): React.ReactElement => {
       return hasActiveFilters ? (
         <FilteredEmptyPrompt onClearFilters={clearSearchAndFilters} />
       ) : (
-        <AutomationsEmptyPrompt onCreate={openCreateFlyout} />
+        <AutomationsEmptyPrompt
+          onCreate={openCreateFlyout}
+          createDisabledReason={editDisabledReason}
+        />
       );
     }
     return (
       <AutomationsTable
         automations={visibleAutomations}
         canManage={canManage}
+        editDisabledReason={editDisabledReason}
         runCounts={runCounts}
         usedToday={usedToday}
         getFacets={getFacets}
@@ -158,19 +173,14 @@ export const AutomationsPage = (): React.ReactElement => {
 
   return (
     <>
-      {isReadOnlyForServiceAccount && (
+      {editDisabledReason && (
         <>
           <KbnInfoCallout
             size="s"
-            title={i18n.translate('xpack.nightshift.automations.serviceAccountReadOnlyTitle', {
-              defaultMessage: 'Automations run as the Nightshift automations service account',
-            })}
+            title={MANAGE_SECURITY_REQUIRED_TITLE}
             data-test-subj="nightshiftAutomationsServiceAccountReadOnly"
           >
-            {i18n.translate('xpack.nightshift.automations.serviceAccountReadOnlyBody', {
-              defaultMessage:
-                'Creating, changing, or deleting them requires the manage_security cluster privilege. Ask an administrator.',
-            })}
+            {MANAGE_SECURITY_REQUIRED_BODY}
           </KbnInfoCallout>
           <EuiSpacer size="m" />
         </>
@@ -211,6 +221,7 @@ export const AutomationsPage = (): React.ReactElement => {
               refreshAutomations();
             }}
             onCreate={openCreateFlyout}
+            createDisabledReason={editDisabledReason}
           />
         </>
       )}
@@ -228,6 +239,7 @@ export const AutomationsPage = (): React.ReactElement => {
           automations={orderedAutomations}
           automation={detailAutomation}
           canManage={canManage}
+          editDisabledReason={editDisabledReason}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
           runRange={runRange}
           rangeLabel={rangeLabel}
