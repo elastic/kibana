@@ -221,6 +221,38 @@ describe('Actions Plugin', () => {
       );
     });
 
+    describe('routeHandlerContext.getSpecsClient()', () => {
+      it('returns a client with get and getAll', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+
+        expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
+        expect(handler[0]).toEqual('actions');
+
+        const actionsContextHandler = (await handler[1](
+          {
+            core: {
+              savedObjects: {
+                client: {},
+              },
+              elasticsearch: {
+                client: jest.fn(),
+              },
+            },
+          } as unknown as RequestHandlerContext,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        )) as unknown as ActionsApiRequestHandlerContext;
+
+        const specsClient = actionsContextHandler.getSpecsClient();
+        expect(typeof specsClient.get).toBe('function');
+        expect(typeof specsClient.getAll).toBe('function');
+      });
+    });
+
     describe('routeHandlerContext.getActionsClient()', () => {
       it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {

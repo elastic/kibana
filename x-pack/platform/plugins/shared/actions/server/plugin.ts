@@ -1157,6 +1157,17 @@ export class ActionsPlugin
             securityService: coreStart.security,
           });
         },
+        getSpecsClient: () => {
+          return new SpecsClient({
+            actionTypeRegistry: actionTypeRegistry!,
+            configurationUtilities: actionsConfigUtils,
+            access: {
+              kind: 'request',
+              authorization: instantiateAuthorization(request),
+              auditLogger: security?.audit.asScoped(request),
+            },
+          });
+        },
         listTypes: (featureId?: string) => {
           return actionTypeRegistry!.list({ featureId });
         },

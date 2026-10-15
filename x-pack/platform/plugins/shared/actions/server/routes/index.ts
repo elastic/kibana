@@ -77,7 +77,7 @@ export function defineRoutes(opts: RouteOptions) {
   connectorAuthStatusRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 
-  getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+  getConnectorSpecRoute(router, licenseState);
 
   // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
   if (inboundEvents) {
