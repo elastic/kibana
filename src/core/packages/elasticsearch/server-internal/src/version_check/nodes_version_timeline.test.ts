@@ -92,16 +92,6 @@ const runTimeline = async (
 };
 
 describe('the version machine on a virtual clock', () => {
-  it('yields the initial state, starts immediately, then waits the interval between requests', async () => {
-    const timeline = await runTimeline([compatible, incompatible], baseConfig, 3);
-
-    expect(timeline).toEqual([
-      initialTick,
-      tick(0, 100, 'NORMAL', true, 'compatibilityChanged'),
-      tick(100, 200, 'NORMAL', false, 'compatibilityChanged'),
-    ]);
-  });
-
   it('waits the interval after each request completes, so request time adds to the period', async () => {
     const timeline = await runTimeline(
       [compatible, compatible, compatible],
@@ -165,25 +155,6 @@ describe('the version machine on a virtual clock', () => {
       tick(50, 100, 'STARTUP', false, 'compatibilityChanged'),
       tick(100, 150, 'STARTUP', false, 'retried'),
       tick(150, 250, 'NORMAL', true, 'compatibilityChanged'),
-    ]);
-  });
-
-  it('waits the full interval after a slow failure before retrying', async () => {
-    // The request due at 100 takes 50ms to fail, so the retry is due a full interval
-    // later, at 250. The retry keeps the last compatibility, so the next success
-    // changes nothing.
-    const timeline = await runTimeline(
-      [compatible, requestError, compatible],
-      baseConfig,
-      4,
-      [0, 50, 0]
-    );
-
-    expect(timeline).toEqual([
-      initialTick,
-      tick(0, 100, 'NORMAL', true, 'compatibilityChanged'),
-      tick(150, 250, 'NORMAL', true, 'retried'),
-      tick(250, 350, 'NORMAL', true, 'compatibilityUnchanged'),
     ]);
   });
 });

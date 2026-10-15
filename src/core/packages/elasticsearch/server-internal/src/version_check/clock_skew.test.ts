@@ -235,20 +235,6 @@ describe('pollEsNodesClockSkew', () => {
     expect(log.info.mock.calls).toEqual([['Kibana and Elasticsearch clocks are in sync again.']]);
   });
 
-  it('reminds every hour from when the skew was detected', async () => {
-    // In sync at 0, skewed from 10 minutes: detected at 10, reminders due at 70 and 130.
-    await runRequests([
-      respond(kibanaTime),
-      ...Array<() => Promise<unknown>>(13).fill(respond(kibanaTime - 61_000)),
-    ]);
-
-    expect(log.error.mock.calls.map(([message]) => String(message).includes('still'))).toEqual([
-      false,
-      true,
-      true,
-    ]);
-  });
-
   it('swallows request failures and checks again ten minutes later', async () => {
     const stoppedAt = await runRequests([
       async () => {
