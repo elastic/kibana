@@ -34,19 +34,34 @@ import type { TilePeriod } from './tile_period';
  * `period` shifts the whole window back by one range ('previous'), for the period-over-period
  * delta. The previous period only needs the counts, so it leaves out the entity id lists.
  */
-export const buildAlertBasedTilesQuery = (
-  entitiesIndexName: string,
-  spaceId: string,
-  timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = [],
-  period: TilePeriod = 'current'
-): string => {
+interface AlertTilesHeadOptions {
+  entitiesIndexName: string;
+  spaceId: string;
+  /** The ES|QL condition that keeps the alerts of the window the query covers. */
+  windowCondition: string;
+  entityFilterClauses: string[];
+  /** Passed to the alert pipeline to get one row per (bucket, entity) for the sparkline series. */
+  bucketExpression?: string;
+}
+
+/**
+ * The stages the alert based tile queries share, up to the resolved entity and its watchlist flag:
+ * the alerts of the window, their entity ids, the join to the entities, the entity filters.
+ * The count and the sparkline series both start here, so they cannot drift apart.
+ */
+export const buildAlertTilesHead = ({
+  entitiesIndexName,
+  spaceId,
+  windowCondition,
+  entityFilterClauses,
+  bucketExpression,
+}: AlertTilesHeadOptions): string[] => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${getAlertsIndex(spaceId)}`);
-  parts.push(`| WHERE ${buildPeriodCondition('@timestamp', timeRange, period)}`);
-  parts.push(...buildAlertEuidPipeline());
+  parts.push(`| WHERE ${windowCondition}`);
+  parts.push(...buildAlertEuidPipeline(bucketExpression));
 
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
@@ -56,10 +71,27 @@ export const buildAlertBasedTilesQuery = (
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
+  parts.push(`| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL`);
+
+  return parts;
+};
+
+export const buildAlertBasedTilesQuery = (
+  entitiesIndexName: string,
+  spaceId: string,
+  timeRange: TimeRange = '24h',
+  entityFilterClauses: string[] = [],
+  period: TilePeriod = 'current'
+): string => {
+  const parts = buildAlertTilesHead({
+    entitiesIndexName,
+    spaceId,
+    windowCondition: buildPeriodCondition('@timestamp', timeRange, period),
+    entityFilterClauses,
+  });
 
   // One row per resolved entity: whether any of its alerting records has a severe alert or
   // is watchlisted.
-  parts.push(`| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL`);
   parts.push(
     `| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id`
   );

@@ -80,6 +80,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
     "@kbn/scout",
+    "@kbn/mock-idp-utils",
     "@kbn/object-utils",
     "@kbn/alerting-v2-browser-shared",
     "@kbn/alerting-v2-constants",

@@ -22,6 +22,10 @@ export const servers: ScoutServerConfig = {
       '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
       '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
       '--uiSettings.globalOverrides.alerting:v2:enabled=true',
+      // Action policies hold UIAM API keys here. Without this, Task Manager clones the dispatcher
+      // request key through the native ES endpoint, which rejects raw `essu_` credentials, so no
+      // workflow execution can be scheduled.
+      '--xpack.task_manager.grant_uiam_api_keys=true',
     ],
   },
 };

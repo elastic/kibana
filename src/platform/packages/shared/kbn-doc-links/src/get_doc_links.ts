@@ -479,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       notesPage: `${ELASTIC_DOCS}solutions/security/investigate/notes`,
       timelinesPage: `${ELASTIC_DOCS}solutions/security/investigate/timeline`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
+      attackDiscovery: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },
@@ -1134,7 +1135,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       quickstart: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-quickstart`,
       dataSources: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources`,
       datasets: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets`,
-      datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets#dataset-settings`,
+      datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-dataset-settings`,
+      datasetMappings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-schema#declare-a-schema-explicitly`,
       authentication: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#authentication`,
       grantReadAccess: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#grant-read-access`,
       staticCredentials: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-static-credentials`,
@@ -1174,6 +1176,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
       featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
       externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
+      selfHostedInference: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models#connect-a-local-llm`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless

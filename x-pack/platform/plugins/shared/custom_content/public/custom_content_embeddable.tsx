@@ -16,6 +16,7 @@ import type {
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -28,6 +29,7 @@ import {
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
@@ -374,6 +376,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       }
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
+
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
@@ -389,6 +393,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           previewHtml,
           timeRange,
           isGenerating,
+          viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -400,7 +405,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables$,
           previewHtml$,
           effectiveTimeRange$,
-          isGenerating$
+          isGenerating$,
+          viewMode$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -525,7 +531,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               filters={filters}
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
-              isAiAvailable={Boolean(agentBuilder)}
+              isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
