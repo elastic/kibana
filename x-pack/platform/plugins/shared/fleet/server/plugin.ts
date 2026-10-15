@@ -48,7 +48,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
-import { FLEET_PACKAGE_WORKFLOW } from '@kbn/workflows/managed';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -149,6 +148,10 @@ import { FleetActionsClient, type FleetActionsClientInterface } from './services
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import {
+  registerWorkflowAssetsOwner,
+  startManagedWorkflowsClient,
+} from './services/epm/kibana/workflows/managed_client';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerFieldsMetadataExtractors } from './services/register_fields_metadata_extractors';
@@ -406,9 +409,10 @@ export class FleetPlugin
       config.enableExperimental ?? [],
       config.experimentalFeatures || {}
     );
-    if (experimentalFeatures.enableWorkflowAssets) {
-      deps.workflowsExtensions?.registerManagedWorkflowOwner(FLEET_PACKAGE_WORKFLOW.pluginId);
-    }
+    registerWorkflowAssetsOwner({
+      enabled: experimentalFeatures.enableWorkflowAssets === true,
+      workflowsExtensions: deps.workflowsExtensions,
+    });
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -875,20 +879,13 @@ export class FleetPlugin
       featureFlags: core.featureFlags,
     });
     if (appContextService.getExperimentalFeatures().enableWorkflowAssets) {
-      const managedWorkflowsClientInit = Promise.resolve(
-        plugins.workflowsExtensions?.initManagedWorkflowsClient(FLEET_PACKAGE_WORKFLOW.pluginId)
-      )
-        .then(async (managedWorkflowsClient) => {
-          if (!managedWorkflowsClient) return undefined;
-          appContextService.setManagedWorkflowsClient(managedWorkflowsClient);
-          await managedWorkflowsClient.ready();
-          return managedWorkflowsClient;
+      appContextService.setManagedWorkflowsClientInit(
+        startManagedWorkflowsClient({
+          workflowsExtensions: plugins.workflowsExtensions,
+          setClient: (client) => appContextService.setManagedWorkflowsClient(client),
+          logger: this.logger,
         })
-        .catch((error) => {
-          this.logger?.error(`Failed to initialize the managed workflows client: ${error.message}`);
-          return undefined;
-        });
-      appContextService.setManagedWorkflowsClientInit(managedWorkflowsClientInit);
+      );
     }
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
