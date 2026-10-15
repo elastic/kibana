@@ -465,6 +465,12 @@ export function ComposeDiscoverFlyout({
    * remount to stay up while the unsaved-changes modal is open.
    */
   const { flyoutKey, reregister } = useEuiFlyoutReregister();
+  /*
+   * A reregister remount of a sole session replays EUI's opening slide-in, which
+   * reads as the flyout closing and reopening behind the confirm modal. The first
+   * mount keeps the default animation; every remount skips it.
+   */
+  const isReregistered = flyoutKey > 0;
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
 
@@ -1424,6 +1430,7 @@ export function ComposeDiscoverFlyout({
             session="start"
             historyKey={historyKey}
             flyoutMenuProps={{ title: sessionTitleRef.current }}
+            hasAnimation={isReregistered ? false : undefined}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={STACKED_FLYOUT_SIZE}

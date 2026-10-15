@@ -35,6 +35,7 @@ let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
 let latestFlyoutKey: number | undefined;
 let latestFlyoutSession: EuiFlyoutProps['session'];
 let latestFlyoutMenuTitle: string | undefined;
+let latestFlyoutHasAnimation: EuiFlyoutProps['hasAnimation'];
 
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
@@ -50,6 +51,7 @@ jest.mock('@elastic/eui', () => {
           latestFlyoutKey = (props as { 'data-flyout-key'?: number })['data-flyout-key'];
           latestFlyoutSession = props.session;
           latestFlyoutMenuTitle = props.flyoutMenuProps?.title;
+          latestFlyoutHasAnimation = props.hasAnimation;
         }
         return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
       }
@@ -1045,6 +1047,7 @@ describe('ComposeDiscoverFlyout', () => {
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
       const keyAfterEdit = latestFlyoutKey;
+      expect(latestFlyoutHasAnimation).toBeUndefined();
       fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
       expect(onClose).not.toHaveBeenCalled();
@@ -1052,6 +1055,8 @@ describe('ComposeDiscoverFlyout', () => {
       // EUI unregisters the session before onClose. Re-registering keeps the
       // panel up, and the query sandbox stays a child of that session.
       expect(latestFlyoutKey).toBe((keyAfterEdit ?? 0) + 1);
+      // The remount must not replay the opening slide-in behind the modal.
+      expect(latestFlyoutHasAnimation).toBe(false);
       expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
     });
 
