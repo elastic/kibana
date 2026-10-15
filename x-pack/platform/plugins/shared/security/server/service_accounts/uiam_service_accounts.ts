@@ -196,26 +196,15 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     try {
-      const { platformAssumers, ...account } = await this.createAccount(
-        request,
-        params,
-        auditLogger
-      );
-      auditLogger.log(
-        serviceAccountAuditEvent({
-          action: ServiceAccountAuditAction.CREATE,
-          serviceAccount: { id: account.id, name: account.name },
-          platformAssumers,
-        })
-      );
+      const account = await this.createAccount(request, params, auditLogger);
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
         serviceAccountBackend: 'uiam',
       });
       return account;
     } catch (e) {
-      // An authorization refusal is the one failure audited, and `createAccount` logs it where
-      // it happens.
+      // An authorization refusal is the one failure audited. `createAccount` logs it, and the
+      // success event, where the validated parameters are in scope.
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
@@ -224,15 +213,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
-  /**
-   * `auditLogger` records an authorization refusal. Also returns the validated platform assumers,
-   * so the audit event of a create records them.
-   */
+  /** `auditLogger` records the created account, or an authorization refusal. */
   private async createAccount(
     request: KibanaRequest,
     params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger
-  ): Promise<ServiceAccount & Pick<CreateServiceAccountServerParams, 'platformAssumers'>> {
+  ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot create a service account: security features are disabled in Elasticsearch'
@@ -297,12 +283,19 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     // caller, describing a failure that did not happen. The roles are echoed from the request
     // rather than read back. UIAM stores them as sent, and the directory reads the same roles out
     // of its role assignments on list and get.
+    auditLogger.log(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: result.id, name: result.name },
+        platformAssumers,
+      })
+    );
+
     return {
       id: result.id,
       name: result.name,
       roles,
       ...toDescriptionField(result.description),
-      platformAssumers,
     };
   }
 
