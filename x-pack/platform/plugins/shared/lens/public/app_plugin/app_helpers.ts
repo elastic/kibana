@@ -51,7 +51,7 @@ export function getTelemetrySource(
   }
   // without an originating path, the chart is created in the library, i.e., Visualize or the Dashboards' Visualizations tab.
   if (originatingApp === VISUALIZE_APP_ID || originatingApp === DASHBOARD_APP_ID) {
-    return 'visualize';
+    return 'library';
   }
   if (originatingApp === DISCOVER_APP_ID) {
     return 'discover';

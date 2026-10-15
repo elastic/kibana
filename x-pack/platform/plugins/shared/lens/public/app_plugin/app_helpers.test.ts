@@ -97,12 +97,12 @@ describe('App helpers', () => {
       ).toBeUndefined();
     });
 
-    it('returns visualize when creating from the Visualize library', () => {
-      expect(getTelemetrySource({ originatingApp: 'visualize' })).toBe('visualize');
+    it('returns library when creating from the Visualize library', () => {
+      expect(getTelemetrySource({ originatingApp: 'visualize' })).toBe('library');
     });
 
-    it('returns visualize when creating from the Dashboards app visualizations tab', () => {
-      expect(getTelemetrySource({ originatingApp: 'dashboards' })).toBe('visualize');
+    it('returns library when creating from the Dashboards app visualizations tab', () => {
+      expect(getTelemetrySource({ originatingApp: 'dashboards' })).toBe('library');
     });
 
     it('returns discover when editing a Discover chart in Lens', () => {
