@@ -384,7 +384,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           showAddIntegrations
           spacing="compact"
         />
-        <EuiPageTemplate.Section restrictWidth={false} grow alignment="center">
+        {/* Full-width content, or centering shrinks the landing to its content. */}
+        <EuiPageTemplate.Section
+          restrictWidth={false}
+          grow
+          alignment="center"
+          contentProps={{ css: { width: '100%' } }}
+        >
           <AgenticFirstEmptyStateLive
             onSubmitPrompt={handleLandingSubmit}
             onStartManually={() => setShowAgenticLanding(false)}
