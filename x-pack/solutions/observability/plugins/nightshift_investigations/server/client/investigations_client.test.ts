@@ -2006,3 +2006,50 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
     });
   });
 });
+
+describe('NightshiftInvestigationsClient.recordSlackThreadStatusMessage()', () => {
+  const THREAD_KEY = 'team:T1/channel:C1/thread:1.1';
+  const MESSAGE = { investigationId: 'inv-1', channel: 'C1', threadTs: '1.1', messageTs: '1.2' };
+  const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
+    makeStoredSubject({
+      subjectType: 'slack_thread',
+      subjectId: THREAD_KEY,
+      slack: { channel: 'C1', thread_ts: '1.1', ...slack },
+    });
+
+  it("records the message on the investigation's subject for the thread", async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject(), threadSubject()]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: '1.1', status_message_ts: '1.2' },
+      },
+    ]);
+  });
+
+  it('keeps a status message the thread already has', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ status_message_ts: '1.0' }),
+    ]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it('records nothing when the investigation is not about that thread', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject(),
+      threadSubject({ thread_ts: '9.9' }),
+    ]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+});

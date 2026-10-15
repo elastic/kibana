@@ -406,6 +406,15 @@ describe('generateWorkflowYaml', () => {
         });
       });
 
+      it("names the message's thread, so a reply in it continues the investigation", () => {
+        const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
+        expect(yaml.steps[0].with.slack_thread).toEqual({
+          workspace: '{{ event.workspace }}',
+          channel: '{{ event.channel }}',
+          thread_ts: '{{ event.messageId }}',
+        });
+      });
+
       it('puts the slack message in the prompt after the prompt template', () => {
         const automation = slackAutomation(slackRow());
         automation.execution.promptTemplate = 'Look for deploy problems.';

@@ -32,25 +32,35 @@ export const slackNotificationHandler: NotificationHandler = {
   validateParams: (params) => {
     parseSlackNotificationParams(params);
   },
-  prepareDelivery: ({ notificationDestination, investigation, url, phase, reason }) => {
+  prepareDelivery: ({
+    notificationDestination,
+    investigation,
+    url,
+    phase,
+    reason,
+    messageTs: editedMessageTs,
+  }) => {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
+    const text = formatInvestigationSlackMessage({
+      investigation,
+      url,
+      phase,
+      reason,
+      automationName: notificationDestination.automation_name,
+    });
+    const params: JsonObject = editedMessageTs
+      ? {
+          subAction: 'updateMessage',
+          subActionParams: { channel, messageTs: editedMessageTs, text },
+        }
+      : {
+          subAction: 'sendMessage',
+          subActionParams: { channel, text, ...(threadTs ? { threadTs } : {}) },
+        };
     return {
-      params: {
-        subAction: 'sendMessage',
-        subActionParams: {
-          channel,
-          text: formatInvestigationSlackMessage({
-            investigation,
-            url,
-            phase,
-            reason,
-            automationName: notificationDestination.automation_name,
-          }),
-          ...(threadTs ? { threadTs } : {}),
-        },
-      },
+      params,
       getOutcome: (response) => {
         if (response.status !== 'ok') {
           return {

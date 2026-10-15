@@ -17,7 +17,12 @@ import type {
   InvestigationSubject as StoredInvestigationSubject,
   InvestigationSubjectKey,
 } from '@kbn/agentic-investigations-plugin/common';
-import type { AlertSnapshot, InvestigationSubject, InvestigationTriggerType } from '../../common';
+import type {
+  AlertSnapshot,
+  InvestigationSubject,
+  InvestigationTriggerType,
+  SlackThreadReference,
+} from '../../common';
 import {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
@@ -65,20 +70,38 @@ const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'ty
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
 /**
+ * The key Agent Builder identifies a Slack thread's conversation by (its conversation origin),
+ * which is also the thread's subject id. Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => `team:${workspace}/channel:${channel}/thread:${threadTs}`;
+
+/**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
- * recorded under the investigation's own id, so it never matches another investigation.
+ * recorded under the investigation's own id, so it never matches another investigation. A start
+ * about a Slack thread also records the thread, which is how the Slack thread workflow finds the
+ * investigation when someone replies in it.
  */
 export const toStartSubjects = ({
   subject,
   alerts = [],
   triggerType,
   investigationId,
+  slackThread,
 }: {
   subject: InvestigationSubject;
   alerts?: AlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
+  slackThread?: SlackThreadReference;
 }): WorkflowSubjectInput[] => {
   const primaryId = isPlaceholderManualSubject(subject) ? investigationId : subject.id;
   const summary = truncateSummary(subject.summary);
@@ -88,9 +111,23 @@ export const toStartSubjects = ({
     triggerType,
     ...(summary ? { summary } : {}),
   };
+  const thread: WorkflowSubjectInput[] = slackThread
+    ? [
+        {
+          type: 'slack_thread',
+          id: toSlackThreadKey({
+            workspace: slackThread.workspace,
+            channel: slackThread.channel,
+            threadTs: slackThread.thread_ts,
+          }),
+          triggerType,
+          slack: { channel: slackThread.channel, thread_ts: slackThread.thread_ts },
+        },
+      ]
+    : [];
 
   if (subject.type !== 'alert') {
-    return [primary];
+    return [primary, ...thread];
   }
 
   const fromAlerts = alerts.map(
@@ -102,7 +139,10 @@ export const toStartSubjects = ({
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })
   );
-  return fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts];
+  return [
+    ...(fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts]),
+    ...thread,
+  ];
 };
 
 /** The keys a start matches open investigations and claims subjects by. */

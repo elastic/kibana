@@ -22,6 +22,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
+import { repliesUnderCallerMessage } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -77,8 +78,35 @@ const hasDeliveryAttempt = (
       attempt.phase === phase
   );
 
+/**
+ * The message this execution's started phase posted under the caller's message, which is the
+ * thread's single message. Undefined for other destinations and when that post was not confirmed.
+ */
+export const getStartedMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination
+): string | undefined => {
+  if (!repliesUnderCallerMessage(destination)) {
+    return undefined;
+  }
+  return routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === 'started' &&
+      attempt.status === 'sent'
+  )?.message_ts;
+};
+
 const prepareDestinationDelivery = (
-  { investigation, investigationUrl, phase, reason }: DeliverInvestigationNotificationsParams,
+  {
+    investigation,
+    investigationUrl,
+    executionId,
+    phase,
+    reason,
+  }: DeliverInvestigationNotificationsParams,
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
@@ -104,6 +132,9 @@ const prepareDestinationDelivery = (
     diagnostic = 'No confirmed notification thread is available';
   }
 
+  // The terminal phase edits the started message, so the thread keeps a single message.
+  const messageTs =
+    phase === 'started' ? undefined : getStartedMessageTs(routing, executionId, destination);
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
@@ -111,6 +142,7 @@ const prepareDestinationDelivery = (
       url: investigationUrl,
       phase,
       reason,
+      ...(messageTs ? { messageTs } : {}),
       notificationDestination: {
         type: destination.type,
         connector_id: destination.connector_id,

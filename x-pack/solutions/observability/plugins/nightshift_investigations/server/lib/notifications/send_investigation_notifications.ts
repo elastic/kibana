@@ -8,12 +8,15 @@
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NotificationPhase } from './notification_routing';
 import type { NotificationRoutingClient } from './notification_routing_client';
 import type { InvestigationLocator } from '../../../common/locators';
 import type { GetInvestigationsClient } from '../../routes/types';
-import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
+import {
+  deliverInvestigationNotifications,
+  getStartedMessageTs,
+} from './deliver_investigation_notifications';
 import type { DeliverInvestigationNotificationsResult } from './deliver_investigation_notifications';
 
 export interface InvestigationNotificationDeps {
@@ -60,7 +63,7 @@ export const sendInvestigationNotifications = async (
     await client.getInvestigationExecutionContext(investigationId, executionId);
   const routingClient = await getRoutingClient(request, spaceId, conversationId, investigationId);
   // Without server.publicBaseUrl, the server locator returns a relative URL.
-  return deliverInvestigationNotifications({
+  const result = await deliverInvestigationNotifications({
     investigation,
     executionId,
     workflowId,
@@ -87,4 +90,55 @@ export const sendInvestigationNotifications = async (
     signal: context.abortSignal,
     onTerminalPhaseSelected,
   });
+  if (phase === 'started') {
+    await recordSlackThreadStatusMessages({
+      client,
+      routingClient,
+      investigationId,
+      executionId,
+      logger: context.logger,
+    });
+  }
+  return result;
+};
+
+/**
+ * Hands the message the started phase posted under the caller's Slack message to the Slack thread
+ * workflow, which edits it for every reply instead of posting its own. A failure is logged rather
+ * than thrown: the message is already posted and recorded, and the thread workflow posts its own
+ * message when none is recorded.
+ */
+const recordSlackThreadStatusMessages = async ({
+  client,
+  routingClient,
+  investigationId,
+  executionId,
+  logger,
+}: {
+  client: ReturnType<GetInvestigationsClient>;
+  routingClient: NotificationRoutingClient;
+  investigationId: string;
+  executionId: string;
+  logger: Pick<Logger, 'warn'>;
+}): Promise<void> => {
+  try {
+    const routing = await routingClient.get();
+    for (const destination of routing?.destinations ?? []) {
+      const messageTs = routing && getStartedMessageTs(routing, executionId, destination);
+      if (destination.type === 'slack' && destination.thread && messageTs) {
+        await client.recordSlackThreadStatusMessage({
+          investigationId,
+          channel: destination.thread.channel,
+          threadTs: destination.thread.thread_ts,
+          messageTs,
+        });
+      }
+    }
+  } catch (error) {
+    logger.warn(
+      `Could not record the Slack thread status message for investigation "${investigationId}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 };

@@ -34,6 +34,14 @@ const SLACK_MESSAGE_EXCLUSIONS = [
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
 
+// The message's thread, which the managed Slack thread workflow looks the investigation up by when
+// someone replies. The trigger condition guarantees a workspace.
+const SLACK_THREAD = {
+  workspace: '{{ event.workspace }}',
+  channel: '{{ event.channel }}',
+  thread_ts: '{{ event.messageId }}',
+};
+
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
@@ -178,7 +186,12 @@ function buildInvestigationStep(
     type: 'nightshift.triggerInvestigation',
     with: {
       ...(kind === 'slack'
-        ? { subject_type: 'manual', subject_id: SLACK_SUBJECT_ID, title: automation.name }
+        ? {
+            subject_type: 'manual',
+            subject_id: SLACK_SUBJECT_ID,
+            title: automation.name,
+            slack_thread: SLACK_THREAD,
+          }
         : hasAlertRows
         ? {
             subject_type: 'alert',

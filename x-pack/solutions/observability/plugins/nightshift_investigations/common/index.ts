@@ -70,6 +70,15 @@ export interface StartInvestigationRequest {
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
+  /** The Slack thread the investigation is about, so a reply in it continues the investigation. */
+  slack_thread?: SlackThreadReference;
+}
+
+/** A Slack thread, by the workspace and channel ids and the thread's root message ts. */
+export interface SlackThreadReference {
+  workspace: string;
+  channel: string;
+  thread_ts: string;
 }
 
 export interface StartInvestigationResponse {
