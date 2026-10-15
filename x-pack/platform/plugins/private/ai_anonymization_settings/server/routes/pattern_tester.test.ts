@@ -6,11 +6,12 @@
  */
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
 import { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import type { AnonymizationWorkerConfig } from '@kbn/ai-anonymization-server';
 import { registerPatternTesterRoute } from './pattern_tester';
+import type { PatternTesterRequestHandlerContext } from './pattern_tester';
 
 describe('registerPatternTesterRoute', () => {
   const disabledWorkerConfig = { enabled: false } as AnonymizationWorkerConfig;
@@ -46,10 +47,18 @@ describe('registerPatternTesterRoute', () => {
     return { handler, routeConfig };
   };
 
-  const callHandler = async (handler: any, body: Record<string, any>) => {
+  const callHandler = async (
+    handler: any,
+    body: Record<string, any>,
+    licenseType: 'basic' | 'platinum' | 'enterprise' = 'enterprise'
+  ) => {
     const request = httpServerMock.createKibanaRequest({ body });
     const response = httpServerMock.createResponseFactory();
-    await handler({} as RequestHandlerContext, request, response);
+    const licensing = licensingMock.createRequestHandlerContext({
+      license: { type: licenseType, mode: licenseType },
+    });
+    const context = { licensing: Promise.resolve(licensing) } as PatternTesterRequestHandlerContext;
+    await handler(context, request, response);
     return response;
   };
 
@@ -158,6 +167,24 @@ describe('registerPatternTesterRoute', () => {
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
   });
+
+  it.each(['basic', 'platinum'] as const)(
+    'refuses a %s license with a 403 before running anything, since AI features need Enterprise',
+    async (licenseType) => {
+      const { handler } = setup();
+
+      const response = await callHandler(
+        handler,
+        { input: { a: 'a.mehta@example.com' }, rules: [] },
+        licenseType
+      );
+
+      expect(response.forbidden).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.objectContaining({ message: expect.any(String) }) })
+      );
+      expect(response.ok).not.toHaveBeenCalled();
+    }
+  );
 
   it('requires the privilege needed to edit the setting, since it runs caller-supplied regexes', () => {
     const { routeConfig } = setup();

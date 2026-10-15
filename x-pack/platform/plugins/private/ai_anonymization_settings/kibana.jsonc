@@ -4,13 +4,13 @@
   "owner": ["@elastic/security-investigations"],
   "group": "platform",
   "visibility": "private",
-  "description": "Management page for configuring AI anonymization rules (regex and NER), available to every offering.",
+  "description": "Management page for configuring AI anonymization rules (regex and NER), available to every offering with an Enterprise license.",
   "plugin": {
     "id": "aiAnonymizationSettings",
     "browser": true,
     "server": true,
     "configPath": ["xpack", "aiAnonymizationSettings"],
-    "requiredPlugins": ["management"],
+    "requiredPlugins": ["management", "licensing"],
     "requiredBundles": ["kibanaReact"]
   }
 }

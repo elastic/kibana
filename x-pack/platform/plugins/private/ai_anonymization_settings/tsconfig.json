@@ -17,7 +17,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/app-header",
     "@kbn/code-editor",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -8,7 +8,10 @@
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { AiAnonymizationSettingsConfig } from './config';
 import { PatternTesterWorker } from './pattern_tester_worker';
-import { registerPatternTesterRoute } from './routes/pattern_tester';
+import {
+  registerPatternTesterRoute,
+  type PatternTesterRequestHandlerContext,
+} from './routes/pattern_tester';
 import type {
   AiAnonymizationSettingsPluginSetup,
   AiAnonymizationSettingsPluginStart,
@@ -31,7 +34,7 @@ export class AiAnonymizationSettingsPlugin
 
   public setup(core: CoreSetup): AiAnonymizationSettingsPluginSetup {
     registerPatternTesterRoute({
-      router: core.http.createRouter(),
+      router: core.http.createRouter<PatternTesterRequestHandlerContext>(),
       getStartServices: core.getStartServices,
       getRegexWorker: () => this.patternTesterWorker.get(),
       logger: this.logger.get('pattern_tester'),

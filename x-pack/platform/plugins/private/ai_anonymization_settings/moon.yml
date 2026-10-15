@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/code-editor'
   - '@kbn/scout'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod

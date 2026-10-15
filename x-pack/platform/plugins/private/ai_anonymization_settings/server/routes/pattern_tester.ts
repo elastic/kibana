@@ -6,10 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, CustomRequestHandlerContext, IRouter, Logger } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { testAnonymizationPatterns } from '@kbn/ai-anonymization-server';
 import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
+import { isValidLicense } from '../../common/license';
+
+export type PatternTesterRequestHandlerContext = CustomRequestHandlerContext<{
+  licensing: LicensingApiRequestHandlerContext;
+}>;
 
 export const PATTERN_TESTER_ROUTE_PATH = '/internal/ai_anonymization_settings/pattern_tester';
 
@@ -40,7 +46,7 @@ export function registerPatternTesterRoute({
   getRegexWorker,
   logger,
 }: {
-  router: IRouter<RequestHandlerContext>;
+  router: IRouter<PatternTesterRequestHandlerContext>;
   getStartServices: CoreSetup['getStartServices'];
   /** A pool dedicated to this route, never the one serving `chatComplete` traffic. */
   getRegexWorker: () => RegexWorkerService | undefined;
@@ -61,7 +67,16 @@ export function registerPatternTesterRoute({
         body: patternTesterBodySchema,
       },
     },
-    async (_context, request, response) => {
+    async (context, request, response) => {
+      const { license } = await context.licensing;
+      if (!isValidLicense(license)) {
+        return response.forbidden({
+          body: {
+            message: 'Invalid license level. The pattern tester requires an Enterprise license.',
+          },
+        });
+      }
+
       const regexWorker = getRegexWorker();
       if (!regexWorker) {
         return response.customError({

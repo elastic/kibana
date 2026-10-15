@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { Subscription } from 'rxjs';
+import { isValidLicense } from '../common/license';
 
 interface AiAnonymizationSettingsPublicConfig {
   patternTester: { enabled: boolean };
@@ -17,8 +20,9 @@ export interface AiAnonymizationSettingsSetupDeps {
   management: ManagementSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAnonymizationSettingsStartDeps {}
+export interface AiAnonymizationSettingsStartDeps {
+  licensing: LicensingPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAnonymizationSettingsPluginSetup {}
@@ -36,6 +40,7 @@ export class AiAnonymizationSettingsPlugin
     >
 {
   private registeredApp?: ManagementApp;
+  private licenseSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -62,20 +67,33 @@ export class AiAnonymizationSettingsPlugin
       },
     });
 
-    // Stays disabled until start() confirms the user can save advanced settings, so users without
-    // that privilege do not get a Stack Management entry for a page they cannot use.
+    // Stays disabled until start() confirms the user can save advanced settings and the license is
+    // Enterprise, so users who cannot use the page do not get a Stack Management entry for it.
     this.registeredApp.disable();
 
     return {};
   }
 
-  public start(coreStart: CoreStart): AiAnonymizationSettingsPluginStart {
-    if (coreStart.application.capabilities.advancedSettings?.save === true) {
-      this.registeredApp?.enable();
-    }
+  public start(
+    coreStart: CoreStart,
+    { licensing }: AiAnonymizationSettingsStartDeps
+  ): AiAnonymizationSettingsPluginStart {
+    const canSaveAdvancedSettings =
+      coreStart.application.capabilities.advancedSettings?.save === true;
+
+    // The license can change while Kibana runs, so follow it instead of reading it once.
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      if (canSaveAdvancedSettings && isValidLicense(license)) {
+        this.registeredApp?.enable();
+      } else {
+        this.registeredApp?.disable();
+      }
+    });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
+  }
 }
