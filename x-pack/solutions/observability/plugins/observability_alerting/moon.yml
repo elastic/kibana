@@ -30,6 +30,9 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/observability-plugin'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/cases-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod

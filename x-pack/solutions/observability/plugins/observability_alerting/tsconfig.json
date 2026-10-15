@@ -18,7 +18,10 @@
     "@kbn/rule-data-utils",
     "@kbn/observability-plugin",
     "@kbn/triggers-actions-ui-plugin/test/scout/common/ui",
-    "@kbn/alerting-v2-episodes-ui"
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/cases-plugin",
+    "@kbn/security-plugin",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
