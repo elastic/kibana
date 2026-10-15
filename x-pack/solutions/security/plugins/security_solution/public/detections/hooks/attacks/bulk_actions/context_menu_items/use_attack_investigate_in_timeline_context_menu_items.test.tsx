@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import { renderHook } from '@testing-library/react';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useAttackInvestigateInTimelineContextMenuItems } from './use_attack_investigate_in_timeline_context_menu_items';
 import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
 
@@ -128,9 +129,11 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
 
     expect(onClick.mock.calls[0][0]).toEqual([
       expect.objectContaining({
-        ecs: { _id: 'attack-1', timestamp: '2024-05-02T09:00:00.000Z' },
+        data: expect.arrayContaining([{ field: TIMESTAMP, value: ['2024-05-02T09:00:00.000Z'] }]),
       }),
-      expect.objectContaining({ ecs: { _id: 'attack-2', timestamp: undefined } }),
+      expect.objectContaining({
+        data: expect.arrayContaining([{ field: TIMESTAMP, value: [] }]),
+      }),
     ]);
   });
 

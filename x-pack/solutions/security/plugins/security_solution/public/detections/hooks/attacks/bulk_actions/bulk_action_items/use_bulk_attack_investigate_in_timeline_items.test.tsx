@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useBulkAttackInvestigateInTimelineItems } from './use_bulk_attack_investigate_in_timeline_items';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
@@ -112,13 +113,19 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
       [
         {
           _id: 'attack-1',
-          data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] }],
-          ecs: { _id: 'attack-1', timestamp: '2024-05-02T09:00:00.000Z' },
+          data: [
+            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] },
+            { field: TIMESTAMP, value: ['2024-05-02T09:00:00.000Z'] },
+          ],
+          ecs: { _id: 'attack-1' },
         },
         {
           _id: 'attack-2',
-          data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2'] }],
-          ecs: { _id: 'attack-2', timestamp: '2024-04-28T06:00:00.000Z' },
+          data: [
+            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2'] },
+            { field: TIMESTAMP, value: ['2024-04-28T06:00:00.000Z'] },
+          ],
+          ecs: { _id: 'attack-2' },
         },
       ],
       false,
