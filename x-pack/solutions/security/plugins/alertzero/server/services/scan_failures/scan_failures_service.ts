@@ -143,7 +143,7 @@ export const foldFailedExecutions = async (
     (execution) => attributeFailedExecution(execution, loadExecution),
     { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
   );
-  const lastFailedAtByWorker = new Map<string, string>();
+  const latestByWorker = new Map<string, { lastFailedAt: string; workflowId: string }>();
   let lastFailedAt: string | undefined;
 
   executions.forEach((execution, index) => {
@@ -153,19 +153,24 @@ export const foldFailedExecutions = async (
     }
     lastFailedAt = laterOf(lastFailedAt, finishedAt);
     const workerId = attributed[index];
-    if (workerId) {
-      lastFailedAtByWorker.set(workerId, laterOf(lastFailedAtByWorker.get(workerId), finishedAt));
+    if (!workerId) {
+      return;
     }
+    const latest = latestByWorker.get(workerId);
+    if (latest && laterOf(latest.lastFailedAt, finishedAt) === latest.lastFailedAt) {
+      return;
+    }
+    // Link to the workflow that failed, which is a child when the Worker went on past it.
+    latestByWorker.set(workerId, {
+      lastFailedAt: finishedAt,
+      workflowId: execution.workflowId || `${workerId}-${spaceId}`,
+    });
   });
 
-  const workers = SYSTEM_SECURITY_WORKER_CATALOG.filter((entry) =>
-    lastFailedAtByWorker.has(entry.id)
-  ).map((entry) => ({
-    workerId: entry.id,
-    watchId: entry.watchId,
-    workflowId: `${entry.id}-${spaceId}`,
-    lastFailedAt: lastFailedAtByWorker.get(entry.id) as string,
-  }));
+  const workers = SYSTEM_SECURITY_WORKER_CATALOG.flatMap((entry) => {
+    const latest = latestByWorker.get(entry.id);
+    return latest ? [{ workerId: entry.id, watchId: entry.watchId, ...latest }] : [];
+  });
 
   return { workers, unknown: false, lastFailedAt: lastFailedAt ?? null };
 };
