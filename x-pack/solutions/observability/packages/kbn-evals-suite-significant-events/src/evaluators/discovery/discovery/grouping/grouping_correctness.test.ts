@@ -12,7 +12,7 @@ import { groupingCorrectnessEvaluator } from './grouping_correctness';
 // event) — cast past the full shape rather than filling in unused required fields.
 const buildSignal = (rule_uuid: string): SignalEntry => ({
   type: 'detection',
-  stream_name: 'logs',
+  source_id: 'logs',
   verdict: 'confirms',
   description: 'Found: checkout timeout to payment API. Impact: checkout degraded.',
   metadata: {

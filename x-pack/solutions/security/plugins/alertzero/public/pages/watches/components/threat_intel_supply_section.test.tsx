@@ -15,6 +15,7 @@ const baseStatus = (): HuntThreatIntelSupplyStatus => ({
   huntEnabled: true,
   drift: false,
   hardGate: { ok: true, reasonCodes: [] },
+  modelTiers: [],
   workflows: [
     {
       key: 'ingest',
@@ -91,6 +92,15 @@ describe('ThreatIntelSupplySectionView', () => {
     status.hardGate = { ok: false, reasonCodes: ['embedding_endpoint_unavailable'] };
     renderView(status);
     expect(screen.getByTestId('alertZeroThreatIntelSupplyHardGateCallout')).toBeInTheDocument();
+  });
+
+  it('names the index in the hard-gate callout when it exists without its template', () => {
+    const status = baseStatus();
+    status.hardGate = { ok: false, reasonCodes: ['reports_index_unmanaged'] };
+    renderView(status);
+    expect(screen.getByTestId('alertZeroThreatIntelSupplyHardGateCallout')).toHaveTextContent(
+      'exists without its template'
+    );
   });
 
   it('shows in-use elsewhere copy on a deployment row when flagged', () => {
