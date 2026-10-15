@@ -554,5 +554,9 @@ const dashboardGridStyles = {
             visibility: 'hidden',
           },
         },
+      // in select mode a click or drag on a panel selects, so panels can't be resized
+      '.dshDashboardGrid__item--selectMode ~ .kbnGridPanel--resizeHandle': {
+        visibility: 'hidden',
+      },
     }),
 };
