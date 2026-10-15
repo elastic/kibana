@@ -46,15 +46,10 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
-  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
+  it.each([false, true])('finalizes native identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    jest
-      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
-      .mockRejectedValue(
-        new Error('The workload binding does not match the expected service account.')
-      );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
@@ -110,6 +105,15 @@ describe('resumeWorkflow', () => {
       ).not.toHaveBeenCalled();
     });
 
+    const emitIdentityFailure = jest.fn().mockResolvedValue(undefined);
+    const runAs = {
+      withScopedRequest: jest
+        .fn()
+        .mockRejectedValue(
+          new Error('The workload binding does not match the expected service account.')
+        ),
+    };
+
     await expect(
       resumeWorkflow({
         workflowRunId: 'run-identity-failure',
@@ -118,7 +122,9 @@ describe('resumeWorkflow', () => {
         dependencies,
         logger: createMockLogger(),
         config: createMockWorkflowExecutionEngineConfig(),
-        fakeRequest: createFakeKibanaRequest(),
+        fakeRequest: undefined,
+        runAs,
+        emitIdentityFailure,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository,
         stepExecutionRepository,
@@ -134,6 +140,7 @@ describe('resumeWorkflow', () => {
       expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
       { seqNo: 1, primaryTerm: 1 }
     );
+    expect(emitIdentityFailure).toHaveBeenCalledTimes(1);
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });

@@ -12,6 +12,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { getWorkflowTaskRunAs } from '../service_account_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -90,6 +91,7 @@ export const cancelWorkflow = async ({
     await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
       spaceId: workflowExecution.spaceId,
       fakeRequest: schedulingRequest,
+      runAs: getWorkflowTaskRunAs(workflowExecution),
     });
   }
 

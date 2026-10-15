@@ -10,8 +10,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
@@ -23,7 +23,7 @@ import {
   getWorkflowWakeTaskId,
   WorkflowTaskManager,
 } from './workflow_task_manager';
-import { withWorkflowExecutionIdentity } from '../service_account_execution';
+import { getWorkflowTaskRunAs, withWorkflowExecutionIdentity } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 // Mock uuid
@@ -108,7 +108,7 @@ describe('WorkflowTaskManager', () => {
   });
 
   it.each(['delay', 'idle timeout', 'immediate', 'wake', 'queued'] as const)(
-    'schedules %s tasks with the original credentials during service-account execution',
+    'schedules %s tasks with a pinned workload identity during service-account execution',
     async (kind) => {
       const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
       core.security.serviceAccounts.isEnabled.mockReturnValue(true);
@@ -118,9 +118,10 @@ describe('WorkflowTaskManager', () => {
       const serviceAccountRequest = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Bearer short-lived-service-account-token' },
       });
-      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
-        async (_, execute) => execute(serviceAccountRequest)
-      );
+      const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
+      jest
+        .mocked(runAs.withScopedRequest)
+        .mockImplementation(async (execute) => execute(serviceAccountRequest));
       mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
       const workflowExecution = createMockWorkflowExecution();
       workflowExecution.workflowDefinition.settings = { run_as: 'account-a' };
@@ -136,6 +137,7 @@ describe('WorkflowTaskManager', () => {
             spaceId: workflowExecution.spaceId,
             resumeAt: new Date(),
             fakeRequest: request,
+            runAs: getWorkflowTaskRunAs(workflowExecution),
           };
           switch (kind) {
             case 'delay':
@@ -157,7 +159,8 @@ describe('WorkflowTaskManager', () => {
               });
               break;
           }
-        }
+        },
+        runAs
       );
 
       const calls = [
@@ -165,12 +168,37 @@ describe('WorkflowTaskManager', () => {
         ...mockTaskManager.ensureScheduled.mock.calls,
       ];
       expect(calls.length).toBeGreaterThan(0);
-      for (const [, options] of calls) {
-        expect(options?.request).toBe(originalRequest);
+      for (const [task, options] of calls) {
+        expect(task.runAs).toEqual({
+          workloadType: 'workflow',
+          workloadId: workflowExecution.workflowId,
+          spaceId: 'default',
+          expectedServiceAccountId: 'account-a',
+        });
+        expect(options?.request).toBe(serviceAccountRequest);
         expect(options?.cloneApiKey).toBe(true);
       }
     }
   );
+
+  it('propagates conflicting task identity instead of accepting a caller-credential task', async () => {
+    const conflict = SavedObjectsErrorHelpers.createConflictError('task', 'existing');
+    mockTaskManager.ensureScheduled.mockRejectedValue(conflict);
+    await expect(
+      workflowTaskManager.ensureWakeTask({
+        executionId: 'execution',
+        spaceId: 'default',
+        runAs: {
+          workloadType: 'workflow',
+          workloadId: 'parent',
+          spaceId: 'default',
+          expectedServiceAccountId: 'account',
+        },
+      })
+    ).rejects.toBe(conflict);
+    expect(mockTaskManager.get).not.toHaveBeenCalled();
+    expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+  });
 
   describe('scheduleResumeTask', () => {
     it('should schedule a resume task with correct parameters', async () => {
@@ -1138,6 +1166,38 @@ describe('WorkflowTaskManager', () => {
   });
 
   describe('queued workflow run tasks', () => {
+    it('queues a bound failure handler without caller credentials', async () => {
+      const workflowExecution = createMockWorkflowExecution({
+        effectiveIdentity: {
+          type: 'service_account',
+          id: 'handler-sa',
+          inheritedFrom: { workloadId: 'handler' },
+        },
+      });
+      mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
+      await workflowTaskManager.scheduleDormantQueuedRunTask({ workflowExecution });
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runAs: {
+            workloadType: 'workflow',
+            workloadId: 'handler',
+            spaceId: workflowExecution.spaceId,
+            expectedServiceAccountId: 'handler-sa',
+          },
+        }),
+        undefined
+      );
+    });
+
+    it('rejects a queued handler without either caller credentials or a binding', async () => {
+      await expect(
+        workflowTaskManager.scheduleDormantQueuedRunTask({
+          workflowExecution: createMockWorkflowExecution(),
+        })
+      ).rejects.toThrow('caller credentials or a service account binding');
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
     it('scheduleDormantQueuedRunTask schedules workflow:run with queue TTL runAt and trigger request', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
       const workflowExecution = createMockWorkflowExecution({

@@ -12,6 +12,7 @@ import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   type RunSoonOptions,
   TaskAlreadyRunningError,
+  type TaskInstance,
   type TaskManagerStartContract,
   TaskPriority,
   TaskStatus,
@@ -21,7 +22,7 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
-import { getWorkflowOriginalRequest } from '../service_account_execution';
+import { getWorkflowTaskRunAs } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
@@ -83,6 +84,7 @@ export class WorkflowTaskManager {
       executionId: workflowExecution.id,
       spaceId: workflowExecution.spaceId,
       fakeRequest,
+      runAs: getWorkflowTaskRunAs(workflowExecution),
       runAt: resumeAt,
     });
 
@@ -118,6 +120,9 @@ export class WorkflowTaskManager {
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        ...(getWorkflowTaskRunAs(workflowExecution)
+          ? { runAs: getWorkflowTaskRunAs(workflowExecution) }
+          : {}),
         timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
@@ -127,7 +132,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      { request: fakeRequest, cloneApiKey: true }
     );
 
     return {
@@ -149,6 +154,9 @@ export class WorkflowTaskManager {
       {
         id: v4(),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        ...(getWorkflowTaskRunAs(workflowExecution)
+          ? { runAs: getWorkflowTaskRunAs(workflowExecution) }
+          : {}),
         timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
@@ -158,7 +166,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      { request: fakeRequest, cloneApiKey: true }
     );
 
     return {
@@ -175,10 +183,16 @@ export class WorkflowTaskManager {
     request,
   }: {
     workflowExecution: EsWorkflowExecution;
-    request: KibanaRequest;
+    request?: KibanaRequest;
   }): Promise<{ taskId: string }> {
     if (!workflowExecution.id || !workflowExecution.spaceId) {
       throw new Error('Workflow execution must have id and spaceId to schedule a queued run task');
+    }
+
+    if (!request && !getWorkflowTaskRunAs(workflowExecution)) {
+      throw new Error(
+        'A queued workflow requires caller credentials or a service account binding.'
+      );
     }
 
     const triggeredBy = workflowExecution.triggeredBy || 'manual';
@@ -195,6 +209,9 @@ export class WorkflowTaskManager {
       {
         id: taskId,
         taskType: WORKFLOW_RUN_TASK_TYPE,
+        ...(getWorkflowTaskRunAs(workflowExecution)
+          ? { runAs: getWorkflowTaskRunAs(workflowExecution) }
+          : {}),
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -209,7 +226,7 @@ export class WorkflowTaskManager {
         enabled: true,
         priority,
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      request ? { request, cloneApiKey: true } : undefined
     );
 
     return { taskId: task.id };
@@ -269,11 +286,13 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    runAs,
     isUserInteractive,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    runAs?: TaskInstance['runAs'];
     isUserInteractive?: boolean;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
@@ -283,14 +302,13 @@ export class WorkflowTaskManager {
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        ...(runAs ? { runAs } : {}),
         params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
         priority,
       },
-      fakeRequest
-        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
-        : undefined
+      fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
     );
     return { taskId };
   }
@@ -332,6 +350,7 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    runAs?: TaskInstance['runAs'];
     isUserInteractive?: boolean;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
@@ -358,6 +377,7 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    runAs?: TaskInstance['runAs'];
     isUserInteractive?: boolean;
   }): Promise<void> {
     if (await this.tryRunImmediateResume(params)) return;
@@ -378,11 +398,13 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    runAs?: TaskInstance['runAs'];
     runAt?: Date;
   }): Promise<void> {
     await this.taskManager.ensureScheduled(
       {
         id: getWorkflowWakeTaskId(params.executionId),
+        ...(params.runAs ? { runAs: params.runAs } : {}),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
         timeoutOverride: '1m',
         params: { workflowRunId: params.executionId, spaceId: params.spaceId },
@@ -390,9 +412,7 @@ export class WorkflowTaskManager {
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
       },
-      params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
-        : undefined
+      params.fakeRequest ? { request: params.fakeRequest, cloneApiKey: true } : undefined
     );
   }
 
@@ -452,7 +472,7 @@ export class WorkflowTaskManager {
 
   async forceRunIdleTasks(
     workflowExecutionId: string,
-    options?: { spaceId: string; fakeRequest: KibanaRequest }
+    options?: { spaceId: string; fakeRequest: KibanaRequest; runAs?: TaskInstance['runAs'] }
   ): Promise<void> {
     const scopeTerm = {
       term: {
@@ -509,6 +529,7 @@ export class WorkflowTaskManager {
         executionId: workflowExecutionId,
         spaceId: options.spaceId,
         fakeRequest: options.fakeRequest,
+        runAs: options.runAs,
       });
     }
   }

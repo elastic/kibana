@@ -91,6 +91,8 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
   })),
 }));
 
+import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
+import type { runWorkflow } from './execution_functions/run_workflow';
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
@@ -174,7 +176,9 @@ describe('workflow:scheduled task runner', () => {
     mockEvaluateConcurrencyKey.mockReturnValue('group-1');
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
     mockGetWorkflowExecutionById.mockResolvedValue(null);
-    mockRunWorkflow.mockResolvedValue(undefined);
+    mockRunWorkflow.mockImplementation(async (params: Parameters<typeof runWorkflow>[0]) => {
+      await params.canStartExecution?.(params.fakeRequest ?? ({} as KibanaRequest));
+    });
   });
 
   it('requests task deletion when the workflow document is missing', async () => {
@@ -352,7 +356,7 @@ describe('workflow:scheduled task runner', () => {
 
     await runner.run();
 
-    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(handleConcurrencyBlockedExecution).toHaveBeenCalled();
     expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
       workflow_execution_id: expect.any(String),
       workflow_id: workflowId,
@@ -401,6 +405,61 @@ describe('workflow:scheduled task runner', () => {
       space_id: spaceId,
       outcome: 'completed',
     });
+  });
+
+  it('persists a native SA execution before handing identity resolution to runWorkflow', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+        settings: {
+          run_as: 'scheduled-sa',
+          concurrency: { key: 'g1', strategy: 'queue', max: 1 },
+        },
+      },
+    });
+    mockCheckConcurrency.mockResolvedValue(false);
+    const runAs = { withScopedRequest: jest.fn().mockRejectedValue(new Error('Binding changed')) };
+    mockRunWorkflow.mockRejectedValue(new Error('Binding changed'));
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: undefined,
+        runAs,
+        setCustomTaskRunEventFields,
+      })
+    );
+    await expect(runner.run()).rejects.toThrow('Binding changed');
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executedBy: 'scheduled-sa',
+        effectiveIdentity: { type: 'service_account', id: 'scheduled-sa' },
+      }),
+      expect.anything()
+    );
+    expect(mockRunWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fakeRequest: undefined,
+        runAs,
+        emitIdentityFailure: expect.any(Function),
+      })
+    );
+    expect(mockCreateWorkflowExecution.mock.invocationCallOrder[0]).toBeLessThan(
+      mockRunWorkflow.mock.invocationCallOrder[0]
+    );
+    expect(mockCheckConcurrency).not.toHaveBeenCalled();
+    expect(handleConcurrencyBlockedExecution).not.toHaveBeenCalled();
+    expect(runAs.withScopedRequest).not.toHaveBeenCalled();
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: expect.any(String), outcome: 'failed' })
+    );
   });
 
   it('stamps failed with workflow_execution_id when run fails after create', async () => {

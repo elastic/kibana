@@ -71,15 +71,10 @@ const mockHandleQueuedWorkflowRunAtTaskStart =
   >;
 
 describe('runWorkflow', () => {
-  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
+  it.each([false, true])('finalizes native identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    jest
-      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
-      .mockRejectedValue(
-        new Error('The workload binding does not match the expected service account.')
-      );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
@@ -135,6 +130,16 @@ describe('runWorkflow', () => {
       ).not.toHaveBeenCalled();
     });
 
+    const emitIdentityFailure = jest.fn().mockResolvedValue(undefined);
+    const canStartExecution = jest.fn().mockResolvedValue(false);
+    const runAs = {
+      withScopedRequest: jest
+        .fn()
+        .mockRejectedValue(
+          new Error('The workload binding does not match the expected service account.')
+        ),
+    };
+
     await expect(
       runWorkflow({
         workflowRunId: 'run-identity-failure',
@@ -143,7 +148,10 @@ describe('runWorkflow', () => {
         dependencies,
         logger: createMockLogger(),
         config: createMockWorkflowExecutionEngineConfig(),
-        fakeRequest: createFakeKibanaRequest(),
+        fakeRequest: undefined,
+        runAs,
+        emitIdentityFailure,
+        canStartExecution,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository,
         stepExecutionRepository,
@@ -159,6 +167,8 @@ describe('runWorkflow', () => {
       expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
       { seqNo: 1, primaryTerm: 1 }
     );
+    expect(emitIdentityFailure).toHaveBeenCalledTimes(1);
+    expect(canStartExecution).not.toHaveBeenCalled();
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });
@@ -190,6 +200,8 @@ describe('runWorkflow', () => {
     });
 
     const runWorkflowWithDefaults = (overrides?: {
+      canStartExecution?: Parameters<typeof runWorkflow>[0]['canStartExecution'];
+      runAs?: Parameters<typeof runWorkflow>[0]['runAs'];
       meteringService?: WorkflowsMeteringService;
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
       internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
@@ -201,6 +213,8 @@ describe('runWorkflow', () => {
         logger,
         config: mockConfig,
         fakeRequest,
+        canStartExecution: overrides?.canStartExecution,
+        runAs: overrides?.runAs,
         dependencies,
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
@@ -241,6 +255,38 @@ describe('runWorkflow', () => {
       });
 
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
+    });
+
+    it('validates the native identity before handing a scheduled execution to its queue', async () => {
+      jest
+        .spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled')
+        .mockReturnValue(true);
+      workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
+        ...defaultRunningExecution(),
+        workflowDefinition: {
+          name: 'Scheduled SA workflow',
+          steps: [],
+          settings: { run_as: 'scheduled-sa' },
+        },
+      });
+      const runAs: NonNullable<Parameters<typeof runWorkflow>[0]['runAs']> = {
+        withScopedRequest: jest.fn(async (callback) => callback(fakeRequest)),
+      };
+      const canStartExecution = jest.fn(async (request: KibanaRequest) => {
+        expect(request).toBe(fakeRequest);
+        expect(runAs.withScopedRequest).toHaveBeenCalledTimes(1);
+        expect(mockSetupDependencies).not.toHaveBeenCalled();
+        return false;
+      });
+
+      await runWorkflowWithDefaults({ runAs, canStartExecution });
+
+      expect(runAs.withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+        expectedServiceAccountId: 'scheduled-sa',
+      });
+      expect(canStartExecution).toHaveBeenCalledTimes(1);
+      expect(mockSetupDependencies).not.toHaveBeenCalled();
+      expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
     });
 
     describe('current workflow access', () => {

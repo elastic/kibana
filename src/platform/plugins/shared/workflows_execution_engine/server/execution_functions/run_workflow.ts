@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
@@ -136,8 +137,11 @@ async function runWorkflowWithRequest({
   // Older test executions have no isEphemeral flag and still require edit access.
   const requiredPermission =
     execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
+  // The caller was checked at admission; a bound workload authorizes its own execution.
+  // Delegated children still require access under the invoking SA.
   if (
     currentWorkflow &&
+    (!execution.effectiveIdentity || execution.effectiveIdentity.inheritedFrom) &&
     !(await hasWorkflowAccess(currentWorkflow, fakeRequest, dependencies.coreStart, {
       id: execution.workflowId,
       spaceId,
@@ -284,7 +288,14 @@ async function runWorkflowWithRequest({
 }
 
 export const runWorkflow = async (
-  params: Parameters<typeof runWorkflowWithRequest>[0]
+  params: Omit<Parameters<typeof runWorkflowWithRequest>[0], 'fakeRequest'> & {
+    fakeRequest?: KibanaRequest;
+    runAs?: RunContext['runAs'];
+    canStartExecution?: (request: KibanaRequest) => Promise<boolean>;
+    emitIdentityFailure?: Parameters<
+      typeof emitWorkflowIdentityFailureEvent
+    >[0]['emitWithoutRequest'];
+  }
 ): ReturnType<typeof runWorkflowWithRequest> => {
   const execution = await params.workflowExecutionRepository.getWorkflowExecutionById(
     params.workflowRunId,
@@ -307,10 +318,12 @@ export const runWorkflow = async (
       params.dependencies.coreStart,
       execution,
       params.fakeRequest,
-      (fakeRequest) => {
+      async (fakeRequest) => {
         enteredExecution = true;
+        if (params.canStartExecution && !(await params.canStartExecution(fakeRequest))) return;
         return runWorkflowWithRequest({ ...params, fakeRequest });
-      }
+      },
+      params.runAs
     );
   } catch (error) {
     if (!enteredExecution && getExecutionServiceAccountId(execution)) {
@@ -327,6 +340,7 @@ export const runWorkflow = async (
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
           request: params.fakeRequest,
+          emitWithoutRequest: params.emitIdentityFailure,
           emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
           logger: params.logger,
           maxEventChainDepth: params.config.eventDriven.maxChainDepth,

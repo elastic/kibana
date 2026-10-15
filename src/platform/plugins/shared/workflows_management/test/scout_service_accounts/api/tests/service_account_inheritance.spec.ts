@@ -258,7 +258,7 @@ apiTest.describe(
         `${
           asynchronous ? 'async' : 'sync'
         } managed child retains inherited identity through wait and resume`,
-        async ({ apiClient }) => {
+        async ({ apiClient, esClient }) => {
           apiTest.setTimeout(150_000);
           const { readOnlyAccountId, wait } = getContext();
           const child = await install(apiClient, { waitForInput: true });
@@ -276,6 +276,37 @@ apiTest.describe(
           );
           const childRun = await childExecution(apiClient, parentExecution);
           const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
+          const scope = { term: { 'task.scope': `workflow:execution:${paused.id}` } };
+          await expect
+            .poll(
+              async () =>
+                (
+                  await esClient.count({ index: '.kibana_task_manager', query: scope })
+                ).count
+            )
+            .toBeGreaterThan(0);
+          const tasks = await esClient.search<{
+            task: {
+              credential: { type: string; workloadId: string; expectedServiceAccountId: string };
+              apiKey?: string;
+              uiamApiKey?: string;
+            };
+          }>({
+            index: '.kibana_task_manager',
+            query: scope,
+            _source: ['task.credential', 'task.apiKey', 'task.uiamApiKey'],
+          });
+          expect(tasks.hits.hits.length).toBeGreaterThan(0);
+          for (const task of tasks.hits.hits) {
+            expect(Boolean(task._source?.task.apiKey)).toBe(false);
+            expect(Boolean(task._source?.task.uiamApiKey)).toBe(false);
+            expect(task._source?.task.credential).toMatchObject({
+              type: 'service_account',
+              workloadId: workflowId(parent),
+              expectedServiceAccountId: readOnlyAccountId,
+            });
+          }
+
           const saved = await apiClient.get(`api/workflows/workflow/${workflowId(child)}`, {
             headers,
             responseType: 'json',
@@ -510,7 +541,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'default preserves the original caller rather than inheriting implicitly',
+      'default follows the invoking service account for an unbound managed child',
       async ({ apiClient }) => {
         apiTest.setTimeout(150_000);
         const { readOnlyAccountId, wait } = getContext();
@@ -521,8 +552,11 @@ apiTest.describe(
         });
         const completed = await wait(apiClient, await run(apiClient, parent), 'completed', headers);
         const execution = await childExecution(apiClient, completed);
-        expect(execution.effectiveIdentity).toBeUndefined();
-        expect(authenticatedAs(execution)).not.toContain(readOnlyAccountId);
+        expect(execution.effectiveIdentity).toMatchObject({
+          id: readOnlyAccountId,
+          inheritedFrom: { workloadId: workflowId(parent) },
+        });
+        expect(authenticatedAs(execution)).toContain(readOnlyAccountId);
         expect(execution.executedBy).toBe(completed.executedBy);
       }
     );

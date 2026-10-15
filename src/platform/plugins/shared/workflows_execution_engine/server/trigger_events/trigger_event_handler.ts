@@ -17,8 +17,9 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   type EventChainContext,
@@ -39,6 +40,7 @@ import {
   type TriggerEventScheduleStats,
 } from './trigger_event_stats';
 import type { EventTriggersConfig } from '../config';
+import { buildWorkflowExecutionFailedPayload } from '../lib/build_workflow_execution_failed_payload';
 import {
   extractEventChainDepthFromExecution,
   extractEventChainVisitedWorkflowIdsFromExecution,
@@ -63,6 +65,10 @@ export interface TriggerEventHandlerDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   spaces: SpacesServiceStart | undefined;
   scheduleWorkflow: ScheduleWorkflow;
+  scheduleBoundSubscription: (
+    workflow: Parameters<ScheduleWorkflow>[0],
+    context: Parameters<ScheduleWorkflow>[1]
+  ) => ReturnType<ScheduleWorkflow>;
   config: EventTriggersConfig;
   logger: Logger;
   triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
@@ -168,6 +174,7 @@ export class TriggerEventHandler {
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
   private readonly workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   private readonly scheduleWorkflow: ScheduleWorkflow;
+  private readonly scheduleBoundSubscription: TriggerEventHandlerDeps['scheduleBoundSubscription'];
   private readonly telemetryClient: WorkflowExecutionTelemetryClient;
   private readonly spaces: SpacesServiceStart | undefined;
   private readonly config: EventTriggersConfig;
@@ -176,6 +183,7 @@ export class TriggerEventHandler {
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
+    this.scheduleBoundSubscription = deps.scheduleBoundSubscription;
     this.workflowRepository = deps.workflowRepository;
     this.spaces = deps.spaces;
     this.workflowsExtensions = deps.workflowsExtensions;
@@ -201,9 +209,6 @@ export class TriggerEventHandler {
 
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    const timestamp = new Date().toISOString();
-    const eventId = generateUuid();
-
     let eventChainContext = getEventChainContext(request);
     if (eventChainContext === undefined) {
       eventChainContext = await this.resolveEventChainContextFromEmitterExecution(
@@ -213,6 +218,50 @@ export class TriggerEventHandler {
       );
     }
 
+    return this.dispatchEvent({ triggerId, payload, request, spaceId, eventChainContext });
+  }
+
+  /** Dispatches a persisted identity failure without borrowing the source workflow's revoked identity. */
+  async handleWorkflowIdentityFailure(execution: EsWorkflowExecution): Promise<void> {
+    if (
+      execution.isTestRun ||
+      execution.status !== ExecutionStatus.FAILED ||
+      execution.error?.type !== 'ServiceAccountExecutionError'
+    )
+      return;
+    const visitedWorkflowIds = mergeEmitterWorkflowIntoEventChainVisited(
+      extractEventChainVisitedWorkflowIdsFromExecution(execution, this.config.maxChainDepth),
+      execution.workflowId,
+      this.config.maxChainDepth
+    );
+    return this.dispatchEvent({
+      triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+      payload: buildWorkflowExecutionFailedPayload(execution),
+      spaceId: execution.spaceId,
+      eventChainContext: {
+        depth: extractEventChainDepthFromExecution(execution) ?? -1,
+        sourceExecutionId: execution.id,
+        visitedWorkflowIds,
+      },
+    });
+  }
+
+  private async dispatchEvent({
+    triggerId,
+    payload,
+    request,
+    spaceId,
+    eventChainContext,
+  }: {
+    triggerId: string;
+    payload: Record<string, unknown>;
+    request?: KibanaRequest;
+    spaceId: string;
+    eventChainContext?: EventChainContext;
+  }): Promise<void> {
+    if (!this.config.enabled && !this.config.logEvents) return;
+    const timestamp = new Date().toISOString();
+    const eventId = generateUuid();
     const eventContextForResolution = {
       ...payload,
       timestamp,
@@ -254,7 +303,7 @@ export class TriggerEventHandler {
       this.config.enabled &&
       workflows.length > 0 &&
       isConnectorSourcedEvent(payload) &&
-      !request.headers?.authorization
+      !request?.headers?.authorization
     ) {
       this.logger.warn(
         `Skipping schedule for connector event ${triggerId}: request has no Authorization header`
@@ -513,7 +562,7 @@ export class TriggerEventHandler {
 
   private async scheduleMatchingWorkflows(
     workflows: WorkflowDetailDto[],
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     eventParams: ScheduleEventParams
   ): Promise<TriggerEventScheduleStats> {
     if (workflows.length === 0) {
@@ -558,7 +607,11 @@ export class TriggerEventHandler {
                 eventId: eventParams.eventId,
               },
             };
-            await this.scheduleWorkflow(workflowToRun, context, request);
+            if (request) {
+              await this.scheduleWorkflow(workflowToRun, context, request);
+            } else {
+              await this.scheduleBoundSubscription(workflowToRun, context);
+            }
             return 'success';
           } catch (reason) {
             const message = reason instanceof Error ? reason.message : String(reason);

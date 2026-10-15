@@ -50,7 +50,7 @@ apiTest.describe(
       };
       await expect.poll(async () => (await list()).length, { timeout: 100_000 }).toBeGreaterThan(0);
       const [execution] = await list();
-      expectAccount(await wait(apiClient, execution.id), accountId);
+      expectAccount(await wait(apiClient, execution.id), accountId, { username: accountId });
     });
 
     for (const rebind of [false, true]) {

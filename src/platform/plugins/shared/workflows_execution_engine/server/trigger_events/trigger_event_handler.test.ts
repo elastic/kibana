@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
@@ -114,6 +115,9 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
       maxChainDepth: 10,
     },
     scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
+    scheduleBoundSubscription: jest
+      .fn()
+      .mockResolvedValue({ workflowExecutionId: 'bound-handler' }),
     logger: mockLogger,
     ...overrides,
   };
@@ -679,5 +683,83 @@ describe('TriggerEventHandler', () => {
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('native identity failure dispatch', () => {
+  const execution: EsWorkflowExecution = {
+    id: 'failed-execution',
+    workflowId: 'source',
+    spaceId: 'source-space',
+    status: ExecutionStatus.FAILED,
+    isTestRun: false,
+    context: {},
+    yaml: '',
+    scopeStack: [],
+    createdAt: '',
+    startedAt: '',
+    finishedAt: '',
+    cancelRequested: false,
+    duration: 0,
+    error: { type: 'ServiceAccountExecutionError', message: 'Binding revoked' },
+    workflowDefinition: {
+      version: '1',
+      name: 'Source',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+    },
+    eventChainDepth: 2,
+    eventChainVisitedWorkflowIds: ['ancestor'],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockClassifyWorkflowTriggerMatch.mockReturnValue('matched');
+  });
+
+  it('uses the bound subscription path and preserves persisted space and event chain', async () => {
+    const deps = createDeps({
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    await new TriggerEventHandler(deps).handleWorkflowIdentityFailure(execution);
+    expect(deps.scheduleWorkflow).not.toHaveBeenCalled();
+    expect(deps.spaces?.getSpaceId).not.toHaveBeenCalled();
+    expect(deps.scheduleBoundSubscription).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-1' }),
+      expect.objectContaining({
+        spaceId: 'source-space',
+        triggeredBy: 'workflows.failed',
+        event: expect.objectContaining({
+          eventChainDepth: 3,
+          eventChainVisitedWorkflowIds: ['ancestor', 'source'],
+        }),
+      })
+    );
+  });
+
+  it.each<Partial<EsWorkflowExecution>>([
+    { isTestRun: true },
+    { status: ExecutionStatus.RUNNING },
+    { error: { type: 'OtherError', message: 'Other failure' } },
+  ])('ignores non-production identity failures: %j', async (overrides) => {
+    const deps = createDeps();
+    await new TriggerEventHandler(deps).handleWorkflowIdentityFailure({
+      ...execution,
+      ...overrides,
+    });
+    expect(deps.workflowRepository.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
+    expect(deps.scheduleBoundSubscription).not.toHaveBeenCalled();
+  });
+
+  it('retains cycle prevention and maximum event-chain depth', async () => {
+    const deps = createDeps({
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'source' })]),
+    });
+    const handler = new TriggerEventHandler(deps);
+    await handler.handleWorkflowIdentityFailure(execution);
+    expect(deps.scheduleBoundSubscription).not.toHaveBeenCalled();
+    await handler.handleWorkflowIdentityFailure({ ...execution, eventChainDepth: 10 });
+    expect(deps.scheduleBoundSubscription).not.toHaveBeenCalled();
   });
 });

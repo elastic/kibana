@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   calculateNextRunAtFromSchedule,
+  type ConcreteTaskInstance,
+  type TaskInstance,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
@@ -21,6 +24,25 @@ const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
 const getScheduledWorkflowTaskId = (workflowId: string) => `workflow:${workflowId}:scheduled`;
+
+const getRecreatedTaskTiming = (
+  existing: ConcreteTaskInstance,
+  schedule: TaskInstance['schedule'],
+  preserveRunAt: boolean
+): Pick<TaskInstance, 'runAt' | 'scheduledAt'> => ({
+  scheduledAt: existing.scheduledAt,
+  runAt: preserveRunAt
+    ? existing.runAt
+    : new Date(
+        calculateNextRunAtFromSchedule({
+          schedule,
+          // RRule dtstart defines the recurrence anchor; an interval retains the task's anchor.
+          startDate: schedule?.rrule?.dtstart
+            ? new Date(schedule.rrule.dtstart)
+            : existing.scheduledAt,
+        })
+      ),
+});
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -48,7 +70,13 @@ export class WorkflowTaskScheduler {
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(
+          workflow.id,
+          spaceId,
+          trigger,
+          request,
+          workflow.definition?.settings?.run_as
+        );
         scheduledTaskIds.push(taskId);
         this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -74,7 +102,8 @@ export class WorkflowTaskScheduler {
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request: KibanaRequest
+    request: KibanaRequest,
+    serviceAccountId: string | undefined
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;
@@ -89,9 +118,18 @@ export class WorkflowTaskScheduler {
       );
     }
 
+    const runAs: TaskInstance['runAs'] = serviceAccountId
+      ? {
+          workloadType: 'workflow',
+          workloadId: workflowId,
+          spaceId,
+          expectedServiceAccountId: serviceAccountId,
+        }
+      : undefined;
     const taskInstance = {
       id: taskId,
       taskType: 'workflow:scheduled',
+      ...(runAs ? { runAs } : {}),
       schedule,
       params: {
         workflowId,
@@ -108,13 +146,36 @@ export class WorkflowTaskScheduler {
     };
 
     try {
-      // Use Task Manager's first-class API key support by passing the request.
-      // Task Manager will automatically create and manage the API key for user context.
+      // Task Manager stores workload coordinates for SAs and caller credentials otherwise.
       const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
 
       return scheduledTask.id;
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
+        const existing = await this.taskManager.get(taskId).catch((error) => {
+          if ((error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS) return undefined;
+          throw error;
+        });
+        const credential = existing?.credential;
+        const sameIdentity = runAs
+          ? credential?.type === 'service_account' &&
+            credential.workloadType === runAs.workloadType &&
+            credential.workloadId === runAs.workloadId &&
+            credential.spaceId === runAs.spaceId &&
+            credential.expectedServiceAccountId === runAs.expectedServiceAccountId
+          : !credential;
+        // TM runAs is immutable; replacing the task is required when its identity changes.
+        if (!sameIdentity) {
+          const recreatedTaskInstance = existing
+            ? {
+                ...taskInstance,
+                ...getRecreatedTaskTiming(existing, schedule, isEqual(existing.schedule, schedule)),
+              }
+            : taskInstance;
+          await this.taskManager.removeIfExists(taskId);
+          return (await this.taskManager.schedule(recreatedTaskInstance, { request })).id;
+        }
+
         // Task already exists — update its schedule in place rather than failing.
         // This handles both interval and RRule schedule types.
         const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, {
@@ -146,13 +207,7 @@ export class WorkflowTaskScheduler {
           const recreatedTaskInstance = existingTask
             ? {
                 ...taskInstance,
-                scheduledAt: existingTask.scheduledAt,
-                runAt: new Date(
-                  calculateNextRunAtFromSchedule({
-                    schedule,
-                    startDate: existingTask.scheduledAt,
-                  })
-                ),
+                ...getRecreatedTaskTiming(existingTask, schedule, false),
               }
             : taskInstance;
           await this.taskManager.removeIfExists(taskId);
