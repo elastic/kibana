@@ -69,7 +69,7 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
    * load in order, so the last write wins. Avoid calling it more than once per
    * test unless that stacking is intentional.
    */
-  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
+  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'esql') {
     return this.page.addInitScript(
       ({ storageKey, storageValue }) => {
         window.localStorage.setItem(storageKey, storageValue);
