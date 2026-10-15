@@ -58,6 +58,8 @@ export function usePatternTester() {
       } catch (e) {
         const bodyMessage = (e as { body?: { message?: string } })?.body?.message;
         const message = bodyMessage ?? (e instanceof Error ? e.message : String(e));
+        // The previous output belongs to a different input, so do not keep presenting it as this test's.
+        setResult(undefined);
         setError(message);
         if (!silent) {
           notifications.toasts.addDanger({ title: message });

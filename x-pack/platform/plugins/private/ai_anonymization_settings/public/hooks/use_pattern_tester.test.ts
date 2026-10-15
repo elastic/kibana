@@ -52,4 +52,21 @@ describe('usePatternTester', () => {
     expect(addDanger).not.toHaveBeenCalled();
     expect(result.current.error).toBe('The pattern tester is disabled');
   });
+
+  it('drops the previous result when a later test fails, so stale output is not shown for the new input', async () => {
+    const previous = { maskedInput: {}, anonymizations: [], stats: {} };
+    post.mockResolvedValueOnce(previous).mockRejectedValueOnce(new Error('timed out'));
+    const { result } = renderHook(() => usePatternTester());
+
+    await act(async () => {
+      await result.current.test({}, rules);
+    });
+    expect(result.current.result).toEqual(previous);
+
+    await act(async () => {
+      await result.current.test({}, rules);
+    });
+    expect(result.current.result).toBeUndefined();
+    expect(result.current.error).toBe('timed out');
+  });
 });
