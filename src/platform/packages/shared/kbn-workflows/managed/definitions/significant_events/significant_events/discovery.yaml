@@ -43,10 +43,10 @@ triggers:
           description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
         classifierProbeWindowMinutes:
           type: number
-          default: 60
+          default: 20
           minimum: 15
           maximum: 360
-          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it at or above the detection lookback bucket window so sparse rules do not flicker between rows and no rows.'
+          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent.'
         classifierProbeTimeoutMs:
           type: number
           default: 8000

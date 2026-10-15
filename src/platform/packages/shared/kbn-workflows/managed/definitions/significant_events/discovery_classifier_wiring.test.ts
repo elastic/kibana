@@ -145,7 +145,7 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it.each([
       ['classifierShadowMode', 'boolean', true, undefined, undefined],
-      ['classifierProbeWindowMinutes', 'number', 60, 15, 360],
+      ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
       ['classifierBudgetMs', 'number', 20000, 2000, 60000],
