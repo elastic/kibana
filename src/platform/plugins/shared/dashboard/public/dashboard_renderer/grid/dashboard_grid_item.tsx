@@ -79,6 +79,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       dashboardContainerRef,
       relatedPanelsIndicatorId,
       blurredPanelIds,
+      isSelectMode,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -90,7 +91,8 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
       dashboardApi.relatedPanelsIndicatorId$,
-      dashboardApi.blurredPanelIds$
+      dashboardApi.blurredPanelIds$,
+      dashboardApi.isSelectMode$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -110,8 +112,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     const isSelected = selectedPanelIds.has(id) || (previewSelectedPanelIds?.has(id) ?? false);
     const showSelectedPanelActions = viewMode === 'edit' && selectedPanelIds.has(id);
     const isInSelectMode =
-      viewMode === 'edit' &&
-      (selectedPanelIds.size > 0 || (previewSelectedPanelIds?.size ?? 0) > 0);
+      viewMode === 'edit' && (isSelectMode || (previewSelectedPanelIds?.size ?? 0) > 0);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -147,6 +148,17 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         });
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
+
+    // In select mode the panel's content is out of reach for the keyboard too, so Tab moves between
+    // panels instead of into charts and title editors
+    useEffect(() => {
+      if (!isInSelectMode || typeof ref === 'function' || !ref?.current) return;
+      const regions = Array.from(
+        ref.current.querySelectorAll<HTMLElement>('.embPanel__content, .embPanel__header')
+      );
+      regions.forEach((region) => region.setAttribute('inert', ''));
+      return () => regions.forEach((region) => region.removeAttribute('inert'));
+    }, [isInSelectMode, isRenderable, ref]);
 
     useEffect(() => {
       return () => {
@@ -213,12 +225,12 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const mouseDownPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-    // Once at least one panel is selected the dashboard is in select mode, where a plain click
+    // In select mode (entered by selecting a panel or pressing Cmd alone) a plain click
     // anywhere on a panel toggles it. The panel's own actions keep working, and clicks from
     // portaled content (e.g. hover action popovers) or that end a panel drag are ignored.
     const isSelectModeClick = useCallback(
       (e: React.MouseEvent) => {
-        if (viewMode !== 'edit' || selectedPanelIds.size === 0) return false;
+        if (viewMode !== 'edit' || !isSelectMode) return false;
         const target = e.target as HTMLElement;
         if (!(e.currentTarget as HTMLElement).contains(target)) return false;
         if (
@@ -235,7 +247,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
             Math.abs(e.clientY - start.y) < SELECTION_DRAG_THRESHOLD_PX)
         );
       },
-      [viewMode, selectedPanelIds]
+      [viewMode, isSelectMode]
     );
 
     const handlePanelMouseDownCapture = useCallback(
@@ -337,6 +349,11 @@ const dashboardGridItemStyles = {
         // anchors the selection indicator and the selected panel actions to the panel's edges
         '&.dshDashboardGrid__item--selectMode': {
           position: 'relative',
+          // in select mode a click anywhere on a panel selects it, so its content (chart tooltips,
+          // brushing, title editing, ...) stops reacting to the pointer and clicks land on the panel
+          '.embPanel__content, .embPanel__header': {
+            pointerEvents: 'none',
+          },
         },
         '&:hover .dshDashboardGrid__selectionIndicator:not(.dshDashboardGrid__selectionIndicator--checked)':
           {

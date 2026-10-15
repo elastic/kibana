@@ -62,6 +62,12 @@ export function initializeTrackPanel(
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const selectedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
+  // Select mode outlives an empty selection (e.g. entered with the modifier key alone, or after
+  // toggling off the last panel) until the selection is explicitly cleared
+  const isSelectMode$ = new BehaviorSubject<boolean>(false);
+  const setSelectMode = (isSelectMode: boolean) => {
+    if (isSelectMode$.value !== isSelectMode) isSelectMode$.next(isSelectMode);
+  };
   const copiedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
@@ -75,6 +81,10 @@ export function initializeTrackPanel(
   function setExpandedPanelId(id: string | undefined) {
     if (expandedPanelId$.value !== id) expandedPanelId$.next(id);
   }
+
+  const exitSelectModeSubscription = viewMode$.subscribe((viewMode) => {
+    if (viewMode !== 'edit') setSelectMode(false);
+  });
 
   const blurredPanelIds$ = new BehaviorSubject<string[]>([]);
   const blurredPanelIdsSubscription = combineLatest([
@@ -187,6 +197,7 @@ export function initializeTrackPanel(
       selectedPanelIds$,
       setSelectedPanelIds: (ids: Set<string>) => {
         selectedPanelIds$.next(ids);
+        setSelectMode(ids.size > 0);
       },
       togglePanelSelection: (id: string) => {
         const next = new Set(selectedPanelIds$.value);
@@ -196,7 +207,10 @@ export function initializeTrackPanel(
           next.add(id);
         }
         selectedPanelIds$.next(next);
+        setSelectMode(true);
       },
+      isSelectMode$,
+      enterSelectMode: () => setSelectMode(true),
       copiedPanelIds$,
       copySelectedPanels: () => {
         copiedPanelIds$.next(new Set(selectedPanelIds$.value));
@@ -206,6 +220,7 @@ export function initializeTrackPanel(
     },
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
+      exitSelectModeSubscription.unsubscribe();
     },
   };
 }

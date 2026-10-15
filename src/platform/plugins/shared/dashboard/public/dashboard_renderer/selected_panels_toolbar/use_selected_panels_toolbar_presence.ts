@@ -21,14 +21,15 @@ const prefersReducedMotion = () =>
 /**
  * Decides when the selected panels toolbar is shown and how the hint bar takes its place.
  *
+ * - The toolbar shows while the dashboard is in select mode, even with nothing selected yet.
  * - The toolbar leaves instantly when the selection is cleared (like Linear's bulk actions bar):
  *   the user is done with it, so nothing makes them wait.
  * - The hint bar then fades in after a pointer interaction, and appears instantly after a keyboard
  *   action (e.g. Escape): keyboard actions never wait on motion.
  * - Re-selecting right after the toolbar left skips its entrance.
  */
-export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) => {
-  const showToolbar = selectedPanelIds.size > 0;
+export const useSelectedPanelsToolbarPresence = (isSelectMode: boolean) => {
+  const showToolbar = isSelectMode;
   const [skipEntrance, setSkipEntrance] = useState(false);
   const [animateHintBarIn, setAnimateHintBarIn] = useState(true);
 

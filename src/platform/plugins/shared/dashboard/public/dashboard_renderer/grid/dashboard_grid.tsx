@@ -87,15 +87,23 @@ export const DashboardGrid = () => {
     id: number;
     position: { x: number; y: number };
   } | null>(null);
-  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef, selectedPanelIds] =
-    useBatchedPublishingSubjects(
-      dashboardApi.expandedPanelId$,
-      dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode$,
-      dashboardInternalApi.gridLayout$,
-      dashboardInternalApi.dashboardContainerRef$,
-      dashboardApi.selectedPanelIds$
-    );
+  const [
+    expandedPanelId,
+    useMargins,
+    viewMode,
+    layout,
+    dashboardContainerRef,
+    selectedPanelIds,
+    isSelectMode,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.expandedPanelId$,
+    dashboardApi.settings.useMargins$,
+    dashboardApi.viewMode$,
+    dashboardInternalApi.gridLayout$,
+    dashboardInternalApi.dashboardContainerRef$,
+    dashboardApi.selectedPanelIds$,
+    dashboardApi.isSelectMode$
+  );
   const panelContextMenuValue = useMemo(
     () => ({
       openContextMenu: (panelId: string, position: { x: number; y: number }) => {
@@ -120,6 +128,25 @@ export const DashboardGrid = () => {
     },
     [layout]
   );
+
+  // While the selection modifier is held, a click or drag selects panels, so panel content stops
+  // reacting to the pointer (no chart tooltips or brushing under a Cmd+click)
+  const [isSelectionModifierHeld, setIsSelectionModifierHeld] = useState(false);
+  useEffect(() => {
+    if (viewMode !== 'edit') return;
+    const onKeyChange = (e: KeyboardEvent) =>
+      setIsSelectionModifierHeld(isSelectionModifierPressed(e));
+    const onBlur = () => setIsSelectionModifierHeld(false);
+    document.addEventListener('keydown', onKeyChange, true);
+    document.addEventListener('keyup', onKeyChange, true);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      document.removeEventListener('keydown', onKeyChange, true);
+      document.removeEventListener('keyup', onKeyChange, true);
+      window.removeEventListener('blur', onBlur);
+      setIsSelectionModifierHeld(false);
+    };
+  }, [viewMode]);
 
   const dragStateRef = useRef<{
     start: { x: number; y: number };
@@ -147,10 +174,10 @@ export const DashboardGrid = () => {
         }
         return;
       }
-      if ((selectedPanelIds?.size ?? 0) === 0) return;
+      if (!isSelectMode) return;
       dashboardApi.setSelectedPanelIds(new Set());
     },
-    [viewMode, selectedPanelIds, dashboardApi]
+    [viewMode, isSelectMode, dashboardApi]
   );
 
   const dismissClickHint = useCallback(() => setClickHint(null), []);
@@ -411,7 +438,8 @@ export const DashboardGrid = () => {
           ref={layoutRef}
           className={classNames({
             'dshLayout--editing': viewMode === 'edit',
-            'dshLayout--selectMode': viewMode === 'edit' && (selectedPanelIds?.size ?? 0) > 0,
+            'dshLayout--selectMode': viewMode === 'edit' && isSelectMode,
+            'dshLayout--selectionModifierHeld': viewMode === 'edit' && isSelectionModifierHeld,
             'dshLayout-withoutMargins': !useMargins,
             'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
           })}
@@ -486,6 +514,11 @@ const dashboardGridStyles = {
         visibility: 'hidden !important' as 'hidden',
       },
       // Select mode: the hovered panel previews the selected outline
+      '&.dshLayout--selectionModifierHeld': {
+        '.embPanel__content, .embPanel__header': {
+          pointerEvents: 'none',
+        },
+      },
       '&.dshLayout--selectMode .dshDashboardGrid__item:hover .embPanel': {
         outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`,
       },

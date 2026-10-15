@@ -134,6 +134,8 @@ export const SelectedPanelsToolbar = ({
     hadAddToChatWhenReady.current = Boolean(addToChat);
   }
   const isAddToChatLate = hadAddToChatWhenReady.current === false;
+  // in select mode the toolbar shows before any panel is selected, with nothing to act on yet
+  const hasSelection = selectedPanelIds.size > 0;
 
   const children = useStateFromPublishingSubject(dashboardApi.children$);
   const [annotationsVisibility, setAnnotationsVisibility] = useState<AnnotationsVisibility>(() =>
@@ -222,6 +224,7 @@ export const SelectedPanelsToolbar = ({
                   iconType="addToChat"
                   aria-label={strings.getAddToChat()}
                   withToolTip
+                  isDisabled={!hasSelection}
                   onClick={() => addToChat.execute()}
                   data-test-subj="dashboardSelectedPanelsToolbarAddToChat"
                 />
@@ -232,6 +235,7 @@ export const SelectedPanelsToolbar = ({
                 label={dashboardClonePanelActionStrings.getDisplayName()}
                 iconType="copy"
                 onClick={duplicate}
+                isDisabled={!hasSelection}
                 data-test-subj="dashboardSelectedPanelsToolbarDuplicate"
               />
             </EuiFlexItem>
@@ -241,6 +245,7 @@ export const SelectedPanelsToolbar = ({
                   label={dashboardCopyToDashboardActionStrings.getDisplayName()}
                   iconType="addToDashboard"
                   onClick={copyToDashboard}
+                  isDisabled={!hasSelection}
                   data-test-subj="dashboardSelectedPanelsToolbarCopyToDashboard"
                 />
               </EuiFlexItem>
@@ -323,6 +328,7 @@ export const SelectedPanelsToolbar = ({
                     label={strings.getMoreOptions()}
                     iconType="boxesVertical"
                     onClick={() => setIsMorePopoverOpen((open) => !open)}
+                    isDisabled={!hasSelection}
                     isSelected={isMorePopoverOpen}
                     aria-expanded={isMorePopoverOpen}
                     data-test-subj="dashboardSelectedPanelsToolbarToggleMore"

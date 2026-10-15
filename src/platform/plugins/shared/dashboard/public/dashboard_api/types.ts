@@ -231,6 +231,9 @@ export type DashboardApi = CanExpandPanels &
     selectedPanelIds$: PublishingSubject<Set<string>>;
     setSelectedPanelIds: (ids: Set<string>) => void;
     togglePanelSelection: (id: string) => void;
+    /** true while panel clicks select panels, even before any panel is selected */
+    isSelectMode$: PublishingSubject<boolean>;
+    enterSelectMode: () => void;
     copiedPanelIds$: PublishingSubject<Set<string>>;
     copySelectedPanels: () => void;
     runPastePanels: () => Promise<void>;

@@ -14,7 +14,7 @@ const selected = new Set(['a', 'b']);
 const none = new Set<string>();
 
 const setup = (initial: Set<string>) =>
-  renderHook(({ ids }) => useSelectedPanelsToolbarPresence(ids), {
+  renderHook(({ ids }) => useSelectedPanelsToolbarPresence(ids.size > 0), {
     initialProps: { ids: initial },
   });
 
