@@ -85,11 +85,58 @@ interface PatternMatchesProps {
   maxHeight: number;
 }
 
-interface ListTitle {
-  label: string;
-  iconType: string;
-  color: 'success' | 'subdued';
+interface PatternMatchStatusProps {
+  exactCount: number;
+  partialCount: number;
 }
+
+interface MatchStatus {
+  label: string;
+  color: 'success' | 'subdued';
+  iconType?: string;
+}
+
+/** How well a pattern matches, for beside its label: exactly, partly, or not at all. */
+export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchStatusProps) => {
+  const { euiTheme } = useEuiTheme();
+  const status: MatchStatus =
+    exactCount > 0
+      ? {
+          label: i18n.translate('xpack.boost.patternMatches.exactCount', {
+            defaultMessage: '{count, plural, one {# exact match} other {# exact matches}}',
+            values: { count: exactCount },
+          }),
+          color: 'success',
+          iconType: 'checkCircleFill',
+        }
+      : partialCount > 0
+      ? {
+          label: i18n.translate('xpack.boost.patternMatches.partialCount', {
+            defaultMessage: '{count, plural, one {# partial match} other {# partial matches}}',
+            values: { count: partialCount },
+          }),
+          color: 'subdued',
+          iconType: 'partial',
+        }
+      : {
+          label: i18n.translate('xpack.boost.patternMatches.noMatchesCount', {
+            defaultMessage: '0 matches',
+          }),
+          color: 'subdued',
+        };
+
+  return (
+    <EuiText
+      size="xs"
+      color={status.color}
+      css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}
+      data-test-subj="boostRulePatternMatchCount"
+    >
+      {status.iconType && <EuiIcon type={status.iconType} size="s" aria-hidden={true} />}
+      {status.label}
+    </EuiText>
+  );
+};
 
 /**
  * What an index pattern matches, or partly matches until it matches something, beside every data
@@ -126,57 +173,34 @@ export const PatternMatches = ({
       size="s"
       color={euiTheme.colors.textDisabled}
       textAlign="center"
-      css={{ paddingBlock: euiTheme.size.s }}
+      // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
+      css={{ paddingBlockStart: euiTheme.size.base, paddingBlockEnd: euiTheme.size.l }}
       data-test-subj="boostRulePatternMatchesEmpty"
     >
       <p>{message}</p>
     </EuiText>
   );
 
-  // Titled lists keep their title outside the scrolling area, so it stays in view. The scrolling
-  // area is labeled by the title, so the title itself isn't a heading. The area keeps 8px of
-  // padding, which its scroll mask fades.
-  const renderList = (
-    label: string,
-    rows: ReactNode,
-    { title, isSubdued = false }: { title?: ListTitle; isSubdued?: boolean } = {}
-  ) => (
-    <>
-      {title && (
-        <EuiText
-          size="xs"
-          color={title.color}
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: euiTheme.size.xs,
-            paddingBlockStart: euiTheme.size.s,
-          }}
-          data-test-subj="boostRulePatternMatchesTitle"
-        >
-          <EuiIcon type={title.iconType} size="s" aria-hidden={true} />
-          {title.label}
-        </EuiText>
-      )}
-      <EuiText
-        size="s"
-        color={isSubdued ? 'subdued' : undefined}
-        tabIndex={0}
-        role="region"
-        aria-label={label}
-        css={css`
-          ${scrollStyles}
-          display: flex;
-          flex-direction: column;
-          flex: 1 1 auto;
-          gap: ${euiTheme.size.s};
-          min-block-size: 0;
-          padding-block: ${euiTheme.size.s};
-        `}
-      >
-        {rows}
-      </EuiText>
-    </>
+  // The scrolling area keeps 8px of padding, which its scroll mask fades.
+  const renderList = (label: string, rows: ReactNode, isSubdued = false) => (
+    <EuiText
+      size="s"
+      color={isSubdued ? 'subdued' : undefined}
+      tabIndex={0}
+      role="region"
+      aria-label={label}
+      css={css`
+        ${scrollStyles}
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        gap: ${euiTheme.size.s};
+        min-block-size: 0;
+        padding-block: ${euiTheme.size.s};
+      `}
+    >
+      {rows}
+    </EuiText>
   );
 
   // Each target, struck through with the rule that keeps it when a higher-ranked rule does.
@@ -215,29 +239,24 @@ export const PatternMatches = ({
         })
       );
     }
+    // How well they match is beside the pattern's label, so the lists only name it for screen
+    // readers.
     if (hasExactMatches) {
-      const title = {
-        label: i18n.translate('xpack.boost.patternMatches.exactMatchesTitle', {
+      return renderList(
+        i18n.translate('xpack.boost.patternMatches.exactMatchesLabel', {
           defaultMessage: 'Exact matches',
         }),
-        iconType: 'checkCircleFill',
-        color: 'success' as const,
-      };
-      return renderList(title.label, renderTargets(exactMatches, pattern), { title });
+        renderTargets(exactMatches, pattern)
+      );
     }
     if (partialMatches.length > 0) {
-      const title = {
-        label: i18n.translate('xpack.boost.patternMatches.partialMatchesTitle', {
-          defaultMessage: 'Partial matches',
-        }),
-        iconType: 'partial',
-        color: 'subdued' as const,
-      };
       // Subdued, since the rule doesn't apply to these yet.
       return renderList(
-        title.label,
+        i18n.translate('xpack.boost.patternMatches.partialMatchesLabel', {
+          defaultMessage: 'Partial matches',
+        }),
         renderTargets(partialMatches, partialPattern, 'boostRulePartialMatch'),
-        { title, isSubdued: true }
+        true
       );
     }
     return renderEmpty(

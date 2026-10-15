@@ -53,7 +53,7 @@ import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import { SupersedingRule } from './target_name';
 import type { TargetPreview } from './pattern_matches';
-import { PatternMatches, getPartialPattern } from './pattern_matches';
+import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -495,24 +495,18 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const priorityError =
     visibleErrors.priority && RULE_PRIORITY_ERROR_MESSAGES[visibleErrors.priority];
 
-  // What a valid pattern matches, counted beside its label.
-  const hasMatchCount = Boolean(type && pattern && !errors.pattern);
-  const matchesLabel = i18n.translate('xpack.boost.ruleForm.matchesLabel', {
-    defaultMessage: '{count, plural, one {# exact match} other {# exact matches}}',
-    values: { count: patternPreview.length },
-  });
   const patternRow = (
     <EuiFormRow
       display="rowCompressed"
       label={i18n.translate('xpack.boost.ruleForm.patternLabel', {
         defaultMessage: 'Index pattern',
       })}
+      // How well the pattern matches, which is "0 matches" until there's a valid one.
       labelAppend={
-        hasMatchCount && (
-          <EuiText size="xs" color="subdued" data-test-subj="boostRulePatternMatchCount">
-            {matchesLabel}
-          </EuiText>
-        )
+        <PatternMatchStatus
+          exactCount={patternPreview.length}
+          partialCount={partialPreview.length}
+        />
       }
       isInvalid={Boolean(patternError)}
       error={patternError}

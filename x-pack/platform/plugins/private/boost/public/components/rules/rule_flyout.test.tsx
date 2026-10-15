@@ -367,12 +367,12 @@ describe('RuleFlyout pattern matches', () => {
     expect(highlights).toEqual(['cat', '-fa']);
   });
 
-  it('titles exact matches', async () => {
+  it('lists exact matches without partial ones', async () => {
     renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Exact matches');
+    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent('catalog-fall');
     expect(screen.queryByTestId('boostRulePartialMatch')).not.toBeInTheDocument();
   });
 
@@ -381,8 +381,8 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 exact matches');
-    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Partial matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 partial match');
+    expect(screen.getByRole('region', { name: 'Partial matches' })).toBeInTheDocument();
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
     // A pattern widened to match it would still rank below the saved catalogs rule.
@@ -413,7 +413,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 exact matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
@@ -449,7 +449,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Enter an index pattern to see matches'
     );
-    expect(screen.queryByTestId('boostRulePatternMatchCount')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
   });
 
   it('lists every index, highlighting the same matches', async () => {
