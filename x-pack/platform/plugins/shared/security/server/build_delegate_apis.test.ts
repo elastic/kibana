@@ -324,7 +324,7 @@ describe('buildSecurityApi', () => {
 
       await expect(
         api.serviceAccounts.delete(request, 'service-account-id', params)
-      ).resolves.toBeUndefined();
+      ).resolves.toEqual({ deleted: true, warnings: [] });
 
       expect(serviceAccounts!.management.delete).toHaveBeenCalledWith(
         request,
@@ -333,17 +333,16 @@ describe('buildSecurityApi', () => {
       );
     });
 
-    it('rejects when workloads are still bound to the account', async () => {
+    it('resolves with the blocking workloads when workloads are still bound to the account', async () => {
+      const workload = {
+        pluginId: 'alerting',
+        workloadType: 'rule',
+        workloadId: 'rule-1',
+        displayName: 'rule-1',
+      };
       serviceAccounts!.management.delete.mockResolvedValue({
         deleted: false,
-        workloads: [
-          {
-            pluginId: 'alerting',
-            workloadType: 'rule',
-            workloadId: 'rule-1',
-            displayName: 'rule-1',
-          },
-        ],
+        workloads: [workload],
       });
 
       await expect(
@@ -352,9 +351,7 @@ describe('buildSecurityApi', () => {
           'service-account-id',
           params
         )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Service account [service-account-id] is still bound to 1 workloads"`
-      );
+      ).resolves.toEqual({ deleted: false, workloads: [workload] });
     });
 
     it('throws when service accounts are not enabled', async () => {

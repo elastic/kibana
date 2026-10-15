@@ -135,6 +135,8 @@ export type {
   ServiceAccount,
   CreateServiceAccountParams,
   CreateServiceAccountServerParams,
+  DeleteServiceAccountResult,
+  ServiceAccountBoundWorkload,
   TrustedPlatformServiceAccountName,
   AuditEvent,
   AuditHttp,

@@ -18,6 +18,7 @@ export type {
   CoreServiceAccountsService,
   CreateServiceAccountServerParams,
   DeleteServiceAccountOptions,
+  DeleteServiceAccountResult,
   TrustedPlatformServiceAccountName,
 } from './src/service_accounts';
 export { TRUSTED_PLATFORM_SERVICE_ACCOUNTS } from './src/service_accounts';
@@ -45,6 +46,7 @@ export type {
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
+  ServiceAccountBoundWorkload,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,

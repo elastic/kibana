@@ -70,7 +70,7 @@ function createHarness({
 
   const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
   const createServiceAccount = jest.fn();
-  const deleteServiceAccount = jest.fn().mockResolvedValue(undefined);
+  const deleteServiceAccount = jest.fn().mockResolvedValue({ deleted: true, warnings: [] });
   const serviceAccountsIsEnabled = jest.fn().mockReturnValue(serviceAccountsEnabled);
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
