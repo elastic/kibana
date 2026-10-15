@@ -19,7 +19,7 @@
 
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-import { javascriptRules } from './javascript.mts';
+import { javascriptOverrides, javascriptRules } from './javascript.mts';
 import { typescriptRules } from './typescript.mts';
 import { jestRules } from './jest.mts';
 import { reactRules } from './react.mts';
@@ -77,6 +77,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
   },
   overrides: [
+    ...javascriptOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
     ...scoutOverrides,

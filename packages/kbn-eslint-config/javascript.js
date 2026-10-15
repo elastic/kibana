@@ -79,7 +79,6 @@ module.exports = {
         'import/export': 'error',
         'import/no-named-as-default': 'error',
         'import/no-named-as-default-member': 'error',
-        'import/no-duplicates': 'error',
         'import/no-dynamic-require': 'error',
 
         'prefer-object-spread': 'error',

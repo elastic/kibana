@@ -744,7 +744,6 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -808,7 +807,6 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -999,7 +997,6 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
@@ -1387,7 +1384,6 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1835,7 +1831,6 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -2010,7 +2005,6 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
@@ -2057,7 +2051,6 @@ module.exports = {
             },
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -2083,7 +2076,6 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
       },
     },
     /**
