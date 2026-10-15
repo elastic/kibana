@@ -21,6 +21,7 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import type { EventLoopDelaysDaily } from '../../saved_objects';
@@ -103,10 +104,12 @@ describe(`daily rollups integration test`, () => {
     rawEventLoopDelaysDaily = rawDailyDocs.rawEventLoopDelaysDaily;
     outdatedRawEventLoopDelaysDaily = rawDailyDocs.outdatedRawEventLoopDelaysDaily;
 
-    await internalRepository.bulkCreate<EventLoopDelaysDaily>(
-      [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
-      { refresh: true }
-    );
+    const { saved_objects: createdSavedObjects } =
+      await internalRepository.bulkCreate<EventLoopDelaysDaily>(
+        [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
+        { refresh: true }
+      );
+    expect(createdSavedObjects.filter(isSavedObjectErrorResult)).toEqual([]);
   });
 
   afterAll(async () => {
@@ -119,6 +122,9 @@ describe(`daily rollups integration test`, () => {
     await esClient.indices.refresh({ index: `.kibana` }); // Make sure that the changes are searchable
     const { total, saved_objects: savedObjects } =
       await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+    expect(savedObjects.map(({ id }) => id).sort()).toEqual(
+      rawEventLoopDelaysDaily.map(({ id }) => id).sort()
+    );
     expect(total).toBe(rawEventLoopDelaysDaily.length);
     expect(comparableSavedObjects(savedObjects)).toEqual(
       comparableSavedObjects(rawEventLoopDelaysDaily)
