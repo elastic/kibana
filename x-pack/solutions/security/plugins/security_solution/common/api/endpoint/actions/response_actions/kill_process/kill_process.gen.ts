@@ -35,13 +35,13 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
             .min(1)
             .describe('The process ID (PID) of the process to terminate.'),
           /**
-           * Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.
+           * Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
            */
           kill_descendants: z
             .boolean()
             .optional()
             .describe(
-              'Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.'
+              'Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.'
             ),
         }),
         z.object({
@@ -54,13 +54,13 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
             .max(256)
             .describe('The entity ID of the process to terminate.'),
           /**
-           * Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.
+           * Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
            */
           kill_descendants: z
             .boolean()
             .optional()
             .describe(
-              'Whether to kill all child processes of the specified process. Valid only for Endpoint agent type.'
+              'Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.'
             ),
         }),
         z.object({
