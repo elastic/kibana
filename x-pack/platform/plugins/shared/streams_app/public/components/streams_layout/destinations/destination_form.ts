@@ -12,6 +12,8 @@ import type {
   DestinationCreationFormData,
   DestinationCreationFormErrors,
   ElasticsearchDestinationFormData,
+  S3DestinationFormData,
+  S3DestinationFormErrors,
 } from './types';
 import type { Unit } from '../../../services/unit_repository';
 
@@ -34,6 +36,16 @@ const getLocalElasticsearchErrors = (
   return errors;
 };
 
+const getS3Errors = (s3: S3DestinationFormData): S3DestinationFormErrors => {
+  const errors: S3DestinationFormErrors = {};
+  for (const field of ['region', 'bucket', 'accessKey', 'secret'] as const) {
+    if (!s3[field].trim()) {
+      errors[field] = 'required';
+    }
+  }
+  return errors;
+};
+
 export const getDestinationCreationFormErrors = ({
   formData,
   unitDefinition,
@@ -47,10 +59,12 @@ export const getDestinationCreationFormErrors = ({
       unitDefinition,
     }),
   };
-  if (formData.storageKind !== 'local_elasticsearch') {
-    return errors;
+  switch (formData.storageKind) {
+    case 'local_elasticsearch':
+      return { ...errors, ...getLocalElasticsearchErrors(formData.elasticsearch) };
+    case 'external_storage':
+      return { ...errors, ...getS3Errors(formData.s3) };
   }
-  return { ...errors, ...getLocalElasticsearchErrors(formData.elasticsearch) };
 };
 
 export const canSubmitDestinationForm = ({
@@ -67,5 +81,5 @@ export const canSubmitDestinationForm = ({
     return false;
   }
   const errors = getDestinationCreationFormErrors({ formData, unitDefinition });
-  return !errors.destinationName && !errors.index && !errors.indexPatterns;
+  return Object.values(errors).every((error) => !error);
 };

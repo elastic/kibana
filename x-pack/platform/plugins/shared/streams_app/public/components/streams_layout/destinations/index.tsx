@@ -15,7 +15,7 @@ import { UnitDestinationFlyout } from './unit_destination_flyout';
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
 export const DestinationsTab = () => {
@@ -67,7 +67,12 @@ export const DestinationsTab = () => {
     return destinations.filter(
       (destination) =>
         (!normalizedQuery ||
-          [destination.name, destination.id, destination.index, LOCAL_ELASTICSEARCH_LABEL]
+          [
+            destination.name,
+            destination.id,
+            destination.type === 'elasticsearch' ? destination.index : destination.bucket,
+            getDestinationTypeLabel(destination.type),
+          ]
             .join(' ')
             .toLowerCase()
             .includes(normalizedQuery)) &&

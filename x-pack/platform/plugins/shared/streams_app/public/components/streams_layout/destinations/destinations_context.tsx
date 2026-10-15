@@ -23,9 +23,12 @@ import {
 } from './state_machines/destinations_table_state_machine';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_S3_DESTINATION_FORM,
   type DestinationStorageKind,
   type DestinationType,
   type DestinationViewModel,
+  type S3DestinationFormData,
+  type S3DestinationFormErrors,
 } from './types';
 
 export interface DestinationsController {
@@ -41,6 +44,8 @@ export interface DestinationsController {
   elasticsearchIndexPatterns: string;
   indexError?: 'required';
   indexPatternsError?: 'required' | 'invalid';
+  s3Form: S3DestinationFormData;
+  s3Errors: S3DestinationFormErrors;
   canCreateDestination: boolean;
   isUnitSaving: boolean;
   unconfiguredNodeIds: string[];
@@ -53,6 +58,7 @@ export interface DestinationsController {
   setCreateDestinationName: (destinationName: string) => void;
   setElasticsearchIndex: (index: string) => void;
   setElasticsearchIndexPatterns: (indexPatterns: string) => void;
+  setS3Form: (changes: Partial<S3DestinationFormData>) => void;
   validateCreationForm: () => void;
   deleteDestination: (destinationId: string) => void;
   setQuery: (query: string) => void;
@@ -200,6 +206,17 @@ export const useDestinations = ({
     EMPTY_ELASTICSEARCH_DESTINATION_FORM.indexPatterns;
   const indexError = creationContext?.formErrors.index;
   const indexPatternsError = creationContext?.formErrors.indexPatterns;
+  const s3Form = creationContext?.formData.s3 ?? EMPTY_S3_DESTINATION_FORM;
+  const formErrors = creationContext?.formErrors;
+  const s3Errors = useMemo<S3DestinationFormErrors>(
+    () => ({
+      region: formErrors?.region,
+      bucket: formErrors?.bucket,
+      accessKey: formErrors?.accessKey,
+      secret: formErrors?.secret,
+    }),
+    [formErrors]
+  );
   const isCreatingDestination = useSelector(destinationsActorRef, (state) =>
     state.matches({ configuring: 'persisting' })
   );
@@ -255,6 +272,11 @@ export const useDestinations = ({
       destinationsActorRef.send({ type: 'elasticsearch.change', indexPatterns }),
     [destinationsActorRef]
   );
+  const setS3Form = useCallback(
+    (changes: Partial<S3DestinationFormData>) =>
+      destinationsActorRef.send({ type: 's3.change', changes }),
+    [destinationsActorRef]
+  );
   const validateCreationForm = useCallback(
     () => destinationsActorRef.send({ type: 'creationForm.blur' }),
     [destinationsActorRef]
@@ -284,6 +306,8 @@ export const useDestinations = ({
       elasticsearchIndexPatterns,
       indexError,
       indexPatternsError,
+      s3Form,
+      s3Errors,
       canCreateDestination: canCreateDestination && !isUnitSaving,
       isUnitSaving,
       unconfiguredNodeIds,
@@ -298,6 +322,7 @@ export const useDestinations = ({
       setCreateDestinationName,
       setElasticsearchIndex,
       setElasticsearchIndexPatterns,
+      setS3Form,
       validateCreationForm,
       deleteDestination,
       setQuery: (nextQuery: string) => {
@@ -329,10 +354,13 @@ export const useDestinations = ({
       openCreateModal,
       persistenceError,
       query,
+      s3Errors,
+      s3Form,
       selectedDestinationId,
       setCreateDestinationName,
       setElasticsearchIndex,
       setElasticsearchIndexPatterns,
+      setS3Form,
       setStorageKind,
       storageKind,
       tableState,

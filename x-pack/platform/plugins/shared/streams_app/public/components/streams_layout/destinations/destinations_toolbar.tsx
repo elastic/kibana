@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { AMAZON_S3_LABEL, LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
 import type { DestinationType } from './types';
 
 interface DestinationsToolbarProps {
@@ -37,6 +37,7 @@ interface DestinationsToolbarProps {
 
 const TYPE_OPTIONS: Array<SourceFilterOption<DestinationType>> = [
   { key: 'elasticsearch', label: LOCAL_ELASTICSEARCH_LABEL },
+  { key: 's3', label: AMAZON_S3_LABEL },
 ];
 
 export const DestinationsToolbar = ({

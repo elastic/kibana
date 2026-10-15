@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
-import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
+import { S3Fields } from './s3_fields';
+import type {
+  DestinationCreationFormErrors,
+  DestinationStorageKind,
+  S3DestinationFormData,
+  S3DestinationFormErrors,
+} from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
@@ -17,9 +21,12 @@ interface DestinationTypeFieldsProps {
   indexPatterns: string;
   indexError?: DestinationCreationFormErrors['index'];
   indexPatternsError?: DestinationCreationFormErrors['indexPatterns'];
+  s3Form: S3DestinationFormData;
+  s3Errors: S3DestinationFormErrors;
   disabled: boolean;
   onIndexChange: (index: string) => void;
   onIndexPatternsChange: (indexPatterns: string) => void;
+  onS3Change: (changes: Partial<S3DestinationFormData>) => void;
   onBlur: () => void;
 }
 
@@ -27,18 +34,25 @@ interface DestinationTypeFieldsProps {
  * Renders the form section for the selected destination type.
  * Add a case and a fields component when a new type becomes available.
  */
-export const DestinationTypeFields = ({ storageKind, ...fields }: DestinationTypeFieldsProps) => {
+export const DestinationTypeFields = ({
+  storageKind,
+  s3Form,
+  s3Errors,
+  onS3Change,
+  ...fields
+}: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
       return <LocalElasticsearchFields {...fields} />;
     case 'external_storage':
       return (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.streams.destinations.externalStorageUnavailableDescription"
-            defaultMessage="External storage isn't available yet."
-          />
-        </EuiText>
+        <S3Fields
+          values={s3Form}
+          errors={s3Errors}
+          disabled={fields.disabled}
+          onChange={onS3Change}
+          onBlur={fields.onBlur}
+        />
       );
   }
 };
