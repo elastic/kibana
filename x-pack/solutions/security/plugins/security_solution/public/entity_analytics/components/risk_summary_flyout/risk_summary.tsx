@@ -6,9 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-<<<<<<< HEAD
-import { EuiAccordion, EuiSpacer, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-=======
 import {
   EuiAccordion,
   EuiSpacer,
@@ -17,7 +14,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
->>>>>>> 7eb5c3295cfbde623e65b42457175efa1e15cdf1
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
@@ -61,11 +57,7 @@ const resolutionRiskScoreMetricLabel = i18n.translate(
   }
 );
 
-<<<<<<< HEAD
-export const RESOLUTION_RISK_SCORE_QUERY_ID = 'riskSummaryResolutionRiskScoreQuery';
-=======
 const RESOLUTION_RISK_SCORE_QUERY_ID_PREFIX = 'riskSummaryResolutionRiskScoreQuery';
->>>>>>> 7eb5c3295cfbde623e65b42457175efa1e15cdf1
 
 const entityCaseAttachmentLabel = (entityType: EntityType, entityName?: string) =>
   i18n.translate('xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel', {
@@ -139,12 +131,9 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
   const { setQuery, deleteQuery } = useGlobalTime();
-<<<<<<< HEAD
-=======
   // Flyouts can stack (a child entity flyout shares the Redux store with its parent), so the
   // registration must be unique per instance or the child would overwrite/delete the parent's.
   const resolutionQueryId = useGeneratedHtmlId({ prefix: RESOLUTION_RISK_SCORE_QUERY_ID_PREFIX });
->>>>>>> 7eb5c3295cfbde623e65b42457175efa1e15cdf1
 
   const entityBaseRiskScore = entityRiskScores?.base;
   const entityResolutionRiskScore = entityRiskScores?.resolution.state;
