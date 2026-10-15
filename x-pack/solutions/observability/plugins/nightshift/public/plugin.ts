@@ -13,10 +13,11 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, catchError, from, map, of, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
+import { NightshiftSettingsLocatorDefinition } from '../common/locators';
 import type {
   NightshiftPublicSetup,
   NightshiftPublicStart,
@@ -38,8 +39,13 @@ export class NightshiftPlugin
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<NightshiftStartDependencies>): NightshiftPublicSetup {
+  setup(
+    coreSetup: CoreSetup<NightshiftStartDependencies>,
+    pluginsSetup: NightshiftSetupDependencies
+  ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
+
+    pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
@@ -56,6 +62,17 @@ export class NightshiftPlugin
       keywords: ['nightshift', 'significant events'],
       // Hidden until Significant Events reports itself available; start() feeds the real value.
       visibleIn: [],
+      deepLinks: [
+        {
+          id: 'knowledge_indicators' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.knowledgeIndicatorsDeepLinkTitle', {
+            defaultMessage: 'Knowledge Indicators',
+          }),
+          path: '/knowledge/knowledge_indicators',
+          visibleIn: [],
+          keywords: ['knowledge indicators', 'ki', 'kis', 'knowledge', 'significant events'],
+        },
+      ],
       updater$: this.appUpdater$,
       mount: async (appMountParameters: AppMountParameters) => {
         const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
@@ -102,8 +119,12 @@ export class NightshiftPlugin
         catchError(() => of(false)),
         map(
           (isAvailable): AppUpdater =>
-            () => ({
+            (app) => ({
               visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+              deepLinks: (app.deepLinks ?? []).map((link) => ({
+                ...link,
+                visibleIn: isAvailable ? ['globalSearch'] : [],
+              })),
             })
         )
       )

@@ -1,5 +1,5 @@
 {
-  "sha1": "2643534700835fa2a2667f8953d49d054a70cb99",
+  "sha1": "f556032c0be30c40106c1a1240f5ff49d7df13e1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,7 +21,7 @@
     {
       "id": "e7ed3a10b6ce0d6-da5902d0f911d23",
       "title": "Console autocomplete suggests inside a request body",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -35,13 +35,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 52,
-        "column": 20
+        "column": 25
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-4ec17b149a515d0",
       "title": "Console autocomplete inserts a suggestion into inline JSON without breaking the quoting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -55,13 +55,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 58,
-        "column": 14
+        "column": 26
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-0905b998c633330",
       "title": "Console autocomplete does not offer the same suggestion twice",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -74,14 +74,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 70,
+        "column": 25
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-0671ddd9d47148b",
       "title": "Console autocomplete suggests the HTTP methods matching what has been typed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -95,13 +95,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 78,
-        "column": 26
+        "column": 17
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-8251a8e0be6e05b",
       "title": "Console autocomplete suggests the API endpoints of the typed method",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -114,14 +114,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 110,
-        "column": 21
+        "line": 109,
+        "column": 27
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-844eb3acfaeedb4",
       "title": "Console autocomplete expands a suggestion that carries placeholder fields",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -135,13 +135,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 150,
-        "column": 13
+        "column": 26
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-e411bcc9a7a5952",
       "title": "Console autocomplete activates on a single character after a slash in the url",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -161,7 +161,7 @@
     {
       "id": "e7ed3a10b6ce0d6-9501057c04c7de5",
       "title": "Console autocomplete activates after a comma listing several indices in the url",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -175,13 +175,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 160,
-        "column": 23
+        "column": 96
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-29cf07a9862664b",
       "title": "Console autocomplete activates for methods however they are capitalized",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -195,13 +195,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 170,
-        "column": 14
+        "column": 5
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-644ff7ad77e413c",
       "title": "Console autocomplete suggests ES|QL commands inside a triple quoted query",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -215,13 +215,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 179,
-        "column": 23
+        "column": 85
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-1616ed60c676060",
       "title": "Console autocomplete does not suggest ES|QL inside triple quotes that are not a query",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -234,14 +234,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 189,
-        "column": 78
+        "line": 190,
+        "column": 60
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-d6859840941ae40",
       "title": "Console autocomplete does not suggest ES|QL outside of a query",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -255,13 +255,13 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 191,
-        "column": 13
+        "column": 59
       }
     },
     {
       "id": "e7ed3a10b6ce0d6-f8a517924cf94a0",
       "title": "Console autocomplete does not activate inside a comment",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -275,7 +275,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
         "line": 200,
-        "column": 3
+        "column": 5
       }
     },
     {

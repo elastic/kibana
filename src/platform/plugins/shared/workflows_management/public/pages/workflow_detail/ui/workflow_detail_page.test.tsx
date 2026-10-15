@@ -444,7 +444,7 @@ describe('WorkflowDetailPage', () => {
       expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
     });
 
-    it('mounts execution flyouts instead of the sidebar when an execution is selected', () => {
+    it('mounts the detail flyout without the list flyout when an execution is selected', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
@@ -456,12 +456,26 @@ describe('WorkflowDetailPage', () => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(screen.getByTestId('workflow-execution-list-flyout')).toHaveTextContent(
-        'test-workflow-123'
-      );
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
       expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('execution-123');
       expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
+    });
+
+    it('mounts the execution flyout for a draft run before the workflow is saved', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({}, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('execution-123');
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
     });
 
     it('opens the list flyout on Executions click and closes it on the next click', () => {
@@ -551,7 +565,7 @@ describe('WorkflowDetailPage', () => {
       });
 
       expect(screen.getByTestId('workflow-execution-flyout')).toBeInTheDocument();
-      expect(screen.getByTestId('workflow-execution-list-flyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
       expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();

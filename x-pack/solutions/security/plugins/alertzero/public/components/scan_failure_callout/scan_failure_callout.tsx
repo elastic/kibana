@@ -16,7 +16,14 @@ const WORKER_NAMES = new Map<string, string>(
   SYSTEM_SECURITY_WORKER_CATALOG.map((entry) => [entry.id, entry.name])
 );
 
-export const ScanFailureCallout: React.FC = () => {
+interface ScanFailureCalloutProps {
+  /** Wraps the callout, so the wrapper is only rendered when the callout is. */
+  wrapper?: (callout: JSX.Element) => JSX.Element;
+}
+
+export const ScanFailureCallout: React.FC<ScanFailureCalloutProps> = ({
+  wrapper,
+}): JSX.Element | null => {
   const { data, isLoading, error } = useScanFailures();
 
   if (isLoading || error != null || data == null) {
@@ -32,7 +39,7 @@ export const ScanFailureCallout: React.FC = () => {
     return null;
   }
 
-  return (
+  const callout = (
     <EuiCallOut
       announceOnMount
       title={SCAN_FAILURE_TITLE}
@@ -53,4 +60,6 @@ export const ScanFailureCallout: React.FC = () => {
       </ul>
     </EuiCallOut>
   );
+
+  return wrapper ? wrapper(callout) : callout;
 };

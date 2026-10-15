@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-security-server'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/cloud-plugin'
   - '@kbn/utility-types'
   - '@kbn/zod'

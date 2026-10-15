@@ -17,6 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Jest covers detection logic; only this checks registration in `/api/deprecations`. Tag
+  // `tags.stateful.classic` (scripted fields are disabled on serverless).
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/deprecations/scripted_fields.spec.ts
   describe('scripted field deprecations', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

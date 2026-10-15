@@ -17,7 +17,11 @@ import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
 } from '../fixtures/service_account_cleanup';
-import { unbindWorkloads, workloadPath } from '../fixtures/service_account_workloads';
+import {
+  type TestWorkload,
+  unbindWorkloads,
+  workloadPath,
+} from '../fixtures/service_account_workloads';
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
@@ -32,7 +36,8 @@ apiTest.describe(
   { tag: ['@local-stateful-classic'] },
   () => {
     const created: ServiceAccountPrincipal[] = [];
-    const boundWorkloads: string[] = [];
+    const boundWorkloads: TestWorkload[] = [];
+    const createdSpaces: string[] = [];
     /** Grants `monitor`, which is what the test plugin's workload needs to run. */
     const workloadRole = uniqueName();
     let adminHeaders: Record<string, string>;
@@ -64,10 +69,11 @@ apiTest.describe(
     const bindWorkload = async (
       apiClient: ApiClientFixture,
       workloadId: string,
-      account: ServiceAccountPrincipal
+      account: ServiceAccountPrincipal,
+      spaceId?: string
     ) => {
-      boundWorkloads.push(workloadId);
-      const bound = await apiClient.post(workloadPath(workloadId), {
+      boundWorkloads.push({ workloadId, spaceId });
+      const bound = await apiClient.post(workloadPath(workloadId, spaceId), {
         headers: adminHeaders,
         body: { operation: 'bind', serviceAccountId: idOf(account) },
         responseType: 'json',
@@ -91,6 +97,11 @@ apiTest.describe(
       const failures: Error[] = [];
       const cleanup = [
         async () => unbindWorkloads(kbnClient, boundWorkloads),
+        async () => {
+          for (const spaceId of createdSpaces) {
+            await kbnClient.spaces.delete(spaceId);
+          }
+        },
         async () => {
           for (const { namespace, name } of created) {
             await esClient.security.deleteServiceToken(
@@ -182,20 +193,16 @@ apiTest.describe(
       async ({ apiClient }) => {
         const account = await createAccount(apiClient);
         const workloadId = uniqueName();
-        boundWorkloads.push(workloadId);
-        const bound = await apiClient.post(workloadPath(workloadId), {
-          headers: adminHeaders,
-          body: { operation: 'bind', serviceAccountId: idOf(account) },
-          responseType: 'json',
-        });
-        expect(bound).toHaveStatusCode(200);
+        await bindWorkload(apiClient, workloadId, account);
 
         const expectedWorkloads = [
           {
             pluginId: 'serviceAccountsTest',
             workloadType: 'job',
             workloadId,
-            displayName: workloadId,
+            displayName: `Test job ${workloadId}`,
+            typeName: 'Test job',
+            href: `/app/service_accounts_test/jobs/${workloadId}`,
           },
         ];
 
@@ -236,6 +243,69 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(gone).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
+      'names and links bound workloads through their workload type, in the space of each binding',
+      async ({ apiClient, kbnClient }) => {
+        const account = await createAccount(apiClient);
+        const spaceId = uniqueName();
+        createdSpaces.push(spaceId);
+        await kbnClient.spaces.create({ id: spaceId, name: spaceId, disabledFeatures: [] });
+
+        const suffix = uniqueName();
+        const linked = `linked-${suffix}`;
+        const unresolved = `unresolved-${suffix}`;
+        const badPath = `bad-path-${suffix}`;
+        const titleOnly = `title-only-${suffix}`;
+        await bindWorkload(apiClient, linked, account);
+        await bindWorkload(apiClient, linked, account, spaceId);
+        await bindWorkload(apiClient, unresolved, account);
+        await bindWorkload(apiClient, badPath, account);
+        await bindWorkload(apiClient, titleOnly, account);
+
+        const job = (workloadId: string) => ({
+          pluginId: 'serviceAccountsTest',
+          workloadType: 'job',
+          workloadId,
+          typeName: 'Test job',
+        });
+        const byLink = <T extends { workloadId: string; href?: string }>(workloads: T[]) =>
+          [...workloads].sort((a, b) =>
+            `${a.workloadId}${a.href}`.localeCompare(`${b.workloadId}${b.href}`)
+          );
+        const expectedWorkloads = byLink([
+          {
+            ...job(linked),
+            displayName: `Test job ${linked}`,
+            href: `/app/service_accounts_test/jobs/${linked}`,
+          },
+          {
+            ...job(linked),
+            displayName: `Test job ${linked}`,
+            href: `/s/${spaceId}/app/service_accounts_test/jobs/${linked}`,
+          },
+          // The workload type has nothing for it.
+          { ...job(unresolved), displayName: unresolved },
+          // The workload type returned a path Core refuses, so its title goes too.
+          { ...job(badPath), displayName: badPath },
+          { ...job(titleOnly), displayName: `Test job ${titleOnly}` },
+        ]);
+
+        const listed = await apiClient.get(`${accountPath(idOf(account))}/workloads`, {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(listed).toHaveStatusCode(200);
+        expect(byLink(listed.body.workloads)).toStrictEqual(expectedWorkloads);
+
+        const refused = await apiClient.delete(accountPath(idOf(account)), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(refused).toHaveStatusCode(409);
+        expect(byLink(refused.body.attributes.workloads)).toStrictEqual(expectedWorkloads);
       }
     );
 

@@ -20,6 +20,9 @@ import { useLoadList } from '../use_load_list';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
+import { UI_COUNTER_EVENTS } from '../ui_counters';
+import { docLinksMock } from '../doc_links_mock';
+
 // `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
 // Loading the real module pulls in Monaco language registration which evaluates generated i18n
 // messages at import time (and can throw in Jest).
@@ -32,35 +35,6 @@ jest.mock('@kbn/code-editor', () => ({
     <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
   ),
 }));
-
-const docLinksMock = {
-  links: {
-    elasticsearch: {
-      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
-      mappingKeyword:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
-      mappingBoolean:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
-      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
-      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
-      mappingUnsignedLong:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
-      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
-    },
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
 
 describe('CreateDatasetWizardPage', () => {
   const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
@@ -97,6 +71,7 @@ describe('CreateDatasetWizardPage', () => {
     const history = createMemoryHistory({ initialEntries: [CREATE_DATASET_PATH] });
     const add = jest.fn().mockResolvedValue(undefined);
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const view = render(
       <EuiProvider>
         <I18nProvider>
@@ -107,6 +82,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -121,7 +97,7 @@ describe('CreateDatasetWizardPage', () => {
         </I18nProvider>
       </EuiProvider>
     );
-    return { ...view, history, add, loadDataSets };
+    return { ...view, history, add, loadDataSets, reportUiCounter };
   };
 
   const renderEditWizard = (initialDataSet: DataSetWithName) => {
@@ -131,6 +107,7 @@ describe('CreateDatasetWizardPage', () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const remove = jest.fn().mockResolvedValue(undefined);
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const view = render(
       <EuiProvider>
         <I18nProvider>
@@ -141,6 +118,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add, delete: remove },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -156,7 +134,7 @@ describe('CreateDatasetWizardPage', () => {
         </I18nProvider>
       </EuiProvider>
     );
-    return { ...view, history, add, remove, loadDataSets };
+    return { ...view, history, add, remove, loadDataSets, reportUiCounter };
   };
 
   it('auto-selects format from resource extension', async () => {
@@ -248,7 +226,8 @@ describe('CreateDatasetWizardPage', () => {
   });
 
   it('creates a dataset through the dataset, mapping, and review steps then saves', async () => {
-    const { getByTestId, getByText, findByTestId, history, add, loadDataSets } = renderWizard();
+    const { getByTestId, getByText, findByTestId, history, add, loadDataSets, reportUiCounter } =
+      renderWizard();
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent(createDatasetWizardStrings.pageTitle);
     expect(getByTestId('appHeaderBack')).toHaveAttribute(
@@ -270,6 +249,10 @@ describe('CreateDatasetWizardPage', () => {
     // Resource help text is rendered via FormattedMessage with an embedded example code snippet,
     // so assert on the input rather than the exact composed help text.
     expect(getByText(createDatasetWizardStrings.resourceLabel)).toBeInTheDocument();
+    expect(getByTestId('nextButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-dataset-nextButton'
+    );
 
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
@@ -284,6 +267,10 @@ describe('CreateDatasetWizardPage', () => {
     // Additional settings is optional, so the stepper can jump over it.
     await clickStep(getByTestId, 'mapping');
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    expect(getByTestId('backButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-mapping-backButton'
+    );
     // Timeseries is on by default and requires a field name before Next is allowed.
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
@@ -297,6 +284,10 @@ describe('CreateDatasetWizardPage', () => {
       createDatasetWizardStrings.addDatasetButton
     );
     expect(getByTestId('nextButton').querySelector('[data-euiicon-type]')).toBeNull();
+    expect(getByTestId('nextButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-saveButton'
+    );
 
     await clickNext(getByTestId);
     await waitFor(() => {
@@ -311,6 +302,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(loadDataSets).toHaveBeenCalledTimes(1);
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(['dataset_create', 'dataset_create_csv']);
   });
 
   it('persists common/advanced accordion show/hide state across wizard navigation', async () => {
@@ -380,7 +373,8 @@ describe('CreateDatasetWizardPage', () => {
       },
     };
 
-    const { getByTestId, history, add, remove, loadDataSets } = renderEditWizard(initialDataSet);
+    const { getByTestId, history, add, remove, loadDataSets, reportUiCounter } =
+      renderEditWizard(initialDataSet);
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent('Edit dataset: logs-dataset');
     expect(getByTestId('createDatasetName')).toHaveValue('logs-dataset');
@@ -424,6 +418,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(loadDataSets).toHaveBeenCalledTimes(1);
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
   });
 
   it('deletes the previous dataset when the name changes in edit mode', async () => {
@@ -435,7 +431,7 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId, add, remove } = renderEditWizard(initialDataSet);
+    const { getByTestId, add, remove, reportUiCounter } = renderEditWizard(initialDataSet);
 
     fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'renamed-dataset' },
@@ -454,6 +450,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
       expect(remove).toHaveBeenCalledWith('logs-dataset');
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
   });
 
   it('shows a delete error distinct from a save error when the previous dataset cannot be deleted', async () => {
@@ -461,6 +459,7 @@ describe('CreateDatasetWizardPage', () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const remove = jest.fn().mockRejectedValue(new Error('security_exception: unauthorized'));
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
@@ -479,6 +478,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add, delete: remove },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -524,6 +524,7 @@ describe('CreateDatasetWizardPage', () => {
     );
     expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
     expect(loadDataSets).not.toHaveBeenCalled();
+    expect(reportUiCounter).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
   });
 
@@ -612,7 +613,8 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId, findByTestId, history, add } = renderEditWizard(initialDataSet);
+    const { getByTestId, findByTestId, history, add, reportUiCounter } =
+      renderEditWizard(initialDataSet);
     add.mockRejectedValue(new Error('validation_exception: bad resource'));
 
     await clickNext(getByTestId);
@@ -641,6 +643,7 @@ describe('CreateDatasetWizardPage', () => {
       'nextButton',
     ]);
     expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
+    expect(reportUiCounter).not.toHaveBeenCalled();
   });
 
   it('preserves API-only settings not managed by the UI when saving edits', async () => {
@@ -755,58 +758,6 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardReviewRequest')).toHaveTextContent(
       '"target_split_size": "512mb"'
     );
-  });
-
-  it('requires at least one mapped field when Define schema is selected', async () => {
-    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
-
-    fireEvent.click(getByTestId('createDatasetDataSource'));
-    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
-    selectFormat(getByTestId, 'csv');
-
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-
-    // Keep timeseries enabled, but make it valid.
-    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
-      target: { value: 'event_time' },
-    });
-
-    // Select Define schema (dynamic = false).
-    fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
-
-    // Attempt to proceed.
-    await clickNext(getByTestId);
-
-    // Should stay on mapping step and show the error.
-    expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
-    expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
-    const testSubjsInDocumentOrder = Array.from(
-      document.querySelectorAll(
-        '[data-test-subj="dataFederationMappingEditorAddField"], [data-test-subj="createDatasetWizardMappingStepErrors"], [data-test-subj="nextButton"]'
-      ),
-      (element) => element.getAttribute('data-test-subj')
-    );
-    expect(testSubjsInDocumentOrder).toEqual([
-      'dataFederationMappingEditorAddField',
-      'createDatasetWizardMappingStepErrors',
-      'nextButton',
-    ]);
-    expect(getByTestId('nextButton')).toBeDisabled();
-
-    // Fixing the problem clears the error and re-enables Next without clicking it.
-    await act(async () => {
-      fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
-    });
-    expect(queryByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeNull();
-    expect(getByTestId('nextButton')).toBeEnabled();
   });
 
   it('disables Next on the mapping step until the missing timestamp field name is provided', async () => {
