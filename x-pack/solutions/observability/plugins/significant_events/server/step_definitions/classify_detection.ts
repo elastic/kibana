@@ -8,7 +8,8 @@
 import type { SignalVerdict } from '@kbn/significant-events-schema';
 import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
 
-export type ProbeStatus = 'ok' | 'error' | 'timeout' | 'no_query' | 'aborted';
+export const PROBE_STATUSES = ['ok', 'error', 'timeout', 'no_query', 'aborted'] as const;
+export type ProbeStatus = (typeof PROBE_STATUSES)[number];
 
 /** What re-running a rule's stored query found. `hasRows` only means something when `ok`. */
 export interface ProbeOutcome {
@@ -18,18 +19,20 @@ export interface ProbeOutcome {
 
 export type DetectionDecision = 'skip' | 'needs_agent';
 
-export type DecisionReason =
-  | 'still_breaching'
-  | 'still_healthy'
-  | 'possible_recovery'
-  | 'possible_rebreach'
-  | 'not_live_member'
-  | 'unjudged_member'
-  | 'no_stored_query'
-  | 'probe_error'
-  | 'probe_timeout'
-  | 'probe_aborted'
-  | 'over_cap';
+export const DECISION_REASONS = [
+  'still_breaching',
+  'still_healthy',
+  'possible_recovery',
+  'possible_rebreach',
+  'not_live_member',
+  'unjudged_member',
+  'no_stored_query',
+  'probe_error',
+  'probe_timeout',
+  'probe_aborted',
+  'over_cap',
+] as const;
+export type DecisionReason = (typeof DECISION_REASONS)[number];
 
 export interface DetectionClassification {
   decision: DetectionDecision;
