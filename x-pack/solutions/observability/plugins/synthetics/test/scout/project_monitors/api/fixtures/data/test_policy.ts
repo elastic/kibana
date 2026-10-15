@@ -568,11 +568,10 @@ const OMITTED_WHEN_FALSY_FIELDS = [
   'wait',
 ];
 
-// Optional vars added in newer synthetics package versions: `kerberos`/`ntlm` in 1.12.0
-// (elastic/integrations#21116) and `secret_stores` in 1.13.0 (elastic/integrations#20440).
-// Present (usually empty) on newer package templates and absent on older ones — drop empty
+// `secret_stores` was added in synthetics package 1.13.0 (elastic/integrations#20440).
+// Present (usually empty) on 1.13.0+ package templates and absent on older ones — drop empty
 // values so golden fixtures work against either package version.
-const OPTIONAL_EMPTY_PACKAGE_VARS = ['kerberos', 'ntlm', 'secret_stores'] as const;
+const OPTIONAL_EMPTY_PACKAGE_VARS = ['secret_stores'] as const;
 
 const isEmptyPackageVar = (entry: unknown): boolean => {
   if (entry == null || typeof entry !== 'object') {
