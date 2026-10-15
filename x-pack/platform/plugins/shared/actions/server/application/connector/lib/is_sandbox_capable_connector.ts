@@ -33,7 +33,7 @@ export const isSandboxCapableConnector = ({
   }
 
   const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
-  const authType = secrets === undefined ? config?.authType : secrets.authType;
+  const authType = secrets?.authType ?? config?.authType;
   return (
     typeof authType === 'string' &&
     authType.length > 0 &&
