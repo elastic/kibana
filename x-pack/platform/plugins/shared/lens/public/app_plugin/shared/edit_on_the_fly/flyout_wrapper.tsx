@@ -30,19 +30,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import type { FlyoutWrapperProps } from './types';
 
-/**
- * Framed right flyouts clip to half their width. Drag-drop extras sit to the
- * left of the drop zones, so that clip has to be cleared on customizeLens.
- */
-const inlineFlyoutDndOverflowFix = css`
-  body
-    .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
-      [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
-    ) {
-    clip-path: none !important;
-  }
-`;
-
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
   defaultMessage: 'Apply and close',
 });
@@ -67,9 +54,26 @@ export const FlyoutWrapper = ({
   applyButtonDisabledTooltip,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
+  /**
+   * Chrome clips framed right flyouts with inset(0 0 0 -50%). That is only half
+   * the panel width, which cuts drag-drop extras. Keep the same rounded right
+   * corners and extend the left edge by the extra-target gutter.
+   */
+  const customizeLensClipPathFix = css`
+    body
+      .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
+        [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+      ) {
+      clip-path: inset(
+          0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame}
+            ${euiTheme.border.radius.frame} 0
+        )
+        !important;
+    }
+  `;
   return (
     <>
-      <Global styles={inlineFlyoutDndOverflowFix} />
+      <Global styles={customizeLensClipPathFix} />
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder={false}
