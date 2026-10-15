@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Severity, SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
+  type SignalEntry,
+  type SignificantEvent,
+} from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -25,6 +30,9 @@ import type {
   ResolvedWriteCandidate,
   WriteCandidate,
 } from './types';
+
+const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((live) => live === status);
 
 interface EventFacts
   extends Pick<SignificantEvent, 'status' | 'severity' | 'signals' | 'confidence'> {
@@ -148,9 +156,12 @@ export const computeEventFacts = ({
   const { latest, priorDocs } = candidate;
   const isContinuation = candidate.input.event_id !== undefined;
 
-  const signals = isContinuation
-    ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
-    : candidate.input.signals ?? [];
+  // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
+  const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
+  const signals =
+    isContinuation && !reopens
+      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+      : candidate.input.signals ?? [];
 
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)

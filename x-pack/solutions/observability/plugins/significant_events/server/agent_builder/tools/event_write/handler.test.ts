@@ -597,6 +597,45 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
+  it('drops the closed episode signals when a closed event reopens', async () => {
+    const detection = (ruleUuid: string, verdict: 'confirms' | 'refutes'): SignalEntry => ({
+      type: 'detection' as const,
+      source_id: 'logs.checkout',
+      description: `${ruleUuid} ${verdict}`,
+      verdict,
+      evidence: { esql_query: 'FROM logs.checkout', result: 'found' as const },
+      metadata: {
+        detection_id: `det-${ruleUuid}`,
+        rule_uuid: ruleUuid,
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    });
+    const closed = makeStoredEvent('checkout-reopened', {
+      status: 'inactive',
+      signals: [detection('rule-a', 'confirms'), detection('rule-b', 'confirms')],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          event_id: 'checkout-reopened',
+          signals: [detection('rule-c', 'confirms')],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'active' });
+    const [written] = writtenDocs();
+    expect(written.status).toBe('active');
+    expect(written.signals.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
+  });
+
   describe('a continuation onto a recovering event', () => {
     const eventId = 'checkout-recovering';
     const recovering = () => makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
