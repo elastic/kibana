@@ -39,10 +39,10 @@ import type {
 } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
 import type {
   OsqueryCopySavedQueryRequestParamsInput,
-  OsqueryFindSavedQueriesRequestQueryInput,
   OsqueryGetSavedQueryDetailsRequestParamsInput,
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
+  OsqueryFindSavedQueriesRequestQueryInput,
   OsqueryCreateSavedQueryRequestBodyInput,
   OsqueryDeleteSavedQueryRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
