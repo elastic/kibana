@@ -54,6 +54,7 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
+import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -120,6 +121,7 @@ import {
   describeConversationWrite,
   diffMetadata,
 } from '../../../workflows/triggers/describe_conversation_write';
+import { describeConversationFieldsChanged } from '../../../telemetry/describe_conversation_fields_changed';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
@@ -278,6 +280,7 @@ export const createClient = ({
   conversationEvents,
   eventEmitter,
   onConversationCreated,
+  reportFieldsChange,
 }: {
   space: string;
   logger: Logger;
@@ -287,6 +290,7 @@ export const createClient = ({
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
   onConversationCreated?: OnConversationCreated;
+  reportFieldsChange?: ConversationFieldsChangeReporter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -299,8 +303,14 @@ export const createClient = ({
     logger,
     eventEmitter,
     onConversationCreated,
+    reportFieldsChange,
   });
 };
+
+/** Receives the template fields, opted in with `report_changes`, that one write changed. */
+export type ConversationFieldsChangeReporter = (
+  params: ReportConversationFieldsChangedParams
+) => void;
 
 /**
  * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
@@ -334,6 +344,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
   private readonly onConversationCreated?: OnConversationCreated;
+  private readonly reportFieldsChange?: ConversationFieldsChangeReporter;
 
   constructor({
     storage,
@@ -345,6 +356,7 @@ class ConversationClientImpl implements ConversationClient {
     logger,
     eventEmitter,
     onConversationCreated,
+    reportFieldsChange,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -355,6 +367,7 @@ class ConversationClientImpl implements ConversationClient {
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
     onConversationCreated?: OnConversationCreated;
+    reportFieldsChange?: ConversationFieldsChangeReporter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -365,6 +378,7 @@ class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
     this.eventEmitter = eventEmitter;
     this.onConversationCreated = onConversationCreated;
+    this.reportFieldsChange = reportFieldsChange;
   }
 
   /**
@@ -425,6 +439,31 @@ class ConversationClientImpl implements ConversationClient {
     } catch (error) {
       this.logger.warn(
         `Failed to notify metadata patched for conversation "${payload.conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Reports the `report_changes` template fields a successful write changed, as one event.
+   * Best-effort: the changes are described lazily inside the guard, so failures are logged and
+   * never fail the (already persisted) write.
+   */
+  private notifyFieldChanges(
+    conversationId: string,
+    describe: () => ReportConversationFieldsChangedParams | undefined
+  ): void {
+    const { reportFieldsChange } = this;
+    if (!reportFieldsChange) {
+      return;
+    }
+    try {
+      const params = describe();
+      if (params) {
+        reportFieldsChange(params);
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to report field changes for conversation "${conversationId}": ${error}`
       );
     }
   }
@@ -775,12 +814,18 @@ class ConversationClientImpl implements ConversationClient {
     this.notifyAttachmentEvents(id, conversation.events ?? []);
     const seqNo = indexed._seq_no;
     const primaryTerm = indexed._primary_term;
+    const readCreated = () =>
+      fromEs(
+        { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
+        this.getUser()
+      );
     this.notifyConversationUpdated(id, () =>
-      describeConversationWrite({
-        after: fromEs(
-          { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
-          this.getUser()
-        ),
+      describeConversationWrite({ after: readCreated(), source })
+    );
+    this.notifyFieldChanges(id, () =>
+      describeConversationFieldsChanged({
+        after: readCreated(),
+        resolveTemplate: getTemplate,
         source,
       })
     );
@@ -1503,6 +1548,14 @@ class ConversationClientImpl implements ConversationClient {
         const { source } = emission;
         this.notifyConversationUpdated(conversationId, () =>
           describeConversationWrite({ before: previous, after: document, source })
+        );
+        this.notifyFieldChanges(conversationId, () =>
+          describeConversationFieldsChanged({
+            after: document,
+            before: previous,
+            resolveTemplate: getTemplate,
+            source,
+          })
         );
       }
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });

@@ -5,18 +5,54 @@
  * 2.0.
  */
 
+import type { MitreEntity } from '@kbn/security-mitre-attack-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { HuntBehaviorModels } from '../types';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
-import { getMitreCatalog } from './mitre_catalog';
+import { buildMitreCatalog } from './mitre_catalog';
+
+/**
+ * A small ATT&CK Enterprise entity set for tests that need real-looking technique ids, plus 30
+ * filler techniques: enough to exceed Tier 2's per-report generation budget.
+ */
+// A hoisted function declaration (mock-prefixed) so the jest.mock factory below can call it.
+function mockBuildEnterpriseFixture(): MitreEntity[] {
+  const { buildMockMitreTechnique, buildMockMitreSubtechnique, buildMockMitreEntities } =
+    jest.requireActual<typeof import('@kbn/security-mitre-attack-mocks')>(
+      '@kbn/security-mitre-attack-mocks'
+    );
+  return [
+    buildMockMitreTechnique({ id: 'T1566', name: 'Phishing', tactic_ids: ['TA0001'] }),
+    buildMockMitreTechnique({ id: 'T1078', name: 'Valid Accounts', tactic_ids: ['TA0001'] }),
+    buildMockMitreSubtechnique({
+      id: 'T1078.004',
+      name: 'Cloud Accounts',
+      technique_id: 'T1078',
+      tactic_ids: ['TA0001'],
+    }),
+    ...buildMockMitreEntities(30),
+  ];
+}
+
+// The catalog now comes from the managed MITRE data client; serve a fixed ATT&CK Enterprise
+// catalog instead so these tests do not need a data client.
+jest.mock('./mitre_catalog', () => {
+  const actual = jest.requireActual('./mitre_catalog');
+  const { buildMitreCatalog: build } = actual;
+  const catalog = build(mockBuildEnterpriseFixture());
+  return { ...actual, getMitreCatalog: jest.fn(async () => catalog) };
+});
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
 }));
+
+const enterpriseCatalog = buildMitreCatalog(mockBuildEnterpriseFixture());
 
 const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
@@ -43,15 +79,16 @@ const generateByTechnique = (queries: Record<string, string>) =>
 
 const buildMockModel = (
   candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> = []
-): ScopedModel => {
+): HuntBehaviorModels => {
   const withStructuredOutput = jest.fn().mockReturnValue({
     invoke: jest.fn().mockResolvedValue({ candidates }),
   });
-  return {
+  const model: ScopedModel = {
     chatModel: { withStructuredOutput } as unknown as ScopedModel['chatModel'],
     inferenceClient: {} as ScopedModel['inferenceClient'],
     connector: {} as ScopedModel['connector'],
   };
+  return { extraction: model, esql: model };
 };
 
 // Carries a stub `esql.query` because the probe-scoping wrapper reads `esClient.esql` when the
@@ -133,6 +170,46 @@ describe('huntBehavior', () => {
     );
   });
 
+  it('skips extraction and reports one report-level catalog_unavailable gap when the catalog is empty', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockResolvedValueOnce({
+      techniqueById: new Map(),
+      subtechniqueById: new Map(),
+    });
+    const warnMock = logger.warn as jest.Mock;
+    warnMock.mockClear();
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(model.extraction.chatModel.withStructuredOutput).not.toHaveBeenCalled();
+    expect(result.status).toBe('no_behaviors_validated');
+    expect(result.behaviors).toHaveLength(0);
+    expect(result.incomplete).toEqual([
+      expect.objectContaining({ reason: 'catalog_unavailable', detail: expect.any(String) }),
+    ]);
+    expect(result.incomplete?.[0].technique_id).toBeUndefined();
+    expect(warnMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads the catalog before calling the extraction model', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockClear();
+    const model = buildMockModel([]);
+    const order: string[] = [];
+    getMitreCatalog.mockImplementationOnce(async () => {
+      order.push('catalog');
+      return enterpriseCatalog;
+    });
+    (model.extraction.chatModel.withStructuredOutput as jest.Mock).mockImplementationOnce(() => {
+      order.push('extraction');
+      return { invoke: jest.fn().mockResolvedValue({ candidates: [] }) };
+    });
+    await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(order).toEqual(['catalog', 'extraction']);
+  });
+
   it('returns indexed_behaviors id as reportId:techniqueId', async () => {
     const model = buildMockModel([
       { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
@@ -176,6 +253,25 @@ describe('huntBehavior', () => {
     // The whole placeholder stays commented out, which is the property that makes it
     // non-executable — a single uncommented line would be ES|QL.
     expect(rule.split('\n').every((line) => line.startsWith('//'))).toBe(true);
+  });
+
+  it('reads the report on the extraction model and generates ES|QL on the esql model', async () => {
+    // Distinct models, so a job wired to the wrong one fails here. Every other test hands both
+    // jobs the same object and could not tell.
+    const { extraction: extractionModel } = buildMockModel([t1078Candidate]);
+    const esqlModel = { connector: { id: 'esql' } } as unknown as ScopedModel;
+
+    await huntBehavior(
+      { extraction: extractionModel, esql: esqlModel },
+      logger,
+      { text: REPORT_TEXT },
+      esClient
+    );
+
+    expect(extractionModel.chatModel.withStructuredOutput).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock.mock.calls[0][0].model).toBe(esqlModel);
+    expect(generateEsqlMock.mock.calls[0][0].model).not.toBe(extractionModel);
   });
 
   it('returns one generateEsql call per validated behavior', async () => {
@@ -798,7 +894,7 @@ describe('huntBehavior', () => {
     });
 
     /** Real catalog ids, so none are dropped as unknown before generation. */
-    const catalogIds = () => [...getMitreCatalog().techniqueById.keys()].slice(0, OVER_BUDGET);
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, OVER_BUDGET);
 
     /** Ascending confidence, so the lowest-confidence ids are the ones over budget. */
     const ascendingCandidates = () =>
