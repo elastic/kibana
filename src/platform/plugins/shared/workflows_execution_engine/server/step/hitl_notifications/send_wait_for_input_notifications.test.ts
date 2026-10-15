@@ -258,6 +258,36 @@ describe('sendWaitForInputNotifications', () => {
     );
   });
 
+  it('renders Teams team-id and channel-id before posting', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: {
+          'connector-id': 'teams-1',
+          'team-id': '{{ inputs.teamId }}',
+          'channel-id': '{{ inputs.channelId }}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replace('{{ inputs.teamId }}', 'team-from-input')
+          .replace('{{ inputs.channelId }}', '19:channel-from-input@thread.tacv2'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        teamId: 'team-from-input',
+        channelId: '19:channel-from-input@thread.tacv2',
+      })
+    );
+  });
+
   it('adds a ServiceNow comment with the form link and an optional message override', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

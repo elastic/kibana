@@ -31,6 +31,7 @@ import {
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
+  renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
   slackApiChannelTarget,
@@ -324,6 +325,8 @@ export async function sendWaitForInputNotifications({
   const teamId = teamsConfig?.['team-id'];
   const channelId = teamsConfig?.['channel-id'];
   if (teamsConnectorId && teamId && channelId) {
+    const renderedTeamId = renderTeamsField(teamId, renderTemplate, 'team-id');
+    const renderedChannelId = renderTeamsField(channelId, renderTemplate, 'channel-id');
     const renderedComment =
       teamsConfig.message != null
         ? resolveWaitForInputChannelMessage({
@@ -343,7 +346,7 @@ export async function sendWaitForInputNotifications({
     const result = await connectorExecutor.execute({
       connectorType: 'microsoft-teams',
       connectorNameOrId: teamsConnectorId,
-      input: buildTeamsSendChannelMessageInput(teamId, channelId, content),
+      input: buildTeamsSendChannelMessageInput(renderedTeamId, renderedChannelId, content),
       abortController,
     });
     assertConnectorSucceeded(result);

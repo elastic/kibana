@@ -347,6 +347,53 @@ describe('send_wait_for_approval_notifications', () => {
       });
     });
 
+    it('renders Teams team-id and channel-id before posting', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          teams: {
+            'connector-id': 'teams-1',
+            'team-id': '{{ inputs.teamId }}',
+            'channel-id': '{{ inputs.channelId }}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{ inputs.teamId }}', 'team-from-input')
+            .replace('{{ inputs.channelId }}', '19:channel-from-input@thread.tacv2'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({
+          teamId: 'team-from-input',
+          channelId: '19:channel-from-input@thread.tacv2',
+        })
+      );
+    });
+
+    it('throws when a Teams field renders empty', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            teams: {
+              'connector-id': 'teams-1',
+              'team-id': 'team-1',
+              'channel-id': '{{ inputs.channelId }}',
+            },
+          },
+          renderTemplate: (template) => (template === 'team-1' ? template : ' '),
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL Teams "channel-id" rendered empty');
+      expect(execute).not.toHaveBeenCalled();
+    });
+
     it('adds a ServiceNow comment with approve and decline links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

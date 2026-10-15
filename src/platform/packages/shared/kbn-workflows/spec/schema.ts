@@ -412,14 +412,14 @@ export const HitlTeamsChannelSchema = z.object({
     .min(1)
     .max(200)
     .describe(
-      'The ID of the team containing the channel. Obtain this from listJoinedTeams (the "id" field on each team object).'
+      'Team ID, or Liquid that renders to one. Obtain this from listJoinedTeams (the "id" field on each team object).'
     ),
   'channel-id': z
     .string()
     .min(1)
     .max(200)
     .describe(
-      'The ID of the channel to post to. Obtain this from listChannels (the "id" field on each channel object).'
+      'Channel ID, or Liquid that renders to one. Obtain this from listChannels (the "id" field on each channel object).'
     ),
 });
 

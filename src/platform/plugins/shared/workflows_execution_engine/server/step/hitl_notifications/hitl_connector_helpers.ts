@@ -96,6 +96,19 @@ export function renderServiceNowField(
   return rendered;
 }
 
+/** Renders a required Teams channel field and rejects a blank result. */
+export function renderTeamsField(
+  value: string,
+  renderTemplate: (template: string) => string,
+  field: 'team-id' | 'channel-id'
+): string {
+  const rendered = renderTemplate(value).trim();
+  if (rendered.length === 0) {
+    throw new Error(`HITL Teams "${field}" rendered empty`);
+  }
+  return rendered;
+}
+
 /** Builds Actions params for a ServiceNow `addComment` call. */
 export function buildServiceNowAddCommentInput(table: string, sysId: string, comment: string) {
   return {
