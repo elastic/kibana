@@ -40,55 +40,18 @@ const inlineFlyoutDndOverflowFix = css`
      body .euiFlyout[class*='right']:not([data-managed-flyout-layout-mode=…][data-managed-flyout-level=child])
      { clip-path: inset(0 0 0 -50% …) !important }
      That -50% only allows half the flyout width (~250px); DnD extras need ~296px. */
-  body .euiFlyout[class*='right'][data-test-subj='customizeLens'],
-  body .euiFlyout[class*='right'][data-test-subj='lnsEditOnFlyFlyout'],
-  body .euiFlyout[class*='right'].kbnPresentationLazyFlyout,
   body
     .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
       [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
-    ),
-  body
-    .euiFlyout[class*='right'].kbnPresentationLazyFlyout:not(
-      [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
-    ),
-  .euiOverlayMask[data-relative-to-header='above']
-    + [data-euiportal='true']
-    .euiFlyout[class*='right'][data-test-subj='customizeLens'],
-  .euiOverlayMask[data-relative-to-header='above']
-    + [data-euiportal='true']
-    .euiFlyout[class*='right'].kbnPresentationLazyFlyout {
+    ) {
     clip-path: none !important;
+  }
+
+  .euiFlyout[data-test-subj='customizeLens'] [data-test-subj='euiFlyoutContent'] {
     overflow: visible !important;
   }
 
-  .euiFlyout[data-test-subj='customizeLens'] [data-test-subj='euiFlyoutContent'],
-  .euiFlyout[data-test-subj='customizeLens'] .euiFlyout__content,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] [data-test-subj='euiFlyoutContent'],
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyout__content,
-  .euiFlyout.kbnPresentationLazyFlyout [data-test-subj='euiFlyoutContent'],
-  .euiFlyout.kbnPresentationLazyFlyout .euiFlyout__content,
-  .euiFlyout[data-test-subj='customizeLens'] .kbnOverlayMountWrapper,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .kbnOverlayMountWrapper,
-  .euiFlyout.kbnPresentationLazyFlyout .kbnOverlayMountWrapper,
-  .euiFlyout[data-test-subj='customizeLens'] .lnsEditFlyoutBody,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .lnsEditFlyoutBody,
-  .euiFlyout.kbnPresentationLazyFlyout .lnsEditFlyoutBody,
-  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflowContent,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyoutBody__overflowContent,
-  .euiFlyout.kbnPresentationLazyFlyout .euiFlyoutBody__overflowContent,
-  .euiFlyout[data-test-subj='customizeLens'] .euiAccordion__childWrapper,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiAccordion__childWrapper,
-  .euiFlyout.kbnPresentationLazyFlyout .euiAccordion__childWrapper {
-    overflow: visible !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-    overflow-block: visible !important;
-    overflow-inline: visible !important;
-  }
-
-  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflow,
-  .euiFlyout[data-test-subj='lnsEditOnFlyFlyout'] .euiFlyoutBody__overflow,
-  .euiFlyout.kbnPresentationLazyFlyout .euiFlyoutBody__overflow {
+  .euiFlyout[data-test-subj='customizeLens'] .euiFlyoutBody__overflow {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     mask-image: none !important;
@@ -246,7 +209,6 @@ export const FlyoutWrapper = ({
         className="lnsEditFlyoutBody"
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
-          // (Global styles reinforce overflow/gutter against EUI + chrome-layout)
           overflow-y: auto;
           padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
           margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
