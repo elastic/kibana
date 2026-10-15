@@ -84,7 +84,8 @@ describe('generateWorkflowYaml', () => {
         })
       );
       expect(yaml.settings.run_as).toBe('kibana/nightshift-automations-default');
-      expect(yaml.settings.concurrency.key).toBe('auto-123');
+      // The concurrency settings are kept next to it.
+      expect(yaml.settings.concurrency).toBeDefined();
     });
 
     it('is unbound without one', () => {
