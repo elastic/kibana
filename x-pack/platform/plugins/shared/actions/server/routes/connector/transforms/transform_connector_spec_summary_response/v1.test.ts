@@ -6,7 +6,10 @@
  */
 
 import type { ConnectorSpecSummary } from '../../../../../common/connector_spec';
-import { getConnectorSpecResponseBodySchemaV1 } from '../../../../../common/routes/connector/response';
+import {
+  connectorSpecSummaryResponseSchemaV1,
+  getConnectorSpecResponseBodySchemaV1,
+} from '../../../../../common/routes/connector/response';
 import { transformConnectorSpecSummaryResponse } from './v1';
 
 const summary: ConnectorSpecSummary = {
@@ -111,5 +114,11 @@ describe('transformConnectorSpecSummaryResponse', () => {
     };
 
     expect(() => getConnectorSpecResponseBodySchemaV1.validate(detailBody)).not.toThrow();
+  });
+
+  it('validates against connectorSpecSummaryResponseSchemaV1', () => {
+    expect(() =>
+      connectorSpecSummaryResponseSchemaV1.validate(transformConnectorSpecSummaryResponse(summary))
+    ).not.toThrow();
   });
 });

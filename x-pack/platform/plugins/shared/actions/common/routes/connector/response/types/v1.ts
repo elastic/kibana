@@ -17,6 +17,8 @@ import type {
 import type {
   connectorSpecActionDetailResponseSchema,
   connectorSpecActionSummaryResponseSchema,
+  connectorSpecSummaryResponseSchema,
+  getAllConnectorSpecsResponseSchema,
   getConnectorSpecResponseBodySchema,
 } from '../schemas/v1';
 
@@ -33,3 +35,5 @@ export type ConnectorSpecActionDetailResponse = TypeOf<
   typeof connectorSpecActionDetailResponseSchema
 >;
 export type GetConnectorSpecResponse = TypeOf<typeof getConnectorSpecResponseBodySchema>;
+export type ConnectorSpecSummaryResponse = TypeOf<typeof connectorSpecSummaryResponseSchema>;
+export type GetAllConnectorSpecsResponse = TypeOf<typeof getAllConnectorSpecsResponseSchema>;

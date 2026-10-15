@@ -17,6 +17,7 @@ import { getConnectorRoute } from './connector/get';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { updateConnectorRoute } from './connector/update';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
+import { getAllConnectorSpecsRoute } from './connector/get_all_specs';
 
 jest.mock('./inbound_events', () => ({
   inboundEventsRoute: jest.fn(),
@@ -48,6 +49,7 @@ jest.mock('./connector/get_all_system', () => ({
 jest.mock('./connector/auth_status', () => ({ connectorAuthStatusRoute: jest.fn() }));
 jest.mock('./connector/list_types_system', () => ({ listTypesWithSystemRoute: jest.fn() }));
 jest.mock('./connector/get_spec', () => ({ getConnectorSpecRoute: jest.fn() }));
+jest.mock('./connector/get_all_specs', () => ({ getAllConnectorSpecsRoute: jest.fn() }));
 
 const inboundEventsRouteMock = inboundEventsRoute as jest.MockedFunction<typeof inboundEventsRoute>;
 const rotateInboundIngressRouteMock = rotateInboundIngressRoute as jest.MockedFunction<
@@ -131,5 +133,12 @@ describe('defineRoutes', () => {
       opts.licenseState,
       opts.actionsConfigUtils
     );
+  });
+
+  it('registers getAllConnectorSpecsRoute', () => {
+    const opts = baseOpts();
+    defineRoutes(opts);
+
+    expect(getAllConnectorSpecsRoute).toHaveBeenCalledWith(opts.router, opts.licenseState);
   });
 });

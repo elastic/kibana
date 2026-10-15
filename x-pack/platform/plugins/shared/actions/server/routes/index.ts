@@ -14,6 +14,7 @@ import { connectorAuthStatusRoute } from './connector/auth_status';
 import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
 import { getConnectorSpecRoute } from './connector/get_spec';
+import { getAllConnectorSpecsRoute } from './connector/get_all_specs';
 import type { ILicenseState } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
 import { createConnectorRoute } from './connector/create';
@@ -83,6 +84,7 @@ export function defineRoutes(opts: RouteOptions) {
   listTypesWithSystemRoute(router, licenseState);
 
   getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+  getAllConnectorSpecsRoute(router, licenseState);
 
   // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
   if (inboundEvents) {
