@@ -148,6 +148,7 @@ tags:
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
     x-displayName: Fleet enrollment API keys
+  - name: Fleet IaC provisioner
   - name: Fleet internals
     description: |
       Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
@@ -52942,6 +52943,153 @@ paths:
       summary: Check Fleet Server health
       tags:
         - Fleet internals
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/iac_provisioner/callbacks/{callbackId}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/iac_provisioner/callbacks/{callbackId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticated with the API key issued for this callback.
+      operationId: post-fleet-iac-provisioner-callbacks-callbackid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: callbackId
+          required: true
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                role_arn:
+                  description: ARN of the IAM role the stack created.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                stack_arn:
+                  description: ARN (StackId) of the CloudFormation stack.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+              required:
+                - role_arn
+                - stack_arn
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  status:
+                    enum:
+                      - pending
+                      - received
+                    type: string
+                required:
+                  - status
+          description: 'OK: the values were stored, or were already stored.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not found.
+        '409':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Different values were already received for this callback.
+        '410':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: The callback has expired.
+      summary: Receive an IaC callback
+      tags:
+        - Fleet IaC provisioner
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
