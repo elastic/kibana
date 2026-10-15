@@ -23,6 +23,10 @@ export const ALERTZERO_TELEMETRY_EVENTS = {
   RuleCoverageReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_coverage_review_completed`,
   HuntReportCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_report_completed`,
   EndpointAnalysisCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_endpoint_analysis_completed`,
+  WorkerSettingsChanged: `${ALERTZERO_TELEMETRY_PREFIX}_worker_settings_changed`,
+  WorkerActivated: `${ALERTZERO_TELEMETRY_PREFIX}_worker_activated`,
+  AutonomySnapshot: `${ALERTZERO_TELEMETRY_PREFIX}_autonomy_snapshot`,
+  FeatureFlagsSnapshot: `${ALERTZERO_TELEMETRY_PREFIX}_feature_flags_snapshot`,
 } as const;
 
 export type AlertZeroTelemetryEventType =
@@ -65,3 +69,41 @@ export const TRIGGER_TYPES = [
 ] as const;
 
 export type AlertZeroTriggerType = (typeof TRIGGER_TYPES)[number];
+
+/**
+ * Worker settings that `alertzero_worker_settings_changed` may report, one event each. `enabled`
+ * is the Worker's enabled state, not a settings key. `service_account` reports only that the
+ * Worker's service account changed, never which one. `other` stands in for any settings key not on
+ * this allowlist, and never carries values.
+ */
+export const WORKER_SETTINGS = [
+  'autonomy',
+  'schedule_interval',
+  'extras',
+  'service_account',
+  'enabled',
+  'other',
+] as const;
+
+export type AlertZeroWorkerSetting = (typeof WORKER_SETTINGS)[number];
+
+/** The previous and next values of an `enabled` change: the boolean as a keyword string. */
+export const WORKER_ENABLED_VALUES = ['true', 'false'] as const;
+
+export type AlertZeroWorkerEnabledValue = (typeof WORKER_ENABLED_VALUES)[number];
+
+/**
+ * Half-open ranges a Worker schedule interval is reported in, so the raw interval never ships.
+ * `unknown` is an interval that does not parse.
+ */
+export const SCHEDULE_INTERVAL_BUCKETS = [
+  'lt_15m',
+  '15m_to_lt_1h',
+  '1h_to_lt_6h',
+  '6h_to_lt_24h',
+  '24h_to_lt_7d',
+  'gte_7d',
+  'unknown',
+] as const;
+
+export type AlertZeroScheduleIntervalBucket = (typeof SCHEDULE_INTERVAL_BUCKETS)[number];

@@ -4,12 +4,12 @@ Event-Based Telemetry (EBT) events registered by the `alertzero` plugin. They go
 
 The events are registered in `setup()` inside the `xpack.alertzero.enabled` guard, so with the kill switch off no AlertZero event type exists. See the plugin [README](../../README.md).
 
-Run reliability (started, completed, failed, cancelled, timed out) is not duplicated here. It comes from the Workflows engine's own terminal execution events. Join them to these events through `run_id`, which is the root execution id. AlertZero events cover only what the engine cannot know: domain outcomes, including the Worker's own Investigation closes.
+Run reliability (started, completed, failed, cancelled, timed out) is not duplicated here. It comes from the Workflows engine's own terminal execution events. Join them to these events through `run_id`, which is the root execution id. AlertZero events cover only what the engine cannot know: domain outcomes (including the Worker's own Investigation closes), settings and daily snapshots.
 
 ## Privacy contract
 
 - **No identities.** No event carries a user name, email, role, API key, or anything read from a `KibanaRequest`. The static test in `event_types.test.ts` fails if any file in this directory imports `KibanaRequest` or `ProposalUser`, so audit data stays out by construction. Audit logging is a separate pipeline.
-- **No free text.** Every field is a closed enum, a bounded count, a boolean, or a system-generated id. No field carries titles, summaries, descriptions, comments, rationales, verdict text, error messages, alert content or query content. No field uses the `text` type.
+- **No free text.** Every field is a closed enum, a bounded count, a boolean, a day, or a system-generated id. No field carries titles, summaries, descriptions, comments, rationales, verdict text, error messages, alert content or query content. No field uses the `text` type.
 - **No space ids.** Events carry `is_default_space` instead. This holds only within AlertZero's own events (see "What a join reaches" below).
 - **System ids ship raw.**
   - `run_id` and `execution_id` are generated UUIDs, which the engine already ships.
@@ -17,6 +17,7 @@ Run reliability (started, completed, failed, cancelled, timed out) is not duplic
     - Attack Discovery: the review's `resolve_investigation_id` step takes the first 120 bits of the attack's `kibana.alert.uuid` (a SHA-256 hex) and sets the UUID version and variant characters to `8`.
     - Hunt: `buildHuntInvestigationConversationId` takes a UUID v5 of the threat report id.
   - Workflow ids ship only as a Worker catalog id; anything else is `other`.
+- **Snapshots are cluster-level aggregates.** They are summed across spaces and carry `space_count`, never a per-space breakdown.
 - **Closed schemas.** No field is `pass_through`. In dev mode, a payload with an undeclared key throws, and the schema tests check this.
 - **Never throw.** Every emission goes through `safeReportEvent`, which catches everything and logs at debug level. Emitters report after their write resolves, never inside an optimistic-concurrency callback, and only on a real transition.
 
@@ -43,6 +44,9 @@ The schema tests (`event_types.test.ts`) enforce the following:
 | `register_telemetry_events.ts` | `registerAlertZeroTelemetryEvents(analytics)`, called once in `setup()` |
 | `safe_report_event.ts` | `safeReportEvent` and `createAlertZeroTelemetryReporter`, the never-throw reporters; both return whether the event was reported |
 | `envelope/` | `buildAlertZeroEnvelope` and its resolvers |
+| `worker_settings/` | `buildWorkerSettingsChangedPayloads`, `buildWorkerActivatedPayload`, `bucketScheduleInterval` and `resolveWorkerSetting`, used by `WorkersService` |
+| `snapshot/` | `buildAutonomySnapshotPayload`, `buildFeatureFlagsSnapshotPayload`, `toSnapshotDay` and the `SNAPSHOT_FLAGS` allowlist, used by the snapshot task |
+| `../tasks/telemetry_snapshot/` | The daily `alertzero:telemetry_snapshot` Task Manager task that reads every space and reports the two snapshots |
 | `../../common/telemetry/constants.ts` | The Worker outcome vocabularies (the Attack Discovery Worker's, the shared run outcome, and each Worker's item events) and the Investigation close reasons any Worker reports, which the report step's input schema shares |
 
 ## The envelope
@@ -67,6 +71,98 @@ Some Workers act at their configured autonomy only for some triggers, and for th
 | Worker | Acts at its configured autonomy when | Otherwise |
 |---|---|---|
 | Endpoint Analysis | `trigger_type: scheduled` | `set_ki_autonomy` in `forensics_endpoint_analysis.yaml` writes `manual` to each indicator it dispatches, so the analysis waits for approval |
+
+## Worker settings events
+
+`WorkersService.update` emits these events after its write is confirmed. They carry no run envelope. Instead they carry `worker_id`, `watch_tag` and `is_default_space`, with the same rules as the envelope. The helpers that build them live in `worker_settings/`.
+
+A PATCH that is rejected, conflicts on its revision, is invalid, or whose write cannot be confirmed sends nothing. The events are reported only once every write of the PATCH has succeeded, so a PATCH that fails part way (for example, its disable write fails after its settings were saved) sends nothing either.
+
+### `alertzero_worker_settings_changed`
+
+One event per changed setting. The service diffs the stored settings against the confirmed write (`diffWorkerSettings`), so a PATCH that repeats the stored values sends nothing. Defaults that a legacy document gains on save are not a change.
+
+An enable or disable of an installed Worker is reported as the `enabled` setting. The service compares the requested state with the enabled state it read before the write, so enabling an enabled Worker or disabling a disabled one sends nothing. The write that first installs a Worker sends `alertzero_worker_activated` instead, and no `enabled` event, so the install is not counted twice. A settings save on that install is still compared with the Worker's defaults, so a non-default autonomy, schedule or extras value in it sends `alertzero_worker_settings_changed`. Binding a Worker's first service account is not a change: the browser creates the account (`public/service_accounts/ensure_worker_service_accounts.ts`) and sends it with the Worker's first enable, whether that enable installs the Worker or turns on one a settings save installed disabled. So when the previous settings had no account, the account is not compared. Replacing one account with another, or clearing it, is `setting: service_account`, without either account.
+
+Enables and disables that don't go through `WorkersService.update` send nothing: an enabled-only update through the Workflows pages or API (`PUT /api/workflows/workflow/{id}` accepts one on a managed workflow), a per-space "disable all workflows", and the Workflows plugin turning workflows off on license or configuration loss. `alertzero_autonomy_snapshot` catches the state up the next day.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `worker_id` | keyword | yes | Catalog id, else `other` |
+| `watch_tag` | keyword | yes | Catalog watch tag, else `other` |
+| `is_default_space` | boolean | yes | Whether the Worker is in the default space |
+| `setting` | keyword | yes | `autonomy`, `schedule_interval`, `extras`, `service_account` (the Worker's service account changed; never which account), `enabled` (an enable or disable of an installed Worker) or `other` (any settings key outside this allowlist) |
+| `previous_value` | keyword | no | The previous value, for enum, bounded or boolean settings only: the autonomy level, the schedule interval bucket, or `true` or `false` for `enabled`. On a Worker's first save it is the Worker's default. Absent for `extras` and `other` |
+| `next_value` | keyword | no | The new value, with the same rules as `previous_value` |
+| `settings_revision` | long | no | The settings revision the write was accepted against (the Worker document's version before the write). Absent on a Worker's first save, and on an enable or disable that saves no settings |
+| `bulk_write` | boolean | yes | Whether the same write changed more than one setting, counting an enable or disable as one. Each changed setting still gets its own event |
+
+`extras` and `other` values are never sent. The event only records that they changed.
+
+`enabled` values are the strings `true` and `false`, because `previous_value` and `next_value` are keywords. A PATCH that changes the autonomy level and disables the Worker sends two events, `autonomy` then `enabled`, both with `bulk_write: true` and the same `settings_revision`.
+
+A schedule interval is never sent raw. It is reported as one of these half-open buckets: `lt_15m`, `15m_to_lt_1h`, `1h_to_lt_6h`, `6h_to_lt_24h`, `24h_to_lt_7d` or `gte_7d`, and `unknown` for an interval that does not parse. A change inside one bucket (for example `2h` to `3h`) is still reported, with equal previous and next values.
+
+### `alertzero_worker_activated`
+
+Emitted once per Worker and space, by the write that first installs the Worker there. That is a first enable, or a settings save or disable on a Worker with no document yet, which installs it disabled. So "activated" means installed, not turned on: the onboarding page's per-Worker toggles install every Worker they list, including the ones left off, and each of those sends `enabled: false`. A later enable or disable of an installed Worker sends `alertzero_worker_settings_changed` with `setting: enabled` instead. Current enabled state across the cluster comes from `alertzero_autonomy_snapshot`.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `worker_id` | keyword | yes | Catalog id, else `other` |
+| `watch_tag` | keyword | yes | Catalog watch tag, else `other` |
+| `is_default_space` | boolean | yes | Whether the Worker is in the default space |
+| `enabled` | boolean | yes | Whether the Worker is enabled after the write that installed it |
+| `autonomy_level` | keyword | no | The autonomy level the Worker was installed with. Absent when its stored settings cannot be read |
+
+## Daily snapshots
+
+A daily Task Manager task (`alertzero:telemetry_snapshot`, `../tasks/telemetry_snapshot/`) sends one event of each type per day, as a cluster-level aggregate summed across spaces. No event carries a space id, and there is no per-space event.
+
+- **Registration.** The task type is registered in `setup()` inside the `xpack.alertzero.enabled` guard. `start()` schedules it, with a stable id and a `3h` interval, only when Agent Builder, Proposals and Agentic Investigations are present, and then before it checks service accounts. Task Manager is a required plugin (the task type is registered with its setup contract). Telemetry is optional: without it every run counts as opted out and sends nothing.
+- **Service accounts off.** AlertZero installs and manages Workers only with Kibana service accounts on (`xpack.security.serviceAccounts.enabled`, off by default). With them off, `start()` schedules the task and then returns early: it installs no Workers and starts no managed workflows client, so the outcome step reports nothing, even from a Worker installed earlier that keeps running. The task still reports both snapshots, each with `service_accounts_enabled: false`, from the same check. `alertzero_autonomy_snapshot` then has no `workers` field, because the task reads no Worker documents. So a cluster that turned AlertZero on but not service accounts shows up as such.
+- **Kill switch.** With `xpack.alertzero.enabled: false` the plugin does not load, so it cannot remove the task; a task document scheduled earlier is never claimed, because its type is not registered.
+- **Opt-in first.** Each run reads the telemetry plugin's opt-in decision before any Elasticsearch work, and sends nothing when opted out. No telemetry plugin, or no decision yet, counts as opted out.
+- **Once per UTC day.** The task runs every 3 hours, and its state keeps `lastSnapshotDay`, so only the first successful run of a UTC day sends. A run is successful only when both summaries were reported. A failed or aborted run is retried within hours rather than a day later. A newly scheduled task runs right away, and after a restart the next run still sends if the day has not been reported. Consumers can also dedupe on `snapshot_day`.
+- **Reads.** The task lists every space from the `space` saved objects (only `default` without the spaces plugin), then reads at most 5 spaces at a time. For each space it reads the two Advanced Settings through an internal saved objects client scoped to that space, and, with service accounts on, each catalog Worker's installed document through AlertZero's owner-bound managed workflows client, as the Workers API does. None of these reads takes an abort signal, so the run checks it before each space and before reporting.
+- **Read-only settings.** Reading Advanced Settings normally creates the space's `config` object for this Kibana version when it is missing (upgrading an older one). The task reads them through a saved objects client that refuses every write (`create_read_only_saved_objects_client.ts`), which the settings client treats as a read-only user: it returns the values an upgrade would carry over, or the defaults, with `uiSettings.overrides` still applied, and writes nothing. So the daily task never creates or upgrades a space's settings.
+- **Failures.** A space whose reads fail is left out of both events, and `space_count` counts only the spaces read. A run that fails, is aborted, or can read no space sends nothing and does not record the day. A run whose report of either summary fails (the reporter returns `false`) does not record the day either, so the next run sends both again, and the one that did go out arrives twice that day (dedupe on `snapshot_day`). Each is logged, and the next scheduled run tries again, so a failure skips a day at most.
+
+### `alertzero_autonomy_snapshot`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `service_accounts_enabled` | boolean | yes | Whether Kibana service accounts are on (`xpack.security.serviceAccounts.enabled`). AlertZero installs and manages Workers only when they are. When `false`, the task reads no Workers and `workers` is absent |
+| `snapshot_day` | keyword | yes | The UTC day (`YYYY-MM-DD`) the snapshot describes. Used to dedupe catch-up runs |
+| `space_count` | long | yes | Number of spaces aggregated |
+| `workers` | array | no | One entry per `worker_id` × `autonomy_level` × `enabled` combination. Absent when `service_accounts_enabled` is `false`, because no Worker document was read; empty when Workers were read and none is installed |
+| `workers.worker_id` | keyword | yes | Catalog id, else `other` |
+| `workers.autonomy_level` | keyword | yes | `manual`, `assisted` or `supervised` |
+| `workers.enabled` | boolean | yes | Whether the installed Worker is enabled |
+| `workers.count` | long | yes | Number of spaces with that combination |
+
+Only Workers installed in a space are counted: a Worker that was never enabled or saved there has no document. A Worker whose stored settings cannot be parsed is not counted either. With service accounts off the event has no `workers` field, even for Workers installed while they were on, because the task reads no Worker documents then.
+
+### `alertzero_feature_flags_snapshot`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `snapshot_day` | keyword | yes | The UTC day (`YYYY-MM-DD`) the snapshot describes |
+| `space_count` | long | yes | Number of spaces aggregated |
+| `service_accounts_enabled` | boolean | yes | Whether Kibana service accounts are on, from the same check as `alertzero_autonomy_snapshot` |
+| `flags` | array | yes | One entry per allowlisted flag |
+| `flags.flag` | keyword | yes | An allowlisted flag or advanced setting id: `securitySolution:enableAlertZero`, `securitySolution:enableAttackDiscoveryWorkflows` or `securitySolution.attackDiscoveryWorkflowsEnabled` (see the allowlist below) |
+| `flags.enabled_space_count` | long | yes | Number of spaces where it is enabled |
+
+The allowlist, in payload order:
+
+| `flag` | Kind | Enabled when |
+|---|---|---|
+| `securitySolution:enableAlertZero` | Per-space Advanced Setting | The space's value is `true` |
+| `securitySolution:enableAttackDiscoveryWorkflows` | Per-space Advanced Setting (Security Solution) | The space's value is `true`. An unset value, or Security Solution not registering the setting, counts as disabled |
+| `securitySolution.attackDiscoveryWorkflowsEnabled` | Deployment-wide feature flag | The flag is on (it defaults to on). It has no per-space value, so its count is `space_count` or `0` |
+
+Attack Discovery Workflows are active in a space only when both of the last two are enabled there.
 
 ## Worker run events
 

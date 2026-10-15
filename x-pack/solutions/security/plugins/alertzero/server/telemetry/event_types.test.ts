@@ -28,14 +28,23 @@ import {
   WORKER_REVIEW_DECISIONS,
   WORKER_RUN_OUTCOMES,
 } from '../../common/telemetry/constants';
-import { ALERTZERO_TELEMETRY_EVENTS, ALERTZERO_TELEMETRY_PREFIX } from './constants';
+import {
+  ALERTZERO_TELEMETRY_EVENTS,
+  ALERTZERO_TELEMETRY_PREFIX,
+  SCHEDULE_INTERVAL_BUCKETS,
+  WORKER_ENABLED_VALUES,
+  WORKER_SETTINGS,
+} from './constants';
 import type { AlertZeroEnvelope, AlertZeroTelemetryEventPayloads } from './event_types';
 import {
   ALERTZERO_AD_WORKER_RUN_COMPLETED_EVENT,
+  ALERTZERO_FEATURE_FLAGS_SNAPSHOT_EVENT,
   ALERTZERO_TELEMETRY_EVENT_TYPES,
   ALERTZERO_WORKER_INVESTIGATION_CLOSED_EVENT,
+  ALERTZERO_WORKER_SETTINGS_CHANGED_EVENT,
 } from './event_types';
 import { registerAlertZeroTelemetryEvents } from './register_telemetry_events';
+import { SNAPSHOT_FLAGS } from './snapshot/constants';
 
 /** Identity and free-text field names no AlertZero event may declare, at any nesting depth. */
 const DENYLISTED_FIELD_NAMES = [
@@ -275,6 +284,42 @@ const FIXTURES: {
     watch_tag: 'watch-forensics',
     worker_id: 'system-security-forensics-endpoint-analysis',
   },
+  [ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged]: {
+    bulk_write: true,
+    is_default_space: false,
+    next_value: 'assisted',
+    previous_value: 'manual',
+    setting: 'autonomy',
+    settings_revision: 4,
+    watch_tag: 'watch-detection',
+    worker_id: 'system-security-detection-rule-tuning',
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.WorkerActivated]: {
+    autonomy_level: 'manual',
+    enabled: true,
+    is_default_space: true,
+    watch_tag: 'watch-floor',
+    worker_id: 'system-security-floor-attack-discovery',
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot]: {
+    service_accounts_enabled: true,
+    snapshot_day: '2026-09-28',
+    space_count: 3,
+    workers: [
+      {
+        autonomy_level: 'manual',
+        count: 2,
+        enabled: true,
+        worker_id: 'system-security-floor-attack-discovery',
+      },
+    ],
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.FeatureFlagsSnapshot]: {
+    flags: [{ enabled_space_count: 1, flag: 'securitySolution:enableAlertZero' }],
+    service_accounts_enabled: true,
+    snapshot_day: '2026-09-28',
+    space_count: 3,
+  },
 };
 
 const README_PATH = join(__dirname, 'README.md');
@@ -389,6 +434,65 @@ describe('AlertZero telemetry event types', () => {
     it('has a privacy contract section', () => {
       expect(readFileSync(README_PATH, 'utf8')).toMatch(/^## Privacy contract$/m);
     });
+
+    it('documents every schedule interval bucket and settings name', () => {
+      const readme = readFileSync(README_PATH, 'utf8');
+
+      expect(
+        [...SCHEDULE_INTERVAL_BUCKETS, ...WORKER_SETTINGS].filter(
+          (value) => !readme.includes(`\`${value}\``)
+        )
+      ).toEqual([]);
+    });
+
+    it('lists every settings name and enabled value in the settings_changed section', () => {
+      const section = readDocumentedEventSection(ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged);
+
+      expect(
+        [...WORKER_SETTINGS, ...WORKER_ENABLED_VALUES].filter(
+          (value) => !section.includes(`\`${value}\``)
+        )
+      ).toEqual([]);
+    });
+  });
+
+  describe('alertzero_worker_settings_changed enabled changes', () => {
+    const { schema } = ALERTZERO_WORKER_SETTINGS_CHANGED_EVENT;
+    const fieldDescription = (field: keyof typeof schema): unknown =>
+      getDescription(schema[field] as unknown as Record<string, unknown>);
+
+    it('reports the Worker enabled state as the `enabled` setting', () => {
+      expect(WORKER_SETTINGS).toContain('enabled');
+      expect(fieldDescription('setting')).toContain('`enabled`');
+    });
+
+    it.each([['next_value'], ['previous_value']] as const)(
+      'documents the keyword strings `true` and `false` in %s',
+      (field) => {
+        expect(fieldDescription(field)).toEqual(expect.stringContaining('`true`'));
+        expect(fieldDescription(field)).toEqual(expect.stringContaining('`false`'));
+      }
+    );
+
+    it.each([
+      ['true', 'false'],
+      ['false', 'true'],
+    ])('accepts an enabled change from %s to %s in dev mode', (previousValue, nextValue) => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+
+      expect(() =>
+        analytics.reportEvent(ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged, {
+          bulk_write: false,
+          is_default_space: true,
+          next_value: nextValue,
+          previous_value: previousValue,
+          setting: 'enabled',
+          watch_tag: 'watch-floor',
+          worker_id: 'system-security-floor-attack-discovery',
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('trigger_type', () => {
@@ -409,6 +513,64 @@ describe('AlertZero telemetry event types', () => {
           description.includes(value)
         ),
       }).toEqual({ readme: true, schema: true });
+    });
+  });
+
+  describe.each([
+    [ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot],
+    [ALERTZERO_TELEMETRY_EVENTS.FeatureFlagsSnapshot],
+  ] as const)('%s service_accounts_enabled', (eventType) => {
+    const report = (payload: object) => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+      analytics.reportEvent(eventType, payload);
+    };
+
+    it.each([[true], [false]])('accepts %s in dev mode', (serviceAccountsEnabled) => {
+      expect(() =>
+        report({ ...FIXTURES[eventType], service_accounts_enabled: serviceAccountsEnabled })
+      ).not.toThrow();
+    });
+
+    it('rejects a payload without it in dev mode', () => {
+      const { service_accounts_enabled: _omitted, ...payload } = FIXTURES[eventType];
+
+      expect(() => report(payload)).toThrow();
+    });
+
+    it('rejects a payload with an undeclared key in dev mode', () => {
+      expect(() => report({ ...FIXTURES[eventType], undeclared_field: 1 })).toThrow();
+    });
+  });
+
+  describe('alertzero_autonomy_snapshot workers', () => {
+    it('accepts a payload without workers, as sent with service accounts off, in dev mode', () => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+      const { workers: _omitted, ...payload } =
+        FIXTURES[ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot];
+
+      expect(() =>
+        analytics.reportEvent(ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot, {
+          ...payload,
+          service_accounts_enabled: false,
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe('alertzero_feature_flags_snapshot flags', () => {
+    it('lists every allowlisted flag in the schema and README', () => {
+      const flagField = collectFields(
+        ALERTZERO_FEATURE_FLAGS_SNAPSHOT_EVENT.schema as unknown as Record<string, unknown>
+      ).find(({ path }) => path === 'flags.flag');
+      const description = String(flagField ? getDescription(flagField.node) : '');
+      const section = readDocumentedEventSection(ALERTZERO_TELEMETRY_EVENTS.FeatureFlagsSnapshot);
+
+      expect({
+        readme: SNAPSHOT_FLAGS.filter((flag) => !section.includes(`\`${flag}\``)),
+        schema: SNAPSHOT_FLAGS.filter((flag) => !description.includes(`\`${flag}\``)),
+      }).toEqual({ readme: [], schema: [] });
     });
   });
 

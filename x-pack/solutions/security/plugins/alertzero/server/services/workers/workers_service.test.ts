@@ -8,6 +8,8 @@
 import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createAnalytics } from '@elastic/ebt/client';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -28,6 +30,12 @@ import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyNotInstalledError,
 } from '../threat_intel_supply';
+import type { AlertZeroTelemetryReporter } from '../../telemetry';
+import {
+  ALERTZERO_TELEMETRY_EVENTS,
+  createAlertZeroTelemetryReporter,
+  registerAlertZeroTelemetryEvents,
+} from '../../telemetry';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
@@ -178,13 +186,14 @@ const createPersistentHarness = () => {
     updateWorkflow,
     createService: (
       agentBuilder?: AgentBuilderPluginStart,
-      getBlockingReasons: GetWorkerBlockingReasons = async () => []
+      getBlockingReasons: GetWorkerBlockingReasons = async () => [],
+      telemetryReporter?: AlertZeroTelemetryReporter
     ) => {
       return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
-        { agentBuilder },
+        { agentBuilder, telemetryReporter },
         async (_request, registration, options) => {
           await install(registration.id, options);
         },
@@ -1600,6 +1609,743 @@ describe('WorkersService', () => {
       );
 
       expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    const SETTINGS_CHANGED = ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged;
+    const ACTIVATED = ALERTZERO_TELEMETRY_EVENTS.WorkerActivated;
+
+    /**
+     * Reports through the production never-throw reporter into a dev-mode EBT client, which throws
+     * on any payload that does not match its registered schema.
+     */
+    const createTelemetry = () => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+      const reportEvent = jest.spyOn(analytics, 'reportEvent');
+      const reportedEvents = () =>
+        reportEvent.mock.calls.map(([eventType, payload]) => ({ eventType, payload }));
+      return {
+        clear: () => reportEvent.mockClear(),
+        eventsOfType: (eventType: string) =>
+          reportedEvents()
+            .filter((event) => event.eventType === eventType)
+            .map(({ payload }) => payload),
+        rejectedReports: () => reportEvent.mock.results.filter(({ type }) => type === 'throw'),
+        reportedEvents,
+        reporter: createAlertZeroTelemetryReporter({ analytics, logger: loggerMock.create() }),
+      };
+    };
+
+    const enableWorker = async (workerId: string, spaceId = SPACE) => {
+      const telemetry = createTelemetry();
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, undefined, telemetry.reporter);
+      // Enables the way onboarding does: with a service account, which main requires.
+      const enabled = await service.update(
+        workerId,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        spaceId,
+        request
+      );
+      if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+      telemetry.clear();
+      return { harness, revision: enabled.response.worker.settingsRevision, service, telemetry };
+    };
+
+    it('emits one settings_changed event per changed setting of a multi-field PATCH', async () => {
+      const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        {
+          settings: { autonomy: 'supervised', scheduleInterval: '15m' },
+          settingsRevision: revision,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(telemetry.reportedEvents().map(({ eventType }) => eventType)).toEqual([
+        SETTINGS_CHANGED,
+        SETTINGS_CHANGED,
+      ]);
+      expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+        {
+          bulk_write: true,
+          is_default_space: true,
+          next_value: 'supervised',
+          previous_value: 'manual',
+          setting: 'autonomy',
+          settings_revision: revision,
+          watch_tag: 'watch-floor',
+          worker_id: ATTACK_DISCOVERY,
+        },
+        {
+          bulk_write: true,
+          is_default_space: true,
+          next_value: '15m_to_lt_1h',
+          previous_value: '24h_to_lt_7d',
+          setting: 'schedule_interval',
+          settings_revision: revision,
+          watch_tag: 'watch-floor',
+          worker_id: ATTACK_DISCOVERY,
+        },
+      ]);
+      expect(telemetry.rejectedReports()).toEqual([]);
+    });
+
+    it('emits a single, non-bulk event when one setting changes', async () => {
+      const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+      await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '6h' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+        expect.objectContaining({
+          bulk_write: false,
+          next_value: '6h_to_lt_24h',
+          setting: 'schedule_interval',
+        }),
+      ]);
+    });
+
+    it('emits nothing for a settings PATCH that changes no value', async () => {
+      const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { autonomy: 'manual', scheduleInterval: '24h' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(telemetry.reportedEvents()).toEqual([]);
+    });
+
+    it('emits nothing when the settings revision conflicts', async () => {
+      const { service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+      await expect(
+        service.update(
+          ATTACK_DISCOVERY,
+          { settings: { autonomy: 'supervised' }, settingsRevision: 999 },
+          SPACE,
+          request
+        )
+      ).resolves.toEqual({ outcome: 'conflict' });
+      expect(telemetry.reportedEvents()).toEqual([]);
+    });
+
+    it('emits nothing for a settings PATCH the Worker rejects as invalid', async () => {
+      const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { autonomy: 'assisted' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('invalid');
+      expect(telemetry.reportedEvents()).toEqual([]);
+    });
+
+    it('emits nothing when the settings write cannot be confirmed', async () => {
+      const { harness, revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+      harness.install.mockResolvedValueOnce(undefined);
+
+      await expect(
+        service.update(
+          ATTACK_DISCOVERY,
+          { settings: { autonomy: 'supervised' }, settingsRevision: revision },
+          SPACE,
+          request
+        )
+      ).resolves.toEqual({ outcome: 'failed' });
+      expect(telemetry.reportedEvents()).toEqual([]);
+    });
+
+    it('reports an extras change as changed, never with its values', async () => {
+      const { revision, service, telemetry } = await enableWorker(RULE_TUNING);
+
+      const result = await service.update(
+        RULE_TUNING,
+        {
+          settings: {
+            extras: { analysisWindowDays: 23, fpCountThreshold: 77, fpRateThresholdPct: 61 },
+          },
+          settingsRevision: revision,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      const events = telemetry.eventsOfType(SETTINGS_CHANGED);
+      expect(events).toEqual([
+        {
+          bulk_write: false,
+          is_default_space: true,
+          setting: 'extras',
+          settings_revision: revision,
+          watch_tag: 'watch-detection',
+          worker_id: RULE_TUNING,
+        },
+      ]);
+      expect(JSON.stringify(events)).not.toMatch(/23|77|61/);
+      expect(telemetry.rejectedReports()).toEqual([]);
+    });
+
+    it('does not report the defaults a legacy document gains on save as an extras change', async () => {
+      const { harness, service, telemetry } = await enableWorker(RULE_TUNING);
+      const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+      if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+      document.values = {
+        autonomyLevel: 'manual',
+        scheduleInterval: '2h',
+        serviceAccountId: 'sa-1',
+        settingsVersion: 1,
+      };
+
+      await service.update(
+        RULE_TUNING,
+        { settings: { scheduleInterval: '12h' }, settingsRevision: document.version },
+        SPACE,
+        request
+      );
+
+      expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+        expect.objectContaining({
+          next_value: '6h_to_lt_24h',
+          previous_value: '1h_to_lt_6h',
+          setting: 'schedule_interval',
+        }),
+      ]);
+    });
+
+    it('emits only activation, and no enabled change, on the first enable', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      // Onboarding enables a Worker together with its service account; binding it is not a change.
+      await service.update(
+        ATTACK_DISCOVERY,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+
+      expect(telemetry.reportedEvents()).toEqual([
+        {
+          eventType: ACTIVATED,
+          payload: {
+            autonomy_level: 'manual',
+            enabled: true,
+            is_default_space: true,
+            watch_tag: 'watch-floor',
+            worker_id: ATTACK_DISCOVERY,
+          },
+        },
+      ]);
+
+      telemetry.clear();
+      await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+      await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+      await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+
+      expect(telemetry.eventsOfType(ACTIVATED)).toEqual([]);
+      expect(telemetry.rejectedReports()).toEqual([]);
+    });
+
+    describe('enabled changes of an installed Worker', () => {
+      const enabledChange = (previousValue: string, nextValue: string) => ({
+        bulk_write: false,
+        is_default_space: true,
+        next_value: nextValue,
+        previous_value: previousValue,
+        setting: 'enabled',
+        watch_tag: 'watch-floor',
+        worker_id: ATTACK_DISCOVERY,
+      });
+
+      it('reports a disable, then an enable, each as one settings_changed event', async () => {
+        const { service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+        const disabled = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+        expect(disabled.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([
+          { eventType: SETTINGS_CHANGED, payload: enabledChange('true', 'false') },
+        ]);
+
+        telemetry.clear();
+        const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+
+        expect(enabled.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([
+          { eventType: SETTINGS_CHANGED, payload: enabledChange('false', 'true') },
+        ]);
+        expect(telemetry.rejectedReports()).toEqual([]);
+      });
+
+      it('reports the enabled change of a Worker that a settings save installed disabled', async () => {
+        const telemetry = createTelemetry();
+        const service = createPersistentHarness().createService(
+          undefined,
+          undefined,
+          telemetry.reporter
+        );
+        const saved = await service.update(
+          TRIAGE,
+          { settings: { autonomy: 'supervised' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+        if (saved.outcome !== 'updated') throw new Error('Expected the settings save to succeed');
+        telemetry.clear();
+
+        // An installed Worker with no account can only be enabled together with one.
+        await service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: saved.response.worker.settingsRevision,
+          },
+          SPACE,
+          request
+        );
+
+        // The browser binds the account it created with this first enable, so binding it is not a
+        // user's settings change: only the enable is reported.
+        const revision = saved.response.worker.settingsRevision;
+        expect(telemetry.reportedEvents()).toEqual([
+          {
+            eventType: SETTINGS_CHANGED,
+            payload: {
+              ...enabledChange('false', 'true'),
+              settings_revision: revision,
+              worker_id: TRIAGE,
+            },
+          },
+        ]);
+        expect(JSON.stringify(telemetry.reportedEvents())).not.toContain('sa-1');
+      });
+
+      it('marks an enabled change outside the default space', async () => {
+        const { service, telemetry } = await enableWorker(ATTACK_DISCOVERY, 'space-a');
+
+        await service.update(ATTACK_DISCOVERY, { enabled: false }, 'space-a', request);
+
+        expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+          { ...enabledChange('true', 'false'), is_default_space: false },
+        ]);
+      });
+
+      it('sends nothing for an enable of an enabled Worker', async () => {
+        const { service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+        const result = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+
+        expect(result.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([]);
+      });
+
+      it('sends nothing for a disable of a disabled Worker', async () => {
+        const { service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+        await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+        telemetry.clear();
+
+        const result = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+        expect(result.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([]);
+      });
+
+      it('reports autonomy and enabled changes of one PATCH as a bulk write with one revision', async () => {
+        const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+        const result = await service.update(
+          ATTACK_DISCOVERY,
+          { enabled: false, settings: { autonomy: 'supervised' }, settingsRevision: revision },
+          SPACE,
+          request
+        );
+
+        expect(result.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([
+          {
+            eventType: SETTINGS_CHANGED,
+            payload: {
+              bulk_write: true,
+              is_default_space: true,
+              next_value: 'supervised',
+              previous_value: 'manual',
+              setting: 'autonomy',
+              settings_revision: revision,
+              watch_tag: 'watch-floor',
+              worker_id: ATTACK_DISCOVERY,
+            },
+          },
+          {
+            eventType: SETTINGS_CHANGED,
+            payload: {
+              ...enabledChange('true', 'false'),
+              bulk_write: true,
+              settings_revision: revision,
+            },
+          },
+        ]);
+        expect(telemetry.rejectedReports()).toEqual([]);
+      });
+
+      it('reports an autonomy change alone when the same PATCH repeats the enabled state', async () => {
+        const { revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+        await service.update(
+          ATTACK_DISCOVERY,
+          { enabled: true, settings: { autonomy: 'supervised' }, settingsRevision: revision },
+          SPACE,
+          request
+        );
+
+        expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+          expect.objectContaining({ bulk_write: false, setting: 'autonomy' }),
+        ]);
+      });
+
+      it('sends nothing when a PATCH that also disables conflicts on its settings revision', async () => {
+        const { harness, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+
+        await expect(
+          service.update(
+            ATTACK_DISCOVERY,
+            { enabled: false, settings: { autonomy: 'supervised' }, settingsRevision: 999 },
+            SPACE,
+            request
+          )
+        ).resolves.toEqual({ outcome: 'conflict' });
+        expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(true);
+        expect(telemetry.reportedEvents()).toEqual([]);
+      });
+
+      it('sends nothing when the disable write fails', async () => {
+        const { harness, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+        harness.updateWorkflow.mockRejectedValueOnce(new Error('write failed'));
+
+        await expect(
+          service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request)
+        ).rejects.toThrow('write failed');
+        expect(telemetry.reportedEvents()).toEqual([]);
+      });
+
+      it('sends nothing, not even for the saved settings, when the disable write of the same PATCH fails', async () => {
+        const { harness, revision, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+        const persist = harness.updateWorkflow.getMockImplementation();
+        if (!persist) throw new Error('Expected the harness to persist enabled writes');
+        harness.updateWorkflow.mockImplementation(async (id, update, spaceId) => {
+          if (update.enabled === false) throw new Error('write failed');
+          return persist(id, update, spaceId);
+        });
+
+        await expect(
+          service.update(
+            ATTACK_DISCOVERY,
+            { enabled: false, settings: { autonomy: 'supervised' }, settingsRevision: revision },
+            SPACE,
+            request
+          )
+        ).rejects.toThrow('write failed');
+        expect(telemetry.reportedEvents()).toEqual([]);
+      });
+
+      it('still completes a disable when the reporter throws', async () => {
+        const harness = createPersistentHarness();
+        await harness
+          .createService()
+          .update(
+            ATTACK_DISCOVERY,
+            { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+            SPACE,
+            request
+          );
+        const reportAttempt = jest.fn();
+        const throwingReporter: AlertZeroTelemetryReporter = (eventType, payload) => {
+          reportAttempt(eventType, payload);
+          throw new Error('telemetry exploded');
+        };
+        const service = harness.createService(undefined, undefined, throwingReporter);
+
+        const result = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+        expect(reportAttempt).toHaveBeenCalledWith(
+          SETTINGS_CHANGED,
+          expect.objectContaining({ setting: 'enabled' })
+        );
+        expect(result.outcome).toBe('updated');
+        if (result.outcome !== 'updated') throw new Error('Expected the disable to succeed');
+        expect(result.response.worker.enabled).toBe(false);
+      });
+    });
+
+    describe('service account changes of an installed Worker', () => {
+      const serviceAccountChange = (revision: number | null) => ({
+        bulk_write: false,
+        is_default_space: true,
+        setting: 'service_account',
+        settings_revision: revision,
+        watch_tag: 'watch-floor',
+        worker_id: ATTACK_DISCOVERY,
+      });
+
+      it('reports a re-bind to another account as service_account, without either account', async () => {
+        const { harness, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+        const revision = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.version ?? null;
+
+        const result = await service.update(
+          ATTACK_DISCOVERY,
+          { settings: { serviceAccountId: 'sa-2' }, settingsRevision: revision },
+          SPACE,
+          request
+        );
+
+        expect(result.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([
+          { eventType: SETTINGS_CHANGED, payload: serviceAccountChange(revision) },
+        ]);
+        expect(JSON.stringify(telemetry.reportedEvents())).not.toMatch(/sa-1|sa-2/);
+      });
+
+      it('reports clearing the account of a disabled Worker as service_account', async () => {
+        const { harness, service, telemetry } = await enableWorker(ATTACK_DISCOVERY);
+        await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+        const revision = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.version ?? null;
+        telemetry.clear();
+
+        const result = await service.update(
+          ATTACK_DISCOVERY,
+          { settings: { serviceAccountId: null }, settingsRevision: revision },
+          SPACE,
+          request
+        );
+
+        expect(result.outcome).toBe('updated');
+        expect(telemetry.reportedEvents()).toEqual([
+          { eventType: SETTINGS_CHANGED, payload: serviceAccountChange(revision) },
+        ]);
+      });
+    });
+
+    it('emits activation once when a settings save installs the Worker before its first enable', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      const saved = await service.update(
+        TRIAGE,
+        { settings: { autonomy: 'supervised' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      if (saved.outcome !== 'updated') throw new Error('Expected the settings save to succeed');
+
+      expect(telemetry.reportedEvents()).toEqual([
+        {
+          eventType: SETTINGS_CHANGED,
+          payload: {
+            bulk_write: false,
+            is_default_space: true,
+            next_value: 'supervised',
+            previous_value: 'manual',
+            setting: 'autonomy',
+            watch_tag: 'watch-floor',
+            worker_id: TRIAGE,
+          },
+        },
+        {
+          eventType: ACTIVATED,
+          payload: {
+            autonomy_level: 'supervised',
+            enabled: false,
+            is_default_space: true,
+            watch_tag: 'watch-floor',
+            worker_id: TRIAGE,
+          },
+        },
+      ]);
+
+      telemetry.clear();
+      const enabled = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: saved.response.worker.settingsRevision,
+        },
+        SPACE,
+        request
+      );
+
+      expect(enabled.outcome).toBe('updated');
+      expect(telemetry.eventsOfType(ACTIVATED)).toEqual([]);
+    });
+
+    it('emits one activation for a PATCH that saves settings and enables together', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { autonomy: 'supervised', serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      // The account the first install binds is not reported; the autonomy choice is.
+      expect(telemetry.eventsOfType(ACTIVATED)).toEqual([
+        expect.objectContaining({ autonomy_level: 'supervised', enabled: true }),
+      ]);
+      expect(telemetry.eventsOfType(SETTINGS_CHANGED)).toEqual([
+        expect.objectContaining({ bulk_write: false, setting: 'autonomy' }),
+      ]);
+    });
+
+    it('omits autonomy_level from activation when the installed settings cannot be read', async () => {
+      const telemetry = createTelemetry();
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, undefined, telemetry.reporter);
+      // The first read confirms the settings write; the read that projects the Worker fails.
+      const getInstalledWorkflowState = harness.managedWorkflows
+        .getInstalledWorkflowState as jest.Mock;
+      const readState = getInstalledWorkflowState.getMockImplementation();
+      if (!readState) throw new Error('Expected the harness to read installed state');
+      getInstalledWorkflowState
+        .mockImplementationOnce(readState)
+        .mockRejectedValueOnce(new Error('storage down'));
+
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+
+      const [activation, ...rest] = telemetry.eventsOfType(ACTIVATED);
+      expect(rest).toEqual([]);
+      expect(activation).toEqual(expect.objectContaining({ enabled: true, worker_id: TRIAGE }));
+      expect(activation).not.toHaveProperty('autonomy_level');
+      expect(telemetry.rejectedReports()).toEqual([]);
+    });
+
+    it('emits activation with enabled false when a disable installs the Worker', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(telemetry.reportedEvents()).toEqual([
+        {
+          eventType: ACTIVATED,
+          payload: expect.objectContaining({ enabled: false, worker_id: TRIAGE }),
+        },
+      ]);
+    });
+
+    it('activates each space separately and marks events outside the default space', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        'space-a',
+        request
+      );
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        'space-b',
+        request
+      );
+
+      expect(telemetry.eventsOfType(ACTIVATED)).toEqual([
+        expect.objectContaining({ is_default_space: false }),
+        expect.objectContaining({ is_default_space: false }),
+      ]);
+    });
+
+    it('emits nothing for a Worker that is not found', async () => {
+      const telemetry = createTelemetry();
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        telemetry.reporter
+      );
+
+      await expect(
+        service.update('unknown-worker', { enabled: true }, SPACE, request)
+      ).resolves.toEqual({ outcome: 'not-found' });
+      expect(telemetry.reportedEvents()).toEqual([]);
+    });
+
+    it('still completes the update when the reporter throws', async () => {
+      const throwingReporter: AlertZeroTelemetryReporter = () => {
+        throw new Error('telemetry exploded');
+      };
+      const service = createPersistentHarness().createService(
+        undefined,
+        undefined,
+        throwingReporter
+      );
+
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { autonomy: 'supervised', serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected the update to succeed');
+      expect(result.response.worker).toMatchObject({
+        enabled: true,
+        settings: { autonomy: 'supervised' },
+      });
     });
   });
 });

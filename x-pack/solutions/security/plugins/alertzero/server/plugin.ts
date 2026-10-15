@@ -72,12 +72,24 @@ import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabl
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 import { ThreatIntelSupplyService } from './services/threat_intel_supply';
-import { readTelemetryOptIn, registerAlertZeroTelemetryEvents } from './telemetry';
+import {
+  createAlertZeroTelemetryReporter,
+  readTelemetryOptIn,
+  registerAlertZeroTelemetryEvents,
+} from './telemetry';
 import {
   REPORT_STEP_OPT_IN_TIMEOUT_MS,
   registerAlertZeroStepDefinitions,
   registerStepDefinitions,
 } from './step_types';
+import type { FollowedBooleanFlag } from './tasks/telemetry_snapshot';
+import {
+  createTelemetrySnapshotDependencies,
+  followBooleanFlag,
+  registerTelemetrySnapshotTask,
+  scheduleTelemetrySnapshotTask,
+} from './tasks/telemetry_snapshot';
+import { ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG } from './telemetry/snapshot';
 
 export class AlertZeroPlugin
   implements
@@ -101,6 +113,8 @@ export class AlertZeroPlugin
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   /** Resolved during `start`; the report step awaits it for its owner-bound managed check. */
   private managedWorkflows?: Promise<PluginScopedManagedWorkflowsApi | undefined>;
+  /** Followed from `start()` to `stop()`, so each daily snapshot reads the flag as it is then. */
+  private attackDiscoveryWorkflowsFlag?: FollowedBooleanFlag;
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
@@ -158,6 +172,7 @@ export class AlertZeroPlugin
       contextEngine,
       features,
       searchInferenceEndpoints,
+      taskManager,
       workflowsExtensions,
       workflowsManagement,
     }: AlertZeroSetupDependencies
@@ -174,6 +189,23 @@ export class AlertZeroPlugin
     registerUiSettings(coreSetup.uiSettings);
     // Inside the guard too: with the kill switch off, no AlertZero event type exists to report.
     registerAlertZeroTelemetryEvents(coreSetup.analytics);
+    // Inside the guard too, so the kill switch leaves no snapshot task type to claim.
+    registerTelemetrySnapshotTask({
+      getDependencies: async () => {
+        const [core, { spaces, telemetry }] = await coreSetup.getStartServices();
+        return createTelemetrySnapshotDependencies({
+          core,
+          // Defaults to on, like every other reader of this flag.
+          getAttackDiscoveryWorkflowsEnabled: async () =>
+            this.attackDiscoveryWorkflowsFlag?.getValue() ?? true,
+          getManagedWorkflows: async () => this.managedWorkflows,
+          spaces,
+          telemetry,
+        });
+      },
+      logger: this.logger.get('telemetry'),
+      taskManager,
+    });
 
     this.workflowsManagementApi = workflowsManagement.management;
 
@@ -327,13 +359,30 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
+    // Before the dependency guards: the snapshot task is registered whenever AlertZero is enabled.
+    this.attackDiscoveryWorkflowsFlag = followBooleanFlag({
+      fallbackValue: true,
+      featureFlags: core.featureFlags,
+      flagName: ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
+    });
+
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
     const { agentBuilder, agenticInvestigations, proposals } = plugins;
     // Optional dependencies allow the upgrade shell to load without starting feature work.
+    if (!agentBuilder || !proposals || !agenticInvestigations) {
+      return this.alertZeroStartContract();
+    }
+    // Scheduled before the service accounts check, so the daily summary also reports a
+    // deployment that has AlertZero but not service accounts. With them off it reads no Workers,
+    // only spaces and settings through core services.
+    scheduleTelemetrySnapshotTask({
+      logger: this.logger.get('telemetry'),
+      taskManager: plugins.taskManager,
+    });
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
-    if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
+    if (!this.serviceAccountsEnabled) {
       return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
@@ -399,6 +448,10 @@ export class AlertZeroPlugin
           ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
         agentBuilder,
         agentTypes: [agentType],
+        telemetryReporter: createAlertZeroTelemetryReporter({
+          analytics: core.analytics,
+          logger: this.logger.get('telemetry'),
+        }),
       },
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
@@ -505,5 +558,7 @@ export class AlertZeroPlugin
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  stop() {}
+  stop() {
+    this.attackDiscoveryWorkflowsFlag?.stop();
+  }
 }

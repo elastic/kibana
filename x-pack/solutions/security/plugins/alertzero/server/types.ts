@@ -23,6 +23,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -79,6 +80,7 @@ export interface AlertZeroSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  taskManager: TaskManagerSetupContract;
   agentBuilder?: AgentBuilderPluginSetup;
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;
@@ -120,8 +122,8 @@ export interface AlertZeroStartDependencies {
    */
   mitreAttack?: MitreAttackServerStart;
   /**
-   * Optional, matching the plugin manifest. The report step reads its opt-in state before any
-   * Elasticsearch work; a missing telemetry plugin counts as opted out.
+   * Optional, matching the plugin manifest. The report step and the snapshot task read its opt-in
+   * state before any Elasticsearch work; a missing telemetry plugin counts as opted out.
    */
   telemetry?: TelemetryPluginStart;
 }

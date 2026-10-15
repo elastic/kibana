@@ -52,12 +52,21 @@ import {
 import type {
   AlertZeroAutonomyLevel,
   AlertZeroAutonomyMode,
+  AlertZeroScheduleIntervalBucket,
   AlertZeroTriggerType,
   AlertZeroWatchTag,
+  AlertZeroWorkerEnabledValue,
   AlertZeroWorkerId,
+  AlertZeroWorkerSetting,
 } from './constants';
-import { ALERTZERO_TELEMETRY_EVENTS } from './constants';
+import {
+  ALERTZERO_TELEMETRY_EVENTS,
+  SCHEDULE_INTERVAL_BUCKETS,
+  WORKER_ENABLED_VALUES,
+  WORKER_SETTINGS,
+} from './constants';
 import { formatVocabulary } from './format_vocabulary';
+import { SNAPSHOT_FLAGS } from './snapshot/constants';
 
 /** The fields every AlertZero Worker run event carries, built by `buildAlertZeroEnvelope`. */
 export interface AlertZeroEnvelope {
@@ -191,6 +200,58 @@ export interface AlertZeroEndpointAnalysisCompletedPayload extends AlertZeroEnve
   timeline_found: boolean;
 }
 
+export interface AlertZeroWorkerSettingsChangedPayload {
+  bulk_write: boolean;
+  is_default_space: boolean;
+  next_value?:
+    | AlertZeroAutonomyLevel
+    | AlertZeroScheduleIntervalBucket
+    | AlertZeroWorkerEnabledValue;
+  previous_value?:
+    | AlertZeroAutonomyLevel
+    | AlertZeroScheduleIntervalBucket
+    | AlertZeroWorkerEnabledValue;
+  setting: AlertZeroWorkerSetting;
+  settings_revision?: number;
+  watch_tag: AlertZeroWatchTag;
+  worker_id: AlertZeroWorkerId;
+}
+
+export interface AlertZeroWorkerActivatedPayload {
+  autonomy_level?: AlertZeroAutonomyLevel;
+  enabled: boolean;
+  is_default_space: boolean;
+  watch_tag: AlertZeroWatchTag;
+  worker_id: AlertZeroWorkerId;
+}
+
+export interface AlertZeroAutonomySnapshotWorker {
+  autonomy_level: AlertZeroAutonomyLevel;
+  count: number;
+  enabled: boolean;
+  worker_id: AlertZeroWorkerId;
+}
+
+export interface AlertZeroAutonomySnapshotPayload {
+  service_accounts_enabled: boolean;
+  snapshot_day: string;
+  space_count: number;
+  /** Absent when service accounts are off: the snapshot reads no Worker documents then. */
+  workers?: AlertZeroAutonomySnapshotWorker[];
+}
+
+export interface AlertZeroFeatureFlagsSnapshotFlag {
+  enabled_space_count: number;
+  flag: string;
+}
+
+export interface AlertZeroFeatureFlagsSnapshotPayload {
+  flags: AlertZeroFeatureFlagsSnapshotFlag[];
+  service_accounts_enabled: boolean;
+  snapshot_day: string;
+  space_count: number;
+}
+
 /** The payload each AlertZero event type carries. */
 export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.AdWorkerRunCompleted]: AlertZeroAdWorkerRunCompletedPayload;
@@ -205,6 +266,10 @@ export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: AlertZeroRuleCoverageReviewCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted]: AlertZeroHuntReportCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.EndpointAnalysisCompleted]: AlertZeroEndpointAnalysisCompletedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged]: AlertZeroWorkerSettingsChangedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.WorkerActivated]: AlertZeroWorkerActivatedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot]: AlertZeroAutonomySnapshotPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.FeatureFlagsSnapshot]: AlertZeroFeatureFlagsSnapshotPayload;
 }
 
 const WORKER_ID_DESCRIPTION =
@@ -218,6 +283,11 @@ const IS_DEFAULT_SPACE_DESCRIPTION =
   'Whether the event happened in the default space. The space id itself is never sent';
 const INVESTIGATION_ID_DESCRIPTION =
   "It is the Investigation's Agent Builder conversation id, a UUID, and the same value already ships raw as Agent Builder `conversation_id`. Most Workers' Investigations get a random id. Two are derived from a customer record, so they are stable ids for that record, not for a person: an Attack Discovery Worker Investigation's id is the first 120 bits of the attack's `kibana.alert.uuid` (the review's `attack_discovery_id`, a SHA-256 hex) with the UUID version and variant characters set to `8`, and a Hunt Worker Investigation's id is a UUID v5 of the threat report id";
+const SNAPSHOT_DAY_DESCRIPTION =
+  'UTC day (`YYYY-MM-DD`) the snapshot describes; one snapshot per type per day, used to dedupe catch-up runs';
+const SNAPSHOT_SPACE_COUNT_DESCRIPTION = 'Number of spaces the cluster-level aggregate covers';
+const SERVICE_ACCOUNTS_ENABLED_DESCRIPTION =
+  'Whether Kibana service accounts are on (`xpack.security.serviceAccounts.enabled`). AlertZero installs and manages Workers only when they are';
 
 const ENVELOPE_SCHEMA: RootSchema<AlertZeroEnvelope> = {
   autonomy_level: {
@@ -667,6 +737,204 @@ export const ALERTZERO_ENDPOINT_ANALYSIS_COMPLETED_EVENT: EventTypeOpts<AlertZer
     },
   };
 
+export const ALERTZERO_WORKER_SETTINGS_CHANGED_EVENT: EventTypeOpts<AlertZeroWorkerSettingsChangedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.WorkerSettingsChanged,
+    schema: {
+      bulk_write: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Whether the same Worker write changed more than one setting, counting an enable or disable as one (one event is sent for each)',
+          optional: false,
+        },
+      },
+      is_default_space: {
+        type: 'boolean',
+        _meta: { description: IS_DEFAULT_SPACE_DESCRIPTION, optional: false },
+      },
+      next_value: {
+        type: 'keyword',
+        _meta: {
+          description: `New value, only for enum, bounded or boolean settings: the autonomy level (${formatVocabulary(
+            WATCH_AUTONOMY_LEVELS
+          )}) for \`autonomy\`, the interval bucket (${formatVocabulary(
+            SCHEDULE_INTERVAL_BUCKETS
+          )}) for \`schedule_interval\`, or ${formatVocabulary(
+            WORKER_ENABLED_VALUES
+          )} (strings) for \`enabled\`. Absent for \`extras\`, \`service_account\` and \`other\``,
+          optional: true,
+        },
+      },
+      previous_value: {
+        type: 'keyword',
+        _meta: {
+          description: `Previous value, with the same rules as next_value (${formatVocabulary(
+            WORKER_ENABLED_VALUES
+          )} for \`enabled\`); the Worker's defaults on its first save`,
+          optional: true,
+        },
+      },
+      setting: {
+        type: 'keyword',
+        _meta: {
+          description: `Which setting changed: ${formatVocabulary(
+            WORKER_SETTINGS
+          )}, where \`enabled\` is an enable or disable of an installed Worker and \`other\` is any settings key outside the allowlist. \`service_account\` is a change of the Worker's service account, sent without the account. Values are never sent for \`extras\`, \`service_account\` or \`other\`. One event per changed setting`,
+          optional: false,
+        },
+      },
+      settings_revision: {
+        type: 'long',
+        _meta: {
+          description:
+            "Settings revision the write was accepted against (the Worker document's version before the write); absent on a Worker's first save and on an enable or disable that saves no settings",
+          optional: true,
+        },
+      },
+      watch_tag: {
+        type: 'keyword',
+        _meta: { description: WATCH_TAG_DESCRIPTION, optional: false },
+      },
+      worker_id: {
+        type: 'keyword',
+        _meta: { description: WORKER_ID_DESCRIPTION, optional: false },
+      },
+    },
+  };
+
+export const ALERTZERO_WORKER_ACTIVATED_EVENT: EventTypeOpts<AlertZeroWorkerActivatedPayload> = {
+  eventType: ALERTZERO_TELEMETRY_EVENTS.WorkerActivated,
+  schema: {
+    autonomy_level: {
+      type: 'keyword',
+      _meta: {
+        description: `${AUTONOMY_LEVEL_DESCRIPTION} the Worker was installed with`,
+        optional: true,
+      },
+    },
+    enabled: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether the Worker is enabled after the write that installed it (a settings save or a disable installs it disabled)',
+        optional: false,
+      },
+    },
+    is_default_space: {
+      type: 'boolean',
+      _meta: { description: IS_DEFAULT_SPACE_DESCRIPTION, optional: false },
+    },
+    watch_tag: {
+      type: 'keyword',
+      _meta: { description: WATCH_TAG_DESCRIPTION, optional: false },
+    },
+    worker_id: {
+      type: 'keyword',
+      _meta: { description: WORKER_ID_DESCRIPTION, optional: false },
+    },
+  },
+};
+
+export const ALERTZERO_AUTONOMY_SNAPSHOT_EVENT: EventTypeOpts<AlertZeroAutonomySnapshotPayload> = {
+  eventType: ALERTZERO_TELEMETRY_EVENTS.AutonomySnapshot,
+  schema: {
+    service_accounts_enabled: {
+      type: 'boolean',
+      _meta: {
+        description: `${SERVICE_ACCOUNTS_ENABLED_DESCRIPTION}. When false, the snapshot reads no Worker documents and \`workers\` is absent`,
+        optional: false,
+      },
+    },
+    snapshot_day: {
+      type: 'keyword',
+      _meta: { description: SNAPSHOT_DAY_DESCRIPTION, optional: false },
+    },
+    space_count: {
+      type: 'long',
+      _meta: { description: SNAPSHOT_SPACE_COUNT_DESCRIPTION, optional: false },
+    },
+    workers: {
+      type: 'array',
+      items: {
+        properties: {
+          autonomy_level: {
+            type: 'keyword',
+            _meta: { description: AUTONOMY_LEVEL_DESCRIPTION, optional: false },
+          },
+          count: {
+            type: 'long',
+            _meta: {
+              description: 'Number of spaces with this Worker at this autonomy level and state',
+              optional: false,
+            },
+          },
+          enabled: {
+            type: 'boolean',
+            _meta: { description: 'Whether the installed Worker is enabled', optional: false },
+          },
+          worker_id: {
+            type: 'keyword',
+            _meta: { description: WORKER_ID_DESCRIPTION, optional: false },
+          },
+        },
+        _meta: {
+          description: 'One count per worker_id, autonomy_level and enabled combination',
+        },
+      },
+      _meta: {
+        description:
+          'Installed Worker counts across the cluster, summed over spaces. Absent when service_accounts_enabled is false, because no Worker document was read',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const ALERTZERO_FEATURE_FLAGS_SNAPSHOT_EVENT: EventTypeOpts<AlertZeroFeatureFlagsSnapshotPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.FeatureFlagsSnapshot,
+    schema: {
+      flags: {
+        type: 'array',
+        items: {
+          properties: {
+            enabled_space_count: {
+              type: 'long',
+              _meta: {
+                description: 'Number of spaces where the flag is enabled',
+                optional: false,
+              },
+            },
+            flag: {
+              type: 'keyword',
+              _meta: {
+                description: `Allowlisted feature flag or advanced setting id, one of ${formatVocabulary(
+                  SNAPSHOT_FLAGS
+                )}`,
+                optional: false,
+              },
+            },
+          },
+          _meta: { description: 'Enabled-space count of one allowlisted flag' },
+        },
+        _meta: { description: 'Per-flag enabled-space counts across the cluster' },
+      },
+      service_accounts_enabled: {
+        type: 'boolean',
+        _meta: { description: SERVICE_ACCOUNTS_ENABLED_DESCRIPTION, optional: false },
+      },
+      snapshot_day: {
+        type: 'keyword',
+        _meta: { description: SNAPSHOT_DAY_DESCRIPTION, optional: false },
+      },
+      space_count: {
+        type: 'long',
+        _meta: { description: SNAPSHOT_SPACE_COUNT_DESCRIPTION, optional: false },
+      },
+    },
+  };
+
 /** Every AlertZero event type, in registration order. */
 export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_AD_WORKER_RUN_COMPLETED_EVENT,
@@ -681,4 +949,8 @@ export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT,
   ALERTZERO_HUNT_REPORT_COMPLETED_EVENT,
   ALERTZERO_ENDPOINT_ANALYSIS_COMPLETED_EVENT,
+  ALERTZERO_WORKER_SETTINGS_CHANGED_EVENT,
+  ALERTZERO_WORKER_ACTIVATED_EVENT,
+  ALERTZERO_AUTONOMY_SNAPSHOT_EVENT,
+  ALERTZERO_FEATURE_FLAGS_SNAPSHOT_EVENT,
 ] as const;
