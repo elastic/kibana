@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
+import type { AppHeaderBack } from '@kbn/app-header';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
@@ -26,10 +27,6 @@ const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryImportPage.libraryBreadcrumb',
   { defaultMessage: 'Template Library' }
 );
-
-const backToLibraryLabel = i18n.translate('workflowsManagement.libraryImportPage.backToLibrary', {
-  defaultMessage: 'Back to library',
-});
 
 /**
  * Workflow Template Library import page (`/app/workflows/library/import`).
@@ -57,22 +54,21 @@ export const LibraryTemplateImportPage = React.memo(() => {
     }
   }, [customTemplateYaml]);
 
-  const goToLibrary = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
-  }, [application]);
-
-  const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
+  const libraryBack = useMemo<AppHeaderBack>(
     () => ({
-      text: libraryBreadcrumbLabel,
+      label: libraryBreadcrumbLabel,
       href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
       onClick: (event) => {
-        if (event) {
-          event.preventDefault();
-        }
-        goToLibrary();
+        event.preventDefault();
+        application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
       },
     }),
-    [application, goToLibrary]
+    [application]
+  );
+
+  const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
+    () => ({ text: libraryBack.label, href: libraryBack.href, onClick: libraryBack.onClick }),
+    [libraryBack]
   );
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(
@@ -97,18 +93,6 @@ export const LibraryTemplateImportPage = React.memo(() => {
     return <Redirect to="/library" />;
   }
 
-  const backButton = (
-    <EuiButtonEmpty
-      size="xs"
-      flush="left"
-      iconType="chevronSingleLeft"
-      onClick={goToLibrary}
-      data-test-subj="workflowLibraryTemplateImportBackButton"
-    >
-      {backToLibraryLabel}
-    </EuiButtonEmpty>
-  );
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -129,7 +113,7 @@ export const LibraryTemplateImportPage = React.memo(() => {
           template={template}
           installMode="custom"
           showGraphPreview
-          backButton={backButton}
+          back={libraryBack}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
