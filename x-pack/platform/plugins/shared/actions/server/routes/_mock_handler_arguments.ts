@@ -13,15 +13,19 @@ import type { ActionsRequestHandlerContext } from '../types';
 import { actionsClientMock } from '../mocks';
 import type { ActionsClientMock } from '../actions_client/actions_client.mock';
 import type { ConnectorType } from '../application/connector/types';
+import type { SpecsClientMock } from '../specs_client/specs_client.mock';
+import { specsClientMock } from '../specs_client/specs_client.mock';
 
 export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
+    specsClient = specsClientMock.create(),
     listTypes: listTypesRes = [],
     getCurrentUser,
     getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
   }: {
     actionsClient?: ActionsClientMock;
+    specsClient?: SpecsClientMock;
     listTypes?: ConnectorType[];
     getCurrentUser?: jest.Mock;
     getSkippedPreconfiguredConnectorIds?: () => Set<string>;
@@ -46,6 +50,9 @@ export function mockHandlerArguments(
               create: jest.fn(),
             }
           );
+        },
+        getSpecsClient() {
+          return specsClient;
         },
         getSkippedPreconfiguredConnectorIds,
       },

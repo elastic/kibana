@@ -5,44 +5,45 @@
  * 2.0.
  */
 
-import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorSpecDetail } from '../../../../../../common/connector_spec';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
-
-export interface ConnectorActionDef {
-  name: string;
-  description?: string;
-  isTool: boolean;
-  scope?: ActionScope;
-}
-
-export interface GetConnectorSpecServiceResult {
-  metadata: ConnectorMetadata;
-  schema: Record<string, unknown>;
-  isTestable: boolean;
-  actions: ConnectorActionDef[];
-}
+import {
+  transformConnectorSpecActionSummaryResponse,
+  transformConnectorSpecSummaryResponse,
+} from '../../../transforms';
 
 export const transformGetConnectorSpecResponse = (
-  spec: GetConnectorSpecServiceResult
-): GetConnectorSpecResponseV1 => ({
-  metadata: {
-    id: spec.metadata.id,
-    display_name: spec.metadata.displayName,
-    description: spec.metadata.description,
-    minimum_license: spec.metadata.minimumLicense as string,
-    supported_feature_ids: spec.metadata.supportedFeatureIds ?? [],
-    ...(spec.metadata.icon !== undefined ? { icon: spec.metadata.icon } : {}),
-    ...(spec.metadata.docsUrl !== undefined ? { docs_url: spec.metadata.docsUrl } : {}),
-    ...(spec.metadata.isTechnicalPreview !== undefined
-      ? { is_technical_preview: spec.metadata.isTechnicalPreview }
-      : {}),
-  },
-  schema: spec.schema,
-  is_testable: spec.isTestable,
-  actions: spec.actions.map(({ name, description, isTool, scope }) => ({
-    name,
-    is_tool: isTool,
-    ...(description !== undefined ? { description } : {}),
-    ...(scope !== undefined ? { scope } : {}),
-  })),
-});
+  detail: ConnectorSpecDetail
+): GetConnectorSpecResponseV1 => {
+  const {
+    id,
+    display_name,
+    description,
+    icon,
+    docs_url,
+    minimum_license,
+    is_technical_preview,
+    supported_feature_ids,
+    actions: _summaryActions,
+    ...topLevel
+  } = transformConnectorSpecSummaryResponse(detail);
+
+  return {
+    metadata: {
+      id,
+      display_name,
+      description,
+      minimum_license,
+      supported_feature_ids,
+      ...(icon !== undefined ? { icon } : {}),
+      ...(docs_url !== undefined ? { docs_url } : {}),
+      is_technical_preview,
+    },
+    schema: detail.formSchema,
+    ...topLevel,
+    actions: detail.actions.map((action) => ({
+      ...transformConnectorSpecActionSummaryResponse(action),
+      input_schema: action.inputSchema,
+    })),
+  };
+};

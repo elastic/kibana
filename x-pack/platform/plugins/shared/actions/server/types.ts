@@ -46,6 +46,7 @@ export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>
 
 import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
+import type { ISpecsClient } from './specs_client';
 import type { ConnectorUsageCollector } from './usage';
 
 export interface Services {
@@ -66,6 +67,7 @@ export interface HookServices {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
+  getSpecsClient: () => ISpecsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
   getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
