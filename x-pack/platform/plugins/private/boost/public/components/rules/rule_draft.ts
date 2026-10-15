@@ -34,6 +34,8 @@ export interface RuleDraftErrors {
   name?: ProfileNameError;
   profile?: 'required';
   pattern?: IndexPatternError;
+  /** Set by the form when a valid pattern matches nothing, which needs the data sources to check. */
+  patternMatches?: 'none';
   picked?: 'required';
   priority?: RulePriorityError;
 }

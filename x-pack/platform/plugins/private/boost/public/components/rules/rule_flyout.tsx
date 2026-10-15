@@ -63,7 +63,7 @@ import {
   useUpdateRule,
 } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
-import type { RuleDraft } from './rule_draft';
+import type { RuleDraft, RuleDraftErrors } from './rule_draft';
 import {
   createEmptyRuleDraft,
   getDraftPatterns,
@@ -74,6 +74,7 @@ import {
 } from './rule_draft';
 import {
   INDEX_PATTERN_ERROR_MESSAGES,
+  PATTERN_NO_MATCHES_MESSAGES,
   PICKED_REQUIRED_MESSAGES,
   PROFILE_REQUIRED_MESSAGE,
   RULE_NAME_ERROR_MESSAGES,
@@ -229,13 +230,46 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
   const draftErrors = getRuleDraftErrors(draft, isEditing ? [] : rules.map(({ name }) => name));
-  const errors = isDefaultRule ? { profile: draftErrors.profile } : draftErrors;
-  const visibleErrors = showErrors ? errors : {};
   const updateDraft = (changes: Partial<RuleDraft>) => setDraft({ ...draft, ...changes });
 
   const typedDataSources = dataSources
     .filter((dataSource) => PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type] === type)
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // What the pattern reaches, and whether a higher-ranked rule still wins each target.
+  const draftRule: BoostRule = {
+    name: draft.name,
+    index_patterns: getDraftPatterns(draft),
+    boost_profile: draft.profileName,
+    priority: Number(draft.priority) || 0,
+    is_builtin: false,
+  };
+  const pattern = draft.pattern.trim();
+  const patternPreview: TargetPreview[] =
+    draft.mode === 'pattern' && !draftErrors.pattern
+      ? typedDataSources
+          .filter(({ name }) => matchesIndexPattern(pattern, name))
+          .map((dataSource) => {
+            const winner = resolveRule(dataSource, [...otherRules, draftRule], profilesByName);
+            return {
+              name: dataSource.name,
+              overriddenBy: winner && winner !== draftRule ? winner.name : undefined,
+            };
+          })
+      : [];
+
+  // A valid pattern has to match something, unless it's the rule's saved pattern, so a rule whose
+  // targets have since gone can still be edited.
+  const isSavedPattern = rule?.index_patterns.length === 1 && rule.index_patterns[0] === pattern;
+  const hasNoMatches =
+    draft.mode === 'pattern' &&
+    !draftErrors.pattern &&
+    patternPreview.length === 0 &&
+    !isSavedPattern;
+  const errors: RuleDraftErrors = isDefaultRule
+    ? { profile: draftErrors.profile }
+    : { ...draftErrors, patternMatches: hasNoMatches ? 'none' : undefined };
+  const visibleErrors = showErrors ? errors : {};
 
   const onSave = () => {
     if (hasRuleDraftErrors(errors)) {
@@ -353,28 +387,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     closeProfileForm();
   };
 
-  // What the pattern reaches, and whether a higher-ranked rule still wins each target.
-  const draftRule: BoostRule = {
-    name: draft.name,
-    index_patterns: getDraftPatterns(draft),
-    boost_profile: draft.profileName,
-    priority: Number(draft.priority) || 0,
-    is_builtin: false,
-  };
-  const pattern = draft.pattern.trim();
-  const patternPreview: TargetPreview[] =
-    draft.mode === 'pattern' && !errors.pattern
-      ? typedDataSources
-          .filter(({ name }) => matchesIndexPattern(pattern, name))
-          .map((dataSource) => {
-            const winner = resolveRule(dataSource, [...otherRules, draftRule], profilesByName);
-            return {
-              name: dataSource.name,
-              overriddenBy: winner && winner !== draftRule ? winner.name : undefined,
-            };
-          })
-      : [];
-
   // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
   // when editing, or the original when duplicating.
   const hasValidTargets =
@@ -466,7 +478,11 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   );
 
   const nameError = visibleErrors.name && RULE_NAME_ERROR_MESSAGES[visibleErrors.name];
-  const patternError = visibleErrors.pattern && INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern];
+  const patternError = visibleErrors.pattern
+    ? INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern]
+    : visibleErrors.patternMatches && type
+    ? PATTERN_NO_MATCHES_MESSAGES[type]
+    : undefined;
   const pickedError = visibleErrors.picked && type ? PICKED_REQUIRED_MESSAGES[type] : undefined;
   const priorityError =
     visibleErrors.priority && RULE_PRIORITY_ERROR_MESSAGES[visibleErrors.priority];

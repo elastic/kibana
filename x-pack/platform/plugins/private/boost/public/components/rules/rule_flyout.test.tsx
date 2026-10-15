@@ -415,6 +415,32 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
+  it('requires the pattern to match something before saving', async () => {
+    mutation.mutate.mockClear();
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRuleName'), 'new-rule');
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+    await userEvent.click(screen.getByTestId('boostRuleSave'));
+
+    expect(mutation.mutate).not.toHaveBeenCalled();
+    const message = 'Enter a pattern that matches at least one index.';
+    expect(screen.getByText(message)).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
+
+    expect(screen.queryByText(message)).not.toBeInTheDocument();
+  });
+
+  it('still saves a rule whose saved pattern no longer matches anything', async () => {
+    mutation.mutate.mockClear();
+    renderFlyout({ ...rule, index_patterns: ['retired-*'] });
+
+    await userEvent.click(screen.getByTestId('boostRuleSave'));
+
+    expect(mutation.mutate).toHaveBeenCalled();
+  });
+
   it('asks for a pattern until one is entered', () => {
     renderNewRule();
 
@@ -465,7 +491,7 @@ describe('RuleFlyout pattern matches', () => {
     );
   });
 
-  it('disables both tabs until a profile is selected', async () => {
+  it('disables both tabs until a profile is selected', () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -478,14 +504,7 @@ describe('RuleFlyout pattern matches', () => {
     const matchingTab = screen.getByTestId('boostRuleMatchingTab');
     expect(matchingTab).toBeDisabled();
     expect(matchingTab).toHaveAttribute('aria-selected', 'true');
-    const allTab = screen.getByTestId('boostRuleAllTab');
-    expect(allTab).toBeDisabled();
-    // EUI turns off pointer events on disabled tabs, so hovers land on the tooltip's anchor.
-    await userEvent.hover(allTab.parentElement as HTMLElement);
-
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Select a boost profile to see all indices.'
-    );
+    expect(screen.getByTestId('boostRuleAllTab')).toBeDisabled();
   });
 
   it('explains why the pattern is disabled before a profile is selected', async () => {
