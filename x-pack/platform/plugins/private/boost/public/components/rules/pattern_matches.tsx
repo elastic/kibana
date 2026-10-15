@@ -11,11 +11,11 @@ import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   useEuiOverflowScroll,
   useEuiTheme,
@@ -56,6 +56,15 @@ const TAB_LABELS: Readonly<Record<MatchesTab, Readonly<Record<BoostProfileType, 
   },
 };
 
+const SELECT_PROFILE_LABELS: Readonly<Record<MatchesTab, string>> = {
+  matching: i18n.translate('xpack.boost.patternMatches.selectProfileForMatching', {
+    defaultMessage: 'Select a boost profile to see matching indices.',
+  }),
+  all: i18n.translate('xpack.boost.patternMatches.selectProfileForAll', {
+    defaultMessage: 'Select a boost profile to see all indices.',
+  }),
+};
+
 const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.patternMatches.noIndices', {
     defaultMessage: 'No indices detected',
@@ -76,8 +85,13 @@ interface PatternMatchesProps {
   exactMatches: readonly TargetPreview[];
   /** Every data source of the rule's type, in the order they're listed. */
   names: readonly string[];
-  /** The height below the tabs, which stays the same whatever they show. */
-  height: number;
+  /** The panel's tallest height, past which its list scrolls. */
+  maxHeight: number;
+}
+
+interface ListTitle {
+  label: string;
+  iconType: string;
 }
 
 /**
@@ -91,13 +105,13 @@ export const PatternMatches = ({
   isPatternValid,
   exactMatches,
   names,
-  height,
+  maxHeight,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const idPrefix = useGeneratedHtmlId({ prefix: 'patternMatches' });
   const [tab, setTab] = useState<MatchesTab>('matching');
-  // Every data source depends on the type, so the full list waits for a profile.
+  // What the tabs list depends on the type, so they wait for a profile.
   const selectedTab = type ? tab : 'matching';
   const panelId = `${idPrefix}-panel`;
   const getTabId = (id: MatchesTab) => `${idPrefix}-${id}`;
@@ -120,27 +134,34 @@ export const PatternMatches = ({
   const renderEmpty = (message: string) => (
     <EuiText
       size="s"
-      color="subdued"
+      color={euiTheme.colors.textDisabled}
       textAlign="center"
-      css={{ margin: 'auto', padding: euiTheme.size.s, fontWeight: euiTheme.font.weight.bold }}
+      css={{ paddingBlock: euiTheme.size.l, paddingInline: euiTheme.size.s }}
       data-test-subj="boostRulePatternMatchesEmpty"
     >
       <p>{message}</p>
     </EuiText>
   );
 
-  // Titled lists keep their title outside the scrolling area, so it stays in view.
-  const renderList = (label: string, list: ReactNode, title?: string) => (
+  // Titled lists keep their title outside the scrolling area, so it stays in view. The scrolling
+  // area is labeled by the title, so the title itself isn't a heading.
+  const renderList = (label: string, list: ReactNode, title?: ListTitle) => (
     <>
       {title && (
-        <EuiTitle size="xxxs">
-          <h3
-            css={{ padding: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}
-            data-test-subj="boostRulePatternMatchesTitle"
-          >
-            {title}
-          </h3>
-        </EuiTitle>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: euiTheme.size.xs,
+            padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+          }}
+          data-test-subj="boostRulePatternMatchesTitle"
+        >
+          <EuiIcon type={title.iconType} size="s" aria-hidden={true} />
+          {title.label}
+        </EuiText>
       )}
       <div
         tabIndex={0}
@@ -148,7 +169,7 @@ export const PatternMatches = ({
         aria-label={label}
         css={css`
           ${scrollStyles}
-          flex: 1;
+          flex: 1 1 auto;
           min-block-size: 0;
           padding: ${euiTheme.size.s};
           padding-block-start: ${title ? euiTheme.size.xs : euiTheme.size.s};
@@ -168,11 +189,14 @@ export const PatternMatches = ({
       );
     }
     if (hasExactMatches) {
-      const title = i18n.translate('xpack.boost.patternMatches.exactMatchesTitle', {
-        defaultMessage: 'Exact matches',
-      });
+      const title = {
+        label: i18n.translate('xpack.boost.patternMatches.exactMatchesTitle', {
+          defaultMessage: 'Exact matches',
+        }),
+        iconType: 'checkCircle',
+      };
       return renderList(
-        title,
+        title.label,
         exactMatches.map(({ name, overriddenBy }) => (
           <EuiFlexGroup
             key={name}
@@ -200,12 +224,15 @@ export const PatternMatches = ({
       );
     }
     if (partialMatches.length > 0) {
-      const title = i18n.translate('xpack.boost.patternMatches.partialMatchesTitle', {
-        defaultMessage: 'Partial matches',
-      });
+      const title = {
+        label: i18n.translate('xpack.boost.patternMatches.partialMatchesTitle', {
+          defaultMessage: 'Partial matches',
+        }),
+        iconType: 'partial',
+      };
       // Subdued, and without what ranks higher, since the rule doesn't apply to these yet.
       return renderList(
-        title,
+        title.label,
         <EuiText size="s" color="subdued">
           {partialMatches.map((name) => (
             <div key={name} css={rowStyles} data-test-subj="boostRulePartialMatch">
@@ -246,11 +273,12 @@ export const PatternMatches = ({
       hasBorder
       hasShadow={false}
       paddingSize="none"
+      css={{ display: 'flex', flexDirection: 'column', maxBlockSize: maxHeight }}
       data-test-subj="boostRulePatternMatches"
     >
-      <EuiTabs size="s" css={{ paddingInline: euiTheme.size.s }}>
+      <EuiTabs size="s" bottomBorder={false} css={{ paddingInline: euiTheme.size.s }}>
         {TABS.map((id) => {
-          const isDisabled = id === 'all' && !type;
+          const isDisabled = !type;
           const tabButton = (
             <EuiTab
               key={id}
@@ -265,12 +293,7 @@ export const PatternMatches = ({
             </EuiTab>
           );
           return isDisabled ? (
-            <EuiToolTip
-              key={id}
-              content={i18n.translate('xpack.boost.patternMatches.selectProfileForAll', {
-                defaultMessage: 'Select a boost profile to see all indices.',
-              })}
-            >
+            <EuiToolTip key={id} content={SELECT_PROFILE_LABELS[id]}>
               {tabButton}
             </EuiToolTip>
           ) : (
@@ -282,7 +305,7 @@ export const PatternMatches = ({
         role="tabpanel"
         id={panelId}
         aria-labelledby={getTabId(selectedTab)}
-        css={{ display: 'flex', flexDirection: 'column', blockSize: height }}
+        css={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', minBlockSize: 0 }}
       >
         {selectedTab === 'matching' ? renderMatching() : renderAll()}
       </div>

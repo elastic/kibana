@@ -101,9 +101,11 @@ const PICK_LABELS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-// The height of the pattern's matches and the list to select from, so both modes take the same
-// space.
-const PREVIEW_HEIGHT = 240;
+// The tallest the pattern's matches and the list to select from grow, so both modes match.
+const PREVIEW_MAX_HEIGHT = 320;
+
+// The height of each data source in the list to select from, which is EUI's default.
+const PICK_ROW_HEIGHT = 32;
 
 const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.ruleForm.managedBadge', {
   defaultMessage: 'Managed',
@@ -186,6 +188,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   // Whether the pattern or profile field has focus. While one does, an estimate it made
   // unavailable stays, faded.
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
+  // Text typed to search the list to select from, which sizes the list to what it shows.
+  const [pickSearch, setPickSearch] = useState('');
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
   const createProfileLinkRef = useCallback((element: HTMLElement | null) => {
@@ -422,6 +426,16 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         ),
       };
     }
+  );
+
+  // The list grows with what the search shows, up to the same height as the pattern's matches.
+  // EUI only sizes a list to its options up to seven of them, so the height is set here.
+  const searchedName = pickSearch.trim().toLowerCase();
+  const pickListHeight = Math.min(
+    pickOptions.filter(({ label }) => label.toLowerCase().includes(searchedName)).length *
+      PICK_ROW_HEIGHT,
+    // Less the list's 1px top and bottom borders.
+    PREVIEW_MAX_HEIGHT - 2
   );
 
   const modeToggle = (
@@ -722,7 +736,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                   isPatternValid={!errors.pattern}
                   exactMatches={patternPreview}
                   names={typedDataSources.map(({ name }) => name)}
-                  height={PREVIEW_HEIGHT}
+                  maxHeight={PREVIEW_MAX_HEIGHT}
                 />
               </>
             ) : (
@@ -749,6 +763,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                     placeholder: i18n.translate('xpack.boost.ruleForm.pickSearchPlaceholder', {
                       defaultMessage: 'Search',
                     }),
+                    onChange: setPickSearch,
                   }}
                   options={pickOptions}
                   // A selected name that a higher-ranked rule keeps is struck through, as in the
@@ -771,8 +786,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                         .map(({ label }) => label),
                     })
                   }
-                  listProps={{ bordered: true }}
-                  height={PREVIEW_HEIGHT}
+                  listProps={{ bordered: true, rowHeight: PICK_ROW_HEIGHT }}
+                  height={pickListHeight}
                   isLoading={isSaving}
                   data-test-subj="boostRulePicker"
                 >

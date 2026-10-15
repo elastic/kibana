@@ -465,7 +465,7 @@ describe('RuleFlyout pattern matches', () => {
     );
   });
 
-  it('keeps every index from the list until a profile is selected', async () => {
+  it('disables both tabs until a profile is selected', async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -475,6 +475,9 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Enter an index pattern to see matches'
     );
+    const matchingTab = screen.getByTestId('boostRuleMatchingTab');
+    expect(matchingTab).toBeDisabled();
+    expect(matchingTab).toHaveAttribute('aria-selected', 'true');
     const allTab = screen.getByTestId('boostRuleAllTab');
     expect(allTab).toBeDisabled();
     // EUI turns off pointer events on disabled tabs, so hovers land on the tooltip's anchor.
