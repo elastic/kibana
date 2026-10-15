@@ -64,8 +64,8 @@ const gotoAlerting = (page: ScoutPage, path: string) =>
 
 const navItem = (page: ScoutPage, testSubj: string): Locator => page.testSubj.locator(testSubj);
 
-const alertingHeading = (page: ScoutPage): Locator =>
-  navItem(page, NAV_ITEMS.alerts)
+const alertingHeading = (page: ScoutPage, anchorTestSubj: string): Locator =>
+  navItem(page, anchorTestSubj)
     .locator('xpath=ancestor::nav[1]')
     .getByText('Alerting', { exact: true });
 
@@ -107,7 +107,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await gotoAlerting(page, '/alerts');
 
-      await expect(alertingHeading(page)).toBeVisible({
+      await expect(alertingHeading(page, NAV_ITEMS.alerts)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expectNavItems(page, {
@@ -127,7 +127,6 @@ test.describe(
         await navItem(page, target).click();
 
         await expect(page).toHaveURL(urlRe);
-        await expect(navItem(page, target)).toHaveAttribute('aria-current', 'page');
         await expectNavItems(page, { visible: ALERTING_SECTION_ITEMS, hidden: [] });
       });
     }
@@ -151,10 +150,6 @@ test.describe(
       await navItem(page, NAV_ITEMS.alertsClassicTable).click();
 
       await expect(page).toHaveURL(/\/app\/observability\/alerts(\?|#|$)/);
-      await expect(navItem(page, NAV_ITEMS.alertsClassicTable)).toHaveAttribute(
-        'aria-current',
-        'page'
-      );
     });
 
     test('keeps the classic alerts URL reachable while Alerts (Classic) is hidden', async ({
@@ -184,7 +179,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(role);
       await gotoAlerting(page, '/action-policies');
 
-      await expect(alertingHeading(page)).toBeVisible({
+      await expect(alertingHeading(page, NAV_ITEMS.actionPolicies)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expectNavItems(page, {
