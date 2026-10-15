@@ -238,7 +238,6 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
         onClose={this.props.onClose}
         css={styles}
         aria-labelledby={modalTitleId}
-        initialFocus='[data-test-subj="savedObjectTitle"]'
       >
         {content}
       </EuiModal>
