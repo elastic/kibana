@@ -125,5 +125,16 @@ describe('renderSteps', () => {
         'step "No key" is missing a "key" (required for cancelOnGateFailure)'
       );
     });
+
+    it('registers keys of steps whose command is an array', () => {
+      renderSteps([step('a', { command: ['one.sh', 'two.sh'] })], { cancelOnGateFailure: true });
+      expect(registeredKeys()).toEqual(['a']);
+    });
+
+    it('throws for an array-command step without a key', () => {
+      expect(() =>
+        getStepKeys([genericStep({ command: ['a.sh', 'b.sh'], label: 'No key' })])
+      ).toThrow('step "No key" is missing a "key" (required for cancelOnGateFailure)');
+    });
   });
 });

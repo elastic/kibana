@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'yaml';
-import { registerCancelKeys } from '../buildkite/utils.ts';
+import { isCommandStep, registerCancelKeys } from '../buildkite/utils.ts';
 import type { Step } from './types.ts';
 
 export interface RenderOptions {
@@ -34,7 +34,7 @@ export const getStepKeys = (steps: readonly Step[]): string[] =>
       return getStepKeys(step.steps);
     }
 
-    if (typeof step.command !== 'string') {
+    if (!isCommandStep(step)) {
       return [];
     }
 
