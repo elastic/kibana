@@ -496,7 +496,7 @@ describe('MetricVisComponent', function () {
     'should display N/A without calculating palette bounds for empty data with max %s',
     async (max) => {
       mockGetColorForValue.mockClear();
-      await renderMetricChart({
+      await renderChart({
         data: { ...table, rows: [] },
         config: {
           dimensions: { metric: basePriceColumnId, max },
