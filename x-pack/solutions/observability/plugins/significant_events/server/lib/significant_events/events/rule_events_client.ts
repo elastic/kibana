@@ -21,6 +21,7 @@ import {
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
+  type SignalVerdict,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
@@ -224,6 +225,15 @@ export type UpdateEventStatusResult =
       reason: LifecycleSkipReason | 'not_found' | 'superseded';
     };
 
+/** A rule's membership in one live series, with that member's latest stored signal. */
+export interface LiveRuleMembership {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  verdict: SignalVerdict;
+  /** The stored verification query, absent when the signal ran no query. */
+  esqlQuery: string | undefined;
+}
+
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
  * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
@@ -413,6 +423,42 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
     return { hits: hits.map(decodeSignificantEvent) };
+  }
+
+  /**
+   * Maps each requested rule to the live series (`active` or `recovering`) it belongs to, with the
+   * member's latest stored signal. Every series version carries the latest signal per rule, so the
+   * latest version per series is enough. A rule that is in no live series is absent from the map.
+   *
+   * Built on `findLatestActive`, so it shares its cap: a space with more live series than
+   * MAX_DEDUP_SCAN_LIMIT can omit members, which callers must read as "not a live member".
+   */
+  async findLiveMembers({
+    ruleUuids,
+  }: {
+    ruleUuids: string[];
+  }): Promise<Map<string, LiveRuleMembership[]>> {
+    const memberships = new Map<string, LiveRuleMembership[]>();
+    if (ruleUuids.length === 0) return memberships;
+
+    const requested = new Set(ruleUuids);
+    const { hits } = await this.findLatestActive({ ruleUuids });
+    for (const event of hits) {
+      for (const signal of event.signals ?? []) {
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (!ruleUuid || !requested.has(ruleUuid)) continue;
+        memberships.set(ruleUuid, [
+          ...(memberships.get(ruleUuid) ?? []),
+          {
+            eventId: event.event_id,
+            status: event.status,
+            verdict: signal.verdict,
+            esqlQuery: signal.evidence?.esql_query,
+          },
+        ]);
+      }
+    }
+    return memberships;
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
