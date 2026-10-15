@@ -237,6 +237,8 @@ Once you have a scoped ActionsClient you can generate an action by calling eithe
 
 `getSpecsClientWithRequest(request)` returns a request-scoped SpecsClient that enforces `get` authorization and audits failures. `getUnsecuredSpecsClient()` returns a server-internal client with no request, authorization, or audit logging. Use `getAll({ featureId })` for lightweight summaries of spec-backed types, and `get({ id })` for the form schema, skill, and action input schemas. Unknown ids and classic (non-spec) types throw a 404.
 
+The same contract is exposed over HTTP as `GET /internal/actions/connector_types/{id}/spec` and `GET /internal/actions/connector_types/specs?feature_id=`. Browser code can call `createSpecsClient({ http })` from `@kbn/alerts-ui-shared`.
+
 ### actionsClient.enqueueExecution(options)
 
 This api schedules a task which will run the action using the current user scope at the soonest opportunity.

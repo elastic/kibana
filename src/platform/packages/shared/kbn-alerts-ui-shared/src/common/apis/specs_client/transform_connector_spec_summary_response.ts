@@ -7,34 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorSpecSummary, GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
+import type {
+  ConnectorSpecSummary,
+  ConnectorSpecSummaryResponse,
+} from '@kbn/actions-plugin/common';
 import { resolveActionScope } from '@kbn/connector-specs';
 
-type ConnectorSpecSummaryWire = {
-  id: string;
-  display_name: string;
-  description: string;
-  icon?: string;
-  docs_url?: string;
-  minimum_license: string;
-  is_technical_preview?: boolean;
-  supported_feature_ids: string[];
-  availability?: GetConnectorSpecResponse['availability'];
-  auth_type_ids?: string[];
-  is_testable?: boolean;
-  has_inbound_events?: boolean;
-  is_inbound_only?: boolean;
-  is_ears_experimental?: boolean;
-  actions?: Array<{
-    name: string;
-    description?: string;
-    is_tool: boolean;
-    scope?: 'read' | 'write' | 'destroy';
-  }>;
-};
-
 export const transformConnectorSpecSummaryResponse = (
-  wire: ConnectorSpecSummaryWire
+  wire: ConnectorSpecSummaryResponse
 ): ConnectorSpecSummary => ({
   id: wire.id,
   displayName: wire.display_name,

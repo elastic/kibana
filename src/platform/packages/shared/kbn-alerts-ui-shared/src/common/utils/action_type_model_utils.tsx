@@ -18,9 +18,9 @@ import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/co
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
 import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type { ConnectorSpecDetail } from '@kbn/actions-plugin/common';
 import type { ConnectorMetadata } from '@kbn/connector-specs';
+import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type { ConnectorActionDef, ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import { createSpecsClient } from '../apis/specs_client';
 import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';

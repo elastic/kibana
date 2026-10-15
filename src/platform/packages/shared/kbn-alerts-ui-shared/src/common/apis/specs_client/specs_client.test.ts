@@ -112,4 +112,93 @@ describe('createSpecsClient', () => {
       expect(result).not.toHaveProperty('docsUrl');
     });
   });
+
+  describe('getAll', () => {
+    const summaryWire = {
+      id: 'test-connector',
+      display_name: 'Test Connector',
+      description: 'A test connector',
+      minimum_license: 'gold',
+      is_technical_preview: false,
+      supported_feature_ids: ['alerting'],
+      availability: {
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        is_deprecated: false,
+      },
+      auth_type_ids: ['basic'],
+      is_testable: true,
+      has_inbound_events: false,
+      is_inbound_only: false,
+      is_ears_experimental: false,
+      actions: [{ name: 'ping', is_tool: true, scope: 'read' as const }],
+    };
+
+    it('calls the specs path with no query when featureId is absent', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.get.mockResolvedValueOnce([summaryWire]);
+      const signal = new AbortController().signal;
+
+      const result = await createSpecsClient({ http }).getAll({ signal });
+
+      expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/internal/actions/connector_types/specs",
+          Object {
+            "signal": AbortSignal {},
+          },
+        ]
+      `);
+      expect(result).toEqual([
+        {
+          id: 'test-connector',
+          displayName: 'Test Connector',
+          description: 'A test connector',
+          minimumLicense: 'gold',
+          isTechnicalPreview: false,
+          supportedFeatureIds: ['alerting'],
+          availability: {
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            isDeprecated: false,
+          },
+          authTypeIds: ['basic'],
+          isTestable: true,
+          hasInboundEvents: false,
+          isInboundOnly: false,
+          isEarsExperimental: false,
+          actions: [{ name: 'ping', isTool: true, scope: 'read' }],
+        },
+      ]);
+    });
+
+    it('sends query.feature_id when featureId is present', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.get.mockResolvedValueOnce([summaryWire]);
+
+      await createSpecsClient({ http }).getAll({ featureId: 'workflows' });
+
+      expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/internal/actions/connector_types/specs",
+          Object {
+            "query": Object {
+              "feature_id": "workflows",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('passes an empty array through', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.get.mockResolvedValueOnce([]);
+
+      const result = await createSpecsClient({ http }).getAll();
+
+      expect(result).toEqual([]);
+    });
+  });
 });

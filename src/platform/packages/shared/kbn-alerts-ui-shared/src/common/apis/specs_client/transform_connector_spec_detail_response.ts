@@ -20,7 +20,7 @@ export const transformConnectorSpecDetailResponse = (
     icon: wire.metadata.icon,
     docs_url: wire.metadata.docs_url,
     minimum_license: wire.metadata.minimum_license,
-    is_technical_preview: wire.metadata.is_technical_preview,
+    is_technical_preview: wire.metadata.is_technical_preview ?? false,
     supported_feature_ids: wire.metadata.supported_feature_ids,
     availability: wire.availability,
     auth_type_ids: wire.auth_type_ids,

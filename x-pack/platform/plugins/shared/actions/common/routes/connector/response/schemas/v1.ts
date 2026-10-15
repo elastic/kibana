@@ -329,13 +329,12 @@ export const connectorSpecActionSummaryResponseSchema = schema.object(
   }
 );
 
-export const connectorSpecActionDetailResponseSchema = connectorSpecActionSummaryResponseSchema.extends(
-  {
+export const connectorSpecActionDetailResponseSchema =
+  connectorSpecActionSummaryResponseSchema.extends({
     input_schema: schema.recordOf(schema.string(), schema.any(), {
       meta: { description: 'JSON Schema of this action input.' },
     }),
-  }
-);
+  });
 
 export const getConnectorSpecResponseBodySchema = schema.object({
   metadata: schema.object(
@@ -474,7 +473,9 @@ export const connectorSpecSummaryResponseSchema = schema.object(
       meta: { description: 'Authentication type identifiers this connector type supports.' },
     }),
     is_testable: schema.boolean({
-      meta: { description: 'When true, this connector type supports the reserved test sub-action.' },
+      meta: {
+        description: 'When true, this connector type supports the reserved test sub-action.',
+      },
     }),
     has_inbound_events: schema.boolean({
       meta: { description: 'Whether this connector type can receive inbound events.' },
