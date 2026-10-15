@@ -22,6 +22,44 @@ interface RequestOptions {
   agentIds?: string[];
 }
 
+/**
+ * Builds the Kuery string for searching agents.
+ * Searches across host.name (as displayed in Security alerts) and host.hostname
+ * (as displayed on Fleet agents), along with agent id, policy id, platform, and policy name.
+ * Generates case variations for keyword matching to ensure case-insensitive matching
+ * across unanalyzed keyword fields.
+ */
+export const buildAgentSearchKuery = (searchValue: string): string => {
+  if (!searchValue) {
+    return '';
+  }
+
+  const escapedSearch = escapeKuery(searchValue);
+  const searchTerms = Array.from(
+    new Set([searchValue, searchValue.toLowerCase(), searchValue.toUpperCase()])
+  );
+
+  const hostClauses = searchTerms.flatMap((term) => {
+    const escapedTerm = escapeKuery(term);
+    return [
+      `local_metadata.host.name.keyword:*${escapedTerm}*`,
+      `local_metadata.host.hostname.keyword:*${escapedTerm}*`,
+    ];
+  });
+
+  const queryParts = [
+    ...hostClauses,
+    `local_metadata.host.name:*${escapedSearch}*`,
+    `local_metadata.host.hostname:*${escapedSearch}*`,
+    `local_metadata.elastic.agent.id:*${escapedSearch}*`,
+    `policy_id: *${escapedSearch}*`,
+    `local_metadata.os.platform: *${escapedSearch}*`,
+    `policy_name:${escapedSearch}`,
+  ];
+
+  return queryParts.join(' or ');
+};
+
 // TODO: break out the paginated vs all cases into separate hooks
 export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage: 9000 }) => {
   const { perPage, agentIds } = opts;
@@ -41,10 +79,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       // Policy-id scoping is enforced server-side; sending the ids here overflowed the 16 KB
       // request header at ~175 policies (#266739). Escaping is not cosmetic: an unescaped
       // `)` + `or` can lift clauses out of the server's policy scope.
-      const escapedSearch = escapeKuery(searchValue);
-      const kuery = searchValue
-        ? `local_metadata.host.hostname.keyword:*${escapedSearch}* or local_metadata.elastic.agent.id:*${escapedSearch}* or policy_id: *${escapedSearch}* or local_metadata.os.platform: *${escapedSearch}* or policy_name:${escapedSearch}`
-        : '';
+      const kuery = buildAgentSearchKuery(searchValue);
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         version: API_VERSIONS.internal.v1,

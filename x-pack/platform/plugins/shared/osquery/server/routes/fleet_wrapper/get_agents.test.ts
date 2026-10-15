@@ -212,6 +212,26 @@ describe('getAgentsRoute', () => {
     expect(JSON.stringify(esQuery.bool.filter)).toContain('policy-1');
   });
 
+  it('applies policy scope correctly when searching across host.name and host.hostname with case variations', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(
+        'local_metadata.host.name.keyword:*uppername* or local_metadata.host.hostname.keyword:*uppername* or local_metadata.host.name.keyword:*UPPERNAME* or local_metadata.host.hostname.keyword:*UPPERNAME* or local_metadata.host.name:*uppername* or local_metadata.host.hostname:*uppername*'
+      ) as never,
+      mockResponse
+    );
+
+    expect(typeof receivedKueryString()).toBe('string');
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    expect(node.arguments).toHaveLength(2);
+
+    const esQuery = toElasticsearchQuery(node) as { bool: { filter: unknown[] } };
+    expect(esQuery.bool.filter).toBeDefined();
+    expect(JSON.stringify(esQuery.bool.filter)).toContain('policy-1');
+  });
+
   it('rejects an unescaped scope-breaking search term rather than widening the scope', async () => {
     // Defense in depth: pre-fix this was concatenated verbatim and produced a top-level `or`.
     const mockResponse = httpServerMock.createResponseFactory();

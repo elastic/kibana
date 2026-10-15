@@ -47,10 +47,14 @@ export const generateAgentOption = (
       color = AGENT_STATUS_COLORS.UNAVAILABLE;
     }
 
+    const hostName =
+      agent.local_metadata?.host?.hostname ?? agent.local_metadata?.host?.name ?? '';
+    const agentId = agent.local_metadata?.elastic?.agent?.id ?? agent.id;
+
     return {
       disabled: isDisabled,
-      label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
-      key: agent.local_metadata.elastic.agent.id,
+      label: `${hostName} (${agentId})`,
+      key: agentId,
       color,
       value: {
         groupType,
@@ -58,9 +62,9 @@ export const generateAgentOption = (
           // Normalized so it matches the policy group's key; otherwise a
           // policy and one of its version-suffixed agents double-count.
           policy: stripPolicyIdVersionSuffix(agent.policy_id ?? ''),
-          platform: agent.local_metadata.os.platform,
+          platform: agent.local_metadata?.os?.platform,
         },
-        id: agent.local_metadata.elastic.agent.id,
+        id: agentId,
         status: (agent.status ?? 'unknown') as AgentStatus | 'unknown',
       },
     };

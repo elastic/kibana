@@ -9,7 +9,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
-import { useAllAgents } from './use_all_agents';
+import { useAllAgents, buildAgentSearchKuery } from './use_all_agents';
 import { useOsqueryPolicies } from './use_osquery_policies';
 import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 
@@ -68,6 +68,45 @@ describe('useAllAgents', () => {
     const [, { query }] = httpGet.mock.calls[0];
     expect(query.kuery).not.toMatch(/[^\\]\)/);
     expect(query.kuery).toContain('a\\) \\or \\(b');
+  });
+
+  describe('buildAgentSearchKuery', () => {
+    it('returns empty string when search value is empty', () => {
+      expect(buildAgentSearchKuery('')).toBe('');
+    });
+
+    it('searches across both host.name and host.hostname fields', () => {
+      const kuery = buildAgentSearchKuery('my-host');
+      expect(kuery).toContain('local_metadata.host.name.keyword:*my-host*');
+      expect(kuery).toContain('local_metadata.host.hostname.keyword:*my-host*');
+      expect(kuery).toContain('local_metadata.host.name:*my-host*');
+      expect(kuery).toContain('local_metadata.host.hostname:*my-host*');
+      expect(kuery).toContain('local_metadata.elastic.agent.id:*my-host*');
+      expect(kuery).toContain('policy_id: *my-host*');
+      expect(kuery).toContain('local_metadata.os.platform: *my-host*');
+      expect(kuery).toContain('policy_name:my-host');
+    });
+
+    it('generates case variations for keyword matching to handle alerts displaying host.name with different casing than host.hostname', () => {
+      const kueryLower = buildAgentSearchKuery('uppername');
+      expect(kueryLower).toContain('local_metadata.host.name.keyword:*uppername*');
+      expect(kueryLower).toContain('local_metadata.host.hostname.keyword:*uppername*');
+      expect(kueryLower).toContain('local_metadata.host.name.keyword:*UPPERNAME*');
+      expect(kueryLower).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
+
+      const kueryUpper = buildAgentSearchKuery('UPPERNAME');
+      expect(kueryUpper).toContain('local_metadata.host.name.keyword:*UPPERNAME*');
+      expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
+      expect(kueryUpper).toContain('local_metadata.host.name.keyword:*uppername*');
+      expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*uppername*');
+    });
+
+    it('escapes special characters across all generated search clauses', () => {
+      const kuery = buildAgentSearchKuery('a) or (b');
+      expect(kuery).not.toMatch(/[^\\]\)/);
+      expect(kuery).toContain('local_metadata.host.name.keyword:*a\\) \\or \\(b*');
+      expect(kuery).toContain('local_metadata.host.hostname.keyword:*a\\) \\or \\(b*');
+    });
   });
 
   // Asserted on the builder rather than the hook so the test has a real subject — this
