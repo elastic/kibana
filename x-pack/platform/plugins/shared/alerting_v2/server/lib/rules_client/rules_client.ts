@@ -1824,8 +1824,8 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const wasEnabled = existingAttrs.enabled;
-    const nextEnabled = parsed.enabled ?? wasEnabled;
+    const prevEnabled = existingAttrs.enabled;
+    const nextEnabled = parsed.enabled ?? prevEnabled;
 
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: nextEnabled,
@@ -1843,7 +1843,7 @@ export class RulesClient {
         // A disabled rule has no running task, so its stored schedule is not
         // consuming capacity — only count it as "previous" when it was
         // actually enabled, same as `enableRule`.
-        prevEvery: wasEnabled ? existingAttrs.schedule.every : undefined,
+        prevEvery: prevEnabled ? existingAttrs.schedule.every : undefined,
         checkLimit: nextEnabled,
       },
     ]);
@@ -1886,7 +1886,7 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
-    if (nextEnabled !== wasEnabled) {
+    if (nextEnabled !== prevEnabled) {
       const eventRule = { ruleId: rule.id, spaceId: this.spaceId, rule };
       if (nextEnabled) {
         this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [eventRule]);

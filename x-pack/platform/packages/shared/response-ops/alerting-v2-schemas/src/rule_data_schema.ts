@@ -875,13 +875,12 @@ export const putRuleDataSchema = applyCreateRuleRefinements(
       .boolean()
       .optional()
       .describe(
-        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.'
+        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
       ),
   })
 ).meta({ id: 'alerting_put_rule' });
 
 export type PutRuleData = z.infer<typeof putRuleDataSchema>;
-export type PutRuleDataInput = z.input<typeof putRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
