@@ -16,6 +16,8 @@ interface WorkflowStep {
   type?: string;
   condition?: string;
   'on-failure'?: { continue?: boolean };
+  'iteration-on-failure'?: { continue?: boolean };
+  foreach?: string;
   steps?: WorkflowStep[];
   with?: Record<string, unknown>;
 }
@@ -29,6 +31,7 @@ interface InputProperty {
 
 interface ParsedWorkflow {
   steps: WorkflowStep[];
+  outputs?: Array<{ name: string; type: string }>;
   triggers: Array<{
     inputs?: { properties?: Record<string, InputProperty>; additionalProperties?: boolean };
   }>;
@@ -182,6 +185,142 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it('keeps the columns from the detections query', () => {
       expect(renderMessage({ output: { rows: [] } })).toContain('Columns: ["rule_uuid"]');
+    });
+  });
+
+  describe('stamping skipped detections', () => {
+    const gate = () => requireStep('stamp_skipped_detections').condition;
+    const countContext = (classify: unknown) => ({
+      steps: {
+        classify_detections: classify,
+        count_skipped_rules: {
+          output: {
+            skippedRuleCount: evaluate(
+              requireStep('count_skipped_rules').with?.skippedRuleCount,
+              withClassify(classify)
+            ),
+          },
+        },
+      },
+    });
+
+    it('runs right after classification and before the run can exit for lack of work', () => {
+      const order = [
+        'classify_detections',
+        'count_skipped_rules',
+        'stamp_skipped_detections',
+        'compute_batch_size',
+        'maybe_exit_no_work',
+        'run_discovery_agent',
+      ].map(topLevelIndex);
+
+      expect(order.every((index) => index >= 0)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+    });
+
+    it('stamps only when the classifier skipped at least one rule', () => {
+      expect(evaluate(gate(), countContext({ output: { skipped_rule_uuids: ['rule-A'] } }))).toBe(
+        true
+      );
+      expect(evaluate(gate(), countContext({ output: { skipped_rule_uuids: [] } }))).toBe(false);
+    });
+
+    it('never stamps when the classifier failed or produced no output', () => {
+      expect(evaluate(gate(), countContext({ error: { message: 'boom' } }))).toBe(false);
+      expect(evaluate(gate(), countContext(undefined))).toBe(false);
+    });
+
+    it('takes the skipped rules from the classifier, not from the agent summary', () => {
+      const backlog = JSON.stringify(requireStep('get_skipped_rules_backlog'));
+
+      expect(backlog).toContain('steps.classify_detections.output.skipped_rule_uuids');
+      expect(backlog).not.toContain('written_rule_uuids');
+    });
+
+    it('writes processed markers through the same internal route as the agent path', () => {
+      const skipped = requireStep('write_skipped_marker').with;
+      const written = requireStep('write_processed_marker').with;
+
+      expect(skipped).toEqual(written);
+    });
+
+    it('lets a stamping failure pass without failing the run', () => {
+      expect(requireStep('get_skipped_rules_backlog')['on-failure']).toEqual({ continue: true });
+      expect(requireStep('foreach_stamp_skipped')['iteration-on-failure']).toEqual({
+        continue: true,
+      });
+      expect(requireStep('write_skipped_marker')['on-failure']).toEqual({ continue: true });
+    });
+
+    it('leaves the agent stamping path untouched', () => {
+      expect(requireStep('maybe_stamp_processed').condition).toBe(
+        '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
+      );
+      expect(requireStep('compute_written_rule_uuids').with?.written_rule_uuids).toBe(
+        '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] | uniq }}'
+      );
+    });
+  });
+
+  describe('outputs', () => {
+    const classifierOutputs = [
+      ['skippedCount', 'number'],
+      ['needsAgentCount', 'number'],
+      ['classifierShadowMode', 'boolean'],
+      ['classifierReasonCounts', 'string'],
+      ['classifierProbeStatusCounts', 'string'],
+    ] as const;
+
+    it.each(classifierOutputs)('declares the %s output as %s', (name, type) => {
+      expect(discovery.outputs).toContainEqual({ name, type });
+    });
+
+    it.each(['output_budget_denied', 'output_no_detections', 'output_result'])(
+      'sets every classifier output in %s',
+      (stepName) => {
+        const outputs = requireStep(stepName).with ?? {};
+
+        for (const [name] of classifierOutputs) {
+          expect(outputs).toHaveProperty(name);
+        }
+      }
+    );
+
+    it('reports zeros and empty counts when the classifier produced nothing', () => {
+      const outputs = requireStep('output_result').with ?? {};
+      const context = { ...withClassify(undefined), inputs: { classifierShadowMode: true } };
+
+      expect(evaluate(outputs.skippedCount, context)).toBe(0);
+      expect(evaluate(outputs.needsAgentCount, context)).toBe(0);
+      expect(evaluate(outputs.classifierShadowMode, context)).toBe(true);
+      expect(evaluate(outputs.classifierReasonCounts, context)).toBe('{}');
+      expect(evaluate(outputs.classifierProbeStatusCounts, context)).toBe('{}');
+    });
+
+    it('reports the classifier counts, and the configured mode even when it is false', () => {
+      const outputs = requireStep('output_no_detections').with ?? {};
+      const context = {
+        ...withClassify({
+          output: {
+            skipped_count: 2,
+            needs_agent_count: 1,
+            reason_counts: { still_breaching: 2, possible_recovery: 1 },
+            probe_status_counts: { ok: 3 },
+          },
+        }),
+        inputs: { classifierShadowMode: false },
+      };
+
+      expect(evaluate(outputs.skippedCount, context)).toBe(2);
+      expect(evaluate(outputs.needsAgentCount, context)).toBe(1);
+      expect(evaluate(outputs.classifierShadowMode, context)).toBe(false);
+      expect(JSON.parse(String(evaluate(outputs.classifierReasonCounts, context)))).toEqual({
+        still_breaching: 2,
+        possible_recovery: 1,
+      });
+      expect(JSON.parse(String(evaluate(outputs.classifierProbeStatusCounts, context)))).toEqual({
+        ok: 3,
+      });
     });
   });
 });
