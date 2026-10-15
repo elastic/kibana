@@ -13,13 +13,7 @@ export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EmbeddableRegistryDefinition } from './types';
 
-export type {
-  PanelTypeMigration,
-  PanelTypeMigrationErrorResult,
-  PanelTypeMigrationPanel,
-  PanelTypeMigrationResult,
-  PanelTypeMigrationSuccessResult,
-} from './panel_type_migrations/types';
+export type { PanelTypeMigration, PanelTypeMigrationResult } from './panel_type_migrations/types';
 
 export type {
   DrilldownState,

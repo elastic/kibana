@@ -7,25 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface PanelTypeMigrationPanel {
-  id: string;
-  config: Record<string, unknown>;
-}
-
-export interface PanelTypeMigrationSuccessResult {
-  panelId: string;
-  type: string;
-  config: Record<string, unknown>;
-}
-
-export interface PanelTypeMigrationErrorResult {
-  panelId: string;
-  error: Error;
-}
-
 export type PanelTypeMigrationResult =
-  | PanelTypeMigrationSuccessResult
-  | PanelTypeMigrationErrorResult;
+  | { panelId: string; type: string; config: Record<string, unknown> }
+  | { panelId: string; error: Error };
 
 export interface PanelTypeMigration {
   from: string;
@@ -33,5 +17,7 @@ export interface PanelTypeMigration {
    * Receives all panels of the `from` type in a single dashboard. Panels omitted from the results
    * are left unchanged.
    */
-  migrateOut: (panels: readonly PanelTypeMigrationPanel[]) => readonly PanelTypeMigrationResult[];
+  migrateOut: (
+    panels: ReadonlyArray<{ id: string; config: Record<string, unknown> }>
+  ) => readonly PanelTypeMigrationResult[];
 }
