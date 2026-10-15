@@ -41,7 +41,8 @@ export const createAlertingV2Availability = ({
         ? { status: 'available' }
         : {
             status: 'unavailable',
-            reason: 'Universal alerting skills are only available in Observability or Classic spaces',
+            reason:
+              'Universal alerting skills are only available in Observability or Classic spaces',
           };
     } catch {
       return { status: 'available' };
