@@ -38,16 +38,6 @@ describe('useAutoCollapseSideNav', () => {
     expect(sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
   });
 
-  it('collapses the side nav again when the page returns from the back/forward cache', () => {
-    const { sideNav } = setup(false);
-    window.dispatchEvent(new Event('pagehide'));
-
-    const pageShow = new Event('pageshow');
-    Object.defineProperty(pageShow, 'persisted', { value: true });
-    window.dispatchEvent(pageShow);
-    expect(sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
-  });
-
   it('leaves a side nav the user already collapsed unchanged', () => {
     const { sideNav, unmount } = setup(true);
     unmount();

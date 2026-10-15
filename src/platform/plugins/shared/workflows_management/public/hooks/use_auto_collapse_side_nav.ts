@@ -23,18 +23,13 @@ export const useAutoCollapseSideNav = (): void => {
     if (sideNav.getIsCollapsed()) {
       return;
     }
-    const collapse = () => sideNav.setIsCollapsed(true);
-    const restore = () => sideNav.setIsCollapsed(false);
-    // A restore from the back/forward cache keeps the mounted tree, so collapse again.
-    const onPageShow = ({ persisted }: PageTransitionEvent) => persisted && collapse();
-    collapse();
+    sideNav.setIsCollapsed(true);
     // Unmount does not run on reload or tab close. Chrome persists synchronously, so restoring
     // on `pagehide` keeps the user's preference saved.
+    const restore = () => sideNav.setIsCollapsed(false);
     window.addEventListener('pagehide', restore);
-    window.addEventListener('pageshow', onPageShow);
     return () => {
       window.removeEventListener('pagehide', restore);
-      window.removeEventListener('pageshow', onPageShow);
       restore();
     };
   }, [chrome]);
