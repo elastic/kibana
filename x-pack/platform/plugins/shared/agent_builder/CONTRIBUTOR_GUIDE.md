@@ -438,12 +438,12 @@ const myAttachmentType: AttachmentTypeDefinition = {
 };
 ```
 
-Do **not** include guidance on _when_ to render inline — that is the responsibility of the
+Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
 #### `toSurfaceComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there. A tag inside a list, table, quote or emphasis renders after that whole block, and a tag inside code stays text.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
@@ -644,7 +644,6 @@ getActionButtons: ({ attachment, openSidebarConversation }) => {
 ```
 
 The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
-
 - **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
 
 `setPreviewBadgeState` accepts:
@@ -736,7 +735,6 @@ renderCanvasContent: (props, { closeCanvas }) => (
 The `updateOrigin` callback allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
 
 This callback is available in two places:
-
 - **`getActionButtons` params** - for static action buttons defined at registration time
 - **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Dynamic canvas buttons with registerActionButtons](#dynamic-canvas-buttons-with-registeractionbuttons) above)
 
@@ -884,13 +882,12 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
 ****
-
 ## Registering renderers
 
 Renderers let the agent display rich, typed objects inline in a chat reply — dashboards, tables, or any
 plugin-owned visualization. This is not generative UI: the agent produces a typed data payload, and a
-predefined renderer registered by your plugin draws it. Attachments (above) are an _input-to-LLM_
-abstraction; renderers are an _output_ abstraction, and the two are independent.
+predefined renderer registered by your plugin draws it. Attachments (above) are an *input-to-LLM*
+abstraction; renderers are an *output* abstraction, and the two are independent.
 
 **How it works end-to-end:**
 
@@ -1557,11 +1554,11 @@ the task.
 
 - A skill that builds a dashboard (composed of multiple visualizations):
   > "Render the dashboard attachment inline once you have finished building it. Do NOT
-  > render each individual visualization inline — only the final dashboard."
+  >  render each individual visualization inline — only the final dashboard."
 
 This per-skill guidance is what controls inline rendering behaviour across different tasks:
-the attachment type definition (via `getAgentDescription`) tells the agent _what_ rendering
-does; the skill tells it _when_ to do it.
+the attachment type definition (via `getAgentDescription`) tells the agent *what* rendering
+does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
@@ -1625,7 +1622,7 @@ attach them to a conversation.
 #### Key concepts
 
 | Concept | Description |
-| --- | --- |
+|---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
 | **SML Document** | A single indexed entry stored in the `.ai-index-idx-elastic-index` system index (the Elastic AI index), containing title, content, permissions, and space information. |
@@ -1832,7 +1829,6 @@ The visualization SML type is registered in
 `x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/visualization.ts`.
 
 It:
-
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
 - Gates access on the `ai_index:visualization/read` action, via `kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE })`
@@ -1877,6 +1873,7 @@ is derived from the same context and is used by the page-leave guard and the
 embeddable welcome-message dismiss — both genuinely care about "is anything in
 flight, anywhere?". Anything inside the conversation tree should use the per-conversation
 scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
 
 ### Lifted state
 
@@ -1926,7 +1923,7 @@ entry it installed (compared by reference so a re-mutate's controller isn't
 clobbered).
 
 **Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
-happens _during_ `mutationFn`, with state mutations flowing for many seconds. Splitting
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
 the work across lifecycle callbacks forces you to bridge state between scopes via refs
 or React Query's `context` return — neither is clean for streaming. With single-scope,
 `streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads

@@ -43,10 +43,7 @@ type MessageNode = SurfaceNode | AttachmentNode;
 /**
  * Splits a message into nodes with {@link splitAuthoredMarkdown}: its markdown becomes `markdown`
  * nodes, and each `<render_attachment>` tag becomes an `attachment` node. Tags without an id are
- * dropped, and tags inside code stay text.
- *
- * A tag between top-level paragraphs, or inline in one, splits it in place. A tag inside a list,
- * table, quote or emphasis becomes an `attachment` node after that whole top-level block.
+ * dropped.
  *
  * For example, `Here is the note: <render_attachment id="a1" /> Anything else?` splits into:
  *
