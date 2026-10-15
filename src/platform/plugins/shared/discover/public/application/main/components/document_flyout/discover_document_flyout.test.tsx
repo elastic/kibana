@@ -43,7 +43,7 @@ jest.mock('../../data_fetching/create_esql_source', () => ({
     query: 'FROM mock',
     title: 'mock',
     name: 'mock',
-    datasetKey: 'esql:mock::',
+    datasetId: 'esql-mock-dataset',
     timeFieldName: undefined,
     references: [],
     fields: [],

@@ -23,11 +23,11 @@ describe('searchEventsToolHandler', () => {
     status: 'active',
     severity: 'high',
     confidence: 0.8,
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals: [
       {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         verdict: 'confirms',
         description: 'Payment call failed',
         collected_at: '2026-07-20T08:00:00.000Z',
@@ -35,7 +35,7 @@ describe('searchEventsToolHandler', () => {
       },
       {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         verdict: 'refutes',
         description: 'Recovered payment call',
         collected_at: '2026-07-19T08:00:00.000Z',
@@ -43,7 +43,7 @@ describe('searchEventsToolHandler', () => {
       },
       {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         verdict: 'inconclusive',
         description: 'Pending verification',
         collected_at: '2026-07-18T08:00:00.000Z',

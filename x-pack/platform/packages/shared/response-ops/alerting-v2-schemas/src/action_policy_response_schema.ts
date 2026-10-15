@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { actorSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
   actionPolicyDestinationSchema,
@@ -40,11 +40,9 @@ export const actionPolicyResponseSchema = z
         'The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.'
       ),
     created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
-    created_at: z.iso.datetime().describe('The ISO datetime when the action policy was created.'),
+    created_at: isoDateTime().describe('The ISO datetime when the action policy was created.'),
     updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),
-    updated_at: z.iso
-      .datetime()
-      .describe('The ISO datetime when the action policy was last updated.'),
+    updated_at: isoDateTime().describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });
 

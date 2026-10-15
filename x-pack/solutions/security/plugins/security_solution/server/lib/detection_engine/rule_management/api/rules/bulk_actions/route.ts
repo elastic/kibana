@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -50,7 +51,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
-import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
@@ -286,11 +287,17 @@ export const performBulkActionRoute = (
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
-          const errors: BulkActionError[] = [...fetchRulesOutcome.errors];
+          const fetchErrors = fetchRulesOutcome.errors;
+          const errors: BulkActionError[] = [];
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
           let skipped: BulkActionSkipResult[] = [];
+
+          // Delete handles fetch errors itself, rules that were not found are reported as skipped
+          if (body.action !== BulkActionTypeEnum.delete) {
+            errors.push(...fetchErrors);
+          }
 
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
@@ -320,6 +327,17 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
+              // Rules not found at fetch time are skipped for delete (idempotent semantics)
+              const [notFoundErrors, otherFetchErrors] = partition(
+                fetchErrors,
+                ({ error }) => error instanceof BulkActionRuleNotFoundError
+              );
+              errors.push(...otherFetchErrors);
+              skipped = notFoundErrors.map(({ item }) => ({
+                id: item,
+                skip_reason: 'RULE_NOT_FOUND',
+              }));
+
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
                 // Populate `deleted` so the summary reflects the correct count of affected rules
@@ -327,11 +345,11 @@ export const performBulkActionRoute = (
                 break;
               }
 
-              const ruleIds = rules.map((rule) => rule.id);
-              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ rules });
 
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
+              skipped = [...skipped, ...bulkDeleteResult.skipped];
               break;
             }
             case BulkActionTypeEnum.duplicate: {

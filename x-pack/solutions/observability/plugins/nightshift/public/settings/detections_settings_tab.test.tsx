@@ -13,7 +13,7 @@ import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-event
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
-import { useDeveloperMode } from './hooks/use_developer_mode';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
 
 const mockContinuousSave = jest.fn();
 const mockRunLimitsRequestSave = jest.fn();
@@ -32,8 +32,8 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana');
-jest.mock('./hooks/use_developer_mode');
-jest.mock('./hooks/use_significant_events_maintenance', () => ({
+jest.mock('../hooks/use_developer_mode');
+jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: mockBlocksActivity,
     isBlocked: mockBlocksActivity,

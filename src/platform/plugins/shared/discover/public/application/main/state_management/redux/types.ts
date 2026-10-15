@@ -13,7 +13,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLEditorRestorableState, QuickSearchVisorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
@@ -252,6 +252,8 @@ export interface TabState extends TabItem {
   profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
+    // Unlike the editor state, the visor mode is also persisted locally
+    visor?: Partial<QuickSearchVisorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
