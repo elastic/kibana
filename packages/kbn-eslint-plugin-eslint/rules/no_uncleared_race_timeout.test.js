@@ -463,6 +463,40 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => {
+            setTimeout(resolve, 10);
+          });
+          if (flag) {
+            try {
+              work();
+            } finally {
+              timeout = new Promise((resolve) => resolve(true));
+            }
+          } else {
+            timeout = new Promise((resolve) => resolve(false));
+          }
+          return Promise.race([work(), timeout]);
+        }
+      `,
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => {
+            setTimeout(resolve, 10);
+          });
+          if (flag) {
+            timeout = new Promise((resolve) => resolve(true));
+          } else {
+            timeout = new Promise((resolve) => resolve(false));
+            return Promise.race([work(), timeout]);
+          }
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -948,6 +982,42 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
       errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => {
+            setTimeout(() => resolve(true), 5000);
+          });
+          if (flag) {
+            for (const item of items) {
+              timeout = new Promise((resolve) => resolve(item));
+            }
+          } else {
+            timeout = new Promise((resolve) => resolve(false));
+          }
+          return Promise.race([work(), timeout]);
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 3 }],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => {
+            setTimeout(() => resolve(true), 5000);
+          });
+          if (flag) {
+            while (waiting) {
+              timeout = new Promise((resolve) => resolve(false));
+            }
+          } else {
+            timeout = new Promise((resolve) => resolve(null));
+          }
+          return Promise.race([work(), timeout]);
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 3 }],
     },
   ],
 });

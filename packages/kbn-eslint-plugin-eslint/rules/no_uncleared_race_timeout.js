@@ -1026,7 +1026,19 @@ function branchFlow(branch, versions, useAt) {
   if (branch.type === 'IfStatement') {
     return { definite: false, values: branchFlow(branch.consequent, versions, useAt).values };
   }
-  if (branch.type === 'TryStatement' || branch.type === 'SwitchStatement') {
+  if (branch.type === 'TryStatement') {
+    return tryFlow(branch, versions, useAt);
+  }
+  if (branch.type === 'DoWhileStatement') {
+    return branchFlow(branch.body, versions, useAt);
+  }
+  if (
+    branch.type === 'ForStatement' ||
+    branch.type === 'ForInStatement' ||
+    branch.type === 'ForOfStatement' ||
+    branch.type === 'WhileStatement' ||
+    branch.type === 'SwitchStatement'
+  ) {
     return {
       definite: false,
       values: writesReaching(branch, versions, useAt).map((version) => version.value),
@@ -1044,6 +1056,54 @@ function branchFlow(branch, versions, useAt) {
 }
 
 /**
+ * A `finally` that always assigns replaces the try and catch values.
+ * Without that, the try is definite only when both the try and the catch assign.
+ *
+ * @param {any} statement
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {{ definite: boolean, values: any[] }}
+ */
+function tryFlow(statement, versions, useAt) {
+  const finalizer = statement.finalizer ? branchFlow(statement.finalizer, versions, useAt) : null;
+  if (finalizer && finalizer.definite) {
+    return { definite: true, values: finalizer.values };
+  }
+  const tried = branchFlow(statement.block, versions, useAt);
+  const caught = statement.handler
+    ? branchFlow(statement.handler.body, versions, useAt)
+    : null;
+  let values = unionValues(tried.values, caught ? caught.values : []);
+  if (finalizer) {
+    values = unionValues(values, finalizer.values);
+  }
+  return { definite: Boolean(caught && tried.definite && caught.definite), values };
+}
+
+/**
+ * @param {any} statement
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @param {Set<any>} covered
+ */
+function coverBranchWrites(statement, versions, useAt, covered) {
+  if (!statement) {
+    return;
+  }
+  for (const version of versions) {
+    if (
+      version.anchor &&
+      version.ordered !== false &&
+      version.at <= useAt &&
+      containsNode(statement, version.anchor) &&
+      !isInNestedFunction(version.anchor, statement)
+    ) {
+      covered.add(version);
+    }
+  }
+}
+
+/**
  * Local assignments that can reach `useAt`. An if/else that assigns on every
  * path replaces whatever came before it, including nested conditional writes
  * that can still reach the end of a branch.
@@ -1058,7 +1118,27 @@ function localAssignmentEvents(versions, home, useAt) {
   const events = [];
   const covered = new Set();
   for (const statement of ifStatementsBefore(home, useAt)) {
-    if (!home || isConditional(statement, home) || rangeContains(statement, useAt)) {
+    if (!home || isConditional(statement, home)) {
+      continue;
+    }
+    if (rangeContains(statement, useAt)) {
+      const inThen = rangeContains(statement.consequent, useAt);
+      const inElse = Boolean(statement.alternate && rangeContains(statement.alternate, useAt));
+      if (!inThen && !inElse) {
+        continue;
+      }
+      const taken = inThen ? statement.consequent : statement.alternate;
+      const other = inThen ? statement.alternate : statement.consequent;
+      coverBranchWrites(other, versions, useAt, covered);
+      const takenResult = branchFlow(taken, versions, useAt);
+      if (takenResult.definite) {
+        events.push({
+          at: nodeStart(statement),
+          values: takenResult.values,
+          replace: true,
+        });
+        coverBranchWrites(taken, versions, useAt, covered);
+      }
       continue;
     }
     const thenResult = branchFlow(statement.consequent, versions, useAt);
@@ -1071,17 +1151,7 @@ function localAssignmentEvents(versions, home, useAt) {
       values: unionValues(thenResult.values, elseResult.values),
       replace: true,
     });
-    for (const version of versions) {
-      if (
-        version.anchor &&
-        version.ordered !== false &&
-        version.at <= useAt &&
-        containsNode(statement, version.anchor) &&
-        !isInNestedFunction(version.anchor, statement)
-      ) {
-        covered.add(version);
-      }
-    }
+    coverBranchWrites(statement, versions, useAt, covered);
   }
   for (const version of versions) {
     if (covered.has(version) || version.ordered === false || version.at > useAt) {
