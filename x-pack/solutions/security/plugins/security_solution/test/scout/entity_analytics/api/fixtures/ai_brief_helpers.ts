@@ -170,8 +170,8 @@ export const buildScope = (
   tiles,
 });
 
-/** A model answer with one priority for `entityId`, citing `factIds`. */
-export const buildDraft = (entityId: string, factIds: number[]): BriefDraft => ({
+/** A model answer with one priority for `entityId`. */
+export const buildDraft = (entityId: string): BriefDraft => ({
   attention: 'Flagged entities in this view have alerts or newly reached High risk.',
   priorities: [
     {
@@ -179,7 +179,6 @@ export const buildDraft = (entityId: string, factIds: number[]): BriefDraft => (
       observed: 'Has High or Critical alerts and newly reached High risk.',
       whyItMatters: 'A privileged user on a high-impact asset.',
       nextStep: 'Review the alerts for this entity in the last 7 days.',
-      factIds,
     },
   ],
   recommendation: `Start with {{ entity.id ${entityId} }}.`,

@@ -259,7 +259,7 @@ describe('renderBrief', () => {
       riskChart: {
         tag: '<render_attachment id="y" version="1" />',
         entityId: 'user:b',
-        riskChangeEntity: { id: 'user:b-laptop', name: 'jdoe_laptop', type: 'user' },
+        of: 'resolution group',
       },
     });
     expect(brief).toContain(`**Priorities**
@@ -271,7 +271,7 @@ _The priority entities at a glance, with their current risk score and asset crit
 1. **web\\_01**: Risk rose. High impact asset. _Next:_ Review its alerts.
 2. **jdoe**: Alerted. High impact asset. _Next:_ Review its alerts.
 
-_Risk history over the period for_ **jdoe** (user jdoe\\_laptop, in its resolution group)
+_Risk history over the period for_ **jdoe** (resolution group)
 
 <render_attachment id="y" version="1" />
 

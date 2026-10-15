@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { maxBy, uniqBy, upperFirst } from 'lodash';
 import moment from 'moment';
-import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
+import type { EntityRiskLevels } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import {
@@ -17,180 +16,118 @@ import {
   getEntityLifecycle,
   matchesPrivilegedWatchlist,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type { BriefCandidate, BriefFact, BriefPriority, RiskAtStart } from './brief_types';
-import {
-  BRIEF_PERIOD_LABELS,
-  BRIEF_TILE_DEFINITIONS,
-  formatCountOf,
-  formatStoredValue,
-  getPeriodStart,
-} from './describe_scope';
+import type { BriefCandidate, BriefPriority, EntityFacts } from './brief_types';
+import { formatStoredValue } from './describe_scope';
 
-/** As the Risk movers count: a change of at least this many points. */
+/** As the Risk movers count: a change of at least this many points is worth a chart. */
 const RISK_CHART_MIN_CHANGE = 10;
-
-interface EntityRisk {
-  /** Normalised score, 0 to 100. */
-  score: number;
-  level: EntityRiskLevels;
-}
-
-const readRisk = (
-  risk: { calculated_score_norm?: number; calculated_level?: EntityRiskLevels } | undefined
-): EntityRisk | undefined => {
-  const score = risk?.calculated_score_norm;
-  if (score === undefined || !Number.isFinite(score)) {
-    return undefined;
-  }
-  return { score, level: risk?.calculated_level ?? getRiskLevel(score) };
-};
-
-/** The risk candidates are ranked on: the resolution group's when scored, otherwise the entity's own. */
-export const getRankRisk = ({ entity }: Entity): EntityRisk | undefined =>
-  readRisk(entity?.relationships?.resolution?.risk) ?? readRisk(entity?.risk);
-
-const describeRisk = (label: string, { score, level }: EntityRisk): string =>
-  `${label}: ${level} (score ${Math.round(score)})`;
-
 const DAY_MS = 24 * 3_600_000;
 
-/** On the store's first day, first seen covers every existing entity, so it doesn't mean new. */
-const describeFirstSeen = (
-  firstSeen: string,
-  storeStartTimestamp: string | undefined,
-  { capturedAt }: EntityAnalyticsScope,
-  periodStart: Date,
-  period: string
-): string => {
-  // Relative to the capture, so no date or time zone is stated.
-  const date = moment(firstSeen).from(capturedAt);
-  const firstSeenTime = new Date(firstSeen).getTime();
-  if (
-    storeStartTimestamp !== undefined &&
-    firstSeenTime - new Date(storeStartTimestamp).getTime() < DAY_MS
-  ) {
-    return `First seen by the Entity Store ${date}, its first day of data`;
-  }
-  if (firstSeenTime < periodStart.getTime()) {
-    return `First seen by the Entity Store ${date}`;
-  }
-  return `First seen by the Entity Store ${date}, inside the last ${period}`;
-};
+/** The risk the brief states for a candidate, and where its scores are stored. */
+export interface CandidateRisk {
+  of: 'entity' | 'resolution group';
+  score: number;
+  level: EntityRiskLevels;
+  scoreType: 'base' | 'resolution';
+  /** The id the risk scores are stored under: the golden entity's for a group, the record's own otherwise. */
+  scoredId: string;
+}
 
-/** The risk change of the candidate, or of its group member that moved most, compared as the Risk movers tile does. */
-const describeRiskChange = (
-  candidate: BriefCandidate,
-  { aliasesById, scoresById }: RiskAtStart,
-  period: string
-): Pick<BriefFact, 'text' | 'riskChangeEntity'> | undefined => {
-  const members = uniqBy(
-    [candidate.record, ...(aliasesById.get(candidate.id) ?? [])],
-    (record) => record.entity?.id
-  ).flatMap(({ entity }) => {
-    const now = readRisk(entity?.risk);
-    if (!entity?.id || !now) {
-      return [];
-    }
-    const start = scoresById.get(entity.id);
-    return [{ id: entity.id, name: entity.name ?? entity.id, now, start }];
-  });
-  const moved = maxBy(members, ({ now, start }) =>
-    start === undefined ? -1 : Math.abs(Math.round(now.score) - Math.round(start))
-  );
-  if (!moved) {
+/**
+ * Resolution first: a scored resolution group's risk, otherwise the entity's own. Used to rank, to state
+ * risk and to chart it.
+ */
+export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk | undefined => {
+  const group = record.entity?.relationships?.resolution?.risk?.calculated_score_norm;
+  if (group !== undefined && Number.isFinite(group)) {
+    const level = record.entity?.relationships?.resolution?.risk?.calculated_level;
+    return {
+      of: 'resolution group',
+      score: group,
+      level: level ?? getRiskLevel(group),
+      scoreType: 'resolution',
+      scoredId: id,
+    };
+  }
+  const own = record.entity?.risk?.calculated_score_norm;
+  if (own === undefined || !Number.isFinite(own)) {
     return undefined;
   }
-  const { id, name, now, start } = moved;
-  // The member's type is stated, or the model guesses it from the name (a user `jdoe@LAPTOP` read as a host).
-  const subject =
-    id === candidate.id
-      ? ''
-      : `${candidate.type} ${JSON.stringify(name)} in the same resolution group: `;
-  // Only a real move gets a chart, by the Risk movers threshold: a wobble or a first score explains nothing.
-  const hasMoved =
-    start !== undefined &&
-    Math.abs(Math.round(now.score) - Math.round(start)) >= RISK_CHART_MIN_CHANGE;
   return {
-    text: upperFirst(`${subject}${describeScoreChange(start, now.score, period)}`),
-    riskChangeEntity: hasMoved ? { id, name, type: candidate.type } : undefined,
+    of: 'entity',
+    score: own,
+    level: record.entity?.risk?.calculated_level ?? getRiskLevel(own),
+    scoreType: 'base',
+    scoredId: record.entity?.id ?? id,
   };
 };
 
-const describeScoreChange = (start: number | undefined, now: number, period: string): string => {
-  const nowScore = Math.round(now);
-  if (start === undefined) {
-    return `no risk score at the start of the last ${period}, ${nowScore} now`;
-  }
-  const startScore = Math.round(start);
-  const change = nowScore - startScore;
-  const prefix = `risk score ${startScore} at the start of the last ${period}, ${nowScore} now`;
-  if (change === 0) {
-    return `${prefix}, unchanged`;
-  }
-  return `${prefix}, ${change > 0 ? 'up' : 'down'} ${Math.abs(change)} points`;
-};
-
-/** Facts about each candidate, numbered from 1. Risk change facts need `riskAtStart`. */
+/**
+ * What the model knows about each candidate. `riskAtStart` holds each candidate's score at the start of
+ * the period, by candidate id; without it, the start is left out.
+ */
 export const buildFacts = (
   candidates: BriefCandidate[],
   scope: EntityAnalyticsScope,
   {
     riskAtStart,
     storeStartTimestamp,
-  }: { riskAtStart?: RiskAtStart; storeStartTimestamp?: string } = {}
-): BriefFact[] => {
-  const period = BRIEF_PERIOD_LABELS[scope.period];
-  const periodStart = getPeriodStart(scope);
-  const facts: BriefFact[] = [];
-  for (const candidate of candidates) {
-    const add = (text: string, riskChangeEntity?: BriefFact['riskChangeEntity']) =>
-      facts.push({ id: facts.length + 1, entityId: candidate.id, text, riskChangeEntity });
-    for (const tileId of candidate.tileIds) {
-      // What the entity did, not which tile shows it: readers don't know the page's tiles.
-      add(upperFirst(BRIEF_TILE_DEFINITIONS[tileId](period)));
-    }
-    // The tiles test the entity's own risk; the group's is a separate fact when it differs.
-    const ownRisk = readRisk(candidate.record.entity?.risk);
-    const groupRisk = readRisk(candidate.record.entity?.relationships?.resolution?.risk);
-    if (ownRisk) {
-      add(describeRisk('Current risk', ownRisk));
-    }
-    if (groupRisk && Math.round(groupRisk.score) !== Math.round(ownRisk?.score ?? -1)) {
-      add(describeRisk('Resolution group risk', groupRisk));
-    }
-    const riskChange = riskAtStart && describeRiskChange(candidate, riskAtStart, period);
-    if (riskChange) {
-      add(riskChange.text, riskChange.riskChangeEntity);
-    }
-    const criticality = getAssetCriticality(candidate);
-    if (criticality) {
-      add(`Asset criticality: ${formatStoredValue(criticality)}`);
-    }
-    if (extractIsPrivileged(candidate)) {
-      add('On the privileged user watchlist');
-    }
+  }: { riskAtStart?: Map<string, number>; storeStartTimestamp?: string } = {}
+): EntityFacts[] =>
+  candidates.map((candidate) => {
+    const { id, name, type, tileIds } = candidate;
     const otherWatchlists = (getEntityAttributes(candidate)?.watchlists ?? []).filter(
       (watchlist) => !matchesPrivilegedWatchlist([watchlist])
-    );
-    // Watchlist ids are not names, so only the count is stated.
-    if (otherWatchlists.length > 0) {
-      add(`On ${formatCountOf(otherWatchlists.length, 'other watchlist', 'other watchlists')}`);
-    }
+    ).length;
     const firstSeen = getEntityLifecycle(candidate)?.first_seen;
-    if (firstSeen) {
-      add(describeFirstSeen(firstSeen, storeStartTimestamp, scope, periodStart, period));
-    }
+    const criticality = getAssetCriticality(candidate);
+    return {
+      entityId: id,
+      name,
+      type,
+      flaggedFor: tileIds,
+      risk: describeRisk(candidate, riskAtStart),
+      assetCriticality: criticality ? formatStoredValue(criticality) : undefined,
+      privilegedUser: extractIsPrivileged(candidate) || undefined,
+      otherWatchlists: otherWatchlists || undefined,
+      // Relative to the capture, so no date or time zone is stated.
+      firstSeen: firstSeen ? moment(firstSeen).from(scope.capturedAt) : undefined,
+      firstSeenOnStoreFirstDay: isStoreFirstDay(firstSeen, storeStartTimestamp) || undefined,
+    };
+  });
+
+const describeRisk = (
+  candidate: BriefCandidate,
+  riskAtStart: Map<string, number> | undefined
+): EntityFacts['risk'] => {
+  const risk = getCandidateRisk(candidate);
+  if (!risk) {
+    return undefined;
   }
-  return facts;
+  const score = Math.round(risk.score);
+  const start = riskAtStart?.get(candidate.id);
+  const atPeriodStart = start === undefined ? null : Math.round(start);
+  return {
+    of: risk.of,
+    level: risk.level,
+    score,
+    atPeriodStart: riskAtStart ? atPeriodStart : undefined,
+    change: atPeriodStart === null ? undefined : score - atPeriodStart,
+  };
 };
 
-/** The risk change fact cited by the first priority that cites one. Only it gets a risk-history chart. */
-export const getFirstCitedRiskChange = (
+/** On the Entity Store's first day, first seen covers every existing entity. */
+const isStoreFirstDay = (firstSeen?: string, storeStartTimestamp?: string): boolean =>
+  firstSeen !== undefined &&
+  storeStartTimestamp !== undefined &&
+  new Date(firstSeen).getTime() - new Date(storeStartTimestamp).getTime() < DAY_MS;
+
+/** The first priority whose risk moved by at least the Risk movers threshold. Only it gets a chart. */
+export const getRiskChartEntityId = (
   priorities: BriefPriority[],
-  facts: BriefFact[]
-): BriefFact | undefined =>
-  priorities
-    .flatMap(({ factIds }) =>
-      facts.filter(({ id, riskChangeEntity }) => riskChangeEntity && factIds.includes(id))
-    )
-    .at(0);
+  facts: EntityFacts[]
+): string | undefined =>
+  priorities.find(({ entityId }) => {
+    const change = facts.find((entity) => entity.entityId === entityId)?.risk?.change;
+    return change !== undefined && Math.abs(change) >= RISK_CHART_MIN_CHANGE;
+  })?.entityId;

@@ -15,13 +15,8 @@ import {
   buildRiskScoreHistoryAttachmentId,
   ensureRiskScoreHistoryAttachment,
 } from '../risk_score_history/risk_score_history_attachment_utils';
-import type {
-  BriefCandidate,
-  GenerateBriefParams,
-  GenerateBriefResult,
-  BriefFact,
-} from './brief_types';
-import { buildFacts, getFirstCitedRiskChange } from './build_facts';
+import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
+import { buildFacts, getCandidateRisk, getRiskChartEntityId } from './build_facts';
 import { draftBrief } from './draft_brief';
 import { describeCoverage, getPeriodStart } from './describe_scope';
 import { fetchCandidateEntities, fetchRiskAtStart } from './read_entities';
@@ -64,20 +59,20 @@ export const generateBrief = async ({
   const { draft, repaired } = await draftBrief({
     inferenceClient,
     scope,
-    candidates,
     facts,
     coverage: describeCoverage(scope, entities),
     abortSignal,
     logger,
   });
   const composed = Date.now();
-  const verified = verifyDraft(draft, facts, scope, candidates);
+  const verified = verifyDraft(draft, facts, scope);
   const priorityCandidates = verified.priorities.flatMap(
     ({ entityId }) => candidates.find(({ id }) => id === entityId) ?? []
   );
   const entityTableTag = await createEntityTable(priorityCandidates, attachments, logger);
+  const chartEntityId = getRiskChartEntityId(verified.priorities, facts);
   const riskChart = await createRiskChart({
-    fact: getFirstCitedRiskChange(verified.priorities, facts),
+    candidate: candidates.find(({ id }) => id === chartEntityId),
     scope,
     riskScoreDataClient,
     attachments,
@@ -86,7 +81,7 @@ export const generateBrief = async ({
   const took = Date.now() - started;
   logger.debug(
     `AI brief: fetch ${fetched - started}ms, compose ${composed - fetched}ms, total ${took}ms; ` +
-      `${candidates.length} candidates, ${facts.length} facts, ${verified.priorities.length} priorities, ` +
+      `${candidates.length} candidates, ${verified.priorities.length} priorities, ` +
       `${verified.droppedPriorityCount} dropped, repaired ${repaired}`
   );
   return {
@@ -127,21 +122,22 @@ const createEntityTable = async (
   return attachment ? buildRenderAttachmentTag(attachment) : undefined;
 };
 
-/** The period's risk-history chart for a cited risk change. A failure means no chart, never a failed brief. */
+/** The period's risk-history chart for a priority whose risk moved. A failure means no chart, never a failed brief. */
 const createRiskChart = async ({
-  fact,
+  candidate,
   scope,
   riskScoreDataClient,
   attachments,
   logger,
 }: Pick<GenerateBriefParams, 'scope' | 'attachments' | 'logger' | 'riskScoreDataClient'> & {
-  fact: BriefFact | undefined;
+  candidate: BriefCandidate | undefined;
 }): Promise<RiskChart | undefined> => {
-  const riskChangeEntity = fact?.riskChangeEntity;
-  if (!fact || !riskChangeEntity || !riskScoreDataClient) {
+  const risk = candidate && getCandidateRisk(candidate);
+  if (!candidate || !risk || !riskScoreDataClient) {
     return undefined;
   }
-  const { id, name, type } = riskChangeEntity;
+  const { name, type } = candidate;
+  const { scoredId: id, scoreType, of } = risk;
   const from = getPeriodStart(scope).toISOString();
   const to = new Date(scope.capturedAt).toISOString();
   const interval = resolveSimpleRiskScoreHistoryInterval({ min: moment(from), max: moment(to) });
@@ -150,7 +146,7 @@ const createRiskChart = async ({
       entityType: type,
       entityId: id,
       range: { gte: from, lte: to },
-      scoreType: 'base',
+      scoreType,
       interval,
     });
     if (entries.length === 0) {
@@ -159,7 +155,7 @@ const createRiskChart = async ({
     const label = `${type}: ${name}`;
     const attachment = await ensureRiskScoreHistoryAttachment({
       attachments,
-      id: buildRiskScoreHistoryAttachmentId(type, id, 'base'),
+      id: buildRiskScoreHistoryAttachmentId(type, id, scoreType),
       data: {
         attachmentLabel: label,
         identifierType: type,
@@ -168,7 +164,7 @@ const createRiskChart = async ({
         from,
         to,
         bucketInterval: `${interval.value}${interval.unit}`,
-        scoreType: 'base',
+        scoreType,
         entries,
       },
       description: label,
@@ -177,7 +173,7 @@ const createRiskChart = async ({
     if (!attachment) {
       return undefined;
     }
-    return { tag: buildRenderAttachmentTag(attachment), entityId: fact.entityId, riskChangeEntity };
+    return { tag: buildRenderAttachmentTag(attachment), entityId: candidate.id, of };
   } catch (error) {
     logger.debug(`AI brief: no risk-history chart for ${id}: ${error.message}`);
     return undefined;

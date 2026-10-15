@@ -6,8 +6,9 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefCandidate, BriefDraft, BriefFact, BriefPriority } from './brief_types';
+import type { BriefDraft, BriefPriority, EntityFacts } from './brief_types';
 import { BRIEF_WORD_LIMITS, MAX_PRIORITIES } from './brief_types';
+import { BRIEF_PERIOD_LABELS, BRIEF_TILE_DEFINITIONS } from './describe_scope';
 
 export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
 /** Numbers as written in prose, with thousands separators; signs are ignored. */
@@ -61,23 +62,29 @@ const numbersIn = (text: string): string[] =>
   (text.match(NUMBER_PATTERN) ?? []).map((number) => String(Number(number.replace(/,/g, ''))));
 
 /**
- * True when every number in the text is in the facts or is a tile value or change. Digits inside
- * mentions, entity names and EUIDs are not claims, so they are ignored.
+ * True when every number in the text is known: in the given entities' data or what their flags mean, or
+ * the period, a count or a change in the view. Digits inside mentions, names and EUIDs are ignored.
  */
 const createNumberCheck = (
-  facts: BriefFact[],
-  { tiles }: EntityAnalyticsScope,
-  candidates: Array<Pick<BriefCandidate, 'id' | 'name'>>
-): ((text: string) => boolean) => {
-  const tileNumbers = Object.values(tiles).flatMap(({ value, delta }) =>
-    delta === undefined ? [value] : [value, Math.abs(delta)]
-  );
-  const known = new Set([
-    ...facts.flatMap(({ text }) => numbersIn(text)),
-    ...tileNumbers.map(String),
-  ]);
-  const names = candidates.flatMap(({ id, name }) => [id, name]).filter(Boolean);
-  return (text) => {
+  { tiles, period }: EntityAnalyticsScope,
+  facts: EntityFacts[]
+): ((text: string, entities: EntityFacts[]) => boolean) => {
+  const periodLabel = BRIEF_PERIOD_LABELS[period];
+  const viewNumbers = [
+    ...numbersIn(periodLabel),
+    ...Object.values(tiles)
+      .flatMap(({ value, delta }) => (delta === undefined ? [value] : [value, Math.abs(delta)]))
+      .map(String),
+  ];
+  const names = facts.flatMap(({ entityId, name }) => [entityId, name]).filter(Boolean);
+  return (text, entities) => {
+    const known = new Set([
+      ...viewNumbers,
+      ...entities.flatMap(({ entityId, name, flaggedFor, ...data }) => [
+        ...numbersIn(JSON.stringify(data)),
+        ...flaggedFor.flatMap((tileId) => numbersIn(BRIEF_TILE_DEFINITIONS[tileId](periodLabel))),
+      ]),
+    ]);
     const prose = names.reduce(
       (remaining, name) => remaining.split(name).join(' '),
       replaceMentions(text, () => ' ')
@@ -86,34 +93,32 @@ const createNumberCheck = (
   };
 };
 
-/** Checks the model's draft against the facts and the view it was written from, and trims it to the limits. */
+/**
+ * Checks the model's draft against the entities and the view, and trims it to the limits. A priority must
+ * be about a flagged entity and quote only its own numbers.
+ */
 export const verifyDraft = (
   draft: BriefDraft,
-  facts: BriefFact[],
-  scope: EntityAnalyticsScope,
-  candidates: Array<Pick<BriefCandidate, 'id' | 'name'>>
+  facts: EntityFacts[],
+  scope: EntityAnalyticsScope
 ): VerifiedBrief => {
-  const factsById = new Map(facts.map((fact) => [fact.id, fact]));
-  const candidateIds = new Set(facts.map(({ entityId }) => entityId));
-  const hasKnownNumbers = createNumberCheck(facts, scope, candidates);
+  const factsById = new Map(facts.map((entity) => [entity.entityId, entity]));
+  const hasKnownNumbers = createNumberCheck(scope, facts);
   const clean = (text: string, max: number): string =>
     capWords(
       replaceMentions(text, (entityId) =>
-        candidateIds.has(entityId) ? `{{ entity.id ${entityId} }}` : ''
+        factsById.has(entityId) ? `{{ entity.id ${entityId} }}` : ''
       ),
       max
     );
 
   const seenEntityIds = new Set<string>();
   const priorities: BriefPriority[] = [];
-  for (const priority of draft.priorities) {
-    const { entityId, observed, whyItMatters, nextStep } = priority;
-    const factIds = [...new Set(priority.factIds)].filter(
-      (factId) => factsById.get(factId)?.entityId === entityId
-    );
+  for (const { entityId, observed, whyItMatters, nextStep } of draft.priorities) {
+    const entity = factsById.get(entityId);
     const isKept =
-      factIds.length > 0 &&
-      [observed, whyItMatters, nextStep].every(hasKnownNumbers) &&
+      entity !== undefined &&
+      [observed, whyItMatters, nextStep].every((text) => hasKnownNumbers(text, [entity])) &&
       !seenEntityIds.has(entityId) &&
       priorities.length < MAX_PRIORITIES;
     if (isKept) {
@@ -123,14 +128,19 @@ export const verifyDraft = (
         observed: clean(observed, BRIEF_WORD_LIMITS.priorityText),
         whyItMatters: clean(whyItMatters, BRIEF_WORD_LIMITS.priorityText),
         nextStep: clean(nextStep, BRIEF_WORD_LIMITS.priorityText),
-        factIds,
       });
     }
   }
 
-  // A sentence with a number that is in neither the facts nor the tiles is dropped, not repaired.
+  // A sentence with a number that is in neither the entities nor the view is dropped, not repaired.
   const cleanProse = (text: string, max: number): string =>
-    clean(stripToolMarkup(text).split(SENTENCE_END).filter(hasKnownNumbers).join(' '), max);
+    clean(
+      stripToolMarkup(text)
+        .split(SENTENCE_END)
+        .filter((sentence) => hasKnownNumbers(sentence, facts))
+        .join(' '),
+      max
+    );
   const attention = cleanProse(draft.attention, BRIEF_WORD_LIMITS.attention);
   const recommendation = cleanProse(draft.recommendation, BRIEF_WORD_LIMITS.recommendation);
   const namesCandidate = replaceMentions(attention, () => '') !== attention;

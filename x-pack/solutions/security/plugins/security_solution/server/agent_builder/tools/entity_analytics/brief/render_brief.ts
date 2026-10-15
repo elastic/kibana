@@ -13,7 +13,6 @@ import type {
   EntityAnalyticsScopeTile,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
-import type { RiskChangeEntity } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   describeEntityFilter,
@@ -40,12 +39,13 @@ export const NO_MATCH_LINE =
 export const NO_PRIORITIES_LINE =
   'No entity in this view has enough evidence to prioritise. That does not mean the environment is safe.';
 
-/** A risk-history chart for a priority's risk change: its render tag and whose score it shows. */
+/** A risk-history chart for a priority whose risk moved. */
 export interface RiskChart {
   tag: string;
   /** The priority's entity. */
   entityId: string;
-  riskChangeEntity: RiskChangeEntity;
+  /** Resolution first: a group's chart is the group's risk. */
+  of: 'entity' | 'resolution group';
 }
 
 interface RenderBriefParams {
@@ -177,18 +177,13 @@ const renderAttention = (
   return ['**What needs attention**', getNoBriefLine(scope, entities)];
 };
 
-/** The chart with a caption naming its priority, and the group member when the chart is the member's. */
+/** The chart with a caption naming its priority. */
 const renderRiskChart = (
-  { tag, entityId, riskChangeEntity }: RiskChart,
+  { tag, entityId, of }: RiskChart,
   boldName: (entityId: string) => string
 ): string[] => {
-  const member =
-    riskChangeEntity.id === entityId
-      ? ''
-      : ` (${riskChangeEntity.type} ${escapeMarkdown(
-          riskChangeEntity.name
-        )}, in its resolution group)`;
-  return [`_Risk history over the period for_ ${boldName(entityId)}${member}`, '', tag];
+  const group = of === 'resolution group' ? ' (resolution group)' : '';
+  return [`_Risk history over the period for_ ${boldName(entityId)}${group}`, '', tag];
 };
 
 /** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */

@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { compact, orderBy, truncate, uniq } from 'lodash';
+import { orderBy, truncate, uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
@@ -19,9 +19,9 @@ import { getEntityType } from '../../../../../common/entity_analytics/entity_sto
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
-import type { BriefCandidate, BriefEntityType, RiskAtStart } from './brief_types';
+import type { BriefCandidate, BriefEntityType } from './brief_types';
 import { MAX_BRIEF_CANDIDATES } from './brief_types';
-import { getRankRisk } from './build_facts';
+import { getCandidateRisk } from './build_facts';
 import { getPeriodStart, getScopeFilters } from './describe_scope';
 
 /** Display names come from source logs, so an attacker can choose them. */
@@ -178,18 +178,29 @@ const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;
 /** As on the Risk movers tile: scoring runs hourly, so two hours always hold a run. */
 const BOUNDARY_WINDOW_MS = 2 * 3_600_000;
 
-interface TypeAggregation {
+interface StartScoreAggregation {
   buckets: Array<{
     key: string;
-    last: {
-      hits: {
-        hits: Array<{ _source?: Record<string, { risk?: { calculated_score_norm?: number } }> }>;
-      };
+    score_type: {
+      buckets: Array<{
+        key: string;
+        last: {
+          hits: {
+            hits: Array<{
+              _source?: Record<string, { risk?: { calculated_score_norm?: number } }>;
+            }>;
+          };
+        };
+      }>;
     };
   }>;
 }
 
-/** Aliases, then base scores at the period start by the Risk movers rule (`tile_risk_movers_query.ts`, in `public/`). */
+/**
+ * Each candidate's score at the start of the period, by candidate id, in one search. It compares like with
+ * like, resolution first: a group's resolution score, or an entity's own base score. The window follows
+ * the Risk movers tile (`tile_risk_movers_query.ts`, in `public/`): the last score in the two hours before.
+ */
 export const fetchRiskAtStart = async ({
   candidates,
   scope,
@@ -200,18 +211,14 @@ export const fetchRiskAtStart = async ({
   scope: EntityAnalyticsScope;
   spaceId: string;
   esClient: ElasticsearchClient;
-}): Promise<RiskAtStart> => {
-  const aliasesById = await expandAliases({
-    entityIds: candidates.map(({ id }) => id),
-    spaceId,
-    esClient,
+}): Promise<Map<string, number>> => {
+  const risks = candidates.flatMap((candidate) => {
+    const risk = getCandidateRisk(candidate);
+    return risk ? [{ candidateId: candidate.id, ...risk }] : [];
   });
-  const records = [...candidates.map(({ record }) => record), ...[...aliasesById.values()].flat()];
-  const entityIds = uniq(
-    compact([...candidates.map(({ id }) => id), ...records.map(({ entity }) => entity?.id)])
-  );
+  const scoredIds = uniq(risks.map(({ scoredId }) => scoredId));
   const start = getPeriodStart(scope);
-  const response = await esClient.search<unknown, Record<string, TypeAggregation>>({
+  const response = await esClient.search<unknown, Record<string, StartScoreAggregation>>({
     index: getRiskScoreTimeSeriesIndex(spaceId),
     size: 0,
     ignore_unavailable: true,
@@ -229,29 +236,31 @@ export const fetchRiskAtStart = async ({
           {
             bool: {
               should: RISK_ENTITY_TYPES.map((type) => ({
-                terms: { [`${type}.risk.id_value`]: entityIds },
+                terms: { [`${type}.risk.id_value`]: scoredIds },
               })),
               minimum_should_match: 1,
             },
           },
         ],
-        // Resolution scores share the golden entity's id, and "now" is the entity's own base score.
-        must_not: RISK_ENTITY_TYPES.map((type) => ({
-          term: { [`${type}.risk.score_type`]: 'resolution' },
-        })),
       },
     },
     aggs: Object.fromEntries(
       RISK_ENTITY_TYPES.map((type) => [
         type,
         {
-          terms: { field: `${type}.risk.id_value`, include: entityIds, size: entityIds.length },
+          terms: { field: `${type}.risk.id_value`, include: scoredIds, size: scoredIds.length },
           aggs: {
-            last: {
-              top_hits: {
-                size: 1,
-                sort: [{ '@timestamp': 'desc' as const }],
-                _source: [`${type}.risk.calculated_score_norm`],
+            // Scores written before `score_type` existed are base scores.
+            score_type: {
+              terms: { field: `${type}.risk.score_type`, missing: 'base', size: 2 },
+              aggs: {
+                last: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ '@timestamp': 'desc' as const }],
+                    _source: [`${type}.risk.calculated_score_norm`],
+                  },
+                },
               },
             },
           },
@@ -260,51 +269,24 @@ export const fetchRiskAtStart = async ({
     ),
   });
 
-  const scoresById = new Map<string, number>();
+  const scores = new Map<string, number>();
   for (const type of RISK_ENTITY_TYPES) {
-    for (const { key, last } of response.aggregations?.[type]?.buckets ?? []) {
-      const score = last.hits.hits[0]?._source?.[type]?.risk?.calculated_score_norm;
-      if (score !== undefined && Number.isFinite(score)) {
-        scoresById.set(key, score);
+    for (const { key: scoredId, score_type: scoreTypes } of response.aggregations?.[type]
+      ?.buckets ?? []) {
+      for (const { key: scoreType, last } of scoreTypes.buckets) {
+        const score = last.hits.hits[0]?._source?.[type]?.risk?.calculated_score_norm;
+        if (score !== undefined && Number.isFinite(score)) {
+          scores.set(`${scoreType}:${scoredId}`, score);
+        }
       }
     }
   }
-  return { aliasesById, scoresById };
-};
-
-/** Aliases read per brief. A resolution group rarely has more than a handful. */
-const MAX_ALIASES = MAX_BRIEF_CANDIDATES * 20;
-const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
-
-/**
- * The alias records of the given golden entity ids, grouped by golden id, in one search. Tile ids are
- * golden entities, while risk scores, alerts and anomalies belong to each alias's own EUID.
- */
-export const expandAliases = async ({
-  entityIds,
-  spaceId,
-  esClient,
-}: {
-  entityIds: string[];
-  spaceId: string;
-  esClient: ElasticsearchClient;
-}): Promise<Map<string, Entity[]>> => {
-  const response = await esClient.search<Entity>({
-    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-    size: MAX_ALIASES,
-    ignore_unavailable: true,
-    query: { bool: { filter: [{ terms: { [RESOLVED_TO_FIELD]: entityIds } }] } },
-    _source: ['entity.id', 'entity.name', RESOLVED_TO_FIELD, 'entity.risk'],
-    sort: [{ 'entity.id': 'asc' }],
-  });
-  const aliasesById = new Map<string, Entity[]>();
-  for (const { _source: record } of response.hits.hits) {
-    const goldenId = record?.entity?.relationships?.resolution?.resolved_to;
-    if (record && goldenId) {
-      aliasesById.set(goldenId, [...(aliasesById.get(goldenId) ?? []), record]);
-    }
-  }
-  return aliasesById;
+  return new Map(
+    risks.flatMap(({ candidateId, scoreType, scoredId }) => {
+      const score = scores.get(`${scoreType}:${scoredId}`);
+      return score === undefined ? [] : [[candidateId, score] as const];
+    })
+  );
 };
 
 // Candidate selection
@@ -362,7 +344,7 @@ export const rankCandidates = (
     candidates,
     [
       ({ tileIds }) => getRankWeight(tileIds, focusTileId),
-      ({ record }) => getRankRisk(record)?.score ?? -1,
+      (candidate) => getCandidateRisk(candidate)?.score ?? -1,
     ],
     ['desc', 'desc']
   ).slice(0, MAX_BRIEF_CANDIDATES);

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Entity } from '@kbn/entity-store/common';
+import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -33,24 +33,30 @@ export interface BriefCandidate {
   record: Entity;
 }
 
-/** One statement about one candidate. Ids are local to a brief. */
-export interface BriefFact {
-  id: number;
+/** What the model knows about one candidate, as data. Every number the brief may state is here or in the view. */
+export interface EntityFacts {
+  /** The EUID, used in mention tokens. */
   entityId: string;
-  text: string;
-  /** On a risk change fact whose score moved: the entity it states, the candidate or a group member, for its chart. */
-  riskChangeEntity?: RiskChangeEntity;
-}
-
-/** The entity a risk change fact is about, for its risk-history chart. */
-export type RiskChangeEntity = Pick<BriefCandidate, 'id' | 'name' | 'type'>;
-
-/** The risk at the start of the period, read for the risk change facts. */
-export interface RiskAtStart {
-  /** Alias records of each candidate that is a golden entity. */
-  aliasesById: Map<string, Entity[]>;
-  /** Base score at the start of the period, by entity id. Absent when there was none. */
-  scoresById: Map<string, number>;
+  name: string;
+  type: BriefEntityType;
+  /** The page's counts that flag the entity, the selected one first. */
+  flaggedFor: SignalCardId[];
+  risk?: {
+    /** Resolution first: the group's risk when the entity is a scored resolution group. */
+    of: 'entity' | 'resolution group';
+    level: EntityRiskLevels;
+    score: number;
+    /** Null when not scored at the start of the period, never 0. Absent when it couldn't be read. */
+    atPeriodStart?: number | null;
+    change?: number;
+  };
+  assetCriticality?: string;
+  privilegedUser?: true;
+  otherWatchlists?: number;
+  /** Relative to the capture, such as "5 days ago". */
+  firstSeen?: string;
+  /** First seen on the Entity Store's first day of data, so it doesn't mean the entity is new. */
+  firstSeenOnStoreFirstDay?: true;
 }
 
 /**
@@ -76,9 +82,6 @@ export const BriefDraft = lazySchema(() =>
           nextStep: z
             .string()
             .describe(`One specific investigation step, at most ${priorityText} words`),
-          factIds: z
-            .array(z.number().int())
-            .describe('Ids of the facts about this entity that support the priority'),
         })
       )
       .describe(

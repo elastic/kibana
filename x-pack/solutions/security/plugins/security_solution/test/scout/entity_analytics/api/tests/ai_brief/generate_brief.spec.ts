@@ -91,17 +91,30 @@ apiTest.describe(
     });
 
     apiTest('writes a brief with one priority from the tile entities', async ({ apiClient }) => {
-      // Fact 1 is the user's membership of the selected tile.
-      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [1]));
+      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
 
       const brief = await askForBrief(
         apiClient,
         buildScope(
           {
-            entitiesWithAlerts: { title: 'Entities with alerts', value: 14, delta: 3, entityIds: [SEEDED_USER.id] },
-            entitiesWithAnomalies: { title: 'Entities with anomalies', value: 0, unavailable: true, entityIds: [] },
+            entitiesWithAlerts: {
+              title: 'Entities with alerts',
+              value: 14,
+              delta: 3,
+              entityIds: [SEEDED_USER.id],
+            },
+            entitiesWithAnomalies: {
+              title: 'Entities with anomalies',
+              value: 0,
+              unavailable: true,
+              entityIds: [],
+            },
             riskMovers: { title: 'Risk movers', value: 0, entityIds: [] },
-            newlyHighCritical: { title: 'Newly high/critical', value: 1, entityIds: [SEEDED_USER.id] },
+            newlyHighCritical: {
+              title: 'Newly high/critical',
+              value: 1,
+              entityIds: [SEEDED_USER.id],
+            },
           },
           'entitiesWithAlerts'
         )
@@ -132,20 +145,22 @@ apiTest.describe(
     apiTest(
       'states the risk change and charts it under the priority citing it',
       async ({ apiClient }) => {
-        // Facts 1 to 3: Risk movers membership, current risk, risk change.
-        mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [3]));
+        mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
 
         const brief = await askForBrief(
           apiClient,
-          buildScope({ riskMovers: { title: 'Risk movers', value: 1, entityIds: [SEEDED_USER.id] } }, 'riskMovers')
+          buildScope(
+            { riskMovers: { title: 'Risk movers', value: 1, entityIds: [SEEDED_USER.id] } },
+            'riskMovers'
+          )
         );
 
         const submitRequests = getSubmitBriefRequests(llmProxy);
         expect(submitRequests).toHaveLength(1);
+        // The messages are JSON, so the entity's own JSON is escaped inside them.
         expect(submitRequests[0]).toContain(
-          `3. Risk score ${SEEDED_USER_START_SCORE} at the start of the last 7 days`
+          `\\"score\\":82,\\"atPeriodStart\\":${SEEDED_USER_START_SCORE},\\"change\\":44`
         );
-        expect(submitRequests[0]).toContain('82 now, up 44 points');
         // The table comes before the list, and the chart directly under the priority citing the change.
         const lines = brief.split('\n');
         const priority = lines.findIndex((line) => line.startsWith(PRIORITY_LINE));
@@ -162,7 +177,12 @@ apiTest.describe(
         const brief = await askForBrief(
           apiClient,
           buildScope({
-            entitiesWithAlerts: { title: 'Entities with alerts', value: 0, delta: 0, entityIds: [] },
+            entitiesWithAlerts: {
+              title: 'Entities with alerts',
+              value: 0,
+              delta: 0,
+              entityIds: [],
+            },
             riskMovers: { title: 'Risk movers', value: 0, entityIds: [] },
             newlyHighCritical: { title: 'Newly high/critical', value: 0, entityIds: [] },
           })
@@ -173,16 +193,19 @@ apiTest.describe(
       }
     );
 
-    apiTest('drops a priority that cites another entity’s fact', async ({ apiClient }) => {
-      // The host is the only entity in the selected tile, so it is the first candidate and owns fact 1.
-      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [1]));
+    apiTest('drops a priority for an entity the view does not flag', async ({ apiClient }) => {
+      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
 
       const brief = await askForBrief(
         apiClient,
         buildScope(
           {
-            entitiesWithAlerts: { title: 'Entities with alerts', value: 1, delta: 1, entityIds: [SEEDED_HOST.id] },
-            newlyHighCritical: { title: 'Newly high/critical', value: 1, entityIds: [SEEDED_USER.id] },
+            entitiesWithAlerts: {
+              title: 'Entities with alerts',
+              value: 1,
+              delta: 1,
+              entityIds: [SEEDED_HOST.id],
+            },
           },
           'entitiesWithAlerts'
         )
