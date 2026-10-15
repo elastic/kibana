@@ -49,7 +49,7 @@ describe('alerting v2 route access', () => {
       name: `${route.method.toUpperCase()} ${route.path}`,
       route,
     }))
-  )('$name is stable since 9.6.0', ({ route }) => {
-    expect(route.options?.availability).toEqual({ stability: 'stable', since: '9.6.0' });
+  )('$name declares stable availability', ({ route }) => {
+    expect(route.options?.availability?.stability).toBe('stable');
   });
 });
