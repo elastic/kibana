@@ -134,6 +134,8 @@ export type {
   CoreServiceAccountsService,
   ServiceAccount,
   CreateServiceAccountParams,
+  CreateServiceAccountServerParams,
+  ServiceAccountPlatformAssumer,
   AuditEvent,
   AuditHttp,
   AuditKibana,

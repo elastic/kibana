@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -25,6 +25,7 @@ import { parseCreateServiceAccountParams } from './create_params';
 import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
@@ -191,15 +192,20 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     try {
-      const account = await this.createAccount(request, params, auditLogger);
+      const { platformAssumers, ...account } = await this.createAccount(
+        request,
+        params,
+        auditLogger
+      );
       auditLogger.log(
         serviceAccountAuditEvent({
           action: ServiceAccountAuditAction.CREATE,
           serviceAccount: { id: account.id, name: account.name },
+          platformAssumers,
         })
       );
       securityTelemetry.recordServiceAccountCreationAttempt({
@@ -218,19 +224,22 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
-  /** `auditLogger` records an authorization refusal. */
+  /**
+   * `auditLogger` records an authorization refusal. Also returns the validated platform assumers,
+   * so the audit event of a create records them.
+   */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams,
+    params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger
-  ): Promise<ServiceAccount> {
+  ): Promise<ServiceAccount & Pick<CreateServiceAccountServerParams, 'platformAssumers'>> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot create a service account: security features are disabled in Elasticsearch'
       );
     }
 
-    const { name, roles, description } = parseCreateServiceAccountParams(
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -248,6 +257,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           serviceAccountAuditEvent({
             action: ServiceAccountAuditAction.CREATE,
             serviceAccount: { name },
+            platformAssumers,
             error,
           })
         ),
@@ -266,7 +276,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           project_type: this.cloudProjectContext.projectType,
           project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy({
+            ...this.cloudProjectContext,
+            platformServiceAccountIds: getPlatformAssumerServiceAccountIds(platformAssumers ?? []),
+          }),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.
@@ -289,6 +302,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       name: result.name,
       roles,
       ...toDescriptionField(result.description),
+      platformAssumers,
     };
   }
 
