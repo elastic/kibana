@@ -102,7 +102,8 @@ const noise = (id, timestamp) => ({
   'kibana.alert.original_time': timestamp,
   'kibana.alert.last_detected': timestamp,
   'kibana.alert.start': timestamp,
-  'kibana.alert.space_ids': [SPACE],
+  // RAC scopes alert queries by `kibana.space_ids`; without it the alerts table hides these docs.
+  'kibana.space_ids': [SPACE],
   'kibana.alert.workflow_assignee_ids': [],
   'kibana.alert.rule.author': [],
   'kibana.alert.rule.enabled': true,
