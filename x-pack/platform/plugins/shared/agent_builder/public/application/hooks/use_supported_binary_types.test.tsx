@@ -9,13 +9,13 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useSupportedDocumentTypes } from './use_supported_document_types';
+import { useSupportedBinaryTypes } from './use_supported_binary_types';
 
-const mockGetSupportedDocumentMimeTypes = jest.fn();
+const mockGetSupportedBinaryMimeTypes = jest.fn();
 
 jest.mock('./use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    attachmentsService: { getSupportedDocumentMimeTypes: mockGetSupportedDocumentMimeTypes },
+    attachmentsService: { getSupportedBinaryMimeTypes: mockGetSupportedBinaryMimeTypes },
   }),
 }));
 
@@ -27,65 +27,65 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-describe('useSupportedDocumentTypes', () => {
+describe('useSupportedBinaryTypes', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('is empty until the server answers', () => {
-    mockGetSupportedDocumentMimeTypes.mockReturnValue(new Promise(() => {}));
+    mockGetSupportedBinaryMimeTypes.mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedBinaryTypes(), { wrapper: createWrapper() });
 
     expect(result.current).toEqual([]);
   });
 
   it('returns the types the server says work', async () => {
-    mockGetSupportedDocumentMimeTypes.mockResolvedValue(['text/markdown', 'text/plain']);
+    mockGetSupportedBinaryMimeTypes.mockResolvedValue(['text/markdown', 'text/plain']);
 
-    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedBinaryTypes(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current).toEqual(['text/markdown', 'text/plain']));
   });
 
   it('is empty when the server says no type works', async () => {
-    mockGetSupportedDocumentMimeTypes.mockResolvedValue([]);
+    mockGetSupportedBinaryMimeTypes.mockResolvedValue([]);
 
-    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedBinaryTypes(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalled());
     expect(result.current).toEqual([]);
   });
 
   it('is empty when the check fails', async () => {
-    mockGetSupportedDocumentMimeTypes.mockRejectedValue(new Error('boom'));
+    mockGetSupportedBinaryMimeTypes.mockRejectedValue(new Error('boom'));
 
-    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedBinaryTypes(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalled());
     expect(result.current).toEqual([]);
   });
 
   it('keeps the same empty list between renders', async () => {
-    mockGetSupportedDocumentMimeTypes.mockRejectedValue(new Error('boom'));
+    mockGetSupportedBinaryMimeTypes.mockRejectedValue(new Error('boom'));
 
-    const { result, rerender } = renderHook(() => useSupportedDocumentTypes(), {
+    const { result, rerender } = renderHook(() => useSupportedBinaryTypes(), {
       wrapper: createWrapper(),
     });
     const before = result.current;
-    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalled());
     rerender();
 
     expect(result.current).toBe(before);
   });
 
   it('asks the server once for many hook users', async () => {
-    mockGetSupportedDocumentMimeTypes.mockResolvedValue(['application/pdf']);
+    mockGetSupportedBinaryMimeTypes.mockResolvedValue(['application/pdf']);
     const wrapper = createWrapper();
 
-    const first = renderHook(() => useSupportedDocumentTypes(), { wrapper });
+    const first = renderHook(() => useSupportedBinaryTypes(), { wrapper });
     await waitFor(() => expect(first.result.current).toEqual(['application/pdf']));
-    const second = renderHook(() => useSupportedDocumentTypes(), { wrapper });
+    const second = renderHook(() => useSupportedBinaryTypes(), { wrapper });
 
     expect(second.result.current).toEqual(['application/pdf']);
-    expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalledTimes(1);
   });
 });

@@ -41,7 +41,7 @@ let mockConversation: { attachments?: unknown[] } | undefined;
 
 const documentInput = {
   id: 'pdf-1',
-  type: 'document',
+  type: 'binary',
   origin: 'file-1',
   description: 'invoice.pdf',
 };

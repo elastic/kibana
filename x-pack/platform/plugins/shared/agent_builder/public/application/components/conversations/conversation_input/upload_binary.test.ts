@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MAX_DOCUMENT_BYTES } from '@kbn/agent-builder-common/attachments';
+import { MAX_BINARY_BYTES } from '@kbn/agent-builder-common/attachments';
 import {
-  MAX_DOCUMENTS_PER_MESSAGE,
-  rejectIfTooManyDocuments,
-  rejectInvalidDocument,
-  uploadDocument,
-} from './upload_document';
+  MAX_FILES_PER_MESSAGE,
+  rejectIfTooManyFiles,
+  rejectInvalidFile,
+  uploadBinary,
+} from './upload_binary';
 
 jest.mock('@kbn/agent-builder-browser', () => ({
   formatAgentBuilderErrorMessage: (error: Error) => error.message,
@@ -22,11 +22,11 @@ const MB = 1024 * 1024;
 const createDocument = ({ name = 'invoice.pdf', type = 'application/pdf', size = 4 } = {}) =>
   new File([new Uint8Array(size)], name, { type });
 
-describe('rejectInvalidDocument', () => {
+describe('rejectInvalidFile', () => {
   it('accepts a small PDF', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectInvalidDocument({ file: createDocument(), addErrorToast })).toBe(false);
+    expect(rejectInvalidFile({ file: createDocument(), addErrorToast })).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
@@ -34,22 +34,22 @@ describe('rejectInvalidDocument', () => {
     const addErrorToast = jest.fn();
     const file = createDocument({ name: 'notes.md', type: '' });
 
-    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(false);
+    expect(rejectInvalidFile({ file, addErrorToast })).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
   it('accepts a PDF of exactly the maximum size', () => {
     const addErrorToast = jest.fn();
-    const file = createDocument({ size: MAX_DOCUMENT_BYTES['application/pdf'] });
+    const file = createDocument({ size: MAX_BINARY_BYTES['application/pdf'] });
 
-    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(false);
+    expect(rejectInvalidFile({ file, addErrorToast })).toBe(false);
   });
 
   it('rejects a file type that is not supported', () => {
     const addErrorToast = jest.fn();
     const file = createDocument({ name: 'data.csv', type: 'text/plain' });
 
-    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(true);
+    expect(rejectInvalidFile({ file, addErrorToast })).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({ title: 'This file type is not supported.' });
   });
 
@@ -61,7 +61,7 @@ describe('rejectInvalidDocument', () => {
     const addErrorToast = jest.fn();
     const file = createDocument({ name, type, size: limitInMb * MB + 1 });
 
-    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(true);
+    expect(rejectInvalidFile({ file, addErrorToast })).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({
       title: `The file is too large. The maximum size is ${limitInMb} MB.`,
     });
@@ -71,22 +71,22 @@ describe('rejectInvalidDocument', () => {
     const addErrorToast = jest.fn();
 
     expect(
-      rejectInvalidDocument({
+      rejectInvalidFile({
         file: createDocument({ name: 'notes.txt', type: 'text/plain', size: 3 * MB }),
         addErrorToast,
       })
     ).toBe(true);
-    expect(rejectInvalidDocument({ file: createDocument({ size: 3 * MB }), addErrorToast })).toBe(
+    expect(rejectInvalidFile({ file: createDocument({ size: 3 * MB }), addErrorToast })).toBe(
       false
     );
   });
 });
 
-describe('rejectIfTooManyDocuments', () => {
+describe('rejectIfTooManyFiles', () => {
   it('allows the first document', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectIfTooManyDocuments({ currentDocumentCount: 0, addErrorToast })).toBe(false);
+    expect(rejectIfTooManyFiles({ currentFileCount: 0, addErrorToast })).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
@@ -94,16 +94,16 @@ describe('rejectIfTooManyDocuments', () => {
     const addErrorToast = jest.fn();
 
     expect(
-      rejectIfTooManyDocuments({ currentDocumentCount: MAX_DOCUMENTS_PER_MESSAGE, addErrorToast })
+      rejectIfTooManyFiles({ currentFileCount: MAX_FILES_PER_MESSAGE, addErrorToast })
     ).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({ title: 'You can attach 1 document per message.' });
   });
 });
 
-describe('uploadDocument', () => {
-  const attachment = { id: 'att-1', type: 'document' };
+describe('uploadBinary', () => {
+  const attachment = { id: 'att-1', type: 'binary' };
   const setup = () => {
-    const documentFilesClient = {
+    const binaryFilesClient = {
       create: jest.fn().mockResolvedValue({ file: { id: 'file-1' } }),
       upload: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
@@ -111,28 +111,28 @@ describe('uploadDocument', () => {
     const attachmentsService = { create: jest.fn().mockResolvedValue(attachment) };
     const controller = new AbortController();
     const run = () =>
-      uploadDocument({
+      uploadBinary({
         file: createDocument(),
         name: 'invoice.pdf',
         mimeType: 'application/pdf',
         conversationId: 'conv-1',
-        documentFilesClient: documentFilesClient as never,
+        binaryFilesClient: binaryFilesClient as never,
         attachmentsService: attachmentsService as never,
         signal: controller.signal,
       });
-    return { documentFilesClient, attachmentsService, controller, run };
+    return { binaryFilesClient, attachmentsService, controller, run };
   };
 
   it('uploads the file, then creates the document attachment from its id', async () => {
-    const { documentFilesClient, attachmentsService, controller, run } = setup();
+    const { binaryFilesClient, attachmentsService, controller, run } = setup();
 
     await expect(run()).resolves.toEqual({ status: 'done', attachment, fileId: 'file-1' });
 
-    expect(documentFilesClient.create).toHaveBeenCalledWith({
+    expect(binaryFilesClient.create).toHaveBeenCalledWith({
       name: 'invoice.pdf',
       mimeType: 'application/pdf',
     });
-    expect(documentFilesClient.upload).toHaveBeenCalledWith(
+    expect(binaryFilesClient.upload).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'file-1',
         contentType: 'application/pdf',
@@ -142,37 +142,37 @@ describe('uploadDocument', () => {
     );
     expect(attachmentsService.create).toHaveBeenCalledWith({
       conversationId: 'conv-1',
-      type: 'document',
+      type: 'binary',
       origin: 'file-1',
       signal: controller.signal,
     });
   });
 
   it('uses the resolved MIME type, not the type of the file', async () => {
-    const { documentFilesClient, attachmentsService, controller } = setup();
+    const { binaryFilesClient, attachmentsService, controller } = setup();
 
-    await uploadDocument({
+    await uploadBinary({
       file: createDocument({ name: 'notes.md', type: '' }),
       name: 'notes.md',
       mimeType: 'text/markdown',
       conversationId: 'conv-1',
-      documentFilesClient: documentFilesClient as never,
+      binaryFilesClient: binaryFilesClient as never,
       attachmentsService: attachmentsService as never,
       signal: controller.signal,
     });
 
-    expect(documentFilesClient.create).toHaveBeenCalledWith({
+    expect(binaryFilesClient.create).toHaveBeenCalledWith({
       name: 'notes.md',
       mimeType: 'text/markdown',
     });
-    expect(documentFilesClient.upload).toHaveBeenCalledWith(
+    expect(binaryFilesClient.upload).toHaveBeenCalledWith(
       expect.objectContaining({ contentType: 'text/markdown' })
     );
   });
 
   it('fails with a plain message when the upload fails, and does not create the attachment', async () => {
-    const { documentFilesClient, attachmentsService, run } = setup();
-    documentFilesClient.upload.mockRejectedValue(new Error('network'));
+    const { binaryFilesClient, attachmentsService, run } = setup();
+    binaryFilesClient.upload.mockRejectedValue(new Error('network'));
 
     await expect(run()).resolves.toEqual({
       status: 'failed',
@@ -192,25 +192,25 @@ describe('uploadDocument', () => {
   });
 
   it('reports an abort during the upload as aborted, not failed', async () => {
-    const { documentFilesClient, attachmentsService, controller, run } = setup();
-    documentFilesClient.upload.mockImplementation(async () => {
+    const { binaryFilesClient, attachmentsService, controller, run } = setup();
+    binaryFilesClient.upload.mockImplementation(async () => {
       controller.abort();
       throw new Error('aborted');
     });
 
     await expect(run()).resolves.toEqual({ status: 'aborted' });
     expect(attachmentsService.create).not.toHaveBeenCalled();
-    expect(documentFilesClient.delete).not.toHaveBeenCalled();
+    expect(binaryFilesClient.delete).not.toHaveBeenCalled();
   });
 
   it('deletes the file itself when aborted between the upload and the read', async () => {
-    const { documentFilesClient, attachmentsService, controller, run } = setup();
-    documentFilesClient.upload.mockImplementation(async () => {
+    const { binaryFilesClient, attachmentsService, controller, run } = setup();
+    binaryFilesClient.upload.mockImplementation(async () => {
       controller.abort();
     });
 
     await expect(run()).resolves.toEqual({ status: 'aborted' });
-    expect(documentFilesClient.delete).toHaveBeenCalledWith({ id: 'file-1' });
+    expect(binaryFilesClient.delete).toHaveBeenCalledWith({ id: 'file-1' });
     expect(attachmentsService.create).not.toHaveBeenCalled();
   });
 

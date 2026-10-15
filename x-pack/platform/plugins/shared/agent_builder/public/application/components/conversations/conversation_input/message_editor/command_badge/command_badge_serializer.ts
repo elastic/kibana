@@ -9,7 +9,7 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
-import { IMAGE_ATTACHMENT_SCHEME, DOCUMENT_ATTACHMENT_SCHEME } from '../attachment_placeholder';
+import { IMAGE_ATTACHMENT_SCHEME, BINARY_ATTACHMENT_SCHEME } from '../attachment_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -23,11 +23,11 @@ interface ImageSegment {
   type: 'image';
   name: string;
 }
-interface DocumentSegment {
-  type: 'document';
+interface BinarySegment {
+  type: 'binary';
   name: string;
 }
-export type ContentSegment = TextSegment | BadgeSegment | ImageSegment | DocumentSegment;
+export type ContentSegment = TextSegment | BadgeSegment | ImageSegment | BinarySegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -103,10 +103,10 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
 
     const [_, displayText, scheme, path, queryString] = match;
 
-    if (scheme === IMAGE_ATTACHMENT_SCHEME || scheme === DOCUMENT_ATTACHMENT_SCHEME) {
+    if (scheme === IMAGE_ATTACHMENT_SCHEME || scheme === BINARY_ATTACHMENT_SCHEME) {
       try {
         segments.push({
-          type: scheme === DOCUMENT_ATTACHMENT_SCHEME ? 'document' : 'image',
+          type: scheme === BINARY_ATTACHMENT_SCHEME ? 'binary' : 'image',
           name: decodeURIComponent(path),
         });
       } catch {

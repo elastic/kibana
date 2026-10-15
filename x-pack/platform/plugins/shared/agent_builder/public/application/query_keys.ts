@@ -24,7 +24,7 @@ export const queryKeys = {
     byId: (conversationId: string) => ['conversations', conversationId],
   },
   attachments: {
-    supportedDocumentTypes: ['attachments', 'document', 'supported_types'] as const,
+    supportedBinaryTypes: ['attachments', 'binary', 'supported_types'] as const,
   },
   agentProfiles: {
     all: ['agentProfiles'] as const,

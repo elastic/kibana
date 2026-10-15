@@ -10,13 +10,13 @@ import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip, useEuiTheme } from '@e
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AttachmentTile } from './attachment_tile';
-import { getDocumentTypeLabel, resolveDocumentMimeType } from './document_mime_type';
+import { getFileTypeLabel, resolveFileMimeType } from './file_type';
 
-const readingLabel = i18n.translate('xpack.agentBuilder.documentAttachmentPill.readingLabel', {
+const readingLabel = i18n.translate('xpack.agentBuilder.fileAttachmentPill.readingLabel', {
   defaultMessage: 'Reading file...',
 });
 
-export interface DocumentAttachmentPillProps {
+export interface FileAttachmentPillProps {
   attachmentId: string;
   /** The file name, shown in the tooltip. */
   name: string;
@@ -28,7 +28,7 @@ export interface DocumentAttachmentPillProps {
 }
 
 /** A tile for a document, the size of an image tile: the document icon and the file type. */
-export const DocumentAttachmentPill: React.FC<DocumentAttachmentPillProps> = ({
+export const FileAttachmentPill: React.FC<FileAttachmentPillProps> = ({
   attachmentId,
   name,
   mimeType,
@@ -37,8 +37,8 @@ export const DocumentAttachmentPill: React.FC<DocumentAttachmentPillProps> = ({
   isHighlighted = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const resolvedMimeType = resolveDocumentMimeType({ name, mimeType });
-  const typeLabel = resolvedMimeType ? getDocumentTypeLabel(resolvedMimeType) : undefined;
+  const resolvedMimeType = resolveFileMimeType({ name, mimeType });
+  const typeLabel = resolvedMimeType ? getFileTypeLabel(resolvedMimeType) : undefined;
 
   return (
     <EuiToolTip content={isLoading ? readingLabel : name} disableScreenReaderOutput>
@@ -46,7 +46,7 @@ export const DocumentAttachmentPill: React.FC<DocumentAttachmentPillProps> = ({
         attachmentId={attachmentId}
         data-test-subj={
           isLoading
-            ? `agentBuilderLoadingDocumentPill-${attachmentId}`
+            ? `agentBuilderLoadingFilePill-${attachmentId}`
             : `agentBuilderAttachmentPill-${attachmentId}`
         }
         onRemoveAttachment={onRemoveAttachment}

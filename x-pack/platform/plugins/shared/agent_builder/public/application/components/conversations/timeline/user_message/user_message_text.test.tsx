@@ -306,7 +306,7 @@ describe('UserMessageText', () => {
 
     it('renders a document badge for document scheme links, with the name decoded', () => {
       renderWithProvider(
-        <UserMessageText text="Read [My invoice.pdf](document://My%20invoice.pdf)" />
+        <UserMessageText text="Read [My invoice.pdf](binary://My%20invoice.pdf)" />
       );
 
       expect(screen.getByText('My invoice.pdf')).toBeInTheDocument();
@@ -386,7 +386,7 @@ describe('UserMessageText', () => {
           const onHoverAttachment = jest.fn();
           renderWithProvider(
             <UserMessageText
-              text="[invoice.pdf](document://invoice.pdf)"
+              text="[invoice.pdf](binary://invoice.pdf)"
               onHoverAttachment={onHoverAttachment}
             />
           );

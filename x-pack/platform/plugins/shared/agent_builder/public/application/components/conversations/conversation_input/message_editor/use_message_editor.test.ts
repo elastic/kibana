@@ -106,10 +106,10 @@ describe('useMessageEditor setContent', () => {
     attachRef(result.current.messageEditor, div);
 
     act(() => {
-      result.current.controller.setContent('[invoice.pdf](document://invoice.pdf)');
+      result.current.controller.setContent('[invoice.pdf](binary://invoice.pdf)');
     });
 
-    expect(result.current.controller.getPlaceholderNames('document')).toEqual(['invoice.pdf']);
+    expect(result.current.controller.getPlaceholderNames('binary')).toEqual(['invoice.pdf']);
     expect(result.current.controller.getPlaceholderNames()).toEqual([]);
   });
 

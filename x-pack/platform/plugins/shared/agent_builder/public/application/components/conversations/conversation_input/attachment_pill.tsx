@@ -22,7 +22,7 @@ import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attac
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { DocumentAttachmentPill } from './document_attachment_pill';
+import { FileAttachmentPill } from './file_attachment_pill';
 import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -65,9 +65,9 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     );
   }
 
-  if (attachment.type === AttachmentType.document) {
+  if (attachment.type === AttachmentType.binary) {
     return (
-      <DocumentAttachmentPill
+      <FileAttachmentPill
         attachmentId={attachment.id}
         name={label}
         mimeType={(attachment.data as { mime_type?: string } | undefined)?.mime_type}

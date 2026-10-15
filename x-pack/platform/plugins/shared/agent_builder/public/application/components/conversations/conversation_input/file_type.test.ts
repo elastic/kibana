@@ -6,13 +6,13 @@
  */
 
 import {
-  getDocumentMimeType,
-  getDocumentName,
-  getDocumentTypeLabel,
-  resolveDocumentMimeType,
-} from './document_mime_type';
+  getFileMimeType,
+  getFileName,
+  getFileTypeLabel,
+  resolveFileMimeType,
+} from './file_type';
 
-describe('getDocumentMimeType', () => {
+describe('getFileMimeType', () => {
   it.each([
     ['a.md', '', 'text/markdown'],
     ['a.markdown', 'text/x-markdown', 'text/markdown'],
@@ -35,15 +35,15 @@ describe('getDocumentMimeType', () => {
     ['', '', undefined],
     ['README', 'image/png', undefined],
   ])('maps name "%s" and type "%s" to %s', (name, type, expected) => {
-    expect(getDocumentMimeType({ name, type })).toBe(expected);
+    expect(getFileMimeType({ name, type })).toBe(expected);
   });
 });
 
-describe('getDocumentName', () => {
+describe('getFileName', () => {
   it('keeps the name of the file', () => {
     const file = new File(['x'], 'notes.md', { type: 'text/markdown' });
 
-    expect(getDocumentName(file, 'text/markdown')).toBe('notes.md');
+    expect(getFileName(file, 'text/markdown')).toBe('notes.md');
   });
 
   it.each([
@@ -53,13 +53,13 @@ describe('getDocumentName', () => {
   ] as const)('uses a default name for %s when the file has no name', (mimeType, expected) => {
     const file = new File(['x'], '', { type: mimeType });
 
-    expect(getDocumentName(file, mimeType)).toBe(expected);
+    expect(getFileName(file, mimeType)).toBe(expected);
   });
 });
 
-describe('resolveDocumentMimeType', () => {
+describe('resolveFileMimeType', () => {
   it('uses the stored mime type when it is supported', () => {
-    expect(resolveDocumentMimeType({ name: 'a.txt', mimeType: 'text/markdown' })).toBe(
+    expect(resolveFileMimeType({ name: 'a.txt', mimeType: 'text/markdown' })).toBe(
       'text/markdown'
     );
   });
@@ -67,21 +67,21 @@ describe('resolveDocumentMimeType', () => {
   it.each([[undefined], [''], ['application/msword']])(
     'takes the mime type from the name when the stored one is %s',
     (mimeType) => {
-      expect(resolveDocumentMimeType({ name: 'a.pdf', mimeType })).toBe('application/pdf');
+      expect(resolveFileMimeType({ name: 'a.pdf', mimeType })).toBe('application/pdf');
     }
   );
 
   it('is undefined when nothing tells the type', () => {
-    expect(resolveDocumentMimeType({ name: 'README' })).toBeUndefined();
+    expect(resolveFileMimeType({ name: 'README' })).toBeUndefined();
   });
 });
 
-describe('getDocumentTypeLabel', () => {
+describe('getFileTypeLabel', () => {
   it.each([
     ['application/pdf', 'PDF'],
     ['text/markdown', 'MD'],
     ['text/plain', 'TXT'],
   ] as const)('labels %s as %s', (mimeType, label) => {
-    expect(getDocumentTypeLabel(mimeType)).toBe(label);
+    expect(getFileTypeLabel(mimeType)).toBe(label);
   });
 });

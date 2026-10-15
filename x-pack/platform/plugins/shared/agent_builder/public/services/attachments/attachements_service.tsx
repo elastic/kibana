@@ -7,8 +7,8 @@
 
 import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import {
-  isSupportedDocumentMimeType,
-  type SupportedDocumentMimeType,
+  isSupportedBinaryMimeType,
+  type SupportedBinaryMimeType,
   type UnknownAttachment,
   type UpdateOriginResponse,
   type VersionedAttachment,
@@ -22,7 +22,7 @@ import type {
   ListAttachmentsResult,
   UpdateAttachmentArgs,
 } from '@kbn/agent-builder-browser';
-import { documentSupportedTypesPath, publicApiPath } from '../../../common/constants';
+import { binarySupportedTypesPath, publicApiPath } from '../../../common/constants';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
@@ -153,11 +153,11 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async getSupportedDocumentMimeTypes(): Promise<SupportedDocumentMimeType[]> {
+  async getSupportedBinaryMimeTypes(): Promise<SupportedBinaryMimeType[]> {
     const { mime_types: mimeTypes } = await this.http.get<{ mime_types: string[] }>(
-      documentSupportedTypesPath
+      binarySupportedTypesPath
     );
-    return mimeTypes.filter(isSupportedDocumentMimeType);
+    return mimeTypes.filter(isSupportedBinaryMimeType);
   }
 
   async update({

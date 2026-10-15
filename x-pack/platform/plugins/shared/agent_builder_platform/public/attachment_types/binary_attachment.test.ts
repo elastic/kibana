@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { documentAttachmentDefinition } from './document_attachment';
+import { binaryAttachmentDefinition } from './binary_attachment';
 
-describe('documentAttachmentDefinition', () => {
+describe('binaryAttachmentDefinition', () => {
   it('uses the stored file name as the label', () => {
     expect(
-      documentAttachmentDefinition.getLabel({
+      binaryAttachmentDefinition.getLabel({
         id: 'a1',
-        type: 'document',
+        type: 'binary',
         data: { name: 'invoice.pdf', file_id: 'f1', text: 'hello' },
       })
     ).toBe('invoice.pdf');
@@ -20,24 +20,24 @@ describe('documentAttachmentDefinition', () => {
 
   it('uses the description when there is no data (pending input attachment)', () => {
     expect(
-      documentAttachmentDefinition.getLabel({
+      binaryAttachmentDefinition.getLabel({
         id: 'a1',
-        type: 'document',
+        type: 'binary',
         origin: 'f1',
         description: 'invoice.pdf',
       } as never)
     ).toBe('invoice.pdf');
   });
 
-  it('falls back to "Document"', () => {
-    expect(documentAttachmentDefinition.getLabel({ id: 'a1', type: 'document' } as never)).toBe(
-      'Document'
+  it('falls back to "File"', () => {
+    expect(binaryAttachmentDefinition.getLabel({ id: 'a1', type: 'binary' } as never)).toBe(
+      'File'
     );
   });
 
   it('uses the document icon and has no thumbnail or inline content', () => {
-    expect(documentAttachmentDefinition.getIcon?.()).toBe('document');
-    expect(documentAttachmentDefinition.getThumbnail).toBeUndefined();
-    expect(documentAttachmentDefinition.renderInlineContent).toBeUndefined();
+    expect(binaryAttachmentDefinition.getIcon?.()).toBe('document');
+    expect(binaryAttachmentDefinition.getThumbnail).toBeUndefined();
+    expect(binaryAttachmentDefinition.renderInlineContent).toBeUndefined();
   });
 });

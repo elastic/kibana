@@ -30,10 +30,10 @@ describe('useInputDraft', () => {
     expect(renderDraft().result.current.draft).toBe('hello');
   });
 
-  it('strips image and document chips from the saved draft', () => {
+  it('strips image, binary and text chips from the saved draft', () => {
     const { result } = renderDraft();
 
-    result.current.saveDraft('see [a.png](image://a.png) and [b.pdf](document://b.pdf) please');
+    result.current.saveDraft('see [a.png](image://a.png) and [b.pdf](binary://b.pdf) please');
 
     expect(renderDraft().result.current.draft).toBe('see  and  please');
   });
@@ -41,16 +41,16 @@ describe('useInputDraft', () => {
   it('keeps other links', () => {
     const { result } = renderDraft();
 
-    result.current.saveDraft('[/Summarize](skill://skill-1) [b.pdf](document://b.pdf)');
+    result.current.saveDraft('[/Summarize](skill://skill-1) [b.pdf](binary://b.pdf)');
 
     expect(renderDraft().result.current.draft).toBe('[/Summarize](skill://skill-1) ');
   });
 
-  it('removes the draft when only a document chip is left', () => {
+  it('removes the draft when only a file chip is left', () => {
     const { result } = renderDraft();
     result.current.saveDraft('text');
 
-    result.current.saveDraft('[b.pdf](document://b.pdf)');
+    result.current.saveDraft('[b.pdf](binary://b.pdf)');
 
     expect(renderDraft().result.current.draft).toBeNull();
   });

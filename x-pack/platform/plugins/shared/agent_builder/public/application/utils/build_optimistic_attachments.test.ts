@@ -72,13 +72,13 @@ describe('buildOptimisticAttachments', () => {
     const conversationAttachments = [
       createVersionedAttachment({
         id: 'pdf-1',
-        type: 'document',
+        type: 'binary',
         data: { file_id: 'file-1', name: 'invoice.pdf', text: 'hello' },
         currentVersion: 3,
       }),
     ];
     const attachments: AttachmentInput[] = [
-      { id: 'pdf-1', type: 'document', origin: 'file-1', description: 'invoice.pdf' },
+      { id: 'pdf-1', type: 'binary', origin: 'file-1', description: 'invoice.pdf' },
     ];
 
     const result = buildOptimisticAttachments({ attachments, conversationAttachments });

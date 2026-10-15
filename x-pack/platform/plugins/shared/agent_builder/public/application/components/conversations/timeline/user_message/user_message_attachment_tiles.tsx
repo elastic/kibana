@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DocumentAttachmentPill } from '../../conversation_input/document_attachment_pill';
+import { FileAttachmentPill } from '../../conversation_input/file_attachment_pill';
 import { ThumbnailAttachmentPill } from '../../conversation_input/thumbnail_attachment_pill';
-import type { UserMessageDocument } from './use_user_message_documents';
+import type { UserMessageFile } from './use_user_message_files';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
 export interface UserMessageAttachmentTilesProps {
   thumbnails: UserMessageThumbnail[];
-  documents?: UserMessageDocument[];
+  documents?: UserMessageFile[];
   /** When set, the tile whose file name matches is highlighted. */
   hoveredAttachmentName?: string | null;
 }
@@ -41,7 +41,7 @@ export const UserMessageAttachmentTiles: React.FC<UserMessageAttachmentTilesProp
         ))}
         {documents.map(({ key, attachmentId, name, mimeType }) => (
           <EuiFlexItem grow={false} key={key}>
-            <DocumentAttachmentPill
+            <FileAttachmentPill
               attachmentId={attachmentId}
               name={name}
               mimeType={mimeType}

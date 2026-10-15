@@ -120,14 +120,14 @@ describe('AttachmentPillsRow', () => {
   describe('loading documents', () => {
     it('renders nothing for an empty list with no loading documents', () => {
       const { container } = render(
-        <AttachmentPillsRow attachments={[]} loadingDocumentNames={new Set()} />
+        <AttachmentPillsRow attachments={[]} loadingBinaryNames={new Set()} />
       );
       expect(container.firstChild).toBeNull();
     });
 
     it('renders a named loading pill for each loading document, even with no attachments', () => {
       render(
-        <AttachmentPillsRow attachments={[]} loadingDocumentNames={new Set(['invoice.pdf'])} />
+        <AttachmentPillsRow attachments={[]} loadingBinaryNames={new Set(['invoice.pdf'])} />
       );
 
       const pill = screen.getByTestId('mock-attachment-pill-invoice.pdf');
@@ -139,7 +139,7 @@ describe('AttachmentPillsRow', () => {
       render(
         <AttachmentPillsRow
           attachments={[makeInput('a1')]}
-          loadingDocumentNames={new Set(['invoice.pdf'])}
+          loadingBinaryNames={new Set(['invoice.pdf'])}
         />
       );
 
@@ -151,41 +151,41 @@ describe('AttachmentPillsRow', () => {
     });
 
     it('cancels a loading document by its name when removable', () => {
-      const onRemoveLoadingDocument = jest.fn();
+      const onRemoveLoadingBinary = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingDocumentNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingDocument={onRemoveLoadingDocument}
+          loadingBinaryNames={new Set(['invoice.pdf'])}
+          onRemoveLoadingBinary={onRemoveLoadingBinary}
           removable
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingDocument).toHaveBeenCalledWith('invoice.pdf');
+      expect(onRemoveLoadingBinary).toHaveBeenCalledWith('invoice.pdf');
     });
 
     it('offers no cancel when not removable', () => {
-      const onRemoveLoadingDocument = jest.fn();
+      const onRemoveLoadingBinary = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingDocumentNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingDocument={onRemoveLoadingDocument}
+          loadingBinaryNames={new Set(['invoice.pdf'])}
+          onRemoveLoadingBinary={onRemoveLoadingBinary}
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingDocument).not.toHaveBeenCalled();
+      expect(onRemoveLoadingBinary).not.toHaveBeenCalled();
     });
 
     it('passes the description of an added document to its pill, so the label is its name', () => {
       render(
         <AttachmentPillsRow
           attachments={[
-            { id: 'pdf-1', type: 'document', origin: 'file-1', description: 'invoice.pdf' },
+            { id: 'pdf-1', type: 'binary', origin: 'file-1', description: 'invoice.pdf' },
           ]}
         />
       );
@@ -198,9 +198,9 @@ describe('AttachmentPillsRow', () => {
   });
 
   describe('highlighting by the hovered chip name', () => {
-    const makeDocument = (id: string, name: string): ConversationAttachment => ({
+    const makeBinary = (id: string, name: string): ConversationAttachment => ({
       id,
-      type: 'document',
+      type: 'binary',
       data: {},
       description: name,
     });
@@ -208,7 +208,7 @@ describe('AttachmentPillsRow', () => {
     it('highlights the document pill whose name matches the hovered chip', () => {
       render(
         <AttachmentPillsRow
-          attachments={[makeDocument('d1', 'notes.md'), makeDocument('d2', 'other.md')]}
+          attachments={[makeBinary('d1', 'notes.md'), makeBinary('d2', 'other.md')]}
           hoveredAttachmentName="notes.md"
         />
       );
@@ -224,7 +224,7 @@ describe('AttachmentPillsRow', () => {
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingDocumentNames={new Set(['notes.md'])}
+          loadingBinaryNames={new Set(['notes.md'])}
           hoveredAttachmentName="notes.md"
         />
       );

@@ -126,15 +126,15 @@ describe('document placeholders', () => {
       createAttachmentPlaceholderElement('a.png').getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)
     ).toBe('image');
     expect(
-      createAttachmentPlaceholderElement('a.pdf', 'document').getAttribute(
+      createAttachmentPlaceholderElement('a.pdf', 'binary').getAttribute(
         PLACEHOLDER_KIND_ATTRIBUTE
       )
-    ).toBe('document');
+    ).toBe('binary');
   });
 
   it('reads the kind back, treating a chip without the attribute as an image', () => {
-    expect(getPlaceholderKind(createAttachmentPlaceholderElement('a.pdf', 'document'))).toBe(
-      'document'
+    expect(getPlaceholderKind(createAttachmentPlaceholderElement('a.pdf', 'binary'))).toBe(
+      'binary'
     );
     const legacy = createAttachmentPlaceholderElement('a.png');
     legacy.removeAttribute(PLACEHOLDER_KIND_ATTRIBUTE);
@@ -143,7 +143,7 @@ describe('document placeholders', () => {
 
   it('draws the document icon instead of the image icon', () => {
     const image = createAttachmentPlaceholderElement('a.png');
-    const pdf = createAttachmentPlaceholderElement('a.pdf', 'document');
+    const pdf = createAttachmentPlaceholderElement('a.pdf', 'binary');
     const imagePath = image.querySelector(`[${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] path`);
     const documentPath = pdf.querySelector(`[${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] path`);
     expect(documentPath?.getAttribute('d')).not.toBe(imagePath?.getAttribute('d'));
@@ -154,15 +154,15 @@ describe('document placeholders', () => {
     const setup = () => {
       const container = document.createElement('div');
       container.appendChild(createAttachmentPlaceholderElement('same.name'));
-      container.appendChild(createAttachmentPlaceholderElement('same.name', 'document'));
-      container.appendChild(createAttachmentPlaceholderElement('only.pdf', 'document'));
+      container.appendChild(createAttachmentPlaceholderElement('same.name', 'binary'));
+      container.appendChild(createAttachmentPlaceholderElement('only.pdf', 'binary'));
       return container;
     };
 
     it('lists the names of one kind', () => {
       const container = setup();
       expect(getPlaceholderNamesFromElement(container)).toEqual(['same.name']);
-      expect(getPlaceholderNamesFromElement(container, 'document')).toEqual([
+      expect(getPlaceholderNamesFromElement(container, 'binary')).toEqual([
         'same.name',
         'only.pdf',
       ]);
@@ -170,18 +170,18 @@ describe('document placeholders', () => {
 
     it('removes a chip of one kind only', () => {
       const container = setup();
-      removePlaceholderByName(container, 'same.name', 'document');
+      removePlaceholderByName(container, 'same.name', 'binary');
       expect(getPlaceholderNamesFromElement(container)).toEqual(['same.name']);
-      expect(getPlaceholderNamesFromElement(container, 'document')).toEqual(['only.pdf']);
+      expect(getPlaceholderNamesFromElement(container, 'binary')).toEqual(['only.pdf']);
     });
 
     it('syncs the uploading state of chips of every kind by name', () => {
       const container = setup();
       syncChipsUploadingState(container, new Set(['only.pdf']));
-      const [image, pdf, otherDocument] = Array.from(container.children);
+      const [image, pdf, otherBinary] = Array.from(container.children);
       expect(image.hasAttribute('data-uploading')).toBe(false);
       expect(pdf.hasAttribute('data-uploading')).toBe(false);
-      expect(otherDocument.getAttribute('data-uploading')).toBe('true');
+      expect(otherBinary.getAttribute('data-uploading')).toBe('true');
     });
   });
 });

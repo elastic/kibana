@@ -13,8 +13,8 @@ import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { UserMessage } from './user_message';
 import { ResponseActions } from '../response/response_actions';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
-import { useUserMessageDocuments } from './use_user_message_documents';
-import type { UserMessageDocument } from './use_user_message_documents';
+import { useUserMessageFiles } from './use_user_message_files';
+import type { UserMessageFile } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
@@ -43,11 +43,11 @@ jest.mock('./user_message_attachment_tiles', () => ({
 }));
 
 jest.mock('./use_user_message_thumbnails');
-jest.mock('./use_user_message_documents');
+jest.mock('./use_user_message_files');
 
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseUserMessageThumbnails = jest.mocked(useUserMessageThumbnails);
-const mockUseUserMessageDocuments = jest.mocked(useUserMessageDocuments);
+const mockUseUserMessageDocuments = jest.mocked(useUserMessageFiles);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 const MockResponseActions = jest.mocked(ResponseActions);
 const MockUserMessageAttachmentTiles = jest.mocked(UserMessageAttachmentTiles);
@@ -60,7 +60,7 @@ const thumbnail: UserMessageThumbnail = {
   name: 'photo.png',
 };
 
-const document: UserMessageDocument = {
+const document: UserMessageFile = {
   key: 'doc1-v1',
   attachmentId: 'doc1',
   name: 'notes.md',

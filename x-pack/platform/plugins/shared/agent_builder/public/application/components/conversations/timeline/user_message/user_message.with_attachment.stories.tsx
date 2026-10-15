@@ -52,9 +52,9 @@ const imageAttachment = createVersionedAttachment({
   ],
 });
 
-const documentAttachment = createVersionedAttachment({
+const binaryAttachment = createVersionedAttachment({
   id: 'story-document-attachment',
-  type: AttachmentType.document,
+  type: AttachmentType.binary,
   versions: [
     {
       version: 1,
@@ -92,7 +92,7 @@ const meta: Meta<typeof UserMessage> = {
     author: { id: STORYBOOK_CURRENT_USER_ID },
     isPendingCurrentRound: false,
     startedAt: '2026-01-01T10:00:00.000Z',
-    conversationAttachments: [textAttachment, imageAttachment, documentAttachment],
+    conversationAttachments: [textAttachment, imageAttachment, binaryAttachment],
   },
 };
 export default meta;
@@ -131,8 +131,8 @@ export const WithoutTextWithImageAttachment: Story = {
 
 export const WithDocumentAttachment: Story = {
   args: {
-    input: "[invoice.pdf](document://invoice.pdf) What's in the PDF?",
-    attachmentRefs: [userRef(documentAttachment.id)],
+    input: "[invoice.pdf](binary://invoice.pdf) What's in the PDF?",
+    attachmentRefs: [userRef(binaryAttachment.id)],
   },
 };
 
@@ -140,14 +140,14 @@ export const WithDocumentAttachment: Story = {
 export const WithoutTextWithDocumentAttachment: Story = {
   args: {
     input: '',
-    attachmentRefs: [userRef(documentAttachment.id)],
+    attachmentRefs: [userRef(binaryAttachment.id)],
   },
 };
 
 export const WithImageAndDocumentAttachments: Story = {
   args: {
     input:
-      '[screenshot.png](image://screenshot.png) [invoice.pdf](document://invoice.pdf) Compare them.',
-    attachmentRefs: [userRef(imageAttachment.id), userRef(documentAttachment.id)],
+      '[screenshot.png](image://screenshot.png) [invoice.pdf](binary://invoice.pdf) Compare them.',
+    attachmentRefs: [userRef(imageAttachment.id), userRef(binaryAttachment.id)],
   },
 };

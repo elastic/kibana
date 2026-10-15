@@ -15,11 +15,11 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
-  CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
+  CHAT_ATTACHMENT_BINARIES_FILE_KIND,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
-  MAX_DOCUMENT_FILE_KIND_BYTES,
+  MAX_BINARY_FILE_KIND_BYTES,
   MAX_IMAGE_BYTES,
-  SUPPORTED_DOCUMENT_MIME_TYPES,
+  SUPPORTED_BINARY_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
@@ -151,9 +151,9 @@ export class AgentBuilderPlugin
     });
 
     deps.files.registerFileKind({
-      id: CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
-      allowedMimeTypes: [...SUPPORTED_DOCUMENT_MIME_TYPES],
-      maxSizeBytes: MAX_DOCUMENT_FILE_KIND_BYTES,
+      id: CHAT_ATTACHMENT_BINARIES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_BINARY_MIME_TYPES],
+      maxSizeBytes: MAX_BINARY_FILE_KIND_BYTES,
     });
 
     registerApp({
@@ -199,8 +199,8 @@ export class AgentBuilderPlugin
     const filesClient = startDependencies.files.filesClientFactory.asScoped(
       CHAT_ATTACHMENT_IMAGES_FILE_KIND
     );
-    const documentFilesClient = startDependencies.files.filesClientFactory.asScoped(
-      CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND
+    const binaryFilesClient = startDependencies.files.filesClientFactory.asScoped(
+      CHAT_ATTACHMENT_BINARIES_FILE_KIND
     );
 
     const agentService = new AgentService({ http });
@@ -291,7 +291,7 @@ export class AgentBuilderPlugin
 
     const internalServices: AgentBuilderInternalService = {
       filesClient,
-      documentFilesClient,
+      binaryFilesClient,
       agentService,
       attachmentsService,
       renderersService,

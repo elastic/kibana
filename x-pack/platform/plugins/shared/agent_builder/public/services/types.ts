@@ -29,7 +29,7 @@ import type { SpaceSettingsService } from './space_settings';
 
 export interface AgentBuilderInternalService {
   filesClient: ScopedFilesClient;
-  documentFilesClient: ScopedFilesClient;
+  binaryFilesClient: ScopedFilesClient;
   agentService: AgentService;
   attachmentsService: AttachmentsService;
   renderersService: RenderersService;

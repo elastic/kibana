@@ -10,7 +10,7 @@ import {
   getPlaceholderKind,
   IMAGE_ATTACHMENT_SCHEME,
   isElementAttachmentPlaceholder,
-  DOCUMENT_ATTACHMENT_SCHEME,
+  BINARY_ATTACHMENT_SCHEME,
 } from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
 
@@ -25,7 +25,7 @@ export const encodeImageName = (name: string): string =>
 /**
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
- * Image and document placeholders are converted to `[name](image://encodedName)` and `[name](document://encodedName)`.
+ * Image and document placeholders are converted to `[name](image://encodedName)` and `[name](binary://encodedName)`.
  * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  */
 export const serializeEditorContent = (editorElement: HTMLElement): string => {
@@ -45,8 +45,8 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
       const scheme =
-        getPlaceholderKind(element) === 'document'
-          ? DOCUMENT_ATTACHMENT_SCHEME
+        getPlaceholderKind(element) === 'binary'
+          ? BINARY_ATTACHMENT_SCHEME
           : IMAGE_ATTACHMENT_SCHEME;
       result += `[${displayName}](${scheme}://${encodeImageName(name)})`;
     } else if (isElementCommandBadge(element)) {

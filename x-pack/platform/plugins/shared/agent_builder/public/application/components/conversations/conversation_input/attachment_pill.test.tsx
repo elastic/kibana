@@ -31,7 +31,7 @@ describe('AttachmentPill', () => {
   it('shows a pending document as a tile with the type from its file name', () => {
     render(
       <AttachmentPill
-        attachment={{ id: 'd1', type: 'document', data: {}, description: 'notes.md' }}
+        attachment={{ id: 'd1', type: 'binary', data: {}, description: 'notes.md' }}
       />
     );
 
@@ -44,7 +44,7 @@ describe('AttachmentPill', () => {
       <AttachmentPill
         attachment={{
           id: 'd1',
-          type: 'document',
+          type: 'binary',
           data: { mime_type: 'application/pdf' },
           description: 'notes.md',
         }}
@@ -57,12 +57,12 @@ describe('AttachmentPill', () => {
   it('shows a loading document as a tile with the reading status', () => {
     render(
       <AttachmentPill
-        attachment={{ id: 'd1', type: 'document', data: {}, description: 'invoice.pdf' }}
+        attachment={{ id: 'd1', type: 'binary', data: {}, description: 'invoice.pdf' }}
         isLoading
       />
     );
 
-    expect(screen.getByTestId('agentBuilderLoadingDocumentPill-d1')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderLoadingFilePill-d1')).toBeInTheDocument();
     expect(screen.getByText('PDF')).toBeInTheDocument();
   });
 

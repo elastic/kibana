@@ -146,10 +146,10 @@ describe('serializeEditorContent', () => {
 
   it('serializes a document placeholder element with the document scheme', () => {
     const div = document.createElement('div');
-    div.appendChild(createAttachmentPlaceholderElement('My invoice (1).pdf', 'document'));
+    div.appendChild(createAttachmentPlaceholderElement('My invoice (1).pdf', 'binary'));
 
     expect(serializeEditorContent(div)).toBe(
-      '[My invoice (1).pdf](document://My%20invoice%20%281%29.pdf)'
+      '[My invoice (1).pdf](binary://My%20invoice%20%281%29.pdf)'
     );
   });
 
@@ -283,15 +283,15 @@ describe('deserializeInputSegments', () => {
   });
 
   it('parses a document segment', () => {
-    const segments = deserializeInputSegments('[My invoice.pdf](document://My%20invoice.pdf)');
+    const segments = deserializeInputSegments('[My invoice.pdf](binary://My%20invoice.pdf)');
 
-    expect(segments).toEqual([{ type: 'document', name: 'My invoice.pdf' }]);
+    expect(segments).toEqual([{ type: 'binary', name: 'My invoice.pdf' }]);
   });
 
   it('preserves a document link with malformed percent-encoding as text', () => {
-    const segments = deserializeInputSegments('[x](document://bad%.pdf)');
+    const segments = deserializeInputSegments('[x](binary://bad%.pdf)');
 
-    expect(segments).toEqual([{ type: 'text', value: '[x](document://bad%.pdf)' }]);
+    expect(segments).toEqual([{ type: 'text', value: '[x](binary://bad%.pdf)' }]);
   });
 
   it('decodes percent-encoded image names', () => {

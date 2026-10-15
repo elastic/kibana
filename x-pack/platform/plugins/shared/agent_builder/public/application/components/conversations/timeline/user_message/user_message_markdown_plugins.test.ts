@@ -18,9 +18,9 @@ describe('ALLOWED_LINK_PROTOCOLS', () => {
     expect(ALLOWED_LINK_PROTOCOLS).toEqual(expect.arrayContaining(['https:', 'http:', 'mailto:']));
   });
 
-  it('allows every command scheme plus the image and document schemes', () => {
+  it('allows every command scheme plus the image and binary schemes', () => {
     expect(ALLOWED_LINK_PROTOCOLS).toEqual(
-      expect.arrayContaining(['skill:', 'sml:', 'image:', 'document:'])
+      expect.arrayContaining(['skill:', 'sml:', 'image:', 'binary:'])
     );
   });
 });
@@ -36,7 +36,7 @@ describe('COMMAND_SCHEMES', () => {
   });
 
   it('does not contain the document scheme (handled separately from commands)', () => {
-    expect(COMMAND_SCHEMES.has('document')).toBe(false);
+    expect(COMMAND_SCHEMES.has('binary')).toBe(false);
   });
 });
 

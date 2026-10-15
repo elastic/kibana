@@ -30,7 +30,7 @@ import { UserMessageText } from './user_message_text';
 import { UserMessageAvatar } from './user_message_avatar';
 import { AuthorHeader } from '../author_header';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
-import { useUserMessageDocuments } from './use_user_message_documents';
+import { useUserMessageFiles } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 
 const labels = {
@@ -50,7 +50,7 @@ interface UserMessageProps {
   fallbackAttachments?: Attachment[];
 }
 
-const TILE_ATTACHMENT_TYPES: AttachmentType[] = [AttachmentType.image, AttachmentType.document];
+const TILE_ATTACHMENT_TYPES: AttachmentType[] = [AttachmentType.image, AttachmentType.binary];
 const USER_ACTOR_FILTER = [ATTACHMENT_REF_ACTOR.user];
 
 export const UserMessage = ({
@@ -77,7 +77,7 @@ export const UserMessage = ({
     fallbackAttachments,
     actorFilter: USER_ACTOR_FILTER,
   });
-  const documents = useUserMessageDocuments({
+  const documents = useUserMessageFiles({
     attachmentRefs,
     conversationAttachments,
     fallbackAttachments,

@@ -12,64 +12,64 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAttachment,
-  SupportedDocumentMimeType,
+  SupportedBinaryMimeType,
 } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { getDocumentMimeType, getDocumentName } from './document_mime_type';
-import { rejectIfTooManyDocuments, rejectInvalidDocument, uploadDocument } from './upload_document';
+import { getFileMimeType, getFileName } from './file_type';
+import { rejectIfTooManyFiles, rejectInvalidFile, uploadBinary } from './upload_binary';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { queryKeys } from '../../../query_keys';
 
-export interface UseDocumentUploadParams {
+export interface UseBinaryUploadParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
   createConversation: (agentId: string) => Promise<{ id: string }>;
 }
 
-export interface UseDocumentUploadResult {
-  loadingDocumentNames: Set<string>;
+export interface UseBinaryUploadResult {
+  loadingBinaryNames: Set<string>;
   pendingConversationId: string | undefined;
-  handlePasteDocument?: (file: File) => string | undefined;
+  handlePasteBinary?: (file: File) => string | undefined;
   handleAfterInput: () => void;
-  handleRemoveDocument: (name: string) => void;
+  handleRemoveBinary: (name: string) => void;
   /** Tells the hook the documents went out with a message, so leaving the screen does not delete them. */
   handleSubmitted: () => void;
 }
 
-interface UnsentDocument {
+interface UnsentBinary {
   attachmentId: string;
   conversationId: string;
 }
 
-const isDocumentInput = (attachment: ConversationAttachment): boolean =>
-  !('items' in attachment) && attachment.type === AttachmentType.document;
+const isBinaryInput = (attachment: ConversationAttachment): boolean =>
+  !('items' in attachment) && attachment.type === AttachmentType.binary;
 
-export const useDocumentUpload = ({
+export const useBinaryUpload = ({
   addErrorToast,
   messageEditorController,
   createConversation,
-}: UseDocumentUploadParams): UseDocumentUploadResult => {
-  const { documentFilesClient, attachmentsService } = useAgentBuilderServices();
+}: UseBinaryUploadParams): UseBinaryUploadResult => {
+  const { binaryFilesClient, attachmentsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const agentId = useAgentId();
   const { attachments, conversationId, upsertAttachments, removeAttachment } =
     useConversationContext();
-  const [loadingDocumentNames, setLoadingDocumentNames] = useState<Set<string>>(new Set());
+  const [loadingBinaryNames, setLoadingBinaryNames] = useState<Set<string>>(new Set());
   const [pendingConversationId, setPendingConversationId] = useState<string | undefined>();
 
   // Uploads and reads that are in flight, by document name.
   const controllers = useRef<Map<string, AbortController>>(new Map());
-  // Documents that are read and sit in the input attachments, but are not sent yet.
-  const unsentDocuments = useRef<Map<string, UnsentDocument>>(new Map());
+  // Binary files that are read and sit in the input attachments, but are not sent yet.
+  const unsentBinaries = useRef<Map<string, UnsentBinary>>(new Map());
   const pendingConversation = useRef<Promise<string> | undefined>();
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
 
   const setLoading = useCallback((name: string, isLoading: boolean) => {
-    setLoadingDocumentNames((prev) => {
+    setLoadingBinaryNames((prev) => {
       if (prev.has(name) === isLoading) return prev;
       const next = new Set(prev);
       if (isLoading) {
@@ -99,7 +99,7 @@ export const useDocumentUpload = ({
   }, [agentId, createConversation]);
 
   const removeFromConversationCache = useCallback(
-    ({ conversationId: cachedConversationId, attachmentId }: UnsentDocument) => {
+    ({ conversationId: cachedConversationId, attachmentId }: UnsentBinary) => {
       queryClient.setQueryData<Conversation | undefined>(
         queryKeys.conversations.byId(cachedConversationId),
         (old) =>
@@ -110,14 +110,14 @@ export const useDocumentUpload = ({
   );
 
   // Removes the pill and best-effort deletes the attachment. The file stays in Files (orphan).
-  const deleteUnsentDocument = useCallback(
+  const deleteUnsentBinary = useCallback(
     (name: string) => {
-      const unsent = unsentDocuments.current.get(name);
+      const unsent = unsentBinaries.current.get(name);
       if (!unsent) return;
-      unsentDocuments.current.delete(name);
+      unsentBinaries.current.delete(name);
 
       const current = attachmentsRef.current ?? [];
-      const index = current.findIndex((a) => isDocumentInput(a) && a.id === unsent.attachmentId);
+      const index = current.findIndex((a) => isBinaryInput(a) && a.id === unsent.attachmentId);
       if (index !== -1) removeAttachment?.(index);
 
       removeFromConversationCache(unsent);
@@ -127,18 +127,18 @@ export const useDocumentUpload = ({
   );
 
   // Stops the work and removes everything the document left in the editor and the input attachments.
-  const removeDocument = useCallback(
+  const removeBinary = useCallback(
     (name: string) => {
-      messageEditorController.removePlaceholderByName(name, 'document');
+      messageEditorController.removePlaceholderByName(name, 'binary');
       controllers.current.get(name)?.abort();
       controllers.current.delete(name);
       setLoading(name, false);
-      deleteUnsentDocument(name);
+      deleteUnsentBinary(name);
     },
-    [messageEditorController, setLoading, deleteUnsentDocument]
+    [messageEditorController, setLoading, deleteUnsentBinary]
   );
 
-  const readDocument = useCallback(
+  const readBinary = useCallback(
     async ({
       file,
       name,
@@ -147,7 +147,7 @@ export const useDocumentUpload = ({
     }: {
       file: File;
       name: string;
-      mimeType: SupportedDocumentMimeType;
+      mimeType: SupportedBinaryMimeType;
       controller: AbortController;
     }) => {
       if (!upsertAttachments) return;
@@ -158,18 +158,18 @@ export const useDocumentUpload = ({
           targetConversationId = await ensurePendingConversation();
         } catch {
           // The create mutation shows its own error toast.
-          removeDocument(name);
+          removeBinary(name);
           return;
         }
       }
       if (controller.signal.aborted) return;
 
-      const result = await uploadDocument({
+      const result = await uploadBinary({
         file,
         name,
         mimeType,
         conversationId: targetConversationId,
-        documentFilesClient,
+        binaryFilesClient,
         attachmentsService,
         signal: controller.signal,
       });
@@ -183,12 +183,12 @@ export const useDocumentUpload = ({
 
       if (result.status === 'failed') {
         addErrorToast({ title: result.message });
-        messageEditorController.removePlaceholderByName(name, 'document');
+        messageEditorController.removePlaceholderByName(name, 'binary');
         return;
       }
 
       const { attachment, fileId } = result;
-      unsentDocuments.current.set(name, {
+      unsentBinaries.current.set(name, {
         attachmentId: attachment.id,
         conversationId: targetConversationId,
       });
@@ -205,15 +205,15 @@ export const useDocumentUpload = ({
           }
       );
       upsertAttachments([
-        { id: attachment.id, type: AttachmentType.document, origin: fileId, description: name },
+        { id: attachment.id, type: AttachmentType.binary, origin: fileId, description: name },
       ]);
     },
     [
       upsertAttachments,
       conversationId,
       ensurePendingConversation,
-      removeDocument,
-      documentFilesClient,
+      removeBinary,
+      binaryFilesClient,
       attachmentsService,
       setLoading,
       addErrorToast,
@@ -222,41 +222,41 @@ export const useDocumentUpload = ({
     ]
   );
 
-  const handlePasteDocument = useCallback(
+  const handlePasteBinary = useCallback(
     (file: File): string | undefined => {
       if (!upsertAttachments) return undefined;
-      if (rejectInvalidDocument({ file, addErrorToast })) return undefined;
-      const mimeType = getDocumentMimeType(file);
+      if (rejectInvalidFile({ file, addErrorToast })) return undefined;
+      const mimeType = getFileMimeType(file);
       if (!mimeType) return undefined;
       if (
-        rejectIfTooManyDocuments({
-          currentDocumentCount: controllers.current.size + unsentDocuments.current.size,
+        rejectIfTooManyFiles({
+          currentFileCount: controllers.current.size + unsentBinaries.current.size,
           addErrorToast,
         })
       ) {
         return undefined;
       }
 
-      const name = getDocumentName(file, mimeType);
+      const name = getFileName(file, mimeType);
       const controller = new AbortController();
       controllers.current.set(name, controller);
       setLoading(name, true);
-      readDocument({ file, name, mimeType, controller });
+      readBinary({ file, name, mimeType, controller });
       return name;
     },
-    [upsertAttachments, addErrorToast, setLoading, readDocument]
+    [upsertAttachments, addErrorToast, setLoading, readBinary]
   );
 
   // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its document.
   const handleAfterInput = useCallback(() => {
-    const chipNames = new Set(messageEditorController.getPlaceholderNames('document'));
-    for (const name of [...controllers.current.keys(), ...unsentDocuments.current.keys()]) {
-      if (!chipNames.has(name)) removeDocument(name);
+    const chipNames = new Set(messageEditorController.getPlaceholderNames('binary'));
+    for (const name of [...controllers.current.keys(), ...unsentBinaries.current.keys()]) {
+      if (!chipNames.has(name)) removeBinary(name);
     }
-  }, [messageEditorController, removeDocument]);
+  }, [messageEditorController, removeBinary]);
 
   const handleSubmitted = useCallback(() => {
-    unsentDocuments.current.clear();
+    unsentBinaries.current.clear();
     pendingConversation.current = undefined;
     setPendingConversationId(undefined);
   }, []);
@@ -268,12 +268,12 @@ export const useDocumentUpload = ({
       controller.abort();
     }
     controllers.current.clear();
-    for (const name of [...unsentDocuments.current.keys()]) {
-      deleteUnsentDocument(name);
+    for (const name of [...unsentBinaries.current.keys()]) {
+      deleteUnsentBinary(name);
     }
     pendingConversation.current = undefined;
     setPendingConversationId(undefined);
-    setLoadingDocumentNames(new Set());
+    setLoadingBinaryNames(new Set());
   };
   useEffect(() => {
     const leave = leaveRef;
@@ -281,11 +281,11 @@ export const useDocumentUpload = ({
   }, [conversationId, agentId]);
 
   return {
-    loadingDocumentNames,
+    loadingBinaryNames,
     pendingConversationId,
-    handlePasteDocument: upsertAttachments ? handlePasteDocument : undefined,
+    handlePasteBinary: upsertAttachments ? handlePasteBinary : undefined,
     handleAfterInput,
-    handleRemoveDocument: removeDocument,
+    handleRemoveBinary: removeBinary,
     handleSubmitted,
   };
 };

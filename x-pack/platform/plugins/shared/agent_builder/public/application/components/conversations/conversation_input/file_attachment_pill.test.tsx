@@ -8,51 +8,51 @@
 import React from 'react';
 import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { DocumentAttachmentPill } from './document_attachment_pill';
+import { FileAttachmentPill } from './file_attachment_pill';
 
 const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
 
-describe('DocumentAttachmentPill', () => {
+describe('FileAttachmentPill', () => {
   it.each([
     ['application/pdf', 'invoice.pdf', 'PDF'],
     ['text/markdown', 'notes.md', 'MD'],
     ['text/plain', 'notes.txt', 'TXT'],
   ])('shows the type label of %s', (mimeType, name, label) => {
-    render(<DocumentAttachmentPill attachmentId="d1" name={name} mimeType={mimeType} />);
+    render(<FileAttachmentPill attachmentId="d1" name={name} mimeType={mimeType} />);
 
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
   it('takes the type label from the file name when there is no mime type yet', () => {
-    render(<DocumentAttachmentPill attachmentId="d1" name="notes.md" />);
+    render(<FileAttachmentPill attachmentId="d1" name="notes.md" />);
 
     expect(screen.getByText('MD')).toBeInTheDocument();
   });
 
   it('shows no type label when the type is not known', () => {
-    render(<DocumentAttachmentPill attachmentId="d1" name="README" />);
+    render(<FileAttachmentPill attachmentId="d1" name="README" />);
 
     expect(screen.getByTestId('agentBuilderAttachmentPill-d1')).toBeInTheDocument();
     expect(screen.queryByText(/^[A-Z]{2,3}$/)).not.toBeInTheDocument();
   });
 
   it('names the file for screen readers', () => {
-    render(<DocumentAttachmentPill attachmentId="d1" name="notes.md" mimeType="text/markdown" />);
+    render(<FileAttachmentPill attachmentId="d1" name="notes.md" mimeType="text/markdown" />);
 
     expect(screen.getByRole('img', { name: 'notes.md' })).toBeInTheDocument();
   });
 
   it('shows a reading status with the loading test id while loading', () => {
-    render(<DocumentAttachmentPill attachmentId="d1" name="notes.md" isLoading />);
+    render(<FileAttachmentPill attachmentId="d1" name="notes.md" isLoading />);
 
-    expect(screen.getByTestId('agentBuilderLoadingDocumentPill-d1')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderLoadingFilePill-d1')).toBeInTheDocument();
     expect(screen.getByRole('status', { name: 'Reading file...' })).toBeInTheDocument();
   });
 
   it('calls onRemoveAttachment from the remove button', () => {
     const onRemoveAttachment = jest.fn();
     render(
-      <DocumentAttachmentPill
+      <FileAttachmentPill
         attachmentId="d1"
         name="notes.md"
         onRemoveAttachment={onRemoveAttachment}
@@ -65,7 +65,7 @@ describe('DocumentAttachmentPill', () => {
   });
 
   it('has no remove button when it cannot be removed', () => {
-    render(<DocumentAttachmentPill attachmentId="d1" name="notes.md" />);
+    render(<FileAttachmentPill attachmentId="d1" name="notes.md" />);
 
     expect(screen.queryByRole('button', { name: 'Remove attachment' })).not.toBeInTheDocument();
   });

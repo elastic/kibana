@@ -11,7 +11,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { useUserMessageDocuments } from './use_user_message_documents';
+import { useUserMessageFiles } from './use_user_message_files';
 
 const makeVersioned = (
   id: string,
@@ -31,13 +31,13 @@ const userRef = (attachmentId: string): AttachmentVersionRef => ({
   actor: ATTACHMENT_REF_ACTOR.user,
 });
 
-describe('useUserMessageDocuments', () => {
+describe('useUserMessageFiles', () => {
   it('returns the name and mime type of each document ref', () => {
     const { result } = renderHook(() =>
-      useUserMessageDocuments({
+      useUserMessageFiles({
         attachmentRefs: [userRef('doc1')],
         conversationAttachments: [
-          makeVersioned('doc1', AttachmentType.document, {
+          makeVersioned('doc1', AttachmentType.binary, {
             file_id: 'f1',
             name: 'notes.md',
             mime_type: 'text/markdown',
@@ -54,7 +54,7 @@ describe('useUserMessageDocuments', () => {
 
   it('ignores refs that are not documents', () => {
     const { result } = renderHook(() =>
-      useUserMessageDocuments({
+      useUserMessageFiles({
         attachmentRefs: [userRef('img1'), userRef('txt1')],
         conversationAttachments: [
           makeVersioned('img1', AttachmentType.image, { name: 'photo.png' }),
@@ -68,10 +68,10 @@ describe('useUserMessageDocuments', () => {
 
   it('ignores documents that were not added by the user', () => {
     const { result } = renderHook(() =>
-      useUserMessageDocuments({
+      useUserMessageFiles({
         attachmentRefs: [{ attachment_id: 'doc1', version: 1, actor: ATTACHMENT_REF_ACTOR.agent }],
         conversationAttachments: [
-          makeVersioned('doc1', AttachmentType.document, { name: 'notes.md' }),
+          makeVersioned('doc1', AttachmentType.binary, { name: 'notes.md' }),
         ],
         actorFilter: [ATTACHMENT_REF_ACTOR.user],
       })

@@ -9,10 +9,10 @@ import { useCallback, useMemo } from 'react';
 import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType, type ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { getDocumentMimeType } from './document_mime_type';
+import { getFileMimeType } from './file_type';
 import { useImageUpload } from './use_image_upload';
-import { useDocumentUpload } from './use_document_upload';
-import { useSupportedDocumentTypes } from '../../../hooks/use_supported_document_types';
+import { useBinaryUpload } from './use_binary_upload';
+import { useSupportedBinaryTypes } from '../../../hooks/use_supported_binary_types';
 
 export interface UseAttachmentUploadsParams {
   addErrorToast: (input: ToastInput) => void;
@@ -36,58 +36,58 @@ export const useAttachmentUploads = ({
     messageEditorController,
   });
 
-  const acceptedDocumentMimeTypes = useSupportedDocumentTypes();
+  const acceptedFileMimeTypes = useSupportedBinaryTypes();
   const {
-    loadingDocumentNames,
+    loadingBinaryNames,
     pendingConversationId,
-    handlePasteDocument,
-    handleAfterInput: handleAfterDocumentInput,
-    handleRemoveDocument,
-    handleSubmitted: handleDocumentSubmitted,
-  } = useDocumentUpload({
+    handlePasteBinary,
+    handleAfterInput: handleAfterBinaryInput,
+    handleRemoveBinary,
+    handleSubmitted: handleBinarySubmitted,
+  } = useBinaryUpload({
     addErrorToast,
     messageEditorController,
     createConversation,
   });
 
   const uploadingChipNames = useMemo(
-    () => new Set([...uploadingNames, ...loadingDocumentNames]),
-    [uploadingNames, loadingDocumentNames]
+    () => new Set([...uploadingNames, ...loadingBinaryNames]),
+    [uploadingNames, loadingBinaryNames]
   );
 
   const handlePasteFile = useCallback(
     (file: File): string | undefined =>
-      getDocumentMimeType(file) ? handlePasteDocument?.(file) : handlePasteImage?.(file),
-    [handlePasteDocument, handlePasteImage]
+      getFileMimeType(file) ? handlePasteBinary?.(file) : handlePasteImage?.(file),
+    [handlePasteBinary, handlePasteImage]
   );
 
   const handleAfterInput = useCallback(() => {
     handleAfterImageInput();
-    handleAfterDocumentInput();
-  }, [handleAfterImageInput, handleAfterDocumentInput]);
+    handleAfterBinaryInput();
+  }, [handleAfterImageInput, handleAfterBinaryInput]);
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {
-      if (!('items' in attachment) && attachment.type === AttachmentType.document) {
-        if (attachment.description) handleRemoveDocument(attachment.description);
+      if (!('items' in attachment) && attachment.type === AttachmentType.binary) {
+        if (attachment.description) handleRemoveBinary(attachment.description);
         return;
       }
       handleRemoveImageAttachment?.(attachment);
     },
-    [handleRemoveDocument, handleRemoveImageAttachment]
+    [handleRemoveBinary, handleRemoveImageAttachment]
   );
 
   return {
     uploadingNames,
-    loadingDocumentNames,
+    loadingBinaryNames,
     uploadingChipNames,
-    isUploading: uploadingNames.size > 0 || loadingDocumentNames.size > 0,
-    acceptedDocumentMimeTypes,
+    isUploading: uploadingNames.size > 0 || loadingBinaryNames.size > 0,
+    acceptedFileMimeTypes,
     pendingConversationId,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
-    handleRemoveLoadingDocument: handleRemoveDocument,
-    handleSubmitted: handleDocumentSubmitted,
+    handleRemoveLoadingBinary: handleRemoveBinary,
+    handleSubmitted: handleBinarySubmitted,
   };
 };

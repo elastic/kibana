@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-const ATTACHMENT_LINK_RE = /\[[^\]]*\]\((?:image|document):\/\/[^)]*\)/g;
+const ATTACHMENT_LINK_RE = /\[[^\]]*\]\((?:image|binary|text):\/\/[^)]*\)/g;
 
 const buildKey = (
   spaceId: string,

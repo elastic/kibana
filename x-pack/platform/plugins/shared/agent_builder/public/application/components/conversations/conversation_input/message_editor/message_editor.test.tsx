@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
+import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
 import { MessageEditor } from './message_editor';
 import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
@@ -505,12 +505,12 @@ describe('MessageEditor', () => {
   describe('pasting a document', () => {
     const PDF_FILE = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
 
-    const pasteDocument = ({
-      acceptedDocumentMimeTypes,
+    const pasteBinary = ({
+      acceptedFileMimeTypes,
       onPasteFile,
       file = PDF_FILE,
     }: {
-      acceptedDocumentMimeTypes?: SupportedDocumentMimeType[];
+      acceptedFileMimeTypes?: SupportedBinaryMimeType[];
       onPasteFile: jest.Mock;
       file?: File;
     }) => {
@@ -520,7 +520,7 @@ describe('MessageEditor', () => {
           messageEditor={messageEditor}
           onSubmit={mockOnSubmit}
           onPasteFile={onPasteFile}
-          acceptedDocumentMimeTypes={acceptedDocumentMimeTypes}
+          acceptedFileMimeTypes={acceptedFileMimeTypes}
           data-test-subj="messageEditor"
         />
       );
@@ -539,29 +539,29 @@ describe('MessageEditor', () => {
           items: [{ kind: 'file', type: file.type, getAsFile: () => file }],
         },
       });
-      return { editor, documentFile: file };
+      return { editor, binaryFile: file };
     };
 
     it('calls onPasteFile and inserts a document chip when the type is accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
 
-      const { editor, documentFile } = pasteDocument({
-        acceptedDocumentMimeTypes: ['application/pdf'],
+      const { editor, binaryFile } = pasteBinary({
+        acceptedFileMimeTypes: ['application/pdf'],
         onPasteFile,
       });
 
-      expect(onPasteFile).toHaveBeenCalledWith(documentFile);
+      expect(onPasteFile).toHaveBeenCalledWith(binaryFile);
       const chip = editor.querySelector('[data-attachment-placeholder]');
       expect(chip).not.toBeNull();
-      expect(chip?.getAttribute('data-placeholder-kind')).toBe('document');
+      expect(chip?.getAttribute('data-placeholder-kind')).toBe('binary');
     });
 
     it('inserts a document chip for a Markdown file with an empty type', () => {
       const onPasteFile = jest.fn().mockReturnValue('notes.md');
       const file = new File(['# Notes'], 'notes.md', { type: '' });
 
-      const { editor } = pasteDocument({
-        acceptedDocumentMimeTypes: ['text/markdown'],
+      const { editor } = pasteBinary({
+        acceptedFileMimeTypes: ['text/markdown'],
         onPasteFile,
         file,
       });
@@ -569,14 +569,14 @@ describe('MessageEditor', () => {
       expect(onPasteFile).toHaveBeenCalledWith(file);
       expect(
         editor.querySelector('[data-attachment-placeholder]')?.getAttribute('data-placeholder-kind')
-      ).toBe('document');
+      ).toBe('binary');
     });
 
     it('inserts no chip when onPasteFile refuses the file', () => {
       const onPasteFile = jest.fn().mockReturnValue(undefined);
 
-      const { editor } = pasteDocument({
-        acceptedDocumentMimeTypes: ['application/pdf'],
+      const { editor } = pasteBinary({
+        acceptedFileMimeTypes: ['application/pdf'],
         onPasteFile,
       });
 
@@ -587,7 +587,7 @@ describe('MessageEditor', () => {
     it('ignores the file when no document type is accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
 
-      const { editor } = pasteDocument({ onPasteFile });
+      const { editor } = pasteBinary({ onPasteFile });
 
       expect(onPasteFile).not.toHaveBeenCalled();
       expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
@@ -596,8 +596,8 @@ describe('MessageEditor', () => {
     it('ignores a PDF when only Markdown and text are accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
 
-      const { editor } = pasteDocument({
-        acceptedDocumentMimeTypes: ['text/markdown', 'text/plain'],
+      const { editor } = pasteBinary({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
         onPasteFile,
       });
 
@@ -608,8 +608,8 @@ describe('MessageEditor', () => {
     it('still accepts a Markdown file when only Markdown and text are accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('notes.md');
 
-      pasteDocument({
-        acceptedDocumentMimeTypes: ['text/markdown', 'text/plain'],
+      pasteBinary({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
         onPasteFile,
         file: new File(['# Notes'], 'notes.md', { type: 'text/markdown' }),
       });
@@ -623,8 +623,8 @@ describe('MessageEditor', () => {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       });
 
-      const { editor } = pasteDocument({
-        acceptedDocumentMimeTypes: ['application/pdf', 'text/markdown', 'text/plain'],
+      const { editor } = pasteBinary({
+        acceptedFileMimeTypes: ['application/pdf', 'text/markdown', 'text/plain'],
         onPasteFile,
         file,
       });
@@ -643,7 +643,7 @@ describe('MessageEditor', () => {
         />
       );
       const editor = screen.getByTestId('messageEditor');
-      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'document'));
+      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'binary'));
 
       rerender(
         <MessageEditor

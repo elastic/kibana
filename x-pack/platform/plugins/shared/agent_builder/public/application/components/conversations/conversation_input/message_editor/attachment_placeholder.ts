@@ -13,13 +13,13 @@ export const ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-attachment-placehol
 
 export const PLACEHOLDER_KIND_ATTRIBUTE = 'data-placeholder-kind';
 
-export type PlaceholderKind = 'image' | 'document';
+export type PlaceholderKind = 'image' | 'binary';
 
 /** Scheme used in serialized image attachment markdown links. */
 export const IMAGE_ATTACHMENT_SCHEME = 'image';
 
 /** Scheme used in serialized document attachment markdown links. */
-export const DOCUMENT_ATTACHMENT_SCHEME = 'document';
+export const BINARY_ATTACHMENT_SCHEME = 'binary';
 
 // Mirrors the EUI `image` icon (packages/eui/src/components/icon/assets/image.tsx).
 // Inlined because the placeholder is imperative DOM inside contentEditable — React can't own it.
@@ -35,7 +35,7 @@ const DOCUMENT_ICON_PATHS = [
 
 const ICON_PATHS_BY_KIND: Record<PlaceholderKind, string[]> = {
   image: IMAGE_ICON_PATHS,
-  document: DOCUMENT_ICON_PATHS,
+  binary: DOCUMENT_ICON_PATHS,
 };
 
 const CROSS_ICON_PATH =
@@ -126,7 +126,7 @@ export const isElementAttachmentPlaceholder = (element: HTMLElement): boolean =>
   element.getAttribute(ATTACHMENT_PLACEHOLDER_ATTRIBUTE) === 'true';
 
 export const getPlaceholderKind = (element: HTMLElement): PlaceholderKind =>
-  element.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE) === 'document' ? 'document' : 'image';
+  element.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE) === 'binary' ? 'binary' : 'image';
 
 const getChipsOfKind = (el: HTMLElement, kind: PlaceholderKind): HTMLElement[] =>
   Array.from(el.querySelectorAll<HTMLElement>(`[${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]`)).filter(

@@ -8,10 +8,10 @@
 import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { DocumentAttachmentPill } from '../../conversation_input/document_attachment_pill';
+import { FileAttachmentPill } from '../../conversation_input/file_attachment_pill';
 import { ThumbnailAttachmentPill } from '../../conversation_input/thumbnail_attachment_pill';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
-import type { UserMessageDocument } from './use_user_message_documents';
+import type { UserMessageFile } from './use_user_message_files';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
 
 jest.mock('../../conversation_input/thumbnail_attachment_pill', () => ({
@@ -20,16 +20,16 @@ jest.mock('../../conversation_input/thumbnail_attachment_pill', () => ({
   )),
 }));
 
-jest.mock('../../conversation_input/document_attachment_pill', () => ({
-  DocumentAttachmentPill: jest.fn(({ attachmentId }: { attachmentId: string }) => (
+jest.mock('../../conversation_input/file_attachment_pill', () => ({
+  FileAttachmentPill: jest.fn(({ attachmentId }: { attachmentId: string }) => (
     <div data-test-subj={`agentBuilderAttachmentPill-${attachmentId}`} />
   )),
 }));
 
 const MockThumbnailAttachmentPill = jest.mocked(ThumbnailAttachmentPill);
-const MockDocumentAttachmentPill = jest.mocked(DocumentAttachmentPill);
+const MockFileAttachmentPill = jest.mocked(FileAttachmentPill);
 
-const makeDocument = (id: string, name: string): UserMessageDocument => ({
+const makeBinary = (id: string, name: string): UserMessageFile => ({
   key: `${id}-v1`,
   attachmentId: id,
   name,
@@ -49,7 +49,7 @@ const makeThumbnail = (id: string, name: string): UserMessageThumbnail => ({
 describe('UserMessageAttachmentTiles', () => {
   beforeEach(() => {
     MockThumbnailAttachmentPill.mockClear();
-    MockDocumentAttachmentPill.mockClear();
+    MockFileAttachmentPill.mockClear();
   });
 
   it('renders nothing when there are no thumbnails', () => {
@@ -77,11 +77,11 @@ describe('UserMessageAttachmentTiles', () => {
 
   it('renders a tile for a document, with no thumbnails', () => {
     render(
-      <UserMessageAttachmentTiles thumbnails={[]} documents={[makeDocument('doc1', 'notes.md')]} />
+      <UserMessageAttachmentTiles thumbnails={[]} documents={[makeBinary('doc1', 'notes.md')]} />
     );
 
-    expect(MockDocumentAttachmentPill).toHaveBeenCalledTimes(1);
-    expect(MockDocumentAttachmentPill.mock.calls[0][0]).toMatchObject({
+    expect(MockFileAttachmentPill).toHaveBeenCalledTimes(1);
+    expect(MockFileAttachmentPill.mock.calls[0][0]).toMatchObject({
       attachmentId: 'doc1',
       name: 'notes.md',
       mimeType: 'text/markdown',
@@ -93,13 +93,13 @@ describe('UserMessageAttachmentTiles', () => {
     render(
       <UserMessageAttachmentTiles
         thumbnails={[]}
-        documents={[makeDocument('doc1', 'notes.md'), makeDocument('doc2', 'other.md')]}
+        documents={[makeBinary('doc1', 'notes.md'), makeBinary('doc2', 'other.md')]}
         hoveredAttachmentName="notes.md"
       />
     );
 
     const highlightByAttachmentId = Object.fromEntries(
-      MockDocumentAttachmentPill.mock.calls.map(([props]) => [
+      MockFileAttachmentPill.mock.calls.map(([props]) => [
         props.attachmentId,
         props.isHighlighted,
       ])

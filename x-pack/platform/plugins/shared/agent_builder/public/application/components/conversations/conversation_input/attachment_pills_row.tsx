@@ -27,8 +27,8 @@ export interface AttachmentPillsRowProps {
   justifyContent?: EuiFlexGroupProps['justifyContent'];
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
   uploadingNames?: Set<string>;
-  loadingDocumentNames?: Set<string>;
-  onRemoveLoadingDocument?: (name: string) => void;
+  loadingBinaryNames?: Set<string>;
+  onRemoveLoadingBinary?: (name: string) => void;
   hoveredAttachmentName?: string | null;
 }
 
@@ -81,18 +81,18 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   justifyContent = 'flexStart',
   onRemoveAttachment,
   uploadingNames,
-  loadingDocumentNames,
-  onRemoveLoadingDocument,
+  loadingBinaryNames,
+  onRemoveLoadingBinary,
   hoveredAttachmentName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
-  const loadingDocumentEntries = loadingDocumentNames ? [...loadingDocumentNames] : [];
+  const loadingFileEntries = loadingBinaryNames ? [...loadingBinaryNames] : [];
 
   if (
     attachments.length === 0 &&
     uploadingEntries.length === 0 &&
-    loadingDocumentEntries.length === 0
+    loadingFileEntries.length === 0
   ) {
     return null;
   }
@@ -128,7 +128,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
 
         const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
         const fileName =
-          attachment.type === AttachmentType.image || attachment.type === AttachmentType.document
+          attachment.type === AttachmentType.image || attachment.type === AttachmentType.binary
             ? (attachment.data as { name?: string } | undefined)?.name ?? attachment.description
             : undefined;
         return (
@@ -155,18 +155,18 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           </EuiFlexItem>
         );
       })}
-      {loadingDocumentEntries.map((name) => (
-        <EuiFlexItem key={`loading-document-${name}`} grow={false} role="listitem">
+      {loadingFileEntries.map((name) => (
+        <EuiFlexItem key={`loading-file-${name}`} grow={false} role="listitem">
           <AttachmentPill
             attachment={{
               id: name,
-              type: AttachmentType.document,
+              type: AttachmentType.binary,
               data: {},
               description: name,
             }}
             isLoading
             isHighlighted={hoveredAttachmentName === name}
-            onRemoveAttachment={removable ? () => onRemoveLoadingDocument?.(name) : undefined}
+            onRemoveAttachment={removable ? () => onRemoveLoadingBinary?.(name) : undefined}
           />
         </EuiFlexItem>
       ))}

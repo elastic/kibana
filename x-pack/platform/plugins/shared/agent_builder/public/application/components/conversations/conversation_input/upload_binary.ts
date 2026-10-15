@@ -12,46 +12,46 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
-  MAX_DOCUMENT_BYTES,
-  type SupportedDocumentMimeType,
+  MAX_BINARY_BYTES,
+  type SupportedBinaryMimeType,
 } from '@kbn/agent-builder-common/attachments';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { AttachmentsService } from '../../../../services/attachments';
-import { getDocumentMimeType } from './document_mime_type';
+import { getFileMimeType } from './file_type';
 
-export const MAX_DOCUMENTS_PER_MESSAGE = 1;
+export const MAX_FILES_PER_MESSAGE = 1;
 
 const labels = {
-  invalidType: i18n.translate('xpack.agentBuilder.uploadDocument.invalidType', {
+  invalidType: i18n.translate('xpack.agentBuilder.uploadBinary.invalidType', {
     defaultMessage: 'This file type is not supported.',
   }),
-  uploadError: i18n.translate('xpack.agentBuilder.uploadDocument.uploadError', {
+  uploadError: i18n.translate('xpack.agentBuilder.uploadBinary.uploadError', {
     defaultMessage: 'Could not upload the file.',
   }),
-  tooMany: i18n.translate('xpack.agentBuilder.uploadDocument.tooMany', {
+  tooMany: i18n.translate('xpack.agentBuilder.uploadBinary.tooMany', {
     defaultMessage:
       'You can attach {max, plural, one {# document} other {# documents}} per message.',
-    values: { max: MAX_DOCUMENTS_PER_MESSAGE },
+    values: { max: MAX_FILES_PER_MESSAGE },
   }),
 };
 
 /** Shows a toast and returns true when the file type is not supported or the file is too large. */
-export const rejectInvalidDocument = ({
+export const rejectInvalidFile = ({
   file,
   addErrorToast,
 }: {
   file: File;
   addErrorToast: (input: ToastInput) => void;
 }): boolean => {
-  const mimeType = getDocumentMimeType(file);
+  const mimeType = getFileMimeType(file);
   if (!mimeType) {
     addErrorToast({ title: labels.invalidType });
     return true;
   }
-  const maxBytes = MAX_DOCUMENT_BYTES[mimeType];
+  const maxBytes = MAX_BINARY_BYTES[mimeType];
   if (file.size > maxBytes) {
     addErrorToast({
-      title: i18n.translate('xpack.agentBuilder.uploadDocument.tooLarge', {
+      title: i18n.translate('xpack.agentBuilder.uploadBinary.tooLarge', {
         defaultMessage: 'The file is too large. The maximum size is {maxSize}.',
         values: { maxSize: numeral(maxBytes).format('0.[0] b') },
       }),
@@ -61,20 +61,20 @@ export const rejectInvalidDocument = ({
   return false;
 };
 
-/** Blocks adding another document once `currentDocumentCount` has reached the per-message limit. */
-export const rejectIfTooManyDocuments = ({
-  currentDocumentCount,
+/** Blocks adding another document once `currentFileCount` has reached the per-message limit. */
+export const rejectIfTooManyFiles = ({
+  currentFileCount,
   addErrorToast,
 }: {
-  currentDocumentCount: number;
+  currentFileCount: number;
   addErrorToast: (input: ToastInput) => void;
 }): boolean => {
-  if (currentDocumentCount < MAX_DOCUMENTS_PER_MESSAGE) return false;
+  if (currentFileCount < MAX_FILES_PER_MESSAGE) return false;
   addErrorToast({ title: labels.tooMany });
   return true;
 };
 
-export type UploadDocumentResult =
+export type UploadBinaryResult =
   | { status: 'done'; attachment: VersionedAttachment; fileId: string }
   | { status: 'aborted' }
   | { status: 'failed'; message: string };
@@ -84,28 +84,28 @@ export type UploadDocumentResult =
  * attachment. Aborting stops either step: Files deletes a half-uploaded file, and the server
  * stops reading. The file stays in Files after a stopped read. Never throws.
  */
-export const uploadDocument = async ({
+export const uploadBinary = async ({
   file,
   name,
   mimeType,
   conversationId,
-  documentFilesClient,
+  binaryFilesClient,
   attachmentsService,
   signal,
 }: {
   file: File;
   name: string;
-  mimeType: SupportedDocumentMimeType;
+  mimeType: SupportedBinaryMimeType;
   conversationId: string;
-  documentFilesClient: ScopedFilesClient;
+  binaryFilesClient: ScopedFilesClient;
   attachmentsService: AttachmentsService;
   signal: AbortSignal;
-}): Promise<UploadDocumentResult> => {
+}): Promise<UploadBinaryResult> => {
   let fileId: string;
   try {
-    const { file: fileEntry } = await documentFilesClient.create({ name, mimeType });
+    const { file: fileEntry } = await binaryFilesClient.create({ name, mimeType });
     fileId = fileEntry.id;
-    await documentFilesClient.upload({
+    await binaryFilesClient.upload({
       id: fileId,
       body: file,
       contentType: mimeType,
@@ -120,14 +120,14 @@ export const uploadDocument = async ({
 
   if (signal.aborted) {
     // Aborted between the two steps: nothing else owns this file yet.
-    await documentFilesClient.delete({ id: fileId }).catch(() => {});
+    await binaryFilesClient.delete({ id: fileId }).catch(() => {});
     return { status: 'aborted' };
   }
 
   try {
     const attachment = await attachmentsService.create({
       conversationId,
-      type: AttachmentType.document,
+      type: AttachmentType.binary,
       origin: fileId,
       signal,
     });
