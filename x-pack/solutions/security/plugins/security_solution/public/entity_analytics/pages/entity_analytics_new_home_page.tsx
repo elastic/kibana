@@ -632,7 +632,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     cards: signalCards,
     timeRange,
     entityFilters,
-    focusTileId: activeFilter?.cardId,
+    // A filter that excludes a tile isn't a focus on it.
+    focusTileId: activeFilter?.exclude ? undefined : activeFilter?.cardId,
   });
 
   const dataViewContextValue = useMemo(

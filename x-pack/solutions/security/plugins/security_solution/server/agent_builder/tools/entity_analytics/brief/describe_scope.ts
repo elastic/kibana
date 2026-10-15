@@ -192,7 +192,7 @@ export const describeScopeForAgent = (
   attachmentId: string,
   scope: EntityAnalyticsScope
 ): string => {
-  const { period, capturedAt, query, entityFilters = {}, focusTileId, tiles } = scope;
+  const { period, capturedAt, query, entityFilters = {}, tiles } = scope;
   const entityFilterLabels = Object.entries(entityFilters).map(([key, values]) =>
     describeEntityFilter(key, values)
   );
@@ -210,7 +210,6 @@ export const describeScopeForAgent = (
     `Search: ${query?.query || 'none'}`,
     `Filters: ${getScopeFilters(scope).map(filterLabel).join('; ') || 'none'}`,
     `Entity filters: ${entityFilterLabels.join('; ') || 'none'}`,
-    `Selected count: ${(focusTileId && tiles[focusTileId]?.title) || 'none'}`,
     `Counts of flagged entities: ${tileLabels.join('; ') || 'none'}`,
   ].join('\n');
 };

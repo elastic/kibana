@@ -46,15 +46,12 @@ describe('selectCandidateTiles', () => {
       { a: ['entitiesWithAlerts', 'watchlisted'], b: ['entitiesWithAlerts'] },
     ],
     [
-      'puts the selected tile first',
-      scopeWith(
-        {
-          entitiesWithAlerts: { title: 'Entities with alerts', value: 1, entityIds: ['a'] },
-          riskMovers: { title: 'Risk movers', value: 1, entityIds: ['a'] },
-        },
-        'riskMovers'
-      ),
-      { a: ['riskMovers', 'entitiesWithAlerts'] },
+      'lists tiles in the page order',
+      scopeWith({
+        entitiesWithAlerts: { title: 'Entities with alerts', value: 1, entityIds: ['a'] },
+        riskMovers: { title: 'Risk movers', value: 1, entityIds: ['a'] },
+      }),
+      { a: ['entitiesWithAlerts', 'riskMovers'] },
     ],
     [
       'skips unavailable tiles',
@@ -131,9 +128,9 @@ describe('foldAliases', () => {
       [['user:gold', 'user:a1', ['entitiesWithAlerts', 'newEntity']]],
     ],
     [
-      'puts the selected tile first in merged tiles',
-      [candidate('user:gold', ['entitiesWithAlerts']), alias('user:a', ['newEntity'], 'user:gold')],
-      [['user:gold', 'user:gold', ['newEntity', 'entitiesWithAlerts']]],
+      'merges tiles in the page order',
+      [candidate('user:gold', ['newEntity']), alias('user:a', ['entitiesWithAlerts'], 'user:gold')],
+      [['user:gold', 'user:gold', ['entitiesWithAlerts', 'newEntity']]],
     ],
     [
       'leaves unrelated entities alone',
@@ -143,14 +140,9 @@ describe('foldAliases', () => {
         ['host:y', 'host:y', ['riskMovers']],
       ],
     ],
-  ])('%s', (name, candidates, expected) => {
-    const focusTileId = name.includes('selected') ? 'newEntity' : undefined;
+  ])('%s', (_name, candidates, expected) => {
     expect(
-      foldAliases(candidates, focusTileId).map(({ id, record, tileIds }) => [
-        id,
-        record.entity?.id,
-        tileIds,
-      ])
+      foldAliases(candidates).map(({ id, record, tileIds }) => [id, record.entity?.id, tileIds])
     ).toEqual(expected);
   });
 });

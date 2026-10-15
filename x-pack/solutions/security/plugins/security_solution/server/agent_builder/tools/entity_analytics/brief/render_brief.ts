@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { compact, dropRightWhile, orderBy } from 'lodash';
+import { compact, dropRightWhile } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type {
   EntityAnalyticsScope,
   EntityAnalyticsScopeTile,
@@ -205,19 +204,12 @@ const getNoBriefLine = ({ tiles }: EntityAnalyticsScope, entities: CandidateEnti
 const isWorthShowing = ({ unavailable, value, delta = 0 }: EntityAnalyticsScopeTile): boolean =>
   !unavailable && (value > 0 || delta !== 0);
 
-/** Every count with something to say, in the page's order, the selected one first. Never summed. */
-const pickChangeRows = ({
-  tiles,
-  focusTileId,
-}: EntityAnalyticsScope): Array<[SignalCardId, EntityAnalyticsScopeTile]> =>
-  orderBy(
-    SIGNAL_CARD_IDS.flatMap((tileId): Array<[SignalCardId, EntityAnalyticsScopeTile]> => {
-      const tile = tiles[tileId];
-      return tile && isWorthShowing(tile) ? [[tileId, tile]] : [];
-    }),
-    ([tileId]) => tileId === focusTileId,
-    'desc'
-  );
+/** Every count with something to say, in the page's order. Never summed. */
+const pickChangeRows = ({ tiles }: EntityAnalyticsScope): EntityAnalyticsScopeTile[] =>
+  SIGNAL_CARD_IDS.flatMap((tileId) => {
+    const tile = tiles[tileId];
+    return tile && isWorthShowing(tile) ? [tile] : [];
+  });
 
 /** The counts, with their change when any can be compared. A column of "not enough history" says nothing. */
 const renderChanges = (scope: EntityAnalyticsScope): string[] => {
@@ -225,7 +217,7 @@ const renderChanges = (scope: EntityAnalyticsScope): string[] => {
   if (rows.length === 0) {
     return [];
   }
-  const hasComparison = rows.some(([, { delta }]) => delta !== undefined);
+  const hasComparison = rows.some(({ delta }) => delta !== undefined);
   const header = hasComparison
     ? [`|  | Entities | vs previous ${BRIEF_PERIOD_LABELS[scope.period]} |`, '| --- | --- | --- |']
     : ['|  | Entities |', '| --- | --- |'];
@@ -233,7 +225,7 @@ const renderChanges = (scope: EntityAnalyticsScope): string[] => {
     '**This period at a glance**',
     '',
     ...header,
-    ...rows.map(([, tile]) => {
+    ...rows.map((tile) => {
       const row = `| ${escapeMarkdown(tile.title)} | ${formatCount(tile.value)} |`;
       return hasComparison ? `${row} ${describeDelta(tile)} |` : row;
     }),

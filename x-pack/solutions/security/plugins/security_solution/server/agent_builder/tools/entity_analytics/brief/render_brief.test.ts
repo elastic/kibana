@@ -188,7 +188,7 @@ describe('renderBrief', () => {
       ],
     ],
     [
-      'puts the selected count first and leaves out rows with nothing to say',
+      'keeps the page order, even with a selected count, and leaves out rows with nothing to say',
       'watchlisted',
       {
         entitiesWithAlerts: { title: 'Entities with alerts', value: 130, delta: 30, entityIds: [] },
@@ -198,8 +198,8 @@ describe('renderBrief', () => {
         watchlisted: { title: 'Watchlisted', value: 3, delta: 0, entityIds: [] },
       },
       [
-        '| Watchlisted | 3 | no change |',
         '| Entities with alerts | 130 | +30 |',
+        '| Watchlisted | 3 | no change |',
         '| New entity | 7 | not enough history |',
       ],
     ],

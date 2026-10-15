@@ -112,7 +112,7 @@ export const fetchCandidateEntities = async ({
     return [{ id, name, type, tileIds, record }];
   });
 
-  const identities = foldAliases(candidates, focusTileId);
+  const identities = foldAliases(candidates);
   const matchedCount = getTotal(response.hits.total);
   return {
     candidates: rankCandidates(identities, focusTileId),
@@ -291,14 +291,11 @@ export const fetchRiskAtStart = async ({
 
 // Candidate selection
 
-const getTileOrder = (focusTileId: SignalCardId | undefined): SignalCardId[] =>
-  orderBy(SIGNAL_CARD_IDS, (tileId) => tileId === focusTileId, 'desc');
-
-/** Maps each entity id in the scope's available tiles to its tile ids, the selected tile first. */
+/** Maps each entity id in the scope's available tiles to its tile ids. */
 export const selectCandidateTiles = (scope: EntityAnalyticsScope): Map<string, SignalCardId[]> => {
-  const { focusTileId, tiles } = scope;
+  const { tiles } = scope;
   const tileIdsByEntityId = new Map<string, SignalCardId[]>();
-  for (const tileId of getTileOrder(focusTileId)) {
+  for (const tileId of SIGNAL_CARD_IDS) {
     const tile = tiles[tileId];
     const entityIds = tile && !tile.unavailable ? tile.entityIds : [];
     for (const entityId of entityIds) {
@@ -315,10 +312,7 @@ const getRankWeight = (
 ): number => (focusTileId !== undefined && tileIds.includes(focusTileId) ? 10 : 0) + tileIds.length;
 
 /** Folds aliases into their golden entity, using its own record when read, otherwise the first alias's. */
-export const foldAliases = (
-  candidates: BriefCandidate[],
-  focusTileId: SignalCardId | undefined
-): BriefCandidate[] => {
+export const foldAliases = (candidates: BriefCandidate[]): BriefCandidate[] => {
   const byIdentityId = new Map<string, BriefCandidate>();
   for (const candidate of candidates) {
     const identityId =
@@ -329,7 +323,7 @@ export const foldAliases = (
     byIdentityId.set(identityId, {
       ...kept,
       id: identityId,
-      tileIds: getTileOrder(focusTileId).filter((tileId) => tileIds.includes(tileId)),
+      tileIds: SIGNAL_CARD_IDS.filter((tileId) => tileIds.includes(tileId)),
     });
   }
   return [...byIdentityId.values()];
