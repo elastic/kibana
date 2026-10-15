@@ -18,7 +18,6 @@ const meta: Meta<typeof AgenticFirstEmptyState> = {
   decorators: [kibanaReactDecorator],
   parameters: { layout: 'fullscreen' },
   args: {
-    onSubmitPrompt: action('onSubmitPrompt'),
     onStartManually: action('onStartManually'),
     onExploreLibrary: action('onExploreLibrary'),
     onSelectExample: action('onSelectExample'),

@@ -19,7 +19,9 @@ import { useKibana } from '../../hooks/use_kibana';
 export type AgenticFirstEmptyStateLiveProps = Omit<
   AgenticFirstEmptyStateProps,
   'liveTemplates' | 'agentInput'
->;
+> & {
+  onSubmitPrompt?: (prompt: string) => void;
+};
 
 /**
  * {@link AgenticFirstEmptyState} with the library catalog and Agent Builder's chat input.
@@ -30,9 +32,9 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
   const libraryEnabled = useLibraryEnabled();
   const { workflowsManagement, application, docLinks } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
-  const hasLlmConnector = useHasLlmConnector();
+  const chatAccess = useAgentChatAccess();
 
-  const { onSubmitPrompt } = props;
+  const { onSubmitPrompt, ...stateProps } = props;
   const handlePromptSubmit = useCallback(
     (message: string) => {
       onSubmitPrompt?.(message);
@@ -45,51 +47,63 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
     void application.navigateToApp('management', { path: '/modelManagement/model_settings' });
   }, [application]);
 
-  // Without an LLM the prompt would lead nowhere, so offer to connect one instead.
-  const agentInput =
-    hasLlmConnector === false ? (
-      <ConnectLlmPanel onConnect={handleConnectLlm} docsHref={docLinks.links.agentBuilder.models} />
-    ) : EmbeddableConversationInput ? (
-      <EmbeddableConversationInput onSubmit={handlePromptSubmit} />
-    ) : undefined;
+  // No prompt when the chat cannot run at all. Without an LLM, offer to connect one.
+  const renderAgentInput = () => {
+    if (chatAccess === 'unavailable' || !EmbeddableConversationInput) return undefined;
+    if (chatAccess === 'noLlm') {
+      return (
+        <ConnectLlmPanel
+          onConnect={handleConnectLlm}
+          docsHref={docLinks.links.agentBuilder.models}
+        />
+      );
+    }
+    return <EmbeddableConversationInput onSubmit={handlePromptSubmit} />;
+  };
+  const agentInput = renderAgentInput();
 
   return libraryEnabled ? (
-    <LiveInner {...props} agentInput={agentInput} />
+    <LiveInner {...stateProps} agentInput={agentInput} />
   ) : (
-    <AgenticFirstEmptyState {...props} agentInput={agentInput} />
+    <AgenticFirstEmptyState {...stateProps} agentInput={agentInput} />
   );
 }
 
-function LiveInner({
-  agentInput,
-  ...props
-}: AgenticFirstEmptyStateLiveProps & { agentInput?: React.ReactNode }) {
+function LiveInner({ agentInput, ...props }: AgenticFirstEmptyStateProps) {
   const { templates } = useCatalog();
   return <AgenticFirstEmptyState {...props} liveTemplates={templates} agentInput={agentInput} />;
 }
 
+type AgentChatAccess = 'loading' | 'ready' | 'noLlm' | 'unavailable';
+
 /**
- * Resolves whether Agent Builder has an LLM connector. `undefined` while the
- * check runs, or when Agent Builder is unavailable.
+ * Whether the landing's prompt can start an Agent Builder chat. Uses the same
+ * checks as the editor's chat integration: plugin, `show` privilege, license, LLM.
  */
-const useHasLlmConnector = (): boolean | undefined => {
-  const agentBuilder = useKibana().services.workflowsManagement?.agentBuilder;
-  const [hasLlmConnector, setHasLlmConnector] = useState<boolean | undefined>();
+const useAgentChatAccess = (): AgentChatAccess => {
+  const { workflowsManagement, application } = useKibana().services;
+  const agentBuilder = workflowsManagement?.agentBuilder;
+  const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
+  const canUseChat = Boolean(agentBuilder) && hasShowPrivilege;
+  const [access, setAccess] = useState<AgentChatAccess>('loading');
 
   useEffect(() => {
-    if (!agentBuilder) return;
+    if (!agentBuilder || !canUseChat) return;
     let cancelled = false;
     agentBuilder
       .getAgentBuilderAccess()
-      .then(({ hasRequiredLicense, hasLlmConnector: hasConnector }) => {
-        // Without the license Agent Builder is off entirely; keep the default input.
-        if (!cancelled && hasRequiredLicense) setHasLlmConnector(hasConnector);
+      .then(({ hasRequiredLicense, hasLlmConnector }) => {
+        if (cancelled) return;
+        if (!hasRequiredLicense) setAccess('unavailable');
+        else setAccess(hasLlmConnector ? 'ready' : 'noLlm');
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setAccess('unavailable');
+      });
     return () => {
       cancelled = true;
     };
-  }, [agentBuilder]);
+  }, [agentBuilder, canUseChat]);
 
-  return hasLlmConnector;
+  return canUseChat ? access : 'unavailable';
 };

@@ -9,22 +9,18 @@
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { TemplateCard } from '@kbn/workflows-ui';
@@ -44,24 +40,13 @@ export interface AgenticFirstEmptyStateProps {
    * `useCatalog()` behind `useLibraryEnabled()`), the first three replace the mock cards.
    */
   liveTemplates?: Template[];
-  /**
-   * When supplied, replaces the built-in mock prompt panel. Intended for the
-   * agentBuilder plugin's `EmbeddableConversationInput`, which already carries the
-   * real LLM/agent selectors and submit wiring.
-   */
+  /** The prompt area, e.g. Agent Builder's chat input. Omitted when AI chat is unavailable. */
   agentInput?: React.ReactNode;
-  onSubmitPrompt?: (prompt: string) => void;
   onStartManually?: () => void;
   onExploreLibrary?: () => void;
   onSelectExample?: (id: string) => void;
   onSelectTemplate?: (template: Template) => void;
-  llmLabel?: string;
-  agentLabel?: string;
 }
-
-const submitLabel = i18n.translate('workflows.agenticFirst.submit', {
-  defaultMessage: 'Submit prompt',
-});
 
 const DEFAULT_EXAMPLES: AgenticFirstExample[] = [
   {
@@ -100,24 +85,14 @@ export function AgenticFirstEmptyState({
   examples = DEFAULT_EXAMPLES,
   liveTemplates,
   agentInput,
-  onSubmitPrompt,
   onStartManually,
   onExploreLibrary,
   onSelectExample,
   onSelectTemplate,
-  llmLabel = 'LLM',
-  agentLabel = 'Elastic Agent',
 }: AgenticFirstEmptyStateProps) {
   const visibleTemplates = liveTemplates?.slice(0, 3) ?? [];
   const showLiveTemplates = visibleTemplates.length > 0;
   const { euiTheme } = useEuiTheme();
-  const [prompt, setPrompt] = useState('');
-
-  const handleSubmit = () => {
-    if (prompt.trim().length === 0) return;
-    onSubmitPrompt?.(prompt.trim());
-  };
-
   const containerCss = css`
     width: 100%;
     padding: ${euiTheme.size.xl} ${euiTheme.size.l};
@@ -144,93 +119,12 @@ export function AgenticFirstEmptyState({
           </h2>
         </EuiTitle>
 
-        {/* Matches the title-to-input gap on the Agent Builder new-chat screen. */}
-        <EuiSpacer size="l" />
-
-        {agentInput ? (
-          <div data-test-subj="agenticFirstAgentInput">{agentInput}</div>
-        ) : (
-          <EuiPanel
-            hasBorder
-            hasShadow={false}
-            paddingSize="m"
-            css={css`
-              border-color: ${euiTheme.colors.primary};
-            `}
-            data-test-subj="agenticFirstPromptPanel"
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="sparkles" color="primary" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTextArea
-                  fullWidth
-                  rows={3}
-                  resize="none"
-                  placeholder={i18n.translate('workflows.agenticFirst.promptPlaceholder', {
-                    defaultMessage:
-                      'e.g. For each high-severity alert, send a Slack message to #security-alerts',
-                  })}
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
-                  }}
-                  data-test-subj="agenticFirstPromptInput"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="spaceBetween"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="gear"
-                  color="text"
-                  data-test-subj="agenticFirstLlmSelector"
-                >
-                  {llmLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="sparkles"
-                      color="text"
-                      data-test-subj="agenticFirstAgentSelector"
-                    >
-                      {agentLabel}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={submitLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="sortUp"
-                        aria-label={submitLabel}
-                        display="base"
-                        onClick={handleSubmit}
-                        isDisabled={prompt.trim().length === 0}
-                        data-test-subj="agenticFirstSubmitButton"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+        {agentInput && (
+          <>
+            {/* Matches the title-to-input gap on the Agent Builder new-chat screen. */}
+            <EuiSpacer size="l" />
+            <div data-test-subj="agenticFirstAgentInput">{agentInput}</div>
+          </>
         )}
 
         <EuiSpacer size="xxl" />

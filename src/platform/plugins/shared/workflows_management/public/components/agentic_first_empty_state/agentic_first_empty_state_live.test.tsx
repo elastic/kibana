@@ -14,17 +14,24 @@ import { AgenticFirstEmptyStateLive } from './agentic_first_empty_state_live';
 
 const mockNavigateToApp = jest.fn();
 const mockGetAgentBuilderAccess = jest.fn();
+let mockHasShowPrivilege = true;
+let mockHasAgentBuilder = true;
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      application: { navigateToApp: mockNavigateToApp },
+      application: {
+        navigateToApp: mockNavigateToApp,
+        capabilities: { agentBuilder: { show: mockHasShowPrivilege } },
+      },
       docLinks: { links: { agentBuilder: { models: 'https://docs.example/models' } } },
       workflowsManagement: {
-        agentBuilder: {
-          getAgentBuilderAccess: mockGetAgentBuilderAccess,
-          EmbeddableConversationInput: () => <div data-test-subj="mockConversationInput" />,
-        },
+        agentBuilder: mockHasAgentBuilder
+          ? {
+              getAgentBuilderAccess: mockGetAgentBuilderAccess,
+              EmbeddableConversationInput: () => <div data-test-subj="mockConversationInput" />,
+            }
+          : undefined,
       },
     },
   }),
@@ -46,7 +53,15 @@ const renderLive = () =>
 describe('AgenticFirstEmptyStateLive', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHasShowPrivilege = true;
+    mockHasAgentBuilder = true;
   });
+
+  const expectNoPrompt = () => {
+    expect(screen.queryByTestId('agenticFirstAgentInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agenticFirstConnectLlmPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agenticFirstStartManuallyButton')).toBeInTheDocument();
+  };
 
   it('shows the chat input when an LLM connector exists', async () => {
     mockGetAgentBuilderAccess.mockResolvedValue({
@@ -82,16 +97,34 @@ describe('AgenticFirstEmptyStateLive', () => {
     });
   });
 
-  it('keeps the chat input when the license is missing', async () => {
+  it('hides the prompt when the license is missing', async () => {
     mockGetAgentBuilderAccess.mockResolvedValue({
       hasRequiredLicense: false,
-      hasLlmConnector: false,
+      hasLlmConnector: true,
     });
 
     renderLive();
 
-    await waitFor(() => expect(mockGetAgentBuilderAccess).toHaveBeenCalled());
-    expect(screen.getByTestId('mockConversationInput')).toBeInTheDocument();
-    expect(screen.queryByTestId('agenticFirstConnectLlmPanel')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId('mockConversationInput')).not.toBeInTheDocument()
+    );
+    expectNoPrompt();
+  });
+
+  it('hides the prompt without the Agent Builder show privilege', () => {
+    mockHasShowPrivilege = false;
+
+    renderLive();
+
+    expectNoPrompt();
+    expect(mockGetAgentBuilderAccess).not.toHaveBeenCalled();
+  });
+
+  it('hides the prompt when Agent Builder is disabled', () => {
+    mockHasAgentBuilder = false;
+
+    renderLive();
+
+    expectNoPrompt();
   });
 });
