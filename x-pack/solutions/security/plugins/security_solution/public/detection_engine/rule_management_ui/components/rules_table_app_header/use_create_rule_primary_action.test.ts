@@ -72,24 +72,44 @@ describe('useCreateRulePrimaryAction', () => {
     const getAction = () =>
       render({ isAiRuleCreationAvailable: true, isDisabled: false, isLoading: true });
 
-    it('renders a dropdown with AI and manual rule creation', () => {
+    it('renders a split button that links to the rule creation page', () => {
       const action = getAction();
 
-      expect(action).toMatchObject({ testId: 'create-rule-button', isLoading: true });
-      expect(action.items?.map(({ testId }) => testId)).toEqual([
+      expect(action).toMatchObject({
+        testId: 'create-rule-button',
+        href: `/app/security/${SecurityPageName.rulesCreate}`,
+        iconType: '',
+        isLoading: true,
+      });
+      expect(action.items).toBeUndefined();
+    });
+
+    it('lists AI and manual rule creation in the split button menu', () => {
+      expect(getAction().splitButtonProps?.items?.map(({ testId }) => testId)).toEqual([
         'ai-rule-creation',
         'manual-rule-creation',
       ]);
     });
 
+    it('disables both parts of the split button when requested', () => {
+      const action = render({
+        isAiRuleCreationAvailable: true,
+        isDisabled: true,
+        isLoading: false,
+      });
+
+      expect(action.disableButton).toBe(true);
+      expect(action.splitButtonProps?.isSecondaryButtonDisabled).toBe(true);
+    });
+
     it('links manual rule creation to the rule creation page', () => {
-      const manualItem = getAction().items?.[1];
+      const manualItem = getAction().splitButtonProps?.items?.[1];
 
       expect(manualItem?.href).toBe(`/app/security/${SecurityPageName.rulesCreate}`);
     });
 
     it('starts an AI rule creation session in the agent chat', () => {
-      const aiItem = getAction().items?.[0];
+      const aiItem = getAction().splitButtonProps?.items?.[0];
 
       aiItem?.run?.();
 
@@ -104,7 +124,7 @@ describe('useCreateRulePrimaryAction', () => {
 
     it('still reports telemetry and does not throw when the agent builder is unavailable', () => {
       mockServices.agentBuilder = undefined;
-      const aiItem = getAction().items?.[0];
+      const aiItem = getAction().splitButtonProps?.items?.[0];
 
       expect(() => aiItem?.run?.()).not.toThrow();
       expect(mockReportEvent).toHaveBeenCalledWith(RuleCreationEventTypes.CreationInitialized, {
