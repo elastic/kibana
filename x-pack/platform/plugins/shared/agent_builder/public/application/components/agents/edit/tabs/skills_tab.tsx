@@ -117,15 +117,16 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     [areElasticCapabilitiesEnabled]
   );
 
-  const isSkillAutoIncluded = useCallback(
+  // Inherited and auto-included skills always apply, so they cannot be toggled.
+  const isSkillLocked = useCallback(
     (skill: PublicSkillSummary) =>
       inheritedSkillIds.has(skill.id) || isIncludedByElasticCapabilities(skill),
     [inheritedSkillIds, isIncludedByElasticCapabilities]
   );
 
   const isSkillActive = useCallback(
-    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id) || isSkillAutoIncluded(skill),
-    [selectedIdSet, isSkillAutoIncluded]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id) || isSkillLocked(skill),
+    [selectedIdSet, isSkillLocked]
   );
 
   const displaySkills = useMemo(() => {
@@ -152,7 +153,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const handleToggleSkill = useCallback(
     (skillId: string) => {
       const skill = skills.find((s) => s.id === skillId);
-      if (skill && isSkillAutoIncluded(skill)) return;
+      if (skill && isSkillLocked(skill)) return;
       const currentIds = selectedSkills ?? [];
       if (currentIds.includes(skillId)) {
         onSkillsChange(currentIds.filter((id) => id !== skillId));
@@ -160,7 +161,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onSkillsChange([...currentIds, skillId]);
       }
     },
-    [selectedSkills, onSkillsChange, skills, isSkillAutoIncluded]
+    [selectedSkills, onSkillsChange, skills, isSkillLocked]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -188,7 +189,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const columns = [
     createCheckboxColumn(
       isSkillActive,
-      isSkillAutoIncluded,
+      isSkillLocked,
       isIncludedByElasticCapabilities,
       handleToggleSkill,
       disabled
@@ -371,20 +372,20 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
 
 const createCheckboxColumn = (
   isSkillActive: (skill: PublicSkillSummary) => boolean,
-  isSkillAutoIncluded: (skill: PublicSkillSummary) => boolean,
+  isSkillLocked: (skill: PublicSkillSummary) => boolean,
   isIncludedByElasticCapabilities: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
   render: (skill: PublicSkillSummary) => {
-    const autoIncluded = isSkillAutoIncluded(skill);
+    const locked = isSkillLocked(skill);
     const checkbox = (
       <EuiCheckbox
         id={`skill-${skill.id}`}
         checked={isSkillActive(skill)}
         onChange={() => onToggle(skill.id)}
-        disabled={disabled || autoIncluded}
+        disabled={disabled || locked}
       />
     );
     // Inherited skills are locked too, but the tooltip only explains Elastic Capabilities.
