@@ -262,6 +262,15 @@ export const describeDispatchTargetForConfirmation = async (
 
   try {
     const authz = await endpointAppContextService.getEndpointAuthz(context.request);
+    // The HTTP routes require the `securitySolution` feature privilege on top
+    // of the endpoint sub-feature privilege; a sub-feature alone does not
+    // grant it, so assert both layers (see `get_response_action_status`).
+    if (!authz.canReadSecuritySolution) {
+      return {
+        kind: 'blocked',
+        message: `You do not have the 'canReadSecuritySolution' privilege (Security feature access), so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
+      };
+    }
     if (!authz[requiredPrivilege]) {
       return {
         kind: 'blocked',
@@ -314,6 +323,11 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
   }
 
   const authz = await endpointAppContextService.getEndpointAuthz(context.request);
+  // Same two layers as the HTTP routes: `securitySolution` first, then the
+  // action's endpoint privilege.
+  if (!authz.canReadSecuritySolution) {
+    return { kind: 'result', result: insufficientPrivilegesResult('canReadSecuritySolution') };
+  }
   if (!authz[requiredPrivilege]) {
     return { kind: 'result', result: insufficientPrivilegesResult(requiredPrivilege) };
   }

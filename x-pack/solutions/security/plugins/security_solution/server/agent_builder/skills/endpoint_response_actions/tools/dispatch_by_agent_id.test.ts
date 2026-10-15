@@ -575,6 +575,170 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
+    it('refuses without securitySolution access even when the endpoint privilege is held, and dispatches nothing', async () => {
+      // The HTTP routes require `securitySolution` on top of the sub-feature
+      // privilege; a role with only e.g. `host_isolation_all` gets a 403 there.
+      service.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }));
+      const tool = build(service);
+
+      const out = results(await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams }));
+
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('insufficient_privileges');
+      expect(data.privilege).toBe('canReadSecuritySolution');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('tells the analyst up front when securitySolution access is missing', async () => {
+      service.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }));
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain('canReadSecuritySolution');
+      expect(toolCallState.value).toEqual(expect.objectContaining({ kind: 'refused', action }));
+    });
+
+    it.each(['unenrolled', 'uninstalled'])(
+      'refuses an %s agent ID instead of dispatching an action nothing will pick up',
+      async (fleetStatus) => {
+        getAgent.mockResolvedValue({
+          id: 'agent-b',
+          status: fleetStatus,
+          packages: ['endpoint'],
+          local_metadata: { host: { name: 'dup-host' } },
+        });
+        const tool = build(service);
+
+        const card = await tool.confirmation?.getConfirmation?.({
+          toolParams: { agentId: 'agent-b', ...extraParams },
+          context: mockContext,
+        });
+        expect(card?.message).toContain('will be refused');
+        expect(card?.message).toContain('agent-b');
+
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext)
+        );
+        const data = out[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_active');
+        expect(data.agentId).toBe('agent-b');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    it('refuses a hostname whose only match is unenrolled', async () => {
+      listAgents.mockResolvedValue({
+        agents: [{ id: 'agent-a', status: 'unenrolled', packages: ['endpoint'] }],
+      });
+      const tool = build(service);
+
+      const out = results(
+        await tool.handler({ hostName: 'dup-host', ...extraParams }, mockContext)
+      );
+
+      expect((out[0].data as Record<string, unknown>).reason).toBe('endpoint_not_active');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('still dispatches to the live agent when an unenrolled record shares the hostname', async () => {
+      listAgents.mockResolvedValue({
+        agents: [
+          { id: 'old-agent', status: 'unenrolled', packages: ['endpoint'] },
+          { id: 'agent-live', status: 'online', packages: ['endpoint'] },
+        ],
+      });
+      const tool = build(service);
+
+      await confirmThenDispatch(tool, { hostName: 'dup-host', ...extraParams });
+
+      expect(client[clientMethod].mock.calls[0][0]).toEqual(
+        expect.objectContaining({ endpoint_ids: ['agent-live'] })
+      );
+    });
+
+    it('labels the host by agent ID, never by the model-supplied hostName, when Fleet records no name', async () => {
+      getAgent.mockResolvedValue({ id: 'agent-b', status: 'online', packages: ['endpoint'] });
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+      expect(card?.message).not.toContain('attacker-chosen-name');
+      expect(card?.message).toContain('agent-b');
+
+      await tool.handler(
+        { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams },
+        mockContext
+      );
+      const [payload, metadata] = client[clientMethod].mock.calls[0];
+      expect(JSON.stringify(payload)).not.toContain('attacker-chosen-name');
+      expect(JSON.stringify(metadata)).not.toContain('attacker-chosen-name');
+      expect(metadata).toEqual({ hosts: { 'agent-b': { name: 'agent-b' } } });
+    });
+
+    it('includes why the action failed in the result', async () => {
+      mockGetActionDetailsById.mockResolvedValue({
+        id: 'action-1',
+        status: 'failed',
+        wasSuccessful: false,
+        isCompleted: true,
+        errors: ['agent was offline', 'policy denied the action'],
+      });
+      const tool = build(service);
+
+      const out = results(await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams }));
+      const data = out[0].data as Record<string, unknown>;
+
+      expect(data.status).toBe('failed');
+      expect(data.errors).toEqual(['agent was offline', 'policy denied the action']);
+      expect(data.totalErrors).toBe(2);
+    });
+
+    it('says the action may already have been sent, and must not be retried, when a step after the dispatch throws', async () => {
+      // The client sends the command through Fleet before it writes the request
+      // document, so a throw from the client call does not prove nothing went out.
+      client[clientMethod].mockRejectedValue(new Error('failed to write action doc'));
+      const tool = build(service);
+
+      const out = results(await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams }));
+      const data = out[0].data as Record<string, unknown>;
+
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('unknown_error');
+      expect(String(data.message)).toContain('failed to write action doc');
+      expect(String(data.message)).toContain('may already have been sent');
+      expect(String(data.message)).toContain('Do NOT retry');
+      expect(String(data.message)).toContain('get_response_action_status');
+      expect(data.actionMayHaveBeenSent).toBe(true);
+    });
+
+    it('does not claim the action may have been sent when the failure precedes the dispatch', async () => {
+      service.getInternalResponseActionsClient = jest.fn(() => {
+        throw new Error('client unavailable');
+      }) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+      const tool = build(service);
+
+      const out = results(await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams }));
+      const data = out[0].data as Record<string, unknown>;
+
+      expect(data.error).toBe('unknown_error');
+      expect(String(data.message)).toContain('client unavailable');
+      expect(String(data.message)).not.toContain('may already have been sent');
+      expect(data.actionMayHaveBeenSent).toBeUndefined();
+    });
+
     it('keeps the dispatched action ID when every completion read fails', async () => {
       jest.useFakeTimers();
       try {

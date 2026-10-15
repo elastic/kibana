@@ -16,7 +16,8 @@ import {
   buildResponseActionComment,
   MAX_ACTION_COMMENT_LENGTH,
   MAX_FILE_PATH_LENGTH,
-  responseActionErrorResult,
+  dispatchErrorResult,
+  summarizeActionErrors,
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
@@ -27,6 +28,7 @@ const scanHostSchema = z
     ...hostTargetFields('The hostname of the endpoint to scan for malware.'),
     path: z
       .string()
+      .trim()
       .min(1)
       .max(MAX_FILE_PATH_LENGTH)
       .describe('The absolute file or folder path on the endpoint to scan for malware.'),
@@ -84,6 +86,9 @@ export const scanHostTool = (
     },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
+      // Set just before the client call: from there on a throw does not mean
+      // nothing was sent (see `dispatchErrorResult`).
+      let dispatchAttempted = false;
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
@@ -118,6 +123,7 @@ export const scanHostTool = (
           isAutomated: false,
         });
 
+        dispatchAttempted = true;
         const dispatchedAction = await responseActionsClient.scan(
           {
             endpoint_ids: endpointIds,
@@ -157,6 +163,9 @@ export const scanHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
+                // Why a failed action failed (bounded); without it the model
+                // sees only `status: failed`.
+                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },
@@ -165,10 +174,7 @@ export const scanHostTool = (
         };
       } catch (error) {
         logger.error(error);
-        return responseActionErrorResult(
-          'unknown_error',
-          `Error scanning host: ${error instanceof Error ? error.message : String(error)}`
-        );
+        return dispatchErrorResult('scanning host', error, { dispatchAttempted });
       }
     },
   };

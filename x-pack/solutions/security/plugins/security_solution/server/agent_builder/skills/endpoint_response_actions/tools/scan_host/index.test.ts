@@ -292,6 +292,17 @@ describe('scanHostTool', () => {
     }
   );
 
+  it('rejects a whitespace-only path and trims a padded one', () => {
+    const tool = scanHostTool(service);
+
+    expect(tool.schema.safeParse({ hostName: 'h', path: '   ' }).success).toBe(false);
+    expect(tool.schema.safeParse({ hostName: 'h', path: '\t\n' }).success).toBe(false);
+
+    const parsed = tool.schema.safeParse({ hostName: 'h', path: '  /tmp/x  ' });
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.path).toBe('/tmp/x');
+  });
+
   it('returns an error result when the response actions client throws', async () => {
     const mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({

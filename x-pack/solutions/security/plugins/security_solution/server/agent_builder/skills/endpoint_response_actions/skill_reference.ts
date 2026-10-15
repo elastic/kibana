@@ -20,11 +20,14 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 | \`status: 'unknown'\` | \`host_status\` not yet in metadata | Report the state is unknown; do not call it offline |
 | Hostname matches several endpoints | \`found: false\`, \`reason: ambiguous_hostname\` (+ \`candidates\`, possibly \`truncated: true\` + \`totalCandidates\`) | Ask analyst which agent ID they mean, then re-call the tool with \`agentId\`; if truncated, say only 10 newest candidates of \`totalCandidates\` are shown |
 | Action not found | \`found: false\`, \`reason: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |
+| Agent unenrolled or uninstalled | \`found: false\`, \`reason: endpoint_not_active\` (+ \`agentId\`) | Tell the analyst the agent can no longer receive actions and nothing was dispatched; if the ID is stale, look the host up again by hostname |
+| Action failed | \`status: failed\` + \`errors\` (bounded; see \`totalErrors\`) | Report the reasons in \`errors\`; do not retry blindly |
 | Action still pending | \`status: pending\` + action ID | Report it is still in flight; offer to re-check with \`get_response_action_status\` |
 | Action expired | \`status: failed\` + \`isExpired: true\` | Report that the action expired before the host responded, not that the command failed; direct the analyst to re-issue it from the Response Actions UI |
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
 | Page out of range | \`error: invalid_argument\` | Narrow the request with \`hostNameFilter\` instead of paging further |
 | Unexpected failure | \`error: unknown_error\` | Report the message; do not retry blindly |
+| Failure after dispatch | \`error: unknown_error\` + \`actionMayHaveBeenSent: true\` | The action may already have been sent. Do NOT call the write tool again; check \`get_response_action_status\` / Response Actions history for the host first |
 
 ## Bounded Fields in \`get_response_action_status\`
 

@@ -192,6 +192,33 @@ export function insufficientPrivilegesResult(privilege: string) {
 }
 
 /**
+ * Error result for a dispatching tool whose handler threw.
+ *
+ * `dispatchAttempted` marks the point where the response-actions client was
+ * called. The client sends the command through Fleet before it writes the
+ * action request document, so a throw from there on (a failed write, a failed
+ * follow-up read) does NOT mean nothing was sent. The result then says so and
+ * tells the model to check the action status instead of retrying, which would
+ * dispatch a second action. Before that point nothing was sent and a retry is
+ * safe.
+ */
+export function dispatchErrorResult(
+  verb: string,
+  error: unknown,
+  { dispatchAttempted }: { dispatchAttempted: boolean }
+) {
+  const detail = error instanceof Error ? error.message : String(error);
+
+  return responseActionErrorResult(
+    'unknown_error',
+    dispatchAttempted
+      ? `Error ${verb}: ${detail}. The action may already have been sent to the endpoint. Do NOT retry the call; it could dispatch a second action. Check the Response Actions history (get_response_action_status) for the host before doing anything else.`
+      : `Error ${verb}: ${detail}`,
+    dispatchAttempted ? { actionMayHaveBeenSent: true } : undefined
+  );
+}
+
+/**
  * Reason codes that explain why an endpoint lookup produced a "not found" result.
  *
  * - endpoint_not_found: the host name was resolved to zero fleet agents.

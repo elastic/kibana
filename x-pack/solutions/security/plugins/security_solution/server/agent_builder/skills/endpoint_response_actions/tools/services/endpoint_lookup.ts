@@ -58,6 +58,13 @@ export interface ResolvedEndpoint {
    * only ever be this machine's names — never another agent's alias.
    */
   defendHostNames?: string[];
+  /**
+   * Status of the resolved agent in the `HostStatus` vocabulary (Fleet's
+   * `unenrolled` / `uninstalled` both report `unenrolled`). Lets a write tool
+   * refuse an agent that can no longer receive actions without changing what
+   * the read-only status tool resolves.
+   */
+  status?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -298,6 +305,15 @@ export function createEndpointLookupService(
   interface CandidateCollection {
     candidates: NormalizedCandidate[];
     truncated: boolean;
+    /**
+     * Fleet agent ids that matched the hostname but are not response-action
+     * targets (no supported integration in `packages`). They are dropped from
+     * `candidates`, but a Defend metadata document for the same agent id can
+     * still match the hostname, so the metadata merge has to know about them —
+     * otherwise the id is offered as an ambiguity candidate and then rejected
+     * as `endpoint_not_found` when the model retries with it.
+     */
+    unsupportedAgentIds?: Set<string>;
     total?: number;
   }
 
@@ -360,26 +376,29 @@ export function createEndpointLookupService(
     // merely share the hostname without a supported integration (e.g. an
     // auditing agent) must not surface as candidates — they would otherwise
     // inflate the ambiguity set or win the tiebreak over a real endpoint.
-    const visible: NormalizedCandidate[] = items
-      .filter((candidate) => (candidate.packages ?? []).some((p) => supportedPackages.has(p)))
-      .map((candidate) => ({
-        agentId: candidate.id,
-        // Mirror Fleet's own ActiveAgentStatuses: only records that are
-        // definitively gone count as not live — `updating`, `degraded`,
-        // `enrolling` and `error` are active machines, so two same-named agents
-        // in those states must still surface as `ambiguous` rather than one
-        // being silently picked.
-        isLive: !['offline', 'inactive', 'unenrolled', 'uninstalled', 'decommissioned'].includes(
-          candidate.status ?? ''
-        ),
-        // Reported in the `HostStatus` vocabulary every other status the tool
-        // returns uses (metadata candidates, the found result); `isLive`
-        // above stays on the raw Fleet status, where the active/gone
-        // distinction is defined.
-        status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
-        packages: candidate.packages,
-        sortKey: candidate.enrolled_at,
-      }));
+    const isSupported = (candidate: RawFleetAgent) =>
+      (candidate.packages ?? []).some((p) => supportedPackages.has(p));
+    const unsupportedAgentIds = new Set(
+      items.filter((candidate) => !isSupported(candidate)).map((candidate) => candidate.id)
+    );
+    const visible: NormalizedCandidate[] = items.filter(isSupported).map((candidate) => ({
+      agentId: candidate.id,
+      // Mirror Fleet's own ActiveAgentStatuses: only records that are
+      // definitively gone count as not live — `updating`, `degraded`,
+      // `enrolling` and `error` are active machines, so two same-named agents
+      // in those states must still surface as `ambiguous` rather than one
+      // being silently picked.
+      isLive: !['offline', 'inactive', 'unenrolled', 'uninstalled', 'decommissioned'].includes(
+        candidate.status ?? ''
+      ),
+      // Reported in the `HostStatus` vocabulary every other status the tool
+      // returns uses (metadata candidates, the found result); `isLive`
+      // above stays on the raw Fleet status, where the active/gone
+      // distinction is defined.
+      status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
+      packages: candidate.packages,
+      sortKey: candidate.enrolled_at,
+    }));
 
     // `truncated` is safe to keep: it says only "there were more pages", which
     // the caller already learns from the space-filtered candidate list being
@@ -387,7 +406,7 @@ export function createEndpointLookupService(
     // `ensureInCurrentSpace` drops the ones this caller cannot see, so returning
     // it would let a hostname probe learn how many matching agent records exist
     // in other Spaces. Drop it and let the count be derived from visible data.
-    return { candidates: visible, truncated };
+    return { candidates: visible, truncated, unsupportedAgentIds };
   };
 
   /**
@@ -544,6 +563,7 @@ export function createEndpointLookupService(
           agentId: agent.id,
           agentType,
           packages,
+          ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
           ...(typeof fleetHostName === 'string' && fleetHostName
             ? { hostName: fleetHostName }
             : {}),
@@ -572,7 +592,12 @@ export function createEndpointLookupService(
       // genuinely different hosts that happen to share a name.
       const merged = [
         ...fleet.candidates,
-        ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
+        // Drop metadata docs of agents Fleet already rejected for lacking a
+        // supported integration: `resolveByAgentId` would answer
+        // `not_found` for the id this result offers.
+        ...metadata.candidates.filter(
+          (c) => !fleetIds.has(c.agentId) && !fleet.unsupportedAgentIds?.has(c.agentId)
+        ),
       ];
 
       // Space isolation first: when the walk hit the hard cap and nothing
@@ -630,6 +655,7 @@ export function createEndpointLookupService(
           agentId: chosen.agentId,
           agentType: resolveAgentTypeFromPackages(chosen.packages ?? []),
           packages: chosen.packages ?? [],
+          status: chosen.status,
         },
       };
     },

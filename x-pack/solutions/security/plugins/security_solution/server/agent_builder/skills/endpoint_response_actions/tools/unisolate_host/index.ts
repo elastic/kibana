@@ -15,7 +15,8 @@ import { UNISOLATE_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
   MAX_ACTION_COMMENT_LENGTH,
-  responseActionErrorResult,
+  dispatchErrorResult,
+  summarizeActionErrors,
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
@@ -68,6 +69,9 @@ export const unisolateHostTool = (
     },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
+      // Set just before the client call: from there on a throw does not mean
+      // nothing was sent (see `dispatchErrorResult`).
+      let dispatchAttempted = false;
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
@@ -102,6 +106,7 @@ export const unisolateHostTool = (
         });
 
         // Note: the ResponseActionsClient method is called `release`, not `unisolate`
+        dispatchAttempted = true;
         const dispatchedAction = await responseActionsClient.release(
           {
             endpoint_ids: endpointIds,
@@ -137,6 +142,9 @@ export const unisolateHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
+                // Why a failed action failed (bounded); without it the model
+                // sees only `status: failed`.
+                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },
@@ -145,10 +153,7 @@ export const unisolateHostTool = (
         };
       } catch (error) {
         logger.error(error);
-        return responseActionErrorResult(
-          'unknown_error',
-          `Error un-isolating host: ${error instanceof Error ? error.message : String(error)}`
-        );
+        return dispatchErrorResult('un-isolating host', error, { dispatchAttempted });
       }
     },
   };

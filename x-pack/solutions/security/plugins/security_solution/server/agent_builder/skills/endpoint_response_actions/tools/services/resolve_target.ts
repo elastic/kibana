@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import { endpointNotFoundData, MAX_AGENT_ID_LENGTH, MAX_HOSTNAME_LENGTH } from '../types';
 import type { EndpointCandidate, EndpointLookupService, ResolvedEndpoint } from './endpoint_lookup';
 
@@ -65,6 +66,22 @@ export interface AmbiguousDispatchData {
   message: string;
 }
 
+/**
+ * The target resolved to an agent that is gone (`unenrolled` / `uninstalled`).
+ * Such an agent cannot pick up an action, but its metadata document can
+ * outlive it, so a dispatch would be accepted and then sit `pending` forever
+ * while reading as containment in progress.
+ */
+export interface EndpointNotActiveData {
+  kind: 'response_action_result';
+  action: DispatchActionName;
+  found: false;
+  reason: 'endpoint_not_active';
+  agentId: string;
+  status: string;
+  message: string;
+}
+
 export type ResolvedDispatchTarget =
   | {
       kind: 'found';
@@ -74,9 +91,28 @@ export type ResolvedDispatchTarget =
     }
   | {
       kind: 'respond';
-      /** Typed not-found / ambiguity payload to return without dispatching. */
-      data: ReturnType<typeof endpointNotFoundData> | AmbiguousDispatchData;
+      /** Typed not-found / ambiguity / not-active payload to return without dispatching. */
+      data: ReturnType<typeof endpointNotFoundData> | AmbiguousDispatchData | EndpointNotActiveData;
     };
+
+const refuseGoneEndpoint = (
+  action: DispatchActionName,
+  endpoint: ResolvedEndpoint
+): ResolvedDispatchTarget | undefined =>
+  endpoint.status === HostStatus.UNENROLLED
+    ? {
+        kind: 'respond',
+        data: {
+          kind: 'response_action_result',
+          action,
+          found: false,
+          reason: 'endpoint_not_active',
+          agentId: endpoint.agentId,
+          status: endpoint.status,
+          message: `The endpoint with agent ID ${endpoint.agentId} is ${endpoint.status} (unenrolled or uninstalled), so it can no longer receive response actions and nothing was dispatched. If this ID came from earlier in the conversation it is stale: look the host up again by hostname.`,
+        },
+      }
+    : undefined;
 
 /**
  * Resolves the host a dispatching tool will act on. A supplied `agentId` wins:
@@ -98,10 +134,18 @@ export async function resolveDispatchTarget(
       return { kind: 'respond', data: endpointNotFoundData({ agentId }) };
     }
 
+    const gone = refuseGoneEndpoint(action, resolved.endpoint);
+    if (gone) {
+      return gone;
+    }
+
     return {
       kind: 'found',
       endpoint: resolved.endpoint,
-      hostLabel: resolved.endpoint.hostName ?? hostName ?? agentId,
+      // Never the model-supplied hostName: when Fleet records no host name the
+      // card and the audit comment would otherwise show an unverified name next
+      // to the agent id.
+      hostLabel: resolved.endpoint.hostName ?? agentId,
     };
   }
 
@@ -138,6 +182,11 @@ export async function resolveDispatchTarget(
           : `Multiple online endpoints share the hostname "${hostName}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
       },
     };
+  }
+
+  const gone = refuseGoneEndpoint(action, resolved.endpoint);
+  if (gone) {
+    return gone;
   }
 
   return { kind: 'found', endpoint: resolved.endpoint, hostLabel: hostName };

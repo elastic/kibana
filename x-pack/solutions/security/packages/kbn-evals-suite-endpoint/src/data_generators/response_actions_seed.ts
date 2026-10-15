@@ -14,6 +14,7 @@ import {
 import type { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { RESPONSE_ACTIONS_AGENT_ID_PREFIX } from './cleanup';
 import type { EndpointScenario } from './endpoint_data';
+import { cleanupPolicyManagementLeftoverFleetPolicies } from './policy_management_package_policy';
 
 export type { IndexedFleetEndpointPolicyResponse };
 
@@ -42,13 +43,31 @@ export const seedResponseActionsEndpointPolicy = async ({
   log: ToolingLog;
   runId?: string;
 }): Promise<{ agentPolicyId: string; indexed: IndexedFleetEndpointPolicyResponse }> => {
-  const indexed = await indexFleetEndpointPolicy(
-    kbnClient,
-    `eval-agent-era-package-policy-${runId}`,
-    undefined,
-    `eval-agent-era-agent-policy-${runId}`,
-    log
-  );
+  const packagePolicyName = `eval-agent-era-package-policy-${runId}`;
+  const agentPolicyName = `eval-agent-era-agent-policy-${runId}`;
+
+  let indexed: IndexedFleetEndpointPolicyResponse;
+  try {
+    indexed = await indexFleetEndpointPolicy(
+      kbnClient,
+      packagePolicyName,
+      undefined,
+      agentPolicyName,
+      log
+    );
+  } catch (error) {
+    // The loader creates the agent policy before the package policy and does not
+    // roll back when a later step throws (e.g. package policy creation times
+    // out). `indexed` never reaches the caller, so its `afterAll` cleanup has
+    // nothing to delete: remove what the failed attempt left, by name.
+    await cleanupPolicyManagementLeftoverFleetPolicies({
+      kbnClient,
+      log,
+      packagePolicyNames: [packagePolicyName],
+      agentPolicyNames: [agentPolicyName],
+    });
+    throw error;
+  }
   const agentPolicyId = indexed.agentPolicies[0]?.id;
   if (!agentPolicyId || indexed.integrationPolicies.length === 0) {
     await deleteIndexedFleetEndpointPolicies(kbnClient, indexed);

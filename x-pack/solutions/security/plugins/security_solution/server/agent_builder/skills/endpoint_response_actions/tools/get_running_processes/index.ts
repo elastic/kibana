@@ -15,7 +15,8 @@ import { RUNNING_PROCESSES_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
   MAX_ACTION_COMMENT_LENGTH,
-  responseActionErrorResult,
+  dispatchErrorResult,
+  summarizeActionErrors,
   RUNNING_PROCESSES_MAX_RESULT_TOKENS,
   summarizeActionHosts,
   summarizeActionOutputs,
@@ -77,6 +78,9 @@ export const getRunningProcessesTool = (
     },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
+      // Set just before the client call: from there on a throw does not mean
+      // nothing was sent (see `dispatchErrorResult`).
+      let dispatchAttempted = false;
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
@@ -109,6 +113,7 @@ export const getRunningProcessesTool = (
           isAutomated: false,
         });
 
+        dispatchAttempted = true;
         const dispatchedAction = await responseActionsClient.runningProcesses(
           {
             endpoint_ids: endpointIds,
@@ -146,6 +151,9 @@ export const getRunningProcessesTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
+                // Why a failed action failed (bounded); without it the model
+                // sees only `status: failed`.
+                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
                 // Bounded: `outputs` carries one entry per running process, each
                 // with its full command line, so a busy host would otherwise blow
                 // the result budget and have generic truncation discard process
@@ -159,12 +167,7 @@ export const getRunningProcessesTool = (
         };
       } catch (error) {
         logger.error(error);
-        return responseActionErrorResult(
-          'unknown_error',
-          `Error retrieving running processes: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        return dispatchErrorResult('retrieving running processes', error, { dispatchAttempted });
       }
     },
   };
