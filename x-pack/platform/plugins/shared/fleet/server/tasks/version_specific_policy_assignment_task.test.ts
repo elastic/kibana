@@ -422,6 +422,39 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should reassign the agents of a version in batches', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = Array.from({ length: 2500 }, (_, i) => ({
+        id: `agent-${i}`,
+        policy_id: 'policy-1',
+        policy_revision: 1,
+        agent: { version: '8.18.0' },
+      })) as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: agents.length,
+        agents,
+        page: 1,
+        perPage: agents.length,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      mockedReassignAgents.mockClear();
+
+      await runTask();
+
+      expect(
+        mockedReassignAgents.mock.calls.map(([, , options]) => (options as any).agentIds.length)
+      ).toEqual([1000, 1000, 500]);
+      for (const [, , , targetPolicyId] of mockedReassignAgents.mock.calls) {
+        expect(targetPolicyId).toBe('policy-1#8.18');
+      }
+    });
+
     it('Should skip agents already on correct versioned policy regardless of revision', async () => {
       const agentPolicies = [
         {

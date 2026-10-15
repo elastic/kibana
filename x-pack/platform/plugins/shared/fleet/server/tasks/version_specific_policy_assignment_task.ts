@@ -22,6 +22,7 @@ import { errors } from '@elastic/elasticsearch';
 import { escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
+import { chunk } from 'lodash';
 
 import type { AgentPolicy } from '../../common/types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
@@ -64,6 +65,10 @@ const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 1000;
+// Agents moved per reassignment: `reassignAgents` loads the agent documents of its ids and updates them in
+// one bulk request, so a group of tens of thousands of agents (e.g. inactive ones, the first time they are
+// selected) is moved in batches, with a pause point between them for the abort signal.
+const REASSIGN_BATCHSIZE = 1000;
 const MAX_CONCURRENT_REASSIGNMENTS = 5;
 // Time window to look for recently upgraded agents
 const RECENTLY_UPGRADED_WINDOW_MINUTES = 30;
@@ -313,6 +318,34 @@ export class VersionSpecificPolicyAssignmentTask {
     return Number.isNaN(elapsedMs) || elapsedMs >= this.orphanSweepIntervalMs;
   }
 
+  /**
+   * Moves the agents to the policy in batches of `REASSIGN_BATCHSIZE`. The agents that were not moved when the run
+   * is aborted or fails stay selected, and are moved by the next run.
+   */
+  private async reassignAgentsInBatches(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentIds: string[],
+    targetPolicyId: string,
+    options: { showInactive: boolean },
+    signal: AbortSignal
+  ) {
+    for (const agentIdsBatch of chunk(agentIds, REASSIGN_BATCHSIZE)) {
+      throwIfAborted(signal);
+      await reassignAgents(
+        soClient,
+        esClient,
+        {
+          agentIds: agentIdsBatch,
+          showInactive: options.showInactive,
+          spaceId: '*',
+          _internalCrossSpace: true,
+        },
+        targetPolicyId
+      );
+    }
+  }
+
   private endRun(msg: string = '') {
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] runTask() ended${msg ? ': ' + msg : ''}`
@@ -450,11 +483,13 @@ export class VersionSpecificPolicyAssignmentTask {
             `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} agents to ${targetPolicyId}`
           );
           try {
-            await reassignAgents(
-              soClient,
+            await this.reassignAgentsInBatches(
               esClient,
-              { agentIds, showInactive: false, spaceId: '*', _internalCrossSpace: true },
-              targetPolicyId
+              soClient,
+              agentIds,
+              targetPolicyId,
+              { showInactive: false },
+              signal
             );
           } catch (error) {
             this.logger.error(
@@ -928,17 +963,14 @@ export class VersionSpecificPolicyAssignmentTask {
     );
 
     try {
-      await reassignAgents(
-        soClient,
+      await this.reassignAgentsInBatches(
         esClient,
-        {
-          agentIds,
-          // the agents were selected above, agents that are inactive by timeout included
-          showInactive: true,
-          spaceId: '*',
-          _internalCrossSpace: true,
-        },
-        targetPolicyId
+        soClient,
+        agentIds,
+        targetPolicyId,
+        // the agents were selected above, agents that are inactive by timeout included
+        { showInactive: true },
+        signal
       );
 
       this.logger.debug(
@@ -1281,11 +1313,13 @@ export class VersionSpecificPolicyAssignmentTask {
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(
-          soClient,
+        await this.reassignAgentsInBatches(
           esClient,
-          { agentIds, showInactive: true, spaceId: '*', _internalCrossSpace: true },
-          targetPolicyId
+          soClient,
+          agentIds,
+          targetPolicyId,
+          { showInactive: true },
+          signal
         );
 
         // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents

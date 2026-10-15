@@ -48,6 +48,12 @@ import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
 
+export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
+
+export const includeUnenrolled = (kuery?: string) =>
+  kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
+
 /**
  * Whether the kuery filters on the `status` field, which only exists as a runtime field. Parsed from the
  * KQL with the same prefixes removed as in the query (`fleet-agents.status`), so that `status : inactive` is
@@ -67,11 +73,6 @@ function kueryReferencesStatusField(kuery?: string): boolean {
     return kuery.toLowerCase().includes('status:');
   }
 }
-export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
-export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
-
-export const includeUnenrolled = (kuery?: string) =>
-  kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
 
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>

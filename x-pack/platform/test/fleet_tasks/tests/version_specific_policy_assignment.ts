@@ -245,6 +245,154 @@ export default function (providerContext: FtrProviderContextWithServices) {
       });
     });
 
+    // The task looks for the agent policies that have agents to assign with one search for a page of
+    // policies, and then finds the agents of each policy with another query. Both have to select the same
+    // agents: an agent that only the second query would select is never reached.
+    it('should select the same agents when looking for the agent policies with agents to assign and when assigning them', async () => {
+      const { body: secondPolicyResponse } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `Selection Test Policy ${Date.now()}`,
+          namespace: 'default',
+          has_agent_version_conditions: true,
+        })
+        .expect(200);
+      const secondPolicyId = secondPolicyResponse.item.id;
+
+      const variant = (id: string, minor: string) =>
+        `${id}${AGENT_POLICY_VERSION_SEPARATOR}${minor}`;
+      const sentinel = (id: string) => `${id}${AGENT_POLICY_VERSION_SEPARATOR}sentinel`;
+      const recentlyUpgraded = new Date().toISOString();
+      const longAgoUpgraded = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+      // Agents without `policy_base_id` are agents enrolled by an older fleet-server. The agents that
+      // stay are of 8.17 on the 8.16 policy: a policy that does not match their version, which the task
+      // leaves alone unless they were upgraded in the last 30 minutes. Not of 8.18, the version the other
+      // agents are moved to: deploying that policy also schedules the reassignment of the agents of that
+      // version that were upgraded at any time, which is another selection.
+      const agents: Array<{
+        id: string;
+        policy: string;
+        version: string;
+        extra: Record<string, unknown>;
+        // the policy the task leaves the agent on, undefined when it is moved to the policy of its version
+        stays?: string;
+      }> = [
+        { id: 'plain', policy: policyId, version: '8.18.0', extra: {} },
+        {
+          id: 'plain-with-base',
+          policy: policyId,
+          version: '8.18.0',
+          extra: { policy_base_id: policyId },
+        },
+        { id: 'sentinel', policy: sentinel(policyId), version: '8.18.0', extra: {} },
+        {
+          id: 'sentinel-with-base',
+          policy: sentinel(policyId),
+          version: '8.18.0',
+          extra: { policy_base_id: policyId },
+        },
+        {
+          id: 'upgraded-variant',
+          policy: variant(policyId, '8.17'),
+          version: '8.18.0',
+          extra: { upgraded_at: recentlyUpgraded },
+        },
+        {
+          id: 'upgraded-variant-with-base',
+          policy: variant(policyId, '8.17'),
+          version: '8.18.0',
+          extra: { upgraded_at: recentlyUpgraded, policy_base_id: policyId },
+        },
+        {
+          id: 'old-upgrade-variant',
+          policy: variant(policyId, '8.16'),
+          version: '8.17.0',
+          extra: { upgraded_at: longAgoUpgraded },
+          stays: variant(policyId, '8.16'),
+        },
+        {
+          id: 'old-upgrade-variant-with-base',
+          policy: variant(policyId, '8.16'),
+          version: '8.17.0',
+          extra: { upgraded_at: longAgoUpgraded, policy_base_id: policyId },
+          stays: variant(policyId, '8.16'),
+        },
+        {
+          id: 'variant-never-upgraded',
+          policy: variant(policyId, '8.16'),
+          version: '8.17.0',
+          extra: {},
+          stays: variant(policyId, '8.16'),
+        },
+        {
+          id: 'unenrolled',
+          policy: policyId,
+          version: '8.18.0',
+          extra: { active: false },
+          stays: policyId,
+        },
+        // agents of the other policy of the same page
+        { id: 'second-policy-plain', policy: secondPolicyId, version: '8.18.0', extra: {} },
+        {
+          id: 'second-policy-upgraded',
+          policy: variant(secondPolicyId, '8.17'),
+          version: '8.18.0',
+          extra: { upgraded_at: recentlyUpgraded },
+        },
+      ];
+
+      try {
+        // The agents that are on the 8.17 and 8.16 policies need their documents: the sweep of the orphans
+        // moves the agents of a version specific policy that does not exist. An agent of each version
+        // makes the task deploy its policy.
+        for (const [primer, version] of [
+          ['primer-8-17', '8.17.0'],
+          ['primer-8-16', '8.16.0'],
+        ]) {
+          await createAgentDoc(providerContext, primer, policyId, version);
+        }
+        await waitForTask();
+        await retry.tryForTime(60000, async () => {
+          expect((await getAgent('primer-8-17')).policy_id).to.be(variant(policyId, '8.17'));
+          expect((await getAgent('primer-8-16')).policy_id).to.be(variant(policyId, '8.16'));
+        });
+
+        for (const { id, policy, version, extra } of agents) {
+          await createAgentDoc(providerContext, id, policy, version, true, extra);
+        }
+
+        await waitForTask();
+
+        // the selected agents are moved to the policy of their version
+        await retry.tryForTime(60000, async () => {
+          for (const { id, policy, stays } of agents) {
+            if (stays !== undefined) continue;
+            const base = policy.split(AGENT_POLICY_VERSION_SEPARATOR)[0];
+            expect((await getAgent(id)).policy_id).to.be(variant(base, '8.18'));
+          }
+        });
+
+        // and the others stay where they are, in the same run of the task
+        const expectedStaying: Record<string, string> = {};
+        const actualStaying: Record<string, string> = {};
+        for (const { id, stays } of agents) {
+          if (stays === undefined) continue;
+          expectedStaying[id] = stays;
+          actualStaying[id] = (await getAgent(id)).policy_id;
+        }
+        expect(actualStaying).to.eql(expectedStaying);
+      } finally {
+        await cleanupAgentDocs(providerContext);
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .send({ agentPolicyId: secondPolicyId })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      }
+    });
+
     it('should handle agents with unparseable/invalid version gracefully', async () => {
       // Create an agent with an unparseable version (edge case)
       // The task uses semver.coerce() which will return null for invalid versions
