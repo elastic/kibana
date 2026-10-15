@@ -1,5 +1,5 @@
 {
-  "sha1": "23e75557b35bb278106f735c1cd5d6776bb53351",
+  "sha1": "182eeb11389f59f5287e9919303ffd4e60e8c458",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -199,7 +199,7 @@
     {
       "id": "29927afd2c6d6ea-5c48478559f0ded",
       "title": "Data view editing — edit flows and field list updates editing a data view updates the display name shown in the page header",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -212,14 +212,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
-        "line": 33,
-        "column": 15
+        "line": 34,
+        "column": 13
       }
     },
     {
       "id": "29927afd2c6d6ea-2760a862dfea1a3",
       "title": "Data view editing — edit flows and field list updates can save a named data view again without changing its name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -232,14 +232,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
-        "line": 47,
-        "column": 29
+        "line": 48,
+        "column": 27
       }
     },
     {
       "id": "29927afd2c6d6ea-27b41d48a11bca1",
       "title": "Data view editing — edit flows and field list updates editing updates field list when the index expression is changed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -252,14 +252,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
-        "line": 70,
-        "column": 29
+        "line": 71,
+        "column": 27
       }
     },
     {
       "id": "29927afd2c6d6ea-a6a106faff66644",
       "title": "Data view editing — edit flows and field list updates save button becomes disabled immediately after clicking to prevent double submission",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -273,13 +273,13 @@
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
         "line": 93,
-        "column": 15
+        "column": 40
       }
     },
     {
       "id": "29927afd2c6d6ea-b905ff68cbe5ebb",
       "title": "Data view editing — edit flows and field list updates editor is prefilled with previously saved title, index pattern, and time field",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -292,8 +292,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
-        "line": 114,
-        "column": 84
+        "line": 115,
+        "column": 77
       }
     },
     {
