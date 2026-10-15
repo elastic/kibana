@@ -707,11 +707,12 @@ function isTimerCleared(timer, cleared) {
   }
   const callback = unwrap(timer.node.arguments && timer.node.arguments[0]);
   /** @type {Array<{ key: string, node: any }>} */
-  const sites = target.memberKey
-    ? cleared.members.filter((site) => site.key === target.memberKey)
-    : target.identifier
-    ? cleared.ids.filter((site) => site.key === identifierKey(target.identifier))
-    : [];
+  let sites = [];
+  if (target.memberKey) {
+    sites = cleared.members.filter((site) => site.key === target.memberKey);
+  } else if (target.identifier) {
+    sites = cleared.ids.filter((site) => site.key === identifierKey(target.identifier));
+  }
   return sites.some((site) => !callback || !containsNode(callback, site.node));
 }
 
