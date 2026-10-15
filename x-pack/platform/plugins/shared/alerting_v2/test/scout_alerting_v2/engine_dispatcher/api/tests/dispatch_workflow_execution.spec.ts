@@ -25,6 +25,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
+  ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
@@ -83,7 +84,9 @@ apiTest.describe(
         // The policy stores an API key minted from the request credential. With UIAM (serverless)
         // that must be a UIAM credential, which basic auth used by `apiServices` is not, so the
         // policy is created with an interactive user session, like the UI does.
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const { cookieHeader } = await samlAuth.asInteractiveUser(
+          ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE
+        );
         const createPolicyResponse = await apiClient.put(
           `${testData.ACTION_POLICY_API_PATH}/${ACTION_POLICY_ID}`,
           {
