@@ -65,6 +65,16 @@ import {
   setMetricRefreshSalt,
   type BucketKey,
 } from './bucket_metrics';
+import {
+  ColumnHeaderWithInfo,
+  alertsGridColumnDescription,
+  firstSeenColumnDescription,
+  healthColumnDescription,
+  lastHealthChangeColumnDescription,
+  lastSeenColumnDescription,
+  metricColumnDescription,
+  uptimeColumnDescription,
+} from './column_header_info';
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
   healthy: 'success',
@@ -106,12 +116,14 @@ const alertBadgeLabel = (entity: Entity): string => {
 
 const METRIC_PREFIX = 'metric:';
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const STORAGE_PREFIX = 'entityCentricLab.listColumns.v2:';
-
+// v3 drops layouts saved before Up time was moved to the far right.
+const STORAGE_PREFIX = 'entityCentricLab.listColumns.v3:';
 
 interface CatalogColumn {
   readonly id: string;
   readonly label: string;
+  /** Shown in an info icon when the header label does not say what the cell is. */
+  readonly description?: string;
 }
 
 // Identity / tag columns shown by default. Application and Anomaly
@@ -128,24 +140,28 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.health', {
       defaultMessage: 'Health',
     }),
+    description: healthColumnDescription(),
   },
   {
     id: 'alerts',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.alerts', {
       defaultMessage: 'Alerts',
     }),
+    description: alertsGridColumnDescription(),
   },
   {
     id: 'lastHealthChange',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.lastHealthChange', {
       defaultMessage: 'Last health change',
     }),
+    description: lastHealthChangeColumnDescription(),
   },
   {
     id: 'age',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.uptime', {
       defaultMessage: 'Up time',
     }),
+    description: uptimeColumnDescription(),
   },
 ];
 
@@ -156,12 +172,14 @@ const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.firstSeen', {
       defaultMessage: 'First seen',
     }),
+    description: firstSeenColumnDescription(),
   },
   {
     id: 'lastSeen',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.lastSeen', {
       defaultMessage: 'Last seen',
     }),
+    description: lastSeenColumnDescription(),
   },
   {
     id: 'environment',
@@ -246,7 +264,11 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   'services:apm service': ['metric:latency-p95', 'metric:error-rate', 'metric:throughput'],
   // Databases
   databases: ['metric:query-latency', 'metric:connection-saturation', 'metric:replication-lag'],
-  'databases:postgres': ['metric:query-latency', 'metric:connection-saturation', 'metric:replication-lag'],
+  'databases:postgres': [
+    'metric:query-latency',
+    'metric:connection-saturation',
+    'metric:replication-lag',
+  ],
   // Networking
   networking: ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
   'networking:nginx': ['metric:active-connections', 'metric:request-rate', 'metric:error-rate'],
@@ -329,21 +351,29 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
+const UPTIME_COLUMN_ID = 'age';
+
+/** Up time is always the last default column, after metrics and context fields. */
+const withUptimeLast = (ids: readonly string[]): string[] => {
+  if (!ids.includes(UPTIME_COLUMN_ID)) return [...ids];
+  return [...ids.filter((id) => id !== UPTIME_COLUMN_ID), UPTIME_COLUMN_ID];
+};
+
 const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string[] => {
   const base = [...DEFAULT_VISIBLE_IDS];
   if (!isHomogeneous) {
     // Mixed-type tables: identity only, plus Type so the mix is readable.
     const typeId = 'type';
     const [name, ...rest] = base;
-    return [name, typeId, ...rest.filter((id) => id !== typeId)];
+    return withUptimeLast([name, typeId, ...rest.filter((id) => id !== typeId)]);
   }
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
   const metricIds = DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? [];
   if (extra.length > 0) {
     const [name, health, ...rest] = base;
-    return [name, health, ...extra, ...rest, ...metricIds];
+    return withUptimeLast([name, health, ...extra, ...rest, ...metricIds]);
   }
-  return [...base, ...metricIds];
+  return withUptimeLast([...base, ...metricIds]);
 };
 
 const rowBucketKey = (category: EntityCategoryId, entity: Entity): BucketKey => {
@@ -517,7 +547,9 @@ const CellSparkline = ({ values, color }: { values: readonly number[]; color: st
     const cp1y = p1.y + (p2.y - p0.y) / tension;
     const cp2x = p2.x - (p3.x - p1.x) / tension;
     const cp2y = p2.y - (p3.y - p1.y) / tension;
-    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(
+      1
+    )} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
   }
 
   // Closed area path: line path → bottom-right → bottom-left.
@@ -663,7 +695,9 @@ const GridSectionHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesLabel', { defaultMessage: 'Resources:' })}
+              {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesLabel', {
+                defaultMessage: 'Resources:',
+              })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -678,11 +712,16 @@ const GridSectionHeader = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel', { defaultMessage: 'Resources with alerts:' })}
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel',
+                { defaultMessage: 'Resources with alerts:' }
+              )}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={alertsCount > 0 ? 'danger' : 'hollow'}>{alertsCount.toLocaleString()}</EuiBadge>
+            <EuiBadge color={alertsCount > 0 ? 'danger' : 'hollow'}>
+              {alertsCount.toLocaleString()}
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -705,10 +744,7 @@ export const EntityDataGridSection = ({
 }: Props) => {
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
-  const isHomogeneous = useMemo(
-    () => isHomogeneousTypeGroup(category, rows),
-    [category, rows]
-  );
+  const isHomogeneous = useMemo(() => isHomogeneousTypeGroup(category, rows), [category, rows]);
   // Bucket key = entity type identity (Kubernetes groups by sub-type, everyone
   // else by `.type`), matching the hex-map metric catalog so metric columns and
   // the per-type column config line up. Mixed tables use a dedicated key so
@@ -731,7 +767,11 @@ export const EntityDataGridSection = ({
               (metric) =>
                 metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
             )
-            .map((metric) => ({ id: `${METRIC_PREFIX}${metric.id}`, label: metric.label }))
+            .map((metric) => ({
+              id: `${METRIC_PREFIX}${metric.id}`,
+              label: metric.label,
+              description: metricColumnDescription(metric),
+            }))
         : [],
     [bucketKey, isHomogeneous]
   );
@@ -756,7 +796,9 @@ export const EntityDataGridSection = ({
       ...BASE_HIDDEN_COLUMNS,
       ...metricColumns,
     ];
-    return isPhase1 ? allColumns.filter((col) => !PHASE1_HIDDEN_COLUMN_IDS.has(col.id)) : allColumns;
+    return isPhase1
+      ? allColumns.filter((col) => !PHASE1_HIDDEN_COLUMN_IDS.has(col.id))
+      : allColumns;
   }, [k8sContext, metricColumns, isPhase1]);
   const catalogIds = useMemo(() => catalog.map((column) => column.id), [catalog]);
 
@@ -772,6 +814,13 @@ export const EntityDataGridSection = ({
       catalog.map((column) => ({
         id: column.id,
         displayAsText: column.label,
+        display: (
+          <ColumnHeaderWithInfo
+            columnId={column.id}
+            label={column.label}
+            description={column.description}
+          />
+        ),
         isSortable: true,
       })),
     [catalog]
@@ -804,7 +853,7 @@ export const EntityDataGridSection = ({
     });
     return copy;
     // refreshTick re-rolls the synthesized metric readings used by sortValueFor.
-  }, [rows, sortingColumns, bucketKey, refreshTick]);
+  }, [rows, sortingColumns, bucketKey, refreshTick, isPhase1]);
 
   const tableKey = bucketKey ?? category;
   const [pageIndex, setPageIndex] = useState(0);
@@ -831,9 +880,7 @@ export const EntityDataGridSection = ({
           return (
             <EuiBadge
               color={ALERT_BADGE_COLOR[alertStatusId(entity)] ?? 'hollow'}
-              onClick={() =>
-                (onSelectEntityAlerts ?? onSelectEntity)(entity.name)
-              }
+              onClick={() => (onSelectEntityAlerts ?? onSelectEntity)(entity.name)}
               onClickAriaLabel={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.datagrid.alertsBadge.ariaLabel',
                 {
@@ -909,7 +956,9 @@ export const EntityDataGridSection = ({
   const showInPanelHeader = !nested || Boolean(subTypeLabel);
 
   const Wrapper = borderless ? React.Fragment : EuiPanel;
-  const wrapperProps = borderless ? {} : { hasBorder: true, hasShadow: false, paddingSize: 'm' as const };
+  const wrapperProps = borderless
+    ? {}
+    : { hasBorder: true, hasShadow: false, paddingSize: 'm' as const };
 
   return (
     <Wrapper {...wrapperProps}>

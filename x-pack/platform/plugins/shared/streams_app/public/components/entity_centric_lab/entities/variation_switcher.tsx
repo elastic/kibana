@@ -20,7 +20,9 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPopover,
-  EuiPopoverTitle,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -34,7 +36,113 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.01';
+export const PROTOTYPE_VERSION = '1.02';
+
+/**
+ * Newest-first change log for the About tab. Update on each prototype push
+ * alongside {@link PROTOTYPE_VERSION}. `details` is the commit body when one
+ * exists (plain prose or short bullets).
+ */
+const PROTOTYPE_CHANGELOG: readonly {
+  readonly date: string;
+  readonly summary: string;
+  readonly details?: string;
+}[] = [
+  {
+    date: '2026-10-15',
+    summary:
+      'Add prototype About tab with change log, hex-map legend help, and inventory polish.',
+    details:
+      'Variation selector tabs (settings / about) with design disclaimer and scrollable change log; hex Color-by legends get info tips and metric (stat) labels; P95/P99 stats; Availability Zone group-by; column/flyout metric explanations; utilization wording; Create dashboard primary button. Bump to v1.02.',
+  },
+  {
+    date: '2026-10-14',
+    summary: 'Polish entity flyout dashboards, host runtime tabs, and the SLO table.',
+    details:
+      'Show the resource name on dashboard previews, give cloud machines Services and Processes, drop the SLO budget column, and open the agent from Create dashboard. Bump the prototype to v1.01.',
+  },
+  {
+    date: '2026-10-12',
+    summary: 'Polish ElasticOn inventory sharing, hex legend counts, and 10k+ host types.',
+    details:
+      'Make flyout state shareable with independent time range, show categorical hex legend counts, keep cloud host types and the truncation banner in the overflow profile, and use full entity type names in category type filters.',
+  },
+  {
+    date: '2026-10-09',
+    summary: 'Polish ElasticOn lab tour, more-actions menu, and prototype versioning.',
+    details:
+      'Add play-tour/revert actions, move reset into the variation selector, clarify list-first tour copy, and show prototype v1.00.',
+  },
+  {
+    date: '2026-10-06',
+    summary: 'Polish entity flyout, inventory, and K8s demo dashboards for Phase 1.',
+    details:
+      'Keep dashboard overlays when switching resources, remember tabs, cap date-picker shortcuts, and seed alerting K8s entities with volume metrics.',
+  },
+  {
+    date: '2026-10-06',
+    summary: 'Add Environment and Region options to the inventory Group by dropdown.',
+  },
+  {
+    date: '2026-10-02',
+    summary: 'Harden inventory filters and saved-view change detection for Phase 1.',
+    details:
+      'Track all filter dimensions in the unsaved badge next to Save view, scope KQL fields (drop health in Phase 1), and align the type filter with the search bar.',
+  },
+  {
+    date: '2026-10-02',
+    summary: 'Add Other nav category, dashboard thumbnail variation, and saved-views collapse/reorder.',
+  },
+  {
+    date: '2026-10-02',
+    summary: 'Polish entity-centric flyout alerts, services, and empty states.',
+    details:
+      'Make alert child flyouts resizable, add SLO/alert create CTAs when unset, align PayFlow inventory alert counts with curated tabs, and refresh the host services table.',
+  },
+  {
+    date: '2026-10-01',
+    summary:
+      'Align entity-centric inventory with flyout alerts and pod phase, and scope search/group-by by category.',
+  },
+  {
+    date: '2026-10-01',
+    summary: 'ElasticOn Phase 1: dashboard preview defaults, Messaging empty state, and flyout polish.',
+    details:
+      'Default Phase 1 to list + flyout preview, seed Messaging as the demo empty category with a deploy-safe Add data link, and align log document and dashboard preview flyouts with the parent.',
+  },
+  {
+    date: '2026-09-29',
+    summary: 'Latest and greatest.',
+  },
+  {
+    date: '2026-09-28',
+    summary:
+      'ElasticOn: top-level category filter, remove per-section filters, flyout badge reorder with +N more.',
+    details:
+      'Category filter on All resources with sub-filters; remove per-section inline filters; flyout badges reorder to category → type → alerts with +N more; dedicated close/expand row; Metrics tab moved into Overview.',
+  },
+  {
+    date: '2026-09-28',
+    summary:
+      'Phase 1: remove APM Services nav, relocate metrics to overview, add resource/alerts labels to list view.',
+    details:
+      'Remove APM Services from ElasticOn nav; relocate charts into Overview golden signals; add Resources / Resources with alerts labels on list badges.',
+  },
+  {
+    date: '2026-09-26',
+    summary: 'Fix Dashboard crash: remove uiSettings TIMEPICKER_QUICK_RANGES override.',
+    details:
+      'Synchronous uiSettings.set() for quick-select presets bled into Dashboard/Discover and crashed QueryBarTopRow. Removed the override and added a one-time repair for corrupted persisted values; Max 3 days validation stays component-scoped.',
+  },
+  {
+    date: '2026-09-25',
+    summary: 'List view: sparkline variety & smoothing, K8s workload metrics, column tweaks.',
+    details:
+      'Richer sparkline shapes with smooth curves; ReplicaSet/StatefulSet/DaemonSet/CronJob metrics and color-by; environment/region off by default; equal-width columns.',
+  },
+];
+
+type PopoverTabId = 'settings' | 'about';
 
 // ---------------------------------------------------------------------------
 // Per-dimension row
@@ -221,6 +329,88 @@ const ResetPrototypeStateButton = () => (
 );
 
 // ---------------------------------------------------------------------------
+// About tab
+// ---------------------------------------------------------------------------
+
+const formatChangelogDate = (isoDate: string): string => {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  if (!year || !month || !day) return isoDate;
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+};
+
+const AboutPrototypePanel = () => (
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="m"
+    css={css`
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
+    `}
+  >
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <p>
+          <strong>This is a DESIGN prototype.</strong>
+        </p>
+        <p>
+          Disclaimer: it uses an outdated version of Kibana so may not come with the latest
+          and greatest components (flyout, banners). Use the latest version in the
+          production code. If any ambiguity, please ask me (Nico).
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiHorizontalRule margin="none" />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+      css={css`
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      `}
+    >
+      <EuiText size="s">
+        <strong>Change log</strong>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <div
+        css={css`
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {PROTOTYPE_CHANGELOG.map((entry) => (
+            <EuiFlexItem key={`${entry.date}-${entry.summary}`} grow={false}>
+              <EuiText size="xs">
+                <p css={css`margin-bottom: 0;`}>
+                  <strong>{formatChangelogDate(entry.date)}</strong>
+                  {' — '}
+                  {entry.summary}
+                </p>
+              </EuiText>
+              {entry.details ? (
+                <EuiText size="xs" color="subdued">
+                  <p css={css`margin-bottom: 0; margin-top: 2px;`}>{entry.details}</p>
+                </EuiText>
+              ) : null}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+// ---------------------------------------------------------------------------
 // Floating switcher button + popover
 // ---------------------------------------------------------------------------
 
@@ -228,6 +418,7 @@ export const VariationSwitcher = () => {
   const { euiTheme } = useEuiTheme();
   const { get, set, isAtDefault, dimensions } = useVariationContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<PopoverTabId>('settings');
 
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -272,14 +463,35 @@ export const VariationSwitcher = () => {
           }
         `}
       >
-        <EuiPopoverTitle>
+        <div
+          css={css`
+            min-width: 280px;
+          `}
+        >
           <EuiFlexGroup
-            alignItems="baseline"
+            alignItems="center"
             justifyContent="spaceBetween"
             gutterSize="s"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>Prototype variations</EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiTabs size="s" bottomBorder={false}>
+                <EuiTab
+                  isSelected={selectedTab === 'settings'}
+                  onClick={() => setSelectedTab('settings')}
+                  data-test-subj="entityCentricLabPrototypeSettingsTab"
+                >
+                  Prototype settings
+                </EuiTab>
+                <EuiTab
+                  isSelected={selectedTab === 'about'}
+                  onClick={() => setSelectedTab('about')}
+                  data-test-subj="entityCentricLabAboutPrototypeTab"
+                >
+                  About the prototype
+                </EuiTab>
+              </EuiTabs>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
                 <span data-test-subj="entityCentricLabPrototypeVersion">
@@ -288,30 +500,62 @@ export const VariationSwitcher = () => {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPopoverTitle>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
-          css={css`
-            min-width: 280px;
-          `}
-        >
-          {dimensions.map((dim) => (
-            <EuiFlexItem key={dim.id} grow={false}>
-              <DimensionRow
-                dimension={dim}
-                activeOptionId={get(dim.id)}
-                onChange={set}
-              />
-            </EuiFlexItem>
-          ))}
-          <EuiFlexItem grow={false}>
-            <SeedDemoDataButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ResetPrototypeStateButton />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="s" />
+          {/* Settings drives width/height; About overlays so it cannot widen the panel. */}
+          <div
+            css={css`
+              position: relative;
+            `}
+          >
+            <div
+              hidden={selectedTab !== 'settings'}
+              css={css`
+                &[hidden] {
+                  display: block !important;
+                  visibility: hidden;
+                  pointer-events: none;
+                }
+              `}
+            >
+              <EuiFlexGroup direction="column" gutterSize="m">
+                {dimensions.map((dim) => (
+                  <EuiFlexItem key={dim.id} grow={false}>
+                    <DimensionRow
+                      dimension={dim}
+                      activeOptionId={get(dim.id)}
+                      onChange={set}
+                    />
+                  </EuiFlexItem>
+                ))}
+                <EuiFlexItem grow={false}>
+                  <SeedDemoDataButton />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ResetPrototypeStateButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+            <div
+              hidden={selectedTab !== 'about'}
+              css={css`
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                overflow: hidden;
+                &[hidden] {
+                  display: flex !important;
+                  visibility: hidden;
+                  pointer-events: none;
+                }
+              `}
+            >
+              <AboutPrototypePanel />
+            </div>
+          </div>
+        </div>
       </EuiPopover>
     </div>
   );

@@ -17,9 +17,9 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
+  EuiIconTip,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiThemeComputed,
@@ -38,7 +38,7 @@ import type {
 } from './fake_entity_overview';
 import { formatGoldenSignalValue } from './fake_entity_overview';
 import type { MetricsTabData, MetricEvent } from './fake_entity_tabs';
-import { MetricChartCard } from './metrics_tab';
+import { explainFlyoutMetric, MetricChartCard } from './metrics_tab';
 
 /** Identity fields that duplicate the flyout / full-page title. */
 const IDENTITY_DETAIL_IDS: ReadonlySet<string> = new Set([
@@ -71,7 +71,13 @@ interface OverviewTabProps {
   readonly hideEvents?: boolean;
 }
 
-export const OverviewTab = ({ overview, metrics, hideAiSummary = false, hideOwnership = false, hideEvents = false }: OverviewTabProps) => {
+export const OverviewTab = ({
+  overview,
+  metrics,
+  hideAiSummary = false,
+  hideOwnership = false,
+  hideEvents = false,
+}: OverviewTabProps) => {
   const { resourceCopy = false } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
@@ -413,31 +419,50 @@ const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
     trend: signal.trend.map((y, x) => ({ x, y })),
     trendShape: MetricTrendShape.Area,
     trendA11yTitle: signal.label,
-    trendA11yDescription: signal.description,
+    trendA11yDescription: explainFlyoutMetric(signal.description),
   };
 
   return (
-    <EuiToolTip content={signal.description} position="top" delay="long">
-      {/* `tabIndex={0}` so keyboard users can also surface the tooltip — the
-          metric tile itself is non-interactive. */}
-      <div
-        tabIndex={0}
-        role="group"
-        aria-label={signal.label}
+    <div
+      role="group"
+      aria-label={signal.label}
+      css={css`
+        position: relative;
+        height: ${GOLDEN_SIGNAL_TILE_HEIGHT}px;
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+        overflow: hidden;
+      `}
+      data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
+    >
+      <Chart>
+        <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
+        <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
+      </Chart>
+      <span
         css={css`
-          height: ${GOLDEN_SIGNAL_TILE_HEIGHT}px;
-          border: ${euiTheme.border.thin};
-          border-radius: ${euiTheme.border.radius.medium};
-          overflow: hidden;
+          position: absolute;
+          top: ${euiTheme.size.s};
+          right: ${euiTheme.size.s};
+          z-index: 1;
         `}
-        data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
       >
-        <Chart>
-          <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
-          <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
-        </Chart>
-      </div>
-    </EuiToolTip>
+        <EuiIconTip
+          type="info"
+          size="s"
+          color="subdued"
+          position="left"
+          content={explainFlyoutMetric(signal.description)}
+          aria-label={i18n.translate('entityCentricLabFlyout.flyout.overview.metricInfoAriaLabel', {
+            defaultMessage: 'About {metric}',
+            values: { metric: signal.label },
+          })}
+          anchorProps={{
+            'data-test-subj': `entityCentricLabGoldenSignalInfo-${signal.id}`,
+          }}
+        />
+      </span>
+    </div>
   );
 };
 

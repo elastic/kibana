@@ -207,7 +207,7 @@ const paymentsServiceOverview: EntityOverview = {
       delta: '+1.66s since 02:46:41',
       color: 'danger',
       trend: PAYMENTS_LATENCY_TREND,
-      description: 'p99 end-to-end latency across payments-service instances.',
+      description: 'The response time that 99 out of 100 requests to payments-service stay under, across every instance.',
     },
     {
       id: 'errorRate',
@@ -217,7 +217,7 @@ const paymentsServiceOverview: EntityOverview = {
       delta: '+7.7% since 02:46:41',
       color: 'danger',
       trend: PAYMENTS_ERROR_TREND,
-      description: 'Percentage of failed requests (status >= 500 or trace error tag).',
+      description: 'The share of requests that failed, as a percentage.',
     },
     {
       id: 'throughput',
@@ -227,7 +227,7 @@ const paymentsServiceOverview: EntityOverview = {
       delta: '-820 req/s since 02:46:41',
       color: 'warning',
       trend: PAYMENTS_THROUGHPUT_TREND,
-      description: 'Requests per second served by payments-service across all instances.',
+      description: 'How many requests payments-service handles per second, across every instance.',
     },
   ],
   details: [
@@ -252,7 +252,7 @@ const paymentsServiceMetrics: MetricsTabData = {
       label: 'p99 latency',
       unit: 's',
       threshold: 0.5,
-      description: 'p99 end-to-end latency across payments-service instances.',
+      description: 'The response time that 99 out of 100 requests to payments-service stay under, across every instance.',
       series: [{ id: 'p99', label: 'p99 (s)', points: seriesPoints(PAYMENTS_LATENCY_TREND) }],
     },
     {
@@ -260,7 +260,7 @@ const paymentsServiceMetrics: MetricsTabData = {
       label: 'Error rate',
       unit: '%',
       threshold: 5,
-      description: 'Percentage of failed requests (status >= 500 or trace error tag).',
+      description: 'The share of requests that failed, as a percentage.',
       series: [
         { id: 'error-pct', label: 'Error rate (%)', points: seriesPoints(PAYMENTS_ERROR_TREND) },
       ],
@@ -269,7 +269,7 @@ const paymentsServiceMetrics: MetricsTabData = {
       id: 'throughput',
       label: 'Throughput',
       unit: 'req/s',
-      description: 'Requests per second across all payments-service instances.',
+      description: 'How many requests payments-service handles per second, across every instance.',
       series: [
         {
           id: 'rps',
@@ -284,7 +284,7 @@ const paymentsServiceMetrics: MetricsTabData = {
       id: 'downstream-stripe',
       label: 'stripe-api outbound latency',
       unit: 'ms',
-      description: 'Outbound span latency from payments-service to stripe-api.',
+      description: 'How long calls from payments-service to stripe-api take.',
       series: [
         {
           id: 'stripe-latency',
@@ -300,7 +300,7 @@ const paymentsServiceMetrics: MetricsTabData = {
       id: 'downstream-db',
       label: 'payments-db latency',
       unit: 'ms',
-      description: 'Outbound span latency from payments-service to payments-db.',
+      description: 'How long calls from payments-service to payments-db take.',
       series: [
         {
           id: 'db-latency',
@@ -327,7 +327,7 @@ const paymentsServiceLogs: LogRow[] = [
     timestamp: `${INCIDENT_DAY} @ 02:46:58.421`,
     severity: 'Warning',
     attribute: 'body.text',
-    summary: 'Memory usage at 97% of limit',
+    summary: 'Memory utilization at 97% of limit',
   },
   {
     id: 'pl-3',
@@ -639,7 +639,7 @@ const checkoutServiceOverview: EntityOverview = {
       delta: '+0.66s since 02:46:41',
       color: 'danger',
       trend: CHECKOUT_LATENCY_TREND,
-      description: 'p99 end-to-end latency across checkout-service instances.',
+      description: 'The response time that 99 out of 100 requests to checkout-service stay under, across every instance.',
     },
     {
       id: 'errorRate',
@@ -649,7 +649,7 @@ const checkoutServiceOverview: EntityOverview = {
       delta: '+7.6% since 02:46:41',
       color: 'danger',
       trend: CHECKOUT_ERROR_TREND,
-      description: 'Percentage of failed checkout-service requests.',
+      description: 'The share of checkout-service requests that failed, as a percentage.',
     },
     {
       id: 'throughput',
@@ -659,7 +659,7 @@ const checkoutServiceOverview: EntityOverview = {
       delta: '-110 req/s since 02:46:41',
       color: 'warning',
       trend: CHECKOUT_THROUGHPUT_TREND,
-      description: 'Requests per second across checkout-service instances.',
+      description: 'How many requests checkout-service handles per second, across every instance.',
     },
   ],
   details: [
@@ -683,7 +683,7 @@ const checkoutServiceMetrics: MetricsTabData = {
       label: 'p99 latency',
       unit: 's',
       threshold: 0.5,
-      description: 'p99 end-to-end latency across checkout-service instances.',
+      description: 'The response time that 99 out of 100 requests to checkout-service stay under, across every instance.',
       series: [{ id: 'p99', label: 'p99 (s)', points: seriesPoints(CHECKOUT_LATENCY_TREND) }],
     },
     {
@@ -691,7 +691,7 @@ const checkoutServiceMetrics: MetricsTabData = {
       label: 'Error rate',
       unit: '%',
       threshold: 5,
-      description: 'Percentage of failed checkout-service requests.',
+      description: 'The share of checkout-service requests that failed, as a percentage.',
       series: [
         { id: 'error-pct', label: 'Error rate (%)', points: seriesPoints(CHECKOUT_ERROR_TREND) },
       ],
@@ -700,7 +700,7 @@ const checkoutServiceMetrics: MetricsTabData = {
       id: 'throughput',
       label: 'Throughput',
       unit: 'req/s',
-      description: 'Requests per second across checkout-service instances.',
+      description: 'How many requests checkout-service handles per second, across every instance.',
       series: [
         { id: 'rps', label: 'Requests / s', points: seriesPoints(CHECKOUT_THROUGHPUT_TREND) },
       ],
@@ -924,13 +924,13 @@ const paymentsPodOverview: EntityOverview = {
   goldenSignals: [
     {
       id: 'latency',
-      label: 'Memory usage',
+      label: 'Memory utilization',
       value: 97,
       unit: '%',
       delta: '+56pp since 02:46:41',
       color: 'danger',
       trend: PAYMENTS_POD_MEMORY_TREND,
-      description: 'Container memory usage as a percentage of the pod memory limit.',
+      description: 'Memory utilization for this container, as a percentage of the memory limit on its pod.',
     },
     {
       id: 'errorRate',
@@ -940,17 +940,17 @@ const paymentsPodOverview: EntityOverview = {
       delta: '3 restarts in last 5 min',
       color: 'danger',
       trend: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 3],
-      description: 'Container restart count over the selected window.',
+      description: 'How many times this container restarted in the selected time range.',
     },
     {
       id: 'throughput',
-      label: 'CPU usage',
+      label: 'CPU utilization',
       value: 78,
       unit: '%',
       delta: '+45pp since 02:46:41',
       color: 'warning',
       trend: PAYMENTS_POD_CPU_TREND,
-      description: 'Container CPU usage as a percentage of the pod CPU limit.',
+      description: 'CPU utilization for this container, as a percentage of the CPU limit on its pod.',
     },
   ],
   details: [
@@ -974,27 +974,27 @@ const paymentsPodMetrics: MetricsTabData = {
   goldenSignals: [
     {
       id: 'latency',
-      label: 'Memory usage',
+      label: 'Memory utilization',
       unit: '%',
       threshold: 90,
-      description: 'Container memory usage as a percentage of the pod memory limit.',
+      description: 'Memory utilization for this container, as a percentage of the memory limit on its pod.',
       series: [
         { id: 'memory', label: 'Memory (%)', points: seriesPoints(PAYMENTS_POD_MEMORY_TREND) },
       ],
     },
     {
       id: 'errorRate',
-      label: 'CPU usage',
+      label: 'CPU utilization',
       unit: '%',
       threshold: 80,
-      description: 'Container CPU usage as a percentage of the pod CPU limit.',
+      description: 'CPU utilization for this container, as a percentage of the CPU limit on its pod.',
       series: [{ id: 'cpu', label: 'CPU (%)', points: seriesPoints(PAYMENTS_POD_CPU_TREND) }],
     },
     {
       id: 'throughput',
       label: 'Restarts',
       unit: '',
-      description: 'Cumulative restart count over the selected window.',
+      description: 'How many times this container restarted in the selected time range, added up.',
       series: [
         {
           id: 'restarts',
@@ -1022,7 +1022,7 @@ const paymentsPodLogs: LogRow[] = [
     timestamp: `${INCIDENT_DAY} @ 02:46:58.421`,
     severity: 'Warning',
     attribute: 'body.text',
-    summary: 'Memory usage at 97% of limit',
+    summary: 'Memory utilization at 97% of limit',
   },
   {
     id: 'pp-3',
@@ -1157,13 +1157,13 @@ const nodeOverview: EntityOverview = {
   goldenSignals: [
     {
       id: 'latency',
-      label: 'Memory used',
+      label: 'Memory utilization',
       value: 94,
       unit: '%',
       delta: '+12pp since 02:30',
       color: 'danger',
       trend: NODE_MEMORY_TREND,
-      description: 'Node memory used as a percentage of total node memory.',
+      description: 'Memory utilization on this node, as a percentage of memory on the node.',
     },
     {
       id: 'errorRate',
@@ -1176,17 +1176,17 @@ const nodeOverview: EntityOverview = {
         18.1, 17.5, 17.0, 16.8, 16.2, 15.5, 14.8, 14.0, 13.2, 12.5, 11.6, 10.7, 10.0, 9.3, 8.5, 7.8,
         6.4, 5.2, 4.4, 3.9, 3.5, 3.3, 3.2, 3.1,
       ],
-      description: 'Allocatable memory remaining out of 32GB total node memory.',
+      description: 'Memory still free for pods, out of 32 GB on this node.',
     },
     {
       id: 'throughput',
-      label: 'CPU used',
+      label: 'CPU utilization',
       value: 71,
       unit: '%',
       delta: '+24pp since 02:30',
       color: 'warning',
       trend: NODE_CPU_TREND,
-      description: 'Node CPU used as a percentage of total node CPU.',
+      description: 'CPU utilization on this node, as a percentage of capacity on the node.',
     },
   ],
   details: [
@@ -1210,25 +1210,25 @@ const nodeMetrics: MetricsTabData = {
   goldenSignals: [
     {
       id: 'latency',
-      label: 'Memory used',
+      label: 'Memory utilization',
       unit: '%',
       threshold: 90,
-      description: 'Node memory used as a percentage of total node memory.',
+      description: 'Memory utilization on this node, as a percentage of memory on the node.',
       series: [{ id: 'mem', label: 'Memory (%)', points: seriesPoints(NODE_MEMORY_TREND) }],
     },
     {
       id: 'errorRate',
-      label: 'CPU used',
+      label: 'CPU utilization',
       unit: '%',
       threshold: 85,
-      description: 'Node CPU used as a percentage of total node CPU.',
+      description: 'CPU utilization on this node, as a percentage of capacity on the node.',
       series: [{ id: 'cpu', label: 'CPU (%)', points: seriesPoints(NODE_CPU_TREND) }],
     },
     {
       id: 'throughput',
       label: 'Pods running',
       unit: '',
-      description: 'Number of pods scheduled on this node.',
+      description: 'How many pods are running on this node.',
       series: [
         {
           id: 'pods',

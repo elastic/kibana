@@ -348,7 +348,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         label: 'Latency',
         unit: 'ms',
         threshold: 320,
-        description: 'Average end-to-end request latency across all instances of this entity.',
+        description: 'How long requests take from start to finish, averaged across every instance.',
         series: [
           series(
             'latency-ms',
@@ -365,7 +365,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         label: 'Error rate',
         unit: '%',
         threshold: 3,
-        description: 'Percentage of failed requests (status >= 500 or trace error tag).',
+        description: 'The share of requests that failed, as a percentage.',
         series: [
           series(
             'error-rate-pct',
@@ -381,7 +381,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'throughput',
         label: 'Throughput',
         unit: 'req/s',
-        description: 'Requests per second served by this entity across all instances.',
+        description: 'How many requests this resource handles per second, across every instance.',
         series: [
           series(
             'network-in',
@@ -407,7 +407,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'cpu-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'Average CPU utilization across pods running this entity.',
+        description: 'CPU utilization as a percentage of capacity, averaged across the pods running this resource.',
         series: [
           series(
             'do-nyc1-demo-infra-1',
@@ -423,7 +423,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'memory-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'Average memory utilization across pods running this entity.',
+        description: 'Memory utilization as a percentage of capacity, averaged across the pods running this resource.',
         series: [
           series(
             'do-nyc1-demo-infra-2',
@@ -531,7 +531,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         status: 'Active',
         triggeredAt: 'Dec 10, 2025, 11:29:50.000',
         ruleName: '[Elastic] Disk pressure',
-        reason: 'Max disk usage above threshold',
+        reason: 'Max disk utilization above threshold',
       },
       {
         id: 'a13',

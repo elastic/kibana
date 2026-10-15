@@ -101,18 +101,15 @@ const TYPE_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
 ]);
 
 const ALERT_GROUP_LABELS = {
-  firing: i18n.translate(
-    'xpack.streams.entityCentricLab.entities.groupBy.alerts.firing',
-    { defaultMessage: 'Resources with active alerts' }
-  ),
-  noSetup: i18n.translate(
-    'xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup',
-    { defaultMessage: 'With no alerts set up' }
-  ),
-  ok: i18n.translate(
-    'xpack.streams.entityCentricLab.entities.groupBy.alerts.ok',
-    { defaultMessage: 'With no active alerts' }
-  ),
+  firing: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.firing', {
+    defaultMessage: 'Resources with active alerts',
+  }),
+  noSetup: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup', {
+    defaultMessage: 'With no alerts set up',
+  }),
+  ok: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.ok', {
+    defaultMessage: 'With no active alerts',
+  }),
 };
 
 /** Canonical sort: firing first, then no setup, then OK. */
@@ -195,6 +192,14 @@ const ENVIRONMENT_REGION_FIELDS: readonly GroupByFieldDef[] = [
     }),
     valueOf: (entity: Entity) => entity.tags.region || UNKNOWN,
   },
+  {
+    id: 'attr:availabilityZone',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.groupBy.field.availabilityZone',
+      { defaultMessage: 'Availability Zone' }
+    ),
+    valueOf: (entity: Entity) => entity.attributes?.availabilityZone || UNKNOWN,
+  },
 ];
 
 /**
@@ -227,42 +232,41 @@ export const getGroupByFields = (
 
   // K8s-specific group-by fields — only when the inventory is K8s-scoped.
   const k8sFields: GroupByFieldDef[] = isKubernetesInventoryScope(inventoryCategoryScope)
-      ? [
-          {
-            id: 'k8s:cluster',
-            label: i18n.translate(
-              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sCluster',
-              { defaultMessage: 'Cluster' }
-            ),
-            valueOf: (entity: Entity) => {
-              if (entity.subType === 'Clusters') return entity.name;
-              return entity.attributes?.cluster || UNKNOWN;
-            },
+    ? [
+        {
+          id: 'k8s:cluster',
+          label: i18n.translate(
+            'xpack.streams.entityCentricLab.entities.groupBy.field.k8sCluster',
+            { defaultMessage: 'Cluster' }
+          ),
+          valueOf: (entity: Entity) => {
+            if (entity.subType === 'Clusters') return entity.name;
+            return entity.attributes?.cluster || UNKNOWN;
           },
-          {
-            id: 'k8s:namespace',
-            label: i18n.translate(
-              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sNamespace',
-              { defaultMessage: 'Namespace' }
-            ),
-            valueOf: (entity: Entity) => {
-              if (entity.subType === 'Namespaces') return entity.name;
-              return entity.attributes?.namespace || UNKNOWN;
-            },
+        },
+        {
+          id: 'k8s:namespace',
+          label: i18n.translate(
+            'xpack.streams.entityCentricLab.entities.groupBy.field.k8sNamespace',
+            { defaultMessage: 'Namespace' }
+          ),
+          valueOf: (entity: Entity) => {
+            if (entity.subType === 'Namespaces') return entity.name;
+            return entity.attributes?.namespace || UNKNOWN;
           },
-          {
-            id: 'k8s:node',
-            label: i18n.translate(
-              'xpack.streams.entityCentricLab.entities.groupBy.field.k8sNode',
-              { defaultMessage: 'Node' }
-            ),
-            valueOf: (entity: Entity) => {
-              if (entity.subType === 'Nodes') return entity.name;
-              return entity.attributes?.node || UNKNOWN;
-            },
+        },
+        {
+          id: 'k8s:node',
+          label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.k8sNode', {
+            defaultMessage: 'Node',
+          }),
+          valueOf: (entity: Entity) => {
+            if (entity.subType === 'Nodes') return entity.name;
+            return entity.attributes?.node || UNKNOWN;
           },
-        ]
-      : [];
+        },
+      ]
+    : [];
   const tagFields = tagGroupByFields(isElasticOn, isPhase1);
   const tagFieldIds = new Set(tagFields.map((field) => field.id));
   const environmentRegionFields = ENVIRONMENT_REGION_FIELDS.filter(

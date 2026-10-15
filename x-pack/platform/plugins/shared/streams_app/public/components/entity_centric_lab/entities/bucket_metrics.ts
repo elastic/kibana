@@ -116,7 +116,7 @@ export const toneColor = (tone: MetricTone, _euiTheme: EuiThemeComputed): string
 // Stat options
 // ---------------------------------------------------------------------------
 
-export type StatId = 'last' | 'min' | 'max' | 'avg';
+export type StatId = 'last' | 'min' | 'max' | 'avg' | 'p95' | 'p99';
 
 export interface StatOption {
   readonly id: StatId;
@@ -148,7 +148,33 @@ export const STAT_OPTIONS: readonly StatOption[] = [
       defaultMessage: 'Average',
     }),
   },
+  {
+    id: 'p95',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.stat.p95', {
+      defaultMessage: 'P95',
+    }),
+  },
+  {
+    id: 'p99',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.stat.p99', {
+      defaultMessage: 'P99',
+    }),
+  },
 ];
+
+/**
+ * How far each stat sits from the base "last" sample in synthetic unit
+ * space. Order is roughly min < avg < last < p95 < p99 < max so toggling
+ * Stats on the hex map is visibly meaningful.
+ */
+const STAT_BIAS: Record<StatId, number> = {
+  min: -0.18,
+  avg: -0.06,
+  last: 0.0,
+  p95: 0.08,
+  p99: 0.14,
+  max: 0.18,
+};
 
 export const getStatLabel = (statId: StatId): string =>
   STAT_OPTIONS.find((option) => option.id === statId)?.label ?? statId;
@@ -800,10 +826,9 @@ const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'bucket-size',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.bucketSize',
-      { defaultMessage: 'Bucket size' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.bucketSize', {
+      defaultMessage: 'Bucket size',
+    }),
     kind: 'numeric',
     unit: ' GB',
     range: { min: 0.1, max: 5000 },
@@ -811,10 +836,9 @@ const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'object-count',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.objectCount',
-      { defaultMessage: 'Object count' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.objectCount', {
+      defaultMessage: 'Object count',
+    }),
     kind: 'numeric',
     unit: 'k',
     range: { min: 0, max: 50000 },
@@ -822,10 +846,9 @@ const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'get-put-ratio',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.getPutRatio',
-      { defaultMessage: 'GET / PUT ratio' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.getPutRatio', {
+      defaultMessage: 'GET / PUT ratio',
+    }),
     kind: 'numeric',
     precision: 1,
     range: { min: 0.1, max: 500 },
@@ -854,10 +877,9 @@ const NETWORKING_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'request-rate',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.requestRate',
-      { defaultMessage: 'Request rate' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.requestRate', {
+      defaultMessage: 'Request rate',
+    }),
     kind: 'numeric',
     unit: ' req/s',
     range: { min: 0, max: 50000 },
@@ -865,10 +887,9 @@ const NETWORKING_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'error-rate',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.errorRate',
-      { defaultMessage: 'Error rate' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.errorRate', {
+      defaultMessage: 'Error rate',
+    }),
     kind: 'numeric',
     unit: '%',
     precision: 1,
@@ -1072,7 +1093,7 @@ const K8S_NAMESPACES_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'cpu-usage',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.cpuUsage', {
-      defaultMessage: 'CPU usage',
+      defaultMessage: 'CPU utilization',
     }),
     kind: 'numeric',
     unit: '%',
@@ -1082,7 +1103,7 @@ const K8S_NAMESPACES_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'memory-usage',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.memoryUsage', {
-      defaultMessage: 'Memory usage',
+      defaultMessage: 'Memory utilization',
     }),
     kind: 'numeric',
     unit: '%',
@@ -1192,7 +1213,7 @@ const K8S_CONTAINERS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'cpu-usage',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.cpuUsage', {
-      defaultMessage: 'CPU usage',
+      defaultMessage: 'CPU utilization',
     }),
     kind: 'numeric',
     unit: '%',
@@ -1202,7 +1223,7 @@ const K8S_CONTAINERS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'memory-usage',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.memoryUsage', {
-      defaultMessage: 'Memory usage',
+      defaultMessage: 'Memory utilization',
     }),
     kind: 'numeric',
     unit: '%',
@@ -1215,19 +1236,17 @@ const K8S_CONTAINERS_METRICS: readonly MetricDescriptor[] = [
 const K8S_REPLICASETS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'rollout',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.rsRollout',
-      { defaultMessage: 'Rollout' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.rsRollout', {
+      defaultMessage: 'Rollout',
+    }),
     kind: 'categorical',
     values: ROLLOUT_VALUES,
   },
   {
     id: 'ready-replicas',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.readyReplicas',
-      { defaultMessage: 'Ready replicas' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.readyReplicas', {
+      defaultMessage: 'Ready replicas',
+    }),
     kind: 'numeric',
     unit: '%',
     range: { min: 0, max: 100 },
@@ -1235,10 +1254,9 @@ const K8S_REPLICASETS_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'replica-count',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.replicaCount',
-      { defaultMessage: 'Replica count' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.replicaCount', {
+      defaultMessage: 'Replica count',
+    }),
     kind: 'numeric',
     range: { min: 1, max: 20 },
     thresholds: { warn: 2, crit: 1, direction: 'desc' },
@@ -1249,10 +1267,9 @@ const K8S_REPLICASETS_METRICS: readonly MetricDescriptor[] = [
 const K8S_STATEFULSETS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'rollout',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.stsRollout',
-      { defaultMessage: 'Rollout' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.stsRollout', {
+      defaultMessage: 'Rollout',
+    }),
     kind: 'categorical',
     values: ROLLOUT_VALUES,
   },
@@ -1269,10 +1286,9 @@ const K8S_STATEFULSETS_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'volume-util',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.volumeUtil',
-      { defaultMessage: 'Volume utilization' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.volumeUtil', {
+      defaultMessage: 'Volume utilization',
+    }),
     kind: 'numeric',
     unit: '%',
     range: { min: 5, max: 100 },
@@ -1290,19 +1306,17 @@ const DAEMONSET_SCHEDULE_VALUES: readonly CategoricalValue[] = [
 const K8S_DAEMONSETS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'schedule-status',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.scheduleStatus',
-      { defaultMessage: 'Schedule status' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.scheduleStatus', {
+      defaultMessage: 'Schedule status',
+    }),
     kind: 'categorical',
     values: DAEMONSET_SCHEDULE_VALUES,
   },
   {
     id: 'available-pct',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.availablePct',
-      { defaultMessage: 'Available %' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.availablePct', {
+      defaultMessage: 'Available %',
+    }),
     kind: 'numeric',
     unit: '%',
     range: { min: 0, max: 100 },
@@ -1310,10 +1324,9 @@ const K8S_DAEMONSETS_METRICS: readonly MetricDescriptor[] = [
   },
   {
     id: 'misscheduled',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.misscheduled',
-      { defaultMessage: 'Misscheduled' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.misscheduled', {
+      defaultMessage: 'Misscheduled',
+    }),
     kind: 'numeric',
     range: { min: 0, max: 10 },
     thresholds: { warn: 1, crit: 3, direction: 'asc' },
@@ -1331,29 +1344,26 @@ const CRONJOB_LAST_STATUS_VALUES: readonly CategoricalValue[] = [
 const K8S_CRONJOBS_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'last-status',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.lastStatus',
-      { defaultMessage: 'Last run' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.lastStatus', {
+      defaultMessage: 'Last run',
+    }),
     kind: 'categorical',
     values: CRONJOB_LAST_STATUS_VALUES,
   },
   {
     id: 'failures-24h',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.failures24h',
-      { defaultMessage: 'Failures (24h)' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.failures24h', {
+      defaultMessage: 'Failures (24h)',
+    }),
     kind: 'numeric',
     range: { min: 0, max: 30 },
     thresholds: { warn: 2, crit: 5, direction: 'asc' },
   },
   {
     id: 'avg-duration',
-    label: i18n.translate(
-      'xpack.streams.entityCentricLab.entities.bucket.metric.avgDuration',
-      { defaultMessage: 'Avg duration' }
-    ),
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.avgDuration', {
+      defaultMessage: 'Avg duration',
+    }),
     kind: 'numeric',
     unit: 's',
     range: { min: 1, max: 600 },
@@ -1478,9 +1488,8 @@ export const getBucketMetrics = (
   // Phase 1: remove the Health metric entirely — Alerts is the primary signal.
   // When localStorage has no entry, fall back to the registry default.
   try {
-    const raw = typeof window !== 'undefined'
-      ? window.localStorage.getItem('elasticOn_v_phase')
-      : null;
+    const raw =
+      typeof window !== 'undefined' ? window.localStorage.getItem('elasticOn_v_phase') : null;
     // Import would create a circular dep, so inline the default id.
     const phase = raw ?? 'phase1'; // must match PHASE_DIMENSION.defaultOption
     if (phase === 'phase1') {
@@ -1506,9 +1515,8 @@ export const getBucketMetrics = (
 export const getDefaultMetricId = (bucketKey: BucketKey): string => {
   const metrics = getBucketMetrics(bucketKey);
   try {
-    const raw = typeof window !== 'undefined'
-      ? window.localStorage.getItem('elasticOn_v_phase')
-      : null;
+    const raw =
+      typeof window !== 'undefined' ? window.localStorage.getItem('elasticOn_v_phase') : null;
     const phase = raw ?? 'phase1'; // must match PHASE_DIMENSION.defaultOption
     if (phase === 'phase1') {
       const alertsMetric = metrics.find((m) => m.id === ENTITY_ALERTS_METRIC_ID);
@@ -2025,22 +2033,16 @@ export const resolveMetricReading = (
     };
   }
   // Numeric. Different stats are simulated by shifting the unit hash
-  // with a stat-specific offset: `max` reads higher than `last` than
-  // `avg` than `min`, on average — so toggling between stats is
-  // visibly meaningful (the relationship is monotonic per entity).
+  // with a stat-specific offset (see {@link STAT_BIAS}) so toggling
+  // between stats is visibly meaningful (the relationship is monotonic
+  // per entity on average).
   const baseUnit = sampleUnit(unitHash(entityName, metric.id, 'last'));
   // Noise stays small (±0.07) so it can wiggle the value inside its
   // health band but rarely jumps a band on its own. Combined with the
   // overlapping band windows above this gives enough variety to look
   // organic without breaking the health correlation.
   const noise = unitHash(entityName, metric.id, statId) * 0.14 - 0.07;
-  const statBias: Record<StatId, number> = {
-    min: -0.18,
-    avg: -0.06,
-    last: 0.0,
-    max: 0.18,
-  };
-  const shifted = baseUnit + statBias[statId] + noise;
+  const shifted = baseUnit + STAT_BIAS[statId] + noise;
   const clamped = Math.min(1, Math.max(0, shifted));
   const value = metric.range.min + clamped * (metric.range.max - metric.range.min);
   return {
@@ -2124,8 +2126,7 @@ export const resolveMetricSparkline = (
   // sparkline matches the number rendered next to it.
   const baseUnit = sampleUnit(unitHash(entityName, metric.id, 'last'));
   const noise = unitHash(entityName, metric.id, statId) * 0.14 - 0.07;
-  const statBias: Record<StatId, number> = { min: -0.18, avg: -0.06, last: 0.0, max: 0.18 };
-  const finalUnit = clampUnit(baseUnit + statBias[statId] + noise);
+  const finalUnit = clampUnit(baseUnit + STAT_BIAS[statId] + noise);
 
   // Shape profiles that mimic real monitoring data: mostly flat baselines
   // with distinct event signatures. Seeds mix entity name, metric id, AND
@@ -2171,9 +2172,7 @@ export const resolveMetricSparkline = (
         // Flat with two spikes at different positions.
         const s1 = 0.15 + posSeed1 * 0.25;
         const s2 = 0.6 + posSeed2 * 0.25;
-        value = finalUnit +
-          spikeHeight * bump(t, s1, 0.04) +
-          spikeHeight * 0.7 * bump(t, s2, 0.04);
+        value = finalUnit + spikeHeight * bump(t, s1, 0.04) + spikeHeight * 0.7 * bump(t, s2, 0.04);
         break;
       }
       case 3: {
@@ -2181,7 +2180,8 @@ export const resolveMetricSparkline = (
         const s1 = 0.1 + posSeed1 * 0.15;
         const s2 = 0.38 + posSeed2 * 0.15;
         const s3 = 0.7 + posSeed3 * 0.15;
-        value = finalUnit +
+        value =
+          finalUnit +
           spikeHeight * bump(t, s1, 0.035) +
           spikeHeight * 0.8 * bump(t, s2, 0.035) +
           spikeHeight * 0.6 * bump(t, s3, 0.035);

@@ -48,8 +48,8 @@ export interface GoldenSignal {
    */
   readonly trend: readonly number[];
   /**
-   * Long-form description shown on hover (replaces the legacy `(?)` icon —
-   * surfaced through `EuiToolTip` rather than a click target).
+   * What this metric measures, in plain language. The tile adds how the
+   * number and the trend chart relate to the selected time range.
    */
   readonly description: string;
 }

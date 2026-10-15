@@ -64,7 +64,7 @@ const AVAILABLE_CUSTOM_DASHBOARDS: readonly { id: string; title: string; descrip
     {
       id: 'custom-resource-usage',
       title: 'Resource Usage Overview',
-      description: 'CPU, memory, disk usage breakdown by resource',
+      description: 'CPU, memory, disk utilization breakdown by resource',
     },
     {
       id: 'custom-network-traffic',
@@ -612,7 +612,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              color="text"
+              color="primary"
               onClick={handleCreateDashboard}
               data-test-subj="entityCentricLabDashboardsListCreateDashboard"
             >

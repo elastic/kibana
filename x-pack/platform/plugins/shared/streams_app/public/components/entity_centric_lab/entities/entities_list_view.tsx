@@ -38,6 +38,14 @@ import { labThings } from '../lab_terminology';
 import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
+import {
+  ColumnHeaderWithInfo,
+  alertsListColumnDescription,
+  anomalyDetectionColumnDescription,
+  healthColumnDescription,
+  lastHealthChangeColumnDescription,
+  uptimeColumnDescription,
+} from './column_header_info';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
 import {
   CATEGORY_RESOURCE_TYPE_ALL,
@@ -130,9 +138,15 @@ const useColumns = (
       },
       {
         field: 'health',
-        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.health', {
-          defaultMessage: 'Health',
-        }),
+        name: (
+          <ColumnHeaderWithInfo
+            columnId="health"
+            label={i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.health', {
+              defaultMessage: 'Health',
+            })}
+            description={healthColumnDescription()}
+          />
+        ),
         width: '120px',
         // Sort by severity (unhealthy → atRisk → healthy), not the raw
         // health string (which alphabetizes to atRisk → healthy →
@@ -144,17 +158,22 @@ const useColumns = (
         ),
       },
       {
-        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.alerts', {
-          defaultMessage: 'Alerts',
-        }),
+        name: (
+          <ColumnHeaderWithInfo
+            columnId="alerts"
+            label={i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.alerts', {
+              defaultMessage: 'Alerts',
+            })}
+            description={alertsListColumnDescription()}
+          />
+        ),
         width: '150px',
         sortable: (row: Entity) => {
           if (!row.alerts) return 2;
           return row.alerts.active > 0 ? 0 : 1;
         },
         render: (row: Entity) => {
-          const openAlerts = () =>
-            (onSelectEntityAlerts ?? onSelectEntity)(row.name);
+          const openAlerts = () => (onSelectEntityAlerts ?? onSelectEntity)(row.name);
           const ariaLabel = i18n.translate(
             'xpack.streams.entityCentricLab.entities.list.alertsBadge.ariaLabel',
             {
@@ -218,26 +237,44 @@ const useColumns = (
       },
       {
         field: 'lastHealthChange',
-        name: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.list.columns.lastHealthChange',
-          { defaultMessage: 'Last health change' }
+        name: (
+          <ColumnHeaderWithInfo
+            columnId="lastHealthChange"
+            label={i18n.translate(
+              'xpack.streams.entityCentricLab.entities.list.columns.lastHealthChange',
+              { defaultMessage: 'Last health change' }
+            )}
+            description={lastHealthChangeColumnDescription()}
+          />
         ),
         width: '180px',
         sortable: true,
       },
       {
-        field: 'age',
-        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.uptime', {
-          defaultMessage: 'Up time',
-        }),
-        width: '120px',
+        field: 'anomalyDetection',
+        name: (
+          <ColumnHeaderWithInfo
+            columnId="anomalyDetection"
+            label={i18n.translate(
+              'xpack.streams.entityCentricLab.entities.list.columns.anomalyDetection',
+              { defaultMessage: 'Anomaly detection' }
+            )}
+            description={anomalyDetectionColumnDescription()}
+          />
+        ),
       },
       {
-        field: 'anomalyDetection',
-        name: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.list.columns.anomalyDetection',
-          { defaultMessage: 'Anomaly detection' }
+        field: 'age',
+        name: (
+          <ColumnHeaderWithInfo
+            columnId="age"
+            label={i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.uptime', {
+              defaultMessage: 'Up time',
+            })}
+            description={uptimeColumnDescription()}
+          />
         ),
+        width: '120px',
       },
     ],
     [onSelectEntity, onSelectEntityAlerts]
@@ -278,7 +315,17 @@ const EntityNameLink = ({
  * the user doesn't read the category name twice.
  */
 
-const StatBadge = ({ label, value, color = 'hollow', showSeparator = false }: { label: string; value: number; color?: string; showSeparator?: boolean }) => (
+const StatBadge = ({
+  label,
+  value,
+  color = 'hollow',
+  showSeparator = false,
+}: {
+  label: string;
+  value: number;
+  color?: string;
+  showSeparator?: boolean;
+}) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     {showSeparator ? (
       <EuiFlexItem grow={false}>
@@ -310,7 +357,8 @@ const CategorySectionHeader = ({
   onTypeFilterChange?: (next: string) => void;
 }) => {
   const descriptor = getCategoryDescriptor(category);
-  const showTypeFilter = typeLabels && typeLabels.length > 1 && typeFilter !== undefined && onTypeFilterChange;
+  const showTypeFilter =
+    typeLabels && typeLabels.length > 1 && typeFilter !== undefined && onTypeFilterChange;
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
       <EuiFlexItem grow={false}>
@@ -326,11 +374,19 @@ const CategorySectionHeader = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+            <StatBadge
+              label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+                defaultMessage: 'Resources:',
+              })}
+              value={total}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StatBadge
-              label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+              label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+                { defaultMessage: 'Resources with alerts:' }
+              )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
               showSeparator
@@ -373,11 +429,19 @@ const CloudProviderSectionHeader = ({
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+      <StatBadge
+        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+          defaultMessage: 'Resources:',
+        })}
+        value={total}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <StatBadge
-        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+        label={i18n.translate(
+          'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+          { defaultMessage: 'Resources with alerts:' }
+        )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
         showSeparator
@@ -420,11 +484,19 @@ const SectionHeader = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+        <StatBadge
+          label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+            defaultMessage: 'Resources:',
+          })}
+          value={total}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <StatBadge
-          label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+          label={i18n.translate(
+            'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+            { defaultMessage: 'Resources with alerts:' }
+          )}
           value={alertsCount}
           color={alertsCount > 0 ? 'danger' : 'hollow'}
           showSeparator
@@ -504,7 +576,7 @@ const TableSection = ({
 };
 
 const countWithAlerts = (entities: readonly Entity[]): number =>
-  entities.filter((e) => e.alerts.active > 0).length;
+  entities.filter((e) => (e.alerts?.active ?? 0) > 0).length;
 
 /**
  * Group entities by their `.type` string, largest groups first with
@@ -560,15 +632,34 @@ type ListItem =
     }
   | { kind: 'kubernetes-header'; total: number; alertsCount: number }
   | { kind: 'type-group-divider'; label: string }
-  | { kind: 'category-header'; category: EntityCategoryId; total: number; alertsCount: number; typeLabels?: readonly string[] }
-  | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number; alertsCount: number }
+  | {
+      kind: 'category-header';
+      category: EntityCategoryId;
+      total: number;
+      alertsCount: number;
+      typeLabels?: readonly string[];
+    }
+  | {
+      kind: 'cloud-provider-header';
+      provider: CloudProviderDescriptor;
+      total: number;
+      alertsCount: number;
+    }
   // Generic level-1 header for a custom "Group by" bucket (ElasticOn).
   | { kind: 'group-header'; label: string; total: number; alertsCount: number }
   // Level-2 sub-group header for 3-field custom grouping.
   | { kind: 'sub-group-header'; label: string; total: number; alertsCount: number };
 
 /** A simple level-1 header for a custom-grouping bucket (no category icon). */
-const GroupSectionHeader = ({ label, total, alertsCount }: { label: string; total: number; alertsCount: number }) => (
+const GroupSectionHeader = ({
+  label,
+  total,
+  alertsCount,
+}: {
+  label: string;
+  total: number;
+  alertsCount: number;
+}) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiTitle size="s">
@@ -576,11 +667,19 @@ const GroupSectionHeader = ({ label, total, alertsCount }: { label: string; tota
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+      <StatBadge
+        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+          defaultMessage: 'Resources:',
+        })}
+        value={total}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <StatBadge
-        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+        label={i18n.translate(
+          'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+          { defaultMessage: 'Resources with alerts:' }
+        )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
         showSeparator
@@ -590,7 +689,15 @@ const GroupSectionHeader = ({ label, total, alertsCount }: { label: string; tota
 );
 
 /** Level-2 sub-group header (smaller) for 3-field custom grouping. */
-const SubGroupSectionHeader = ({ label, total, alertsCount }: { label: string; total: number; alertsCount: number }) => (
+const SubGroupSectionHeader = ({
+  label,
+  total,
+  alertsCount,
+}: {
+  label: string;
+  total: number;
+  alertsCount: number;
+}) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
@@ -598,11 +705,19 @@ const SubGroupSectionHeader = ({ label, total, alertsCount }: { label: string; t
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+      <StatBadge
+        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+          defaultMessage: 'Resources:',
+        })}
+        value={total}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <StatBadge
-        label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+        label={i18n.translate(
+          'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+          { defaultMessage: 'Resources with alerts:' }
+        )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
         showSeparator
@@ -644,11 +759,19 @@ const KubernetesSectionHeader = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StatBadge label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', { defaultMessage: 'Resources:' })} value={total} />
+            <StatBadge
+              label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
+                defaultMessage: 'Resources:',
+              })}
+              value={total}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StatBadge
-              label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge', { defaultMessage: 'Resources with alerts:' })}
+              label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
+                { defaultMessage: 'Resources with alerts:' }
+              )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
               showSeparator
@@ -658,10 +781,7 @@ const KubernetesSectionHeader = ({
       </EuiFlexItem>
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
-        <KubernetesResourceTypeFilter
-          value={resourceType}
-          onChange={onResourceTypeChange}
-        />
+        <KubernetesResourceTypeFilter value={resourceType} onChange={onResourceTypeChange} />
       </EuiFlexItem>
       {clusterNames.length > 0 ? (
         <EuiFlexItem grow={false}>
@@ -709,7 +829,9 @@ export const EntitiesListView = ({
   // Transient (not persisted) — on the All Resources page only resource
   // type + cluster are shown. For deeper filtering (namespace, deployment,
   // node) the user navigates to the dedicated Kubernetes section.
-  const [resourceType, setResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
+  const [resourceType, setResourceType] = useState<KubernetesResourceType>(
+    KUBERNETES_RESOURCE_TYPE_ALL
+  );
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
 
   // Per-category type filter for non-K8s categories (Hosts, Databases, etc.)
@@ -720,30 +842,24 @@ export const EntitiesListView = ({
     (cat: EntityCategoryId) => categoryTypeFilters.get(cat) ?? CATEGORY_RESOURCE_TYPE_ALL,
     [categoryTypeFilters]
   );
-  const setCategoryTypeFilter = useCallback(
-    (cat: EntityCategoryId, value: string) => {
-      setCategoryTypeFilters((prev) => {
-        const next = new Map(prev);
-        if (value === CATEGORY_RESOURCE_TYPE_ALL) {
-          next.delete(cat);
-        } else {
-          next.set(cat, value);
-        }
-        return next;
-      });
-    },
-    []
-  );
+  const setCategoryTypeFilter = useCallback((cat: EntityCategoryId, value: string) => {
+    setCategoryTypeFilters((prev) => {
+      const next = new Map(prev);
+      if (value === CATEGORY_RESOURCE_TYPE_ALL) {
+        next.delete(cat);
+      } else {
+        next.set(cat, value);
+      }
+      return next;
+    });
+  }, []);
 
   const k8sEntities = useMemo(
     () => effectiveEntities.filter((entity) => entity.category === 'kubernetes'),
     [effectiveEntities]
   );
 
-  const clusterNames = useMemo(
-    () => getKubernetesClusterNames(k8sEntities),
-    [k8sEntities]
-  );
+  const clusterNames = useMemo(() => getKubernetesClusterNames(k8sEntities), [k8sEntities]);
 
   const items = useMemo<ListItem[]>(() => {
     // ElasticOn "Group by" override: group by the chosen 1–3 fields instead of
@@ -775,10 +891,20 @@ export const EntitiesListView = ({
       const hasSubLevel = customGroupBy.length > 1;
       for (const node of nodes) {
         if (hasSubLevel && node.children.length > 0) {
-          custom.push({ kind: 'group-header', label: node.label, total: node.entities.length, alertsCount: countWithAlerts(node.entities) });
+          custom.push({
+            kind: 'group-header',
+            label: node.label,
+            total: node.entities.length,
+            alertsCount: countWithAlerts(node.entities),
+          });
           for (const child of node.children) {
             if (child.children.length > 0) {
-              custom.push({ kind: 'sub-group-header', label: child.label, total: child.entities.length, alertsCount: countWithAlerts(child.entities) });
+              custom.push({
+                kind: 'sub-group-header',
+                label: child.label,
+                total: child.entities.length,
+                alertsCount: countWithAlerts(child.entities),
+              });
               for (const grandchild of child.children) {
                 custom.push({
                   kind: 'panel',
@@ -832,8 +958,19 @@ export const EntitiesListView = ({
         // / ...) using the curated reading order, instead of the
         // generic `.type`-based grouping used by other categories.
         const afterResourceType = filterEntitiesByResourceType(rows, resourceType);
-        const filtered = filterKubernetesEntities(afterResourceType, clusterFilter, KUBERNETES_FILTER_ALL, KUBERNETES_FILTER_ALL, KUBERNETES_FILTER_ALL, clusterNames);
-        result.push({ kind: 'kubernetes-header', total: filtered.length, alertsCount: countWithAlerts(filtered) });
+        const filtered = filterKubernetesEntities(
+          afterResourceType,
+          clusterFilter,
+          KUBERNETES_FILTER_ALL,
+          KUBERNETES_FILTER_ALL,
+          KUBERNETES_FILTER_ALL,
+          clusterNames
+        );
+        result.push({
+          kind: 'kubernetes-header',
+          total: filtered.length,
+          alertsCount: countWithAlerts(filtered),
+        });
         const subTypeBuckets = new Map<string, Entity[]>();
         for (const entity of filtered) {
           const key = entity.subType ?? 'Other';
@@ -869,7 +1006,12 @@ export const EntitiesListView = ({
         for (const provider of CLOUD_PROVIDERS) {
           const providerRows = rows.filter((entity) => entity.provider === provider.id);
           if (providerRows.length === 0) continue;
-          result.push({ kind: 'cloud-provider-header', provider, total: providerRows.length, alertsCount: countWithAlerts(providerRows) });
+          result.push({
+            kind: 'cloud-provider-header',
+            provider,
+            total: providerRows.length,
+            alertsCount: countWithAlerts(providerRows),
+          });
           for (const service of provider.services) {
             const serviceRows = providerRows.filter((entity) => entity.type === service.entityType);
             if (serviceRows.length === 0) continue;
@@ -894,7 +1036,13 @@ export const EntitiesListView = ({
       const filteredRows = filterEntitiesByCategoryType(rows, catTypeFilter);
       const typeGroups = groupEntitiesByType(filteredRows);
       if (typeLabels.length > 1) {
-        result.push({ kind: 'category-header', category: descriptor.id, total: filteredRows.length, alertsCount: countWithAlerts(filteredRows), typeLabels });
+        result.push({
+          kind: 'category-header',
+          category: descriptor.id,
+          total: filteredRows.length,
+          alertsCount: countWithAlerts(filteredRows),
+          typeLabels,
+        });
         for (const group of typeGroups) {
           result.push({
             kind: 'panel',
@@ -923,7 +1071,12 @@ export const EntitiesListView = ({
           // category name sits *above* the bordered panel, visually
           // separating it from unrelated panels above (e.g. a K8s
           // sub-type table).
-          result.push({ kind: 'category-header', category: descriptor.id, total: rows.length, alertsCount: countWithAlerts(rows) });
+          result.push({
+            kind: 'category-header',
+            category: descriptor.id,
+            total: rows.length,
+            alertsCount: countWithAlerts(rows),
+          });
           result.push({ kind: 'panel', category: descriptor.id, nested: true, rows });
         }
       }
@@ -998,21 +1151,35 @@ export const EntitiesListView = ({
                 alertsCount={item.alertsCount}
                 typeLabels={item.typeLabels}
                 typeFilter={item.typeLabels ? getCategoryTypeFilter(item.category) : undefined}
-                onTypeFilterChange={item.typeLabels ? (v) => setCategoryTypeFilter(item.category, v) : undefined}
+                onTypeFilterChange={
+                  item.typeLabels ? (v) => setCategoryTypeFilter(item.category, v) : undefined
+                }
               />
             </EuiFlexItem>
           );
         }
         if (item.kind === 'cloud-provider-header') {
           return (
-            <EuiFlexItem key={`cloud-${item.provider.id}-header-${index}`} grow={false} style={groupGap}>
-              <CloudProviderSectionHeader provider={item.provider} total={item.total} alertsCount={item.alertsCount} />
+            <EuiFlexItem
+              key={`cloud-${item.provider.id}-header-${index}`}
+              grow={false}
+              style={groupGap}
+            >
+              <CloudProviderSectionHeader
+                provider={item.provider}
+                total={item.total}
+                alertsCount={item.alertsCount}
+              />
             </EuiFlexItem>
           );
         }
         if (item.kind === 'type-group-divider') {
           return (
-            <EuiFlexItem key={`type-group-${item.label}-${index}`} grow={false} style={{ marginTop: 12 }}>
+            <EuiFlexItem
+              key={`type-group-${item.label}-${index}`}
+              grow={false}
+              style={{ marginTop: 12 }}
+            >
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
@@ -1029,14 +1196,26 @@ export const EntitiesListView = ({
         if (item.kind === 'group-header') {
           return (
             <EuiFlexItem key={`group-header-${item.label}-${index}`} grow={false} style={groupGap}>
-              <GroupSectionHeader label={item.label} total={item.total} alertsCount={item.alertsCount} />
+              <GroupSectionHeader
+                label={item.label}
+                total={item.total}
+                alertsCount={item.alertsCount}
+              />
             </EuiFlexItem>
           );
         }
         if (item.kind === 'sub-group-header') {
           return (
-            <EuiFlexItem key={`sub-group-header-${item.label}-${index}`} grow={false} style={{ marginTop: 12, marginLeft: 16 }}>
-              <SubGroupSectionHeader label={item.label} total={item.total} alertsCount={item.alertsCount} />
+            <EuiFlexItem
+              key={`sub-group-header-${item.label}-${index}`}
+              grow={false}
+              style={{ marginTop: 12, marginLeft: 16 }}
+            >
+              <SubGroupSectionHeader
+                label={item.label}
+                total={item.total}
+                alertsCount={item.alertsCount}
+              />
             </EuiFlexItem>
           );
         }
@@ -1066,7 +1245,9 @@ export const EntitiesListView = ({
                 nested={item.nested}
                 rows={item.rows}
                 columns={columns}
-                tableKey={item.subTypeLabel ? `${item.category}:${item.subTypeLabel}` : item.category}
+                tableKey={
+                  item.subTypeLabel ? `${item.category}:${item.subTypeLabel}` : item.category
+                }
               />
             )}
           </EuiFlexItem>

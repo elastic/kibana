@@ -10,15 +10,14 @@
 import React, { useRef, useState } from 'react';
 import {
   EuiAccordion,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiThemeComputed,
@@ -47,6 +46,14 @@ interface MetricsTabProps {
 
 const NO_EVENTS: readonly MetricEvent[] = [];
 
+/** What a flyout metric number and its chart are, in plain language. */
+export const explainFlyoutMetric = (what: string): string =>
+  i18n.translate('entityCentricLabFlyout.flyout.metrics.plainExplanation', {
+    defaultMessage:
+      '{what} Shows the latest value in the selected time range, with the trend charted over that range.',
+    values: { what },
+  });
+
 export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => {
   const goldenAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsGolden' });
   const otherAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsOther' });
@@ -60,14 +67,16 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
 
   return (
     <>
-      {hideEvents ? null : <EuiSwitch
-        label={i18n.translate('entityCentricLabFlyout.flyout.metrics.surfaceEventsToggle', {
-          defaultMessage: 'Surface events on graphs',
-        })}
-        checked={surfaceEvents}
-        onChange={(e) => setSurfaceEvents(e.target.checked)}
-        data-test-subj="entityCentricLabMetricsSurfaceEventsToggle"
-      />}
+      {hideEvents ? null : (
+        <EuiSwitch
+          label={i18n.translate('entityCentricLabFlyout.flyout.metrics.surfaceEventsToggle', {
+            defaultMessage: 'Surface events on graphs',
+          })}
+          checked={surfaceEvents}
+          onChange={(e) => setSurfaceEvents(e.target.checked)}
+          data-test-subj="entityCentricLabMetricsSurfaceEventsToggle"
+        />
+      )}
       {hideEvents ? null : <EuiSpacer size="m" />}
 
       <EuiAccordion
@@ -166,17 +175,23 @@ export const MetricChartCard = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={series.description} position="top" delay="long">
-            <EuiButtonIcon
-              iconType="question"
-              color="text"
-              aria-label={i18n.translate(
-                'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
-                { defaultMessage: 'Show metric description' }
-              )}
-              data-test-subj={`entityCentricLabMetricsDescription-${series.id}`}
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            type="info"
+            size="s"
+            color="subdued"
+            position="left"
+            content={explainFlyoutMetric(series.description)}
+            aria-label={i18n.translate(
+              'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
+              {
+                defaultMessage: 'About {metric}',
+                values: { metric: series.label },
+              }
+            )}
+            anchorProps={{
+              'data-test-subj': `entityCentricLabMetricsDescription-${series.id}`,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

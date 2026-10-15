@@ -206,10 +206,7 @@ export const PHASE1_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set([
  */
 export const ALWAYS_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['environment', 'region']);
 
-export const getVisibleTagKeys = (
-  isElasticOn: boolean,
-  isPhase1 = false
-): readonly TagKey[] => {
+export const getVisibleTagKeys = (isElasticOn: boolean, isPhase1 = false): readonly TagKey[] => {
   // Preferred row order: Team first (org triage), then Application.
   const preferredOrder: readonly TagKey[] = ['team', 'application', 'environment', 'region'];
   const hidden = isPhase1
@@ -465,6 +462,26 @@ const buildTags = (scope: string, index: number): EntityTags => ({
   region: pickTag(REGION_VALUES, `${scope}-region`, index),
 });
 
+/** AZ letters appended to a region id (e.g. us-east-1 → us-east-1a). */
+const AZ_SUFFIXES = ['a', 'b', 'c'] as const;
+
+/**
+ * Deterministic availability zone for a region. Used on entity attributes and
+ * by the Inventory "Group by → Availability Zone" option.
+ */
+export const buildAvailabilityZone = (region: string, seed: string): string =>
+  `${region}${AZ_SUFFIXES[stableHash(`az-${seed}`) % AZ_SUFFIXES.length]}`;
+
+/** Merge `availabilityZone` onto existing attributes (or create them). */
+const withAvailabilityZone = (
+  region: string,
+  seed: string,
+  attributes?: Readonly<Record<string, string>>
+): Record<string, string> => ({
+  ...attributes,
+  availabilityZone: buildAvailabilityZone(region, seed),
+});
+
 /**
  * PayFlow click-path counts, matching the curated flyout tabs in
  * `payflow_story.ts`. The hash below would otherwise mark some of these
@@ -490,12 +507,14 @@ const buildAlerts = (
   const pinned = STORY_ENTITY_ALERTS[name];
   if (pinned) return pinned;
   const h = stableHash(`alerts-${name}`) % 100;
-  const thresholds: Record<EntityHealth, { readonly activeMax: number; readonly clearMax: number }> =
-    {
-      unhealthy: { activeMax: 70, clearMax: 90 },
-      atRisk: { activeMax: 30, clearMax: 80 },
-      healthy: { activeMax: 5, clearMax: 75 },
-    };
+  const thresholds: Record<
+    EntityHealth,
+    { readonly activeMax: number; readonly clearMax: number }
+  > = {
+    unhealthy: { activeMax: 70, clearMax: 90 },
+    atRisk: { activeMax: 30, clearMax: 80 },
+    healthy: { activeMax: 5, clearMax: 75 },
+  };
   const { activeMax, clearMax } = thresholds[health];
   if (h >= clearMax) return undefined; // no alerts configured
   const total = (stableHash(`alerts-total-${name}`) % 7) + 1; // 1–7 rules
@@ -858,6 +877,7 @@ const buildCloudEntities = (multiplier = 1): Entity[] => {
             ...seenSampleAt(index),
             anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
             tags,
+            attributes: withAvailabilityZone(tags.region, name),
             alerts: buildAlerts(name, health),
           });
           index += 1;
@@ -931,9 +951,7 @@ const scaleSpec = (spec: CategorySpec, multiplier: number): CategorySpec => ({
 /**
  * Scale Kubernetes sub-specs by a count multiplier.
  */
-const scaleKubernetesSpecs = (
-  multiplier: number
-): readonly KubernetesSubSpec[] =>
+const scaleKubernetesSpecs = (multiplier: number): readonly KubernetesSubSpec[] =>
   KUBERNETES_SUB_SPECS.map((sub) => ({
     ...sub,
     total: sub.total * multiplier,
@@ -953,8 +971,7 @@ const buildCategoryEntitiesWithScenario = (
     const name = seed?.name ?? spec.fallbackName(i);
     const type = seed?.type ?? spec.typeCycle[i % spec.typeCycle.length];
     const tags = buildTags(spec.category, i);
-    const baseHealth =
-      seed?.health ?? (healthOverride ?? seededHealth)(salt + i * 3, i);
+    const baseHealth = seed?.health ?? (healthOverride ?? seededHealth)(salt + i * 3, i);
     const health = regionAdjustedHealth(baseHealth, tags.region);
     entities.push({
       id: `${spec.category}-${i + 1}`,
@@ -967,7 +984,11 @@ const buildCategoryEntitiesWithScenario = (
       ...seenSampleAt(i),
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
       tags,
-      attributes: buildExtraAttributes(spec.category, spec.category, i),
+      attributes: withAvailabilityZone(
+        tags.region,
+        name,
+        buildExtraAttributes(spec.category, spec.category, i)
+      ),
       alerts: buildAlerts(name, health),
     });
   }
@@ -1003,9 +1024,18 @@ const buildK8sAttributes = (
   }
   if (subType === 'Namespaces') return attrs;
   // Workload-level subtypes get deployment + node attributes like Pods/Containers.
-  const workloadTypes = new Set(['Pods', 'Containers', 'Deployments', 'ReplicaSets', 'StatefulSets', 'DaemonSets', 'CronJobs']);
+  const workloadTypes = new Set([
+    'Pods',
+    'Containers',
+    'Deployments',
+    'ReplicaSets',
+    'StatefulSets',
+    'DaemonSets',
+    'CronJobs',
+  ]);
   if (deploymentNames.length > 0 && workloadTypes.has(subType)) {
-    attrs.deployment = deploymentNames[stableHash(`k8s-deploy-${entityName}`) % deploymentNames.length];
+    attrs.deployment =
+      deploymentNames[stableHash(`k8s-deploy-${entityName}`) % deploymentNames.length];
   }
   if (nodeNames.length > 0 && (subType === 'Pods' || subType === 'Containers')) {
     attrs.node = nodeNames[stableHash(`k8s-node-${entityName}`) % nodeNames.length];
@@ -1022,26 +1052,30 @@ const buildKubernetesEntitiesWithScenario = (
   // Pre-collect canonical names so attributes can reference them.
   const clusterSpec = subSpecs.find((s) => s.label === 'Clusters');
   const clusterNames = clusterSpec
-    ? Array.from({ length: clusterSpec.total }, (_, i) =>
-        clusterSpec.seedRows[i]?.name ?? clusterSpec.fallbackName(i)
+    ? Array.from(
+        { length: clusterSpec.total },
+        (_, i) => clusterSpec.seedRows[i]?.name ?? clusterSpec.fallbackName(i)
       )
     : [];
   const namespaceSpec = subSpecs.find((s) => s.label === 'Namespaces');
   const namespaceNames = namespaceSpec
-    ? Array.from({ length: namespaceSpec.total }, (_, i) =>
-        namespaceSpec.seedRows[i]?.name ?? namespaceSpec.fallbackName(i)
+    ? Array.from(
+        { length: namespaceSpec.total },
+        (_, i) => namespaceSpec.seedRows[i]?.name ?? namespaceSpec.fallbackName(i)
       )
     : [];
   const deploymentSpec = subSpecs.find((s) => s.label === 'Deployments');
   const deploymentNames = deploymentSpec
-    ? Array.from({ length: deploymentSpec.total }, (_, i) =>
-        deploymentSpec.seedRows[i]?.name ?? deploymentSpec.fallbackName(i)
+    ? Array.from(
+        { length: deploymentSpec.total },
+        (_, i) => deploymentSpec.seedRows[i]?.name ?? deploymentSpec.fallbackName(i)
       )
     : [];
   const nodeSpec = subSpecs.find((s) => s.label === 'Nodes');
   const nodeNames = nodeSpec
-    ? Array.from({ length: nodeSpec.total }, (_, i) =>
-        nodeSpec.seedRows[i]?.name ?? nodeSpec.fallbackName(i)
+    ? Array.from(
+        { length: nodeSpec.total },
+        (_, i) => nodeSpec.seedRows[i]?.name ?? nodeSpec.fallbackName(i)
       )
     : [];
 
@@ -1069,7 +1103,19 @@ const buildKubernetesEntitiesWithScenario = (
         ...seenSampleAt(i),
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
         tags,
-        attributes: buildK8sAttributes(sub.label, name, i, clusterNames, namespaceNames, deploymentNames, nodeNames),
+        attributes: withAvailabilityZone(
+          tags.region,
+          name,
+          buildK8sAttributes(
+            sub.label,
+            name,
+            i,
+            clusterNames,
+            namespaceNames,
+            deploymentNames,
+            nodeNames
+          )
+        ),
         alerts: buildAlerts(name, health),
       });
     }
@@ -1079,9 +1125,7 @@ const buildKubernetesEntitiesWithScenario = (
   return entities;
 };
 
-export const buildFakeEntities = (
-  scenario: DataVariation = 'default'
-): FakeEntitiesDataset => {
+export const buildFakeEntities = (scenario: DataVariation = 'default'): FakeEntitiesDataset => {
   if (scenario === 'empty') {
     return {
       entities: [],
@@ -1093,14 +1137,9 @@ export const buildFakeEntities = (
       })),
     };
   }
-  const healthFn =
-    scenario === 'degraded' ? degradedHealth : undefined;
+  const healthFn = scenario === 'degraded' ? degradedHealth : undefined;
   const multiplier =
-    scenario === 'overflow'
-      ? OVERFLOW_MULTIPLIER
-      : scenario === 'full'
-        ? FULL_MULTIPLIER
-        : 1;
+    scenario === 'overflow' ? OVERFLOW_MULTIPLIER : scenario === 'full' ? FULL_MULTIPLIER : 1;
 
   const effectiveKubeSpecs =
     multiplier > 1 ? scaleKubernetesSpecs(multiplier) : KUBERNETES_SUB_SPECS;
@@ -1124,17 +1163,13 @@ export const buildFakeEntities = (
       healthFn
     ),
     ...buildCategoryEntitiesWithScenario(
-      multiplier > 1
-        ? scaleSpec(findSpec('networking'), multiplier)
-        : findSpec('networking'),
+      multiplier > 1 ? scaleSpec(findSpec('networking'), multiplier) : findSpec('networking'),
       healthFn
     ),
     ...(scenario === 'default'
       ? []
       : buildCategoryEntitiesWithScenario(
-          multiplier > 1
-            ? scaleSpec(findSpec('middlewares'), multiplier)
-            : findSpec('middlewares'),
+          multiplier > 1 ? scaleSpec(findSpec('middlewares'), multiplier) : findSpec('middlewares'),
           healthFn
         )),
     ...buildCategoryEntitiesWithScenario(
@@ -1188,12 +1223,8 @@ export const buildFakeEntities = (
   );
   const rawTotal = entities.length;
   const truncated = inventoryEntities.length > MAX_VISIBLE;
-  const visibleInventory = truncated
-    ? inventoryEntities.slice(0, MAX_VISIBLE)
-    : inventoryEntities;
-  const visibleEntities = truncated
-    ? [...visibleInventory, ...hiddenEntities]
-    : entities;
+  const visibleInventory = truncated ? inventoryEntities.slice(0, MAX_VISIBLE) : inventoryEntities;
+  const visibleEntities = truncated ? [...visibleInventory, ...hiddenEntities] : entities;
 
   return {
     entities: visibleEntities,

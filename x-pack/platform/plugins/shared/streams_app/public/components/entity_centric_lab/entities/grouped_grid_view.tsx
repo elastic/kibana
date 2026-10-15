@@ -37,6 +37,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
@@ -105,6 +106,10 @@ import {
   type MetricTone,
   type StatId,
 } from './bucket_metrics';
+import {
+  hexMapLegendDescription,
+  hexMapLegendMetricLabel,
+} from './column_header_info';
 import { useBucketMetricSelection, type BucketSelection } from './use_bucket_metric_selection';
 import {
   UNGROUPED_LABEL,
@@ -997,19 +1002,52 @@ const formatRangeValue = (metric: MetricDescriptor, value: number): string => {
   return unit ? `${rounded}${unit}` : rounded;
 };
 
-/** Metric-name prefix shared by the palette / steps legends. */
-const LegendMetricPrefix = ({ metric }: { metric: MetricDescriptor }) => (
-  <EuiFlexItem grow={false}>
-    <EuiText size="xs" color="subdued">
-      <strong>
-        {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.legend.metricPrefix', {
-          defaultMessage: '{metricLabel}:',
-          values: { metricLabel: metric.label },
-        })}
-      </strong>
-    </EuiText>
-  </EuiFlexItem>
-);
+/** Metric-name prefix shared by the palette / steps / swatch legends. */
+const LegendMetricPrefix = ({
+  metric,
+  statId = 'last',
+}: {
+  metric: MetricDescriptor;
+  statId?: StatId;
+}) => {
+  const effectiveStat = effectiveStatForMetric(metric, statId);
+  const metricLabel = hexMapLegendMetricLabel(metric, effectiveStat);
+  const description = hexMapLegendDescription(metric, effectiveStat);
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              {metricLabel}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="info"
+            size="s"
+            color="subdued"
+            position="top"
+            repositionOnScroll
+            content={description}
+            aria-label={i18n.translate(
+              'xpack.streams.entityCentricLab.entities.bucket.legend.metricHelpAriaLabel',
+              {
+                defaultMessage: 'About {metricLabel}',
+                values: { metricLabel },
+              }
+            )}
+            anchorProps={{
+              style: { display: 'inline-flex' },
+              'data-test-subj': `entityCentricLabBucketLegendInfo-${metric.id}`,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
 
 /**
  * Continuous gradient ramp + min / max labels for Gradient palette mode.
@@ -1018,10 +1056,12 @@ const PaletteGradientLegend = ({
   metric,
   coloring,
   range,
+  statId = 'last',
 }: {
   metric: MetricDescriptor;
   coloring: ColoringConfig;
   range: { readonly min: number; readonly max: number };
+  statId?: StatId;
 }) => {
   const colors = useMemo(
     () => getPaletteColors(coloring.paletteId, coloring.steps, coloring.reverse),
@@ -1034,7 +1074,7 @@ const PaletteGradientLegend = ({
       responsive={false}
       data-test-subj="entityCentricLabBucketPaletteLegend"
     >
-      <LegendMetricPrefix metric={metric} />
+      <LegendMetricPrefix metric={metric} statId={statId} />
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {formatRangeValue(metric, range.min)}
@@ -1067,9 +1107,11 @@ const PaletteGradientLegend = ({
 const StepRulesLegend = ({
   metric,
   rules,
+  statId = 'last',
 }: {
   metric: MetricDescriptor;
   rules: readonly StepRule[];
+  statId?: StatId;
 }) => {
   const sorted = useMemo(() => [...rules].sort((a, b) => a.value - b.value), [rules]);
   return (
@@ -1080,7 +1122,7 @@ const StepRulesLegend = ({
       wrap
       data-test-subj="entityCentricLabBucketStepsLegend"
     >
-      <LegendMetricPrefix metric={metric} />
+      <LegendMetricPrefix metric={metric} statId={statId} />
       {sorted.map((rule, index) => (
         <EuiFlexItem grow={false} key={`${rule.label}-${rule.value}-${index}`}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -1179,11 +1221,22 @@ const BucketMetricLegend = ({
   if (coloring && coloring.mode === 'palette') {
     if (coloring.type === 'steps' && hasCustomStepRules(coloring, metric.id)) {
       return (
-        <StepRulesLegend metric={metric} rules={effectiveStepRules(coloring, metric, euiTheme)} />
+        <StepRulesLegend
+          metric={metric}
+          rules={effectiveStepRules(coloring, metric, euiTheme)}
+          statId={effectiveStat}
+        />
       );
     }
     if (coloring.type === 'gradient' && paletteRange) {
-      return <PaletteGradientLegend metric={metric} coloring={coloring} range={paletteRange} />;
+      return (
+        <PaletteGradientLegend
+          metric={metric}
+          coloring={coloring}
+          range={paletteRange}
+          statId={effectiveStat}
+        />
+      );
     }
   }
   return (
@@ -1197,16 +1250,7 @@ const BucketMetricLegend = ({
       {/* Lead with the metric name so the swatches read as
           "Status: Running / Degraded / …" — otherwise the colours are
           ambiguous (is yellow "Degraded" or "60–85%"?). */}
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <strong>
-            {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.legend.metricPrefix', {
-              defaultMessage: '{metricLabel}:',
-              values: { metricLabel: metric.label },
-            })}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
+      <LegendMetricPrefix metric={metric} statId={effectiveStat} />
       {entries.map((entry) => {
         const count =
           categoryCounts && entry.id != null ? categoryCounts.get(entry.id) ?? 0 : null;
@@ -2140,7 +2184,7 @@ const BucketMetricControlsFlyout = ({
           >
             {/*
               Categorical metrics (Phase, Status, Rollout, …) only make
-              sense as "Last" — avg/min/max of an enum is meaningless.
+              sense as "Last" — avg/min/max/p95/p99 of an enum is meaningless.
               Force the display to `last` and disable the control; the
               help text explains the lock-in. The stored numeric
               preference is preserved so switching back to a numeric
