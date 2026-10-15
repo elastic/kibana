@@ -43,6 +43,9 @@ const labels = {
   byModelTab: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModelTab', {
     defaultMessage: 'By model',
   }),
+  reasoningTokens: i18n.translate('xpack.agentBuilder.response.metadataPopover.reasoningTokens', {
+    defaultMessage: 'Reasoning tokens',
+  }),
   cacheHitTokens: i18n.translate('xpack.agentBuilder.response.metadataPopover.cacheHitTokens', {
     defaultMessage: 'Cache hit tokens',
   }),
@@ -201,6 +204,13 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
                 label={labels.tokensReceived}
                 value={<EuiI18nNumber value={modelUsage.output_tokens} />}
               />
+              {modelUsage.reasoning_tokens !== undefined && (
+                <MetadataRow
+                  label={labels.reasoningTokens}
+                  value={<EuiI18nNumber value={modelUsage.reasoning_tokens} />}
+                  isSubRow
+                />
+              )}
               <MetadataDivider />
             </>
           )}

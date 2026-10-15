@@ -687,6 +687,11 @@ export interface ConnectorModelUsageStats {
    * Model identifier for this connector, if available.
    */
   model?: string;
+  /**
+   * Number of reasoning (thinking) tokens, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
 }
 
 export interface RoundModelUsageStats {
@@ -719,6 +724,11 @@ export interface RoundModelUsageStats {
    * Total input tokens (including cached) of the agent's last LLM call this round.
    */
   last_call_input_tokens?: number;
+  /**
+   * Number of reasoning (thinking) tokens this round, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
   /**
    * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
    * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.

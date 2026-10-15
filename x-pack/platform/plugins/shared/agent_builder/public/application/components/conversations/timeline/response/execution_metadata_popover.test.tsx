@@ -55,6 +55,16 @@ const usageWithBreakdown: RoundModelUsageStats = {
   ],
 };
 
+const usageWithReasoning: RoundModelUsageStats = {
+  ...usageWithBreakdown,
+  reasoning_tokens: 120,
+  connectors: (usageWithBreakdown.connectors ?? []).map((connector) =>
+    connector.connector_id === 'main-connector'
+      ? { ...connector, reasoning_tokens: 120 }
+      : connector
+  ),
+};
+
 const openPopover = async () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   await user.click(screen.getByTestId('executionMetadataPopoverTrigger'));
@@ -132,6 +142,25 @@ describe('ExecutionMetadataPopover', () => {
       await openPopover();
 
       expect(screen.queryByText('Cache hit tokens')).not.toBeInTheDocument();
+    });
+
+    it('shows the reasoning tokens under the tokens received when they are reported', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithReasoning)} />
+      );
+      await openPopover();
+
+      expect(screen.getByText('Reasoning tokens')).toBeInTheDocument();
+      expect(screen.getByText('120')).toBeInTheDocument();
+    });
+
+    it('hides the reasoning tokens when no model reported them', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      await openPopover();
+
+      expect(screen.queryByText('Reasoning tokens')).not.toBeInTheDocument();
     });
 
     it('has no tabs when the response has no per-model breakdown', async () => {
@@ -245,17 +274,56 @@ describe('ExecutionMetadataPopover', () => {
       expect(await screen.findAllByText('My Anthropic connector')).toHaveLength(2);
     });
 
-    it('shows a dash for a model that does not report cached tokens', async () => {
+    it('shows a dash for each value a model does not report', async () => {
       render(
         <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
       );
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
+      // the cached tokens of the fast model, and the reasoning tokens of both models
       const fast = screen.getByTestId('executionMetadataModelRow-fast-connector');
-      expect(within(fast).getByLabelText('Not reported by this model')).toHaveTextContent('—');
+      expect(within(fast).getAllByLabelText('Not reported by this model')).toHaveLength(2);
       const main = screen.getByTestId('executionMetadataModelRow-main-connector');
-      expect(within(main).queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
+      expect(within(main).getAllByLabelText('Not reported by this model')).toHaveLength(1);
+    });
+
+    it('shows the reasoning tokens of each model, with a dash for a model that does not report them', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithReasoning)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(screen.getByText('Tokens received (reasoning)')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-all')).getByText(/120/)
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-main-connector')).getByText(/120/)
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('executionMetadataModelRow-fast-connector')).getAllByLabelText(
+          'Not reported by this model'
+        )
+      ).toHaveLength(2);
+    });
+
+    it('shows a dash for the reasoning of every model when none reported it', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(screen.getByText('Tokens received (reasoning)')).toBeInTheDocument();
+      for (const rowKey of ['all', 'main-connector']) {
+        expect(
+          within(screen.getByTestId(`executionMetadataModelRow-${rowKey}`)).getAllByLabelText(
+            'Not reported by this model'
+          )
+        ).toHaveLength(1);
+      }
     });
 
     it('falls back to the model, then to the connector id, when the connector name is unknown', async () => {

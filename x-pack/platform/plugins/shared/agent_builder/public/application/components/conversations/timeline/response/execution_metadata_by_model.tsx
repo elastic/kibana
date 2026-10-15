@@ -42,7 +42,7 @@ const labels = {
   }),
   tokensReceived: i18n.translate(
     'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceived',
-    { defaultMessage: 'Tokens received' }
+    { defaultMessage: 'Tokens received (reasoning)' }
   ),
   allModels: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.allModels', {
     defaultMessage: 'All models',
@@ -61,6 +61,7 @@ interface ModelRow {
   inputTokens: number;
   cachedInputTokens?: number;
   outputTokens: number;
+  reasoningTokens?: number;
 }
 
 const MODEL_PALETTE = euiPaletteColorBlind().filter((_, index) => index % 2 === 0);
@@ -79,7 +80,7 @@ const removeCreatorPrefix = (name: string, creator?: string): string => {
 
 const NOT_REPORTED = '—';
 
-const CachedTokens: React.FC<{ value?: number }> = ({ value }) =>
+const ReportedTokens: React.FC<{ value?: number }> = ({ value }) =>
   value === undefined ? (
     <EuiToolTip content={labels.notReported}>
       <span tabIndex={0} aria-label={labels.notReported}>
@@ -176,7 +177,7 @@ const columns: Array<EuiBasicTableColumn<ModelRow>> = [
       <Cell>
         <strong>{formatCompactNumber(inputTokens)}</strong>{' '}
         <EuiTextColor color="subdued">
-          (<CachedTokens value={cachedInputTokens} />)
+          (<ReportedTokens value={cachedInputTokens} />)
         </EuiTextColor>
       </Cell>
     ),
@@ -186,9 +187,12 @@ const columns: Array<EuiBasicTableColumn<ModelRow>> = [
     name: <HeaderCell isRightAligned>{labels.tokensReceived}</HeaderCell>,
     width: '21%',
     align: RIGHT_ALIGNMENT,
-    render: (outputTokens: number) => (
+    render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
       <Cell>
-        <strong>{formatCompactNumber(outputTokens)}</strong>
+        <strong>{formatCompactNumber(outputTokens)}</strong>{' '}
+        <EuiTextColor color="subdued">
+          (<ReportedTokens value={reasoningTokens} />)
+        </EuiTextColor>
       </Cell>
     ),
   },
@@ -231,6 +235,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
         inputTokens: modelUsage.input_tokens,
         cachedInputTokens: modelUsage.cached_input_tokens,
         outputTokens: modelUsage.output_tokens,
+        reasoningTokens: modelUsage.reasoning_tokens,
       },
       ...connectors.map((connector) => {
         const aiConnector = aiConnectorsById.get(connector.connector_id);
@@ -245,6 +250,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
           inputTokens: connector.input_tokens,
           cachedInputTokens: connector.cached_input_tokens,
           outputTokens: connector.output_tokens,
+          reasoningTokens: connector.reasoning_tokens,
         };
       }),
     ];
