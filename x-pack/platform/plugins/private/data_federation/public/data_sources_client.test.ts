@@ -71,6 +71,21 @@ describe('DataSourcesClient', () => {
       expect(http.put).not.toHaveBeenCalled();
     });
 
+    it('throws when name is not a valid data source id', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'SomeUpperCaseLetters',
+        description: '',
+        settings: {},
+      };
+
+      await expect(client.add(data)).rejects.toThrow('Name must be lowercase.');
+      expect(http.put).not.toHaveBeenCalled();
+    });
+
     it('PUTs to the id route and omits empty settings fields', async () => {
       const http = createHttpMock();
       const client = new DataSourcesClient(http as unknown as HttpStart);
@@ -80,7 +95,6 @@ describe('DataSourcesClient', () => {
         name: '  ds1  ',
         description: '',
         settings: {
-          region: '',
           endpoint: 'https://s3.example',
           auth: '',
           access_key: '',
@@ -266,7 +280,6 @@ describe('DataSourcesClient', () => {
         name: 'ds1',
         description: '',
         settings: {
-          region: '',
           endpoint: 'https://s3.example',
           role_arn: undefined,
           access_key: '::es_redacted::',

@@ -132,7 +132,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       if (typeof path === 'string' && path.endsWith('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
       }
-      // For yaml files (used by search_configs)
+      // For YAML files (used by search_configs)
       if (typeof path === 'string' && path.endsWith('.yml')) {
         return 'mock yaml content';
       }
@@ -170,6 +170,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'abc123',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -204,6 +205,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
               exists: true,
               sha1: 'def456',
+              testChannels: [],
               tests: [
                 {
                   id: 'test3',
@@ -236,13 +238,14 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'ghi789',
+              testChannels: [],
               tests: [
                 {
                   id: 'test4',
                   title: 'Test 4',
                   expectedStatus: 'passed',
                   location: { file: 'test4.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in tags.deploymentAgnostic
+                  tags: ['@cloud-serverless-vectordb'], // Only serverless, not in tags.deploymentAgnostic
                 },
               ],
             },
@@ -268,6 +271,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'jkl012',
+              testChannels: [],
               tests: [
                 {
                   id: 'test5',
@@ -295,8 +299,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
       if (flag === 'save') return false;
-      if (flag === 'validate') return true;
-      return false;
+      return flag === 'validate';
     });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -305,6 +308,67 @@ describe('runDiscoverPlaywrightConfigs', () => {
     const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
     expect(callArgs[0]).toBe(log);
     expect(Array.isArray(callArgs[1])).toBe(true);
+  });
+
+  describe('"--validate" test tag checks', () => {
+    const firstTest = () => mockTestableModules.modules[0].configs[0].manifest.tests[0];
+
+    const runValidate = () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => flag === 'validate');
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+    };
+
+    it('rejects a test tagged with limits alone', () => {
+      firstTest().tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(
+        /invalid Scout test tag usage[\s\S]*At least one of the following tags is required/
+      );
+    });
+
+    it('rejects conflicting limit tags', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/only-fips', '@limit/except-fips'];
+
+      expect(runValidate).toThrow(/Conflicting limit tags for the 'fips' target attribute/);
+    });
+
+    it('reports a malformed limit tag instead of failing discovery on it', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/onlyfips'];
+
+      expect(runValidate).toThrow(/Invalid limit tag\(s\): @limit\/onlyfips/);
+    });
+
+    it('names the offending file and test', () => {
+      const test = firstTest();
+      test.tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(`${test.location.file}: test "${test.title}"`);
+    });
+
+    it('tolerates tags Playwright derives from test titles', () => {
+      firstTest().tags = ['@timestamp', '@local-stateful-classic'];
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('ignores global setup and teardown hooks, which carry no target tag', () => {
+      const test = firstTest();
+      test.tags = [];
+      test.location = {
+        ...test.location,
+        file: 'plugin/test/scout/ui/parallel_tests/global.setup.ts',
+      };
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('does not run without "--validate"', () => {
+      firstTest().tags = ['@limit/only-fips'];
+      flagsReader.enum.mockReturnValue('all');
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
   });
 
   describe('"--configs" flag (explicit allow-list)', () => {
@@ -390,6 +454,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: customPath,
                 exists: true,
                 sha1: 'custom123',
+                testChannels: [],
                 tests: [
                   {
                     id: 'customTest1',
@@ -415,6 +480,73 @@ describe('runDiscoverPlaywrightConfigs', () => {
     });
   });
 
+  describe('"--targetAttribute" flag (test limits)', () => {
+    const setLimitTagsOnPackageA = (limitTags: string[]) => {
+      const packageA = mockTestableModules.modules.find((module) => module.name === 'packageA')!;
+      packageA.configs[0].manifest.tests[0].tags = [
+        '@local-stateful-classic',
+        '@cloud-stateful-classic',
+        '@cloud-serverless-observability_complete',
+        ...limitTags,
+      ];
+    };
+
+    const discoveredModuleCounts = (): string => {
+      const foundMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      return foundMessage![0];
+    };
+
+    it('drops configs whose only tests require an undeclared attribute', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('keeps those configs when the attribute is declared', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('1 package(s)');
+      expect(log.info).toHaveBeenCalledWith('Test target attributes: fips');
+    });
+
+    it('drops configs limited to the attribute being absent when it is declared', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('never reports limit tags as test target tags', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const packageAMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('src/platform/packages/shared/packageA')
+      );
+      expect(packageAMessage).toBeDefined();
+      expect(packageAMessage![0]).not.toContain('@limit/');
+    });
+  });
+
   it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
@@ -422,7 +554,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has local/cloud-stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
-    // pluginB has serverless-workplaceai which is NOT in tags.deploymentAgnostic, it should be excluded
+    // pluginB has serverless-vectordb which is NOT in tags.deploymentAgnostic, it should be excluded
     // packageA has local/cloud-stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
 
     const infoCalls = log.info.mock.calls;
@@ -441,7 +573,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has @cloud-serverless-observability_complete, @cloud-serverless-security_complete, @cloud-serverless-search
-    // pluginB has @cloud-serverless-workplaceai
+    // pluginB has @cloud-serverless-vectordb
     // packageA has @cloud-serverless-observability_complete
 
     const infoCalls = log.info.mock.calls;
@@ -481,7 +613,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-*
     // pluginA parallel has @cloud-serverless-search which does NOT match @local-*
-    // pluginB has @cloud-serverless-workplaceai which does NOT match @local-*
+    // pluginB has @cloud-serverless-vectordb which does NOT match @local-*
     // packageA has @local-stateful-classic which matches @local-*
 
     const infoCalls = log.info.mock.calls;
@@ -523,6 +655,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
             exists: true,
             sha1: 'local789',
+            testChannels: [],
             tests: [
               {
                 id: 'localServerlessTest',
@@ -544,7 +677,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-stateful-*
     // pluginA parallel has @cloud-serverless-search which does NOT match
-    // pluginB has @cloud-serverless-workplaceai which does NOT match
+    // pluginB has @cloud-serverless-vectordb which does NOT match
     // pluginLocalServerless has @local-serverless-search which does NOT match @local-stateful-*
     // packageA has @local-stateful-classic which matches @local-stateful-*
 
@@ -592,6 +725,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
               exists: true,
               sha1: 'custom123',
+              testChannels: [],
               tests: [
                 {
                   id: 'customTest1',
@@ -615,6 +749,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'normal456',
+              testChannels: [],
               tests: [
                 {
                   id: 'normalTest1',
@@ -675,6 +810,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/.meta/ui/parallel.json',
               exists: true,
               sha1: 'exclude123',
+              testChannels: [],
               tests: [
                 {
                   id: 'excludedTest',
@@ -698,6 +834,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'include456',
+              testChannels: [],
               tests: [
                 {
                   id: 'includedTest',
@@ -789,13 +926,14 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'mno345',
+              testChannels: [],
               tests: [
                 {
                   id: 'testNoMatch',
                   title: 'Test No Match',
                   expectedStatus: 'passed',
                   location: { file: 'test.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Not in ESS_ONLY
+                  tags: ['@cloud-serverless-vectordb'], // Not in ESS_ONLY
                 },
               ],
             },
@@ -836,13 +974,68 @@ describe('runDiscoverPlaywrightConfigs', () => {
     );
   });
 
+  it('preserves test channel metadata when saving configs', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      if (flag === 'validate') return false;
+      return false;
+    });
+
+    (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginChannels',
+        group: 'groupChannels',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginChannels',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            namespace: undefined,
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+              exists: true,
+              sha1: 'channels123',
+              testChannels: ['ci-on-commit', 'ci-batch-daily'],
+              tests: [
+                {
+                  id: 'channelTest',
+                  title: 'Channel Test',
+                  expectedStatus: 'passed',
+                  location: { file: 'channel.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+            server: {
+              configSet: 'default',
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const savedData = JSON.parse(writeCall[1]);
+
+    expect(savedData).toHaveLength(1);
+    expect(savedData[0].configs[0].testChannels).toEqual(['ci-on-commit', 'ci-batch-daily']);
+  });
+
   it('filters out modules with no matching configs after tag filtering', () => {
     flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginB has @cloud-serverless-workplaceai which doesn't match @cloud-stateful-*, it should be filtered out
+    // pluginB has @cloud-serverless-vectordb which doesn't match @cloud-stateful-*, it should be filtered out
     const infoCalls = log.info.mock.calls;
     const moduleLogs = infoCalls.filter(
       (call) => call[0].includes('] plugin:') || call[0].includes('] package:')
@@ -875,6 +1068,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'pqr678',
+              testChannels: [],
               tests: [
                 {
                   id: 'testFailed',
@@ -909,7 +1103,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toBe('No Playwright config files found');
   });
 
-  it('only collects tags from passed spec files', () => {
+  it('only collects tags from runnable tests', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
@@ -931,6 +1125,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'stu901',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -950,8 +1145,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   id: 'test3',
                   title: 'Test 3',
                   expectedStatus: 'passed',
-                  location: { file: 'test3.ts', line: 1, column: 1 }, // Not a .spec.ts file
-                  tags: ['@cloud-serverless-search'], // Should NOT be included (not .spec.ts)
+                  location: { file: 'parallel_tests/global.setup.ts', line: 1, column: 1 },
+                  tags: ['@cloud-serverless-search'], // Should NOT be included (setup hook)
                 },
                 {
                   id: 'test4',
@@ -996,7 +1191,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
     expect(configLogCall![0]).toContain('@local-stateful-classic');
     expect(configLogCall![0]).toContain('@cloud-serverless-observability_complete');
-    // Should NOT contain tags from failed tests or non-spec files
+    // Should NOT contain tags from failed tests or global setup hooks
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-search');
   });
@@ -1037,6 +1232,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'vwx234',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes1',
@@ -1064,6 +1260,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'yza567',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes2',
@@ -1117,6 +1314,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'bcd234',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest1',
@@ -1140,6 +1338,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
                 exists: true,
                 sha1: 'cde345',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest2',
@@ -1172,6 +1371,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'def456',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest3',
@@ -1204,6 +1404,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'efg567',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest4',
@@ -1226,8 +1427,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     it('logs flattened structure when "--flatten" is set without "--save"', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
-        if (flag === 'flatten') return true;
-        return false;
+        return flag === 'flatten';
       });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -1248,8 +1448,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1309,8 +1508,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1406,8 +1604,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       // Set up a module with a config that has multiple serverRunFlags
@@ -1428,6 +1625,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'fgh678',
+                testChannels: [],
                 tests: [
                   {
                     id: 'multiModeTest',

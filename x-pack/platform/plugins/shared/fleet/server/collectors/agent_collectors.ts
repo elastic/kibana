@@ -121,7 +121,7 @@ const DEFAULT_AGENT_DATA = {
 export const getAgentData = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<AgentData> => {
   try {
     const transformLastCheckinStatusBuckets = (resp: any) =>
@@ -200,7 +200,7 @@ export const getAgentData = async (
           },
         },
       },
-      { signal: abortController.signal }
+      { signal }
     );
     const agentsPerVersion = ((response?.aggregations?.versions as any).buckets ?? []).map(
       (bucket: any) => ({

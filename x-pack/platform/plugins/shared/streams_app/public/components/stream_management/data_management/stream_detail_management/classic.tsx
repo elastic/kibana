@@ -18,16 +18,19 @@ import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../../stream_badges';
 import { StreamOverview } from '../../../stream_detail_overview';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
-import { StreamDetailCanvas } from '../stream_detail_canvas';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -35,11 +38,9 @@ const classicStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'dataQuality',
-  'significantEvents',
   'schemaEditor',
   'schema',
   'attachments',
-  'canvas',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -62,6 +63,23 @@ export function ClassicStreamDetailManagement({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <ClassicStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function ClassicStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.ClassicStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     core: { notifications },
     dependencies: {
@@ -73,15 +91,13 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { canvas, queryStreams },
+    features: { queryStreams },
   } = useStreamsPrivileges();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
+  const isProcessingEnabled = !definition.replicated;
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -108,7 +124,6 @@ export function ClassicStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={classicErrorBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -149,6 +164,8 @@ export function ClassicStreamDetailManagement({
       share,
       router,
       timeRange: { rangeFrom, rangeTo },
+      onImportFromStream: importLifecycleFlyout?.open,
+      isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
     }),
   };
 
@@ -163,8 +180,15 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (processing && !definition.replicated) {
-    tabs.processing = processing;
+  if (isProcessingEnabled) {
+    tabs.processing = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
+      }),
+    };
   }
 
   tabs.schema = {
@@ -196,32 +220,13 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  if (canvas.enabled) {
-    tabs.canvas = {
-      content: <StreamDetailCanvas streamName={definition.stream.name} />,
-      label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
-        defaultMessage: 'Canvas',
-      }),
-    };
-  }
-
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
-
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
     );
   }
 
-  if (tab === 'canvas' && !canvas.enabled) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-    );
-  }
-
-  if (isValidManagementSubTab(tab)) {
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -234,9 +239,5 @@ export function ClassicStreamDetailManagement({
       />
     );
   }
-  if (isLoading) {
-    return null;
-  }
-
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

@@ -16,15 +16,25 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 interface MockServicesOptions {
   executeWorkflow?: boolean;
+  featureFlagEnabled?: boolean;
   isWorkflowsEnabled?: boolean;
   readWorkflow?: boolean;
+  uiSettingEnabled?: boolean;
 }
 
 const mockServices = ({
   executeWorkflow,
+  featureFlagEnabled,
   isWorkflowsEnabled = true,
   readWorkflow,
+  uiSettingEnabled,
 }: MockServicesOptions) => {
+  // Allow callers to decouple FF and uiSetting (for off-diagonal matrix cells).
+  // When featureFlagEnabled / uiSettingEnabled are not provided, fall back to
+  // the combined isWorkflowsEnabled shorthand so existing callers are unchanged.
+  const ffValue = featureFlagEnabled !== undefined ? featureFlagEnabled : isWorkflowsEnabled;
+  const settingValue = uiSettingEnabled !== undefined ? uiSettingEnabled : isWorkflowsEnabled;
+
   mockUseKibana.mockReturnValue({
     services: {
       application: {
@@ -36,7 +46,10 @@ const mockServices = ({
         },
       },
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(isWorkflowsEnabled),
+        useBooleanValue: jest.fn().mockReturnValue(ffValue),
+      },
+      uiSettings: {
+        get: jest.fn().mockReturnValue(settingValue),
       },
     },
   } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
@@ -45,6 +58,64 @@ const mockServices = ({
 describe('useHasWorkflowsPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {
+    beforeEach(() => {
+      mockServices({
+        executeWorkflow: true,
+        featureFlagEnabled: true,
+        readWorkflow: true,
+        uiSettingEnabled: false,
+      });
+    });
+
+    it('reports hasWorkflowsRead as true (inert — uiSetting OFF gates client, not privileges)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.hasWorkflowsRead).toBe(true));
+    });
+
+    it('reports hasWorkflowsExecute as true (inert — uiSetting OFF gates client, not privileges)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.hasWorkflowsExecute).toBe(true));
+    });
+
+    it('reports no missing feature privileges (inert when workflows disabled by uiSetting)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.missingPrivileges.featurePrivileges).toEqual([]));
+    });
+  });
+
+  describe('when the feature flag is OFF but the per-space uiSetting is ON', () => {
+    beforeEach(() => {
+      mockServices({
+        executeWorkflow: false,
+        featureFlagEnabled: false,
+        readWorkflow: false,
+        uiSettingEnabled: true,
+      });
+    });
+
+    it('reports hasWorkflowsRead as true (inert — FF OFF prevents workflows)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.hasWorkflowsRead).toBe(true));
+    });
+
+    it('reports hasWorkflowsExecute as true (inert — FF OFF prevents workflows)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.hasWorkflowsExecute).toBe(true));
+    });
+
+    it('reports no missing feature privileges (inert when FF is off)', async () => {
+      const { result } = renderHook(() => useHasWorkflowsPrivileges());
+
+      await waitFor(() => expect(result.current.missingPrivileges.featurePrivileges).toEqual([]));
+    });
   });
 
   describe('when the attackDiscoveryWorkflowsEnabled feature flag is OFF', () => {
@@ -167,18 +238,16 @@ describe('useHasWorkflowsPrivileges', () => {
     });
   });
 
-  it('reads the feature flag with the correct key and default', async () => {
+  it('reads the feature flag with the correct key and a true default (ON by default)', () => {
     mockServices({ executeWorkflow: true, readWorkflow: true });
 
     renderHook(() => useHasWorkflowsPrivileges());
 
-    const { getBooleanValue } = mockUseKibana().services.featureFlags;
+    const { useBooleanValue } = mockUseKibana().services.featureFlags;
 
-    await waitFor(() =>
-      expect(getBooleanValue).toHaveBeenCalledWith(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
-      )
+    expect(useBooleanValue).toHaveBeenCalledWith(
+      'securitySolution.attackDiscoveryWorkflowsEnabled',
+      true
     );
   });
 });

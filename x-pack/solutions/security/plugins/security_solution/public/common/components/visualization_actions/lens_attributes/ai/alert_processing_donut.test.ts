@@ -12,7 +12,10 @@ interface WithLayers {
   layers: Array<Record<string, unknown>>;
 }
 interface WithRuntimeFieldMap {
-  runtimeFieldMap: Record<string, { script: { source: string } }>;
+  runtimeFieldMap: Record<
+    string,
+    { script: { source: string; params: { attackAlertIds: string[] } } }
+  >;
 }
 
 describe('getAlertProcessingDonutAttributes', () => {
@@ -76,7 +79,8 @@ describe('getAlertProcessingDonutAttributes', () => {
 
     const script = runtimeFieldMap?.processing_analytics_rtf.script;
     expect(script).toHaveProperty('source');
-    expect(script?.source).toContain(JSON.stringify(defaultAttackAlertIds));
+    expect(script?.params.attackAlertIds).toEqual(defaultAttackAlertIds);
+    expect(script?.source).toContain('params.attackAlertIds');
     expect(script?.source).toContain('emit("Escalated")');
     expect(script?.source).toContain('emit("AI Filtered")');
     const testCases = [
@@ -96,7 +100,7 @@ describe('getAlertProcessingDonutAttributes', () => {
           'db828b69-bb21-4b92-bc33-56e3b01da790'
         ] as unknown as WithRuntimeFieldMap
       )?.runtimeFieldMap.processing_analytics_rtf.script;
-      expect(testScript?.source).toContain(JSON.stringify(attackAlertIds));
+      expect(testScript?.params.attackAlertIds).toEqual(attackAlertIds);
 
       const dataView = testResult.state.adHocDataViews?.[
         'db828b69-bb21-4b92-bc33-56e3b01da790'

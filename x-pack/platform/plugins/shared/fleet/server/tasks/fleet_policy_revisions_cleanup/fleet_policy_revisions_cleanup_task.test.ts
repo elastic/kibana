@@ -18,8 +18,16 @@ import {
   TYPE,
   VERSION,
 } from './fleet_policy_revisions_cleanup_task';
+import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
 jest.mock('../../services');
+// Mock the orphan sweep so that existing revision-cleanup tests are unaffected.
+// Dedicated tests for the sweep logic live in sweep_orphaned_fleet_policies.test.ts.
+jest.mock('./sweep_orphaned_fleet_policies');
+
+const mockedSweepOrphanedFleetPolicies = sweepOrphanedFleetPolicies as jest.MockedFunction<
+  typeof sweepOrphanedFleetPolicies
+>;
 
 const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -40,7 +48,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   let logFactory: ReturnType<typeof loggerMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
   let taskInstance: ConcreteTaskInstance;
 
   const defaultConfig = {
@@ -59,7 +67,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     logFactory = loggerMock.create();
     logger = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    abortController = new AbortController();
+    signal = new AbortController().signal;
 
     // Setup core services mock
     mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}] as any);
@@ -73,7 +81,11 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     // Setup app context service mocks
     mockAppContextService.getExperimentalFeatures.mockReturnValue({
       enableFleetPolicyRevisionsCleanupTask: true,
+      enableFleetOrphanedPolicySweep: true,
     } as any);
+
+    // Default: orphan sweep finds nothing to delete
+    mockedSweepOrphanedFleetPolicies.mockResolvedValue({ deletedCount: 0 });
 
     taskInstance = {
       id: `${TYPE}:${VERSION}`,
@@ -182,7 +194,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         enableFleetPolicyRevisionsCleanupTask: false,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.debug).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Aborting runTask: fleet policy revision cleanup task feature is disabled'
@@ -194,7 +206,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       const error = new Error('Test error');
       mockEsClient.search.mockRejectedValue(error);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.error).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] error: Error: Test error'
@@ -216,7 +228,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         },
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('No policies found with more than 10 revisions')
@@ -262,7 +274,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -287,7 +299,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -330,7 +342,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -355,7 +367,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -394,7 +406,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.debug).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] No policy revisions to delete after evaluating agent usage.'
@@ -444,7 +456,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 2 policies with more than 10 revisions.'
@@ -469,7 +481,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -502,7 +514,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -527,9 +539,43 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
+    });
+
+    it('should invoke the orphan sweep on every run and log deleted count when documents are removed', async () => {
+      mockedSweepOrphanedFleetPolicies.mockResolvedValueOnce({ deletedCount: 5 });
+
+      mockEsClient.search.mockResolvedValue({
+        aggregations: { latest_revisions_by_policy_id: { buckets: [] } },
+      } as any);
+
+      await mockTask.runTask(taskInstance, mockCore, signal);
+
+      expect(mockedSweepOrphanedFleetPolicies).toHaveBeenCalledTimes(1);
+      expect(mockedSweepOrphanedFleetPolicies).toHaveBeenCalledWith(
+        mockEsClient,
+        expect.objectContaining({ logger, signal })
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Orphan sweep removed 5 documents')
+      );
+    });
+
+    it('should skip the orphan sweep when enableFleetOrphanedPolicySweep is disabled', async () => {
+      mockAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableFleetPolicyRevisionsCleanupTask: true,
+        enableFleetOrphanedPolicySweep: false,
+      } as any);
+
+      mockEsClient.search.mockResolvedValue({
+        aggregations: { latest_revisions_by_policy_id: { buckets: [] } },
+      } as any);
+
+      await mockTask.runTask(taskInstance, mockCore, signal);
+
+      expect(mockedSweepOrphanedFleetPolicies).not.toHaveBeenCalled();
     });
   });
 
@@ -547,7 +593,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         },
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         {
@@ -572,7 +618,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -617,7 +663,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
       mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -655,7 +701,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         }),
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });

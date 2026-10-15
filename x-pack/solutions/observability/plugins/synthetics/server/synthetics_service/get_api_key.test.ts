@@ -6,7 +6,9 @@
  */
 
 import {
+  generateAPIKey,
   getAPIKeyForSyntheticsService,
+  getApiKeyInvalidTelemetryPayload,
   getServiceApiKeyPrivileges,
   syntheticsIndex,
 } from './get_api_key';
@@ -48,6 +50,7 @@ describe('getAPIKeyTest', function () {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    security.authc.apiKeys.validate = jest.fn().mockResolvedValue(true);
     jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
         [syntheticsIndex]: {
@@ -100,6 +103,40 @@ describe('getAPIKeyTest', function () {
     }
   );
 
+  it('returns missing reason when no api key is stored', async () => {
+    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(undefined),
+    });
+
+    const apiKey = await getAPIKeyForSyntheticsService({ server });
+
+    expect(apiKey).toEqual({ isValid: false, reason: 'missing' });
+  });
+
+  it('returns invalid reason when api key validation fails', async () => {
+    security.authc.apiKeys.validate = jest.fn().mockResolvedValue(false);
+    const checkPrivilegesSpy = jest
+      .spyOn(authUtils, 'checkHasPrivileges')
+      .mockRejectedValue(new Error('Unauthorized'));
+
+    const getObject = jest
+      .fn()
+      .mockReturnValue({ attributes: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' } });
+
+    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+      getDecryptedAsInternalUser: getObject,
+    });
+
+    const apiKey = await getAPIKeyForSyntheticsService({ server });
+
+    expect(apiKey).toEqual({
+      apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
+      isValid: false,
+      reason: 'invalid',
+    });
+    expect(checkPrivilegesSpy).not.toHaveBeenCalled();
+  });
+
   it('invalidates api keys with missing read permissions', async () => {
     jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
@@ -126,6 +163,8 @@ describe('getAPIKeyTest', function () {
     expect(apiKey).toEqual({
       apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
       isValid: false,
+      reason: 'insufficient_privileges',
+      missingPrivileges: ['read'],
     });
 
     expect(encryptedSavedObjects.getClient).toHaveBeenCalledTimes(1);
@@ -136,6 +175,56 @@ describe('getAPIKeyTest', function () {
     expect(getObject).toHaveBeenCalledWith(
       'uptime-synthetics-api-key',
       'ba997842-b0cf-4429-aa9d-578d9bf0d391'
+    );
+  });
+
+  it('maps invalid api key reasons onto existing telemetry fields', () => {
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'missing' })).toEqual({
+      code: 'missing',
+      reason: 'Synthetics service API key is missing.',
+      message: 'Failed to push configs. Synthetics service API key is missing.',
+    });
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'invalid' }).code).toBe('invalid');
+    expect(
+      getApiKeyInvalidTelemetryPayload({
+        reason: 'insufficient_privileges',
+        missingPrivileges: ['read'],
+      })
+    ).toEqual({
+      code: 'insufficient_privileges',
+      reason: 'API key is missing required index privileges.',
+      message:
+        'Failed to push configs. API key is missing required index privileges. Missing privileges: read.',
+    });
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'error' }).code).toBe('error');
+  });
+
+  it('marks new service API keys as Kibana-managed', async () => {
+    server.syntheticsEsClient.baseESClient.security.hasPrivileges = jest.fn().mockResolvedValue({
+      cluster: {
+        manage_security: true,
+        monitor: true,
+        read_pipeline: true,
+        read_ilm: true,
+      },
+      index: {
+        [syntheticsIndex]: {
+          auto_configure: true,
+          create_doc: true,
+          view_index_metadata: true,
+          read: true,
+        },
+      },
+    });
+    security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValue(null);
+
+    await generateAPIKey({ server, request });
+
+    expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        metadata: expect.objectContaining({ managed: true }),
+      })
     );
   });
 });

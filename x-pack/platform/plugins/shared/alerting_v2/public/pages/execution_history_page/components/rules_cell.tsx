@@ -13,10 +13,11 @@ import {
   EuiListGroupItem,
   EuiPopover,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface Props {
   rules: PolicyExecutionHistoryItem['rules'];
@@ -24,6 +25,7 @@ interface Props {
   totalRuleCount: number;
   activeRuleId: string | null;
   onRuleClick: (ruleId: string) => void;
+  canReadRules: boolean;
 }
 
 const RULE_BADGE_MAX_WIDTH = 200;
@@ -34,7 +36,14 @@ export const RulesCell = ({
   totalRuleCount,
   activeRuleId,
   onRuleClick,
+  canReadRules,
 }: Props) => {
+  const getClickProps = useCallback(
+    (ruleId: string, label: string) =>
+      canReadRules ? { onClick: () => onRuleClick(ruleId), onClickAriaLabel: label } : {},
+    [canReadRules, onRuleClick]
+  );
+
   if (totalRuleCount === 0) return null;
   const visible = rules.slice(0, maxVisibleRules);
   const hiddenRules = rules.slice(maxVisibleRules);
@@ -45,14 +54,14 @@ export const RulesCell = ({
       {visible.map((rule) => {
         const isActive = rule.id === activeRuleId;
         const label = rule.name ?? rule.id;
+        const clickProps = getClickProps(rule.id, label);
         return (
           <EuiBadge
             key={rule.id}
             color={isActive ? 'primary' : 'hollow'}
             iconType="bell"
-            onClick={() => onRuleClick(rule.id)}
-            onClickAriaLabel={label}
             css={{ maxWidth: `${RULE_BADGE_MAX_WIDTH}px` }}
+            {...clickProps}
           >
             {label}
           </EuiBadge>
@@ -63,6 +72,7 @@ export const RulesCell = ({
           hiddenRules={hiddenRules}
           notShownCount={notShownCount}
           onRuleClick={onRuleClick}
+          canReadRules={canReadRules}
         />
       )}
     </EuiBadgeGroup>
@@ -73,15 +83,31 @@ const OverflowPopover = ({
   hiddenRules,
   notShownCount,
   onRuleClick,
+  canReadRules,
 }: {
   hiddenRules: PolicyExecutionHistoryItem['rules'];
   notShownCount: number;
   onRuleClick: (ruleId: string) => void;
+  canReadRules: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const total = hiddenRules.length + notShownCount;
+
+  const getRuleClickHandler = useCallback(
+    (ruleId: string) =>
+      canReadRules
+        ? () => {
+            setIsOpen(false);
+            onRuleClick(ruleId);
+          }
+        : undefined,
+    [canReadRules, onRuleClick]
+  );
+
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
@@ -102,7 +128,7 @@ const OverflowPopover = ({
         </EuiBadge>
       }
     >
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
         {i18n.translate('xpack.alertingV2.executionHistory.columns.rules.overflowTitle', {
           defaultMessage: 'More rules',
         })}
@@ -117,16 +143,14 @@ const OverflowPopover = ({
                 iconType="bell"
                 label={label}
                 title={label}
-                onClick={() => {
-                  setIsOpen(false);
-                  onRuleClick(rule.id);
-                }}
+                onClick={getRuleClickHandler(rule.id)}
               />
             );
           })}
         </EuiListGroup>
         {notShownCount > 0 && (
           <EuiCallOut
+            announceOnMount
             size="s"
             iconType="warning"
             color="warning"

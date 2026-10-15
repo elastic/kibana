@@ -34,22 +34,30 @@ interface SplashColors {
   welcomeText: string;
   progress: string;
   progressBefore: string;
+  errorTitleText: string;
+  errorButtonText: string;
 }
 
 const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
   if (theme === 'borealis') {
     return {
       light: {
-        pageBackground: '#F6F9FC', // colors.body
-        welcomeText: '#5A6D8C', // colors.subduedText
-        progress: '#ECF1F9', // colors.lightestShade
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#ECF1F9', // colors.body
+        welcomeText: '#516381', // colors.subduedText
+        progress: '#E3E8F2', // shade20, a step darker than the page so the track stays visible
         progressBefore: '#0B64DD', // colors.primary
+        errorTitleText: '#111C2C', // colors.textHeading
+        errorButtonText: '#FFFFFF', // colors.textInverse
       },
       dark: {
-        pageBackground: '#07101F',
-        welcomeText: '#8E9FBC',
-        progress: '#172336',
-        progressBefore: '#599DFF',
+        // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
+        pageBackground: '#07101F', // colors.body
+        welcomeText: '#98A8C3',
+        progress: '#172336', // colors.lightestShade
+        progressBefore: '#61A2FF',
+        errorTitleText: '#E3E8F2', // colors.textHeading
+        errorButtonText: '#07101F', // colors.textInverse
       },
     };
   }
@@ -60,12 +68,16 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
       welcomeText: '#69707D',
       progress: '#F5F7FA',
       progressBefore: '#006DE4',
+      errorTitleText: '#1a1c21',
+      errorButtonText: '#FFFFFF',
     },
     dark: {
       pageBackground: '#141519',
       welcomeText: '#98A2B3',
       progress: '#25262E',
       progressBefore: '#1BA9F5',
+      errorTitleText: '#DFE5EF',
+      errorButtonText: '#FFFFFF',
     },
   };
 };
@@ -85,6 +97,19 @@ const splashRules = (colors: SplashColors) => `
 
           .kbnProgress:before {
             background-color: ${colors.progressBefore};
+          }
+
+          .kbnBootstrapErrorTitle {
+            color: ${colors.errorTitleText};
+          }
+
+          .kbnBootstrapErrorText {
+            color: ${colors.welcomeText};
+          }
+
+          .kbnBootstrapErrorButton {
+            background-color: ${colors.progressBefore};
+            color: ${colors.errorButtonText};
           }
 `;
 

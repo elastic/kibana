@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { DataTableModel, DataTableState, TableById } from './types';
 
 const selectTableById = (state: DataTableState): TableById => state.dataTable.tableById;

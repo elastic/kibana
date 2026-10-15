@@ -138,7 +138,7 @@ export const invokeGateWorkflow = async ({
   );
 
   try {
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow: ValidatedWorkflow = validateAlertRetrievalWorkflow(
       rawWorkflow,
       workflowId
@@ -205,6 +205,7 @@ export const invokeGateWorkflow = async ({
     });
 
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.some((step) => step.stepType === AI_AGENT_STEP_TYPE),
       logger,

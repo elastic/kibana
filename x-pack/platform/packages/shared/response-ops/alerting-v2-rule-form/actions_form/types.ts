@@ -5,28 +5,19 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { parse } from 'yaml';
 
-export type InlineActionStepType = 'slack' | 'email';
+export type InlineActionStepType = 'slack2.sendMessage' | 'email';
 export type ActionSource = 'existing' | 'inline';
-
-/**
- * Links a draft from an existing action policy (and workflow) back to its source,
- * so saving can update it in place / delete it rather than
- * creating a duplicate. Set only on drafts updated when editing a rule; drafts
- * the user adds leave this undefined so they are created on save.
- */
-export interface ActionDraftOrigin {
-  policyId: string;
-  policyVersion?: string;
-  workflowId: string;
-}
+export type ConnectorCreationConfig =
+  | { readonly mode: 'flyout' }
+  | { readonly mode: 'new-tab'; readonly href: string };
 
 export interface ExistingWorkflowActionDraft {
   id: string;
   source: 'existing';
   workflowId: string | null;
-  origin?: ActionDraftOrigin;
 }
 
 export interface InlineWorkflowActionDraft {
@@ -35,7 +26,6 @@ export interface InlineWorkflowActionDraft {
   stepType: InlineActionStepType;
   connectorId: string | null;
   params: string;
-  origin?: ActionDraftOrigin;
 }
 
 export type ActionDraft = ExistingWorkflowActionDraft | InlineWorkflowActionDraft;
@@ -65,27 +55,69 @@ const isFilledValue = (value: unknown): boolean => {
   return true;
 };
 
+export interface InlineActionErrors {
+  readonly connector?: string;
+  readonly params: string[];
+}
+
+const connectorRequired = (): string =>
+  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.connectorRequired', {
+    defaultMessage: 'Select a connector.',
+  });
+
+const invalidYaml = (reason: string): string =>
+  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.invalidYaml', {
+    defaultMessage: 'Invalid YAML: {reason}',
+    values: { reason },
+  });
+
+const paramsNotAMap = (): string =>
+  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.paramsNotAMap', {
+    defaultMessage: 'Parameters must be a YAML map of field names to values.',
+  });
+
+const fieldRequired = (field: string): string =>
+  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldRequired', {
+    defaultMessage: '{field} is required.',
+    values: { field },
+  });
+
 /**
  * Validates the inline-action params YAML by parsing it (so both quoted and
  * unquoted scalars are handled) and requiring every field to be filled in.
  */
-const areInlineParamsFilled = (params: string): boolean => {
-  if (params.trim() === '') return false;
-
+const getParamsErrors = (params: string): string[] => {
   let parsed: unknown;
   try {
-    parsed = parse(params);
-  } catch {
-    return false;
+    parsed = parse(params, { logLevel: 'error' });
+  } catch (err) {
+    // The first line of the parser's message holds the reason and its location.
+    const reason =
+      err instanceof Error ? err.message.split('\n')[0].replace(/:$/, '') : String(err);
+    return [invalidYaml(reason)];
   }
 
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return [paramsNotAMap()];
+  }
 
-  const values = Object.values(parsed as Record<string, unknown>);
-  return values.length > 0 && values.every(isFilledValue);
+  const entries = Object.entries(parsed);
+  if (entries.length === 0) return [paramsNotAMap()];
+
+  return entries.filter(([, value]) => !isFilledValue(value)).map(([key]) => fieldRequired(key));
 };
 
-export const isActionValid = (action: ActionDraft): boolean =>
-  action.source === 'existing'
-    ? Boolean(action.workflowId)
-    : action.connectorId !== null && areInlineParamsFilled(action.params);
+/** Returns the reasons an inline action draft cannot be turned into a workflow. */
+export const validateInlineAction = (action: InlineWorkflowActionDraft): InlineActionErrors => ({
+  connector: action.connectorId === null ? connectorRequired() : undefined,
+  params: getParamsErrors(action.params),
+});
+
+export const isActionValid = (action: ActionDraft): boolean => {
+  if (action.source === 'existing') {
+    return Boolean(action.workflowId);
+  }
+
+  const { connector, params } = validateInlineAction(action);
+  return !connector && params.length === 0;
+};

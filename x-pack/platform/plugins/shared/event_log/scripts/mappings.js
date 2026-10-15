@@ -41,6 +41,10 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          // arbitrary consumer-provided data for the current task run, owned by task manager.
+          data: {
+            type: 'flattened',
+          },
         },
       },
       // alerting specific fields
@@ -478,10 +482,14 @@ exports.EcsCustomPropertyMappings = {
         properties: {
           dispatcher: {
             properties: {
-              episode_count: {
+              failure_reason: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              alert_count: {
                 type: 'long',
               },
-              episode_ids: {
+              alert_ids: {
                 type: 'keyword',
                 ignore_above: 1024,
               },
@@ -556,7 +564,7 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alert.rule.gap.filled_intervals',
   'kibana.alert.rule.gap.unfilled_intervals',
   'kibana.gap_auto_fill.execution.rule_ids',
-  'kibana.alerting_v2.dispatcher.episode_ids',
+  'kibana.alerting_v2.dispatcher.alert_ids',
   'kibana.alerting_v2.dispatcher.rule_ids',
   'kibana.alerting_v2.dispatcher.action_group_ids',
   'kibana.alerting_v2.dispatcher.workflow_ids',

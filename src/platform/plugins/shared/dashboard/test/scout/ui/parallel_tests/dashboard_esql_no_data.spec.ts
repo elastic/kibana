@@ -9,11 +9,18 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
+// Suite consistently fails on ECH: https://github.com/elastic/kibana/issues/278242
 spaceTest.describe(
   'No data views: try ES|QL from dashboard',
-  { tag: tags.deploymentAgnostic },
+  {
+    tag: [
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+      '@local-stateful-classic',
+    ],
+  },
   () => {
     // The no-data prompt only appears when the active space has no data views,
     // so this suite deliberately does *not* load the shared dashboard kbn archive
@@ -41,16 +48,17 @@ spaceTest.describe(
         await spaceTest.step('opens a new ES|QL-backed dashboard', async () => {
           await page.testSubj.click('tryESQLLink');
           await pageObjects.dashboard.waitForRenderComplete();
-          // The breadcrumb is prefixed with "Editing " when the dashboard is in edit mode,
+          // The title is prefixed with "Editing " when the dashboard is in edit mode,
           // which is the state the "Try ES|QL" flow lands users in.
-          await expect(page.testSubj.locator('breadcrumb last')).toContainText('New Dashboard');
+          await expect(pageObjects.dashboard.getAppTitle()).toContainText('New Dashboard');
           await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
         });
 
         await spaceTest.step('seeds the inline editor with the default ES|QL query', async () => {
           await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          const codeEditor = new KibanaCodeEditorWrapper(page);
-          await expect.poll(() => codeEditor.getCodeEditorValue()).toBe('FROM logs*');
+          await expect
+            .poll(() => pageObjects.esqlEditor.getQuery())
+            .toBe('FROM logs* | SORT @timestamp DESC');
         });
       }
     );

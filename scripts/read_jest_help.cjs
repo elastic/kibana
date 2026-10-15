@@ -23,7 +23,7 @@ function readStdin() {
     let buffer = '';
     let timer = setTimeout(() => {
       reject(
-        new Error('you must pipe the output of `yarn jest --help` to this script', {
+        new Error('you must pipe the output of `pnpm exec jest --help` to this script', {
           showHelp: true,
         })
       );
@@ -115,7 +115,7 @@ run(
     log.warning('make sure you bootstrap to rebuild @kbn/test');
   },
   {
-    usage: `yarn jest --help | node scripts/read_jest_help.cjs`,
+    usage: `pnpm exec jest --help | node scripts/read_jest_help.cjs`,
     description: `
       Jest no longer exposes the ability to parse CLI flags externally, so we use this
       script to read the help output and convert it into parameters we can pass to getopts()

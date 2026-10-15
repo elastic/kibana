@@ -13,9 +13,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import { EditIndexPattern } from '.';
+import { AppHeader } from '@kbn/app-header';
+import { EditIndexPattern } from './edit_index_pattern';
 import type { IndexPatternManagmentContext } from '../../types';
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import { dataViewsListTitle, getEditBreadcrumbs } from '../breadcrumbs';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
   const { dataViews, setBreadcrumbs, notifications, dataViewMgmtService } =
@@ -55,7 +56,20 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     props.history.push('/');
   }
 
-  return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
+  if (indexPattern == null) {
+    return (
+      <AppHeader
+        title={dataViewsListTitle}
+        back={{
+          href: props.history.createHref({ pathname: '/' }),
+          label: dataViewsListTitle,
+        }}
+        spacing="bleed"
+      />
+    );
+  }
+
+  return <EditIndexPattern indexPattern={indexPattern} />;
 };
 
 export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);

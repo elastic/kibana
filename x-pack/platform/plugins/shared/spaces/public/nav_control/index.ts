@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { initSpacesNavControl } from './nav_control';
+export { SpacesNavControl } from './nav_control';

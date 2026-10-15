@@ -16,7 +16,8 @@ import { basicHostFields } from '../fields/basic_host_fields';
 import { cloudFields } from '../fields/cloud_fields';
 
 export const useObservedHostFields = (
-  hostData: ObservedEntityData<HostItem>
+  hostData: ObservedEntityData<HostItem>,
+  hideAnomalies: boolean = false
 ): EntityTableRows<ObservedEntityData<HostItem>> => {
   const mlCapabilities = useMlCapabilities();
 
@@ -27,9 +28,9 @@ export const useObservedHostFields = (
 
     return [
       ...basicHostFields,
-      ...getAnomaliesFields(mlCapabilities),
+      ...(hideAnomalies ? [] : getAnomaliesFields(mlCapabilities)),
       ...cloudFields,
       ...policyFields,
     ];
-  }, [hostData, mlCapabilities]);
+  }, [hostData, hideAnomalies, mlCapabilities]);
 };

@@ -15,11 +15,13 @@ import {
   ruleAttachmentDataSchema,
   type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
 
 interface CreateRuleAttachmentTypeOptions {
-  logger: Logger;
+  logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
 }
 
@@ -69,7 +71,15 @@ export const createRuleAttachmentType = ({
       const rule = await rulesClient.getRule({ id: origin });
       return ruleAttachmentDataSchema.parse(rule);
     } catch (error) {
-      logger.warn(`Failed to resolve rule attachment for origin "${origin}": ${error}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to resolve rule attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
+          labels: { rule_id: origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return undefined;
     }
   },
@@ -84,14 +94,22 @@ export const createRuleAttachmentType = ({
     try {
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: attachment.origin });
-      if (Date.parse(rule.updatedAt) > Date.parse(attachment.origin_snapshot_at)) {
+      if (Date.parse(rule.updated_at) > Date.parse(attachment.origin_snapshot_at)) {
         const latestVersion = getLatestVersion(attachment);
         if (!latestVersion) return false;
-        return rule.updatedAt !== latestVersion.data.updatedAt;
+        return rule.updated_at !== latestVersion.data.updated_at;
       }
       return false;
     } catch (error) {
-      logger.warn(`Failed to check staleness for rule attachment "${attachment.origin}": ${error}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to check rule attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
+          labels: { rule_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return false;
     }
   },

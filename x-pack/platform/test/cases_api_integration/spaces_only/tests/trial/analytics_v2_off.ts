@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  CASE_INDEX_NAME,
+  ACTIVITY_INDEX_NAME,
+  ATTACHMENTS_INDEX_NAME,
+} from '@kbn/cases-plugin/server/cases_analytics_v2/constants';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../common/lib/mock';
 import {
@@ -18,8 +23,12 @@ import {
 /**
  * Regression guard for the "v1 unaffected when v2 is off" guarantee.
  *
- * This suite runs under the main `spaces_only/config.ts`, where the v2
- * feature flag is at its default (`xpack.cases.analyticsV2.enabled: false`).
+ * This suite runs under `config_analytics_v2_off.ts`, which pins
+ * `xpack.cases.analyticsV2.enabled=false` explicitly. It lives in its own
+ * config (rather than the plain `spaces_only/config.ts`) so the flag-off
+ * behavior is exercised deterministically regardless of the plugin default —
+ * when the default is on, `spaces_only/config.ts` boots v2 ON and cannot host
+ * this guard.
  * The proxy / noop-writer wiring in `cases_analytics_v2/service.ts` already
  * makes this correct in code — every writer call funnels through a stable
  * proxy that delegates to `V2_NOOP_WRITER` when the flag is off, and SO
@@ -34,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const auth = getAuthWithSuperUser();
 
-  describe('cases-analytics v2 disabled (feature flag default)', () => {
+  describe('cases-analytics v2 disabled (flag pinned off)', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -64,9 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
       // with v2 off, plugin start skips every `ensure*Index` bootstrap.
       // Asserted in parallel so a regression on any surface fails here.
       const [casesExists, activityExists, attachmentsExists] = await Promise.all([
-        es.indices.exists({ index: '.cases' }),
-        es.indices.exists({ index: '.cases-activity' }),
-        es.indices.exists({ index: '.cases-attachments' }),
+        es.indices.exists({ index: CASE_INDEX_NAME }),
+        es.indices.exists({ index: ACTIVITY_INDEX_NAME }),
+        es.indices.exists({ index: ATTACHMENTS_INDEX_NAME }),
       ]);
       expect(casesExists).to.eql(false);
       expect(activityExists).to.eql(false);

@@ -11,6 +11,7 @@ import type { TestServerlessESUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
+import { withTimeout } from '@kbn/std';
 
 describe('ES capabilities for serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
@@ -30,15 +31,14 @@ describe('ES capabilities for serverless ES', () => {
   });
 
   it('returns the correct capabilities', async () => {
-    const capabilities = await Promise.race([
-      getCapabilitiesFromClient(client),
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject('Waited 10+ seconds to get capabilities from ES, timed out...'),
-          10_000
-        )
-      ),
-    ]);
+    const outcome = await withTimeout({
+      promise: getCapabilitiesFromClient(client),
+      timeoutMs: 10_000,
+    });
+    if (outcome.timedout) {
+      throw new Error('Waited 10+ seconds to get capabilities from ES, timed out...');
+    }
+    const capabilities = outcome.value;
     expect(capabilities).toEqual({
       serverless: true,
     });

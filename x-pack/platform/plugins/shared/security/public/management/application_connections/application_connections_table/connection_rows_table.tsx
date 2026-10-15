@@ -11,15 +11,17 @@ import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { isConnectionActive, useConnectionTableColumns } from './connection_table_columns';
+import { getUnselectableRowMessage, matchesActionMode } from './application_connections_filters';
+import { useConnectionTableColumns } from './connection_table_columns';
 import { labels } from '../constants/i18n';
-import type { ApplicationConnection } from '../constants/types';
+import type { ApplicationConnection, ApplicationConnectionsActionMode } from '../constants/types';
 import type { OAuthClient, OAuthConnection } from '../service/application_connections_api_client';
 
 export interface ConnectionRowsTableProps {
   client: OAuthClient;
   connections: OAuthConnection[];
   selection: OAuthConnection[];
+  actionMode: ApplicationConnectionsActionMode | null;
   onSelectionChange: (selection: OAuthConnection[]) => void;
 }
 
@@ -41,6 +43,7 @@ export const ConnectionRowsTable: FunctionComponent<ConnectionRowsTableProps> = 
   client,
   connections,
   selection,
+  actionMode,
   onSelectionChange,
 }) => {
   const columns = useConnectionTableColumns({ withClientNameColumn: false });
@@ -68,11 +71,11 @@ export const ConnectionRowsTable: FunctionComponent<ConnectionRowsTableProps> = 
   const selectionConfig: EuiTableSelectionType<ApplicationConnection> = {
     selected: selectedItems,
     onSelectionChange: handleSelectionChange,
-    selectable: isConnectionActive,
-    selectableMessage: (selectable, { connection }) =>
+    selectable: (row) => matchesActionMode(row, actionMode),
+    selectableMessage: (selectable, row) =>
       selectable
-        ? labels.connectionColumns.selectRowLabel(connection.name ?? connection.id)
-        : labels.connectionColumns.revokedRowLabel,
+        ? labels.connectionColumns.selectRowLabel(row.connection.name ?? row.connection.id)
+        : getUnselectableRowMessage(row),
   };
 
   return (

@@ -353,16 +353,24 @@ describe('ParsedTemplateDefinitionSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('requires a case-default name', () => {
+  it('allows a definition without a case-default name (name is optional)', () => {
     const result = ParsedTemplateDefinitionSchema.safeParse({ fields: [] });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an empty case-default name when one is provided', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse({ name: '', fields: [] });
 
     expect(result.success).toBe(false);
   });
 
-  it('rejects an empty case-default name', () => {
-    const result = ParsedTemplateDefinitionSchema.safeParse({ name: '', fields: [] });
+  it('allows a null case-default name (a cleared `name:` in the YAML)', () => {
+    // Typing `name:` with no value in the editor parses to `{ name: null }`. This must behave like
+    // the other cleared case defaults (description/severity/category) and not fail validation.
+    const result = ParsedTemplateDefinitionSchema.safeParse({ name: null, fields: [] });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it('rejects a case-default name longer than the max case title length', () => {

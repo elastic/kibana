@@ -26,6 +26,8 @@ import { aiValueReportTelemetryEvents } from './ai_value_report';
 import { attacksTelemetryEvents } from './attacks';
 import { attackDiscoverySchedulesTelemetryEvents } from './attack_discovery_schedules';
 import { siemReadinessTelemetryEvents } from './siem_readiness';
+import { flyoutV2TelemetryEvents } from './flyout_v2';
+import { graphTelemetryEvents } from './graph';
 
 export const telemetryEvents = [
   ...attackDiscoveryTelemetryEvents,
@@ -50,4 +52,6 @@ export const telemetryEvents = [
   ...aiValueReportTelemetryEvents,
   ...trialCompanionTelemetryEvents,
   ...siemReadinessTelemetryEvents,
+  ...flyoutV2TelemetryEvents,
+  ...graphTelemetryEvents,
 ];

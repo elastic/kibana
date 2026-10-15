@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -16,7 +17,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiRadio,
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
@@ -50,6 +50,7 @@ import {
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
   isWorkflowTriggerTabDisabled,
+  omitUnchangedWorkflowInputDefaults,
   resolveInitialSelectedTrigger,
   type WorkflowTriggerTabAvailability,
 } from './workflow_execute_modal_helpers';
@@ -62,7 +63,7 @@ export interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void | Promise<void>;
   yamlString?: string;
   /** When set, open with Historical tab and this execution pre-selected */
   initialExecutionId?: string;
@@ -174,7 +175,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       setEventTriggerTableSelectionCount(count);
     }, []);
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
       if (!canExecuteWorkflow) {
         return;
       }
@@ -223,8 +224,16 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return;
       }
       setExecutionInputErrors(null);
-      onSubmit(parsed, selectedTrigger);
-      onClose();
+      const submittedInput =
+        selectedTrigger === 'manual'
+          ? omitUnchangedWorkflowInputDefaults(parsed, normalizedInputs)
+          : parsed;
+      try {
+        await onSubmit(submittedInput, selectedTrigger);
+        onClose();
+      } catch {
+        // Keep the modal open so the user can retry after a failed run.
+      }
     }, [
       canExecuteWorkflow,
       selectedTrigger,
@@ -232,6 +241,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       onClose,
       executionInput,
       eventTriggerTableSelectionCount,
+      normalizedInputs,
     ]);
 
     const handleChangeTrigger = useCallback(
@@ -268,8 +278,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return;
       }
       autoRunFiredRef.current = true;
-      onSubmit({}, 'manual');
-      onClose();
+      void (async () => {
+        try {
+          await onSubmit({}, 'manual');
+          onClose();
+        } catch {
+          // Keep the modal open so the user can retry after a failed run.
+        }
+      })();
     }, [shouldAutoRun, onSubmit, onClose]);
 
     useEffect(() => {
@@ -458,47 +474,30 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                         triggerTabAvailability
                       );
                       const triggerButton = (
-                        <EuiButton
-                          color={selectedTrigger === trigger ? 'primary' : 'text'}
-                          onClick={() => handleChangeTrigger(trigger)}
-                          isDisabled={isTriggerTabDisabled}
-                          iconSide="right"
+                        <EuiCheckableCard
+                          id={trigger}
+                          name="workflowTriggerTab"
+                          label={<strong>{TRIGGER_TABS_LABELS[trigger]}</strong>}
+                          checked={selectedTrigger === trigger}
+                          disabled={isTriggerTabDisabled}
+                          onChange={() => handleChangeTrigger(trigger)}
                           data-test-subj={`workflowExecuteModalTrigger-${trigger}`}
-                          contentProps={{
-                            style: {
-                              justifyContent: 'flex-start',
-                              flexDirection: 'column',
-                              alignItems: 'flex-start',
-                              textAlign: 'left',
-                            },
-                          }}
                           css={css`
                             width: 100%;
                             flex: 1;
                             min-height: 0;
                             align-self: stretch;
-                            padding: ${euiTheme.size.m};
                           `}
                         >
-                          <EuiRadio
-                            name={TRIGGER_TABS_LABELS[trigger]}
-                            label={TRIGGER_TABS_LABELS[trigger]}
-                            id={trigger}
-                            checked={selectedTrigger === trigger}
-                            disabled={isTriggerTabDisabled}
-                            onChange={() => {}}
-                            css={{ fontWeight: euiTheme.font.weight.bold }}
-                          />
                           <EuiText
                             size="s"
                             css={css`
                               text-wrap: auto;
-                              margin-left: ${euiTheme.size.l};
                             `}
                           >
                             {TRIGGER_TABS_DESCRIPTIONS[trigger]}
                           </EuiText>
-                        </EuiButton>
+                        </EuiCheckableCard>
                       );
 
                       return (

@@ -42,7 +42,7 @@ export class AgentBuilderVisualizationsPlugin
     );
     setupDeps.agentBuilder.tools.register(createVisualizationTool());
     setupDeps.agentBuilder.skills.register(visualizationCreationSkill);
-    setupDeps.agentContextLayer.registerType(visualizationSmlType);
+    setupDeps.agentBuilderSml.registerType(visualizationSmlType);
     return {};
   }
 

@@ -15,12 +15,22 @@ export interface EditorCommand {
   label: string;
   iconType: IconType;
   description?: string;
+  shortcut?: string[];
 }
+
+export type IconVariant =
+  | 'trigger'
+  | 'platform'
+  | 'external'
+  | 'flowControl'
+  | 'neutral'
+  | 'dataTransformation';
 
 export interface JumpToStepEntry {
   id: string;
   label: string;
   lineStart: number;
+  yaml?: string;
 }
 
 export type MenuItemData =
@@ -29,15 +39,7 @@ export type MenuItemData =
   | { kind: 'jump'; entry: JumpToStepEntry }
   | { kind: 'nav'; target: 'viewAll' | 'viewExisting' };
 
-/**
- * Options passed to EuiSelectable carry MenuItemData inside the standard
- * `data` bag. EUI strips `data` from DOM props and spreads its contents
- * into the object handed to `renderOption`, so:
- *   - in renderOption:  (option as any).menuItem   ← spread from data
- *   - in onChange:       (option as any).data.menuItem  ← original objec
- * t
- * Use {@link getMenuItemData} to abstract over both contexts.
- */
+/** Reads menu data before or after EuiSelectable expands the `data` property. */
 export type MenuSelectableOption = EuiSelectableOption & {
   data?: { menuItem: MenuItemData };
 };
@@ -56,6 +58,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  iconVariant?: IconVariant;
   stability?: StabilityLevel;
   /**
    * Ids from the root menu down through this row (for groups: path to open this group).

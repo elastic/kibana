@@ -83,7 +83,7 @@ const renderAnonymizedIndicator = (action: PreviewRow['action']) => {
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={isAnonymized ? 'eyeClosed' : 'eye'}
+            type={isAnonymized ? 'eyeSlash' : 'eye'}
             color={isAnonymized ? 'warning' : 'subdued'}
             aria-label={label}
             data-test-subj={
@@ -119,7 +119,7 @@ const renderDeniedIndicator = (action: PreviewRow['action']) => {
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type="minusInCircleFilled"
+            type="minusCircle"
             color="danger"
             aria-label={label}
             data-test-subj="anonymizationProfilesPreviewDeniedIcon"

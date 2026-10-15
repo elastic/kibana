@@ -17,6 +17,7 @@ import type { EntityId, RelationshipEsqlRow, EntityRecord } from './types';
 import { hashIds } from './utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
+import { RELATIONSHIP_FIELDS_FORK_BATCH_SIZE } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 describe('fetchEntityRelationships', () => {
@@ -53,11 +54,15 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      // ENTITY_RELATIONSHIP_FIELDS has more than 8 entries, so the query is batched into
+      // multiple FORK-bounded ES|QL calls (see RELATIONSHIP_FIELDS_FORK_BATCH_SIZE).
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
@@ -74,8 +79,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: false,
+        entityStoreIndexName: null,
       });
 
       // Should not call ESQL when index does not exist
@@ -95,8 +99,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds: [{ id: 'entity-1', isOrigin: false }],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
@@ -123,11 +126,13 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
@@ -173,11 +178,13 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
 
       // Filter should be undefined when no entityIds provided
@@ -201,10 +208,94 @@ describe('fetchEntityRelationships', () => {
           esClient,
           logger,
           entityIds,
-          spaceId: 'default',
-          entityStoreIndexExists: true,
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
         })
       ).rejects.toThrow('Connection refused');
+    });
+
+    it('rejects the whole call when one of multiple batches fails', async () => {
+      const goodBatch = { records: [{ relationship: 'owns' } as unknown as RelationshipEsqlRow] };
+      const genericError = new Error('Batch 2 failed');
+      let call = 0;
+      esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
+        toRecords: jest.fn().mockImplementation(() => {
+          call += 1;
+          return call === 1 ? Promise.resolve(goodBatch) : Promise.reject(genericError);
+        }),
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      }));
+
+      await expect(
+        fetchEntityRelationships({
+          esClient,
+          logger,
+          entityIds: [{ id: 'entity-1', isOrigin: true }],
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
+        })
+      ).rejects.toThrow('Batch 2 failed');
+    });
+  });
+
+  describe('FORK branch-limit batching', () => {
+    it('splits ENTITY_RELATIONSHIP_FIELDS into multiple ES|QL queries bounded by the FORK branch limit', async () => {
+      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      esClient.asCurrentUser.helpers.esql.mockReturnValue({
+        toRecords: toRecordsMock,
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      });
+
+      await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: 'entity-1', isOrigin: true }],
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
+      });
+
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+      const expectedBatchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(calls).toHaveLength(expectedBatchCount);
+
+      // Every FORK branch count per query must stay within the branch limit, and every
+      // relationship field must appear in exactly one batch's query.
+      const fieldsSeenPerQuery = calls.map(([{ query }]: any[]) =>
+        ENTITY_RELATIONSHIP_FIELDS.filter((field) => query.includes(`_rel_targets_${field}`))
+      );
+      fieldsSeenPerQuery.forEach((fields: string[]) => {
+        expect(fields.length).toBeLessThanOrEqual(RELATIONSHIP_FIELDS_FORK_BATCH_SIZE);
+      });
+      const allFieldsCovered = fieldsSeenPerQuery.flat();
+      expect(new Set(allFieldsCovered)).toEqual(new Set(ENTITY_RELATIONSHIP_FIELDS));
+      expect(allFieldsCovered).toHaveLength(ENTITY_RELATIONSHIP_FIELDS.length);
+    });
+
+    it('merges records from all batches into a single result', async () => {
+      const batch1Records = [{ relationship: 'owns' } as unknown as RelationshipEsqlRow];
+      const batch2Records = [{ relationship: 'administers' } as unknown as RelationshipEsqlRow];
+      let call = 0;
+      esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
+        toRecords: jest.fn().mockImplementation(() => {
+          call += 1;
+          return Promise.resolve({
+            columns: [{ name: `col${call}`, type: 'keyword' }],
+            records: call === 1 ? batch1Records : batch2Records,
+          });
+        }),
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      }));
+
+      const result = await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: 'entity-1', isOrigin: true }],
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
+      });
+
+      expect(result.records).toEqual([...batch1Records, ...batch2Records]);
     });
   });
 
@@ -223,8 +314,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
@@ -716,6 +806,72 @@ describe('regroupRelationships', () => {
     expect(result2[0].actorNodeId).not.toBe(result[0].actorNodeId);
     expect(result2[0].relationshipNodeId).toMatch(/-communicates_with$/);
   });
+
+  it('aggregates risk score and asset criticality separately for merged actors and merged targets', () => {
+    // One STATS row with two same-type actors and two same-type targets, each side carrying
+    // different scores/levels. The actor and target aggregates must be computed from their own
+    // entity sets — swapping them, or dropping one, has to fail here.
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'svc:a',
+        { type: 'Service', subType: 'lambda', riskScore: 91, assetCriticality: 'extreme_impact' },
+      ],
+      [
+        'svc:b',
+        { type: 'Service', subType: 'lambda', riskScore: 40, assetCriticality: 'low_impact' },
+      ],
+      ['host:x', { type: 'Host', subType: 'ec2', riskScore: 12, assetCriticality: 'low_impact' }],
+      ['host:y', { type: 'Host', subType: 'ec2', riskScore: 55, assetCriticality: 'low_impact' }],
+    ]);
+    const row: RelationshipEsqlRow = {
+      actorIds: ['svc:a', 'svc:b'],
+      actorEntityType: 'Service',
+      actorEntitySubType: 'lambda',
+      actorDocData: ['{"id":"svc:a","type":"entity"}', '{"id":"svc:b","type":"entity"}'],
+      relationship: 'communicates_with',
+      targetIds: ['host:x', 'host:y'],
+      targetDocData: ['{"id":"host:x","type":"entity"}', '{"id":"host:y","type":"entity"}'],
+      // Both actors point at both targets, so they stay merged in one group.
+      actorTargetMap: ['svc:a\nhost:x', 'svc:a\nhost:y', 'svc:b\nhost:x', 'svc:b\nhost:y'],
+      pinned: null,
+      badge: 4,
+    };
+
+    const [group] = regroupRelationships([row], enrichmentMap);
+
+    expect(group.actorIdsCount).toBe(2);
+    expect(group.targetIdsCount).toBe(2);
+
+    // Actor side: spread over 91/40, and two distinct levels ordered most severe first.
+    expect(group.actorRiskScore).toEqual({ min: 40, max: 91 });
+    expect(group.actorAssetCriticality).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 1 },
+    ]);
+
+    // Target side: its own spread over 12/55, and both targets share one level so the
+    // distribution is a single entry with count 2.
+    expect(group.targetRiskScore).toEqual({ min: 12, max: 55 });
+    expect(group.targetAssetCriticality).toEqual([{ level: 'low_impact', count: 2 }]);
+  });
+
+  it('omits risk score and asset criticality when the relationship entities have neither', () => {
+    const record = buildRelationshipEsqlRow({
+      actorId: 'host:webserver',
+      targetId: 'user:alice',
+    });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:webserver', { type: 'host', riskScore: null, assetCriticality: null }],
+      ['user:alice', { type: 'user' }],
+    ]);
+
+    const [group] = regroupRelationships([record], enrichmentMap);
+
+    expect(group.actorRiskScore).toBeUndefined();
+    expect(group.actorAssetCriticality).toBeUndefined();
+    expect(group.targetRiskScore).toBeUndefined();
+    expect(group.targetAssetCriticality).toBeUndefined();
+  });
 });
 
 describe('enrichRelationshipDocData', () => {
@@ -802,5 +958,84 @@ describe('enrichEntityRecords', () => {
     expect(result[0].name).toBe('Alice Smith');
     expect(result[0].type).toBe('user');
     expect(result[0].sub_type).toBe('admin');
+  });
+
+  // The entities query builds docData inline in ES|QL and never passes through
+  // rebuildDocData, so risk/criticality have to be injected onto these records explicitly —
+  // otherwise an entity-only graph request (entityIds, no originEventIds) returns neither.
+  // The entities ES|QL query now serializes riskScore / assetCriticality / sources into
+  // docData itself, so enrichEntityRecords no longer injects them — it only normalizes the
+  // document through the shared rebuildDocData path.
+  it('preserves query-serialized risk score, criticality and sources in docData', () => {
+    const record: EntityRecord = {
+      id: 'host:ea-endpoint-1',
+      name: 'ea-endpoint-1',
+      type: 'Host',
+      sub_type: 'AWS EC2 Instance',
+      docData: JSON.stringify({
+        id: 'host:ea-endpoint-1',
+        type: 'entity',
+        entity: {
+          availableInEntityStore: true,
+          riskScore: 82,
+          assetCriticality: 'high_impact',
+          sources: ['endpoint', 'system'],
+        },
+      }),
+      riskScore: 82,
+      assetCriticality: 'high_impact',
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'host:ea-endpoint-1',
+        { riskScore: 82, assetCriticality: 'high_impact', sources: ['endpoint', 'system'] },
+      ],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+    const entity = JSON.parse(result.docData).entity;
+
+    expect(entity.riskScore).toBe(82);
+    expect(entity.assetCriticality).toBe('high_impact');
+    expect(entity.sources).toEqual(['endpoint', 'system']);
+  });
+
+  it('drops an asset criticality level the graph does not model', () => {
+    // The enrichment map filters unknown levels at the source, so no consumer — node
+    // aggregation or per-entity docData — can surface a value the client cannot label.
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData: JSON.stringify({ id: 'user:alice', type: 'entity', entity: {} }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { assetCriticality: 'some_future_level' }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(JSON.parse(result.docData).entity).not.toHaveProperty('assetCriticality');
+  });
+
+  it('omits the fields entirely when the entity has none of them', () => {
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData: JSON.stringify({ id: 'user:alice', type: 'entity', entity: {} }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'alice', riskScore: null, assetCriticality: null }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+    const entity = JSON.parse(result.docData).entity;
+
+    expect(entity).not.toHaveProperty('riskScore');
+    expect(entity).not.toHaveProperty('assetCriticality');
+    expect(entity).not.toHaveProperty('sources');
   });
 });

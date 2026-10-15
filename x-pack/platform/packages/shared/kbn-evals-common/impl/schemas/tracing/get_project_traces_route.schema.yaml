@@ -18,23 +18,27 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 256
         - name: from
           in: query
           required: false
           schema:
             type: string
+            maxLength: 64
           description: Start of time range (ISO 8601)
         - name: to
           in: query
           required: false
           schema:
             type: string
+            maxLength: 64
           description: End of time range (ISO 8601)
         - name: name
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter traces by input, output, or prompt ID content
         - name: sort_field
           in: query

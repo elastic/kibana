@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EntityState, SerializedError } from '@reduxjs/toolkit';
-import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
-import { createSelector } from 'reselect';
+import type { EntityState, SerializedError } from 'redux-toolkit-v1';
+import { createAsyncThunk, createEntityAdapter, createSlice } from 'redux-toolkit-v1';
+import { createSelector } from 'reselect-v4';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import type { State } from '../../common/store';
 import {
@@ -397,6 +397,16 @@ export const makeSelectNotesBySavedObjectId = () =>
       fallbackToEmptyArray(
         notes.filter((note) => savedObjectId !== '' && note.timelineId === savedObjectId)
       )
+  );
+
+/** Multi-id variant for Super Timeline: selects notes whose timelineId is in the provided set. */
+export const makeSelectNotesBySavedObjectIds = () =>
+  createSelector(
+    [selectAllNotes, (_: State, savedObjectIds: string[]) => savedObjectIds],
+    (notes, savedObjectIds) => {
+      const idSet = new Set(savedObjectIds.filter((id) => id !== ''));
+      return fallbackToEmptyArray(notes.filter((note) => idSet.has(note.timelineId ?? '')));
+    }
   );
 
 export const selectDocumentNotesBySavedObjectId = createSelector(

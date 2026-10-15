@@ -63,7 +63,7 @@ export class OtelKubernetesFlowPage {
   public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
     const dashboardURL = await this.page
       .getByTestId(
-        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
+        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-fe68e0e9-0506-4ad7-96be-070cf7592a7e'
       )
       .getAttribute('href');
 
@@ -78,11 +78,11 @@ export class OtelKubernetesFlowPage {
     }
   }
 
-  public async assertDataReceivedIndicator(): Promise<void> {
+  public async assertDataReceivedIndicator(timeout = 15 * 60_000): Promise<void> {
     await expect(
       this.exploreLogsButton,
       'Explore logs action link should be visible after data is detected'
-    ).toBeVisible();
+    ).toBeVisible({ timeout });
   }
 
   public async clickExploreLogsCTA() {

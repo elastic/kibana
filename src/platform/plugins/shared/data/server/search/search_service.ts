@@ -36,6 +36,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -119,6 +120,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 /** @internal */
@@ -273,7 +275,7 @@ export class SearchService {
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, licensing }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -285,7 +287,7 @@ export class SearchService {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled);
+    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled, licensing);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
@@ -550,7 +552,11 @@ export class SearchService {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
-  private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
+  private asScopedProvider = (
+    core: CoreStart,
+    rollupsEnabled: boolean = false,
+    licensing?: LicensingPluginStart
+  ) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest, opts?: AsScopedOptions): IScopedSearchClient => {
@@ -564,6 +570,7 @@ export class SearchService {
 
         request,
         rollupsEnabled,
+        licensing,
       };
       const search = <
         SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,

@@ -100,6 +100,7 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -112,6 +113,10 @@ export interface InMemoryConnector<
   config: Config;
   exposeConfig?: boolean;
   isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -255,6 +260,11 @@ export interface ActionTypeCoreFields<
    */
   isExperimental?: boolean;
   /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
@@ -315,6 +325,10 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -324,6 +338,17 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId?: string;
   consumer?: string;
   source?: string;

@@ -12,103 +12,155 @@ describe('createTraceAccessor', () => {
   const validTraceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const queryMock = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    const searchMock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     const esClient = {
-      esql: { query: queryMock },
+      search: searchMock,
     } as unknown as ElasticsearchClient;
-    return { esClient, queryMock };
+    return { esClient, searchMock };
   };
 
-  describe('source resolution', () => {
-    it('builds FROM traces-* with trace.id field for "traces" source', async () => {
-      const { esClient, queryMock } = createEsClient();
+  describe('runSearch', () => {
+    it('builds trace-scoped DSL query for traces source', async () => {
+      const { esClient, searchMock } = createEsClient();
       const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
 
-      await accessor.runEsql('traces', '| STATS count = COUNT(*)');
-
-      const { query } = queryMock.mock.calls[0][0];
-      expect(query).toContain('FROM traces-*');
-      expect(query).toContain('trace.id == ?trace_id');
-    });
-
-    it('builds FROM logs-* with trace_id field for "logs" source', async () => {
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
-
-      await accessor.runEsql('logs', '| WHERE event_name == "gen_ai.user.message"\n| LIMIT 1');
-
-      const { query } = queryMock.mock.calls[0][0];
-      expect(query).toContain('FROM logs-*');
-      expect(query).toContain('trace_id == ?trace_id');
-    });
-  });
-
-  describe('pipeline passthrough', () => {
-    it('appends the caller pipeline after the scoping WHERE', async () => {
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
-      const pipeline =
-        '| WHERE attributes.elastic.inference.span.kind == "TOOL"\n| STATS tool_call_count = COUNT(*)';
-
-      await accessor.runEsql('traces', pipeline);
-
-      const { query } = queryMock.mock.calls[0][0];
-      expect(query).toContain('attributes.elastic.inference.span.kind == "TOOL"');
-      expect(query).toContain('STATS tool_call_count = COUNT(*)');
-      expect(query.indexOf('trace.id == ?trace_id')).toBeLessThan(
-        query.indexOf('attributes.elastic.inference.span.kind')
-      );
-    });
-  });
-
-  describe('parameter binding', () => {
-    it('passes trace_id as a bound ES|QL parameter, never interpolated into the query', async () => {
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
-
-      await accessor.runEsql('traces', '| STATS count = COUNT(*)');
-
-      const call = queryMock.mock.calls[0][0];
-      expect(call.query).toContain('?trace_id');
-      expect(call.query).not.toContain(validTraceId);
-      expect(call.params).toEqual([{ trace_id: validTraceId }]);
-    });
-
-    it('does not embed a hostile trace_id value in the query string', async () => {
-      const hostileId = '0af7651916cd43dd8448eb211c80319c';
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({ traceId: hostileId, esClient });
-
-      await accessor.runEsql('traces', '| STATS count = COUNT(*)');
-
-      const { query, params } = queryMock.mock.calls[0][0];
-      expect(query).not.toContain(hostileId);
-      expect(params).toEqual([{ trace_id: hostileId }]);
-    });
-  });
-
-  describe('trace_id validation (defense-in-depth)', () => {
-    it('throws before calling ES when trace_id is not valid hex', async () => {
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({ traceId: 'not-a-valid-hex-trace-id', esClient });
-
-      await expect(accessor.runEsql('traces', '| STATS count = COUNT(*)')).rejects.toThrow(
-        'Invalid trace_id: must be a 32-character hex string'
-      );
-      expect(queryMock).not.toHaveBeenCalled();
-    });
-
-    it('throws for trace_id with injection payload', async () => {
-      const { esClient, queryMock } = createEsClient();
-      const accessor = createTraceAccessor({
-        traceId: 'x" OR true OR trace.id == "',
-        esClient,
+      await accessor.runSearch('traces', {
+        filter: [{ type: 'term', field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+        fields: ['@timestamp', 'attributes.gen_ai.tool.name'],
+        sort: [
+          { field: '@timestamp', order: 'asc' },
+          { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
+        ],
+        size: 10,
+        trackTotalHits: 21,
       });
 
-      await expect(accessor.runEsql('traces', '| STATS count = COUNT(*)')).rejects.toThrow(
+      expect(searchMock).toHaveBeenCalledTimes(1);
+      expect(searchMock).toHaveBeenCalledWith({
+        index: 'traces-*',
+        ignore_unavailable: true,
+        _source: ['@timestamp', 'attributes.gen_ai.tool.name'],
+        size: 10,
+        track_total_hits: 21,
+        aggs: undefined,
+        sort: [
+          { '@timestamp': { order: 'asc' } },
+          { span_id: { order: 'asc', unmapped_type: 'keyword' } },
+        ],
+        query: {
+          bool: {
+            filter: [
+              { term: { 'trace.id': validTraceId } },
+              { term: { 'attributes.elastic.inference.span.kind': 'TOOL' } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('builds trace-scoped DSL query for logs source with exists filter', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await accessor.runSearch('logs', {
+        filter: [
+          { type: 'term', field: 'event_name', value: 'gen_ai.user.message' },
+          { type: 'exists', field: 'attributes.content' },
+        ],
+        fields: ['@timestamp', 'attributes.content'],
+        sort: { field: '@timestamp', order: 'desc' },
+        size: 1,
+      });
+
+      expect(searchMock).toHaveBeenCalledWith({
+        index: 'logs-*',
+        ignore_unavailable: true,
+        _source: ['@timestamp', 'attributes.content'],
+        size: 1,
+        aggs: undefined,
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        query: {
+          bool: {
+            filter: [
+              { term: { trace_id: validTraceId } },
+              { term: { event_name: 'gen_ai.user.message' } },
+              { exists: { field: 'attributes.content' } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('passes aggregations through and returns aggregation values', async () => {
+      const { esClient, searchMock } = createEsClient();
+      searchMock.mockResolvedValueOnce({
+        hits: { hits: [] },
+        aggregations: {
+          input_tokens: { value: 321 },
+        },
+      });
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await expect(
+        accessor.runSearch<{ input_tokens?: { value?: number } }>('traces', {
+          size: 0,
+          aggs: {
+            input_tokens: {
+              sum: { field: 'attributes.gen_ai.usage.input_tokens' },
+            },
+          },
+        })
+      ).resolves.toEqual({
+        documents: [],
+        aggregations: {
+          input_tokens: { value: 321 },
+        },
+      });
+    });
+
+    it('returns hit metadata with _source documents', async () => {
+      const { esClient, searchMock } = createEsClient();
+      searchMock.mockResolvedValueOnce({
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          hits: [
+            {
+              _id: 'doc-1',
+              _index: 'logs-evals-default',
+              sort: [1782468000000],
+              _source: { '@timestamp': '2026-06-26T10:00:00.000Z', 'attributes.content': 'hello' },
+            },
+            { _source: undefined },
+          ],
+        },
+      });
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await expect(accessor.runSearch('logs', { size: 2 })).resolves.toEqual({
+        documents: [
+          {
+            id: 'doc-1',
+            index: 'logs-evals-default',
+            sort: [1782468000000],
+            source: {
+              '@timestamp': '2026-06-26T10:00:00.000Z',
+              'attributes.content': 'hello',
+            },
+          },
+        ],
+        total: 2,
+        aggregations: undefined,
+      });
+    });
+
+    it('throws before calling search when trace_id is invalid', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: 'not-a-valid-hex-trace-id', esClient });
+
+      await expect(accessor.runSearch('logs', { size: 1 })).rejects.toThrow(
         'Invalid trace_id: must be a 32-character hex string'
       );
-      expect(queryMock).not.toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
     });
   });
 });

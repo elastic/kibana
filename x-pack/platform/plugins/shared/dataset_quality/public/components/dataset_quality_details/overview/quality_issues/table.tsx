@@ -10,6 +10,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import React from 'react';
 import {
   overviewDegradedFieldsTableLoadingText,
+  qualityIssuesTableCaption,
   qualityIssuesTableNoData,
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
@@ -40,6 +41,7 @@ export const QualityIssuesTable = () => {
 
   return (
     <EuiBasicTable
+      tableCaption={qualityIssuesTableCaption}
       tableLayout="fixed"
       columns={columns}
       items={renderedItems ?? []}

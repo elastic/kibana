@@ -301,3 +301,50 @@ export function createApmSummaryDoc(
     }
   );
 }
+
+/**
+ * Helper to create grouped-by-service.name APM SLO summary docs. Sibling of
+ * `createApmSummaryDoc` for the grouped case: the instance carries no top-level
+ * `service.name`, the service is targeted via `slo.groupings.service.name`, and
+ * the indicator uses `service: '*'`.
+ */
+export function createGroupedApmSummaryDoc(
+  sloId: string,
+  serviceName: string,
+  status: 'HEALTHY' | 'DEGRADING' | 'VIOLATED' | 'NO_DATA',
+  summaryUpdatedAt: string,
+  options: {
+    environment?: string;
+    indicatorType?: 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
+    spaceId?: string;
+  } = {}
+): EsSummaryDocument {
+  const {
+    environment = 'production',
+    indicatorType = 'sli.apm.transactionDuration',
+    spaceId,
+  } = options;
+
+  return createGroupedSummaryDoc(
+    sloId,
+    ['service.name'],
+    { 'service.name': serviceName },
+    summaryUpdatedAt,
+    {
+      spaceId,
+      status,
+      indicator: {
+        type: indicatorType,
+        params: {
+          service: '*',
+          environment,
+          transactionType: 'request',
+          transactionName: '',
+          threshold: 500,
+          index: 'metrics-apm*',
+        },
+      },
+      service: { name: null, environment: null },
+    }
+  );
+}

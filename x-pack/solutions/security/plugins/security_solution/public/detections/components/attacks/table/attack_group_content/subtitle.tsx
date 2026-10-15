@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
@@ -15,16 +16,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 
+import { UserAvatar } from '@kbn/user-profile-components';
+import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
-import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
-import { useDateFormat } from '../../../../../common/lib/kibana';
-import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import {
+  AttackDetectedOn,
+  useFormattedAttackTimestamp,
+} from '../../../../../attack_discovery/components/attack_detected_on';
+import { AttackEntitySummary } from '../../../../../attack_discovery/components/attack_entity_summary';
 
-export const DETECTED_ON_LABEL = (timestamp: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.attacks.group.subtitle.detectedOnLabel', {
-    defaultMessage: 'Detected on {timestamp}',
-    values: { timestamp },
-  });
+export { getSummaryPlainText } from '../../../../../attack_discovery/components/attack_entity_summary';
 
 export const RUN_BY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.attacks.group.subtitle.runByLabel',
@@ -56,8 +57,6 @@ export interface SubtitleProps {
  * A component that displays the subtitle for an attack group, including the detection timestamp and a summary.
  */
 export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = false }) => {
-  const dateFormat = useDateFormat();
-
   const summary = useMemo(() => {
     return attack.entitySummaryMarkdown
       ? showAnonymized
@@ -66,15 +65,10 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
             messageContent: attack.entitySummaryMarkdown,
             replacements: attack.replacements,
           })
-      : null;
+      : undefined;
   }, [attack.entitySummaryMarkdown, attack.replacements, showAnonymized]);
 
-  const formattedTimestamp = useMemo(() => {
-    return getFormattedDate({
-      date: attack.timestamp,
-      dateFormat,
-    });
-  }, [attack.timestamp, dateFormat]);
+  const formattedTimestamp = useFormattedAttackTimestamp(attack.timestamp);
 
   const isManual = attack.alertRuleUuid === ATTACK_DISCOVERY_AD_HOC_RULE_ID;
   const separator = '|';
@@ -85,19 +79,21 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
     [attack.alertIds, attack.replacements]
   );
 
+  const uids = useMemo(() => new Set(attack.userId ? [attack.userId] : []), [attack.userId]);
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids });
+  const runByProfile = userProfiles?.[0];
+
   return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="s"
       responsive={false}
-      wrap={true}
+      wrap={false}
       data-test-subj="attack-subtitle"
     >
       {formattedTimestamp && (
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {DETECTED_ON_LABEL(formattedTimestamp)}
-          </EuiText>
+          <AttackDetectedOn timestamp={attack.timestamp} />
         </EuiFlexItem>
       )}
 
@@ -118,7 +114,21 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                {attack.userId ? (
+                  <UserAvatar
+                    // Fall back to a synthetic user object when the profile is still loading
+                    // or the UID has no matching profile, so initials are shown instead of "?".
+                    user={
+                      runByProfile?.user ??
+                      (attack.userName ? { username: attack.userName } : undefined)
+                    }
+                    avatar={runByProfile?.data?.avatar}
+                    size="s"
+                    data-test-subj="attack-run-by-avatar"
+                  />
+                ) : (
+                  <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -134,12 +144,18 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <AttackDiscoveryMarkdownFormatter
-              scopeId={TableId.alertsOnAttacksPage}
-              disableActions={showAnonymized}
-              markdown={summary}
+          <EuiFlexItem
+            grow
+            css={css`
+              min-width: 0;
+            `}
+            data-test-subj="attack-subtitle-summary"
+          >
+            <AttackEntitySummary
               alertIds={originalAlertIds}
+              disableActions={showAnonymized}
+              entitySummaryMarkdown={summary}
+              scopeId={TableId.alertsOnAttacksPage}
             />
           </EuiFlexItem>
         </>

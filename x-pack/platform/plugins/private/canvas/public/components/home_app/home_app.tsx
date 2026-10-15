@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
 import { resetWorkpad } from '../../state/actions/workpad';
 import { HomeApp as Component } from './home_app.component';

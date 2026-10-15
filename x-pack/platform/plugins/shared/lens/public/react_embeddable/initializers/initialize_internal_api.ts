@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { initializeTitleManager } from '@kbn/presentation-publishing';
+import { apiHasDisableTriggers, type initializeTitleManager } from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -14,7 +14,6 @@ import type {
   ExpressionWrapperProps,
   LensInternalApi,
   LensOverrides,
-  LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
   UserMessage,
@@ -32,17 +31,18 @@ export function initializeInternalApi(
 ): LensInternalApi {
   const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
   const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
-  const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
-  if (apiHasAbortController(parentApi)) {
-    expressionAbortController$.next(parentApi.abortController);
-  }
+  const expressionAbortController$ = new BehaviorSubject<AbortController>(
+    apiHasAbortController(parentApi) ? parentApi.abortController : new AbortController()
+  );
   const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
     initialState.attributes || createEmptyLensState().attributes
   );
   const overrides$ = new BehaviorSubject(initialState.overrides);
-  const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
+  const disableTriggers$ = apiHasDisableTriggers(parentApi)
+    ? parentApi.disableTriggers$
+    : new BehaviorSubject(initialState.disableTriggers ?? false);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -109,17 +109,11 @@ export function initializeInternalApi(
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),
     updateOverrides: (overrides: LensOverrides['overrides']) => overrides$.next(overrides),
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
-    updateAbortController: (abortController: AbortController | undefined) =>
+    updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
-    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
-      disableTriggers$.next(disableTriggers),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
-    resetAllMessages: () => {
-      messages$.next([]);
-      validationMessages$.next([]);
-    },
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {

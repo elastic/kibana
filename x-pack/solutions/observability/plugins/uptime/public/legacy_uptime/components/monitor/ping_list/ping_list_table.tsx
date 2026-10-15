@@ -11,7 +11,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import * as I18LABELS from './translations';
 import type { FailedStepsApiResponse, Ping } from '../../../../../common/runtime_types';
 import { PingStatusColumn } from './columns/ping_status';

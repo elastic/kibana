@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { extractWorkflowMetadata } from '../../../../../common/lib/telemetry/utils/extract_workflow_metadata';
@@ -52,7 +52,7 @@ export const testWorkflowThunk = createAsyncThunk<
       }
 
       const response = await api.testWorkflow({
-        workflowYaml: yamlString,
+        workflowYaml: workflow?.permissions?.edit === false ? undefined : yamlString,
         workflowId: workflow?.id,
         inputs,
       });

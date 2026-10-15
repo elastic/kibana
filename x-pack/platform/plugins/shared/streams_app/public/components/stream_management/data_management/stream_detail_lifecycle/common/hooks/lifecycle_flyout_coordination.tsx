@@ -138,6 +138,7 @@ export const STREAM_LIFECYCLE_FLYOUT_IDS = {
   downsampleSteps: 'downsample-steps',
   failedLifecycle: 'failed-lifecycle',
   failedDeletePhase: 'failed-delete-phase',
+  importLifecycle: 'import-lifecycle',
 } as const;
 
 export type StreamLifecycleFlyoutId =

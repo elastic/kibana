@@ -10,8 +10,8 @@
 import { inspect } from 'util';
 
 import type { Page } from 'playwright';
-import callsites from 'callsites';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getCallsites } from '@kbn/test';
 import type { FtrConfigProvider } from '@kbn/test';
 import type { FtrProviderContext } from '../services/ftr_context_provider';
 import type { Es, KibanaServer, Retry, Auth } from '../services';
@@ -93,7 +93,7 @@ export class Journey<CtxExt extends object> {
    * x-pack/performance/journeys_e2e directory.
    */
   constructor(opts?: JourneyConfigOptions<CtxExt>) {
-    const path = callsites().at(1)?.getFileName();
+    const path = getCallsites().at(1)?.getFileName();
 
     if (!path) {
       throw new Error('unable to determine path of journey config file');

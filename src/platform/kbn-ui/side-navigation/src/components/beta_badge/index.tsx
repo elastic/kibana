@@ -33,7 +33,11 @@ interface BadgeConfig {
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
   const { euiTheme } = useEuiTheme();
   const isNew = type === 'new';
+  const shrinkStyles = css`
+    flex-shrink: 0;
+  `;
   const betaBadgeStyles = css`
+    ${shrinkStyles};
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
 
@@ -60,7 +64,11 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
   return (
     <EuiThemeProvider colorMode={isInverted ? 'dark' : undefined}>
       {isNew ? (
-        <EuiBadge children={config[type].label} color={euiTheme.colors.backgroundFilledPrimary} />
+        <EuiBadge
+          css={shrinkStyles}
+          children={config[type].label}
+          color={euiTheme.colors.backgroundFilledPrimary}
+        />
       ) : (
         <EuiBetaBadge
           css={betaBadgeStyles}

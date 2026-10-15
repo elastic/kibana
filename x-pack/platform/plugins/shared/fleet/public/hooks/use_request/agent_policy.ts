@@ -7,9 +7,10 @@
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 
 import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
+import type { SimplifiedVars } from '../../../common/services/simplified_package_policy_helper';
 
 import { agentPolicyRouteService } from '../../services';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, AGENT_POLICY_API_ROUTES } from '../../../common/constants';
 
 import type {
   GetAgentPoliciesRequest,
@@ -25,6 +26,8 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
@@ -61,17 +64,35 @@ export const useGetAgentPoliciesQuery = (
   });
 };
 
+export const useGetAgentPoliciesPackagePoliciesSummaryQuery = (
+  ids: GetAgentPoliciesPackagePoliciesSummaryRequest['body']['ids'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetAgentPoliciesPackagePoliciesSummaryResponse, RequestError>({
+    // Prefixed with `agentPolicies` so that invalidating the agent policies refreshes the summaries
+    queryKey: ['agentPolicies', 'packagePoliciesSummary', ids],
+    queryFn: () =>
+      sendRequestForRq<GetAgentPoliciesPackagePoliciesSummaryResponse>({
+        path: agentPolicyRouteService.getPackagePoliciesSummaryPath(),
+        method: 'post',
+        body: JSON.stringify({ ids }),
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+  });
+};
+
 export const useBulkGetAgentPoliciesQuery = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean; enabled?: boolean }
 ) => {
   return useQuery<BulkGetAgentPoliciesResponse, RequestError>(
-    ['agentPolicies', ids],
+    ['agentPolicies', ids, { full: options?.full, ignoreMissing: options?.ignoreMissing }],
     () =>
       sendRequestForRq<BulkGetAgentPoliciesResponse>({
         path: agentPolicyRouteService.getBulkGetPath(),
         method: 'post',
-        body: JSON.stringify({ ids, full: options?.full }),
+        body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
         version: API_VERSIONS.public.v1,
       }),
     {
@@ -303,3 +324,36 @@ export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) =>
       }),
   });
 };
+
+/**
+ * Creates an agent policy and its package policies in a single transactional server-side call.
+ *
+ * Route: POST /internal/fleet/agent_and_package_policies
+ *
+ * IMPORTANT: despite the /internal/ URL path, this route is registered at
+ * API_VERSIONS.public.v1 ('2023-10-31'). Using internal.v1 ('1') returns 400
+ * "Unsupported version". The version literal below must not be changed.
+ * See: fleet/server/routes/agent_policy/index.ts ~line 308.
+ *
+ * The handler is transactional: on failure it deletes all created package policies
+ * and the agent policy, then rethrows — so the caller gets a clean rollback.
+ */
+export const sendCreateAgentPolicyWithPackagePolicies = (
+  body: CreateAgentPolicyRequest['body'] & {
+    package_policies: Array<{
+      name: string;
+      package: { name: string; version: string };
+      vars?: SimplifiedVars;
+      inputs?: Record<string, unknown>;
+      namespace?: string;
+    }>;
+  },
+  query?: { sys_monitoring?: boolean }
+) =>
+  sendRequestForRq<CreateAgentPolicyResponse>({
+    path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICIES,
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    query,
+    body: JSON.stringify(body),
+  });

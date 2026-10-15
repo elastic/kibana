@@ -17,9 +17,10 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { css } from '@emotion/react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTitles, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiIsPresentationContainer,
+  getViewModeSubject,
   initializeStateApi,
   initializeTitleManager,
   titleComparators,
@@ -208,10 +209,17 @@ export const getLinksEmbeddableFactory = () => {
             },
           });
         },
+        supportsJsonExport: true,
       });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       const Component = () => {
-        const [resolvedLinks, layout] = useBatchedPublishingSubjects(resolvedLinks$, layout$);
+        const [resolvedLinks, layout, viewMode] = useBatchedPublishingSubjects(
+          resolvedLinks$,
+          layout$,
+          viewMode$
+        );
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           if (!resolvedLinks) return {};
@@ -227,18 +235,21 @@ export const getLinksEmbeddableFactory = () => {
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
                       parentApi={parentApi as LinksParentApi}
+                      viewMode={viewMode}
                     />
                   ) : (
                     <ExternalLinkComponent
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      viewMode={viewMode}
                     />
                   ),
               },
             };
           }, {});
-        }, [resolvedLinks, layout]);
+        }, [resolvedLinks, layout, viewMode]);
+
         return (
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
@@ -246,8 +257,6 @@ export const getLinksEmbeddableFactory = () => {
             color="transparent"
             hasShadow={false}
             hasBorder={false}
-            data-shared-item
-            data-rendering-count={1}
             data-test-subj="links--component"
             borderRadius="none"
           >

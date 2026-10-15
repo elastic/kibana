@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -18,7 +18,7 @@ import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_co
 export const GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID =
   'security.get_installed_rules_mitre_coverage';
 
-export const getInstalledRulesMitreCoverageSchema = z.object({}).strict();
+export const getInstalledRulesMitreCoverageSchema = lazySchema(() => z.object({}).strict());
 
 const MAX_INSTALLED_RULES = 10000;
 
@@ -125,7 +125,7 @@ export const createGetInstalledRulesMitreCoverageTool = ({
     'Includes total rule count, count with MITRE mappings, and per-tactic and per-technique ' +
     'rule counts. ' +
     'Only returns tactics and techniques with count > 0 — absence means zero coverage. ' +
-    'The canonical 14-tactic list is in the skill prompt; use it to identify missing tactics. ' +
+    'The canonical 15-tactic list is in the skill prompt; use it to identify missing tactics. ' +
     'Session-cached — do not call again in the same conversation.',
   schema: getInstalledRulesMitreCoverageSchema,
   handler: async (_input, { request }) => {

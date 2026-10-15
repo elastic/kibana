@@ -66,8 +66,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, from, map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
@@ -76,6 +76,11 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+  type ApmSharedPluginStart,
+} from '@kbn/apm-shared/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
@@ -102,16 +107,14 @@ import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
-import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
-import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
-import { registerServiceMapAttachment } from './agent_builder/attachment_types';
-import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../common/cps_feature_flag';
+  registerServiceMapAttachment,
+  registerServiceMapContextAttachment,
+} from './agent_builder/attachment_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -149,8 +152,31 @@ export interface ApmInternalServices {
   callApmApi: APMClientV2;
 }
 
-export const [getApmInternalServices, setApmInternalServices] =
+const [getApmInternalServices, publishApmInternalServices] =
   createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
+
+export { getApmInternalServices };
+
+const cpsManager$ = new BehaviorSubject<ICPSManager | undefined>(undefined);
+
+/**
+ * Publishes the internal services and notifies `apmCpsManager$` subscribers.
+ */
+export const setApmInternalServices = (services: ApmInternalServices): void => {
+  publishApmInternalServices(services);
+  cpsManager$.next(services.cpsManager);
+};
+
+/** Reads the currently published CPS manager, which is only set while the APM CPS flag is enabled. */
+export const getApmCpsManager = (): ICPSManager | undefined => cpsManager$.getValue();
+
+/**
+ * Emits the published CPS manager, so consumers that rendered before the CPS flag resolved
+ * resubscribe to it instead of caching its absence for their whole lifetime.
+ */
+export const apmCpsManager$: Observable<ICPSManager | undefined> = cpsManager$.pipe(
+  distinctUntilChanged()
+);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -190,13 +216,14 @@ export interface ApmPluginStartDeps {
   apmSourcesAccess: ApmSourceAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  share?: SharePublicStart;
+  share: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
   cps?: CPSPluginStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -238,6 +265,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private cpsEnabledSubscription?: Subscription;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -528,39 +556,44 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet, discoverShared } = plugins;
-    const isCpsEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-    );
+    const { fleet } = plugins;
 
-    // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
-    let _api: APMClientV2 | undefined;
-    const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
-      if (_api) return _api(endpoint, options);
-      return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
-        _api = createCallApmApiV2(core, {
-          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
-        });
-        return _api(endpoint, options);
-      });
-    }) as APMClientV2;
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-service-flyout',
+      renderServiceFlyout: createServiceFlyoutRenderer({
+        share: plugins.share,
+        core,
+        lens: plugins.lens,
+        dataViews: plugins.dataViews,
+        alerting: plugins.alerting,
+        telemetryClient: this.telemetry.start(),
+      }),
+    });
 
-    const ApmInternalServices: ApmInternalServices = {
-      callApmApi,
+    const apmInternalServices: ApmInternalServices = {
+      callApmApi: plugins.apmShared.callApmApi,
     };
 
-    if (isCpsEnabled) {
-      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-      setApmInternalServices({
-        ...ApmInternalServices,
-        cpsManager: plugins.cps?.cpsManager,
+    this.cpsEnabledSubscription = core.featureFlags
+      .getBooleanValue$(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+      .subscribe((isCpsEnabled) => {
+        // Registering DISABLED matches the access the CPS manager resolves for an unregistered app,
+        // so the picker follows the flag when it is turned off after having been on.
+        plugins.cps?.cpsManager?.registerAppAccess('apm', () =>
+          isCpsEnabled ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+        );
+        setApmInternalServices({
+          ...apmInternalServices,
+          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
+        });
       });
-    } else {
-      setApmInternalServices(ApmInternalServices);
-    }
+
     if (plugins.agentBuilder) {
-      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      registerServiceMapAttachment(plugins.agentBuilder.attachments);
+      registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
@@ -568,16 +601,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-focused-trace-waterfall',
-      render: createLazyFocusedTraceWaterfallRenderer({ core }),
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-full-trace-waterfall',
-      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {
@@ -615,5 +638,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+  }
+
+  public stop() {
+    this.cpsEnabledSubscription?.unsubscribe();
   }
 }

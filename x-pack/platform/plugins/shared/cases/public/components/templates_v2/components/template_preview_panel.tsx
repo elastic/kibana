@@ -85,7 +85,9 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       description: template.caseDefaults?.description,
       tags: template.caseDefaults?.tags,
       severity: template.caseDefaults?.severity,
-      category: template.caseDefaults?.category,
+      // caseDefaults.category may be null on the summary type; the definition no longer allows null,
+      // so coerce an absent category to undefined ("no default").
+      category: template.caseDefaults?.category ?? undefined,
       assignees: template.caseDefaults?.assignees,
       fields: template.definition.fields,
     };

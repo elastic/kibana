@@ -27,7 +27,7 @@ import { SeverityBar } from '../../../../../entity_analytics/components/severity
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
@@ -100,6 +100,8 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
                     attackId: item.id,
                     indexName: dataView.getIndexPattern(),
                     onAttackUpdated: refetch,
+                    origin: FLYOUT_ORIGIN.ATTACKS_KPI,
+                    attackTitle: item.name,
                   });
                 } else {
                   openFlyout({

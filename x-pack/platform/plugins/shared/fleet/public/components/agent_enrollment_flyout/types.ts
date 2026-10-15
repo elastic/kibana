@@ -70,6 +70,12 @@ export interface FlyOutProps extends BaseProps {
   onClose: () => void;
   defaultMode?: FlyoutMode;
   selectedAgentPolicies?: AgentPolicy[];
+  hideIncomingDataStep?: boolean;
+  /** When true, suppresses the "View enrolled agents" button on the confirmation step. */
+  hideViewAgentsButton?: boolean;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }
 
 export interface InstructionProps extends BaseProps {
@@ -79,7 +85,7 @@ export interface InstructionProps extends BaseProps {
   setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;
-  onClickViewAgents: () => void;
+  onClickViewAgents?: () => void;
   mode: FlyoutMode;
   setMode: (v: FlyoutMode) => void;
   selectionType: SelectionType;
@@ -91,4 +97,8 @@ export interface InstructionProps extends BaseProps {
   fleetProxy?: EnrollmentSettingsProxy;
   downloadSource?: DownloadSource;
   downloadSourceProxy?: EnrollmentSettingsProxy;
+  hideIncomingDataStep?: boolean;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }

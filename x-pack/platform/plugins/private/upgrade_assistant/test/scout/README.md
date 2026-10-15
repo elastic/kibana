@@ -16,7 +16,3 @@ The `ui`, `api`, and `scout_upgrade_assistant_integration/api` specs intentional
 remain skipped while
 https://github.com/elastic/kibana/issues/266002 is unresolved. This preserves the
 state of the migrated FTR suites.
-
-The remaining archive-heavy suite is still out of scope for this Scout tree:
-
-- `x-pack/platform/test/reindex_service`

@@ -10,14 +10,9 @@ import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from './monitor_page_link';
 import type { CertMonitor } from '../../../../../common/runtime_types';
+import { getLoadedFromRemoteOriginTooltip } from '../../utils/remote/remote_origin_copy';
 
 const DEFAULT_DISPLAY_COUNT = 10;
-
-const getRemoteClusterLabel = (remoteName: string) =>
-  i18n.translate('xpack.synthetics.certs.monitors.remoteClusterTooltip', {
-    defaultMessage: 'Loaded from remote cluster {remoteName}',
-    values: { remoteName },
-  });
 
 interface Props {
   monitors: CertMonitor[];
@@ -36,10 +31,12 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
           <EuiToolTip
             content={mon.url}
             title={
-              mon.remote?.remoteName ? getRemoteClusterLabel(mon.remote.remoteName) : undefined
+              mon.remote?.remoteName
+                ? getLoadedFromRemoteOriginTooltip(mon.remote.remoteName)
+                : undefined
             }
           >
-            <MonitorPageLink configId={mon.configId!} remote={mon.remote}>
+            <MonitorPageLink configId={mon.configId!} remote={mon.remote} spaces={mon.spaces}>
               {mon.name || mon.id}
             </MonitorPageLink>
           </EuiToolTip>

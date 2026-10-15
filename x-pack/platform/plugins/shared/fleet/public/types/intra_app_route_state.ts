@@ -35,6 +35,15 @@ export interface CreatePackagePolicyRouteState {
   onSaveQueryParams?: {
     [key in OnSaveQueryParamKeys]?: OnSaveQueryParamOpts;
   };
+  /**
+   * Optional marker indicating that this add-integration page was reached via a known onboarding
+   * quick-start flow. Used to gate funnel telemetry — events are only emitted for instrumented
+   * flows, not for every direct integration install.
+   *
+   * Current values:
+   * - 'aws_quickstart': navigated from the observability_onboarding AWS CloudWatch quick-start card.
+   */
+  telemetrySource?: 'aws_quickstart';
 }
 
 /**

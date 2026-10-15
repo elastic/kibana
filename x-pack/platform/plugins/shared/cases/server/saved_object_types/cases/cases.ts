@@ -27,6 +27,8 @@ import {
   modelVersion7,
   modelVersion8,
   modelVersion9,
+  modelVersion10,
+  modelVersion11,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -48,6 +50,18 @@ export const createCaseSavedObjectType = (
         properties: {
           uid: {
             type: 'keyword',
+          },
+          username: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          full_name: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          email: {
+            type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },
@@ -196,6 +210,10 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      extract_observables_source: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
       severity: {
         type: 'short',
       },
@@ -301,6 +319,8 @@ export const createCaseSavedObjectType = (
     7: modelVersion7,
     8: modelVersion8,
     9: modelVersion9,
+    10: modelVersion10,
+    11: modelVersion11,
   },
   management: {
     importableAndExportable: true,

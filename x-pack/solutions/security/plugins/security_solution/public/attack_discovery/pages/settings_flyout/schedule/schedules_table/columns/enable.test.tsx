@@ -48,7 +48,10 @@ describe('Enable Column', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          useBooleanValue: jest.fn().mockReturnValue(false),
+        },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(false),
         },
       },
     });
@@ -99,7 +102,10 @@ describe('Enable Column', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
           },
         },
       });
@@ -145,7 +151,10 @@ describe('Enable Column', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
           },
         },
       });

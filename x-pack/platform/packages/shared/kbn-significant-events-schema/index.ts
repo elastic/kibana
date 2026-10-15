@@ -19,12 +19,10 @@ export {
   QUERY_TYPE_STATS,
   bulkStreamQueryInputSchema,
   esqlQuerySchema,
-  isDurable,
   isExpirable,
   isExpired,
   queryFeatureSchema,
   queryTypeSchema,
-  streamQuerySchema,
   upsertStreamQueryRequestSchema,
 } from './src/queries';
 
@@ -44,7 +42,6 @@ export {
   type Feature,
   type FeatureUpsert,
   type FeatureWithFilter,
-  type IdentifiedFeature,
   type IgnoredFeature,
   CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
@@ -62,52 +59,75 @@ export {
   ignoredFeatureSchema,
   isComputedFeature,
   isDuplicateFeature,
-  isFeature,
   isFeatureWithFilter,
+  MAX_FEATURE_ARRAY_ITEMS,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
-export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export type { IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
-  type Discovery,
+  type ChangePointType,
+  CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventStatus,
+  type SignificantEventManualStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   type SignificantEventInvestigation,
-  type InvestigationHypothesis,
-  type InvestigationState,
+  type InvestigationRunStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  INVESTIGATION_PROGRESS_UI_EVENT,
-  INVESTIGATE_STEP_ID,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type SignalVerdict,
+  type Severity,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  SEVERITY_CONTRACT_RULE,
+  getSeverityLabel,
   detectionSchema,
-  discoverySchema,
-  discoveryDetectionSchema,
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  SIGNAL_VERDICTS,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
+  SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
-  investigationStateSchema,
+  MAX_SHORT_STRING_LENGTH,
+  MAX_MEDIUM_STRING_LENGTH,
+  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './src/significant_events';
 
 export type {
@@ -123,21 +143,7 @@ export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
 
-export {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
-} from './src/inference_feature_ids';
+export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
+export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
-export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export type {
-  RelayClaimResponse,
-  RelayClientContract,
-  RelayInstallRequest,
-  RelayInstallResponse,
-} from './src/relay_client';
+export { NIGHTSHIFT_DEFAULT_MODELS, type NightshiftModelStep } from './src/nightshift_models';

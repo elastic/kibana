@@ -38,7 +38,7 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { ALERT_DETAILS_TOGGLE_ARIA_LABEL, GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
@@ -50,6 +50,7 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
 `;
 
 const CHART_HEIGHT = 155; // px
+const COLLAPSED_HEIGHT = 64; // px
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -222,7 +223,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <KpiPanel
-        height={panelHeight}
+        height={showHistogram ? panelHeight : COLLAPSED_HEIGHT}
         hasBorder
         paddingSize={paddingSize}
         data-test-subj="alerts-histogram-panel"
@@ -237,6 +238,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           titleSize={titleSize}
           toggleStatus={showHistogram}
           toggleQuery={hideQueryToggle ? undefined : toggleQuery}
+          toggleAriaLabel={ALERT_DETAILS_TOGGLE_ARIA_LABEL}
           showInspectButton={false}
           subtitle={subtitle}
           isInspectDisabled={false}

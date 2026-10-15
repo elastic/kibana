@@ -8,8 +8,8 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';

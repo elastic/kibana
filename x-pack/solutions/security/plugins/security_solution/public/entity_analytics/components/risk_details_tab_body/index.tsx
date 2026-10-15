@@ -8,8 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
-import { useUiSetting } from '../../../common/lib/kibana';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -19,11 +17,11 @@ import { usersSelectors } from '../../../explore/users/store';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { buildEntityNameFilter, EntityType } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
-import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useEntityRiskScores } from '../../api/hooks/use_entity_risk_scores';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
@@ -35,13 +33,11 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
 const RiskDetailsTabBodyComponent: React.FC<
-  Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-    entityName: string;
+  Pick<ComponentsQueryProps, 'setQuery' | 'deleteQuery'> & {
     entityId?: string;
     riskEntity: EntityType;
   }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity, entityId }) => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+> = ({ setQuery, deleteQuery, riskEntity, entityId }) => {
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host
@@ -56,32 +52,17 @@ const RiskDetailsTabBodyComponent: React.FC<
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
-  const timerange = useMemo(
-    () => ({
-      from: startDate,
-      to: endDate,
-    }),
-    [startDate, endDate]
-  );
-
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
-  const filterQuery = useMemo(() => {
-    if (entityStoreV2Enabled && entityId != null) {
-      return buildEntityNameFilter(riskEntity, [entityId]);
-    }
-
-    return entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {};
-  }, [entityStoreV2Enabled, entityId, entityName, riskEntity]);
-
-  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
-    filterQuery,
-    onlyLatest: false,
+  // Filters by `<entity>.risk.id_value` (the EUID) and returns records including
+  // `risk.inputs`, which the contributors panel needs. Passing `undefined` skips the query.
+  const { base: entityStoreRiskScore } = useEntityRiskScores(
     riskEntity,
-    skip: !contributorsToggleStatus,
-    timerange,
-  });
+    contributorsToggleStatus ? entityId : undefined
+  );
+
+  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = entityStoreRiskScore;
 
   useQueryInspector({
     queryId,

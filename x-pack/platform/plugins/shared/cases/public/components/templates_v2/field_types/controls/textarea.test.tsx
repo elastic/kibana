@@ -19,11 +19,13 @@ jest.mock('@elastic/eui', () => {
     EuiMarkdownEditor: ({
       value,
       onChange,
+      readOnly,
       'aria-label': ariaLabel,
       'data-test-subj': dataTestSubj,
     }: {
       value: string;
       onChange: (value: string) => void;
+      readOnly?: boolean;
       'aria-label': string;
       'data-test-subj': string;
     }) => (
@@ -32,6 +34,7 @@ jest.mock('@elastic/eui', () => {
         aria-label={ariaLabel}
         value={value}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+        disabled={readOnly}
       />
     ),
   };
@@ -44,6 +47,7 @@ interface FormWrapperProps {
   patternValidation?: { regex: string; message?: string };
   minLengthValue?: number;
   maxLengthValue?: number;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -54,6 +58,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   patternValidation,
   minLengthValue,
   maxLengthValue,
+  isSaving,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -83,6 +88,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         patternValidation={patternValidation}
         minLength={minLengthValue}
         maxLength={maxLengthValue}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -99,6 +105,12 @@ describe('Textarea', () => {
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
       expect(screen.queryByTestId('template-field-markdown-editor')).not.toBeInTheDocument();
+    });
+
+    it('disables the textarea while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      expect(screen.getByRole('textbox')).toBeDisabled();
     });
 
     it('renders the label', () => {
@@ -146,6 +158,12 @@ describe('Textarea', () => {
       render(<FormWrapper markdown onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByTestId('template-field-markdown-editor')).toBeInTheDocument();
+    });
+
+    it('makes the markdown editor read-only while saving', () => {
+      render(<FormWrapper markdown isSaving onSubmitResult={jest.fn()} />);
+
+      expect(screen.getByTestId('template-field-markdown-editor')).toBeDisabled();
     });
 
     it('renders EuiTextArea when metadata.markdown is false', () => {

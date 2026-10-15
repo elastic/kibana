@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import pMap from 'p-map';
+import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import {
+  ALERT_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   ALERT_WORKFLOW_REASON,
@@ -18,6 +26,11 @@ import {
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+  toReadableAttackIndexPattern,
+} from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -28,12 +41,15 @@ import type {
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { CasesEventBus } from '../../events/event_bus';
 
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger,
-    private readonly alertsClient: PublicMethodsOf<AlertsClient>
+    private readonly alertsClient: PublicMethodsOf<AlertsClient>,
+    private readonly casesEventBus?: CasesEventBus,
+    private readonly request?: KibanaRequest
   ) {}
 
   public async executeAggregations({
@@ -88,9 +104,23 @@ export class AlertService {
 
   public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]): Promise<number> {
     try {
-      // Map of <index, <alert status, <alert close reason, alerts to update>>
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
+
+      let prefetchResult:
+        | { previousStatusMap: Map<string, STATUS_VALUES>; changeableKeys: Set<string> }
+        | undefined;
+      if (this.casesEventBus?.hasAlertStatusChangedListeners() && this.request) {
+        try {
+          prefetchResult = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
+            retries: 3,
+          });
+        } catch (err) {
+          this.logger.warn(
+            `Failed to prefetch previous alert statuses for Cases event bus: ${err}`
+          );
+        }
+      }
 
       const updateResults = await pMap(
         indexBuckets,
@@ -98,12 +128,167 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
+      if (this.casesEventBus && this.request && prefetchResult !== undefined) {
+        // Isolate event dispatch: a listener exception must not change the mutation result.
+        try {
+          this.emitStatusChangedEvents(
+            alerts,
+            prefetchResult.previousStatusMap,
+            prefetchResult.changeableKeys,
+            this.casesEventBus,
+            this.request
+          );
+        } catch (err) {
+          this.logger.error(`Failed to emit alertStatusChanged events: ${err}`);
+        }
+      }
+
       return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
         error,
         logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * True when the document has a non-null workflow status field. `getUpdateAlertsStatusScript`
+   * sets `ctx.op = 'noop'` when both `kibana.alert.workflow_status` and `signal.status` are
+   * null or missing, so such documents never transition and must not emit status events.
+   */
+  private static hasWorkflowStatusField(source: unknown): boolean {
+    if (typeof source !== 'object' || source === null) return false;
+    const s = source as Record<string, unknown>;
+    if (s[ALERT_WORKFLOW_STATUS] != null) return true;
+    const signal = s.signal;
+    return (
+      typeof signal === 'object' &&
+      signal !== null &&
+      (signal as Record<string, unknown>).status != null
+    );
+  }
+
+  private static parseWorkflowStatus(source: unknown): STATUS_VALUES | undefined {
+    if (typeof source !== 'object' || source === null) return undefined;
+    const s = source as Record<string, unknown>;
+    const modern = s[ALERT_WORKFLOW_STATUS];
+    if (modern != null) {
+      // A non-null modern field is authoritative; do not fall back to signal.status.
+      if (
+        modern === 'open' ||
+        modern === 'acknowledged' ||
+        modern === 'in-progress' ||
+        modern === 'closed'
+      ) {
+        return modern;
+      }
+      return undefined;
+    }
+    // Legacy .siem-signals documents only have signal.status; use it as a fallback.
+    const signal = s.signal;
+    if (typeof signal === 'object' && signal !== null) {
+      const legacy = (signal as Record<string, unknown>).status;
+      if (
+        legacy === 'open' ||
+        legacy === 'acknowledged' ||
+        legacy === 'in-progress' ||
+        legacy === 'closed'
+      ) {
+        return legacy as STATUS_VALUES;
+      }
+    }
+    return undefined;
+  }
+
+  private async prefetchPreviousStatuses(alerts: UpdateAlertStatusRequest[]): Promise<{
+    previousStatusMap: Map<string, STATUS_VALUES>;
+    // Keys of documents the update script can actually mutate, i.e. found AND carrying a
+    // non-null status field. Narrower than "found" on purpose: a status-less attachment is
+    // a guaranteed Elasticsearch no-op and must not start a workflow.
+    changeableKeys: Set<string>;
+  }> {
+    const docs = alerts.reduce<Array<{ _id: string; _index: string }>>((acc, a) => {
+      if (!AlertService.isEmptyAlert(a)) {
+        acc.push({ _id: a.id, _index: a.index });
+      }
+      return acc;
+    }, []);
+    if (docs.length === 0) return { previousStatusMap: new Map(), changeableKeys: new Set() };
+    const response = await this.scopedClusterClient.mget({
+      docs,
+      _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
+    });
+    const previousStatusMap = new Map<string, STATUS_VALUES>();
+    const changeableKeys = new Set<string>();
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._id != null && doc._index != null) {
+        const key = `${doc._index}:${doc._id}`;
+        // Track status-field presence separately from parseWorkflowStatus, which returns
+        // undefined both for an invalid non-null status (a real, repairable transition)
+        // and for a document with no status field at all (an Elasticsearch no-op).
+        if (AlertService.hasWorkflowStatusField(doc._source)) {
+          changeableKeys.add(key);
+        }
+        const previousStatus = AlertService.parseWorkflowStatus(doc._source);
+        if (previousStatus !== undefined) {
+          previousStatusMap.set(key, previousStatus);
+        }
+      }
+    }
+    return { previousStatusMap, changeableKeys };
+  }
+
+  private emitStatusChangedEvents(
+    alerts: UpdateAlertStatusRequest[],
+    previousStatusMap: Map<string, STATUS_VALUES>,
+    changeableKeys: Set<string>,
+    casesEventBus: CasesEventBus,
+    request: KibanaRequest
+  ) {
+    const idToIndex = new Map<string, string>();
+    const byStatus = new Map<STATUS_VALUES, string[]>();
+    for (const alert of alerts) {
+      if (!AlertService.isEmptyAlert(alert)) {
+        const translatedStatus = this.translateStatus(alert);
+        const key = `${alert.index}:${alert.id}`;
+        const previousStatus = previousStatusMap.get(key);
+        // Emit only for alerts the update script can mutate (found, with a non-null status
+        // field) whose status is actually changing. Alerts with an unrecognized stored
+        // status (previousStatus === undefined) are included — the mutation still succeeds
+        // and the event schema does not require a previousStatuses row for every emitted ID.
+        const isActualChange = changeableKeys.has(key) && previousStatus !== translatedStatus;
+        if (isActualChange) {
+          idToIndex.set(alert.id, alert.index);
+          const bucket = byStatus.get(translatedStatus);
+          if (bucket !== undefined) {
+            bucket.push(alert.id);
+          } else {
+            byStatus.set(translatedStatus, [alert.id]);
+          }
+        }
+      }
+    }
+    for (const [status, alertIds] of byStatus) {
+      const indicesSet = new Set<string>();
+      for (const id of alertIds) {
+        const index = idToIndex.get(id);
+        if (index !== undefined) {
+          indicesSet.add(index);
+        }
+      }
+      casesEventBus.emitAlertStatusChanged(request, {
+        alertIds,
+        status,
+        previousStatuses: alertIds.flatMap((id) => {
+          const index = idToIndex.get(id);
+          const previousStatus =
+            index !== undefined ? previousStatusMap.get(`${index}:${id}`) : undefined;
+          return previousStatus !== undefined ? [{ id, previousStatus }] : [];
+        }),
+        alertIdToIndex: Object.fromEntries(idToIndex),
+        indices: Array.from(indicesSet),
       });
     }
   }
@@ -273,12 +458,246 @@ export class AlertService {
         return;
       }
 
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an alert');
+
       await this.alertsClient.ensureAllAlertsAuthorizedRead({
         alerts: nonEmptyAlerts,
       });
     } catch (error) {
       throw createCaseError({
         message: `Failed to authorize alerts: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Rejects CPS/CCS index references before any `mget` — rule_registry's own authorization check
+   * silently skips (doesn't throw) a hit missing `_source`, which is what a cross-project `mget` returns.
+   */
+  private rejectNonLocalIndices(alerts: AlertInfo[], label: string): void {
+    const nonLocalAlert = alerts.find((alert) => isNonLocalIndexName(alert.index));
+
+    if (nonLocalAlert != null) {
+      throw Boom.badRequest(
+        `Cannot attach ${label} from a linked project or remote cluster index: ${nonLocalAlert.index}`
+      );
+    }
+  }
+
+  /**
+   * Authorizes attack attachments, which reference an attack discovery AAD alert.
+   *
+   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
+   * every document that carries those fields, and silently accepts a document that is missing, is
+   * not an alert, or belongs to another space. The status sync later writes to the reference by id
+   * alone, so all three are rejected here, before the attachment is persisted.
+   *
+   * Scheduled, ad-hoc and dev-only generator discoveries are all accepted, but only scheduled ones
+   * reach alerting RBAC — see `ensureScheduledAttacksAuthorized`. The read itself runs as the
+   * caller against an index pattern rather than the index on the attachment — see
+   * `fetchAttackAuthorizationSources`.
+   */
+  public async ensureAttacksAuthorized({
+    attacks,
+    spaceId,
+  }: {
+    attacks: AlertInfo[];
+    spaceId: string;
+  }): Promise<void> {
+    try {
+      const nonEmptyAttacks = this.getNonEmptyAlerts(attacks);
+
+      if (nonEmptyAttacks.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+
+      const sourcesById = await this.fetchAttackAuthorizationSources(nonEmptyAttacks);
+
+      const missingIds = nonEmptyAttacks
+        .filter((attack) => !sourcesById.has(attack.id))
+        .map((attack) => attack.id);
+
+      if (missingIds.length > 0) {
+        throw Boom.badRequest(`Referenced attack(s) not found: ${missingIds.join(', ')}`);
+      }
+
+      const invalidIds = nonEmptyAttacks
+        .filter((attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id), spaceId))
+        .map((attack) => attack.id);
+
+      if (invalidIds.length > 0) {
+        throw Boom.badRequest(
+          `Referenced document(s) are not attack discoveries in space ${spaceId}: ${invalidIds.join(
+            ', '
+          )}`
+        );
+      }
+
+      await this.ensureScheduledAttacksAuthorized(nonEmptyAttacks, sourcesById);
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to authorize attacks: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Reads the authorization fields of each referenced attack, as the caller.
+   *
+   * Deliberately a search over an index *pattern* rather than an `mget` against the index the
+   * attachment carries. `metadata.index` snapshots the attack document's `_index`, which is the
+   * concrete backing index (`.internal.alerts-security.attack.discovery.alerts-default-000001`),
+   * and alert index privileges are only ever granted on the alias family
+   * (`.alerts-security.attack.discovery.alerts*`). Addressing the backing index therefore fails
+   * with a security exception for every non-superuser, which this method would read as "not
+   * found" and reject the attach.
+   *
+   * The alias on its own would not do either: single-document operations against an alias fail
+   * once it spans more than one index, which is exactly what happens on the first rollover.
+   *
+   * Results are keyed by `_id` because a search returns only the documents it found, in relevance
+   * order. Attack discovery alert ids are unique across both index families, so this cannot
+   * conflate two documents, and it never compares the caller-supplied index against the one
+   * Elasticsearch resolved — see `ensureScheduledAttacksAuthorized` for why that matters.
+   */
+  private async fetchAttackAuthorizationSources(
+    attacks: AlertInfo[]
+  ): Promise<Map<string, AttackAuthorizationFields | undefined>> {
+    const idsByPattern = new Map<string, string[]>();
+
+    for (const attack of attacks) {
+      const pattern = toReadableAttackIndexPattern(attack.index);
+      idsByPattern.set(pattern, [...(idsByPattern.get(pattern) ?? []), attack.id]);
+    }
+
+    const sourcesById = new Map<string, AttackAuthorizationFields | undefined>();
+
+    await pMap(
+      Array.from(idsByPattern.entries()),
+      async ([index, ids]) => {
+        const { hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
+          index,
+          size: ids.length,
+          query: { ids: { values: ids } },
+          _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+          // A pattern that currently resolves to nothing is a missing attack, not a failure.
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+
+        for (const hit of hits.hits) {
+          if (hit._id != null) {
+            sourcesById.set(hit._id, hit._source);
+          }
+        }
+      },
+      { concurrency: MAX_CONCURRENT_SEARCHES }
+    );
+
+    return sourcesById;
+  }
+
+  /**
+   * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
+   *
+   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
+   * sentinel the alerting framework never registers and no feature privilege grants, so
+   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
+   * superuser. They carry no privacy of their own — the generating user is recorded on the
+   * document so it can be filtered on, not hidden — so the caller-scoped search that produced
+   * `sourcesById` is the authorization: it is the same Elasticsearch index privilege gate the
+   * attack discovery APIs read ad-hoc discoveries with, and the one the status sync writes
+   * through.
+   *
+   * Pairing is by `_id` and never by index name. That is load-bearing: the index on the
+   * attachment is caller-controlled and is not the one Elasticsearch resolves the document from,
+   * so matching the two would find nothing, leave `scheduledAttacks` empty, and skip alerting
+   * RBAC entirely for a caller that named the alias.
+   */
+  private async ensureScheduledAttacksAuthorized(
+    attacks: AlertInfo[],
+    sourcesById: Map<string, AttackAuthorizationFields | undefined>
+  ): Promise<void> {
+    const scheduledAttacks = attacks.filter((attack) =>
+      AlertService.isScheduledAttack(sourcesById.get(attack.id))
+    );
+
+    if (scheduledAttacks.length <= 0) {
+      return;
+    }
+
+    await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: scheduledAttacks });
+  }
+
+  /**
+   * The rule types that write attack discovery alerts.
+   *
+   * Scheduled and ad hoc are the two production producers. The data generator is a dev-only rule
+   * type that writes through the same AAD config into the same index, so its documents are attack
+   * discoveries too; it is registered only in dev mode or on Elastic-staff-owned cloud
+   * deployments, so recognising it here does not widen production exposure. Rejecting it made the
+   * feature untestable with the generator everyone desk tests with.
+   */
+  private static isAttackDiscoveryRuleType(ruleTypeId: string | undefined): boolean {
+    return (
+      ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID
+    );
+  }
+
+  private static isAttackInSpace(
+    source: AttackAuthorizationFields | undefined,
+    spaceId: string
+  ): boolean {
+    if (source == null) {
+      return false;
+    }
+
+    const spaceIds = source[SPACE_IDS];
+
+    return (
+      AlertService.isAttackDiscoveryRuleType(source[ALERT_RULE_TYPE_ID]) &&
+      Array.isArray(spaceIds) &&
+      spaceIds.includes(spaceId)
+    );
+  }
+
+  private static isScheduledAttack(source: AttackAuthorizationFields | undefined): boolean {
+    return source?.[ALERT_RULE_TYPE_ID] === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
+  }
+
+  /**
+   * Existence check for non-alert indexed attachments (events) — no alerting RBAC, and CPS/CCS
+   * refs are rejected before `mget`.
+   */
+  public async ensureDocumentsExist({ alerts }: { alerts: AlertInfo[] }): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an event');
+
+      const results = await this.getAlerts(nonEmptyAlerts);
+      const missingEventIds = (results?.docs ?? [])
+        .filter((doc) => !('found' in doc && doc.found))
+        .map((doc) => doc._id);
+
+      if (missingEventIds.length > 0) {
+        throw Boom.badRequest(`Referenced event(s) not found: ${missingEventIds.join(', ')}`);
+      }
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to verify referenced events exist: ${error}`,
         error,
         logger: this.logger,
       });
@@ -375,6 +794,12 @@ export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
+}
+
+/** The only `_source` fields `ensureAttacksAuthorized` reads back from the referenced document. */
+interface AttackAuthorizationFields {
+  [ALERT_RULE_TYPE_ID]?: string;
+  [SPACE_IDS]?: string[];
 }
 
 interface AlertIdIndex {

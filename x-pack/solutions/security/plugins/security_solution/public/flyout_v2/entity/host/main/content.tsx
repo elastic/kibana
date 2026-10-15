@@ -20,13 +20,14 @@ import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_
 import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
@@ -59,8 +60,10 @@ export interface ContentProps {
   entityRecord?: Entity;
   /** Refetch entity store record after AI summary persist (v2). */
   refetchEntityRecord?: () => void;
-  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
-  skipRiskAndCriticality?: boolean;
+  /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
+  noEntityInStore?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
@@ -83,6 +86,16 @@ export interface ContentProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * Inspect query id for {@link FlyoutRiskSummary}. Callers must pass a stable id that matches
+   * their `useQueryInspector` registration
+   */
+  riskScoreQueryId: string;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
 }
 
 /**
@@ -101,14 +114,19 @@ export const Content = ({
   isPreviewMode,
   entityRecord,
   refetchEntityRecord,
-  skipRiskAndCriticality = false,
+  noEntityInStore = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
   onShowEntity,
+  riskScoreQueryId,
+  isGroupView = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
@@ -124,9 +142,24 @@ export const Content = ({
   const hostName =
     identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '';
 
+  const resolutionSection =
+    entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.host}
+          scopeId={scopeId}
+          openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
+
   return (
     <>
-      {!skipRiskAndCriticality && (
+      {!noEntityInStore && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity?.id ?? hostName : hostName}
           entityType={EntityType.host}
@@ -134,7 +167,7 @@ export const Content = ({
           refetchEntityRecord={refetchEntityRecord}
         />
       )}
-      {!skipRiskAndCriticality &&
+      {!noEntityInStore &&
         riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
@@ -143,16 +176,18 @@ export const Content = ({
               riskScoreData={riskScoreState}
               entityRiskScores={entityRiskScores}
               recalculatingScore={recalculatingScore}
-              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              queryId={riskScoreQueryId}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity?.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
+              isGroupView={isGroupView}
             />
             <EuiHorizontalRule />
           </>
         )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {loadAnomalies &&
         (anomalyOverview.isLoading || anomalyOverview.isError || anomalyOverview.data) && (
           <>
@@ -179,20 +214,8 @@ export const Content = ({
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.host}
-            scopeId={scopeId}
-            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
-      {!skipRiskAndCriticality && !entityRecord && (
+      {!isNewEntityAnalyticsPage && resolutionSection}
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: hostName, type: EntityType.host }}
           onChange={onAssetCriticalityChange}
@@ -205,6 +228,7 @@ export const Content = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
         hideHeaderIcons={hideHeaderIcons}
+        scopeId={scopeId}
       />
       <ObservedDataSection
         entityType={EntityType.host}
@@ -214,6 +238,7 @@ export const Content = ({
         entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+        hideAnomalies={loadAnomalies}
       />
     </>
   );

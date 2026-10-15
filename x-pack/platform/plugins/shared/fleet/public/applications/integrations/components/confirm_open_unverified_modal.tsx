@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiCallOut, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -49,16 +50,14 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
       buttonColor="danger"
       data-test-subj="ConfirmOpenUnverifiedModal"
     >
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.fleet.ConfirmOpenUnverifiedModal.calloutTitleWithPkg', {
           defaultMessage: 'Integration {pkgName} has failed verification',
           values: {
             pkgName,
           },
         })}
-        color="warning"
-        iconType="warning"
-        children={
+        text={
           <FormattedMessage
             id="xpack.fleet.ConfirmOpenUnverifiedModal.calloutBody"
             defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. Learn more about {learnMoreLink}."

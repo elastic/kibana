@@ -20,6 +20,15 @@ import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_ADD_TO_CASE_ACTION_ID,
+  ATTACK_ASSIGNEE_ACTION_IDS,
+  ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  ATTACK_STATUS_ACTION_IDS,
+  ATTACK_TAG_ACTION_ID,
+} from '../../../../common/constants/action_ids';
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
+import { buildAttackAttachments } from '../../../../cases/attachments/attack';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
@@ -110,25 +119,30 @@ describe('AttacksGroupTakeActionItems', () => {
     });
     mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
       items: [
-        { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
-        { name: 'Mark as closed', key: 'markAsClosed' },
-        { name: 'Mark as open', key: 'markAsOpen' },
+        { name: 'Mark as acknowledged', key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged },
+        { name: 'Mark as closed', key: ATTACK_STATUS_ACTION_IDS.markAsClosed },
+        { name: 'Mark as open', key: ATTACK_STATUS_ACTION_IDS.markAsOpen },
       ],
       panels: [],
     });
     mockUseAttackAssigneesContextMenuItems.mockReturnValue({
       items: [
-        { name: 'Assign alert', key: 'assignAlert' },
-        { name: 'Unassign alert', key: 'unassignAlert' },
+        { name: 'Assign alert', key: ATTACK_ASSIGNEE_ACTION_IDS.assign },
+        { name: 'Unassign alert', key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll },
       ],
       panels: [],
     });
     mockUseAttackTagsContextMenuItems.mockReturnValue({
-      items: [{ name: 'Apply alert tags', key: 'applyAlertTags' }],
+      items: [{ name: 'Apply alert tags', key: ATTACK_TAG_ACTION_ID }],
       panels: [],
     });
     mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
-      items: [{ name: 'Investigate in Timeline', key: 'investigateInTimeline' }],
+      items: [
+        {
+          name: 'Investigate in Timeline',
+          key: ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+        },
+      ],
       panels: [],
     });
     mockUseAttackExploreInAttacksContextMenuItems.mockReturnValue({
@@ -136,7 +150,7 @@ describe('AttacksGroupTakeActionItems', () => {
     });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseAttackCaseContextMenuItems.mockReturnValue({
-      items: [],
+      items: [{ name: 'Add to case', key: ATTACK_ADD_TO_CASE_ACTION_ID }],
       panels: [],
     });
     mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
@@ -149,6 +163,27 @@ describe('AttacksGroupTakeActionItems', () => {
         },
       ],
       panels: [],
+    });
+  });
+
+  it('renders explicitly ordered action groups with icons and separators', () => {
+    const { getAllByRole, getAllByTestId } = renderAttack(mockAttack);
+
+    expect(getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Mark as acknowledged',
+      'Mark as closed',
+      'Mark as open',
+      'Assign alert',
+      'Unassign alert',
+      'Add to case',
+      'Apply alert tags',
+      'Run workflow',
+      'View in AI Assistant',
+      'Investigate in Timeline',
+    ]);
+    expect(getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
+    getAllByRole('menuitem').forEach((item) => {
+      expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
     });
   });
 
@@ -297,6 +332,62 @@ describe('AttacksGroupTakeActionItems', () => {
 
       const { queryByText } = renderAttack(mockAttack);
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('attack case attachment', () => {
+    it('passes the attack to attach to the cases hook', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attackToAttach: {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+            riskScore: attack.riskScore,
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          },
+        })
+      );
+    });
+
+    it('builds a de-anonymised narrative snapshot from what it passes', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      const { attackToAttach } = mockUseAttackCaseContextMenuItems.mock.calls[0][0];
+      const [attackAttachment] = buildAttackAttachments({
+        ...(attackToAttach as Omit<AttackToAttach, 'alertsIndex'>),
+        alertsIndex: '.alerts-security.alerts-default',
+      }).attachments;
+
+      expect(attackAttachment).toEqual(
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            detailsMarkdown: expect.stringContaining('SRVMAC08'),
+            entitySummaryMarkdown: expect.stringContaining('SRVMAC08'),
+            summaryMarkdown: expect.stringContaining('SRVMAC08'),
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+          }),
+        })
+      );
+    });
+
+    it('omits the attack to attach when the source index is unknown', () => {
+      renderAttack({ ...mockAttack, index: undefined });
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ attackToAttach: undefined })
+      );
     });
   });
 

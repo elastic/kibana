@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/es-query'
   - '@kbn/utility-types'
+  - '@kbn/core-capabilities-common'
 tags:
   - shared-common
   - package

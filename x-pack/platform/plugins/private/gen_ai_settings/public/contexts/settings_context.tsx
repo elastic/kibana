@@ -32,6 +32,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
@@ -68,6 +69,7 @@ const SETTING_KEYS = [
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -200,19 +202,19 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     },
     onSuccess() {
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.gen_ai_settings.save.success', {
+        title: i18n.translate('xpack.genAiSettings.save.success', {
           defaultMessage: 'Settings saved',
         }),
       });
     },
     onError(error: Error) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.gen_ai_settings.save.error', {
+        title: i18n.translate('xpack.genAiSettings.save.error', {
           defaultMessage: 'Failed to save settings',
         }),
         text:
           error.message ??
-          i18n.translate('xpack.gen_ai_settings.save.error.text', {
+          i18n.translate('xpack.genAiSettings.save.error.text', {
             defaultMessage: 'Unknown error',
           }),
       });

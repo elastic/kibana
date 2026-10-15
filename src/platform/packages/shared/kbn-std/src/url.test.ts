@@ -11,9 +11,9 @@ import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
-    expect(() => modifyUrl(1 as any, () => ({}))).toThrowError();
-    expect(() => modifyUrl(undefined as any, () => ({}))).toThrowError();
-    expect(() => modifyUrl('http://localhost', undefined as any)).toThrowError();
+    expect(() => modifyUrl(1 as any, () => ({}))).toThrow();
+    expect(() => modifyUrl(undefined as any, () => ({}))).toThrow();
+    expect(() => modifyUrl('http://localhost', undefined as any)).toThrow();
   });
 
   test('supports returning a new url spec', () => {

@@ -33,3 +33,9 @@ export type { PermissionsPolicyConfigType } from './src/permissions_policy';
 export { permissionsPolicyConfig } from './src/permissions_policy';
 
 export { createCookieSessionStorageFactory } from './src/cookie_session_storage';
+
+export {
+  classifyProvenance,
+  createProvenanceTelemetryPostAuthHandler,
+  PROVENANCE_TELEMETRY_COUNTER_TYPE,
+} from './src/provenance_telemetry';

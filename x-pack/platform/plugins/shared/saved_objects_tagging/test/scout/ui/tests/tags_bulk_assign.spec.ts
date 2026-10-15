@@ -11,13 +11,16 @@ import { expect } from '@kbn/scout/ui';
 import { KBN_ARCHIVES, test } from '../fixtures';
 
 test.describe('Tags management bulk assign', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ kbnClient, browserAuth, page, kbnUrl, pageObjects }) => {
+  test.beforeEach(async ({ kbnClient, browserAuth, pageObjects }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BULK_ASSIGN);
 
     await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.app('management/kibana/tags'));
-    await pageObjects.tagManagement.tagsTable.waitForLoaded();
+    await pageObjects.tagManagement.goto();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   test('bulk assigns tags to objects', async ({ pageObjects }) => {

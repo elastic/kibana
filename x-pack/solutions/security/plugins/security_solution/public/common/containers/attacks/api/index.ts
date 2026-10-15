@@ -7,13 +7,10 @@
 
 /**
  * Public Attacks API client helpers.
- *
- * Requires `publicAttacksApiEnabled` on both the Kibana client and server
- * (`xpack.securitySolution.enableExperimental`). The UI gates calls on the client
- * flag; if only the client flag is enabled, requests will 404.
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import {
   DETECTION_ENGINE_ATTACKS_SEARCH_URL,
   DETECTION_ENGINE_ATTACKS_STATUS_URL,
@@ -39,6 +36,12 @@ export interface SearchAttacksParams {
   query: SearchAttacksRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
+  /**
+   * Optional Kibana execution context forwarded to `http.post` (surfaced as `x-opaque-id` in ES
+   * slow logs and as APM trace labels) so the attack query can be attributed to the calling
+   * page/panel.
+   */
+  context?: KibanaExecutionContext;
 }
 
 /**
@@ -47,16 +50,19 @@ export interface SearchAttacksParams {
  * @param params - The search parameters
  * @param params.query - The Elasticsearch query DSL object
  * @param params.signal - Optional AbortSignal for cancelling the request
+ * @param params.context - Optional Kibana execution context for tracing attribution
  * @returns Promise resolving to the search response containing attacks
  */
 export const searchAttacks = async <TResponse = SearchAttacksResponse>({
   query,
   signal,
+  context,
 }: SearchAttacksParams): Promise<TResponse> => {
   return KibanaServices.get().http.post<TResponse>(DETECTION_ENGINE_ATTACKS_SEARCH_URL, {
     version: ATTACKS_API_VERSION,
     body: JSON.stringify(query),
     signal,
+    context,
   });
 };
 

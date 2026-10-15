@@ -12,7 +12,7 @@ import {
   LENS_INTERNAL_VIS_API_PATH,
   LENS_INTERNAL_API_VERSION,
 } from '../../../../../common/constants';
-import type { LensCreateIn, LensSavedObject } from '../../../../content_management';
+import type { LensCreateIn, LensSavedObject } from '../../../../content_management/zod';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 import { getLensInternalRequestConfig, getLensInternalResponseItem } from './utils';
@@ -91,7 +91,7 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
 
         const responseItem = getLensInternalResponseItem(builder, result.item);
         return res.created<LensCreateResponseBody>({
-          body: responseItem,
+          body: lensCreateResponseBodySchema.parse(responseItem),
         });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {

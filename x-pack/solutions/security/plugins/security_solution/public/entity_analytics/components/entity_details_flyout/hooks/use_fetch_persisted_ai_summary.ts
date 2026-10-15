@@ -7,8 +7,19 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { PersistedEntityAiSummary } from '@kbn/entity-store/common';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const PERSISTED_AI_SUMMARY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'ai_summary_get'
+);
 
 export const PERSISTED_AI_SUMMARY_QUERY_KEY = 'PERSISTED_AI_SUMMARY';
 
@@ -17,7 +28,10 @@ export interface UseFetchPersistedAiSummaryResult {
   summary: PersistedEntityAiSummary | null;
   /** False when the user has no metadata read access — caller should offer on-demand generation. */
   canRead: boolean;
+  /** True only while the first fetch is in flight and no cached data exists yet. */
   isLoading: boolean;
+  /** True during any fetch, including background refetches */
+  isFetching: boolean;
   refetch: () => void;
 }
 
@@ -37,11 +51,25 @@ export const useFetchPersistedAiSummary = ({
   skip?: boolean;
 }): UseFetchPersistedAiSummaryResult => {
   const { fetchPersistedAiSummary } = useEntityAnalyticsRoutes();
+  const { addError } = useAppToasts();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
-    queryFn: ({ signal }) => fetchPersistedAiSummary({ entityType, entityIdentifier }, signal),
+    queryFn: ({ signal }) =>
+      fetchPersistedAiSummary({
+        params: { entityType, entityIdentifier },
+        signal,
+        context: PERSISTED_AI_SUMMARY_CONTEXT,
+      }),
     enabled: !skip && Boolean(entityIdentifier),
+    onError: (err: Error) => {
+      addError(err, {
+        title: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.highlights.fetchPersistedSummaryError',
+          { defaultMessage: 'Error fetching persisted AI summary' }
+        ),
+      });
+    },
   });
 
   return useMemo(
@@ -49,8 +77,9 @@ export const useFetchPersistedAiSummary = ({
       summary: data?.summary ?? null,
       canRead: data?.canRead ?? false,
       isLoading,
+      isFetching,
       refetch,
     }),
-    [data?.summary, data?.canRead, isLoading, refetch]
+    [data?.summary, data?.canRead, isLoading, isFetching, refetch]
   );
 };

@@ -102,6 +102,12 @@ export const ChartSwitch = memo(function ChartSwitch({
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const persistedDoc = useLensSelector(selectPersistedDoc);
 
+  // Freeze the frame reference at mount time so late-arriving data updates
+  // (e.g. activeData) don't rebuild the options list while the popover is
+  // open. ChartSwitch is unmounted when the popover closes, so each new
+  // open gets the latest frame.
+  const [mountFrame] = useState(framePublicAPI);
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
@@ -177,7 +183,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       dispatchLens(
         removeLayers({
           visualizationId: visualization.activeId,
-          layerIds: Object.keys(framePublicAPI.datasourceLayers),
+          layerIds: Object.keys(mountFrame.datasourceLayers),
         })
       );
     }
@@ -197,7 +203,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       }
       return state;
     };
-    const layers = Object.entries(framePublicAPI.datasourceLayers);
+    const layers = Object.entries(mountFrame.datasourceLayers);
 
     // Always show the active visualization as a valid selection
     if (
@@ -217,7 +223,7 @@ export const ChartSwitch = memo(function ChartSwitch({
         visualizationId,
         subVisualizationId,
         dataLoss: 'nothing',
-        keptLayerIds: Object.keys(framePublicAPI.datasourceLayers),
+        keptLayerIds: Object.keys(mountFrame.datasourceLayers),
         getVisualizationState: () =>
           switchVisType(subVisualizationId, visualization.state, layerId),
         sameDatasources: true,
@@ -227,7 +233,7 @@ export const ChartSwitch = memo(function ChartSwitch({
     const topSuggestion = getTopSuggestion(
       visualizationMap,
       datasourceMap,
-      framePublicAPI,
+      mountFrame,
       visualizationId,
       datasourceStates,
       visualization,
@@ -368,7 +374,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [visualizationMap, framePublicAPI, visualization.activeId, visualization.state, searchTerm]
+    [visualizationMap, mountFrame, visualization.activeId, visualization.state, searchTerm]
   );
 
   return (

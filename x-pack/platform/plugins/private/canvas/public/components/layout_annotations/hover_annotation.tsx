@@ -6,7 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -16,15 +18,26 @@ interface Props {
   width: number;
 }
 
-export const HoverAnnotation: FC<Props> = ({ transformMatrix, width, height }) => (
-  <div
-    className="canvasHoverAnnotation canvasLayoutAnnotation"
-    style={{
-      width,
-      height,
-      marginLeft: -width / 2,
-      marginTop: -height / 2,
-      transform: matrixToCSS(transformMatrix),
-    }}
-  />
-);
+export const HoverAnnotation: FC<Props> = ({ transformMatrix, width, height }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      outline: solid 1px ${euiTheme.colors.vis.euiColorVis0};
+    `,
+    [euiTheme]
+  );
+
+  return (
+    <div
+      className="canvasHoverAnnotation canvasLayoutAnnotation"
+      css={styles}
+      style={{
+        width,
+        height,
+        marginLeft: -width / 2,
+        marginTop: -height / 2,
+        transform: matrixToCSS(transformMatrix),
+      }}
+    />
+  );
+};

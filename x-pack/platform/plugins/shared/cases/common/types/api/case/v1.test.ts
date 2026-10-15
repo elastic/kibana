@@ -19,6 +19,9 @@ import {
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -42,6 +45,7 @@ import {
   CasesFindResponseRt,
   CasesPatchRequestRt,
   CasesSearchRequestRt,
+  CaseUpdateRequestTemplateRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
@@ -57,6 +61,7 @@ import {
   CasesFindResponseSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
+  CaseUpdateRequestTemplateSchema,
 } from '../../api_zod/case/v1';
 import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../api_zod/stats/v1';
 
@@ -376,6 +381,23 @@ describe('CasePostRequestRt', () => {
     });
   });
 
+  it('accepts a template with no version (resolved on create when templates are enabled)', () => {
+    const request = { ...defaultRequest, template: { id: 'template-id' } };
+
+    expect(PathReporter.report(CasePostRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'throws when the template version is not a positive integer (%p)',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePostRequestRt.decode({ ...defaultRequest, template: { id: 'template-id', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
   it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
     expect(
       PathReporter.report(
@@ -662,6 +684,44 @@ describe('CasesSearchRequestRt', () => {
     const result = CasesSearchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  });
+
+  it('accepts extended field filters at the Field Library limits', () => {
+    const extendedFieldFilters = Array.from({ length: MAX_EXTENDED_FIELD_FILTERS }, () => ({
+      label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH),
+      value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH),
+    }));
+    const request = { ...defaultRequest, extendedFieldFilters };
+
+    expect(CasesSearchRequestRt.decode(request)._tag).toBe('Right');
+    expect(CasesSearchRequestSchema.safeParse(request).success).toBe(true);
+  });
+
+  it.each([
+    {
+      field: 'label',
+      extendedFieldFilters: [
+        { label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH + 1), value: 'value' },
+      ],
+    },
+    {
+      field: 'value',
+      extendedFieldFilters: [
+        { label: 'label', value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH + 1) },
+      ],
+    },
+    {
+      field: 'filter count',
+      extendedFieldFilters: Array.from({ length: MAX_EXTENDED_FIELD_FILTERS + 1 }, (_, index) => ({
+        label: `label-${index}`,
+        value: 'value',
+      })),
+    },
+  ])('rejects extended field filters above the $field limit', ({ extendedFieldFilters }) => {
+    const request = { ...defaultRequest, extendedFieldFilters };
+
+    expect(CasesSearchRequestRt.decode(request)._tag).toBe('Left');
+    expect(CasesSearchRequestSchema.safeParse(request).success).toBe(false);
   });
 });
 
@@ -1017,6 +1077,76 @@ describe('CasePatchRequestRt', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
   });
+
+  it('accepts a valid template on update', () => {
+    const request = { ...defaultRequest, template: { id: 'tmpl-1', version: 1 } };
+    expect(PathReporter.report(CasePatchRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestRt',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePatchRequestRt.decode({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestSchema',
+    (version) => {
+      expect(
+        CasePatchRequestSchema.safeParse({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+          .success
+      ).toBe(false);
+    }
+  );
+});
+
+describe('CaseUpdateRequestTemplateRt', () => {
+  it('accepts a valid template reference', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1 }))
+    ).toContain('No errors!');
+  });
+
+  it('accepts version > 1', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 42 }))
+    ).toContain('No errors!');
+  });
+
+  it('rejects version 0', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 0 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a negative version', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: -1 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a non-integer version', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1.5 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a missing version', () => {
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1' }))).not.toContain(
+      'No errors!'
+    );
+  });
+
+  it('rejects a missing id', () => {
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ version: 1 }))).not.toContain(
+      'No errors!'
+    );
+  });
 });
 
 describe('CasesPatchRequestRt', () => {
@@ -1253,5 +1383,45 @@ describe('CasesBulkGetResponseRt', () => {
     const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+});
+
+describe('CaseUpdateRequestTemplateSchema', () => {
+  it('accepts a valid template reference', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 1 });
+  });
+
+  it('accepts version > 1', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 42 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 42 });
+  });
+
+  it('rejects version 0', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 0 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a negative version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: -1 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a non-integer version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1.5 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a missing version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1' }).success).toBe(false);
+  });
+
+  it('rejects a missing id', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ version: 1 }).success).toBe(false);
   });
 });

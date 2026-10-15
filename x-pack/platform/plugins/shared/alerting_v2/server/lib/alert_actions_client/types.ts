@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisodeStatus,
-  AlertEventSeverity,
   AlertEventStatus,
 } from '../../resources/datastreams/alert_events';
 
@@ -22,7 +22,7 @@ export interface AlertEventRecord {
   '@timestamp': string;
   group_hash: string;
   episode_id: string;
-  rule_id: string;
+  rule_id: string | null;
   space_id: string;
   source: string;
   rule_version?: number;

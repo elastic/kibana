@@ -10,35 +10,31 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import { camelCase, isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import { isEmpty } from 'lodash/fp';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+const isAttackRow = (threat: Threat): boolean =>
+  !threat.framework || threat.framework === MITRE_ATTACK_FRAMEWORK;
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -56,6 +52,8 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
+
+  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration();
 
   const removeTactic = useCallback(
     (index: number) => {
@@ -75,40 +73,41 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
-        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
+        {
+          framework: MITRE_ATTACK_FRAMEWORK,
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
       ]);
     } else {
-      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
+      field.setValue([
+        {
+          framework: MITRE_ATTACK_FRAMEWORK,
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ]);
     }
   }, [field]);
-
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tactics);
-    }
-
-    getMitre();
-  }, []);
 
   const updateTactic = useCallback(
     (index: number, value: string) => {
       const values = [...(field.value as Threats)];
-      const { id, reference, name } = tacticsOptions.find((t) => t.value === value) || {
+      const { id, reference, name } = tactics.find((t) => t.id === value) ?? {
         id: '',
         name: '',
         reference: '',
       };
       values.splice(index, 1, {
         ...values[index],
+        // The options are the Enterprise dataset, so the row's framework must follow the selection.
+        framework: MITRE_ATTACK_FRAMEWORK,
         tactic: { id, reference, name },
         technique: [],
       });
       field.setValue([...values]);
     },
-    [field, tacticsOptions]
+    [field, tactics]
   );
 
   const values = useMemo(() => {
@@ -117,19 +116,19 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
 
   const findCurrentTacticOption = useCallback(
     (threat: Threat) =>
-      threat.tactic.name === 'none' || tacticsOptions.length === 0
+      threat.tactic.name === 'none' || tactics.length === 0
         ? undefined
-        : tacticsOptions.find((t) => t.id === threat.tactic.id),
-    [tacticsOptions]
+        : tactics.find((t) => t.id === threat.tactic.id),
+    [tactics]
   );
 
   const isUnsupportedTactic = useCallback(
     (threat: Threat) =>
       isMitreAttackUpdatesUIEnabled &&
-      tacticsOptions.length > 0 &&
+      tactics.length > 0 &&
       threat.tactic.name !== 'none' &&
       findCurrentTacticOption(threat) === undefined,
-    [findCurrentTacticOption, isMitreAttackUpdatesUIEnabled, tacticsOptions]
+    [findCurrentTacticOption, isMitreAttackUpdatesUIEnabled, tactics]
   );
 
   const getRenamedFromName = useCallback(
@@ -147,10 +146,6 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     (threat: Threat, index: number, disabled: boolean) => {
       const tacticName = threat.tactic.name;
       const isUnsupported = isUnsupportedTactic(threat);
-      const matchedOption = findCurrentTacticOption(threat);
-      const valueOfSelected = isUnsupported
-        ? threat.tactic.id
-        : matchedOption?.value ?? camelCase(tacticName);
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow>
@@ -174,9 +169,9 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                       }),
                     ]
                   : []),
-                ...tacticsOptions.map((t) => ({
-                  inputDisplay: <>{t.label}</>,
-                  value: t.value,
+                ...tactics.map((t) => ({
+                  inputDisplay: <>{getMitreEntityDisplayName(t)}</>,
+                  value: t.id,
                   disabled,
                 })),
               ]}
@@ -184,7 +179,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
               aria-label=""
               onChange={updateTactic.bind(null, index)}
               fullWidth={true}
-              valueOfSelected={valueOfSelected}
+              valueOfSelected={threat.tactic.id}
               data-test-subj="mitreAttackTactic"
               placeholder={i18n.TACTIC_PLACEHOLDER}
               isInvalid={isUnsupported}
@@ -204,16 +199,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         </EuiFlexGroup>
       );
     },
-    [
-      field.label,
-      findCurrentTacticOption,
-      isDisabled,
-      isUnsupportedTactic,
-      removeTactic,
-      tacticsOptions,
-      updateTactic,
-      values,
-    ]
+    [field.label, isDisabled, isUnsupportedTactic, removeTactic, tactics, updateTactic, values]
   );
 
   /**
@@ -227,6 +213,26 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     },
     [field]
   );
+
+  if (isLoading) {
+    return (
+      <MitreAttackContainer>
+        <EuiLoadingSpinner size="m" data-test-subj="mitreAttackLoading" />
+      </MitreAttackContainer>
+    );
+  }
+
+  if (isError) {
+    return (
+      <MitreAttackContainer>
+        <KbnDangerCallout
+          announceOnMount
+          title={i18n.MITRE_LOADING_ERROR}
+          data-test-subj="mitreAttackError"
+        />
+      </MitreAttackContainer>
+    );
+  }
 
   return (
     <MitreAttackContainer>
@@ -268,9 +274,15 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
             <MitreAttackTechniqueFields
               field={field}
               threatIndex={index}
-              isDisabled={isDisabled || threat.tactic.name === 'none'}
+              // The picker edits against the Enterprise dataset, so technique fields are read-only on
+              // rows from other frameworks until the framework-aware picker lands. Users can replace
+              // the tactic (converting the row to ATT&CK) or delete the row.
+              isDisabled={isDisabled || threat.tactic.name === 'none' || !isAttackRow(threat)}
               idAria={idAria}
               onFieldChange={onFieldChange}
+              tactics={tactics}
+              techniques={techniques}
+              subtechniques={subtechniques}
             />
           </div>
         );

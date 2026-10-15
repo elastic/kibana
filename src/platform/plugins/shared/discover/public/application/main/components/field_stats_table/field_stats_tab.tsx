@@ -82,6 +82,7 @@ export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo(
       hideAggregatedPreview={hideAggregatedPreview}
       totalHits={totalHits}
       updateState={updateState}
+      onFieldsCountChange={props.onFieldsCountChange}
     />
   );
 });
