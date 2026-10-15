@@ -60,8 +60,6 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    loadTestFile(require.resolve('./layer_errors'));
-
     loadTestFile(require.resolve('./lens'));
   });
 }

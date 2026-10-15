@@ -38,7 +38,7 @@ export class MapsPage {
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
-  public readonly inspector: InspectorPage;
+  private readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
@@ -465,6 +465,11 @@ export class MapsPage {
     await queryInput.press('Escape');
     await this.page.testSubj.click('mapWhereFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
+  }
+
+  /** Returns the locator for the error icon shown in the TOC entry of `layerName`. */
+  getLayerErrorIcon(layerName: string) {
+    return this.page.testSubj.locator(`layerTocErrorIcon${layerName.replace(/\s+/g, '_')}`);
   }
 
   /** Opens the layer panel for `layerName`, clicks Remove, confirms, and waits for the layer to disappear. */
