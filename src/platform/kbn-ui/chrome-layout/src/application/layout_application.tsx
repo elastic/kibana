@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { EUI_BREAKPOINT_CONTAINER_ATTRIBUTE } from '@elastic/eui';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 
@@ -33,7 +34,8 @@ export const LayoutApplication = ({
   const { appearance } = useLayoutConfig();
 
   return (
-    <div css={styles.root(appearance)}>
+    // The JS breakpoint hooks measure this element. Pairs with `euiBreakpointContainer` in the root styles.
+    <div css={styles.root(appearance)} {...{ [EUI_BREAKPOINT_CONTAINER_ATTRIBUTE]: true }}>
       <div
         css={styles.scrollContainer}
         id={APP_MAIN_SCROLL_CONTAINER_ID}

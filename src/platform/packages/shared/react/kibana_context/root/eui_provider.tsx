@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
@@ -18,7 +18,7 @@ import createCache from '@emotion/cache';
 // import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import type { EuiProviderProps } from '@elastic/eui';
-import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
+import { EUI_BREAKPOINT_CONTAINER_ATTRIBUTE, EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -75,8 +75,62 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
-const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
-const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+// Flyouts are scoped to the app area wrapper, which is also the breakpoint container. Push padding
+// then shrinks the container's content box, so breakpoints follow the area left next to a push flyout.
+const FLYOUT_CONTAINER_SELECTOR = `[${EUI_BREAKPOINT_CONTAINER_ATTRIBUTE}]`;
+
+// `localStorage.kbnSurfacePocDebug = 'true'` outlines each root's mount element:
+// red inside the app area, purple outside it. Reload after changing.
+const BREAKPOINT_DEBUG = localStorage.getItem('kbnSurfacePocDebug') === 'true';
+const DEBUG_ATTRIBUTE = 'data-kbn-breakpoint-debug';
+const DEBUG_STYLES = `
+  [${DEBUG_ATTRIBUTE}] { outline: 2px solid purple; outline-offset: -2px; }
+  [${EUI_BREAKPOINT_CONTAINER_ATTRIBUTE}] [${DEBUG_ATTRIBUTE}] { outline-color: red; }
+`;
+
+const markForDebug = (element: HTMLElement) => {
+  element.setAttribute(DEBUG_ATTRIBUTE, '');
+  if (document.getElementById('kbn-breakpoint-debug')) return;
+  const style = document.createElement('style');
+  style.id = 'kbn-breakpoint-debug';
+  style.textContent = DEBUG_STYLES;
+  document.head.appendChild(style);
+};
+
+/**
+ * Finds the element this provider renders into from a hidden marker, so roots don't have to pass it.
+ * The marker renders alone in the first commit and is replaced by the children before paint,
+ * so it never shows up next to them in the DOM.
+ */
+const useMarkerMountElement = () => {
+  const markerRef = useRef<HTMLSpanElement>(null);
+  const [mountElement, setMountElement] = useState<HTMLElement>();
+
+  useLayoutEffect(() => {
+    const parent = markerRef.current?.parentElement;
+    if (parent && BREAKPOINT_DEBUG) markForDebug(parent);
+    if (parent?.isConnected) {
+      setMountElement(parent);
+      return;
+    }
+    // A root rendered into an element that isn't in the page yet (or without a DOM, like
+    // react-test-renderer) can't find its container, so it falls back to `body`.
+    parent?.setAttribute('data-kbn-breakpoint-detached', '');
+    setMountElement(document.body);
+  }, []);
+
+  return { markerRef, mountElement };
+};
+
+// `renderToStaticMarkup` (used for a few string-rendered tooltips) runs no layout effects, so the marker would
+// never be replaced. Its server snapshot tells us to render the children right away.
+const noopSubscribe = () => () => {};
+const useIsStaticRender = () =>
+  useSyncExternalStore(
+    noopSubscribe,
+    () => false,
+    () => true
+  );
 
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
@@ -109,6 +163,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   children,
 }) => {
   const { theme$ } = theme;
+  const { markerRef, mountElement } = useMarkerMountElement();
+  const isStaticRender = useIsStaticRender();
 
   // use the selected theme if available before using the defaultTheme; this ensures that
   // Kibana loads with the currently selected theme without additional updates from default to selected
@@ -143,6 +199,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
 
+  if (!mountElement && !isStaticRender) return <span hidden ref={markerRef} />;
+
   return (
     <EuiProvider
       {...{
@@ -154,6 +212,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         highContrastMode,
         theme: _theme,
         componentDefaults,
+        // EUI CSS and JS breakpoints follow the nearest breakpoint container (the app area or `body`).
+        breakpointContainer: mountElement ? { mountElement } : true,
       }}
     >
       {children}
