@@ -497,6 +497,27 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((resolve) => {
+              let onTimeout = () => resolve(true);
+              if (flag) {
+                for (onTimeout = logA; false; ) {
+                  onTimeout = logC;
+                }
+              } else {
+                onTimeout = logB;
+              }
+              setTimeout(onTimeout, 1000);
+              abort.addEventListener('abort', () => resolve());
+            }),
+          ]);
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -1018,6 +1039,68 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
       errors: [{ messageId: 'uncleared', line: 3 }],
+    },
+    {
+      code: dedent`
+        async function load() {
+          return Promise.race([
+            work(),
+            new Promise((resolve) => {
+              let onTimeout = log;
+              if (flag) {
+                do {
+                  onTimeout = logA;
+                } while ((onTimeout = () => resolve(true)) && false);
+              } else {
+                onTimeout = logB;
+              }
+              setTimeout(onTimeout, 1000);
+            }),
+          ]);
+        }
+      `,
+      errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => resolve(true));
+          if (flag) {
+            timeout = new Promise((resolve) => resolve(false));
+            try {
+              timeout = new Promise((resolve) => {
+                setTimeout(() => resolve(true), 5000);
+              });
+              work();
+              timeout = new Promise((resolve) => resolve(null));
+            } catch (error) {
+              // A throw from work() leaves the deadline armed.
+            }
+          } else {
+            timeout = new Promise((resolve) => resolve(null));
+          }
+          return Promise.race([work(), timeout]);
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 7 }],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout = new Promise((resolve) => resolve(true));
+          function arm() {
+            timeout = new Promise((resolve) => resolve(false));
+            return true;
+          }
+          if (flag && arm()) {
+            timeout = new Promise((resolve) => {
+              setTimeout(() => resolve(true), 5000);
+            });
+            return Promise.race([work(), timeout]);
+          }
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 9 }],
     },
   ],
 });

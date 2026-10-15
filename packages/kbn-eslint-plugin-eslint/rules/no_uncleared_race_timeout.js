@@ -1030,10 +1030,12 @@ function branchFlow(branch, versions, useAt) {
     return tryFlow(branch, versions, useAt);
   }
   if (branch.type === 'DoWhileStatement') {
-    return branchFlow(branch.body, versions, useAt);
+    return doWhileFlow(branch, versions, useAt);
+  }
+  if (branch.type === 'ForStatement') {
+    return forFlow(branch, versions, useAt);
   }
   if (
-    branch.type === 'ForStatement' ||
     branch.type === 'ForInStatement' ||
     branch.type === 'ForOfStatement' ||
     branch.type === 'WhileStatement' ||
@@ -1071,11 +1073,91 @@ function tryFlow(statement, versions, useAt) {
   }
   const tried = branchFlow(statement.block, versions, useAt);
   const caught = statement.handler ? branchFlow(statement.handler.body, versions, useAt) : null;
-  let values = unionValues(tried.values, caught ? caught.values : []);
+  // An empty catch still resumes after the try, so a throw can leave an earlier
+  // assignment live. A definite catch overwrites those, and no catch skips the race.
+  let triedValues = tried.values;
+  if (caught && !caught.definite) {
+    triedValues = unionValues(
+      triedValues,
+      writesReaching(statement.block, versions, useAt).map((version) => version.value)
+    );
+  }
+  let values = unionValues(triedValues, caught ? caught.values : []);
   if (finalizer) {
     values = unionValues(values, finalizer.values);
   }
   return { definite: Boolean(caught && tried.definite && caught.definite), values };
+}
+
+/**
+ * Assignments inside an expression. The condition of a loop runs as an expression,
+ * so a write there is not a statement of its own.
+ *
+ * @param {any} expression
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {{ definite: boolean, values: any[] }}
+ */
+function expressionFlow(expression, versions, useAt) {
+  if (!expression) {
+    return { definite: false, values: [] };
+  }
+  const writes = writesReaching(expression, versions, useAt);
+  const unconditional = writes.filter((version) => !isConditional(version.anchor, expression));
+  if (!unconditional.length) {
+    return { definite: false, values: writes.map((version) => version.value) };
+  }
+  unconditional.sort((left, right) => left.at - right.at);
+  const last = unconditional[unconditional.length - 1];
+  const later = writes.filter((version) => version.at > last.at).map((version) => version.value);
+  return { definite: true, values: unionValues([last.value], later) };
+}
+
+/**
+ * The condition runs after the body, including the iteration that ends the loop.
+ *
+ * @param {any} statement
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {{ definite: boolean, values: any[] }}
+ */
+function doWhileFlow(statement, versions, useAt) {
+  const body = branchFlow(statement.body, versions, useAt);
+  const test = expressionFlow(statement.test, versions, useAt);
+  if (test.definite) {
+    return { definite: true, values: test.values };
+  }
+  return { definite: body.definite, values: unionValues(body.values, test.values) };
+}
+
+/**
+ * The initializer and the test run even when the body never does.
+ * Body and update writes stay optional.
+ *
+ * @param {any} statement
+ * @param {Array<{ value: any, at: number, ordered?: boolean, anchor: any }>} versions
+ * @param {number} useAt
+ * @returns {{ definite: boolean, values: any[] }}
+ */
+function forFlow(statement, versions, useAt) {
+  let result = statement.init
+    ? branchFlow(statement.init, versions, useAt)
+    : { definite: false, values: [] };
+  if (statement.test) {
+    const test = expressionFlow(statement.test, versions, useAt);
+    if (test.definite) {
+      result = { definite: true, values: test.values };
+    } else if (test.values.length) {
+      result = { definite: result.definite, values: unionValues(result.values, test.values) };
+    }
+  }
+  const optional = unionValues(
+    writesReaching(statement.body, versions, useAt).map((version) => version.value),
+    statement.update
+      ? writesReaching(statement.update, versions, useAt).map((version) => version.value)
+      : []
+  );
+  return { definite: result.definite, values: unionValues(result.values, optional) };
 }
 
 /**
@@ -1130,8 +1212,9 @@ function localAssignmentEvents(versions, home, useAt) {
       coverBranchWrites(other, versions, useAt, covered);
       const takenResult = branchFlow(taken, versions, useAt);
       if (takenResult.definite) {
+        // The condition runs before the branch, so its writes stay ahead of this.
         events.push({
-          at: nodeStart(statement),
+          at: nodeEnd(statement.test),
           values: takenResult.values,
           replace: true,
         });
@@ -1145,7 +1228,7 @@ function localAssignmentEvents(versions, home, useAt) {
       continue;
     }
     events.push({
-      at: nodeStart(statement),
+      at: nodeEnd(statement.test),
       values: unionValues(thenResult.values, elseResult.values),
       replace: true,
     });
