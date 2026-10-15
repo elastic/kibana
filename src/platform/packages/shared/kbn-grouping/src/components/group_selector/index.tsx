@@ -20,6 +20,7 @@ import { StyledContextMenu } from '../styles';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
+  allowedFieldTypes?: string[];
   fields: FieldSpec[];
   groupingId: string;
   groupsSelected: string[];
@@ -30,6 +31,7 @@ export interface GroupSelectorProps {
 }
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
+  allowedFieldTypes,
   fields,
   groupsSelected = ['none'],
   onGroupChange,
@@ -95,11 +97,20 @@ const GroupSelectorComponent = ({
               setIsPopoverOpen(false);
             }}
             fields={fields}
+            allowedFieldTypes={allowedFieldTypes}
           />
         ),
       },
     ];
-  }, [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
+  }, [
+    allowedFieldTypes,
+    fields,
+    groupsSelected.length,
+    isGroupSelected,
+    maxGroupingLevels,
+    onGroupChange,
+    options,
+  ]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]

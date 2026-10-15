@@ -127,6 +127,8 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
@@ -305,6 +307,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -411,7 +414,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 125
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75

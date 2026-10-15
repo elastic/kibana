@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
@@ -29,7 +29,7 @@ interface Props {
   };
 }
 
-export const PaletteArgInput: FC<Props> = ({
+export const PaletteArgInput: CanvasFunctionComponent<Props> = ({
   onValueChange,
   argId,
   argValue,
@@ -74,7 +74,7 @@ export const PaletteArgInput: FC<Props> = ({
   return <PalettePicker id={argId} palette={palette} onChange={handleChange} />;
 };
 
-export const SimplePaletteArgInput: FC<Props> = (props) => {
+export const SimplePaletteArgInput: CanvasFunctionComponent<Props> = (props) => {
   const { typeInstance } = props;
   const { type, ...restOptions } = typeInstance.options ?? {};
   return (
@@ -82,7 +82,7 @@ export const SimplePaletteArgInput: FC<Props> = (props) => {
   );
 };
 
-export const StopsPaletteArgInput: FC<Props> = (props) => (
+export const StopsPaletteArgInput: CanvasFunctionComponent<Props> = (props) => (
   <PaletteArgInput
     {...props}
     typeInstance={{
@@ -96,7 +96,6 @@ PaletteArgInput.propTypes = {
   argId: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   renderError: PropTypes.func,
 };
 

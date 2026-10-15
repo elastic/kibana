@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.findFieldByNameOrValueInDocViewer('time');
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 6;
         });
       });
 
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('typeFilter-number');
 
         await retry.waitFor('second updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 7;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 8;
         });
 
         await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
-        const numberFieldsCount = 6;
+        const numberFieldsCount = 7;
 
         expect(initialFieldsCount).to.above(numberFieldsCount);
 

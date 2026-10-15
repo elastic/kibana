@@ -82,7 +82,7 @@ describe('Mappings editor: date range datatype', () => {
 
     expect(exists('formatParameter')).toBe(true);
     expect(exists('formatParameter.formatInput')).toBe(false);
-    toggleFormRow('formatParameter');
+    await toggleFormRow('formatParameter');
     expect(exists('formatParameter.formatInput')).toBe(true);
 
     await act(async () => {

@@ -451,6 +451,12 @@ describe('reindexService', () => {
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.readonly },
       } as ReindexSavedObject;
 
+      beforeEach(() => {
+        clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+          indices: { myIndex: { index: 'myIndex', managed: false } },
+        });
+      });
+
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
@@ -468,6 +474,136 @@ describe('reindexService', () => {
           },
         });
       });
+
+      it('preserves the ILM lifecycle date of the source index and pauses ILM on the new index', async () => {
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+          indices: {
+            myIndex: {
+              index: 'myIndex',
+              managed: true,
+              lifecycle_date_millis: 1700000000000,
+              skip: false,
+            },
+          },
+        });
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
+        await service.processNextStep(reindexOp);
+        expect(clusterClient.asCurrentUser.ilm.explainLifecycle).toHaveBeenCalledWith({
+          index: 'myIndex',
+        });
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
+          body: {
+            settings_override: {
+              'index.number_of_replicas': 0,
+              'index.refresh_interval': -1,
+              'index.lifecycle.origination_date': 1700000000000,
+              'index.lifecycle.skip': true,
+            },
+          },
+        });
+      });
+
+      it('pauses ILM on the new index when the source is managed but has no lifecycle date yet', async () => {
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+          indices: { myIndex: { index: 'myIndex', managed: true, skip: false } },
+        });
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
+        await service.processNextStep(reindexOp);
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
+          body: {
+            settings_override: {
+              'index.number_of_replicas': 0,
+              'index.refresh_interval': -1,
+              'index.lifecycle.skip': true,
+            },
+          },
+        });
+      });
+
+      const rolloverPhase = { actions: { rollover: { max_docs: 2 } } };
+      const deletePhase = { actions: { delete: {} } };
+      it.each([
+        ['pending rollover', rolloverPhase, undefined, {}, false],
+        [
+          'already rolled over',
+          rolloverPhase,
+          undefined,
+          { 'index.lifecycle.indexing_complete': 'true' },
+          true,
+        ],
+        ['with a rollover alias but no rollover action', deletePhase, undefined, {}, true],
+        ['not yet in a phase, whose policy rolls over', undefined, rolloverPhase, {}, false],
+        ['not yet in a phase, whose policy does not roll over', undefined, deletePhase, {}, true],
+        ['not yet in a phase, whose policy is missing', undefined, undefined, {}, true],
+      ])(
+        'handles the ILM lifecycle date of an index %s',
+        async (_, phaseDefinition, policyHotPhase, extraSettings, preservesLifecycleDate) => {
+          actions.getFlatSettings.mockResolvedValueOnce({
+            ...settingsMappings,
+            settings: {
+              ...settingsMappings.settings,
+              'index.lifecycle.rollover_alias': 'myAlias',
+              ...extraSettings,
+            },
+          });
+          clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+            indices: {
+              myIndex: {
+                index: 'myIndex',
+                managed: true,
+                policy: 'myPolicy',
+                lifecycle_date_millis: 1700000000000,
+                skip: false,
+                phase_execution: {
+                  policy: 'myPolicy',
+                  version: 1,
+                  modified_date_in_millis: 1700000000000,
+                  phase_definition: phaseDefinition,
+                },
+              },
+            },
+          });
+          clusterClient.asCurrentUser.ilm.getLifecycle.mockResponse(
+            policyHotPhase
+              ? {
+                  myPolicy: {
+                    version: 1,
+                    modified_date: '2023-11-14T22:13:20.000Z',
+                    policy: { phases: { hot: policyHotPhase } },
+                  },
+                }
+              : {}
+          );
+          clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+            acknowledged: true,
+          });
+          await service.processNextStep(reindexOp);
+          expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+            method: 'POST',
+            path: `_create_from/myIndex/myIndex-reindex-0`,
+            body: {
+              settings_override: {
+                'index.number_of_replicas': 0,
+                'index.refresh_interval': -1,
+                ...(preservesLifecycleDate && {
+                  'index.lifecycle.origination_date': 1700000000000,
+                }),
+                'index.lifecycle.skip': true,
+              },
+            },
+          });
+          // The policy is only looked up when ILM has not cached a phase yet
+          expect(clusterClient.asCurrentUser.ilm.getLifecycle).toHaveBeenCalledTimes(
+            phaseDefinition ? 0 : 1
+          );
+        }
+      );
 
       it('fails if create index is not acknowledged', async () => {
         clusterClient.asCurrentUser.indices.get.mockResponseOnce(
@@ -724,7 +860,7 @@ describe('reindexService', () => {
         },
       } as ReindexSavedObject;
 
-      it('restores the settings (both to null), and updates lastCompletedStep', async () => {
+      it('restores the settings (all to null), and updates lastCompletedStep', async () => {
         // Setup empty flatSettings with no warnings
         actions.getFlatSettings.mockResolvedValueOnce({
           settings: {
@@ -742,6 +878,7 @@ describe('reindexService', () => {
           settings: {
             'index.number_of_replicas': null,
             'index.refresh_interval': null,
+            'index.lifecycle.skip': null,
           },
         });
       });
@@ -763,6 +900,7 @@ describe('reindexService', () => {
             backupSettings: {
               'index.number_of_replicas': 7,
               'index.refresh_interval': 1,
+              'index.lifecycle.skip': true,
             },
           },
         };
@@ -774,6 +912,7 @@ describe('reindexService', () => {
           settings: {
             'index.number_of_replicas': 7,
             'index.refresh_interval': 1,
+            'index.lifecycle.skip': true,
           },
         });
       });

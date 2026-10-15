@@ -419,7 +419,7 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
+      const shown = await this.testSubjects.exists('confirmModalTitleText');
       if (shown) {
         throw new Error('Modal overlay is showing');
       }
@@ -526,7 +526,7 @@ export class CommonPageObject extends FtrService {
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
+      if (await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 })) {
         throw new Error('save modal still open');
       }
     });
@@ -577,7 +577,7 @@ export class CommonPageObject extends FtrService {
     if (isValidatorCssString) {
       await this.find.byCssSelector(validator);
     } else {
-      await this.testSubjects.exists(validator);
+      await this.testSubjects.existOrFail(validator, { timeout: 5000 });
     }
   }
 

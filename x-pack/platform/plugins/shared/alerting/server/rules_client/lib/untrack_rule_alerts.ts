@@ -54,6 +54,7 @@ export const untrackRuleAlerts = async (
 
         const event = createAlertEventLogRecordObject({
           ruleId: id,
+          ruleTags: attributes.tags,
           ruleName: attributes.name,
           ruleRevision: attributes.revision,
           ruleType,

@@ -9,7 +9,7 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { NAME_REGEX_PATTERN } from '../../common/constants';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
@@ -254,7 +254,7 @@ export function renderPackageManifestYAML(integration: Integration): string {
     uniqueInputsList // inputs
   );
 
-  return dump(packageData);
+  return stringify(packageData);
 }
 
 function createPackageManifest(packageDir: string, integration: Integration): void {

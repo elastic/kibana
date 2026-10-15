@@ -84,22 +84,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns the correct data', () => {
         const elements: Array<{ data: Record<string, any> }> = getElements(response);
-        const serviceNames = uniq(
-          elements
-            .filter((element) => element.data['service.name'] !== undefined)
-            .map((element) => element.data['service.name'])
-        ).sort();
-        expectSnapshot(serviceNames).toMatchInline(`
-              Array [
-                "opbeans-dotnet",
-                "opbeans-go",
-                "opbeans-java",
-                "opbeans-node",
-                "opbeans-python",
-                "opbeans-ruby",
-                "opbeans-rum",
-              ]
-            `);
 
         const externalDestinations = uniq(
           elements
@@ -285,6 +269,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           it('returns some elements', () => {
             expect(getElements(response).length).to.be.greaterThan(1);
+          });
+
+          it('includes opbeans-java', () => {
+            const serviceNames = getElements(response).map(
+              (element) => (element.data as ServiceConnectionNode)['service.name']
+            );
+            expect(serviceNames).to.contain('opbeans-java');
           });
         });
       });

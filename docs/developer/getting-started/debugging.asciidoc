@@ -56,7 +56,7 @@ however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to
 `true`. flags
 
 ....
-ELASTIC_APM_ACTIVE=true yarn start
+ELASTIC_APM_ACTIVE=true pnpm start
 // activates both Node.js and RUM agent
 ....
 
@@ -117,7 +117,7 @@ elastic:
 +
 [source,bash]
 ----
-yarn start
+pnpm start
 ----
 
 . After Kibana starts up, navigate to the APM app, where you should see some transactions.

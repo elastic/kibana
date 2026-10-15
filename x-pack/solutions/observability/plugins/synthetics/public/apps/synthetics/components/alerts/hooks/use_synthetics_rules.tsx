@@ -12,7 +12,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useCanManageRules } from '../../../../../hooks/use_capabilities';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
@@ -38,9 +38,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
-
-  const { canSave } = useSyntheticsSettingsContext();
-
+  const canManageRules = useCanManageRules();
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
@@ -48,12 +46,12 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
 
   const getOrCreateAlerts = useCallback(() => {
-    if (canSave) {
+    if (canManageRules) {
       dispatch(enableDefaultAlertingSilentlyAction.get());
     } else {
       dispatch(getDefaultAlertingAction.get());
     }
-  }, [canSave, dispatch]);
+  }, [canManageRules, dispatch]);
 
   useEffect(() => {
     if (hasMonitors && defaultRulesEnabled) {

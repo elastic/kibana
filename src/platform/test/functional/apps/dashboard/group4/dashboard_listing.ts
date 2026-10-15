@@ -129,8 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await header.awaitKibanaChrome();
         await header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        await testSubjects.existOrFail('dashboardContainer', { timeout: 10000 });
       });
 
       it('title match is case insensitive', async function () {
@@ -143,8 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await header.awaitKibanaChrome();
         await header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        await testSubjects.existOrFail('dashboardContainer', { timeout: 10000 });
       });
 
       it('stays on listing page if title matches no dashboards', async function () {

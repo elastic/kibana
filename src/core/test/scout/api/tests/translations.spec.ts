@@ -12,6 +12,14 @@ import { apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { INTERNAL_HEADERS } from '../fixtures';
 
+// Distributable builds serve pre-built translations with immutable caching and no etag.
+// Local dev servers return `must-revalidate` + etag instead, so we gate on CI.
+// TODO: Replace `process.env.CI` with a Scout config flag (e.g. isDistributable) when available.
+const expectedCaching = () =>
+  process.env.CI
+    ? { cacheControl: 'public, max-age=31536000, immutable', hasEtag: false }
+    : { cacheControl: 'must-revalidate', hasEtag: true };
+
 apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
 
@@ -31,15 +39,9 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.locale).toBe('en');
     expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
-    // Distributable builds serve pre-built translations with immutable caching and no etag.
-    // Local dev servers return `must-revalidate` + etag instead, so we gate on CI.
-    // TODO: Replace `process.env.CI` with a Scout config flag (e.g. isDistributable) when available.
-    if (process.env.CI) {
-      expect(response).toHaveHeaders({
-        'cache-control': 'public, max-age=31536000, immutable',
-      });
-      expect(response.headers.etag).toBeUndefined();
-    }
+    const { cacheControl, hasEtag } = expectedCaching();
+    expect(response).toHaveHeaders({ 'cache-control': cacheControl });
+    expect(response.headers.etag !== undefined).toBe(hasEtag);
   });
 
   apiTest('returns a 404 when not using the correct locale', async ({ apiClient }) => {

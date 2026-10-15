@@ -93,7 +93,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                               >
                                 <span
-                                  class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                                  class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                                   title=""
                                 >
                                   <span
@@ -134,7 +134,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                       >
                         <span
-                          class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                          class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                           title=""
                         >
                           <span
@@ -277,7 +277,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
                   >
                     <div
-                      class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                      class="euiFlexItem ei916al0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
                         data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_direction-outgoing"
@@ -291,7 +291,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <span
-                              class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                              class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                               title=""
                             >
                               <span
@@ -314,7 +314,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                      class="euiFlexItem ei916al0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
                         data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_protocol-http"
@@ -328,7 +328,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <span
-                              class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                              class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                               title=""
                             >
                               <span
@@ -346,7 +346,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                      class="euiFlexItem ei916al0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
                         data-provider-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_bytes-100"
@@ -360,7 +360,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <div
-                              class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                              class="euiText ei916al1 emotion-euiText-xs-Stats"
                             >
                               <span>
                                 100B
@@ -371,7 +371,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                      class="euiFlexItem ei916al0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
                         data-provider-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_packets-3"
@@ -385,7 +385,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <div
-                              class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                              class="euiText ei916al1 emotion-euiText-xs-Stats"
                             >
                               <span>
                                 3 pkts
@@ -396,7 +396,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                      class="euiFlexItem ei916al0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
                         data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_transport-tcp"
@@ -410,7 +410,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <span
-                              class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                              class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                               title=""
                             >
                               <span
@@ -442,7 +442,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <span
-                              class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                              class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                               title=""
                             >
                               <span
@@ -462,7 +462,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1ikjo0y0 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
+                  class="euiFlexItem e5f8nf60 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
@@ -489,7 +489,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="css-u90o0n-Label egdhtzu0"
+                                  class="css-u90o0n-Label ecpgoij0"
                                 >
                                   Source
                                 </div>
@@ -527,7 +527,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             class="euiFlexItem emotion-euiFlexItem-growZero"
                                           >
                                             <span
-                                              class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                              class="css-1jvb4f-IpPortSeparator eooupwg0"
                                               data-test-subj="ip-port-separator"
                                             >
                                               :
@@ -537,7 +537,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             class="euiFlexItem emotion-euiFlexItem-growZero"
                                           >
                                             <div
-                                              class="css-q5yr96-PortContainer etea1110"
+                                              class="css-p0iey-PortContainer e3pw1861"
                                             >
                                               <a
                                                 class="euiLink emotion-euiLink-primary"
@@ -573,7 +573,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -600,7 +600,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -627,7 +627,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -636,7 +636,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                          class="css-purdnl-FlagWrapper e1nywon80"
                                           data-test-subj="country-flag"
                                         >
                                           🇺🇸
@@ -664,7 +664,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -691,7 +691,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -725,7 +725,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       </span>
                     </div>
                     <div
-                      class="euiFlexGroup e1jag3831 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
+                      class="euiFlexGroup e1bqw62g1 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -737,7 +737,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-n00ypt-ArrowBody e1do9oav0"
+                              class="css-n00ypt-ArrowBody e1fwv55w0"
                               height="2.8"
                             />
                           </div>
@@ -756,10 +756,10 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <div
-                                    class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                    class="euiText e1bqw62g2 emotion-euiText-xs-Data"
                                   >
                                     <span
-                                      class="css-1ioglsa-Percent e1jag3832"
+                                      class="css-1ioglsa-Percent e1bqw62g0"
                                     >
                                       (60.00%)
                                     </span>
@@ -775,7 +775,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-n00ypt-ArrowBody e1do9oav0"
+                              class="css-n00ypt-ArrowBody e1fwv55w0"
                               height="2.8"
                             />
                           </div>
@@ -794,7 +794,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <div
-                                    class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                    class="euiText e1bqw62g2 emotion-euiText-xs-Data"
                                   >
                                     <span>
                                       2 pkts
@@ -808,7 +808,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-n00ypt-ArrowBody e1do9oav0"
+                              class="css-n00ypt-ArrowBody e1fwv55w0"
                               height="2.8"
                             />
                           </div>
@@ -842,7 +842,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1ftmfxt-ArrowBody e1do9oav0"
+                              class="css-1ftmfxt-ArrowBody e1fwv55w0"
                               height="2.2"
                             />
                           </div>
@@ -869,10 +869,10 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                         >
                                           <div
-                                            class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                            class="euiText e1bqw62g2 emotion-euiText-xs-Data"
                                           >
                                             <span
-                                              class="css-1ioglsa-Percent e1jag3832"
+                                              class="css-1ioglsa-Percent e1bqw62g0"
                                             >
                                               (40.00%)
                                             </span>
@@ -892,7 +892,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1ftmfxt-ArrowBody e1do9oav0"
+                              class="css-1ftmfxt-ArrowBody e1fwv55w0"
                               height="2.2"
                             />
                           </div>
@@ -911,7 +911,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <div
-                                    class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                    class="euiText e1bqw62g2 emotion-euiText-xs-Data"
                                   >
                                     <span>
                                       1 pkts
@@ -925,7 +925,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1ftmfxt-ArrowBody e1do9oav0"
+                              class="css-1ftmfxt-ArrowBody e1fwv55w0"
                               height="2.2"
                             />
                           </div>
@@ -954,7 +954,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="css-u90o0n-Label egdhtzu0"
+                                  class="css-u90o0n-Label ecpgoij0"
                                 >
                                   Destination
                                 </div>
@@ -992,7 +992,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             class="euiFlexItem emotion-euiFlexItem-growZero"
                                           >
                                             <span
-                                              class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                              class="css-1jvb4f-IpPortSeparator eooupwg0"
                                               data-test-subj="ip-port-separator"
                                             >
                                               :
@@ -1002,7 +1002,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             class="euiFlexItem emotion-euiFlexItem-growZero"
                                           >
                                             <div
-                                              class="css-q5yr96-PortContainer etea1110"
+                                              class="css-p0iey-PortContainer e3pw1861"
                                             >
                                               <a
                                                 class="euiLink emotion-euiLink-primary"
@@ -1038,7 +1038,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1065,7 +1065,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1092,7 +1092,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1101,7 +1101,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                          class="css-purdnl-FlagWrapper e1nywon80"
                                           data-test-subj="country-flag"
                                         >
                                           🇺🇸
@@ -1129,7 +1129,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1156,7 +1156,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                    class="euiFlexItem e1u1awfj0 emotion-euiFlexItem-growZero-GeoFlexItem"
                                   >
                                     <div
                                       class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1217,7 +1217,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     <span
-                      class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                      class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                       title=""
                     >
                       <span
@@ -1277,7 +1277,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     <span
-                      class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                      class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                       title=""
                     >
                       <span
@@ -1337,7 +1337,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     <span
-                      class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                      class="euiBadge e1y5oa3v0 emotion-euiBadge-hollow-Badge"
                       title=""
                     >
                       <span

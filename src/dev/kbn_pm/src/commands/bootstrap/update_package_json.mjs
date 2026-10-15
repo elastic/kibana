@@ -44,6 +44,7 @@ function updatePkgEntries(depsObj, actual, expected) {
 }
 
 /**
+ * Updates the package.json file with the latest dependencies from the workspace.
  * @param {import('@kbn/repo-packages').Package[]} pkgs
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
@@ -63,21 +64,13 @@ export async function updatePackageJson(pkgs, log) {
   changes ||= updatePkgEntries(
     pkgJson.dependencies,
     new Map(Object.entries(pkgJson.dependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(
-      pkgs
-        .filter((p) => !p.isDevOnly())
-        .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
-    )
+    new Map(pkgs.filter((p) => !p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
   );
 
   changes ||= updatePkgEntries(
     pkgJson.devDependencies,
     new Map(Object.entries(pkgJson.devDependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(
-      pkgs
-        .filter((p) => p.isDevOnly())
-        .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
-    )
+    new Map(pkgs.filter((p) => p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
   );
 
   if (changes) {

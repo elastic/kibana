@@ -7,11 +7,40 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const EnrollmentAPIKeySchema = schema.object({
-  id: schema.string(),
-  api_key_id: schema.string(),
-  api_key: schema.string(),
-  name: schema.maybe(schema.string()),
-  active: schema.boolean(),
-  policy_id: schema.maybe(schema.string()),
-});
+export const EnrollmentAPIKeySchema = schema.object(
+  {
+    id: schema.string(),
+    api_key_id: schema.string({
+      meta: { description: 'The ID of the API key in the Security API.' },
+    }),
+    api_key: schema.string({
+      meta: { description: 'The enrollment API key (token) used for enrolling Elastic Agents.' },
+    }),
+    name: schema.maybe(
+      schema.string({
+        meta: { description: 'The name of the enrollment API key.' },
+      })
+    ),
+    active: schema.boolean({
+      meta: {
+        description:
+          'When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.',
+      },
+    }),
+    policy_id: schema.maybe(
+      schema.string({
+        meta: { description: 'The ID of the agent policy the Elastic Agent will be enrolled in.' },
+      })
+    ),
+    created_at: schema.string(),
+    expire_at: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'enrollment_api_key' } }
+);

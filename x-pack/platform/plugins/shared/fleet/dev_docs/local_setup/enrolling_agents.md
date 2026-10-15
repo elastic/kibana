@@ -1,6 +1,6 @@
 # Running a local Fleet Server and enrolling Elastic Agents
 
-This guide assumes Elasticsearch is running from snapshot and Kibana is running from source as detailed in [the README](../README.md#running-fleet-locally-in-stateful-mode). Note that `-E http.host=0.0.0.0` must be passed to `yarn es snapshot`.
+This guide assumes Elasticsearch is running from snapshot and Kibana is running from source as detailed in [the README](../README.md#running-fleet-locally-in-stateful-mode). Note that `-E http.host=0.0.0.0` must be passed to `pnpm es snapshot`.
 
 As explained in the [Set up a Fleet Server and enroll Elastic Agents](../README.md#set-up-a-fleet-server-and-enroll-elastic-agents) section, is it useful to run Elastic Agents in virtual machines or Docker containers for testing purposes. This guide provides step-by-step instructions for both methods using HTTP (note: you can also mix both and have e.g. a dockerized Fleet Server and agents on VMs). Refer to [Developing Kibana and Fleet Server simultaneously](./developing_kibana_and_fleet_server.md) for details about using HTTPS instead.
 

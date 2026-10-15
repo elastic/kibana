@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+const START_DATE_PICKER_FORMAT = 'MMM D, YYYY @ HH:mm';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObject }: FtrProviderContext) {
@@ -30,10 +33,11 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     };
 
     const fillInSchedule = async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(10, 0, 0, 0);
-      const futureDateString = tomorrow.toLocaleDateString();
+      const futureDateString = moment()
+        .add(1, 'day')
+        .startOf('day')
+        .hours(10)
+        .format(START_DATE_PICKER_FORMAT);
       await testSubjects.setValue('startDatePicker', futureDateString);
       // Close the date picker to prevent it from blocking other fields
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -68,9 +72,8 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       expect(titleValue).to.equal('Ecom Dashboard');
 
       // Test date validation with a past date
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const pastDateString = yesterday.toLocaleDateString();
+      const pastDateString = moment().subtract(1, 'day').format(START_DATE_PICKER_FORMAT);
+
       await testSubjects.setValue('startDatePicker', pastDateString);
       // Close the date picker by pressing Escape key
       await browser.pressKeys(browser.keys.ESCAPE);

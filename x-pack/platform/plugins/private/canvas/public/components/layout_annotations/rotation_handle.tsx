@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -15,7 +15,10 @@ interface Props {
   zoomScale?: number;
 }
 
-export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
+export const RotationHandle: CanvasFunctionComponent<Props> = ({
+  transformMatrix,
+  zoomScale = 1,
+}) => (
   <div
     className="canvasRotationHandle canvasLayoutAnnotation"
     style={{
@@ -30,7 +33,6 @@ export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) =>
 );
 
 RotationHandle.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   zoomScale: PropTypes.number,
 };

@@ -14,6 +14,8 @@ export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
   RuleType,
+  RuleTypeParamsAuthorizer,
+  RuleTypeParamsAuthorizerContext,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,

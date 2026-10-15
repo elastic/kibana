@@ -758,7 +758,7 @@ This tells the Alerting Framework that, given a rule of the RuleType whose ID is
 
 The navigation is handled using the `navigateToUrl` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
 
-You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
+You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `pnpm start`.
 
 ### registerDefaultNavigation
 The _registerDefaultNavigation_ API allows you to register a handler for any rule type within your solution:

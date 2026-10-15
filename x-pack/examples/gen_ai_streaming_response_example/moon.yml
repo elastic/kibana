@@ -33,7 +33,6 @@ tags:
   - plugin
   - prod
   - group-undefined
-  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -41,6 +40,4 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

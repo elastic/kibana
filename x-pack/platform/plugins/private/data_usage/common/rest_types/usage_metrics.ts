@@ -59,6 +59,7 @@ export const isMetricType = (type: string): type is MetricTypes =>
 const isValidMetricType = (value: string) => METRIC_TYPE_VALUES.includes(value);
 
 const DateSchema = schema.string({
+  maxLength: 64,
   minLength: 1,
   validate: (v) => (v.trim().length ? undefined : 'Date ISO string must not be empty'),
 });
@@ -70,7 +71,7 @@ const metricTypesSchema = schema.oneOf(
 export const UsageMetricsRequestSchema = schema.object({
   from: DateSchema,
   to: DateSchema,
-  metricTypes: schema.arrayOf(schema.string(), {
+  metricTypes: schema.arrayOf(schema.string({ maxLength: 1000 }), {
     minSize: 1,
     maxSize: 1000,
     validate: (values) => {
@@ -82,7 +83,7 @@ export const UsageMetricsRequestSchema = schema.object({
       }
     },
   }),
-  dataStreams: schema.arrayOf(schema.string(), {
+  dataStreams: schema.arrayOf(schema.string({ maxLength: 1000 }), {
     maxSize: 1000,
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {

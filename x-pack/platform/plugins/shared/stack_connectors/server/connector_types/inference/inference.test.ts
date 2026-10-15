@@ -92,6 +92,7 @@ describe('InferenceConnector', () => {
           meta: true,
           headers: {
             'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+            'accept-encoding': 'identity',
           },
         }
       );
@@ -302,6 +303,9 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
+          headers: {
+            'accept-encoding': 'identity',
+          },
         }
       );
     });
@@ -328,6 +332,9 @@ describe('InferenceConnector', () => {
           asStream: true,
           meta: true,
           signal,
+          headers: {
+            'accept-encoding': 'identity',
+          },
         }
       );
     });

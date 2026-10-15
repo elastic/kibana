@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await lens.switchToVisualization('lnsLegacyMetric');
 
     await lens.waitForVisualization('legacyMtrVis');
-    await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+    await lens.assertLegacyMetric('Average of bytes', '5,727.314');
   };
 
   const createAndSaveDashboard = async (dashboardName: string) => {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
 
-      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.314');
       await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
 
-      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.314');
       await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
 
-      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.314');
       await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
 
-      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.314');
       await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal');
 
       const panelCount = await dashboard.getPanelCount();
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await lens.switchToVisualization('lnsLegacyMetric');
 
             await lens.waitForVisualization('legacyMtrVis');
-            await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+            await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
             await lens.waitForVisualization('legacyMtrVis');
             await testSubjects.click('lnsApp_saveButton');
@@ -332,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await lens.switchToVisualization('lnsLegacyMetric');
 
             await lens.waitForVisualization('legacyMtrVis');
-            await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+            await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
             await lens.waitForVisualization('legacyMtrVis');
             await testSubjects.click('lnsApp_saveButton');

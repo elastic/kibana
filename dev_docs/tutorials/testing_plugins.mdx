@@ -209,23 +209,23 @@ FTR bootstraps an elasticsearch and a Kibana instance and runs the test suite ag
 
 ```bash
 # Start servers once, keep them running
-yarn test:ftr:server --config path/to/config.ts
+pnpm test:ftr:server --config path/to/config.ts
 
 # In another terminal, run tests against the running servers
-yarn test:ftr:runner --config path/to/config.ts
+pnpm test:ftr:runner --config path/to/config.ts
 ```
 
 **Useful FTR flags:**
 
 ```bash
 # Run a specific test by name
-yarn test:ftr:runner --config path/to/config.ts --grep "test name"
+pnpm test:ftr:runner --config path/to/config.ts --grep "test name"
 
 # Debug with browser open, stop on first failure
-yarn test:ftr --config path/to/config.ts --debug --bail
+pnpm test:ftr --config path/to/config.ts --debug --bail
 
 # Run against serverless ES
-yarn test:ftr --config path/to/config.ts --esFrom serverless
+pnpm test:ftr --config path/to/config.ts --esFrom serverless
 ```
 
 Pros:

@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
+import { resolveCurrentUser } from './resolve_current_user';
 
 export interface IRequestContextFactory {
   setup(adhocAttackDiscoveryDataClient: IRuleDataClient | undefined): void;
@@ -67,26 +68,13 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = async () => {
-      let contextUser = coreContext.security.authc.getCurrentUser();
-
-      if (contextUser && !contextUser?.profile_uid) {
-        try {
-          const users = await coreContext.elasticsearch.client.asCurrentUser.security.getUser({
-            username: contextUser.username,
-            with_profile_uid: true,
-          });
-
-          if (users[contextUser.username].profile_uid) {
-            contextUser = { ...contextUser, profile_uid: users[contextUser.username].profile_uid };
-          }
-        } catch (e) {
-          this.logger.error(`Failed to get user profile_uid: ${e}`);
-        }
-      }
-
-      return contextUser;
-    };
+    const getCurrentUser = () =>
+      resolveCurrentUser({
+        currentUser: coreContext.security.authc.getCurrentUser(),
+        logger: this.logger,
+        request,
+        security: startPlugins.security,
+      });
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);

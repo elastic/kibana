@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { TaskCost } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { TaskRunnerFactory } from './task_runner';
 import type {
   RuleType,
@@ -300,6 +300,7 @@ export class RuleTypeRegistry {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

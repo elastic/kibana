@@ -59,4 +59,29 @@ describe('buildTimelineDetailsQuery', () => {
       }
     `);
   });
+
+  it('does not set expand_wildcards when includeHiddenIndices is omitted (primary lookup)', () => {
+    const query = buildTimelineDetailsQuery({
+      indexName: '.ds-logs-endpoint.events-default-2026.05.17-000001',
+      id: 'some-id',
+      runtimeMappings: {},
+    });
+
+    expect(query).not.toHaveProperty('expand_wildcards');
+  });
+
+  it('includes hidden indices in wildcard expansion when includeHiddenIndices is true (fallback)', () => {
+    const query = buildTimelineDetailsQuery({
+      indexName: '*.ds-logs-endpoint.events-default-2026.05.17-000001',
+      id: 'some-id',
+      runtimeMappings: {},
+      includeHiddenIndices: true,
+    });
+
+    expect(query).toEqual(
+      expect.objectContaining({
+        expand_wildcards: ['open', 'hidden'],
+      })
+    );
+  });
 });

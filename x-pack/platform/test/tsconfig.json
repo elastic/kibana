@@ -161,5 +161,6 @@
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
     "@kbn/setup-node-env",
+    "@kbn/utility-types",
   ]
 }

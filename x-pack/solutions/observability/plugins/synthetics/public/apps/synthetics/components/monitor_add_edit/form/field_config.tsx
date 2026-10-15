@@ -597,6 +597,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }): Omit<EuiComboBoxProps<string>, 'selectedOptions'> & FormattedComboBoxProps => ({
       selectedOptions: field?.value || [],
       isDisabled: readOnly,
+      enableCopy: true,
     }),
   },
   [ConfigKey.TIMEOUT]: {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ClearablePalettePicker } from './clearable_palette_picker';
 import { palettes as defaultPalettes } from '../../../../common/lib/palettes';
 import { PalettePickerProps } from '../types';
 import { DefaultPalettePicker } from './default_palette_picker';
 
-export const PalettePicker: FC<PalettePickerProps> = (props) => {
+export const PalettePicker: CanvasFunctionComponent<PalettePickerProps> = (props) => {
   const { additionalPalettes = [] } = props;
   const palettes = [...defaultPalettes, ...additionalPalettes];
 
@@ -33,9 +33,7 @@ export const PalettePicker: FC<PalettePickerProps> = (props) => {
 
 PalettePicker.propTypes = {
   id: PropTypes.string,
-  // @ts-expect-error upgrade typescript v5.9.3
   palette: PropTypes.object,
   onChange: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
   clearable: PropTypes.bool,
 };

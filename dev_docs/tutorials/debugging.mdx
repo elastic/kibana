@@ -89,7 +89,7 @@ There are two options for debugging server code in Kibana: Attach to process or 
   "compounds": [
     {
       "name": "Debug Kibana Server",
-      "description": "Attaches to Kibana server in debug mode. Requires first starting Kibana with `yarn debug`",
+      "description": "Attaches to Kibana server in debug mode. Requires first starting Kibana with `pnpm debug`",
       "configurations": ["kibana-9229", "kibana-9230", "kibana-9231"],
       "restart": true,
       "presentation": {
@@ -103,8 +103,8 @@ There are two options for debugging server code in Kibana: Attach to process or 
 }
 ```
 
-2. Start Elasticsearch with `yarn es snapshot`.
-3. Start Kibana with `yarn debug` or `node --inspect scripts/kibana --dev`.
+2. Start Elasticsearch with `pnpm es snapshot`.
+3. Start Kibana with `pnpm debug` or `node --inspect scripts/kibana --dev`.
 4. In VS Code, click the "Run and debug" icon in the sidebar.
 5. Select "Debug Kibana Server" from the dropdown menu.
 6. Click the green play button to start debugging.
@@ -153,7 +153,7 @@ There are two options for debugging server code in Kibana: Attach to process or 
 }
 ```
 
-2. Start Elasticsearch with `yarn es snapshot`, but don't start Kibana and kill any running instances of Kibana.
+2. Start Elasticsearch with `pnpm es snapshot`, but don't start Kibana and kill any running instances of Kibana.
 3. In VS Code, click the "Run and debug" icon in the sidebar.
 4. Select "Launch and Debug Kibana" from the dropdown menu.
 5. Click the green play button to start debugging. You can choose whether or not to run the developer examples.
@@ -166,7 +166,7 @@ If necessary, add the following to your `.vscode/settings.json` file.
 
 ```jsonc
   // self managed
-  "jest.jestCommandLine": "yarn test:jest --runInBand"
+  "jest.jestCommandLine": "pnpm test:jest --runInBand"
 ```
 
 See the [Jest extension for VS Code documentation](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) for information on how to run and debug your unit tests.
@@ -256,7 +256,7 @@ See the [Jest extension for VS Code documentation](https://marketplace.visualstu
 
 When running Kibana, it's sometimes helpful to enable verbose logging.
 
-`yarn start --verbose`
+`pnpm start --verbose`
 
 Using verbose logging usually results in much more information than you're interested in. The [logging documentation](https://www.elastic.co/guide/en/kibana/current/logging-settings.html) covers ways to change the log level of certain types.
 
