@@ -72,8 +72,6 @@ describe('document attachment type', () => {
     ReturnType<typeof createConverterMock>
   > = {
     'application/pdf': createConverterMock(),
-    'text/markdown': createConverterMock(),
-    'text/plain': createConverterMock(),
   };
   const documentConverters: DocumentConverters = converterMocks;
   const pdfConverter = converterMocks['application/pdf'];
@@ -119,6 +117,15 @@ describe('document attachment type', () => {
       const { plugin } = createFilesPluginStub();
       const result = await createDefinition(plugin).validate(
         { ...validData, mime_type: 'application/zip' },
+        validateContext
+      );
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects a markdown mime type', async () => {
+      const { plugin } = createFilesPluginStub();
+      const result = await createDefinition(plugin).validate(
+        { ...validData, name: 'notes.md', mime_type: 'text/markdown' },
         validateContext
       );
       expect(result.valid).toBe(false);
@@ -186,32 +193,7 @@ describe('document attachment type', () => {
       );
     });
 
-    it('uses the converter of the markdown mime type', async () => {
-      const { plugin } = createFilesPluginStub({
-        mimeType: 'text/markdown',
-        name: 'notes.md',
-        bytes: Buffer.from('# Notes'),
-      });
-      converterMocks['text/markdown'].toText.mockResolvedValue('# Notes');
-
-      const data = await createDefinition(plugin).resolve!(
-        'file-abc',
-        createResolveContext(request)
-      );
-
-      expect(data).toEqual({
-        file_id: 'file-abc',
-        name: 'notes.md',
-        mime_type: 'text/markdown',
-        text: '# Notes',
-      });
-      expect(converterMocks['text/markdown'].toText).toHaveBeenCalledWith(
-        expect.objectContaining({ bytes: Buffer.from('# Notes'), fileName: 'notes.md' })
-      );
-      expect(pdfConverter.toText).not.toHaveBeenCalled();
-    });
-
-    it.each([null, 'application/zip'])(
+    it.each([null, 'text/plain', 'application/zip'])(
       'fails without a download when the file mime type is %s',
       async (mimeType) => {
         const { plugin, downloadContent } = createFilesPluginStub({ mimeType });
@@ -278,27 +260,6 @@ describe('document attachment type', () => {
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
       ).rejects.toThrow('The file is larger than 10 MB.');
       expect(pdfConverter.toText).not.toHaveBeenCalled();
-    });
-
-    it('takes the size limit from the mime type', async () => {
-      const threeMb = 3 * 1024 * 1024;
-      const textFile = createFilesPluginStub({
-        mimeType: 'text/plain',
-        name: 'notes.txt',
-        size: threeMb,
-        bytes: Buffer.alloc(threeMb),
-      });
-
-      await expect(
-        createDefinition(textFile.plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The file is larger than 2 MB.');
-      expect(textFile.downloadContent).not.toHaveBeenCalled();
-
-      const pdfFile = createFilesPluginStub({ size: threeMb, bytes: Buffer.alloc(threeMb) });
-
-      await expect(
-        createDefinition(pdfFile.plugin).resolve!('file-abc', createResolveContext(request))
-      ).resolves.toEqual(expect.objectContaining({ mime_type: 'application/pdf' }));
     });
 
     it('fails when the text is too long', async () => {

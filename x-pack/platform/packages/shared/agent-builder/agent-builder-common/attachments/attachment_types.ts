@@ -162,11 +162,7 @@ export interface ImageAttachmentData {
 
 export const CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND = 'chat-attachment-documents';
 
-export const SUPPORTED_DOCUMENT_MIME_TYPES = [
-  'application/pdf',
-  'text/markdown',
-  'text/plain',
-] as const;
+export const SUPPORTED_DOCUMENT_MIME_TYPES = ['application/pdf'] as const;
 export type SupportedDocumentMimeType = (typeof SUPPORTED_DOCUMENT_MIME_TYPES)[number];
 
 export const isSupportedDocumentMimeType = (
@@ -176,8 +172,6 @@ export const isSupportedDocumentMimeType = (
 
 export const MAX_DOCUMENT_BYTES: Readonly<Record<SupportedDocumentMimeType, number>> = {
   'application/pdf': 10 * 1024 * 1024,
-  'text/markdown': 2 * 1024 * 1024,
-  'text/plain': 2 * 1024 * 1024,
 };
 
 export const MAX_DOCUMENT_FILE_KIND_BYTES = Math.max(...Object.values(MAX_DOCUMENT_BYTES));
@@ -201,6 +195,6 @@ export interface DocumentAttachmentData {
   name: string;
   /** mime type of the file */
   mime_type: SupportedDocumentMimeType;
-  /** text read from the file. Markdown for PDFs, as is for text files */
+  /** text read from the file. Markdown for PDFs */
   text: string;
 }

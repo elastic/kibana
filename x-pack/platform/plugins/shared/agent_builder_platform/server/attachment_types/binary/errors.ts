@@ -29,10 +29,6 @@ export const documentErrors = {
     createAttachmentInvalidError('The file is damaged or has the wrong file type.', {
       documentErrorCode: 'invalid_content',
     }),
-  notUtf8: () =>
-    createAttachmentInvalidError('The file must be UTF-8 text.', {
-      documentErrorCode: 'not_utf8',
-    }),
   extractionFailed: () =>
     createInternalError('Could not read the file. Try again later.', {
       documentErrorCode: 'extraction_failed',

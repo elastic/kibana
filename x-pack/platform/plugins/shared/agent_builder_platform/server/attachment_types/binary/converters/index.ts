@@ -11,7 +11,6 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { DocumentExtractionAvailability } from '../extraction/extraction_availability';
 import { createPdfConverter } from './pdf_converter';
-import { createPlainTextConverter } from './plain_text_converter';
 import type { DocumentConverters } from './types';
 
 export type { DocumentConverter, DocumentConverters, DocumentToTextParams } from './types';
@@ -25,11 +24,8 @@ export const createDocumentConverters = ({
   extractionAvailability: DocumentExtractionAvailability;
   logger: Logger;
 }): DocumentConverters => {
-  const plainTextConverter = createPlainTextConverter();
   return {
     'application/pdf': createPdfConverter({ getEsClient, extractionAvailability, logger }),
-    'text/markdown': plainTextConverter,
-    'text/plain': plainTextConverter,
   };
 };
 

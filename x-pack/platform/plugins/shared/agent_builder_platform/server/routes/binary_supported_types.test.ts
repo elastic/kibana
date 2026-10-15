@@ -23,8 +23,6 @@ describe('registerDocumentSupportedTypesRoute', () => {
   const setup = ({ pdfAvailable }: { pdfAvailable: boolean }) => {
     const documentConverters: DocumentConverters = {
       'application/pdf': createConverter(pdfAvailable),
-      'text/markdown': createConverter(true),
-      'text/plain': createConverter(true),
     };
     const router = httpServiceMock.createRouter();
     registerDocumentSupportedTypesRoute({ router, documentConverters });
@@ -48,23 +46,19 @@ describe('registerDocumentSupportedTypesRoute', () => {
     });
   });
 
-  it('returns all mime types when all are available', async () => {
+  it('returns PDF when it is available', async () => {
     const { handler } = setup({ pdfAvailable: true });
 
     const response = await callHandler(handler);
 
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { mime_types: ['application/pdf', 'text/markdown', 'text/plain'] },
-    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { mime_types: ['application/pdf'] } });
   });
 
-  it('leaves out PDF when it is not available', async () => {
+  it('returns no mime types when PDF is not available', async () => {
     const { handler } = setup({ pdfAvailable: false });
 
     const response = await callHandler(handler);
 
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { mime_types: ['text/markdown', 'text/plain'] },
-    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { mime_types: [] } });
   });
 });
