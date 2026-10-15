@@ -81,8 +81,17 @@ jest.mock('../servers/configs', () => ({
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
   let flagsReader: jest.Mocked<FlagsReader>;
   let log: jest.Mocked<ToolingLog>;
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
+  });
 
   const mockFilteredModules: ModuleDiscoveryInfo[] = [
     {
@@ -126,6 +135,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
 
     // Re-setup fs mocks after clearing
     (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
