@@ -21,11 +21,20 @@ import type { Announcement, Politeness } from './announcement_queue';
  */
 export const ANNOUNCEMENT_CLEAR_MS = 15_000;
 
+/**
+ * An announcement goes to a single live region: the assertive one if any of its messages is
+ * assertive. Updating both regions at once could drop the polite part, because an assertive update
+ * may clear speech that screen readers have queued.
+ */
+const getPoliteness = ({ messages }: Announcement): Politeness =>
+  messages.some(({ politeness }) => politeness === 'assertive') ? 'assertive' : 'polite';
+
 const LiveRegion: FunctionComponent<{
   politeness: Politeness;
   announcement: Announcement | undefined;
 }> = ({ politeness, announcement }) => {
-  const messages = announcement?.messages.filter((message) => message.politeness === politeness);
+  const messages =
+    announcement && getPoliteness(announcement) === politeness ? announcement.messages : [];
 
   return (
     <EuiLiveAnnouncer
@@ -34,7 +43,7 @@ const LiveRegion: FunctionComponent<{
       clearAfterMs={ANNOUNCEMENT_CLEAR_MS}
       data-test-subj={politeness === 'assertive' ? 'screenReaderAlerts' : 'screenReaderStatus'}
     >
-      {announcement && messages?.length ? (
+      {announcement && messages.length ? (
         <>
           {/* Keys are unique per announcement, so repeating a message inserts new nodes that
               screen readers announce again */}
@@ -49,7 +58,8 @@ const LiveRegion: FunctionComponent<{
 
 /**
  * The live regions all screen reader announcements in Kibana go through: a polite one for status
- * messages and page changes, and an assertive one for toasts and urgent messages.
+ * messages and page changes, and an assertive one for toasts and urgent messages. A batch that mixes
+ * both, e.g. a toast and the page title after save-and-navigate, is read in the assertive one.
  *
  * Toasts are assertive because actions that show a toast often also move focus, e.g. a closed
  * flyout returning focus to its trigger, and VoiceOver drops or talks over polite announcements made

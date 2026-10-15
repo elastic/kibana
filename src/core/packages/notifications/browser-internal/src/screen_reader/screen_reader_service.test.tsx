@@ -52,22 +52,33 @@ describe('ScreenReaderService', () => {
     document.body.innerHTML = '';
   });
 
-  it('announces polite messages in a status region and assertive ones in an alert region', () => {
+  it('announces polite messages in a status region', () => {
+    const screenReader = startService();
+
+    screenReader.notify('12 results found');
+    advanceTimers(ANNOUNCEMENT_SETTLE_MS);
+
+    const statusRegion = getStatusRegion();
+    expect(targetDomElement.contains(statusRegion)).toBe(true);
+    expect(statusRegion.getAttribute('role')).toBe('status');
+    expect(statusRegion.getAttribute('aria-live')).toBe('polite');
+    expect(getTexts(statusRegion)).toEqual(['12 results found']);
+    expect(getTexts(getAlertsRegion())).toEqual([]);
+  });
+
+  // An assertive update may clear queued polite speech, so a mixed batch uses one region
+  it('announces a batch with any assertive message entirely in the alert region', () => {
     const screenReader = startService();
 
     screenReader.notify('Success: Rule exported', { politeness: 'assertive' });
     screenReader.notify('Detection rules - Elastic');
     advanceTimers(ANNOUNCEMENT_SETTLE_MS);
 
-    const statusRegion = getStatusRegion();
     const alertsRegion = getAlertsRegion();
-    expect(targetDomElement.contains(statusRegion)).toBe(true);
-    expect(statusRegion.getAttribute('role')).toBe('status');
-    expect(statusRegion.getAttribute('aria-live')).toBe('polite');
-    expect(getTexts(statusRegion)).toEqual(['Detection rules - Elastic']);
     expect(alertsRegion.getAttribute('role')).toBe('alert');
     expect(alertsRegion.getAttribute('aria-live')).toBe('assertive');
-    expect(getTexts(alertsRegion)).toEqual(['Success: Rule exported']);
+    expect(getTexts(alertsRegion)).toEqual(['Success: Rule exported', 'Detection rules - Elastic']);
+    expect(getTexts(getStatusRegion())).toEqual([]);
   });
 
   it('keeps an announcement long enough for late readouts, then clears it', () => {
