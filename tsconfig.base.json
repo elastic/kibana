@@ -2389,6 +2389,8 @@
       "@kbn/security-labs-artifact-builder/*": ["./x-pack/packages/ai-infra/security-labs-artifact-builder/*"],
       "@kbn/security-mitre-attack-common": ["./x-pack/solutions/security/packages/security-mitre-attack-common"],
       "@kbn/security-mitre-attack-common/*": ["./x-pack/solutions/security/packages/security-mitre-attack-common/*"],
+      "@kbn/security-mitre-attack-mocks": ["./x-pack/solutions/security/packages/security-mitre-attack-mocks"],
+      "@kbn/security-mitre-attack-mocks/*": ["./x-pack/solutions/security/packages/security-mitre-attack-mocks/*"],
       "@kbn/security-mitre-attack-server": ["./x-pack/solutions/security/packages/security-mitre-attack-server"],
       "@kbn/security-mitre-attack-server/*": ["./x-pack/solutions/security/packages/security-mitre-attack-server/*"],
       "@kbn/security-plugin": ["./x-pack/platform/plugins/shared/security"],

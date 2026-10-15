@@ -1666,6 +1666,7 @@ packages:
   - 'x-pack/solutions/security/packages/navigation'
   - 'x-pack/solutions/security/packages/security-ai-prompts'
   - 'x-pack/solutions/security/packages/security-mitre-attack-common'
+  - 'x-pack/solutions/security/packages/security-mitre-attack-mocks'
   - 'x-pack/solutions/security/packages/security-mitre-attack-server'
   - 'x-pack/solutions/security/packages/side-nav'
   - 'x-pack/solutions/security/packages/siem-readiness'
