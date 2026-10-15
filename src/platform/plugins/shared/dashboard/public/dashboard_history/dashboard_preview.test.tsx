@@ -41,9 +41,8 @@ jest.mock('..', () => {
           setState(getInitialInput());
           onApiAvailable({
             setState: (next: Record<string, any>) =>
-              setState((prev) => ({
+              setState((prev: DashboardState) => ({
                 ...next,
-                viewMode: prev?.viewMode,
                 time_range: next.time_range ?? prev?.time_range,
               })),
           });
@@ -99,7 +98,12 @@ const getChange = (id: string, snapshot: Partial<DashboardState>): ChangeHistory
     snapshot: { title: `Title ${id}`, panels: [], ...snapshot },
   } as unknown as ChangeHistoryDetail);
 
-const panel = (uid: string) => ({ uid, type: 'markdown', grid: { x: 0, y: 0, w: 12, h: 8 } });
+const panel = (uid: string) => ({
+  uid,
+  type: 'markdown',
+  grid: { x: 0, y: 0, w: 12, h: 8 },
+  config: {},
+});
 
 const fullSnapshot = getChange('full', {
   panels: [panel('panel-a'), panel('panel-b')] as DashboardState['panels'],
