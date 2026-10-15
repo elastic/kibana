@@ -117,13 +117,13 @@ describe('arrangeDashboardLayout', () => {
 
     expect(arrangeLayout).toHaveBeenCalledWith({
       panels: [
-        expect.objectContaining({ id: 'existing', contentChanged: true }),
+        expect.objectContaining({ id: 'existing', relayout: 'size' }),
         expect.objectContaining({
           id: 'new-panel',
           chartType: 'metric',
           title: 'Panel new-panel',
           authoringNote: 'Shows total requests.',
-          isNew: true,
+          relayout: 'all',
         }),
       ],
       sections: [
@@ -147,7 +147,7 @@ describe('arrangeDashboardLayout', () => {
     expect(reportFailure).not.toHaveBeenCalled();
   });
 
-  it('flags panels that moved to another container, but not new panels', async () => {
+  it('sets relayout to position for moved panels, and to all for moved and edited ones', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
     const dashboardWithMovedPanels: DashboardAttachmentData = {
       ...originalDashboardData,
@@ -163,12 +163,12 @@ describe('arrangeDashboardLayout', () => {
     expect(arrangeLayout).toHaveBeenCalledWith(
       expect.objectContaining({
         panels: [
-          expect.objectContaining({ id: 'inner', moved: true }),
-          expect.not.objectContaining({ moved: true }),
+          expect.objectContaining({ id: 'inner', relayout: 'position' }),
+          expect.objectContaining({ id: 'new-panel', relayout: 'all' }),
         ],
         sections: [
           expect.objectContaining({
-            panels: [expect.objectContaining({ id: 'existing', moved: true })],
+            panels: [expect.objectContaining({ id: 'existing', relayout: 'all' })],
           }),
         ],
       })

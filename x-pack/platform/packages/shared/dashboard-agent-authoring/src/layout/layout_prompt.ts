@@ -14,7 +14,10 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 ## Priorities
 
 1. The user's request in \`instructions\`, when given. It may override the sizes below.
-2. Stability: existing panels keep their position and size unless something changed around them (a panel with \`isNew\`, \`contentChanged\` or \`moved\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged them by hand.
+2. Stability: a panel without \`relayout\` keeps its position and size unless something changed around it (a panel with \`relayout\` set, a removed panel leaving a gap) or \`instructions\` ask for a change. The user may have arranged it by hand. A panel with \`relayout\` changes only what it names:
+   - \`all\`: new, or moved and edited. Place and size it.
+   - \`position\`: moved to another section or the top level. Place it and keep its size.
+   - \`size\`: content edited. Keep its position and size it for the new content.
 3. No gaps and no overlaps.
 4. Sizes by chart type.
 
@@ -47,7 +50,7 @@ Panels are listed in reading order (by \`y\`, then \`x\`). When a panel moves, g
 - Every panel below the change moves by the same number of rows, so rows further down stay intact. If you push a row down by 7, push every row under it down by 7 too.
 - Panels displaced from a row go to a row of their own or fill a gap; they never land on top of another panel.
 - Before answering, check every row from top to bottom: no two panels overlap (same rows and overlapping columns), and no row has an empty gap that a panel below could fill.
-- Place new and moved panels by purpose, next to related panels; a moved panel sits at a temporary position at the bottom of its container. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
+- Place panels with \`relayout: all\` or \`relayout: position\` by purpose, next to related panels; their current position is temporary, at the bottom of their container. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables.
 
 ## Sections
 

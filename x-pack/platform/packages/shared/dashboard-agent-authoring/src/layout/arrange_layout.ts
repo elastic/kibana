@@ -22,6 +22,7 @@ import {
   type LayoutArrangement,
   type LayoutPanel,
   type LayoutRequest,
+  type Relayout,
 } from './types';
 
 /** The text size of a markdown panel, which its height depends on. */
@@ -100,10 +101,23 @@ export const arrangeDashboardLayout = async ({
       ? describeMarkdownText(config.content)
       : undefined);
 
+  const getRelayout = (id: string, containerId: string | null): Relayout | undefined => {
+    const originalContainerId = originalContainerByPanelId.get(id);
+    if (originalContainerId === undefined) {
+      return 'all';
+    }
+    const isMoved = originalContainerId !== containerId;
+    const isEdited = editedPanelIds.has(id);
+    if (isMoved) {
+      return isEdited ? 'all' : 'position';
+    }
+    return isEdited ? 'size' : undefined;
+  };
+
   const toLayoutPanel = (panel: AttachmentPanel, containerId: string | null): LayoutPanel => {
     const { id, type, config, grid } = panel;
     const authoringNote = getAuthoringNote(panel);
-    const originalContainerId = originalContainerByPanelId.get(id);
+    const relayout = getRelayout(id, containerId);
     return {
       id,
       type,
@@ -111,11 +125,7 @@ export const arrangeDashboardLayout = async ({
       ...(typeof config.title === 'string' ? { title: config.title } : {}),
       ...(authoringNote ? { authoringNote } : {}),
       grid,
-      ...(originalContainerId === undefined ? { isNew: true } : {}),
-      ...(originalContainerId !== undefined && originalContainerId !== containerId
-        ? { moved: true }
-        : {}),
-      ...(editedPanelIds.has(id) ? { contentChanged: true } : {}),
+      ...(relayout ? { relayout } : {}),
     };
   };
 

@@ -20,13 +20,15 @@ export interface LayoutPanel {
   /** What the panel shows when it was authored in this call, or the text size of a markdown panel. */
   authoringNote?: string;
   grid: { x: number; y: number; w: number; h: number };
-  /** Added in this call; omitted otherwise. */
-  isNew?: true;
-  /** Content edited in this call, so its size may no longer fit; omitted otherwise. */
-  contentChanged?: true;
-  /** Moved to another section or the top level in this call, so its position is temporary; omitted otherwise. */
-  moved?: true;
+  /** Which parts of `grid` to set again; omitted when the panel keeps its grid. */
+  relayout?: Relayout;
 }
+
+/**
+ * `all` for a panel added in this call, or moved and edited; `position` for a panel moved to
+ * another container, whose position is temporary; `size` for a panel whose content was edited.
+ */
+export type Relayout = 'all' | 'position' | 'size';
 
 export interface LayoutSection {
   id: string;
