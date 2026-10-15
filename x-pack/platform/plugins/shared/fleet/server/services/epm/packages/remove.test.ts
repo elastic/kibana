@@ -15,6 +15,7 @@ import { FleetUnauthorizedError } from '../../../errors';
 
 import {
   deleteESAsset,
+  deleteKibanaSavedObjectsAssets,
   removeInstallation,
   cleanupAssets,
   cleanupDependenciesStep,
@@ -37,6 +38,7 @@ jest.mock('../..', () => {
         info: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
+        debug: jest.fn(),
       }),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
       getExperimentalFeatures: jest.fn().mockReturnValue({
@@ -767,5 +769,38 @@ describe('cleanupAssets', () => {
         'udp.test': 'logs-udp.test-*',
       },
     });
+  });
+});
+
+describe('deleteKibanaSavedObjectsAssets', () => {
+  const uninstall = jest.fn();
+  const installedPkg = {
+    attributes: {
+      name: 'test-package',
+      version: '1.0.0',
+      install_source: 'registry',
+      installed_kibana_space_id: 'default',
+      installed_kibana: [
+        { id: 'system-fleet-package-workflow-default-test-package-a', type: 'workflow' },
+      ],
+    },
+  } as any;
+
+  beforeEach(() => {
+    uninstall.mockReset();
+    (appContextService as any).getManagedWorkflowsClient = jest.fn().mockReturnValue({ uninstall });
+    (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
+      getUnsafeInternalClient: jest.fn().mockReturnValue({ bulkDelete: jest.fn() }),
+    });
+  });
+
+  it('does not uninstall workflows, so upgrades can update them in place', async () => {
+    await deleteKibanaSavedObjectsAssets({
+      savedObjectsClient: {} as any,
+      installedPkg,
+      spaceId: 'default',
+    });
+
+    expect(uninstall).not.toHaveBeenCalled();
   });
 });

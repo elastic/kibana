@@ -591,11 +591,7 @@ export async function deleteKibanaSavedObjectsAssets({
   if (!refsToDelete.length) return;
 
   const logger = appContextService.getLogger();
-  await deleteWorkflowAssets({
-    refs: refsToDelete,
-    spaceId: spaceIdToDelete ?? DEFAULT_SPACE_ID,
-    logger,
-  });
+  // Workflows are not deleted here: on upgrade/reinstall installWorkflows updates them in place
   const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
