@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { act, renderHook } from '@testing-library/react';
 
 import { useAddToCase } from '.';
@@ -107,6 +109,55 @@ describe('useAddToCase', () => {
         type: 'security.alert',
       },
     ]);
+  });
+
+  it('opens the case selector with the attachments the caller builds for the chosen case', () => {
+    mockCanUserCreateAndReadCases.mockReturnValue(true);
+    const mockOpenSelectCaseModal = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
+              open: mockOpenSelectCaseModal,
+            }),
+          },
+        },
+      },
+    });
+    const attachments = [
+      {
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-1',
+        metadata: { title: 'An attack', alertCount: 1, index: 'attack-index' },
+      },
+    ];
+
+    const { result } = renderHook(
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          title: mockTitle,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    const buildAttachments = jest.fn().mockReturnValue(attachments);
+
+    act(() => {
+      result.current.onAddToCase({
+        alertIds: mockAlertIds,
+        markdownComments: mockMarkdownComments,
+        getAttachments: buildAttachments,
+      });
+    });
+
+    const { getAttachments } = mockOpenSelectCaseModal.mock.calls[0][0];
+    const theCase = { id: 'case-1', totalAlerts: 12 } as unknown as CaseUI;
+
+    expect(getAttachments({ theCase })).toEqual(attachments);
+    // The chosen case is handed to the caller so it can size the payload against it.
+    expect(buildAttachments).toHaveBeenCalledWith(theCase);
   });
 
   it.each([true, false])('forwards the case path on success when isNewCase is %s', (isNewCase) => {
