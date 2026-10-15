@@ -135,10 +135,26 @@ apiTest.describe(
       }>;
     };
 
+    // Creates a dashboard with one version per title, so each test owns its history
+    const seedVersions = async (
+      apiClient: ApiClient,
+      spaceId: string,
+      id: string,
+      titles: string[]
+    ) => {
+      for (const [index, title] of titles.entries()) {
+        expect(
+          await saveDashboard(apiClient, spaceId, title, editorBothSpaces, id)
+        ).toHaveStatusCode(index === 0 ? 201 : 200);
+      }
+      return waitForVersions(apiClient, spaceId, titles.length, id);
+    };
+
     apiTest('restore persists the snapshot and records a new version', async ({ apiClient }) => {
-      expect(await saveDashboard(apiClient, spaceA, 'Version one')).toHaveStatusCode(201);
-      expect(await saveDashboard(apiClient, spaceA, 'Version two')).toHaveStatusCode(200);
-      const before = await waitForVersions(apiClient, spaceA, 2);
+      const before = await seedVersions(apiClient, spaceA, dashboardId, [
+        'Version one',
+        'Version two',
+      ]);
       expect(before.map((item) => item.metadata.version)).toStrictEqual([2, 1]);
       const versionOne = before[1];
 
@@ -236,15 +252,15 @@ apiTest.describe(
       'privileges in one space do not grant access to history in another space',
       async ({ apiClient }) => {
         // the dashboard and its history exist in space A; the user only has access to space A
-        expect(await saveDashboard(apiClient, spaceA, 'Space A title')).toHaveStatusCode(200);
-        const itemsA = await waitForVersions(apiClient, spaceA, 4);
+        const id = 'history-authz-dashboard';
+        const itemsA = await seedVersions(apiClient, spaceA, id, ['Space A one', 'Space A two']);
 
         // the user can read space A history, proving the rejections below are about space B
-        expect(await listHistory(apiClient, spaceA, editorSpaceAOnly)).toHaveStatusCode(200);
+        expect(await listHistory(apiClient, spaceA, editorSpaceAOnly, id)).toHaveStatusCode(200);
 
-        const list = await listHistory(apiClient, spaceB, editorSpaceAOnly);
-        const details = await getChange(apiClient, spaceB, itemsA[0].id, editorSpaceAOnly);
-        const restored = await restore(apiClient, spaceB, itemsA[0].id, editorSpaceAOnly);
+        const list = await listHistory(apiClient, spaceB, editorSpaceAOnly, id);
+        const details = await getChange(apiClient, spaceB, itemsA[0].id, editorSpaceAOnly, id);
+        const restored = await restore(apiClient, spaceB, itemsA[0].id, editorSpaceAOnly, id);
         expect(list).toHaveStatusCode(403);
         expect(details).toHaveStatusCode(403);
         expect(restored).toHaveStatusCode(403);
@@ -254,21 +270,23 @@ apiTest.describe(
     apiTest(
       'history and restore never cross Spaces for a user who can access both',
       async ({ apiClient }) => {
+        const dashboardIdA = 'history-cross-space-dashboard-a';
+        const asA = [editorBothSpaces, dashboardIdA] as const;
         const asB = [editorBothSpaces, dashboardIdB] as const;
-        expect(await saveDashboard(apiClient, spaceB, 'Space B original', ...asB)).toHaveStatusCode(
-          201
-        );
-        expect(await saveDashboard(apiClient, spaceB, 'Space B edited', ...asB)).toHaveStatusCode(
-          200
-        );
-        const itemsB = await waitForVersions(apiClient, spaceB, 2, dashboardIdB);
-        const itemsA = (await listHistory(apiClient, spaceA)).body.items as Array<{ id: string }>;
+        const itemsA = await seedVersions(apiClient, spaceA, dashboardIdA, [
+          'Space A original',
+          'Space A title',
+        ]);
+        const itemsB = await seedVersions(apiClient, spaceB, dashboardIdB, [
+          'Space B original',
+          'Space B edited',
+        ]);
         const [changeFromA] = itemsA;
 
         // space A's dashboard and history are not reachable through space B
-        expect(await listHistory(apiClient, spaceB)).toHaveStatusCode(404);
-        expect(await getChange(apiClient, spaceB, changeFromA.id)).toHaveStatusCode(404);
-        expect(await restore(apiClient, spaceB, changeFromA.id)).toHaveStatusCode(404);
+        expect(await listHistory(apiClient, spaceB, ...asA)).toHaveStatusCode(404);
+        expect(await getChange(apiClient, spaceB, changeFromA.id, ...asA)).toHaveStatusCode(404);
+        expect(await restore(apiClient, spaceB, changeFromA.id, ...asA)).toHaveStatusCode(404);
         // a change id from space A does not resolve on space B's dashboard either
         expect(await getChange(apiClient, spaceB, changeFromA.id, ...asB)).toHaveStatusCode(404);
         expect(await restore(apiClient, spaceB, changeFromA.id, ...asB)).toHaveStatusCode(404);
@@ -280,17 +298,21 @@ apiTest.describe(
         expect((await getDashboard(apiClient, spaceB, dashboardIdB)).body.data.title).toBe(
           'Space B edited'
         );
-        expect((await getDashboard(apiClient, spaceA)).body.data.title).toBe('Space A title');
+        expect((await getDashboard(apiClient, spaceA, dashboardIdA)).body.data.title).toBe(
+          'Space A title'
+        );
         expect((await listHistory(apiClient, spaceB, ...asB)).body.total).toBe(2);
-        expect((await listHistory(apiClient, spaceA)).body.total).toBe(4);
+        expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
 
         // a legitimate restore in space B only touches space B
         const restoredB = await restore(apiClient, spaceB, itemsB[1].id, ...asB);
         expect(restoredB).toHaveStatusCode(200);
         expect(restoredB.body.title).toBe('Space B original');
         await waitForVersions(apiClient, spaceB, 3, dashboardIdB);
-        expect((await getDashboard(apiClient, spaceA)).body.data.title).toBe('Space A title');
-        expect((await listHistory(apiClient, spaceA)).body.total).toBe(4);
+        expect((await getDashboard(apiClient, spaceA, dashboardIdA)).body.data.title).toBe(
+          'Space A title'
+        );
+        expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
       }
     );
 
