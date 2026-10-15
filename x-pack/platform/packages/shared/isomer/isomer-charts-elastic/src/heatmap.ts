@@ -18,7 +18,7 @@ import {
 } from '@kbn/isomer-primitives-charts';
 
 import type { ChartHint } from './hints';
-import { kibanaBaseTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 
 type ColorScale = ReturnType<typeof resolveHeatmap>['colorScale'];
 
@@ -85,7 +85,11 @@ export const HeatmapChart = ({
   height,
   onSelect,
   hint = {},
-}: LiveChartProps<HeatmapNode> & { hint?: ChartHint }): ReactNode => {
+  baseTheme = kibanaBaseTheme,
+}: LiveChartProps<HeatmapNode> & {
+  hint?: ChartHint;
+  baseTheme?: BaseTheme;
+}): ReactNode => {
   const { x, y, time, values, colorScale } = resolveHeatmap(node);
   const isTime = node.x.type === 'time';
   const xOf = (key: string): string | number => (isTime ? timeValue(key) : key);
@@ -112,7 +116,7 @@ export const HeatmapChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       theme: {
         background: { color: 'transparent' },
         ...(hint.valueLabels === undefined

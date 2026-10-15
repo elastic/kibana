@@ -23,4 +23,4 @@ const pack = defineChartsPack(defineElasticChartsEngine({ hints }), {
 - Tests use Jest's globals instead of importing from `vitest`.
 - Formatting follows Kibana's Prettier settings.
 
-The copy is of `packages/isomer-charts-elastic/src` at elastic/isomer `5b65808e`.
+The copy is of `packages/isomer-charts-elastic/src` at elastic/isomer `984f5a3d`.

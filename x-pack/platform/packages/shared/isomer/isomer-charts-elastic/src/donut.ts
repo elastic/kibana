@@ -15,7 +15,7 @@ import {
 } from '@kbn/isomer-primitives-charts';
 
 import type { ChartHint } from './hints';
-import { kibanaBaseTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 
 /** Lens's default for a share printed on a slice. */
 const LENS_PERCENT_DECIMALS = 2;
@@ -31,7 +31,11 @@ export const DonutChart = ({
   height,
   onSelect,
   hint = {},
-}: LiveChartProps<DonutNode> & { hint?: ChartHint }): ReactNode => {
+  baseTheme = kibanaBaseTheme,
+}: LiveChartProps<DonutNode> & {
+  hint?: ChartHint;
+  baseTheme?: BaseTheme;
+}): ReactNode => {
   const { parts } = resolveDonut(node);
   const index = new Map(parts.map(({ key }, at) => [key, at]));
   const label = new Map(parts.map(({ key, label: printed }) => [key, printed]));
@@ -44,7 +48,7 @@ export const DonutChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       theme: {
         background: { color: 'transparent' },
         partition: { emptySizeRatio: hint.pie ? 0 : EMPTY_SIZE_RATIO },

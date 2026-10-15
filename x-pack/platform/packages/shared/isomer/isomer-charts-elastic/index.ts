@@ -11,4 +11,4 @@ export {
   defineElasticChartsEngine,
 } from './src/engine';
 export { type ChartHint, type ChartHints, chartHintSchema, chartHintsSchema } from './src/hints';
-export { kibanaBaseTheme, lensXyTheme } from './src/theme';
+export { type BaseTheme, kibanaBaseTheme, lensXyTheme } from './src/theme';

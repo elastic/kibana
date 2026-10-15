@@ -103,7 +103,10 @@ const ChartsBench = ({ charts }: { charts: ChartsPluginStart }) => {
     };
   }, [chartsBaseTheme]);
   const [bench, setBench] = useState<Bench>();
-  const engine = useMemo(() => defineElasticChartsEngine({ hints: bench?.hints ?? {} }), [bench]);
+  const engine = useMemo(
+    () => defineElasticChartsEngine({ hints: bench?.hints ?? {}, baseTheme: chartsBaseTheme }),
+    [bench, chartsBaseTheme]
+  );
   const theme = useMemo(() => resolveChartTheme('light'), []);
   const runtime = useMemo(
     () => createKibanaIsomerRuntime({ packs: [defineChartsPack(engine, { render: 'live' })] }),

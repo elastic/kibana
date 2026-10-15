@@ -10,6 +10,8 @@
 
 import { z } from '@elastic/isomer-sdk';
 
+export const ANNOTATION_ICONS = ['triangle', 'alert', 'asterisk', 'bell'] as const;
+
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$/);
 
 const axisHint = z
@@ -41,6 +43,8 @@ export const chartHintSchema = z
     pie: z.boolean().optional(),
     /** What a partition's slices print: their value, their share, or nothing. */
     values: z.enum(['value', 'percent', 'hidden']).optional(),
+    /** The marker an annotation draws with, by annotation key. Defaults to a triangle. */
+    icons: z.record(z.string(), z.enum(ANNOTATION_ICONS)).optional(),
     /** A gauge drawn as Lens's metric, its progress bar in this direction. */
     progress: z.enum(['horizontal', 'vertical']).optional(),
     /** Decimal places a percent share prints with. Defaults to Lens's 2. */

@@ -52,7 +52,10 @@ const baseTheme = (mode: ColorMode): Theme => {
 const themes = { light: baseTheme('light'), dark: baseTheme('dark') };
 
 /** The charts plugin's base theme, as every Kibana chart receives it. */
-export const kibanaBaseTheme = (mode: ColorMode): Theme => themes[mode];
+/** The Elastic Charts base theme for a color mode. */
+export type BaseTheme = (mode: ColorMode) => Theme;
+
+export const kibanaBaseTheme: BaseTheme = (mode) => themes[mode];
 
 /** What Lens's xy chart lays over the base theme on an embeddable. */
 export const lensXyTheme: PartialTheme = {

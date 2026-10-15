@@ -23,7 +23,7 @@ import {
 } from '@kbn/isomer-primitives-charts';
 
 import type { ChartHint } from './hints';
-import { kibanaBaseTheme } from './theme';
+import { type BaseTheme, kibanaBaseTheme } from './theme';
 
 /** Lens's arc gauge sweeps from lower left to lower right. */
 const ARC = { start: Math.PI + Math.PI / 4, end: -Math.PI / 4 };
@@ -36,7 +36,11 @@ export const GaugeChart = ({
   height,
   onSelect,
   hint = {},
-}: LiveChartProps<GaugeNode> & { hint?: ChartHint }): ReactNode => {
+  baseTheme = kibanaBaseTheme,
+}: LiveChartProps<GaugeNode> & {
+  hint?: ChartHint;
+  baseTheme?: BaseTheme;
+}): ReactNode => {
   const { shape, min, max, value, target, bands } = resolveGauge(node);
   const format = (amount: number) => formatValue(amount, node.format);
   const bandOf = (amount: number) => bands.find(({ from, to }) => amount >= from && amount <= to);
@@ -53,7 +57,7 @@ export const GaugeChart = ({
           : { width, height },
     },
     h(Settings, {
-      baseTheme: kibanaBaseTheme(theme.mode),
+      baseTheme: baseTheme(theme.mode),
       theme: { background: { color: 'transparent' } },
       ...(onSelect ? { onElementClick: () => onSelect([{}]) } : {}),
     }),
