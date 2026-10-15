@@ -151,7 +151,7 @@ export const DeleteProfileModal = ({
           <EuiText size="s">
             <p>{summary}</p>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <RuleChangeList
             aria-label={i18n.translate('xpack.boost.deleteProfileModal.rulesListLabel', {
               defaultMessage: 'Boost rules to be deleted',
