@@ -46,6 +46,7 @@ import {
   loadIndexPatterns,
   ensureESQLTimeFieldOnAdHocDataViews,
 } from '../../data_views_service/loader';
+import { withEsqlLayerDataViewSpecs } from '../../data_views_service/esql_layer_data_view_specs';
 import { getDatasourceLayers } from '../../state_management/utils';
 import { applyLegacySecondaryLabelIfMetric } from '../../visualizations/metric/runtime_state/apply_legacy_secondary_label';
 
@@ -270,7 +271,7 @@ export async function initializeSources(
   // from the actual ES|QL queries, including time field detection via http.
   const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: dataViews,
     http,
@@ -445,7 +446,7 @@ export async function persistedStateToExpression(
     | TextBasedPersistedState
     | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: services.dataViews,
     http: services.http,
