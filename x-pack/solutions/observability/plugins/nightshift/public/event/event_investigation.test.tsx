@@ -33,7 +33,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
   status: 'active',
-  stream_names: ['logs.web-frontend'],
+  source_ids: ['logs.web-frontend'],
   title: 'Latency spike on web-frontend',
   summary: 'Summary',
   severity: 'high',

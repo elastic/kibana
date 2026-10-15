@@ -16,6 +16,8 @@ import {
   type MonitorPrivileges,
 } from './deployment_stats';
 
+const USER_INDICES_PATTERN = ['*', '-.*', '-traces-agent_builder.otel-*'];
+
 describe('fetchMonitorPrivileges', () => {
   let client: ScopedClusterClientMock;
   const logger = loggingSystemMock.createLogger();
@@ -114,7 +116,7 @@ describe('countVectors', () => {
     await expect(countVectors(client, logger)).resolves.toBe(125);
 
     expect(client.asInternalUser.indices.stats).toHaveBeenCalledWith({
-      index: ['*', '-.*'],
+      index: USER_INDICES_PATTERN,
       expand_wildcards: ['open'],
       level: 'shards',
       metric: ['dense_vector', 'sparse_vector'],
@@ -446,7 +448,7 @@ describe('fetchIndexStats', () => {
     const result = await getIndexStats();
 
     expect(client.asCurrentUser.count).toHaveBeenCalledWith({
-      index: ['*', '-.*'],
+      index: USER_INDICES_PATTERN,
       expand_wildcards: ['open'],
     });
     expect(result.documentsCount).toBe(500);
@@ -543,7 +545,7 @@ describe('fetchNewIndex', () => {
     await fetchNewIndex(client, logger, []);
 
     expect(client.asCurrentUser.cat.indices).toHaveBeenCalledWith({
-      index: ['*', '-.*'],
+      index: USER_INDICES_PATTERN,
       format: 'json',
       h: ['index', 'creation.date'],
       expand_wildcards: ['open'],

@@ -168,6 +168,8 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
+        title: >-
+          Close {{ variables.fp_candidate_count }} {% if variables.fp_candidate_count == 1 %}alert{% else %}alerts{% endif %} as false positive
         comment: >-
           {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
           Approving this proposal will close them with workflow_reason=false_positive.

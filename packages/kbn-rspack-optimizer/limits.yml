@@ -195,13 +195,13 @@ pageLoadAssetSize:
   shared-plugins: 13536562
   shared-solution-packages: 392658
   significantEvents: 4439
-  significantEventsApp: 5212
+  significantEventsApp: 5759
   slo: 19531
   snapshotRestore: 16909
   spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
-  streams: 4563
+  streams: 6955
   streamsApp: 55882
   synthetics: 20839
   telemetry: 20586

@@ -105,6 +105,7 @@ export type AlertTriageEnableBlockedReason =
 /** Why Continuous Threat Hunt enable was refused before anything was written. */
 export type HuntSupplyEnableBlockedReason =
   | 'huntSupplyPrerequisitesUnmet'
+  | 'huntSupplyReportsIndexUnmanaged'
   | 'huntSupplyNotInstalled';
 
 /** Why a Worker enable was refused before anything was written. */
@@ -390,7 +391,12 @@ export class WorkersService {
         huntSupplyEnsured = true;
       } catch (err) {
         if (err instanceof ThreatIntelSupplyHardGateError) {
-          return { outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' };
+          return {
+            outcome: 'blocked',
+            reason: err.reasonCodes.includes('reports_index_unmanaged')
+              ? 'huntSupplyReportsIndexUnmanaged'
+              : 'huntSupplyPrerequisitesUnmet',
+          };
         }
         if (err instanceof ThreatIntelSupplyNotInstalledError) {
           return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };

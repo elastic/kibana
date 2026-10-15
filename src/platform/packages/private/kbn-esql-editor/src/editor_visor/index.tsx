@@ -32,10 +32,10 @@ import {
   enterHintFilterLabel,
   enterHintGenerateLabel,
 } from './visor_i18n';
-import { NLInput } from './nl_input';
+import { NLInput, type NLInputApi } from './nl_input';
 import { visorStyles } from './visor.styles';
 import { SparklesIcon } from './sparkles_icon';
-import type { ESQLEditorDeps } from '../types';
+import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
@@ -197,7 +197,7 @@ export interface QuickSearchVisorProps {
   // Whether the visor is currently visible (controls CSS transition for inline toggle)
   isVisible?: boolean;
   // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
-  onNlResult?: (generatedQuery: string) => void;
+  onNlResult?: VisorNlResultHandler;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
@@ -227,6 +227,9 @@ export function QuickSearchVisor({
   const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
   const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
+  const nlInputRef = useRef<NLInputApi>(null);
+  // No-op while the input is unmounted (KQL mode) or inert (closed inline visor)
+  const focusNlInput = useCallback(() => nlInputRef.current?.focus(), []);
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
     [core.analytics]
@@ -239,7 +242,13 @@ export function QuickSearchVisor({
     hasConnector,
     onNlSubmit: submitNl,
     onStopGeneration,
-  } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
+  } = useNlGeneration({
+    query,
+    onNlResult,
+    onNlReject: focusNlInput,
+    onUpdateAndSubmitQuery,
+    telemetryService,
+  });
   const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
@@ -390,6 +399,7 @@ export function QuickSearchVisor({
     >
       <div css={styles.inputSlot}>
         <NLInput
+          ref={nlInputRef}
           value={nlValue}
           placeholder={nlPlaceholder}
           disabled={isNlLoading}

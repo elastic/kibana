@@ -29,7 +29,7 @@ const mockEvent = (
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
     status: 'active',
-    stream_names: ['service-a'],
+    source_ids: ['service-a'],
     title: 'Event',
     summary: 'Summary',
     severity: 'medium',

@@ -16,7 +16,6 @@ import {
   type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
-
 import type { LensAttributes } from '../../../../types';
 import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
@@ -129,7 +128,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       }
     }
 
-    // Icons with no API mapping (e.g. legacy `empty`/`popout`) are dropped by the transform.
+    // Icons with no API mapping (e.g. legacy `empty`) are dropped by the transform.
     if (viz.icon && iconCompat.toAPI(viz.icon) === undefined) {
       delete viz.icon;
     }

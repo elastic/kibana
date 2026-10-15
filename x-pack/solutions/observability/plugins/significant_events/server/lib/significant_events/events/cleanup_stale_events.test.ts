@@ -7,6 +7,7 @@
 
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
@@ -27,6 +28,14 @@ const makeAlertEventsClient = (
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 const createEvent = (eventId: string, ruleIds: string[]): SignificantEventResponse =>
   ({
@@ -89,6 +98,7 @@ describe('cleanupStaleEvents', () => {
       closed: 1,
       kept: 1,
       skipped: 1,
+      failed: 0,
     });
 
     expect(rulesClient.findExistingRuleIds).toHaveBeenCalledWith(['deleted-rule', 'live-rule']);
@@ -242,11 +252,36 @@ describe('cleanupStaleEvents', () => {
 
       await cleanupStaleEvents({ eventSearchClient, rulesClient, alertEventsClient });
 
-      // Both stale events should have received the alertEventsClient
       expect(updateStatusMock).toHaveBeenCalledTimes(2);
       for (const call of updateStatusMock.mock.calls) {
         expect(call[0]).toMatchObject({ alertEventsClient });
       }
+    });
+
+    it('counts a rejected close as failed and keeps going', async () => {
+      const stale1 = createEvent('stale-1', ['deleted-rule']);
+      const stale2 = createEvent('stale-2', ['deleted-rule']);
+      const eventSearchClient = createEventSearchClient([[stale1, stale2]]);
+      const rulesClient = createRulesClient([]);
+      const alertEventsClient = makeAlertEventsClient();
+      const logger = makeLogger();
+      updateStatusMock.mockImplementation(async ({ eventId }) => {
+        if (eventId === 'stale-1') {
+          throw new Error('write failed');
+        }
+        return { updated: 1, ignored: 0, status: 'inactive' as const };
+      });
+
+      await expect(
+        cleanupStaleEvents({ eventSearchClient, rulesClient, alertEventsClient, logger })
+      ).resolves.toEqual({
+        scanned: 2,
+        closed: 1,
+        kept: 0,
+        skipped: 0,
+        failed: 1,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stale-1'));
     });
   });
 });

@@ -67,6 +67,23 @@ const checkReportsIndexState = async (
 };
 
 /**
+ * The reports index template sets `dynamic: strict`; an index auto-created by a write
+ * before the template existed does not. Anything else (including a failed read) is
+ * treated as managed so unrelated errors do not masquerade as a template-free index.
+ */
+const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  try {
+    const response = await esClient.indices.getMapping({
+      index: THREAT_REPORTS_INDEX,
+      expand_wildcards: ['open', 'hidden'],
+    });
+    return Object.values(response).every((entry) => entry.mappings?.dynamic === 'strict');
+  } catch {
+    return true;
+  }
+};
+
+/**
  * Verifies report-content semantic_text embedding endpoints (cluster default).
  * Missing or unreachable endpoints yield `embedding_endpoint_unavailable`.
  */
@@ -217,7 +234,13 @@ export const getThreatIntelReadiness = async ({
     reasonCodes.push('reports_index_check_failed');
   }
 
-  if (!bootstrapComplete || reportsIndexState !== 'exists') {
+  const reportsIndexUnmanaged =
+    reportsIndexState === 'exists' && !(await checkReportsIndexManaged(esClient));
+  if (reportsIndexUnmanaged) {
+    reasonCodes.push('reports_index_unmanaged');
+  }
+
+  if (!bootstrapComplete || reportsIndexState !== 'exists' || reportsIndexUnmanaged) {
     return {
       status: 'blocked',
       reasonCodes,

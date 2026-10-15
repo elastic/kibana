@@ -200,7 +200,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   return (
     <CreateOptionsPanel
       title={
-        <h2>
+        <h2 data-test-subj="ruleCreateOptionsEmptyStateTitle">
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
             defaultMessage="No Universal rules yet. Let's get started!"

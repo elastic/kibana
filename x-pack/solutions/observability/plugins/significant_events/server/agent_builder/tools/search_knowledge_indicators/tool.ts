@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_FEATURE_ARRAY_ITEMS,
@@ -33,6 +34,11 @@ import {
   MAX_COMPACT_META_KEYS,
   searchKnowledgeIndicatorsToolHandler,
 } from './handler';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  restrictCatalogToReadable,
+} from '../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
@@ -42,10 +48,9 @@ const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 
 const searchKnowledgeIndicatorsSchema = lazySchema(() =>
   z.object({
-    stream_names: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .optional()
-      .describe('Optional. If omitted, search across all accessible streams.'),
+    slugs: nightshiftSourceSlugsField(
+      'Omit to search every source in this space, including disabled ones.'
+    ).optional(),
     search_text: z
       .string()
       .max(MAX_TEXT_LENGTH)
@@ -59,9 +64,9 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
       .default([])
       .describe(
         dedent`What to return.
-        - ['query']: queries-only KIs
-        - ['feature']: feature-based KIs only
-        - default (empty array or omitted): both features and queries`
+      - ['query']: queries-only KIs
+      - ['feature']: feature-based KIs only
+      - default (empty array or omitted): both features and queries`
       ),
     feature_types: z
       .array(z.enum(KNOWLEDGE_INDICATOR_FEATURE_TYPES))
@@ -114,8 +119,8 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
       .default('compact')
       .describe(
         dedent`Response detail level.
-        - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
-        - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
+      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
+      - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
       ),
   })
 );
@@ -133,16 +138,19 @@ export function createSearchKnowledgeIndicatorsTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Search Knowledge Indicators (KIs) derived from streams data to enrich context for a target
-      stream, service, or group of streams.
+      Search Knowledge Indicators (KIs) for Nightshift sources.
 
       KIs include:
-      - Feature-based indicators (stream features)
-      - Query-based indicators (stored stream queries)
+      - Feature-based indicators
+      - Query-based indicators (stored detection queries)
+
+      Pass source slugs in \`slugs\`. Omit \`slugs\` to search every source in this space.
+      Results report each source as its slug. The \`sources\` list gives \`slug\`, \`title\`, and
+      \`view_name\` for every source the results belong to, with or without \`slugs\`.
 
       Use this tool to:
-      - Gather domain context for a specific stream or group of streams
-      - Narrow results by stream, kind, feature/query type, IDs, or rule backing
+      - Gather domain context for a specific source or group of sources
+      - Narrow results by source, kind, feature/query type, IDs, or rule backing
       - Traverse large filtered result sets with \`page\` and \`per_page\`
       - Find relevant KIs via semantic text using \`search_text\`
       - Retrieve queries-only KIs with \`kind: ['query']\`
@@ -193,18 +201,31 @@ export function createSearchKnowledgeIndicatorsTool({
         });
         await assertCanReadSignificantEvents({ request, server });
 
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-
-        const { view, ...restParams } = toolParams;
+        const { view, slugs, ...restParams } = toolParams;
         const maxPerPage =
           view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
+        const fullCatalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const sources = slugs ? resolveSourcesBySlug(fullCatalog, slugs) : undefined;
+        // Stored KIs are read as the internal user, so check the caller's own data access first.
+        // Named sources must all be readable; an unscoped search covers only the readable ones.
+        if (sources) {
+          await Promise.all(
+            sources.map(({ id }) => scopedClients.sourcesClient.assertReadable(id))
+          );
+        }
+        const catalog = sources
+          ? fullCatalog
+          : await restrictCatalogToReadable(fullCatalog, scopedClients.sourcesClient);
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const params = {
           ...restParams,
+          ...(sources ? { source_ids: sources.map((source) => source.id) } : {}),
           per_page: Math.min(restParams.per_page, maxPerPage),
         };
 
         const output = await searchKnowledgeIndicatorsToolHandler({
-          streamsClient: scopedClients.streamsClient,
+          catalog,
+          sources,
           kiClient,
           logger,
           params,

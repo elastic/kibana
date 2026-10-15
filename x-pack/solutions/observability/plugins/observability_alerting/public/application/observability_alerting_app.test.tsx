@@ -27,6 +27,10 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
+jest.mock('@kbn/observability-plugin/public', () => ({
+  AlertingNavPromo: () => <div data-test-subj="alertingNavPromo" />,
+}));
+
 const Placeholder = ({
   name,
   privilegeCheck,
@@ -167,6 +171,26 @@ describe('ObservabilityAlertingApp', () => {
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
     });
+  });
+
+  it('renders the alerting nav promo on the alerts landing route', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId('alertingNavPromo')).toBeInTheDocument();
+  });
+
+  it('does not render the alerting nav promo on episode details', async () => {
+    const { getByTestId, queryByTestId } = renderAt(
+      `${OBSERVABILITY_ALERTING_ALERTS_PATH}/episode-1`
+    );
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(queryByTestId('alertingNavPromo')).not.toBeInTheDocument();
   });
 
   it('renders the classic rules page at /rules/v1', async () => {

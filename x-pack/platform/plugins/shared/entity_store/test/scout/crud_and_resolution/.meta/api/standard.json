@@ -1,5 +1,5 @@
 {
-  "sha1": "d986f632e2fb4017a6e6d27c0a8b728c578a9516",
+  "sha1": "660523a863cac0aaa239e983ac53b98b7241ed21",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1090,7 +1090,7 @@
     {
       "id": "fc8fec24ce63075-f8c198fdf451522",
       "title": "Entity Store Status API tests hides non-priority internal config and cursor state from the public response",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1099,14 +1099,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 12
       }
     },
     {
       "id": "fc8fec24ce63075-e6c43c81299ce12",
       "title": "Entity Store Status API tests reports a nonPriority block only for types that run one",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1115,14 +1115,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 14
       }
     },
     {
       "id": "fc8fec24ce63075-0fd057695a50a62",
       "title": "Entity Store Status API tests omits the nonPriority block with the dual-process flag off",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1131,7 +1131,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 98,
+        "line": 99,
         "column": 54
       }
     },

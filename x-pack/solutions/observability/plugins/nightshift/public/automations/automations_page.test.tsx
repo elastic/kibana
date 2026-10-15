@@ -37,6 +37,7 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
@@ -168,7 +169,7 @@ describe('AutomationsPage', () => {
       isEnabled: true,
       trigger: { rows: [{ kind: 'alert' }] },
       execution: {},
-      completion: {},
+      completions: [],
       runtime: { dailyDispatchLimit: 20 },
       createdAt: '2026-10-01T00:00:00.000Z',
       updatedAt: '2026-10-01T00:00:00.000Z',
@@ -293,7 +294,10 @@ describe('AutomationsPage', () => {
       fireEvent.click(await screen.findByTestId('deleteAutomation'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-      expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+      expect(deleteMutate).toHaveBeenCalledWith(
+        { id: 'report', name: 'Daily report' },
+        expect.anything()
+      );
     });
 
     it('returns to the list when the automation id in the URL does not exist', () => {

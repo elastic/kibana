@@ -16,7 +16,7 @@ const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
   event_id: 'evt-1',
   status: 'active',
-  stream_names: ['service-a'],
+  source_ids: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
   severity: 'high',

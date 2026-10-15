@@ -50,7 +50,11 @@ export interface MonitorPrivileges {
   canMonitorCluster: boolean;
 }
 
-const USER_INDICES_PATTERN = ['*', '-.*'];
+/**
+ * `-.*` cannot exclude a data stream by its backing `.ds-` indices, so internal data streams
+ * without a leading dot, such as the Agent Builder traces, must be excluded by name.
+ */
+const USER_INDICES_PATTERN = ['*', '-.*', '-traces-agent_builder.otel-*'];
 
 /**
  * The monitor privileges that gate the vector count, which Elasticsearch does not scope to the

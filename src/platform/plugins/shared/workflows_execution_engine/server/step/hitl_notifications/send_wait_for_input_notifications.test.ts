@@ -21,6 +21,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate,
       connectorExecutor: { execute } as never,
       abortController: new AbortController(),
@@ -36,6 +37,118 @@ describe('sendWaitForInputNotifications', () => {
     );
   });
 
+  it('sends a Kibana-style email notification with Open form markdown and footer path', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: { 'connector-id': 'email-1', to: ['analyst@example.com'] },
+      },
+      stepMessage: 'Please provide input',
+      formUrl:
+        'https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0]).toEqual({
+      connectorType: 'email',
+      connectorNameOrId: 'email-1',
+      input: {
+        to: ['analyst@example.com'],
+        subject: 'Input required',
+        message:
+          'Please provide input\n\n[Open form](https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc)',
+        kibanaFooterLink: {
+          path: '/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+          text: 'View in Kibana',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+  });
+
+  it('sends a rendered email subject and custom message', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: {
+          'connector-id': 'email-1',
+          to: ['analyst@example.com'],
+          subject: 'Ticket for {{inputs.hostname}}',
+          message: 'Open {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replaceAll('{{inputs.hostname}}', 'web-01')
+          .replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subject).toBe('Ticket for web-01');
+    expect(execute.mock.calls[0][0].input.message).toBe('Open https://kibana.example/form');
+  });
+
+  it('renders email recipients and drops a blank address', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: {
+          'connector-id': 'email-1',
+          to: ['{{inputs.email}}', '{{inputs.empty}}'],
+          cc: ['{{inputs.cc}}'],
+          bcc: ['audit@example.com'],
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replaceAll('{{inputs.email}}', 'analyst@example.com')
+          .replaceAll('{{inputs.empty}}', '  ')
+          .replaceAll('{{inputs.cc}}', 'lead@example.com'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.to).toEqual(['analyst@example.com']);
+    expect(execute.mock.calls[0][0].input.cc).toEqual(['lead@example.com']);
+    expect(execute.mock.calls[0][0].input.bcc).toEqual(['audit@example.com']);
+  });
+
+  it('throws when every email recipient renders blank', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      sendWaitForInputNotifications({
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['{{inputs.email}}'],
+          },
+        },
+        stepMessage: 'Please provide input',
+        formUrl: 'https://kibana.example/form',
+        kibanaUrl: 'https://kibana.example',
+        renderTemplate: () => '  ',
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      })
+    ).rejects.toThrow('HITL email "to" rendered to an empty list');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   it('sends slack2 sendMessage with default Open form mrkdwn and optional message override', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 
@@ -45,6 +158,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form?token=abc&x=1',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate,
       connectorExecutor: { execute } as never,
       abortController: new AbortController(),
@@ -76,6 +190,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate: (template) =>
         template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
       connectorExecutor: { execute } as never,

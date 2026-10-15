@@ -105,7 +105,7 @@ overrides:
   'typescript': '6.0.3'
   'util': '0.12.5'
   'yauzl': '3.4.0'
-  'zod': '4.4.3'
+  'zod': '4.6.5'
   # END GENERATED OVERRIDES
   # pnpm-only pins: catalog: refs, drift pins, and scoped selectors with no
   # package.json#resolutions counterpart.

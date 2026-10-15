@@ -45,7 +45,6 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
           </EuiLink>
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
     </>
   );
 }

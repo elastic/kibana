@@ -34,7 +34,7 @@ export const triggerInvestigationWorkflow = async ({
   const {
     title,
     summary,
-    stream_names,
+    source_ids,
     event_id,
     status,
     severity,
@@ -52,7 +52,7 @@ export const triggerInvestigationWorkflow = async ({
       title,
       trigger_type: 'manual',
       message: `${title}\n\n${summary}`,
-      stream_names: stream_names ?? [],
+      source_ids: source_ids ?? [],
       concurrency_key: event_id,
       context: {
         event_id,

@@ -146,7 +146,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     headerBlockCss,
     editorBodyCss,
     editorResizeHandleCss,
+    searchItemCss,
+    dateRangeItemCss,
+    controlsRowCss,
     timeFieldSelectCss,
+    esqlMenuItemCss,
     loadingCenterCss,
     resultsSectionCss,
   } = useQuerySandboxStyles(euiThemeContext);
@@ -398,9 +402,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </div>
 
       <EuiPanel hasBorder paddingSize="m" data-test-subj="querySandboxEditorPanel">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          wrap
+          css={controlsRowCss}
+        >
+          <EuiFlexItem grow={false} css={searchItemCss}>
             <EuiToolTip
+              display="block"
               content={i18n.translate(
                 'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
                 {
@@ -411,6 +422,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             >
               <EuiButton
                 size="s"
+                fullWidth
                 onClick={run}
                 isLoading={isLoading}
                 data-test-subj="querySandboxRunQuery"
@@ -421,13 +433,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={dateRangeItemCss}>
             <AlertingDateRangePicker
               from={dateRange.dateStart}
               to={dateRange.dateEnd}
               onChange={handleDateRangeChange}
               services={services}
-              width="auto"
+              width="full"
               data-test-subj="querySandboxDatePicker"
             />
           </EuiFlexItem>
@@ -452,7 +464,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             />
           </EuiFlexItem>
           {EsqlMenu && EsqlEditorActionsProvider && (
-            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+            <EuiFlexItem grow={false} css={esqlMenuItemCss}>
               <EsqlEditorActionsProvider>
                 {canWireRecommendedQueries && EsqlEditorActionsRegister && (
                   <EsqlEditorActionsRegister

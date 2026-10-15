@@ -24,6 +24,7 @@
       "agentBuilder",
       "agenticInvestigations",
       "nightshiftInvestigations",
+      "nightshiftSources",
       "serverless",
       "spaces"
     ],

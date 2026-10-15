@@ -419,7 +419,32 @@ describe('Quick search visor', () => {
           })
         );
       });
-      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+      await waitFor(() =>
+        expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', {
+          onAccept: expect.any(Function),
+          onReject: expect.any(Function),
+        })
+      );
+    });
+
+    it('focuses the input again when the generated query is undone', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, onNlResult }));
+
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalled());
+      act(() => getByTestId('esqlVisorNLQueryInput').blur());
+
+      act(() => onNlResult.mock.calls[0][1].onReject());
+
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('show me logs');
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
     });
 
     it.each([

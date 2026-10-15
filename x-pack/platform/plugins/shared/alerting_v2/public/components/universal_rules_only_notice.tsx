@@ -44,6 +44,7 @@ export const UniversalRulesOnlyCallout = ({
     <>
       <EuiCallOut
         announceOnMount
+        size="s"
         title={CALLOUT_TITLE}
         iconType="info"
         data-test-subj="universalRulesOnlyCallout"

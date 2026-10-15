@@ -38,7 +38,7 @@ const dataDoc = {
   event_id: 'agent-event-1',
   title: 'Checkout errors',
   summary: 'Checkout is failing',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   confidence: 0.8,
 };
 
@@ -116,8 +116,8 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
-    it('normalizes a scalar stream_names string to a 1-element array', async () => {
-      const scalarDataDoc = { ...dataDoc, stream_names: 'logs.bridge.only' };
+    it('normalizes a scalar source_ids string to a 1-element array', async () => {
+      const scalarDataDoc = { ...dataDoc, source_ids: 'logs.bridge.only' };
       const row: MockRow = {
         source: ruleEventSource(),
         dataJson: JSON.stringify(scalarDataDoc),
@@ -126,10 +126,10 @@ describe('RuleEventsClient', () => {
 
       const { hits } = await client.findLatest({});
 
-      expect(hits[0].stream_names).toEqual(['logs.bridge.only']);
+      expect(hits[0].source_ids).toEqual(['logs.bridge.only']);
     });
 
-    it('passes through an array stream_names unchanged', async () => {
+    it('passes through an array source_ids unchanged', async () => {
       const row: MockRow = {
         source: ruleEventSource(),
         dataJson: JSON.stringify(dataDoc),
@@ -138,20 +138,20 @@ describe('RuleEventsClient', () => {
 
       const { hits } = await client.findLatest({});
 
-      expect(hits[0].stream_names).toEqual(dataDoc.stream_names);
+      expect(hits[0].source_ids).toEqual(dataDoc.source_ids);
     });
 
-    it('decodes a missing stream_names field to an empty array, not undefined', async () => {
-      const { stream_names: _omit, ...dataDocWithoutStreamNames } = dataDoc;
+    it('decodes a missing source_ids field to an empty array, not undefined', async () => {
+      const { source_ids: _omit, ...dataDocWithoutSourceIds } = dataDoc;
       const row: MockRow = {
         source: ruleEventSource(),
-        dataJson: JSON.stringify(dataDocWithoutStreamNames),
+        dataJson: JSON.stringify(dataDocWithoutSourceIds),
       };
       const { client } = createClient(async () => sourceResponse([row]));
 
       const { hits } = await client.findLatest({});
 
-      expect(hits[0].stream_names).toEqual([]);
+      expect(hits[0].source_ids).toEqual([]);
     });
   });
 
@@ -194,17 +194,15 @@ describe('RuleEventsClient', () => {
       expect(q).toContain('severity IN ("critical")');
     });
 
-    it('filters stream via MV_INTERSECTS against FIELD_EXTRACT(data, "stream_names")', async () => {
+    it('filters sourceIds via MV_INTERSECTS against FIELD_EXTRACT(data, "source_ids")', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ stream: ['logs.a', 'logs.b'] });
+      await client.findLatestByCurrentStatePaginated({ sourceIds: ['logs.a', 'logs.b'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "stream_names"), ["logs.a", "logs.b"])'
-      );
+      expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "source_ids"), ["logs.a", "logs.b"])');
     });
 
     it('filters eventIds via the FIELD_EXTRACT(data, "event_id") IN (...) predicate', async () => {
@@ -341,13 +339,13 @@ describe('RuleEventsClient', () => {
       expect(q).not.toContain('status IN ("open")');
     });
 
-    it('narrows by streamNames via FIELD_EXTRACT(data, "stream_names")', async () => {
+    it('narrows by sourceIds via FIELD_EXTRACT(data, "source_ids")', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
-      await client.findLatestActive({ streamNames: ['logs.checkout'] });
+      await client.findLatestActive({ sourceIds: ['logs.checkout'] });
 
       const q = lastQuery(query);
-      expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "stream_names"), ["logs.checkout"])');
+      expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "source_ids"), ["logs.checkout"])');
     });
 
     it('narrows by ruleUuids via FIELD_EXTRACT(data, "signals.metadata.rule_uuid")', async () => {
