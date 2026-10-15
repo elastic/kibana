@@ -14,6 +14,7 @@ export type {
   DocViewRenderProps,
   DocViewRestorableStateProps,
   DocViewerComponent,
+  DocViewerGridImplementation,
   DocViewerRestorableState,
   DocViewerShareableState,
 } from './services/types';

@@ -49,3 +49,9 @@ export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
+
+export { TanStackCellActionsBubble } from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
+export {
+  TANSTACK_CELL_ACTIONS_CLASS,
+  tanStackCellActionsStyles,
+} from './src/components/tanstack_cell_actions/tanstack_cell_actions_styles';

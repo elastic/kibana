@@ -75,6 +75,9 @@ export interface DocViewActions {
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 }
 
+/** Identifies which grid implementation renders tabular doc views (e.g. the fields table). */
+export type DocViewerGridImplementation = 'tanstack' | 'unified';
+
 export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
@@ -92,6 +95,10 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   hideFilteringOnComputedColumns?: boolean;
+  /**
+   * Grid implementation used by the fields table. Defaults to the EUI-based `unified` table.
+   */
+  gridImplementation?: DocViewerGridImplementation;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;

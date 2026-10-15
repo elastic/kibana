@@ -13,6 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { buildServices } from './build_services';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  ENABLE_TANSTACK_DOC_VIEWER_TABLE_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 
@@ -55,12 +56,15 @@ describe('discoverFeatureFlags', () => {
           ? false
           : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
           ? false
+          : flagName === ENABLE_TANSTACK_DOC_VIEWER_TABLE_FEATURE_FLAG_KEY
+          ? true
           : fallback
       )
     );
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
     expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
+    expect(services.discoverFeatureFlags.getEnableTanstackDocViewerTable()).toBe(true);
   });
 
   it('returns the fallback when the observable emits after subscribe returns', () => {

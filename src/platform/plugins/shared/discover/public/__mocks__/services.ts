@@ -342,6 +342,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
+      getEnableTanstackDocViewerTable: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
