@@ -129,11 +129,19 @@ export const installWorkflows = async ({
       await client.install(FLEET_PACKAGE_WORKFLOW_ID, { spaceId, workflowId, values: { yaml } });
 
       // install() resolves even when nothing was written (license, availability, ES readiness).
-      const state = await client.getInstalledWorkflowState(workflowId, spaceId);
-      if (!state) {
+      const { status } = await client.getWorkflowStatus(FLEET_PACKAGE_WORKFLOW_ID, {
+        spaceId,
+        workflowId,
+      });
+      const deferred = status === 'missing' || status === 'not_managed';
+      if (deferred) {
         logger.warn(`Workflow ${workflowId} was not installed, deferring it`);
+      } else if (status === 'invalid') {
+        logger.warn(
+          `Workflow ${workflowId} was installed but does not pass workflow validation, it will stay disabled until fixed`
+        );
       }
-      return { id: workflowId, type: KibanaSavedObjectType.workflow, deferred: !state };
+      return { id: workflowId, type: KibanaSavedObjectType.workflow, deferred };
     },
     { concurrency: MAX_CONCURRENT_WORKFLOW_OPERATIONS }
   );

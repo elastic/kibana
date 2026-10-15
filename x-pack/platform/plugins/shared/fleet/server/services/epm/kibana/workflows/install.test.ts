@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import { FLEET_PACKAGE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import type { ManagedWorkflowStatus } from '@kbn/workflows/server';
 
 import type { PackageInstallContext } from '../../../../../common/types';
 import { KibanaSavedObjectType } from '../../../../../common/types';
@@ -38,11 +39,11 @@ const createContext = (entries: Record<string, string>): PackageInstallContext =
     },
   } as unknown as PackageInstallContext);
 
-const createClient = (installed = true) =>
+const createClient = (status: ManagedWorkflowStatus = 'disabled') =>
   ({
     install: jest.fn().mockResolvedValue(undefined),
     uninstall: jest.fn().mockResolvedValue(undefined),
-    getInstalledWorkflowState: jest.fn().mockResolvedValue(installed ? { workflowId: 'x' } : null),
+    getWorkflowStatus: jest.fn().mockResolvedValue({ status }),
   } as unknown as jest.Mocked<ManagedWorkflowsClient>);
 
 const WORKFLOW_PATH = 'my_pkg-1.0.0/kibana/workflow/my_pkg-hello.yml';
@@ -109,13 +110,39 @@ describe('workflow assets', () => {
 
     it('defers workflows that were not persisted', async () => {
       const refs = await installWorkflows({
-        client: createClient(false),
+        client: createClient('missing'),
         packageInstallContext: createContext({ [WORKFLOW_PATH]: 'name: hello' }),
         spaceId: 'default',
         logger,
       });
 
       expect(refs[0].deferred).toBe(true);
+    });
+
+    it('defers workflows owned by another plugin', async () => {
+      const refs = await installWorkflows({
+        client: createClient('not_managed'),
+        packageInstallContext: createContext({ [WORKFLOW_PATH]: 'name: hello' }),
+        spaceId: 'default',
+        logger,
+      });
+
+      expect(refs[0].deferred).toBe(true);
+    });
+
+    it('keeps workflows that fail validation as installed and warns', async () => {
+      const warn = jest.spyOn(logger, 'warn');
+      const refs = await installWorkflows({
+        client: createClient('invalid'),
+        packageInstallContext: createContext({ [WORKFLOW_PATH]: 'name: hello' }),
+        spaceId: 'default',
+        logger,
+      });
+
+      expect(refs[0].deferred).toBe(false);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('does not pass workflow validation')
+      );
     });
 
     it.each([
