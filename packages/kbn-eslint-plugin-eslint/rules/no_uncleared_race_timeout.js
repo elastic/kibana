@@ -549,7 +549,15 @@ function promiseInitsByScope(scope) {
       versions = [];
       inits.set(identifier.name, versions);
     }
-    versions.push({ value: init, at: nodeStart(identifier) });
+    const home = scopeFunction(bindingScope);
+    const writeFn = enclosingScope(identifier);
+    const ordered = writeFn === home;
+    versions.push({
+      value: init,
+      at: nodeStart(identifier),
+      ordered,
+      fn: ordered ? null : writeFn,
+    });
   }
 
   walk(
@@ -632,12 +640,126 @@ function lookupValue(identifier, valuesByScope) {
 }
 
 /**
+ * Function or program that owns bindings in `scope`.
+ *
+ * @param {any} scope
+ * @returns {any}
+ */
+function scopeFunction(scope) {
+  if (!scope || FUNCTION_TYPES.has(scope.type) || scope.type === 'Program') {
+    return scope;
+  }
+  const parent = enclosingScope(scope);
+  return parent && parent !== scope ? parent : scope;
+}
+
+/**
+ * Calls directly in `home` at or before `useAt`. Nested functions are separate.
+ *
+ * @param {any} home
+ * @param {number} useAt
+ * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} functions
+ * @returns {Array<{ at: number, fn: any }>}
+ */
+function directCallsBefore(home, useAt, functions) {
+  /** @type {Array<{ at: number, fn: any }>} */
+  const calls = [];
+  const root = home && home.type === 'Program' ? home : home && home.body;
+  if (!root || FUNCTION_TYPES.has(root.type)) {
+    return calls;
+  }
+
+  /**
+   * @param {any} node
+   */
+  function visit(node) {
+    if (
+      node.type === 'CallExpression' &&
+      node.callee &&
+      node.callee.type === 'Identifier' &&
+      nodeStart(node) <= useAt
+    ) {
+      const fn = lookupValue(node.callee, functions);
+      if (fn && FUNCTION_TYPES.has(fn.type)) {
+        calls.push({ at: nodeStart(node), fn });
+      }
+    }
+    for (const child of childNodes(node)) {
+      if (FUNCTION_TYPES.has(child.type)) {
+        continue;
+      }
+      visit(child);
+    }
+  }
+
+  visit(root);
+  return calls;
+}
+
+/**
+ * Promise this binding holds at `useAt`. Source order applies only to writes in
+ * the same function. A write inside a helper counts when that helper is called
+ * before the read, even if the helper is declared later.
+ *
+ * @param {Array<{ value: any, at: number, ordered: boolean, fn: any }>} versions
+ * @param {any} bindingScope
+ * @param {number} useAt
+ * @returns {any}
+ */
+function promiseAt(versions, bindingScope, useAt) {
+  const home = scopeFunction(bindingScope);
+  const functions = functionValuesByScope(home);
+  /** @type {Array<{ at: number, value: any }>} */
+  const events = [];
+  for (const version of versions) {
+    if (version.ordered && version.at <= useAt) {
+      events.push({ at: version.at, value: version.value });
+    }
+  }
+  for (const call of directCallsBefore(home, useAt, functions)) {
+    /** @type {{ value: any, at: number } | undefined} */
+    let installed;
+    for (const version of versions) {
+      if (!version.ordered && version.fn === call.fn) {
+        installed = version;
+      }
+    }
+    if (installed) {
+      events.push({ at: call.at, value: installed.value });
+    }
+  }
+  events.sort((left, right) => left.at - right.at);
+  return events.length ? events[events.length - 1].value : undefined;
+}
+
+/**
  * @param {any} identifier
- * @param {Map<any, Map<string, Array<{ value: any, at: number }>>>} initsByScope
+ * @param {Map<any, Map<string, Array<{ value: any, at: number, ordered: boolean, fn: any }>>>} initsByScope
  * @returns {any}
  */
 function lookupPromise(identifier, initsByScope) {
-  return lookupValue(identifier, initsByScope);
+  const useAt = nodeStart(identifier);
+  /** @type {Set<any>} */
+  const seen = new Set();
+  let scope = parentLexicalScope(identifier);
+  while (scope && !seen.has(scope)) {
+    seen.add(scope);
+    const versions = initsByScope.get(scope) && initsByScope.get(scope).get(identifier.name);
+    if (versions) {
+      const value = promiseAt(versions, scope, useAt);
+      if (value) {
+        return value;
+      }
+    }
+    if (bindingsOf(scope).has(identifier.name)) {
+      return;
+    }
+    const parent = parentLexicalScope(scope);
+    if (!parent || parent === scope) {
+      break;
+    }
+    scope = parent;
+  }
 }
 
 /**

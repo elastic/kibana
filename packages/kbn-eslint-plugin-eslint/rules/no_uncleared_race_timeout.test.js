@@ -313,6 +313,26 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        async function load() {
+          let timer;
+          let timeout = new Promise((resolve) => {
+            timer = setTimeout(() => resolve(true), 5000);
+          });
+          function later() {
+            timeout = new Promise((resolve) => {
+              setTimeout(() => resolve(true), 10);
+            });
+          }
+          try {
+            return await Promise.race([work(), timeout]);
+          } finally {
+            clearTimeout(timer);
+          }
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -652,6 +672,21 @@ ruleTester.run('@kbn/eslint/no_uncleared_race_timeout', rule, {
         }
       `,
       errors: [error],
+    },
+    {
+      code: dedent`
+        async function load() {
+          let timeout;
+          arm();
+          return Promise.race([work(), timeout]);
+          function arm() {
+            timeout = new Promise((resolve) => {
+              setTimeout(() => resolve(true), 5000);
+            });
+          }
+        }
+      `,
+      errors: [{ messageId: 'uncleared', line: 7 }],
     },
   ],
 });
