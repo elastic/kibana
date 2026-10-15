@@ -117,6 +117,27 @@ describe('useSendMessageMutation', () => {
     });
   });
 
+  it.each([
+    ['/app/agent_builder', '/app/agent_builder'],
+    ['/app/agent_builder?injected=1', '/app/agent_builder'],
+    ['/app/dev_tools#/console', '/app/dev_tools#/console'],
+    ['/app/dev_tools#/console?injected=1', '/app/dev_tools#/console'],
+    ['/app/agent_builder?injected=1#/route?injected=2', '/app/agent_builder#/route'],
+  ])('sends %s as screen context url %s', async (location, expected) => {
+    window.history.pushState({}, '', location);
+    const { result } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+
+    expect(mockChat.mock.calls[0][0].attachments).toContainEqual(
+      expect.objectContaining({
+        type: 'screen_context',
+        data: { url: `${window.location.origin}${expected}` },
+      })
+    );
+  });
+
   it('releases the pending message and live events once the refetch has their saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
