@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
-import { SUPPORTED_DOCUMENT_MIME_TYPES } from '@kbn/agent-builder-common/attachments';
+import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
+import { SUPPORTED_BINARY_MIME_TYPES } from '@kbn/agent-builder-common/attachments';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { DocumentExtractionAvailability } from '../extraction/extraction_availability';
 import { createPdfConverter } from './pdf_converter';
-import type { DocumentConverters } from './types';
+import type { BinaryConverters } from './types';
 
-export type { DocumentConverter, DocumentConverters, DocumentToTextParams } from './types';
+export type { BinaryConverter, BinaryConverters, BinaryToTextParams } from './types';
 
-export const createDocumentConverters = ({
+export const createBinaryConverters = ({
   getEsClient,
   extractionAvailability,
   logger,
@@ -23,13 +23,13 @@ export const createDocumentConverters = ({
   getEsClient: () => Promise<ElasticsearchClient>;
   extractionAvailability: DocumentExtractionAvailability;
   logger: Logger;
-}): DocumentConverters => {
+}): BinaryConverters => {
   return {
     'application/pdf': createPdfConverter({ getEsClient, extractionAvailability, logger }),
   };
 };
 
-export const getAvailableDocumentMimeTypes = (
-  converters: DocumentConverters
-): SupportedDocumentMimeType[] =>
-  SUPPORTED_DOCUMENT_MIME_TYPES.filter((mimeType) => converters[mimeType].isAvailable());
+export const getAvailableBinaryMimeTypes = (
+  converters: BinaryConverters
+): SupportedBinaryMimeType[] =>
+  SUPPORTED_BINARY_MIME_TYPES.filter((mimeType) => converters[mimeType].isAvailable());

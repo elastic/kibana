@@ -7,25 +7,22 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
-import type {
-  DocumentConverter,
-  DocumentConverters,
-} from '../attachment_types/binary/converters';
-import { registerDocumentSupportedTypesRoute } from './binary_supported_types';
+import { binarySupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
+import type { BinaryConverter, BinaryConverters } from '../attachment_types/binary/converters';
+import { registerBinarySupportedTypesRoute } from './binary_supported_types';
 
-describe('registerDocumentSupportedTypesRoute', () => {
-  const createConverter = (available: boolean): DocumentConverter => ({
+describe('registerBinarySupportedTypesRoute', () => {
+  const createConverter = (available: boolean): BinaryConverter => ({
     isAvailable: () => available,
     toText: jest.fn(),
   });
 
   const setup = ({ pdfAvailable }: { pdfAvailable: boolean }) => {
-    const documentConverters: DocumentConverters = {
+    const binaryConverters: BinaryConverters = {
       'application/pdf': createConverter(pdfAvailable),
     };
     const router = httpServiceMock.createRouter();
-    registerDocumentSupportedTypesRoute({ router, documentConverters });
+    registerBinarySupportedTypesRoute({ router, binaryConverters });
     const [config, handler] = router.get.mock.calls[0];
     return { config, handler };
   };
@@ -38,8 +35,8 @@ describe('registerDocumentSupportedTypesRoute', () => {
 
   it('registers an internal route that needs the read privilege', () => {
     const { config } = setup({ pdfAvailable: true });
-    expect(config.path).toBe('/internal/agent_builder/attachments/document/_supported_types');
-    expect(config.path).toBe(documentSupportedTypesPath);
+    expect(config.path).toBe('/internal/agent_builder/attachments/binary/_supported_types');
+    expect(config.path).toBe(binarySupportedTypesPath);
     expect(config.options).toEqual({ access: 'internal' });
     expect(config.security).toEqual({
       authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },

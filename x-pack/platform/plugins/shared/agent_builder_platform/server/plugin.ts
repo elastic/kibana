@@ -22,10 +22,10 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
-import { createDocumentConverters } from './attachment_types/binary/converters';
+import { createBinaryConverters } from './attachment_types/binary/converters';
 import type { DocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
 import { createDocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
-import { registerDocumentSupportedTypesRoute } from './routes/binary_supported_types';
+import { registerBinarySupportedTypesRoute } from './routes/binary_supported_types';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -60,7 +60,7 @@ export class AgentBuilderPlatformPlugin
       logger: documentExtractionLogger,
     });
     this.documentExtractionAvailability = extractionAvailability;
-    const documentConverters = createDocumentConverters({
+    const binaryConverters = createBinaryConverters({
       getEsClient,
       extractionAvailability,
       logger: documentExtractionLogger,
@@ -68,11 +68,11 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
-      documentConverters,
+      binaryConverters,
     });
-    registerDocumentSupportedTypesRoute({
+    registerBinarySupportedTypesRoute({
       router: coreSetup.http.createRouter(),
-      documentConverters,
+      binaryConverters,
     });
     registerConversationTemplates({ setupDeps });
     registerConversationEventTypes({ setupDeps });

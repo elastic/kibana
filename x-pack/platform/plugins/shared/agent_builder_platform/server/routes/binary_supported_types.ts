@@ -7,20 +7,20 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
-import type { DocumentConverters } from '../attachment_types/binary/converters';
-import { getAvailableDocumentMimeTypes } from '../attachment_types/binary/converters';
+import { binarySupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
+import type { BinaryConverters } from '../attachment_types/binary/converters';
+import { getAvailableBinaryMimeTypes } from '../attachment_types/binary/converters';
 
-export const registerDocumentSupportedTypesRoute = ({
+export const registerBinarySupportedTypesRoute = ({
   router,
-  documentConverters,
+  binaryConverters,
 }: {
   router: IRouter;
-  documentConverters: DocumentConverters;
+  binaryConverters: BinaryConverters;
 }) => {
   router.get(
     {
-      path: documentSupportedTypesPath,
+      path: binarySupportedTypesPath,
       validate: false,
       options: { access: 'internal' },
       security: {
@@ -28,6 +28,6 @@ export const registerDocumentSupportedTypesRoute = ({
       },
     },
     async (_context, _request, response) =>
-      response.ok({ body: { mime_types: getAvailableDocumentMimeTypes(documentConverters) } })
+      response.ok({ body: { mime_types: getAvailableBinaryMimeTypes(binaryConverters) } })
   );
 };

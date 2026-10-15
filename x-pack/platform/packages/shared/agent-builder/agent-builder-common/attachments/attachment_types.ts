@@ -18,7 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   connector = 'connector',
   image = 'image',
-  document = 'document',
+  binary = 'binary',
 }
 
 interface AttachmentDataMap {
@@ -27,7 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
   [AttachmentType.image]: ImageAttachmentData;
-  [AttachmentType.document]: DocumentAttachmentData;
+  [AttachmentType.binary]: BinaryAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -160,41 +160,41 @@ export interface ImageAttachmentData {
   mime_type: SupportedImageMimeType;
 }
 
-export const CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND = 'chat-attachment-documents';
+export const CHAT_ATTACHMENT_BINARIES_FILE_KIND = 'chat-attachment-binaries';
 
-export const SUPPORTED_DOCUMENT_MIME_TYPES = ['application/pdf'] as const;
-export type SupportedDocumentMimeType = (typeof SUPPORTED_DOCUMENT_MIME_TYPES)[number];
+export const SUPPORTED_BINARY_MIME_TYPES = ['application/pdf'] as const;
+export type SupportedBinaryMimeType = (typeof SUPPORTED_BINARY_MIME_TYPES)[number];
 
-export const isSupportedDocumentMimeType = (
+export const isSupportedBinaryMimeType = (
   value: string | undefined
-): value is SupportedDocumentMimeType =>
-  SUPPORTED_DOCUMENT_MIME_TYPES.some((mimeType) => mimeType === value);
+): value is SupportedBinaryMimeType =>
+  SUPPORTED_BINARY_MIME_TYPES.some((mimeType) => mimeType === value);
 
-export const MAX_DOCUMENT_BYTES: Readonly<Record<SupportedDocumentMimeType, number>> = {
+export const MAX_BINARY_BYTES: Readonly<Record<SupportedBinaryMimeType, number>> = {
   'application/pdf': 10 * 1024 * 1024,
 };
 
-export const MAX_DOCUMENT_FILE_KIND_BYTES = Math.max(...Object.values(MAX_DOCUMENT_BYTES));
+export const MAX_BINARY_FILE_KIND_BYTES = Math.max(...Object.values(MAX_BINARY_BYTES));
 
-export const MAX_DOCUMENT_TEXT_LENGTH = 60_000;
+export const MAX_BINARY_TEXT_LENGTH = 60_000;
 
-export const documentAttachmentDataSchema = z.object({
+export const binaryAttachmentDataSchema = z.object({
   file_id: z.string().max(1024),
   name: z.string().max(1024),
-  mime_type: z.enum(SUPPORTED_DOCUMENT_MIME_TYPES),
-  text: z.string().max(MAX_DOCUMENT_TEXT_LENGTH),
+  mime_type: z.enum(SUPPORTED_BINARY_MIME_TYPES),
+  text: z.string().max(MAX_BINARY_TEXT_LENGTH),
 });
 
 /**
- * Data for a document attachment. The original file stays in the Files API.
+ * Data for a binary attachment. The original file stays in the Files API.
  */
-export interface DocumentAttachmentData {
+export interface BinaryAttachmentData {
   /** files plugin file id */
   file_id: string;
   /** original filename */
   name: string;
   /** mime type of the file */
-  mime_type: SupportedDocumentMimeType;
+  mime_type: SupportedBinaryMimeType;
   /** text read from the file. Markdown for PDFs */
   text: string;
 }

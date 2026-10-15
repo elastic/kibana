@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { DocumentConverters } from './types';
-import { getAvailableDocumentMimeTypes } from '.';
+import type { BinaryConverters } from './types';
+import { getAvailableBinaryMimeTypes } from '.';
 
-describe('getAvailableDocumentMimeTypes', () => {
-  const createConverters = (pdfAvailable: boolean): DocumentConverters => ({
+describe('getAvailableBinaryMimeTypes', () => {
+  const createConverters = (pdfAvailable: boolean): BinaryConverters => ({
     'application/pdf': { isAvailable: () => pdfAvailable, toText: jest.fn() },
   });
 
   it('returns PDF when the converter is available', () => {
-    expect(getAvailableDocumentMimeTypes(createConverters(true))).toEqual(['application/pdf']);
+    expect(getAvailableBinaryMimeTypes(createConverters(true))).toEqual(['application/pdf']);
   });
 
   it('returns nothing when the converter is not available', () => {
-    expect(getAvailableDocumentMimeTypes(createConverters(false))).toEqual([]);
+    expect(getAvailableBinaryMimeTypes(createConverters(false))).toEqual([]);
   });
 });

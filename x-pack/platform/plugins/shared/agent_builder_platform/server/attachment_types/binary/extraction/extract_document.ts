@@ -20,7 +20,7 @@ import {
   USE_FAKE_EXTRACTION,
   // FAKE_EXTRACTION:end
 } from './constants';
-import { documentErrors } from '../errors';
+import { binaryErrors } from '../errors';
 // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
 import { fakeExtractDocument } from './fake_extract_document';
 // FAKE_EXTRACTION:end
@@ -113,14 +113,14 @@ export const extractDocument = ({
         const content = response.document_extraction?.[0]?.content;
         if (!content) {
           logger.error('The document extraction response has no content.');
-          throw documentErrors.extractionFailed();
+          throw binaryErrors.extractionFailed();
         }
         return content;
       } catch (error) {
-        if (timedOut || (error as Error).name === 'TimeoutError') throw documentErrors.timeout();
+        if (timedOut || (error as Error).name === 'TimeoutError') throw binaryErrors.timeout();
         if (signal?.aborted || isAgentBuilderError(error)) throw error;
         logger.error(`Document extraction failed for the PDF: ${getErrorDetails(error)}`);
-        throw documentErrors.extractionFailed();
+        throw binaryErrors.extractionFailed();
       } finally {
         clearTimeout(timer);
         signal?.removeEventListener('abort', abortOnCallerAbort);

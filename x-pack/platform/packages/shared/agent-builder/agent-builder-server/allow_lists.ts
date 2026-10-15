@@ -358,7 +358,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'connector_setup',
   'skill',
   'image',
-  'document',
+  'binary',
 
   // Platform – Visualizations
   'visualization',
