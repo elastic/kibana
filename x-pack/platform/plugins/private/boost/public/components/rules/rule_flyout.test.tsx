@@ -366,6 +366,40 @@ describe('RuleFlyout pattern matches', () => {
     expect(highlights).toEqual(['cat', '-fa']);
   });
 
+  it('titles exact matches', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+
+    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent('Exact matches');
+    expect(screen.queryByTestId('boostRulePotentialMatch')).not.toBeInTheDocument();
+  });
+
+  it('shows what a partial pattern could match until it matches something', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatchesTitle')).toHaveTextContent(
+      'Potential matches'
+    );
+    const [potentialMatch] = screen.getAllByTestId('boostRulePotentialMatch');
+    expect(potentialMatch).toHaveTextContent('catalog-fall');
+    // The rule doesn't apply to it yet, so what ranks higher doesn't matter.
+    expect(within(potentialMatch).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
+  });
+
+  it("doesn't continue a pattern that already ends in a wildcard", async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat-*');
+
+    expect(screen.queryByTestId('boostRulePotentialMatch')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
+  });
+
   it('says when nothing matches, in the same panel', async () => {
     renderNewRule();
 

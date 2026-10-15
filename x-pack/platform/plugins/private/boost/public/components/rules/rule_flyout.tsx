@@ -179,6 +179,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const { data: state } = useBoostState();
   const titleId = useGeneratedHtmlId();
   const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
+  const matchesTitleId = useGeneratedHtmlId();
   const [draft, setDraft] = useState<RuleDraft>(() =>
     getInitialDraft(rule, duplicateOf, initialProfileName, state)
   );
@@ -365,10 +366,11 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     priority: Number(draft.priority) || 0,
     is_builtin: false,
   };
+  const pattern = draft.pattern.trim();
   const patternPreview: TargetPreview[] =
     draft.mode === 'pattern' && !errors.pattern
       ? typedDataSources
-          .filter(({ name }) => matchesIndexPattern(draft.pattern.trim(), name))
+          .filter(({ name }) => matchesIndexPattern(pattern, name))
           .map((dataSource) => {
             const winner = resolveRule(dataSource, [...otherRules, draftRule], profilesByName);
             return {
@@ -376,6 +378,19 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
               overriddenBy: winner && winner !== draftRule ? winner.name : undefined,
             };
           })
+      : [];
+
+  // Until the pattern matches something, what it would match if it continued, like the data view
+  // editor does. A pattern that already ends in `*` has nothing left to continue.
+  const potentialPattern = `${pattern}*`;
+  const potentialMatches =
+    draft.mode === 'pattern' &&
+    !errors.pattern &&
+    !pattern.endsWith('*') &&
+    patternPreview.length === 0
+      ? typedDataSources
+          .filter(({ name }) => matchesIndexPattern(potentialPattern, name))
+          .map(({ name }) => name)
       : [];
 
   // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
@@ -470,6 +485,16 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     defaultMessage: '{count, plural, one {# match} other {# matches}}',
     values: { count: patternPreview.length },
   });
+  const matchesTitle =
+    patternPreview.length > 0
+      ? i18n.translate('xpack.boost.ruleForm.exactMatchesTitle', {
+          defaultMessage: 'Exact matches',
+        })
+      : potentialMatches.length > 0
+      ? i18n.translate('xpack.boost.ruleForm.potentialMatchesTitle', {
+          defaultMessage: 'Potential matches',
+        })
+      : undefined;
   const patternRow = (
     <EuiFormRow
       display="rowCompressed"
@@ -731,14 +756,28 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                       paddingSize="none"
                       data-test-subj="boostRulePatternMatches"
                     >
+                      {matchesTitle && (
+                        // Outside the scrolling list, so it stays in view.
+                        <EuiTitle size="xxxs">
+                          <h3
+                            id={matchesTitleId}
+                            css={{ padding: `${euiTheme.size.s} ${euiTheme.size.s} 0` }}
+                            data-test-subj="boostRulePatternMatchesTitle"
+                          >
+                            {matchesTitle}
+                          </h3>
+                        </EuiTitle>
+                      )}
                       <div
                         tabIndex={0}
                         role="region"
-                        aria-label={matchesLabel}
+                        aria-label={matchesTitle ? undefined : matchesLabel}
+                        aria-labelledby={matchesTitle ? matchesTitleId : undefined}
                         css={css`
                           ${scrollStyles}
                           max-block-size: ${PREVIEW_HEIGHT}px;
                           padding: ${euiTheme.size.s};
+                          padding-block-start: ${matchesTitle ? euiTheme.size.xs : euiTheme.size.s};
                           border-radius: inherit;
                         `}
                       >
@@ -756,7 +795,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                                 <EuiText size="s">
                                   <TargetName
                                     name={name}
-                                    pattern={draft.pattern.trim()}
+                                    pattern={pattern}
                                     supersededBy={overriddenBy}
                                   />
                                 </EuiText>
@@ -770,6 +809,20 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                               )}
                             </EuiFlexGroup>
                           ))
+                        ) : potentialMatches.length > 0 ? (
+                          // Subdued, and without what ranks higher, since the rule doesn't apply to
+                          // these yet.
+                          <EuiText size="s" color="subdued">
+                            {potentialMatches.map((name) => (
+                              <div
+                                key={name}
+                                css={{ paddingBlock: euiTheme.size.xs }}
+                                data-test-subj="boostRulePotentialMatch"
+                              >
+                                <TargetName name={name} pattern={potentialPattern} />
+                              </div>
+                            ))}
+                          </EuiText>
                         ) : (
                           <EuiText
                             size="s"
