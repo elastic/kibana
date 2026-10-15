@@ -113,7 +113,6 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: () => setRenderCounter((current) => current + 1),
-          useReduxHistory: true,
           graphMergeStarted: () => storeRef.current?.dispatch(workspaceGraphMergeStarted()),
           topologyChangeHandler: () => {
             const workspace = workspaceRef.current;
