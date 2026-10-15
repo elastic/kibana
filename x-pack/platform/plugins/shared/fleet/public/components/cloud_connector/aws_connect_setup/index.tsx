@@ -119,7 +119,6 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         <AwsIdentityFederationSetup
           cloud={cloud}
           accountType={accountType}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
           isEditPage={isEditPage}
           initialConnectorId={initialConnectorId}
           packageName={packageName}
