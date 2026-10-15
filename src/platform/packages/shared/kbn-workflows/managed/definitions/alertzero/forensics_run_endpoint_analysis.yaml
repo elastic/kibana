@@ -62,6 +62,11 @@ consts:
 
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
+  # Cap on each `iocs` category, matching the `security.investigation.iocs` attachment type.
+  # Enforced after parsing (`cap_iocs`), not as `maxItems` in the model-facing schema: Gemini
+  # answers 400 to the schema once several arrays carry a cap next to the per-item bounds.
+  max_iocs_per_category: 50
+  no_rows: []
   # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
 
@@ -504,7 +509,6 @@ steps:
                       # schema, and reference resolution is not guaranteed across providers.
                       shas:
                         type: array
-                        maxItems: 50
                         description: File hashes.
                         items:
                           type: object
@@ -517,7 +521,6 @@ steps:
                               description: What it was dropped as and on which hosts.
                       ips:
                         type: array
-                        maxItems: 50
                         description: C2 and other network destinations.
                         items:
                           type: object
@@ -530,7 +533,6 @@ steps:
                               description: Which hosts contacted it and over what protocol.
                       file_paths:
                         type: array
-                        maxItems: 50
                         description: Dropped payloads, staging paths, persistence keys.
                         items:
                           type: object
@@ -540,7 +542,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       ransom_note:
                         type: array
-                        maxItems: 50
                         description: Ransom note paths.
                         items:
                           type: object
@@ -550,7 +551,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       encryption_marker:
                         type: array
-                        maxItems: 50
                         description: Markers of encryption, such as a renamed file extension.
                         items:
                           type: object
@@ -560,7 +560,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       malicious_commands:
                         type: array
-                        maxItems: 50
                         description: Command lines attributed to the attack.
                         items:
                           type: object
@@ -570,7 +569,6 @@ steps:
                             comment: { type: string, maxLength: 1000 }
                       compromised_identities:
                         type: array
-                        maxItems: 50
                         description: Accounts used by the attacker or stolen.
                         items:
                           type: object
@@ -583,7 +581,6 @@ steps:
                               description: How it was compromised and what it was then used for.
                       affected_hosts:
                         type: array
-                        maxItems: 50
                         description: Every host the attack touched.
                         items:
                           type: object
@@ -731,6 +728,21 @@ steps:
                 message: >-
                   Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
 
+          # The schema sent to the model carries no `maxItems` on the `iocs` categories, so the
+          # attachment type's per-category cap is applied here. `slice` keeps the model's order,
+          # so the first indicators it listed survive.
+          - name: cap_iocs
+            type: data.set
+            with:
+              shas: "${{ steps.forensic_analysis.output.structured_output.iocs.shas | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              ips: "${{ steps.forensic_analysis.output.structured_output.iocs.ips | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              file_paths: "${{ steps.forensic_analysis.output.structured_output.iocs.file_paths | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              ransom_note: "${{ steps.forensic_analysis.output.structured_output.iocs.ransom_note | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              encryption_marker: "${{ steps.forensic_analysis.output.structured_output.iocs.encryption_marker | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              malicious_commands: "${{ steps.forensic_analysis.output.structured_output.iocs.malicious_commands | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              compromised_identities: "${{ steps.forensic_analysis.output.structured_output.iocs.compromised_identities | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+              affected_hosts: "${{ steps.forensic_analysis.output.structured_output.iocs.affected_hosts | default: consts.no_rows | slice: 0, consts.max_iocs_per_category }}"
+
           - name: attach_iocs
             type: ai.attachment.add
             if: >-
@@ -743,7 +755,7 @@ steps:
               render_inline: true
               type: security.investigation.iocs
               description: Extracted indicators of compromise
-              data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
+              data: "${{ steps.cap_iocs.output }}"
 
           - name: journal_rationale
             type: workflow.execute

@@ -51,6 +51,17 @@ const definition = parse(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml
 /** `maxLength` on the journal note's `message` input; see journal_note.yaml. */
 const JOURNAL_MESSAGE_MAX_LENGTH = 8000;
 
+const IOC_CATEGORIES = [
+  'shas',
+  'ips',
+  'file_paths',
+  'ransom_note',
+  'encryption_marker',
+  'malicious_commands',
+  'compromised_identities',
+  'affected_hosts',
+];
+
 const flatten = (steps: YamlStep[]): YamlStep[] =>
   steps.flatMap((step) => [step, ...flatten(step.steps ?? []), ...flatten(step.else ?? [])]);
 
@@ -815,6 +826,10 @@ describe('Endpoint analysis run', () => {
 
     // The rest of the mirror. These bounds are the attachment types' own, so a change on
     // either side that is not made on both shows up here rather than at runtime.
+    //
+    // The `iocs` categories carry no `maxItems` in the schema sent to the model: eight capped
+    // arrays next to the per-item bounds make Gemini answer 400. The cap is applied after
+    // parsing instead (`cap_iocs`), which the next tests pin.
     it('matches the caps the attachment types enforce', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: Record<string, Record<string, Record<string, Record<string, unknown>>>>;
@@ -823,10 +838,54 @@ describe('Endpoint analysis run', () => {
       const iocCategories = Object.values(schema?.properties?.iocs?.properties ?? {});
 
       expect(timelineEvents?.maxItems).toBe(50);
-      expect(iocCategories).not.toHaveLength(0);
+      expect(iocCategories).toHaveLength(IOC_CATEGORIES.length);
       for (const category of iocCategories) {
-        expect(category.maxItems).toBe(50);
+        expect(category).not.toHaveProperty('maxItems');
       }
+      expect(definition.consts?.max_iocs_per_category).toBe(50);
+    });
+
+    describe('the post-parse cap on iocs', () => {
+      const capIocs = (iocs: Record<string, unknown[]> | undefined): Record<string, unknown[]> => {
+        const withBlock = stepByName('cap_iocs')?.with ?? {};
+        const context = {
+          consts: definition.consts,
+          steps: { forensic_analysis: { output: { structured_output: { iocs } } } },
+        };
+        return Object.fromEntries(
+          Object.entries(withBlock).map(([name, expression]) => [
+            name,
+            evaluate(String(expression), context) as unknown[],
+          ])
+        );
+      };
+      const indicators = (count: number) =>
+        Array.from({ length: count }, (_, index) => ({ value: `indicator-${index}` }));
+      const MAX = Number(definition.consts?.max_iocs_per_category);
+
+      it('caps every category at the attachment limit, keeping the model order', () => {
+        const capped = capIocs(
+          Object.fromEntries(IOC_CATEGORIES.map((name) => [name, indicators(MAX + 25)]))
+        );
+
+        expect(Object.keys(capped).sort()).toEqual([...IOC_CATEGORIES].sort());
+        for (const name of IOC_CATEGORIES) {
+          expect(capped[name]).toHaveLength(MAX);
+          expect(capped[name]).toEqual(indicators(MAX));
+        }
+      });
+
+      it('leaves a category under the cap untouched and fills an omitted one with an empty list', () => {
+        const capped = capIocs({ shas: indicators(3) });
+
+        expect(capped.shas).toEqual(indicators(3));
+        expect(capped.ips).toEqual([]);
+        expect(capped.affected_hosts).toEqual([]);
+      });
+
+      it('hands the capped object to the iocs attachment', () => {
+        expect(stepByName('attach_iocs')?.with?.data).toBe('${{ steps.cap_iocs.output }}');
+      });
     });
   });
 
