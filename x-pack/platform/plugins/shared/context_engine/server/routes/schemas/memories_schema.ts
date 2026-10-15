@@ -84,7 +84,7 @@ export const memoryWriteBodySchema = schema.object({
       maxLength: MAX_KI_ID_LENGTH,
       meta: {
         description:
-          'A session ID returned by an earlier memory write. Omit to generate a new session ID.',
+          'An opaque caller-chosen correlation ID. Reuse an ID returned by an earlier write to continue that session, or omit it to generate a new ID for this write.',
       },
     })
   ),

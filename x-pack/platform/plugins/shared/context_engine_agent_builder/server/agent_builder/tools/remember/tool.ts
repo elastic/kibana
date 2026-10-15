@@ -22,10 +22,10 @@ import {
   MAX_KI_TITLE_LENGTH,
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import {
+  type AiIndexMemoryWriteServiceApi,
   createConversationReferences,
   createMemoryWriter,
-} from '@kbn/context-engine-plugin/server/ai_indices/memory_document';
-import type { AiIndexMemoryWriteServiceApi } from '@kbn/context-engine-plugin/server/ai_indices/memory_write_service';
+} from '@kbn/context-engine-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';

@@ -393,6 +393,8 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         `Memory '${existingDocument.id}' has an invalid timestamp.`
       );
     }
+    // Current-revision reads sort by @timestamp, so revisions must remain monotonic even if the
+    // parent was written by a clock ahead of this Kibana instance.
     return new Date(Math.max(currentDate.getTime(), existingTimestamp + 1));
   }
 

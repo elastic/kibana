@@ -24,7 +24,7 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import type { GetAiIndexMemoryWriteServiceParams } from '../types';
 import type { AiIndexMemoryWriteServiceApi } from '../ai_indices/memory_write_service';
-import { MemoryWriteError } from '../ai_indices/memory_write_errors';
+import { MemoryWriteError, type MemoryWriteErrorCode } from '../ai_indices/memory_write_errors';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
@@ -57,6 +57,20 @@ const elasticsearchErrorMessages = {
   429: 'Elasticsearch is temporarily unable to process the memory write.',
 } as const;
 
+const memoryWriteStatusCodes: Record<MemoryWriteErrorCode, 400 | 404 | 409> = {
+  memory_disabled: 404,
+  ai_index_memory_disabled: 400,
+  destination_not_writable: 400,
+  memory_not_found: 404,
+  duplicate_memory: 409,
+  revision_tie_window_exceeded: 409,
+  not_a_memory: 400,
+  memory_type_mismatch: 409,
+  memory_deleted: 409,
+  invalid_memory_timestamp: 409,
+  missing_concurrency_metadata: 409,
+};
+
 const handleMemoryWriteError = (
   error: unknown,
   response: KibanaResponseFactory,
@@ -66,20 +80,15 @@ const handleMemoryWriteError = (
     return response.notFound({ body: { message: error.message } });
   }
   if (error instanceof MemoryWriteError) {
-    if (error.code === 'memory_not_found' || error.code === 'memory_disabled') {
-      return response.notFound({ body: { message: error.message } });
+    const body = { message: error.message };
+    switch (memoryWriteStatusCodes[error.code]) {
+      case 404:
+        return response.notFound({ body });
+      case 409:
+        return response.conflict({ body });
+      default:
+        return response.badRequest({ body });
     }
-    if (
-      error.code === 'memory_type_mismatch' ||
-      error.code === 'memory_deleted' ||
-      error.code === 'duplicate_memory' ||
-      error.code === 'revision_tie_window_exceeded' ||
-      error.code === 'invalid_memory_timestamp' ||
-      error.code === 'missing_concurrency_metadata'
-    ) {
-      return response.conflict({ body: { message: error.message } });
-    }
-    return response.badRequest({ body: { message: error.message } });
   }
   if (isResponseError(error)) {
     const { statusCode } = error;

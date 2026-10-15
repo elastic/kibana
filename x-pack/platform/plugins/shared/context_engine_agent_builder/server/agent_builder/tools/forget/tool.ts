@@ -12,8 +12,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
-import { createMemoryWriter } from '@kbn/context-engine-plugin/server/ai_indices/memory_document';
-import type { AiIndexMemoryWriteServiceApi } from '@kbn/context-engine-plugin/server/ai_indices/memory_write_service';
+import {
+  type AiIndexMemoryWriteServiceApi,
+  createMemoryWriter,
+} from '@kbn/context-engine-plugin/server';
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';

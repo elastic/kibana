@@ -14,6 +14,8 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type { AiIndexMemoryWriteServiceApi } from './ai_indices/memory_write_service';
+export { createConversationReferences, createMemoryWriter } from './ai_indices/memory_document';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

@@ -415,6 +415,39 @@ describe('AiIndexMemoryWriteService', () => {
     );
   });
 
+  it('keeps data-stream revision timestamps monotonic when the parent clock is ahead', async () => {
+    aiIndexService.get.mockResolvedValue({
+      ...indexAiIndex,
+      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+    });
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'parent',
+            _index: '.ds-ai-index-ds-support-000001',
+            _source: {
+              ...existingDocument,
+              '@timestamp': '2026-09-25T12:00:00.000Z',
+            },
+            sort: ['2026-09-25T12:00:00.000Z'],
+          },
+        ],
+      },
+    });
+
+    await service.reviseMemory({ ...request, id: 'memory-1' });
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          '@timestamp': '2026-09-25T12:00:00.001Z',
+          updated_at: '2026-09-24T12:00:00.000Z',
+        }),
+      })
+    );
+  });
+
   it('rejects a data-stream revision whose parent has an invalid timestamp', async () => {
     aiIndexService.get.mockResolvedValue({
       ...indexAiIndex,
