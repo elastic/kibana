@@ -9,6 +9,8 @@ import type { ISavedObjectTypeRegistry, SavedObjectsClientContract } from '@kbn/
 
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../../common/types';
 
+import { appContextService } from '../../app_context';
+
 import { getBulkAssets } from './get_bulk_assets';
 
 describe('getBulkAssets', () => {
@@ -177,5 +179,107 @@ describe('getBulkAssets', () => {
           '/app/management/data/index_management/templates/logs-lmd.pivot_transform_ea-template',
       },
     ]);
+  });
+
+  describe('workflow assets', () => {
+    const soTypeRegistry = {
+      getType: jest.fn().mockReturnValue(undefined),
+    } as unknown as ISavedObjectTypeRegistry;
+    const createSoClient = () =>
+      ({
+        bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+      } as unknown as jest.Mocked<SavedObjectsClientContract>);
+    const mockClient = (states: unknown[] | undefined) =>
+      jest
+        .spyOn(appContextService, 'getManagedWorkflowsClient')
+        .mockReturnValue(
+          states
+            ? ({ listInstalledWorkflowStates: jest.fn().mockResolvedValue(states) } as any)
+            : undefined
+        );
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('resolves workflows through the managed workflows client, not saved objects', async () => {
+      mockClient([
+        {
+          workflowId: 'wf-1',
+          templateValues: { yaml: 'name: Hello\ndescription: Says hello\n' },
+        },
+        { workflowId: 'not-requested', templateValues: { yaml: 'name: Other' } },
+      ]);
+      const soClient = createSoClient();
+
+      const assets = await getBulkAssets(soClient, soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(soClient.bulkResolve).toHaveBeenCalledWith([]);
+      expect(assets).toEqual([
+        {
+          id: 'wf-1',
+          type: KibanaSavedObjectType.workflow,
+          attributes: { title: 'Hello', description: 'Says hello' },
+          appLink: '/app/workflows/wf-1',
+        },
+      ]);
+    });
+
+    it('falls back to the workflow id when the YAML has no name', async () => {
+      mockClient([{ workflowId: 'wf-1', templateValues: { yaml: 'enabled: false' } }]);
+
+      const assets = await getBulkAssets(createSoClient(), soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(assets[0].attributes).toEqual({ title: 'wf-1', description: undefined });
+    });
+
+    it.each([
+      ['invalid YAML', { yaml: 'name: [unclosed' }],
+      ['an empty YAML document', { yaml: '' }],
+      ['missing template values', undefined],
+    ])('falls back to the workflow id for %s', async (_case, templateValues) => {
+      mockClient([{ workflowId: 'wf-1', templateValues }]);
+
+      const assets = await getBulkAssets(createSoClient(), soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(assets[0].attributes.title).toBe('wf-1');
+    });
+
+    it('skips workflows that are not installed', async () => {
+      mockClient([]);
+
+      const assets = await getBulkAssets(createSoClient(), soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(assets).toEqual([]);
+    });
+
+    it('returns no workflows when the managed workflows client is not available', async () => {
+      mockClient(undefined);
+
+      const assets = await getBulkAssets(createSoClient(), soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(assets).toEqual([]);
+    });
+
+    it('does not list the installed workflows when no workflow is requested', async () => {
+      const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
+      jest
+        .spyOn(appContextService, 'getManagedWorkflowsClient')
+        .mockReturnValue({ listInstalledWorkflowStates } as any);
+
+      await getBulkAssets(createSoClient(), soTypeRegistry, []);
+
+      expect(listInstalledWorkflowStates).not.toHaveBeenCalled();
+    });
   });
 });
