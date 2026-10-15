@@ -103,7 +103,7 @@ const UNKNOWN_ENTITIES_DESCRIPTION = i18n.translate(
   'securitySolutionPackages.csp.graph.investigation.unknownEntitiesCalloutDescription',
   {
     defaultMessage:
-      ' · Some target entities could not be identified (this can occur because the graph is configured to show unresolved targets).',
+      ' · Some target entities could not be identified (this can occur because the graph is configured to show linked targets).',
   }
 );
 
