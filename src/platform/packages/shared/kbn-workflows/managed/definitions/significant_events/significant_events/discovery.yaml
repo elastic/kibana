@@ -37,6 +37,34 @@ triggers:
           type: number
           default: 80
           description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+        classifierShadowMode:
+          type: boolean
+          default: true
+          description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
+        classifierProbeWindowMinutes:
+          type: number
+          default: 60
+          minimum: 15
+          maximum: 360
+          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it at or above the detection lookback bucket window so sparse rules do not flicker between rows and no rows.'
+        classifierProbeTimeoutMs:
+          type: number
+          default: 8000
+          minimum: 1000
+          maximum: 30000
+          description: 'Per-probe timeout for re-running a stored query. A probe that times out sends its detection to the agent.'
+        classifierProbeConcurrency:
+          type: number
+          default: 5
+          minimum: 1
+          maximum: 10
+          description: 'Maximum stored-query probes the classifier runs at once.'
+        classifierBudgetMs:
+          type: number
+          default: 20000
+          minimum: 2000
+          maximum: 60000
+          description: 'Shared time budget for all probes of one run. Probes not started when it is spent send their detection to the agent.'
         rootTriggeredBy:
           type: string
           description: 'Root workflow trigger type propagated by a managed driver.'
@@ -139,10 +167,34 @@ steps:
       continue: true
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
+  # This is the raw count; it is the fallback when classify_detections fails or is absent.
+  - name: count_detections
+    type: data.set
+    with:
+      detectionCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
+
+  # Decides per detection whether the agent needs to see it (see classifierShadowMode). Read-only.
+  # A failure here must never change behavior, so every consumer below falls back to the
+  # get_detections rows when this step has no output.
+  - name: classify_detections
+    type: significantEvents.classifyDetections
+    with:
+      rows: '${{ steps.get_detections.output.values | default: [] }}'
+      space_id: '{{ variables.spaceId }}'
+      shadow_mode: '${{ inputs.classifierShadowMode }}'
+      probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
+      probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}'
+      probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
+      budget_ms: '${{ inputs.classifierBudgetMs }}'
+    on-failure:
+      continue: true
+
+  # Rows for the agent. `default` would also replace a legitimately empty classified batch with the
+  # raw rows, so only a missing output falls back to the raw count; a real 0 stays 0.
   - name: compute_batch_size
     type: data.set
     with:
-      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
+      processedCount: '${{ steps.classify_detections.output.row_count | default: steps.count_detections.output.detectionCount }}'
 
   - name: compute_suppressed_count
     type: elasticsearch.esql.query
@@ -217,7 +269,7 @@ steps:
         ## Detection batch
 
         Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
-        Rows: {{ steps.get_detections.output.values | json }}
+        Rows: {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.rows | json }}{% else %}{{ steps.get_detections.output.values | json }}{% endif %}
       schema:
         type: object
         properties:
