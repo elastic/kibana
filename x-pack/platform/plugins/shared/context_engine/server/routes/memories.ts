@@ -49,6 +49,14 @@ const writer = {
   metadata: {},
 };
 
+const elasticsearchErrorMessages = {
+  400: 'Elasticsearch rejected the memory write request.',
+  403: 'Elasticsearch denied the memory write.',
+  404: 'The AI Index destination was not found.',
+  409: 'The memory write conflicted with another operation.',
+  429: 'Elasticsearch is temporarily unable to process the memory write.',
+} as const;
+
 const handleMemoryWriteError = (
   error: unknown,
   response: KibanaResponseFactory,
@@ -58,7 +66,7 @@ const handleMemoryWriteError = (
     return response.notFound({ body: { message: error.message } });
   }
   if (error instanceof MemoryWriteError) {
-    if (error.code === 'memory_not_found') {
+    if (error.code === 'memory_not_found' || error.code === 'memory_disabled') {
       return response.notFound({ body: { message: error.message } });
     }
     if (
@@ -66,6 +74,7 @@ const handleMemoryWriteError = (
       error.code === 'memory_deleted' ||
       error.code === 'duplicate_memory' ||
       error.code === 'revision_tie_window_exceeded' ||
+      error.code === 'invalid_memory_timestamp' ||
       error.code === 'missing_concurrency_metadata'
     ) {
       return response.conflict({ body: { message: error.message } });
@@ -73,13 +82,16 @@ const handleMemoryWriteError = (
     return response.badRequest({ body: { message: error.message } });
   }
   if (isResponseError(error)) {
-    const { statusCode, message } = error;
+    const { statusCode } = error;
     if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
       const documentedStatus =
         statusCode === 401
           ? 403
           : ([400, 403, 404, 409, 429] as const).find((status) => status === statusCode) ?? 400;
-      return response.customError({ statusCode: documentedStatus, body: { message } });
+      return response.customError({
+        statusCode: documentedStatus,
+        body: { message: elasticsearchErrorMessages[documentedStatus] },
+      });
     }
   }
   logger.error(error instanceof Error ? error.stack ?? error.message : String(error));

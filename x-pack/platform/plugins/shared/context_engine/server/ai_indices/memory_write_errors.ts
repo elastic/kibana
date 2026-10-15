@@ -15,6 +15,7 @@ export type MemoryWriteErrorCode =
   | 'not_a_memory'
   | 'memory_type_mismatch'
   | 'memory_deleted'
+  | 'invalid_memory_timestamp'
   | 'missing_concurrency_metadata';
 
 export class MemoryWriteError extends Error {

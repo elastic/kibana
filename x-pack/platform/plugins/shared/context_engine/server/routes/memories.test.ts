@@ -100,21 +100,21 @@ describe('memory routes', () => {
     description: 'duration_ms is a keyword.',
     content: 'Cast it before comparison.',
   };
-  const createEsConflict = () =>
+  const createEsError = (statusCode: number, type: string, reason: string) =>
     new errors.ResponseError({
       meta: {
         aborted: false,
         attempts: 1,
         connection: null,
         context: null,
-        name: 'version conflict',
+        name: type,
         request: {} as unknown as DiagnosticResult['meta']['request'],
       },
       warnings: [],
       body: {
-        error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+        error: { type, reason },
       },
-      statusCode: 409,
+      statusCode,
     });
 
   it('registers public write-protected resource routes', () => {
@@ -206,8 +206,22 @@ describe('memory routes', () => {
     });
   });
 
-  it('passes an Elasticsearch version conflict through as HTTP 409', async () => {
-    reviseMemory.mockRejectedValue(createEsConflict());
+  it('returns 404 when Memory is disabled', async () => {
+    createMemory.mockRejectedValue(
+      new MemoryWriteError('memory_disabled', 'Context Engine memory is not enabled.')
+    );
+
+    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
+
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: { message: 'Context Engine memory is not enabled.' },
+    });
+  });
+
+  it('sanitizes an Elasticsearch version conflict and preserves HTTP 409', async () => {
+    reviseMemory.mockRejectedValue(
+      createEsError(409, 'version_conflict_engine_exception', 'conflict on hidden-index-name')
+    );
 
     await call(
       'PATCH',
@@ -218,7 +232,20 @@ describe('memory routes', () => {
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 409,
-      body: { message: 'version_conflict_engine_exception' },
+      body: { message: 'The memory write conflicted with another operation.' },
+    });
+  });
+
+  it('does not expose Elasticsearch authorization details', async () => {
+    createMemory.mockRejectedValue(
+      createEsError(403, 'security_exception', 'missing privilege for secret-index-name')
+    );
+
+    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'Elasticsearch denied the memory write.' },
     });
   });
 

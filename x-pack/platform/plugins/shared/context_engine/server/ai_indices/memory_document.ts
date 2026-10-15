@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
+
 export interface MemoryReference {
   uri: string;
   relation?: string;
@@ -16,15 +18,13 @@ export interface MemoryWriter {
   metadata: Record<string, string | number>;
 }
 
-export type MemoryLifecycleStatus = 'active' | 'deleted';
-
 export interface MemoryGovernance {
   provenance?: {
     created_by?: MemoryWriter;
     updated_by?: MemoryWriter;
   };
   lifecycle?: {
-    status?: MemoryLifecycleStatus;
+    status?: KiLifecycleStatus;
   };
 }
 

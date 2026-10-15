@@ -282,7 +282,7 @@ describe('AiIndexMemoryWriteService', () => {
     );
   });
 
-  it('appends a data-stream revision and replaces tags when supplied', async () => {
+  it('uses the current time for a data-stream revision when it is newer than the parent', async () => {
     aiIndexService.get.mockResolvedValue({
       ...indexAiIndex,
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
@@ -319,7 +319,7 @@ describe('AiIndexMemoryWriteService', () => {
         id: 'memory-revision-revision-id',
         op_type: 'create',
         document: expect.objectContaining({
-          '@timestamp': '2026-09-01T00:00:00.001Z',
+          '@timestamp': '2026-09-24T12:00:00.000Z',
           tags: [],
         }),
       })
@@ -413,6 +413,30 @@ describe('AiIndexMemoryWriteService', () => {
         }),
       })
     );
+  });
+
+  it('rejects a data-stream revision whose parent has an invalid timestamp', async () => {
+    aiIndexService.get.mockResolvedValue({
+      ...indexAiIndex,
+      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+    });
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'parent',
+            _index: '.ds-ai-index-ds-support-000001',
+            _source: { ...existingDocument, '@timestamp': 'not-a-date' },
+            sort: ['not-a-date'],
+          },
+        ],
+      },
+    });
+
+    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toMatchObject({
+      code: 'invalid_memory_timestamp',
+    });
+    expect(index).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -570,7 +594,7 @@ describe('AiIndexMemoryWriteService', () => {
       id: 'memory-revision-revision-id',
       document: {
         ...existingDocument,
-        '@timestamp': '2026-09-01T00:00:00.001Z',
+        '@timestamp': '2026-09-24T12:00:00.000Z',
         updated_at: '2026-09-24T12:00:00.000Z',
         governance: {
           provenance: {

@@ -11,6 +11,7 @@ import type { AuditLogger } from '@kbn/core-security-server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import type { MemoryType } from '../../common/memory';
+import { isMemoryType } from '../../common/memory';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { MemoryAuditAction, memoryAuditEvent } from '../audit/audit_events';
 import type { AiIndexService } from './service';
@@ -170,7 +171,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         ...existing.document,
         '@timestamp':
           aiIndex.dest.type === 'data_stream'
-            ? this.getNextRevisionDate(existing.document).toISOString()
+            ? this.getNextRevisionDate(existing.document, currentDate).toISOString()
             : existing.document['@timestamp'],
         updated_at: now,
         governance: {
@@ -308,7 +309,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         `Memory '${id}' was not found in AI index '${aiIndexId}'.`
       );
     }
-    if (hit._source.type !== 'memory.session' && hit._source.type !== 'memory.session_fact') {
+    if (!isMemoryType(hit._source.type)) {
       throw new MemoryWriteError(
         'not_a_memory',
         `Document '${id}' in AI index '${aiIndexId}' is not a memory.`
@@ -346,7 +347,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       ...existingFields,
       '@timestamp':
         aiIndex.dest.type === 'data_stream' && existingDocument !== undefined
-          ? this.getNextRevisionDate(existingDocument).toISOString()
+          ? this.getNextRevisionDate(existingDocument, currentDate).toISOString()
           : existingDocument?.['@timestamp'] ?? now,
       id,
       type: request.type,
@@ -384,8 +385,15 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     return (this.deps.getCurrentDate ?? (() => new Date()))();
   }
 
-  private getNextRevisionDate(existingDocument: StoredMemoryDocument): Date {
-    return new Date(Date.parse(existingDocument['@timestamp']) + 1);
+  private getNextRevisionDate(existingDocument: StoredMemoryDocument, currentDate: Date): Date {
+    const existingTimestamp = Date.parse(existingDocument['@timestamp']);
+    if (Number.isNaN(existingTimestamp)) {
+      throw new MemoryWriteError(
+        'invalid_memory_timestamp',
+        `Memory '${existingDocument.id}' has an invalid timestamp.`
+      );
+    }
+    return new Date(Math.max(currentDate.getTime(), existingTimestamp + 1));
   }
 
   private createDataStreamDocumentId(): string {
