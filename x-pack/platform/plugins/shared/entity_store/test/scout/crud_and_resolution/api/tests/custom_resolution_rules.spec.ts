@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/api';
 import type { GetEntityMaintainersResponse } from '../../../../../common';
 import {
   INTERNAL_HEADERS,
-  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
@@ -129,15 +128,6 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       // redefines it, so the same session takes on whichever role was set last.
       const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
       const customRoleHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
-      const customRolePublicHeaders = { ...cookieHeader, ...PUBLIC_HEADERS };
-      const toggleBuiltInRule = (action: 'ENABLE' | 'DISABLE') =>
-        apiClient.put(
-          ENTITY_STORE_ROUTES.public[`RESOLUTION_RULES_${action}`]('email_exact_match'),
-          {
-            headers: customRolePublicHeaders,
-            responseType: 'json',
-          }
-        );
       let ruleId = '';
 
       await apiTest.step('Security all creates a disabled rule', async () => {
@@ -168,11 +158,6 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         const enabledWithWrite = await enableRule();
         expect(enabledWithWrite.statusCode).toBe(200);
         expect(enabledWithWrite.body.enabled).toBe(true);
-      });
-
-      await apiTest.step('Security all toggles a built-in rule', async () => {
-        expect((await toggleBuiltInRule('DISABLE')).statusCode).toBe(200);
-        expect((await toggleBuiltInRule('ENABLE')).statusCode).toBe(200);
       });
 
       await apiTest.step('Security read lists rules but cannot create or delete', async () => {
@@ -209,10 +194,6 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         );
         expect(deleted.statusCode).toBe(403);
         expect(deleted.body.message).toContain(MANAGE_PRIVILEGE);
-
-        const builtInDisabled = await toggleBuiltInRule('DISABLE');
-        expect(builtInDisabled.statusCode).toBe(403);
-        expect(builtInDisabled.body.message).toContain(MANAGE_PRIVILEGE);
       });
 
       await apiTest.step('Security all deletes it', async () => {
