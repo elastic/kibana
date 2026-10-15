@@ -14,5 +14,6 @@
     "@kbn/scout",
     "@kbn/inference-common",
     "@kbn/test",
+    "@kbn/es-snapshot-loader",
   ]
 }
