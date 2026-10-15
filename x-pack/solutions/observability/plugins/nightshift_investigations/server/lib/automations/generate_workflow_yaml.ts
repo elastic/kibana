@@ -35,7 +35,9 @@ const SLACK_MESSAGE_EXCLUSIONS = [
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
 
 // The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. The trigger condition guarantees a workspace.
+// someone replies. Only recorded for an automation that already reports in that thread: it makes
+// a reply there report the investigation, which a silent or channel-mode automation does not do.
+// The trigger condition guarantees a workspace.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
@@ -181,6 +183,7 @@ function buildInvestigationStep(
   hasAlertRows: boolean
 ): Record<string, unknown> {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
+  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   return {
     name,
     type: 'nightshift.triggerInvestigation',
@@ -190,7 +193,7 @@ function buildInvestigationStep(
             subject_type: 'manual',
             subject_id: SLACK_SUBJECT_ID,
             title: automation.name,
-            slack_thread: SLACK_THREAD,
+            ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
           }
         : hasAlertRows
         ? {
