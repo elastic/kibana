@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SerializedVis } from '../../common';
 import { getLegacyVisPanelTypeMigration } from './migrate_out';
 import { getLegacyPanelMigrationRegistry } from './registry';
@@ -20,7 +19,6 @@ const getSavedVis = (type: string): SerializedVis => ({
 });
 
 describe('legacy_vis panel type migration', () => {
-  const savedObjectsClient = savedObjectsClientMock.create();
   const migrate = jest.fn();
   const registry = getLegacyPanelMigrationRegistry();
   registry.registerLegacyPanelMigration('vega', { to: 'vega', migrate });
@@ -31,25 +29,22 @@ describe('legacy_vis panel type migration', () => {
     migrate.mockReturnValue({ spec: 'migrated' });
   });
 
-  test('migrates a by-value panel with the handler for its vis type', async () => {
+  test('migrates a by-value panel with the handler for its vis type', () => {
     const savedVis = getSavedVis('vega');
 
     expect(
-      await migrateOut(
-        [
-          {
-            id: 'panel-1',
-            config: {
-              title: 'Panel title',
-              hide_border: true,
-              time_range: { from: 'now-15m', to: 'now' },
-              uiState: {},
-              savedVis,
-            },
+      migrateOut([
+        {
+          id: 'panel-1',
+          config: {
+            title: 'Panel title',
+            hide_border: true,
+            time_range: { from: 'now-15m', to: 'now' },
+            uiState: {},
+            savedVis,
           },
-        ],
-        savedObjectsClient
-      )
+        },
+      ])
     ).toEqual([{ panelId: 'panel-1', type: 'vega', config: { spec: 'migrated' } }]);
     expect(migrate).toHaveBeenCalledWith({
       savedVis,
@@ -61,60 +56,43 @@ describe('legacy_vis panel type migration', () => {
     });
   });
 
-  test('leaves a by-reference panel unchanged', async () => {
+  test('leaves a by-reference panel unchanged', () => {
     expect(
-      await migrateOut(
-        [{ id: 'panel-1', config: { savedObjectId: 'vis-id', savedVis: getSavedVis('vega') } }],
-        savedObjectsClient
-      )
+      migrateOut([
+        { id: 'panel-1', config: { savedObjectId: 'vis-id', savedVis: getSavedVis('vega') } },
+      ])
     ).toEqual([]);
     expect(migrate).not.toHaveBeenCalled();
   });
 
-  test('migrates only the by-value panels in a mixed batch', async () => {
+  test('migrates only the by-value panels in a mixed batch', () => {
     expect(
-      await migrateOut(
-        [
-          { id: 'by-value', config: { savedVis: getSavedVis('vega') } },
-          { id: 'by-reference', config: { savedObjectId: 'vis-id' } },
-          { id: 'other-type', config: { savedVis: getSavedVis('pie') } },
-        ],
-        savedObjectsClient
-      )
+      migrateOut([
+        { id: 'by-value', config: { savedVis: getSavedVis('vega') } },
+        { id: 'by-reference', config: { savedObjectId: 'vis-id' } },
+        { id: 'other-type', config: { savedVis: getSavedVis('pie') } },
+      ])
     ).toEqual([{ panelId: 'by-value', type: 'vega', config: { spec: 'migrated' } }]);
   });
 
-  test('leaves a panel unchanged when its vis type has no handler', async () => {
-    expect(
-      await migrateOut(
-        [{ id: 'panel-1', config: { savedVis: getSavedVis('pie') } }],
-        savedObjectsClient
-      )
-    ).toEqual([]);
+  test('leaves a panel unchanged when its vis type has no handler', () => {
+    expect(migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('pie') } }])).toEqual([]);
   });
 
-  test('leaves a panel unchanged when the handler returns undefined', async () => {
+  test('leaves a panel unchanged when the handler returns undefined', () => {
     migrate.mockReturnValue(undefined);
 
-    expect(
-      await migrateOut(
-        [{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }],
-        savedObjectsClient
-      )
-    ).toEqual([]);
+    expect(migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }])).toEqual([]);
   });
 
-  test('returns an error result when the handler throws', async () => {
+  test('returns an error result when the handler throws', () => {
     const error = new Error('Invalid spec');
     migrate.mockImplementation(() => {
       throw error;
     });
 
-    expect(
-      await migrateOut(
-        [{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }],
-        savedObjectsClient
-      )
-    ).toEqual([{ panelId: 'panel-1', error }]);
+    expect(migrateOut([{ id: 'panel-1', config: { savedVis: getSavedVis('vega') } }])).toEqual([
+      { panelId: 'panel-1', error },
+    ]);
   });
 });

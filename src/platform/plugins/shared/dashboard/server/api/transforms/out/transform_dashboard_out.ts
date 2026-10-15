@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SavedObjectReference,
-  SavedObjectsClientContract,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -24,16 +21,16 @@ import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { logger } from '../../../kibana_services';
 
-export async function transformDashboardOut(
+export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  savedObjectsClient?: SavedObjectsClientContract
-): Promise<{
+  migratePanelTypes: boolean = false
+): {
   dashboardState: DashboardState;
   warnings: Warnings;
-}> {
+} {
   const {
     pinned_panels,
     controlGroupInput: legacyControls,
@@ -53,12 +50,12 @@ export async function transformDashboardOut(
 
   const { tags } = toAsCodeTags(references);
 
-  const { panels, warnings } = await transformPanelsOut(
+  const { panels, warnings } = transformPanelsOut(
     panelsJSON,
     sections,
     references,
     isDashboardAppRequest,
-    savedObjectsClient
+    migratePanelTypes
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(

@@ -31,7 +31,7 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    await transformDashboardOut(
+    transformDashboardOut(
       storedDashboardState ?? {},
       references ?? [],
       undefined,

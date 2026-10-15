@@ -12,7 +12,7 @@ import { getPanelTypeMigrationRegistry } from './registry';
 describe('panel type migration registry', () => {
   test('returns the migration registered for a source type', () => {
     const registry = getPanelTypeMigrationRegistry();
-    const migration = { from: 'a', migrateOut: async () => [] };
+    const migration = { from: 'a', migrateOut: () => [] };
 
     registry.registerPanelTypeMigration(migration);
 
@@ -23,10 +23,10 @@ describe('panel type migration registry', () => {
   test('rejects a second migration for the same source type', () => {
     const registry = getPanelTypeMigrationRegistry();
 
-    registry.registerPanelTypeMigration({ from: 'a', migrateOut: async () => [] });
+    registry.registerPanelTypeMigration({ from: 'a', migrateOut: () => [] });
 
     expect(() =>
-      registry.registerPanelTypeMigration({ from: 'a', migrateOut: async () => [] })
+      registry.registerPanelTypeMigration({ from: 'a', migrateOut: () => [] })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Panel type migration from \\"a\\" is already registered."`
     );

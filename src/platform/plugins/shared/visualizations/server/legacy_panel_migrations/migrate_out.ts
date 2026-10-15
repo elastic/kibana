@@ -21,7 +21,7 @@ export const getLegacyVisPanelTypeMigration = (
   getLegacyPanelMigration: (visType: string) => LegacyPanelMigration | undefined
 ): PanelTypeMigration => ({
   from: VISUALIZE_EMBEDDABLE_TYPE,
-  migrateOut: async (panels) =>
+  migrateOut: (panels) =>
     panels.flatMap(({ id, config }): PanelTypeMigrationResult[] => {
       if (config.savedObjectId) return [];
 

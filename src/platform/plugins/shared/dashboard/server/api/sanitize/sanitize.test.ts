@@ -62,7 +62,7 @@ describe('sanitize', () => {
     };
 
     mockedTransformDashboardIn.mockReturnValue({ attributes: storedAttributes, references: [] });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [],
     });
@@ -99,7 +99,7 @@ describe('sanitize', () => {
     };
 
     mockedTransformDashboardIn.mockReturnValue({ attributes: storedAttributes, references: [] });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [transformWarning],
     });
@@ -132,7 +132,7 @@ describe('sanitize', () => {
         { name: 'tag-ref-c', type: 'tag', id: 'tag-2' },
       ],
     });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [],
     });
@@ -167,7 +167,7 @@ describe('sanitize', () => {
 
   test('omits related items when there are no references', async () => {
     mockedTransformDashboardIn.mockReturnValue({ attributes: storedAttributes, references: [] });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [],
     });
@@ -198,7 +198,7 @@ describe('sanitize', () => {
         id: `lens-${index}`,
       })),
     });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [],
     });

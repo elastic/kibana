@@ -9,7 +9,7 @@
 
 import { flow, groupBy } from 'lodash';
 
-import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { PanelTypeMigrationResult } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
@@ -34,13 +34,13 @@ interface TransformedPanel {
   migratedFrom?: string;
 }
 
-export async function transformPanelsOut(
+export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
-  savedObjectsClient?: SavedObjectsClientContract
-): Promise<{ panels: DashboardState['panels']; warnings: Warnings }> {
+  migratePanelTypes: boolean = false
+): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -92,8 +92,8 @@ export async function transformPanelsOut(
     }
   });
 
-  const migratedPanels = savedObjectsClient
-    ? await applyPanelTypeMigrations(transformedPanels, savedObjectsClient, warnings)
+  const migratedPanels = migratePanelTypes
+    ? applyPanelTypeMigrations(transformedPanels, warnings)
     : transformedPanels;
 
   migratedPanels.forEach(({ panel, sectionId, storedConfig, panelReferences, migratedFrom }) => {
@@ -199,37 +199,31 @@ function validatePanelConfig(
  * Passes each group of same-typed panels to the panel type migration registered for that type.
  * Panels a migration does not return are unchanged; panels it fails to migrate are dropped.
  */
-async function applyPanelTypeMigrations(
+function applyPanelTypeMigrations(
   transformedPanels: TransformedPanel[],
-  savedObjectsClient: SavedObjectsClientContract,
   warnings: Warnings
-): Promise<TransformedPanel[]> {
+): TransformedPanel[] {
   const results = new Map<TransformedPanel, PanelTypeMigrationResult>();
 
-  await Promise.all(
-    Object.entries(groupBy(transformedPanels, ({ panel }) => panel.type)).map(
-      async ([type, group]) => {
-        const migration = embeddableService?.getPanelTypeMigration(type);
-        if (!migration) return;
+  Object.entries(groupBy(transformedPanels, ({ panel }) => panel.type)).forEach(([type, group]) => {
+    const migration = embeddableService?.getPanelTypeMigration(type);
+    if (!migration) return;
 
-        let groupResults: readonly PanelTypeMigrationResult[];
-        try {
-          groupResults = await migration.migrateOut(
-            group.map(({ panel }) => ({ id: panel.id ?? '', config: panel.config })),
-            savedObjectsClient
-          );
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error(String(err));
-          groupResults = group.map(({ panel }) => ({ panelId: panel.id ?? '', error }));
-        }
+    let groupResults: readonly PanelTypeMigrationResult[];
+    try {
+      groupResults = migration.migrateOut(
+        group.map(({ panel }) => ({ id: panel.id ?? '', config: panel.config }))
+      );
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      groupResults = group.map(({ panel }) => ({ panelId: panel.id ?? '', error }));
+    }
 
-        group.forEach((transformedPanel) => {
-          const result = groupResults.find(({ panelId }) => panelId === transformedPanel.panel.id);
-          if (result) results.set(transformedPanel, result);
-        });
-      }
-    )
-  );
+    group.forEach((transformedPanel) => {
+      const result = groupResults.find(({ panelId }) => panelId === transformedPanel.panel.id);
+      if (result) results.set(transformedPanel, result);
+    });
+  });
 
   return transformedPanels.flatMap((transformedPanel) => {
     const result = results.get(transformedPanel);

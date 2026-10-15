@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
@@ -29,7 +28,7 @@ beforeEach(() => {
 });
 
 describe('transformPanelsOut', () => {
-  it('should drop panels with missing sectionId', async () => {
+  it('should drop panels with missing sectionId', () => {
     const panelsJSON = JSON.stringify([
       {
         type: 'DASHBOARD_MARKDOWN',
@@ -46,7 +45,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -63,7 +62,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should drop panel when panel transform throws', async () => {
+  it('should drop panel when panel transform throws', () => {
     mockGetTransforms.mockImplementation((type: string) => {
       return {
         transformOut: () => {
@@ -86,7 +85,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -104,7 +103,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should drop invalid panels', async () => {
+  it('should drop invalid panels', () => {
     mockGetTransforms.mockImplementation((type: string) => {
       if (type === 'DASHBOARD_MARKDOWN') {
         return {
@@ -154,7 +153,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [
           Object {
@@ -186,7 +185,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should combine panelsJSON and sections', async () => {
+  it('should combine panelsJSON and sections', () => {
     const panelsJSON =
       '[{"type":"DASHBOARD_MARKDOWN","embeddableConfig":{"content":"Markdown panel outside sections"},"panelIndex":"2e814ac0-33c2-4676-9d29-e1f868cddebd","gridData":{"h":15,"i":"2e814ac0-33c2-4676-9d29-e1f868cddebd","w":24,"x":0,"y":0}},{"type":"DASHBOARD_MARKDOWN","embeddableConfig":{"content":"Markdown panel inside section 1"},"panelIndex":"d724d87b-2256-4c8b-8aa3-55bc0b8881c6","gridData":{"h":15,"i":"d724d87b-2256-4c8b-8aa3-55bc0b8881c6","w":24,"x":0,"y":0,"sectionId":"bcebc09a-270f-42ef-8d45-daf5f5f4f511"}}]';
     const sections = [
@@ -199,7 +198,7 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    const panelsOut = await transformPanelsOut(panelsJSON, sections, [], false);
+    const panelsOut = transformPanelsOut(panelsJSON, sections, [], false);
     getDashboardStateSchema(true).parse({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {
@@ -247,7 +246,6 @@ describe('transformPanelsOut', () => {
   });
 
   describe('panel type migrations', () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
     const passThroughSchema = { parse: (config: unknown) => config };
     const panelsJSON = JSON.stringify([
       {
@@ -264,19 +262,19 @@ describe('transformPanelsOut', () => {
       );
     });
 
-    it('replaces type and config when a migration succeeds', async () => {
+    it('replaces type and config when a migration succeeds', () => {
       mockGetPanelTypeMigration.mockImplementation((from: string) =>
         from === 'source'
           ? {
               from,
-              migrateOut: async () => [
+              migrateOut: () => [
                 { panelId: 'panel-1', type: 'target', config: { migrated: true } },
               ],
             }
           : undefined
       );
 
-      expect(await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient)).toEqual({
+      expect(transformPanelsOut(panelsJSON, [], [], false, true)).toEqual({
         panels: [
           {
             config: { migrated: true },
@@ -289,22 +287,22 @@ describe('transformPanelsOut', () => {
       });
     });
 
-    it('does not migrate panels without a migration context', async () => {
+    it('does not migrate panels when migratePanelTypes is false', () => {
       const migrateOut = jest.fn();
       mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false);
+      const result = transformPanelsOut(panelsJSON, [], [], false);
       expect(migrateOut).not.toHaveBeenCalled();
       expect(result.panels).toEqual([expect.objectContaining({ type: 'source' })]);
     });
 
-    it('passes all panels of a type to one migrateOut call with the migration context', async () => {
-      const migrateOut = jest.fn().mockResolvedValue([]);
+    it('passes all panels of a type to one migrateOut call', () => {
+      const migrateOut = jest.fn().mockReturnValue([]);
       mockGetPanelTypeMigration.mockImplementation((from: string) =>
         from === 'source' ? { from, migrateOut } : undefined
       );
 
-      await transformPanelsOut(
+      transformPanelsOut(
         JSON.stringify([
           {
             type: 'source',
@@ -328,37 +326,33 @@ describe('transformPanelsOut', () => {
         [],
         [],
         false,
-        savedObjectsClient
+        true
       );
 
       expect(migrateOut).toHaveBeenCalledTimes(1);
-      expect(migrateOut).toHaveBeenCalledWith(
-        [
-          { id: 'panel-a', config: { a: 1 } },
-          { id: 'panel-b', config: { b: 2 } },
-        ],
-        savedObjectsClient
-      );
+      expect(migrateOut).toHaveBeenCalledWith([
+        { id: 'panel-a', config: { a: 1 } },
+        { id: 'panel-b', config: { b: 2 } },
+      ]);
     });
 
-    it('keeps a panel unchanged when the migration omits it', async () => {
-      mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut: async () => [] });
+    it('keeps a panel unchanged when the migration omits it', () => {
+      mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut: () => [] });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([
         expect.objectContaining({ type: 'source', config: { foo: 'bar' } }),
       ]);
       expect(result.warnings).toEqual([]);
     });
 
-    it('drops a panel when the migration returns an error for it', async () => {
+    it('drops a panel when the migration returns an error for it', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: async () => [{ panelId: 'panel-1', error: new Error('nope') }],
+        migrateOut: () => [{ panelId: 'panel-1', error: new Error('nope') }],
       });
 
-      expect(await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient))
-        .toMatchInlineSnapshot(`
+      expect(transformPanelsOut(panelsJSON, [], [], false, true)).toMatchInlineSnapshot(`
         Object {
           "panels": Array [],
           "warnings": Array [
@@ -376,15 +370,15 @@ describe('transformPanelsOut', () => {
       `);
     });
 
-    it('drops all panels of a type when migrateOut throws', async () => {
+    it('drops all panels of a type when migrateOut throws', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: async () => {
+        migrateOut: () => {
           throw new Error('migration failed');
         },
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
@@ -394,7 +388,7 @@ describe('transformPanelsOut', () => {
       ]);
     });
 
-    it('drops a migrated panel when target schema validation fails', async () => {
+    it('drops a migrated panel when target schema validation fails', () => {
       mockGetTransforms.mockImplementation((type: string) =>
         type === 'target'
           ? {
@@ -408,12 +402,10 @@ describe('transformPanelsOut', () => {
       );
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: async () => [
-          { panelId: 'panel-1', type: 'target', config: { migrated: true } },
-        ],
+        migrateOut: () => [{ panelId: 'panel-1', type: 'target', config: { migrated: true } }],
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
@@ -425,13 +417,13 @@ describe('transformPanelsOut', () => {
       ]);
     });
 
-    it('drops a migrated panel when the target type has no schema', async () => {
+    it('drops a migrated panel when the target type has no schema', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: async () => [{ panelId: 'panel-1', type: 'unregistered', config: {} }],
+        migrateOut: () => [{ panelId: 'panel-1', type: 'unregistered', config: {} }],
       });
 
-      const result = await transformPanelsOut(panelsJSON, [], [], false, savedObjectsClient);
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({

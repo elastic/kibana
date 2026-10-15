@@ -51,34 +51,27 @@ export async function search(
     searchParams
   );
 
-  const dashboards = await Promise.all(
-    soResponse.saved_objects.map(async (so) => {
-      const {
-        dashboardState: { description, tags, time_range, title },
-      } = await transformDashboardOut(
-        so.attributes,
-        so.references,
-        undefined,
-        strictValidationSchema
-      );
+  const dashboards = soResponse.saved_objects.map((so) => {
+    const {
+      dashboardState: { description, tags, time_range, title },
+    } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
-      return {
-        id: so.id,
-        data: {
-          ...(description && { description }),
-          ...(tags && { tags }),
-          ...(time_range && { time_range }),
-          ...(so?.accessControl && {
-            access_control: {
-              access_mode: so.accessControl.accessMode,
-            },
-          }),
-          title: title ?? '',
-        },
-        meta: getMeta(so),
-      };
-    })
-  );
+    return {
+      id: so.id,
+      data: {
+        ...(description && { description }),
+        ...(tags && { tags }),
+        ...(time_range && { time_range }),
+        ...(so?.accessControl && {
+          access_control: {
+            access_mode: so.accessControl.accessMode,
+          },
+        }),
+        title: title ?? '',
+      },
+      meta: getMeta(so),
+    };
+  });
 
   const { total, page, per_page } = soResponse;
 

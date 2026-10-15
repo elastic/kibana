@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-
 export interface PanelTypeMigrationPanel {
   id: string;
   config: Record<string, unknown>;
@@ -35,8 +33,5 @@ export interface PanelTypeMigration {
    * Receives all panels of the `from` type in a single dashboard. Panels omitted from the results
    * are left unchanged.
    */
-  migrateOut: (
-    panels: readonly PanelTypeMigrationPanel[],
-    savedObjectsClient: SavedObjectsClientContract
-  ) => Promise<readonly PanelTypeMigrationResult[]>;
+  migrateOut: (panels: readonly PanelTypeMigrationPanel[]) => readonly PanelTypeMigrationResult[];
 }
