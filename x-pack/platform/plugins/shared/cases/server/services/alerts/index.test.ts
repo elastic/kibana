@@ -929,6 +929,41 @@ describe('updateAlertsStatus', () => {
       expect(esClient.search).toHaveBeenCalledTimes(2);
     });
 
+    it('reads attacks from different backing indices of one family in a single search', async () => {
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          { _index: ATTACK_INDEX, _id: 'attack-1', _source: validAttackSource },
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            _id: 'attack-2',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: ATTACK_INDEX },
+            {
+              id: 'attack-2',
+              index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ATTACK_PATTERN,
+          size: 2,
+          query: { ids: { values: ['attack-1', 'attack-2'] } },
+        })
+      );
+    });
+
     it('authorizes an ad-hoc attack discovery alert in the current space', async () => {
       esClient.search.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
 

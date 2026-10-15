@@ -83,11 +83,11 @@ import {
   toVisibleAttackTabColumnIds,
 } from '../utils';
 
-/** One attached attack: the snapshot persisted on the attachment, plus the live document when it resolves. */
+/** One attached attack: its attach-time snapshot plus the live document once resolved. */
 interface AttackRow {
-  /** The attack document `_id`, persisted as the attachment id. */
+  /** The attack document `_id`. */
   attachmentId: string;
-  /** The attachment saved object id, used to key the row and the navigation button. */
+  /** The attachment saved object id. */
   savedObjectId: string;
   metadata: AttackAttachmentMetadata;
   createdAt: string;
@@ -99,17 +99,15 @@ interface AttackRow {
 }
 
 /**
- * What the grid's cells render from. Passed through context rather than closed over by the render
- * functions, because `EuiDataGrid` renders those as component types: a render function rebuilt
- * when the rows or the selection change is a new component to React, so every cell would unmount
- * — taking an open removal prompt with it.
+ * Passed via context rather than closed over, because `EuiDataGrid` treats cell render functions
+ * as component types and rebuilding them would remount every cell.
  */
 interface AttackGridCellContextValue {
   areAllRowsSelected: boolean;
   canInvestigateInTimeline: boolean;
   investigateAttackInTimeline: (attack: AttackDiscoveryAlert | undefined) => void;
   rows: AttackRow[];
-  /** How many rows can be selected, which is every row that resolved to a live document. */
+  /** Rows that resolved to a live document. */
   selectableRowCount: number;
   selectedRowCount: number;
   selectedRowIds: ReadonlySet<string>;
@@ -129,17 +127,14 @@ const useAttackGridCellContext = (): AttackGridCellContextValue => {
   return cellContext;
 };
 
-/** Matches the alerts grid directly above this section in the tab. */
+/** Matches the alerts grid. */
 const GRID_STYLE: EuiDataGridStyle = {
   border: 'none',
   fontSize: 's',
   header: 'underline',
 };
 
-/**
- * Matches the alerts grid. `EuiDataGrid` has no grouping or CSV export of its own to hide.
- * The bulk action bar is appended to this at render time, once there is a selection to act on.
- */
+/** Matches the alerts grid; the bulk action bar is appended at render time. */
 const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
   showColumnSelector: true,
   showSortSelector: true,
@@ -150,16 +145,10 @@ const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
 const DEFAULT_PAGE_SIZE = 50;
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-/**
- * Wide enough for the three row actions, sized by the helper the alerts grid's actions column
- * uses so the two columns line up.
- */
+/** Sized like the alerts grid's actions column so the two line up. */
 const ACTIONS_COLUMN_WIDTH = getActionsColumnWidth(3);
 
-/**
- * The selection control column's id. It is deliberately not an `ATTACK_TAB_COLUMN_ID`: those
- * key the user's persisted column selection, and this column is never pickable.
- */
+/** Not an `ATTACK_TAB_COLUMN_ID`, since those key the persisted column picker selection. */
 const SELECTION_COLUMN_ID = 'selection';
 const SELECTION_COLUMN_WIDTH = 36;
 
@@ -205,7 +194,6 @@ const MORE_ACTIONS_LABEL = i18n.translate(
   }
 );
 
-/** The telemetry source every action taken from this grid is attributed to. */
 const TELEMETRY_SOURCE = 'case_attachment_table';
 
 const COLUMN_HEADERS: Record<AttackTabColumnId, string> = {
@@ -259,10 +247,7 @@ const CELL_TEST_IDS: Record<AttackTabColumnId, string> = {
   [ATTACK_TAB_COLUMN_ID.attachedAt]: ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
 };
 
-/**
- * `actions` is absent: it is a leading control column, which the grid renders outside the
- * visible-column list and therefore outside the column picker.
- */
+/** `actions` is a leading control column, so it is absent here and from the column picker. */
 const GRID_COLUMNS: EuiDataGridColumn[] = [
   {
     id: ATTACK_TAB_COLUMN_ID.detectedOn,
@@ -283,7 +268,7 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
     isExpandable: false,
   },
   {
-    // The only expandable column: its value is prose the cell can only show one line of.
+    // The only expandable column, as its prose shows one line in the cell.
     id: ATTACK_TAB_COLUMN_ID.summary,
     displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.summary],
     isSortable: false,
@@ -318,27 +303,21 @@ const DEFAULT_SORTING: EuiDataGridColumnSortingConfig[] = [
   { id: ATTACK_TAB_COLUMN_ID.detectedOn, direction: 'desc' },
 ];
 
-/** Clips the summary to the single line the row is tall, matching the alerts grid's rule cell. */
+/** Clips the summary to one line, matching the alerts grid's rule cell. */
 const truncateCss = css`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
-/**
- * The fields the date cells name in their tooltip, so a date reads the same here as it does in
- * the alerts grid: the attack document's own timestamp, and the attachment's creation time.
- */
+/** Field names the date cell tooltips show, matching the alerts grid. */
 const DETECTED_ON_FIELD_NAME = '@timestamp';
 const ATTACHED_AT_FIELD_NAME = 'created_at';
 
 const getAttachedBy = (createdBy: AttackCaseAttachmentRow['createdBy']): string =>
   createdBy?.fullName || createdBy?.username || createdBy?.email || UNKNOWN_USER;
 
-/**
- * Prefers the live attack title, de-anonymised, and falls back to the snapshot taken at attach
- * time so a row still names its attack when the document cannot be resolved.
- */
+/** Prefers the de-anonymised live title, falling back to the attach-time snapshot. */
 const getTitle = (
   attack: AttackDiscoveryAlert | undefined,
   metadata: AttackAttachmentMetadata
@@ -353,10 +332,7 @@ const getTitle = (
   });
 };
 
-/**
- * The time the attack itself was detected, which is not the time it was attached to the case.
- * `undefined` for an attachment written before the snapshot carried a timestamp.
- */
+/** When the attack was detected, not attached; older snapshots may have no timestamp. */
 const getDetectedOn = (
   attack: AttackDiscoveryAlert | undefined,
   metadata: AttackAttachmentMetadata
@@ -366,11 +342,8 @@ const getDetectedOn = (
 };
 
 /**
- * The attack summary as plain text, with the `{{ field value }}` tokens the markdown carries
- * reduced to their values so no markdown syntax reaches the cell.
- *
- * The live summary is de-anonymised here; the snapshot was de-anonymised at attach time, so
- * de-anonymising it again would rewrite any of its words that happen to be a replacement key.
+ * The summary as plain text. Only the live summary is de-anonymised: the snapshot already was,
+ * and a second pass would rewrite any word that happens to be a replacement key.
  */
 const getSummary = (
   attack: AttackDiscoveryAlert | undefined,
@@ -440,9 +413,7 @@ const compareBySortColumn = (
   if (left == null && right == null) {
     return 0;
   }
-  // A row with nothing to sort by is ordered last whichever way the column is sorted — hence
-  // ahead of the direction flip — so an attachment written before the metadata carried the
-  // field never displaces one that has it.
+  // Rows missing the value sort last in either direction, so this precedes the direction flip.
   if (left == null) {
     return 1;
   }
@@ -458,10 +429,7 @@ const compareBySortColumn = (
   return direction === 'asc' ? order : -order;
 };
 
-/**
- * Sorts client-side over the merged rows, because half of what a row is made of — the
- * attachment provenance, and the snapshot an unresolved row falls back to — exists only here.
- */
+/** Sorts client-side, since attachment provenance and snapshots exist only on the client. */
 const compareRows = (
   a: AttackRow,
   b: AttackRow,
@@ -518,12 +486,7 @@ const SelectAttackCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     />
   );
 
-  // The bulk actions all read the live document, so a row without one has nothing to act on and
-  // its checkbox is disabled. Only an unresolved row explains itself: a row whose live query is
-  // still in flight is disabled too, but it is about to resolve and the grid already shows a
-  // progress bar. The span is what the tooltip binds to, since a disabled input emits no mouse
-  // events of its own, and it takes the tab stop the disabled input gives up so the reason stays
-  // reachable from the keyboard.
+  // A disabled input emits no mouse events and takes no focus, so the span carries the tooltip.
   return row.isUnresolved ? (
     <EuiToolTip content={UNRESOLVED_TOOLTIP}>
       <span tabIndex={0}>{checkbox}</span>
@@ -539,10 +502,7 @@ const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.act
 
 AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
 
-/**
- * The row's overflow, carrying the same menu the attack flyout's "Take action" button opens,
- * minus the navigation item the row already offers as its own icon button.
- */
+/** The row's overflow menu: the attack flyout's "Take action" items minus navigation. */
 const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -553,8 +513,7 @@ const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
 
   const isRemoteDocument = useMemo(() => isNonLocalIndexName(attack?.index ?? ''), [attack?.index]);
 
-  // The menu reads the live document — its alert ids, tags, assignees and workflow status — so a
-  // row that resolved to nothing but its snapshot has nothing to take action on.
+  // Every menu item reads the live document.
   const isDisabled = attack == null;
 
   const button = (
@@ -630,8 +589,6 @@ const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
       </EuiFlexItem>
       {canInvestigateInTimeline ? (
         <EuiFlexItem grow={false}>
-          {/* Disabled rather than hidden for an unresolved attack, so the row keeps the shape
-              every other row has and the tooltip can say why. */}
           <InvestigateAttackInTimelineButton
             id={row.savedObjectId}
             isDisabled={getAttackAlertIds(row.attack).length === 0}
@@ -674,11 +631,8 @@ const LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [
 ];
 
 /**
- * Renders the "Attacks" accordion body in the case Attachments tab.
- *
- * Filters the case's attack attachments by `searchTerm` in-memory against the persisted
- * metadata before handing the surviving ids to the live query, so a search that matches
- * nothing costs no request.
+ * Renders the "Attacks" section of the case Attachments tab, filtering by `searchTerm` against
+ * the snapshot before querying so a search that matches nothing costs no request.
  */
 export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
   caseData,
@@ -725,10 +679,7 @@ export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
 
 AttackTabContent.displayName = 'AttackTabContent';
 
-/**
- * Deferred inner component — keeps the attacks search request from firing on cases with no
- * attack attachments.
- */
+/** Split out so the attacks query never fires on a case with no attack attachments. */
 const AttackTabTable = ({
   attachments,
   searchTerm,
@@ -738,12 +689,10 @@ const AttackTabTable = ({
 }) => {
   const { http, storage } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
-  // Resolved once for the whole grid rather than per row — see the hook.
   const { canInvestigateInTimeline, investigateAttackInTimeline } =
     useInvestigateAttackInTimeline();
 
-  // One `_find` request for every attached attack rather than one per row. Memoized because
-  // the array is part of the react-query key.
+  // Memoized because the array is part of the react-query key.
   const attackIds = useMemo(
     () => attachments.map(({ attachmentId }) => attachmentId),
     [attachments]
@@ -769,9 +718,8 @@ const AttackTabTable = ({
     [data?.data]
   );
 
-  // A row the query never returned still renders, from the snapshot metadata: the attachment
-  // records what the analyst captured, so dropping it would hide evidence. `_find` also
-  // filters by visibility, so a missing id is not necessarily a deletion.
+  // A row `_find` did not return still renders from its snapshot; the attack may be deleted or
+  // just not visible to this user.
   const hasSettled = !isLoading && status !== 'idle';
 
   const items = useMemo<AttackRow[]>(
@@ -804,13 +752,10 @@ const AttackTabTable = ({
     [items, sortingColumns]
   );
 
-  // Read once, on mount: the selection is only ever changed from this grid's own picker.
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
     toVisibleAttackTabColumnIds(storage.get(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY))
   );
 
-  // Persisted per user rather than per case: which columns an analyst reads attacks by is a
-  // property of how they work, not of the case they happen to have open.
   const onChangeVisibleColumns = useCallback(
     (nextVisibleColumns: string[]) => {
       storage.set(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY, nextVisibleColumns);
@@ -824,13 +769,11 @@ const AttackTabTable = ({
     [onChangeVisibleColumns, visibleColumns]
   );
 
-  // Keyed by saved object id, the same handle the row actions and the bulk removal use.
   const [selectedRowIds, setSelectedRowIds] = useState<ReadonlySet<string>>(NO_SELECTION);
 
   const clearSelection = useCallback(() => setSelectedRowIds(NO_SELECTION), []);
 
-  // A row the search has filtered out must not stay part of a bulk action the user can no
-  // longer see.
+  // A row filtered out by the search must not stay in a bulk action the user cannot see.
   useEffect(() => {
     clearSelection();
   }, [clearSelection, searchTerm]);
@@ -842,8 +785,7 @@ const AttackTabTable = ({
     (nextPageSize: number) => {
       setPageSize(nextPageSize);
       setPageIndex(0);
-      // Repaginating reshuffles which rows a user can see at once, so the selection they built
-      // against the old layout no longer describes anything they are looking at.
+      // The old selection no longer matches the rows on screen.
       clearSelection();
     },
     [clearSelection]
@@ -870,15 +812,10 @@ const AttackTabTable = ({
     });
   }, []);
 
-  // Every bulk action reads the live attack document, so a row without one cannot be acted on and
-  // is kept out of the selection entirely. Covers both the row that resolved to nothing but its
-  // snapshot and the row whose live query has not returned yet. Doing it here rather than in the
-  // bulk bar is what keeps the count honest: the bar reports what it is given.
+  // Every bulk action reads the live document, so unresolved and still-loading rows are excluded.
   const selectableRows = useMemo(() => rows.filter(({ attack }) => attack != null), [rows]);
 
-  // Taken from the selectable rows rather than the selection, so an attachment removed from the
-  // case while selected, or one that stops resolving on a refetch, cannot leave the header
-  // checkbox stuck or the bulk bar naming a row it cannot act on.
+  // Derived from the selectable rows so a row that is removed or stops resolving drops out.
   const selectedRows = useMemo(
     () => selectableRows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)),
     [selectableRows, selectedRowIds]
@@ -890,8 +827,7 @@ const AttackTabTable = ({
     selectableRows.length > 0 && selectedRowCount === selectableRows.length;
 
   const toggleAllRowsSelected = useCallback(() => {
-    // Every filtered row, not just the page on screen: the user asked for "all", and the rows
-    // the grid is paginating over are all in hand here.
+    // Selects across every page, not just the visible one.
     setSelectedRowIds(
       areAllRowsSelected
         ? NO_SELECTION
@@ -990,13 +926,8 @@ const AttackTabTable = ({
 AttackTabTable.displayName = 'AttackTabTable';
 
 /**
- * Renders one grid cell. Every value prefers the live attack document and falls back to the
- * snapshot persisted on the attachment, so a row is never blank because a field arrived in a
- * later release.
- *
- * Cell text is coloured with `EuiTextColor` rather than wrapped in `EuiText`, which would
- * override the font size and line height the grid sets from `gridStyle` and leave the rows
- * taller and tighter than the alerts grid's.
+ * Renders one cell from the live document, falling back to the snapshot. Uses `EuiTextColor`
+ * because `EuiText` would override the grid's font size and line height.
  */
 const AttackCell = ({
   row,
@@ -1029,11 +960,10 @@ const AttackCell = ({
     case ATTACK_TAB_COLUMN_ID.title: {
       const title = getTitle(attack, metadata);
 
-      // Degrades to plain text when the attack could not be resolved, the way the alerts grid's
-      // rule cell does when there is no rule to open.
+      // Plain text when unresolved, like the alerts grid's rule cell with no rule to open.
       return isUnresolved ? (
         <EuiToolTip content={UNRESOLVED_TOOLTIP}>
-          {/* Focusable so the explanation is reachable by keyboard: the title is not a link here. */}
+          {/* Focusable so the tooltip is keyboard reachable without a link. */}
           <EuiTextColor
             color={color}
             data-test-subj={ATTACK_TAB_ROW_UNRESOLVED_TEST_ID}

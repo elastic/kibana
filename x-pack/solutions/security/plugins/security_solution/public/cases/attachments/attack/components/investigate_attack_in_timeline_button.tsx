@@ -20,22 +20,14 @@ const ALERTS_UNAVAILABLE_TOOLTIP = i18n.translate(
 );
 
 export interface InvestigateAttackInTimelineButtonProps {
-  /** Id used to build the button's `data-test-subj` and DOM id — the attachment saved object id. */
+  /** The attachment saved object id, used for the button's `data-test-subj` and DOM id. */
   id: string;
-  /**
-   * Disables the action when the attack's constituent alerts are unknown, which is the case for
-   * an attack the live query could not resolve. The tooltip explains why.
-   */
+  /** Set when the attack's alerts are unknown because the live query could not resolve it. */
   isDisabled?: boolean;
   onClick: () => void;
 }
 
-/**
- * Opens Timeline scoped to the alerts an attached attack comprises.
- *
- * Carries the `timeline` icon the alerts grid's own row action uses, so the same investigation
- * looks the same in both grids.
- */
+/** Opens Timeline scoped to the alerts an attached attack comprises. */
 export const InvestigateAttackInTimelineButton = ({
   id,
   isDisabled = false,

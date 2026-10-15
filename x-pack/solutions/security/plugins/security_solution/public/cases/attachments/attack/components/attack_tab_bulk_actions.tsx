@@ -42,7 +42,6 @@ import type {
 } from '../../../../detections/hooks/attacks/bulk_actions/types';
 import { toAttacksToAttach } from '../utils';
 
-/** The telemetry source every bulk action taken from this bar is attributed to. */
 const TELEMETRY_SOURCE = 'case_attachment_table';
 
 const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
@@ -50,7 +49,7 @@ const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Bulk actions' }
 );
 
-/** Mirrors the alerts table's toolbar, where the count is the button rather than a label beside it. */
+/** Mirrors the alerts table's toolbar, where the count is the button. */
 const getSelectedLabel = (attackCountFormatted: string, attackCount: number): string =>
   i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectedAttacksLabel', {
     defaultMessage:
@@ -82,24 +81,20 @@ const getSelectionTitle = (attackCount: number): string =>
 
 /** One selected row. */
 export interface SelectedAttack {
-  /** The attack document `_id`, persisted as the attachment id. */
+  /** The attack document `_id`. */
   attackId: string;
   /** The attack title, from the live document where it resolved and the snapshot otherwise. */
   title: string;
-  /**
-   * The live attack document. The grid only lets a row be selected once it has one, so in practice
-   * this is always set; it stays optional so the bar is still correct on its own terms, and the
-   * filter below is what enforces that.
-   */
+  /** The live attack document; always set in practice, as the grid only selects resolved rows. */
   attack?: AttackDiscoveryAlert;
 }
 
 export interface AttackTabBulkActionsProps {
-  /** The selected rows. The bar renders nothing while none of them can be acted on. */
+  /** The bar renders nothing while none of these can be acted on. */
   selectedAttacks: readonly SelectedAttack[];
   /** Every row the grid is currently showing, which is what "select all" selects. */
   totalAttacks: number;
-  /** True once the selection covers every row, which turns the select-all control into a clear. */
+  /** Turns the select-all control into a clear. */
   areAllAttacksSelected: boolean;
   /** Selects every row, or clears the selection when they are all selected already. */
   onToggleSelectAll: () => void;
@@ -107,11 +102,7 @@ export interface AttackTabBulkActionsProps {
   onActionSuccess: () => void;
 }
 
-/**
- * The attacks grid's bulk action bar: a count of the selection, and the attack take-action verbs
- * applied across it. Nothing here removes an attachment — an attack is removed from its own entry
- * in the case activity timeline, as an alert is.
- */
+/** The attacks grid's bulk action bar: the selection count and the attack take-action verbs. */
 export const AttackTabBulkActions = ({
   selectedAttacks,
   totalAttacks,
@@ -132,10 +123,7 @@ export const AttackTabBulkActions = ({
     onActionSuccess();
   }, [invalidateAttackDiscoveriesCache, onActionSuccess]);
 
-  // A row that resolved to nothing but its snapshot has no live document to act on. The grid
-  // already keeps those out of the selection, so this is a backstop rather than the guard — but
-  // it is the one the bar's own count and title are drawn from, so the bar never names more than
-  // it will touch even if a caller hands it an unresolved row.
+  // A backstop to the grid's own filter, so the bar never counts a row it will not act on.
   const actionableAttacks = useMemo(
     () =>
       selectedAttacks.flatMap(({ attack, title }) => (attack != null ? [{ attack, title }] : [])),
@@ -230,9 +218,7 @@ export const AttackTabBulkActions = ({
     telemetrySource: TELEMETRY_SOURCE,
   });
 
-  // Only attachable where we know which index the attack document came from — the attachment
-  // metadata requires it — so a selected attack without one is left out of the case items rather
-  // than costing the rest of the selection the action.
+  // Attachment metadata requires the index, so attacks without one are left out of the case items.
   const attachableAttacks = useMemo(
     () => resolvedAttacks.filter(({ index }) => index != null),
     [resolvedAttacks]
@@ -273,11 +259,7 @@ export const AttackTabBulkActions = ({
     title: caseTitle,
   });
 
-  /**
-   * Grouped and decorated the way the alerts table's bulk action menu and the attacks page's
-   * take-action menu are, so the same verbs read the same wherever they're offered: status first
-   * with its coloured dots, then the attack-management verbs, then workflows, then navigation.
-   */
+  /** Grouped like the alerts table's bulk menu: status, attack management, workflows, navigation. */
   const menuItems = useMemo(
     () =>
       withActionIcons(
@@ -328,7 +310,6 @@ export const AttackTabBulkActions = ({
     [assignPanels, menuItems, runWorkflowPanels, tagsPanels, workflowPanels]
   );
 
-  // A selection with nothing actionable in it is no selection as far as this bar is concerned.
   if (actionableAttacks.length === 0) {
     return null;
   }

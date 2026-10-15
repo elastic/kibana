@@ -25,8 +25,7 @@ export interface UseAttackWorkflowStatusContextMenuItemsProps
 /**
  * Hook that provides context menu items and panels for managing workflow status on attacks.
  * The hook creates mock alert items from the attack IDs and related alert IDs to work with the bulk actions system.
- * The current status is the status shared by every attack in the array, or `undefined` when the statuses differ
- * (or any is unknown), in which case all workflow status actions are offered.
+ * The current status is set only when every attack shares a known status, otherwise all actions are offered.
  */
 export const useAttackWorkflowStatusContextMenuItems = ({
   attacksWithWorkflowStatus,
@@ -37,10 +36,7 @@ export const useAttackWorkflowStatusContextMenuItems = ({
   refresh,
   telemetrySource,
 }: UseAttackWorkflowStatusContextMenuItemsProps): BulkAttackContextMenuItems => {
-  // The consumer hides the action matching `currentStatus`, so it must only be set when the whole selection
-  // is known to share that status. A mixed selection still has attacks that need every transition, and an
-  // attack with an unknown status is not known to share anything, so both fall back to `undefined`,
-  // which offers all actions. This mirrors alerts, where the status is never guessed from a single row.
+  // The consumer hides the action matching `currentStatus`, as alerts do.
   const currentStatus = useMemo(() => {
     const [first] = attacksWithWorkflowStatus;
     if (first?.workflowStatus === undefined) {

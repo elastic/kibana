@@ -101,10 +101,7 @@ export interface AttackWithCase extends BaseAttackProps {
  * Represents an attack with alert IDs that should be investigated in Timeline.
  */
 export interface AttackWithTimelineAlerts extends BaseAttackProps {
-  /**
-   * When the attack was detected, used to open Timeline on a range wide enough to hold the alerts
-   * behind it. Optional because an attack without one simply leaves the range to the time picker.
-   */
+  /** When the attack was detected, used to open Timeline on a range holding its alerts. */
   timestamp?: string;
 }
 

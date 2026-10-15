@@ -40,10 +40,7 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
-  /**
-   * Whether to include the investigate in timeline / explore in attacks navigation action in the
-   * menu (default true). Set to false where the surface already offers it as its own control.
-   */
+  /** Whether to include the navigation action (default true); off where the surface has its own. */
   showNavigationAction?: boolean;
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;

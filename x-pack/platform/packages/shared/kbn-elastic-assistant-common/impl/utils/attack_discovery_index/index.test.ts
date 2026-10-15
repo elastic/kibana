@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAttackDiscoveryIndex, toReadableAttackIndexPattern } from './constants';
+import { isAttackDiscoveryIndex, toReadableAttackIndexPattern } from '.';
 
 describe('toReadableAttackIndexPattern', () => {
   it.each([

@@ -185,7 +185,7 @@ describe('useBulkAttackCaseItems', () => {
       expect(reportEvent).not.toHaveBeenCalled();
 
       const { onSuccess } = useAddToCase.mock.calls[0][0];
-      onSuccess(isNewCase);
+      onSuccess({ id: 'case-1' } as CaseUI, isNewCase);
 
       expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
         source: 'attacks_page_group_take_action',
@@ -241,16 +241,23 @@ describe('useBulkAttackCaseItems', () => {
       return getAttachments(theCase as CaseUI);
     };
 
+    /**
+     * Plays out an attach to `theCase` the way the case selector does: it builds the payload for
+     * the case, posts it, then reports success with the same case.
+     */
+    const attachTo = (theCase: Partial<CaseUI>, isNewCase = false) => {
+      const attachments = resolveAttachments(theCase);
+      const { onSuccess } = useAddToCase.mock.lastCall[0];
+      onSuccess(theCase as CaseUI, isNewCase);
+      return attachments;
+    };
+
     it('posts the attack attachment payload when the flag is on', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
       await clickAddToCase();
 
-      expect(onAddToCase).toHaveBeenCalledWith({
-        alertIds: [],
-        markdownComments: [],
-        getAttachments: expect.any(Function),
-      });
+      expect(onAddToCase).toHaveBeenCalledWith({ getAttachments: expect.any(Function) });
       expect(resolveAttachments({ totalAlerts: 0 })).toEqual(expectedAttachments);
     });
 
@@ -302,7 +309,7 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
 
-      const attachments = resolveAttachments({ totalAlerts: 0 });
+      const attachments = attachTo({ totalAlerts: 0 });
       expect(attachments).toHaveLength(2);
       expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE);
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
@@ -317,7 +324,7 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
 
-      const attachments = resolveAttachments({ totalAlerts: 10 });
+      const attachments = attachTo({ totalAlerts: 10 });
       // Otherwise the case would end up over the limit and the server would reject the attach.
       expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE - 10);
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
@@ -328,7 +335,7 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase();
 
-      const attachments = resolveAttachments({ totalAlerts: MAX_ALERTS_PER_CASE });
+      const attachments = attachTo({ totalAlerts: MAX_ALERTS_PER_CASE });
       expect(attachments).toEqual([expectedAttachments[0]]);
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
     });
@@ -338,9 +345,7 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase();
 
-      expect(resolveAttachments({ totalAlerts: MAX_ALERTS_PER_CASE - 2 })).toEqual(
-        expectedAttachments
-      );
+      expect(attachTo({ totalAlerts: MAX_ALERTS_PER_CASE - 2 })).toEqual(expectedAttachments);
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
     });
 
@@ -357,11 +362,53 @@ describe('useBulkAttackCaseItems', () => {
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
     });
 
+    it('does not warn while the case selector builds the payload to check for duplicates', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const tooManyAlertIds = Array.from(
+        { length: MAX_ALERTS_PER_CASE + 5 },
+        (_, i) => `alert-${i}`
+      );
+
+      await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
+
+      // What `useCheckDocumentAttachments` does on every render of the case list: a placeholder
+      // case built from the owner alone, with nothing attached.
+      resolveAttachments({ owner: 'securitySolution' });
+      resolveAttachments({ owner: 'securitySolution' });
+
+      expect(appToastsMock.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('warns exactly once when a truncated selection is attached to a new case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const tooManyAlertIds = Array.from(
+        { length: MAX_ALERTS_PER_CASE + 5 },
+        (_, i) => `alert-${i}`
+      );
+
+      await clickAddToCase({ attacksToAttach: [{ ...attack, alertIds: tooManyAlertIds }] });
+
+      // The selector resolves the payload more than once on the way: for the duplicate check, for
+      // the post, and again for its own success toast.
+      resolveAttachments({ owner: 'securitySolution' });
+      attachTo({ id: 'new-case', owner: 'securitySolution', totalAlerts: 0 }, true);
+      resolveAttachments({ owner: 'securitySolution' });
+
+      expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
+      expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+        title: expect.stringContaining(
+          `Only ${MAX_ALERTS_PER_CASE} of the ${
+            MAX_ALERTS_PER_CASE + 5
+          } alerts in this attack were added`
+        ),
+      });
+    });
+
     it('does not warn when every constituent alert fits', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
       await clickAddToCase();
-      resolveAttachments({ totalAlerts: 0 });
+      attachTo({ totalAlerts: 0 });
 
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
     });

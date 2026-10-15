@@ -23,11 +23,8 @@ export interface UseInvestigateAttackInTimelineResult {
 }
 
 /**
- * Opens Timeline filtered to an attack's constituent alerts — the same investigation the Attacks
- * page offers from its "Take actions" menu, reached here from an attached attack.
- *
- * Meant to be called once per grid rather than once per row: `useInvestigateInTimeline` resolves
- * data views and timeline state, which is not work to repeat for every rendered row.
+ * Opens Timeline filtered to an attack's constituent alerts. Call once per grid, not per row, as
+ * `useInvestigateInTimeline` resolves data views and timeline state.
  */
 export const useInvestigateAttackInTimeline = (): UseInvestigateAttackInTimelineResult => {
   const { telemetry } = useKibana().services;

@@ -488,13 +488,8 @@ export class AlertService {
   }
 
   /**
-   * Rejects attack references that name an index outside the two attack discovery families.
-   *
-   * The authorization read below runs as the caller, so this is not about privilege escalation.
-   * It is about what the read can be pointed at: without this, any index the caller can read is
-   * searchable, and a document there whose `_source` carries an attack discovery rule type and the
-   * right space id would satisfy every check that follows. Narrowing to the two families means the
-   * rule type and space checks only ever run against documents that are attack discoveries.
+   * Rejects indices outside the two attack discovery families, so a document elsewhere that merely
+   * carries an attack discovery rule type and space id cannot pass the checks that follow.
    */
   private rejectNonAttackIndices(attacks: AlertInfo[]): void {
     const foreignAttack = attacks.find((attack) => !isAttackDiscoveryIndex(attack.index));
@@ -507,17 +502,8 @@ export class AlertService {
   }
 
   /**
-   * Authorizes attack attachments, which reference an attack discovery AAD alert.
-   *
-   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
-   * every document that carries those fields, and silently accepts a document that is missing, is
-   * not an alert, or belongs to another space. The status sync later writes to the reference by id
-   * alone, so all three are rejected here, before the attachment is persisted.
-   *
-   * Scheduled, ad-hoc and dev-only generator discoveries are all accepted, but only scheduled ones
-   * reach alerting RBAC — see `ensureScheduledAttacksAuthorized`. The read itself runs as the
-   * caller against an index pattern rather than the index on the attachment — see
-   * `fetchAttackAuthorizationSources`.
+   * Authorizes attack attachments, rejecting references that are missing, not attack discoveries,
+   * or in another space, all of which `ensureAlertsAuthorized` silently accepts.
    */
   public async ensureAttacksAuthorized({
     attacks,
@@ -571,27 +557,12 @@ export class AlertService {
   }
 
   /**
-   * Reads the authorization fields of each referenced attack, as the caller.
+   * Reads each referenced attack's authorization fields as the caller, keyed by `_id`.
    *
-   * Deliberately a search over an index *pattern* rather than an `mget` against the index the
-   * attachment carries. `metadata.index` snapshots the attack document's `_index`, which is the
-   * concrete backing index (`.internal.alerts-security.attack.discovery.alerts-default-000001`),
-   * and alert index privileges are only ever granted on the alias family
-   * (`.alerts-security.attack.discovery.alerts*`). Addressing the backing index therefore fails
-   * with a security exception for every non-superuser, which this method would read as "not
-   * found" and reject the attach.
-   *
-   * The alias on its own would not do either: single-document operations against an alias fail
-   * once it spans more than one index, which is exactly what happens on the first rollover.
-   *
-   * Results are keyed by `_id` because a search returns only the documents it found, in relevance
-   * order. Attack discovery alert ids are unique across both index families, so this cannot
-   * conflate two documents, and it never compares the caller-supplied index against the one
-   * Elasticsearch resolved — see `ensureScheduledAttacksAuthorized` for why that matters. Each
-   * entry carries that resolved `_index` so later authorization can address the same document.
-   *
-   * Callers must have rejected out-of-family indices first (`rejectNonAttackIndices`); the pattern
-   * mapping below passes anything else through unchanged.
+   * Searches an index pattern rather than `mget`-ing the attachment's index: privileges are granted
+   * on the alias family, not the concrete backing index `metadata.index` holds, and single-document
+   * operations against the alias fail once it spans more than one index, i.e. after the first
+   * rollover. Callers must call `rejectNonAttackIndices` first.
    */
   private async fetchAttackAuthorizationSources(
     attacks: AlertInfo[]
@@ -600,7 +571,12 @@ export class AlertService {
 
     for (const attack of attacks) {
       const pattern = toReadableAttackIndexPattern(attack.index);
-      idsByPattern.set(pattern, [...(idsByPattern.get(pattern) ?? []), attack.id]);
+      const ids = idsByPattern.get(pattern);
+      if (ids) {
+        ids.push(attack.id);
+      } else {
+        idsByPattern.set(pattern, [attack.id]);
+      }
     }
 
     const sourcesById = new Map<string, AttackAuthorizationSource>();
@@ -633,25 +609,10 @@ export class AlertService {
   /**
    * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
    *
-   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
-   * sentinel the alerting framework never registers and no feature privilege grants, so
-   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
-   * superuser. They carry no privacy of their own — the generating user is recorded on the
-   * document so it can be filtered on, not hidden — so the caller-scoped search that produced
-   * `sourcesById` is the authorization: it is the same Elasticsearch index privilege gate the
-   * attack discovery APIs read ad-hoc discoveries with, and the one the status sync writes
-   * through.
-   *
-   * Pairing is by `_id` and never by index name. That is load-bearing: the index on the
-   * attachment is caller-controlled and is not the one Elasticsearch resolves the document from,
-   * so matching the two would find nothing, leave `scheduledAttacks` empty, and skip alerting
-   * RBAC entirely for a caller that named the alias.
-   *
-   * For the same reason the alerts handed to alerting RBAC carry the `_index` the search resolved
-   * rather than the one the attachment named. `ensureAllAlertsAuthorizedRead` runs its own
-   * internal `mget`, and the caller-supplied index need not hold the document the search found —
-   * so passing it through would authorize a different document than the one whose rule type was
-   * just read.
+   * Ad-hoc attacks are skipped because their rule type is never registered, so RBAC would reject
+   * them for every non-superuser; the caller-scoped search is their authorization instead.
+   * Attacks are paired with their sources by `_id`, and RBAC is given the resolved `_index`, never
+   * the caller-supplied one, so it checks the same document whose rule type was read.
    */
   private async ensureScheduledAttacksAuthorized(
     attacks: AlertInfo[],
@@ -673,13 +634,8 @@ export class AlertService {
   }
 
   /**
-   * The rule types that write attack discovery alerts.
-   *
-   * Scheduled and ad hoc are the two production producers. The data generator is a dev-only rule
-   * type that writes through the same AAD config into the same index, so its documents are attack
-   * discoveries too; it is registered only in dev mode or on Elastic-staff-owned cloud
-   * deployments, so recognising it here does not widen production exposure. Rejecting it made the
-   * feature untestable with the generator everyone desk tests with.
+   * The rule types that write attack discovery alerts. The data generator is only registered in
+   * dev mode or on Elastic-staff cloud deployments, so accepting it does not widen production.
    */
   private static isAttackDiscoveryRuleType(ruleTypeId: string | undefined): boolean {
     return (
@@ -839,13 +795,7 @@ interface AttackAuthorizationFields {
   [SPACE_IDS]?: string[];
 }
 
-/**
- * A referenced attack as Elasticsearch actually resolved it.
- *
- * `index` is the `_index` of the hit, not the index the attachment named — the two differ
- * whenever the caller names an alias or a pattern, and only the resolved one identifies the
- * document whose `fields` were read.
- */
+/** A referenced attack as resolved; `index` is the hit's `_index`, not the attachment's. */
 interface AttackAuthorizationSource {
   index: string;
   fields: AttackAuthorizationFields | undefined;

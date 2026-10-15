@@ -31,7 +31,6 @@ import {
 import {
   buildAttackAttachments,
   buildAttacksAttachments,
-  generateAttackAttachmentsWithoutOwner,
   getAttackAttachment,
   MAX_ATTACKS_PER_ATTACH,
   type AttackToAttach,
@@ -851,19 +850,5 @@ describe('buildAttacksAttachments', () => {
 
   it('returns nothing for an empty selection', () => {
     expect(buildAttacksAttachments([]).attachments).toEqual([]);
-  });
-});
-
-describe('generateAttackAttachmentsWithoutOwner', () => {
-  it('returns just the attachments array', () => {
-    const attack = attackToAttach({ alertIds: ['alert-1'] });
-
-    expect(generateAttackAttachmentsWithoutOwner(attack)).toEqual(
-      buildAttackAttachments(attack).attachments
-    );
-  });
-
-  it('returns an empty array when the attack has no id', () => {
-    expect(generateAttackAttachmentsWithoutOwner(attackToAttach({ id: '' }))).toEqual([]);
   });
 });
