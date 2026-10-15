@@ -6,7 +6,7 @@ Dashboard versions are recorded with `@kbn/change-history` (`module: dashboard`,
 
 Each dashboard saved object stores a `historySequence` attribute, and every history event stores the same number as `object.sequence`. The UI shows it as the version number (`v{n}`), and the history client orders events by it (newest first), falling back to `@timestamp` and `event.id`.
 
-- **Create**: starts at `INITIAL_HISTORY_SEQUENCE` (`1`).
+- **Create**: starts at `INITIAL_HISTORY_SEQUENCE` (`1`). When created with an explicit ID that still has history (deleting a dashboard does not delete its history), it continues from the latest existing sequence + 1 so new versions stay ordered above the deleted dashboard's.
 - **Update**: `getNextHistorySequence` increments the existing sequence by one only when the stored content (attributes without `historySequence`, or references) changed. Otherwise the sequence is preserved, and no new history event is written.
 - **Legacy dashboards** (no `historySequence`): the first update sets the sequence to `INITIAL_HISTORY_SEQUENCE`.
 - **Restore**: is a regular update with the restored snapshot, so it creates a _new_ version rather than rewinding. The event stores `metadata.restoredFrom` (the restored version).

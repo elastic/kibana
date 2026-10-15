@@ -12,7 +12,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { transformDashboardOut } from '../api/transforms';
-import { addToHistory, getHistorySnapshot } from './util';
+import { addToHistory, getCreateHistorySequence, getHistorySnapshot } from './util';
 
 jest.mock('./change_history_service');
 jest.mock('../api/transforms');
@@ -39,6 +39,31 @@ const baseArgs = {
   timestamp: '2026-01-01T00:00:00.000Z',
   snapshot: { title: 'New' } as DashboardState,
 };
+
+describe('getCreateHistorySequence', () => {
+  beforeEach(() => jest.resetAllMocks());
+
+  it('continues after the latest existing sequence', async () => {
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 2 } }] }),
+    };
+    mockedGetClient.mockReturnValue(client as never);
+    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(3);
+  });
+
+  it('starts at the initial sequence when there is no history', async () => {
+    const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
+    mockedGetClient.mockReturnValue(client as never);
+    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(1);
+  });
+
+  it('starts at the initial sequence when the client is unavailable', async () => {
+    mockedGetClient.mockImplementation(() => {
+      throw new Error('not ready');
+    });
+    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(1);
+  });
+});
 
 describe('addToHistory', () => {
   beforeEach(() => jest.resetAllMocks());

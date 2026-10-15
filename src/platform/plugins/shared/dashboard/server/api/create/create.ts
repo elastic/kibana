@@ -16,7 +16,11 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
-import { addToHistory, getHistorySnapshot } from '../../change_history/util';
+import {
+  addToHistory,
+  getCreateHistorySequence,
+  getHistorySnapshot,
+} from '../../change_history/util';
 
 export interface CreateOptions {
   id?: string;
@@ -43,9 +47,14 @@ export async function create(
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
+  // a recreated ID may still have history from a deleted dashboard
+  const historySequence =
+    id !== undefined
+      ? await getCreateHistorySequence({ spaceId, dashboardId: id })
+      : INITIAL_HISTORY_SEQUENCE;
   const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    { ...soAttributes, historySequence: INITIAL_HISTORY_SEQUENCE },
+    { ...soAttributes, historySequence },
     {
       ...(id !== undefined && { id }),
       references: soReferences,
@@ -70,7 +79,7 @@ export async function create(
       snapshot,
       spaceId,
       sequence: {
-        current: INITIAL_HISTORY_SEQUENCE,
+        current: historySequence,
       },
       timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
     });

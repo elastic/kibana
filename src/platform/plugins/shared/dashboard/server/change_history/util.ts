@@ -19,6 +19,7 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { transformDashboardOut } from '../api/transforms';
 import { getChangeHistoryClient } from './change_history_service';
+import { INITIAL_HISTORY_SEQUENCE } from './history_sequence';
 
 /**
  * Builds the snapshot to record in history from the stored attributes, always in the dashboard-app
@@ -45,6 +46,30 @@ export const getHistorySnapshot = ({
     return dashboardState;
   } catch {
     return undefined;
+  }
+};
+
+/**
+ * Sequence for a newly created dashboard. Deleting a dashboard does not delete its history, so a
+ * dashboard recreated with the same ID continues after the latest existing version, keeping the
+ * new versions ordered above the deleted dashboard's. Falls back to the initial sequence when there
+ * is no history or it cannot be read.
+ */
+export const getCreateHistorySequence = async ({
+  spaceId = 'default',
+  dashboardId,
+}: {
+  spaceId: string | undefined;
+  dashboardId: string;
+}): Promise<number> => {
+  try {
+    const {
+      items: [latest],
+    } = await getChangeHistoryClient().getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
+    const latestSequence = latest?.object.sequence;
+    return typeof latestSequence === 'number' ? latestSequence + 1 : INITIAL_HISTORY_SEQUENCE;
+  } catch {
+    return INITIAL_HISTORY_SEQUENCE;
   }
 };
 
